@@ -1,0 +1,14 @@
+{
+  "id": "KRN-001",
+  "title": "Build the full E1S XNU kernel with supplied SDK and pinned dependencies",
+  "status": "pending",
+  "owner": null,
+  "priority": 85,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": ["BLD-001"],
+  "paths": ["tools/build/kernel_preflight.py", "src/xnu/", "docs/procedures/kernel-build.md"],
+  "acceptance": ["SDK/dependency provenance and exact toolchain are recorded without committing Apple files", "Full E1S build, including exports, succeeds or retains precise failure evidence", "Kernel/payload/ADT are validated separately from the freestanding loader"],
+  "sources": ["apple-xnu", "s24-port", "hakios"],
+  "steps": ["Check explicitly supplied iPhoneOS16.5 SDK and dependency build tools", "Pin the matching HakiOS dependency recipes", "Build in artifacts and retain actual exit codes; never mask export failures"]
+}

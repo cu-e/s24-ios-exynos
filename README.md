@@ -2,7 +2,9 @@
 
 A research workspace for the Galaxy S24 with Exynos 2400, from measurements inside running Android to a possible XNU port. Preserving the owner's current Android system and data is the primary practical requirement.
 
-Tooling and a task plan are available. On 2026-11-05, ADB measurements identified **SM-S921B / e1s**, Exynos s5e9945, Android 15 and S921BXXS9BYH3. See the [device baseline](research/notes/DEV-001-profile.md). This project has no working iOS port or APK yet. The owner reports an unlocked bootloader, while Android properties show locked/green; Magisk is present. Actual unlock state, root access and recovery remain unverified. The primary upstream targets **SM-S921B / e1s**; compatibility with other S24 variants is not assumed.
+The first host research lab is implemented: pinned sources, reproducible freestanding loader builds, independent boot checks, a signed Android Vulkan APK and one real AIR-shaped compute translation test. **There is no working native iOS port on this phone.** See the [implementation handoff](research/notes/implementation-handoff.md) for actual results, artifact paths and remaining gates.
+
+On 2026-11-05, ADB measurements identified **SM-S921B / e1s**, Exynos s5e9945, Android 15 and S921BXXS9BYH3. See the [device baseline](research/notes/DEV-001-profile.md). The owner reports an unlocked bootloader, while Android properties show locked/green; Magisk is present. Actual unlock state, root access and recovery remain unverified. The primary upstream targets **SM-S921B / e1s**; compatibility with other S24 variants is not assumed.
 
 ## Quick start
 
@@ -13,12 +15,30 @@ cd /home/egor/dev/pet/s24-ios-exynos
 make doctor
 make check
 python3 tools/lab.py task next
-python3 tools/lab.py task show RES-001
+python3 tools/lab.py task show KRN-001
 ```
 
 [STATUS.md](STATUS.md) is a saved summary. `python3 tools/lab.py status` renders the current registry; `make status` updates the file. [AGENTS.md](AGENTS.md) defines the agent working agreement. English is the working language; see the [language policy](docs/language.md).
 
 [BOARD.md](BOARD.md) is the file-based Kanban with owner reports, progress, dependencies and task-card links. `python3 tools/lab.py board` renders current state; `make board` refreshes all planning files. See the [planning workflow](docs/planning.md). Every successful registry mutation automatically refreshes the board, cards, machine view and status under the shared lock.
+
+[Implementation contract](docs/implementation.md) records the approved iOS 16.5 sequence through graphics, radios, telephony and eSIM. [CAPABILITIES.md](CAPABILITIES.md) separates local Android observations, authored implementations and native acceptance. Use `make capabilities-check` to validate its evidence and generated view. [Feasibility review](research/notes/2026-11-05-feasibility.md) records sources, unavailable inputs and research limits.
+
+## Run the host lab
+
+Source fetches and heavy builds are explicit. These commands do not select a phone:
+
+```sh
+python3 tools/sources.py fetch s24-port apple-xnu metal2vulkan
+python3 tools/sources.py verify s24-port apple-xnu metal2vulkan
+python3 tools/build/e1s.py --run my-loader-build
+python3 tools/build/prepare_xnu.py --run my-xnu-source
+python3 tools/verify/boot.py artifacts/e1s-build/my-loader-build/probe/boot.img \
+  --tar artifacts/e1s-build/my-loader-build/probe/boot.img.tar
+python3 src/android-probe/build.py --run my-apk-build
+```
+
+Run names must be new. See [build requirements](docs/procedures/e1s-build.md), the [probe instructions](src/android-probe/README.md) and the [graphics fixture](src/graphics/README.md). The loader build does not compile a complete XNU kernel. Check required external inputs with `python3 tools/build/kernel_preflight.py`. No SDK or Apple userspace is bundled.
 
 ## Directory map
 
@@ -33,7 +53,7 @@ python3 tools/lab.py task show RES-001
 | `research/notes/` | Findings and handoffs with citations and limitations |
 | `research/snapshots/` | Historical local research snapshots; excluded from Git |
 | `references/` | Local upstream checkouts; excluded from Git |
-| `src/android-probe/` | Future Android measurement app |
+| `src/android-probe/` | Android Vulkan measurement app, manual build and isolated emulator harness |
 | `src/graphics/` | User-space graphics adapters and test scenes |
 | `src/xnu/`, `patches/` | Project code and small patches against pinned upstream |
 | `fixtures/public/` | Sanitized or synthetic test data with provenance |

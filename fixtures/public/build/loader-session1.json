@@ -1,0 +1,416 @@
+{
+  "schema_version": 1,
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-04T22:51:34+00:00",
+  "source": {
+    "id": "s24-port",
+    "origin": "https://github.com/RNDMBG/iOS-On-S24",
+    "revision": "c8860decc62c6d6180e609036d027a2997972420",
+    "clean": true,
+    "review_file_sha256": {
+      "README.md": "dd023897cbfc0f6b1690fd8a510a491e9ad6b4d5e669a8ac08db3e6a90fa2272",
+      "E1S_PROGRESS.md": "be7bc81ac98fc6892d14cc9274abe7e0cacb59371b17c087ca4219ce945e2797",
+      "xnu/hackios/README.md": "454b04e943d7fb829c06e9017019f8813492a876bbaf477c8b67488e13eafee8",
+      "docs/e1s-hardware-map.md": "b8d4d3e8870099de7e1dbf77516d7acd1ed9ded67e1e3dc6881fec1005a4e6d8",
+      "docs/e1s-userland.md": "f82c3a6216e13edaf70e40ec6d41da284bad1a614a6bb01fceecd5f2a992f3d5",
+      "docs/e1s-hackios-port-map.md": "15a49b9ad7c318645e0763f9467bb872499a51a5c33d644a1f04b72ef00349fd"
+    },
+    "submodules_fetched": false,
+    "local_device_verified": false
+  },
+  "commands": [
+    {
+      "argv": [
+        "zig",
+        "version"
+      ],
+      "exit_code": 0,
+      "stdout": "0.16.0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/source/shim/e1s/start.S",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/probe/start.S.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/source/shim/e1s/probe.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/probe/probe.c.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/source/shim/e1s/probe.c:560:24: warning: unused function 'be16' [-Wunused-function]\n  560 | static inline uint16_t be16(const uint8_t *p)\n      |                        ^~~~\n1 warning generated.\n"
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-static",
+        "-nostdlib",
+        "-Wl,--build-id=none",
+        "-Wl,-T,/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/source/shim/e1s/loader.ld",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/probe/start.S.o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/probe/probe.c.o",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/probe/probe.elf"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "objcopy",
+        "-O",
+        "binary",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/probe/probe.elf",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/probe/Image"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/source/tools/e1s/fix_image.py",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/probe/Image"
+      ],
+      "exit_code": 0,
+      "stdout": "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/probe/Image: 97104 bytes\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/source/tools/e1s/mkboot.py",
+        "--kernel",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/probe/Image",
+        "--output",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/probe/boot.img",
+        "--os-version",
+        "15.0.0",
+        "--os-patch-level",
+        "2025-08",
+        "--tar"
+      ],
+      "exit_code": 0,
+      "stdout": "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/probe/boot.img: 102416 bytes\n  kernel: 97104 bytes at offset 4096\n  os_version: 15.0.0 2025-08 -> 0x1e000198\n  sha256: 7a267eedb50243446af1f96a770b0e4707496e1499c4a25503e1fcb3f8023169\n/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/probe/boot.img.tar: 112640 bytes, sha256 c3085d823c61cc5b4f276fb66c91786d4a89e0a039421de8016cf9ae078141f8\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/source/shim/e1s-xnu/start.S",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/start.S.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/source/shim/e1s-xnu/loader.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/loader.c.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/source/shim/e1s-xnu/ui.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/ui.c.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/source/shim/e1s-xnu/adt_patch.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/adt_patch.c.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/source/shim/e1s-xnu/gic.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/gic.c.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/source/shim/e1s-xnu/fdt.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/fdt.c.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-static",
+        "-nostdlib",
+        "-Wl,--build-id=none",
+        "-Wl,-T,/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/source/shim/e1s-xnu/loader.ld",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/start.S.o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/loader.c.o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/ui.c.o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/adt_patch.c.o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/gic.c.o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/fdt.c.o",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/loader.elf"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "objcopy",
+        "-O",
+        "binary",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/loader.elf",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/Image"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/source/tools/e1s/fix_image.py",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/Image"
+      ],
+      "exit_code": 0,
+      "stdout": "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/Image: 131072 bytes\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/source/tools/e1s/mkboot.py",
+        "--kernel",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/Image",
+        "--output",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/boot.img",
+        "--os-version",
+        "15.0.0",
+        "--os-patch-level",
+        "2025-08",
+        "--tar"
+      ],
+      "exit_code": 0,
+      "stdout": "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/boot.img: 135184 bytes\n  kernel: 131072 bytes at offset 4096\n  os_version: 15.0.0 2025-08 -> 0x1e000198\n  sha256: f7c64a76fc82100aa4d03123e014559989bc1018f723ca9eff4a17259c9bee62\n/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/loader-session1/loader/boot.img.tar: 143360 bytes, sha256 37881d96d90a983d7d4dfc507d30110af05494bf2efb27cd86480146b70979e9\n",
+      "stderr": ""
+    }
+  ],
+  "hardware_execution": false,
+  "apple_userland": false,
+  "kernel_build": "not-run; SDK/dependencies are a separate prerequisite",
+  "toolchain": {
+    "zig": "0.16.0",
+    "path": "/usr/bin/zig"
+  },
+  "summary": "Freestanding probe and XNU handoff loader built; no kernel/userland/device execution",
+  "products": [
+    {
+      "path": "artifacts/e1s-build/loader-session1/probe/probe.elf",
+      "size": 164472,
+      "sha256": "976b229a86349554d829db7cdbfa60dec6de1f1de2fe95c6986a389c5128be33"
+    },
+    {
+      "path": "artifacts/e1s-build/loader-session1/probe/Image",
+      "size": 97104,
+      "sha256": "7588c09b590bc9fb1c1c418df486fff81ad923ce2ada3129e94146ee6cb48a2d"
+    },
+    {
+      "path": "artifacts/e1s-build/loader-session1/probe/boot.img",
+      "size": 102416,
+      "sha256": "7a267eedb50243446af1f96a770b0e4707496e1499c4a25503e1fcb3f8023169"
+    },
+    {
+      "path": "artifacts/e1s-build/loader-session1/probe/boot.img.tar",
+      "size": 112640,
+      "sha256": "c3085d823c61cc5b4f276fb66c91786d4a89e0a039421de8016cf9ae078141f8"
+    },
+    {
+      "path": "artifacts/e1s-build/loader-session1/loader/loader.elf",
+      "size": 199984,
+      "sha256": "d5192363d66895ee0ffd1675d1d427bb47c6bdf81c8c995e5393e59f90a952d1"
+    },
+    {
+      "path": "artifacts/e1s-build/loader-session1/loader/Image",
+      "size": 131072,
+      "sha256": "dacbfaaa0a3b4e6536ee1f7e9b584c40c94e89be589f61ee795cd2e3f946ad9d"
+    },
+    {
+      "path": "artifacts/e1s-build/loader-session1/loader/boot.img",
+      "size": 135184,
+      "sha256": "f7c64a76fc82100aa4d03123e014559989bc1018f723ca9eff4a17259c9bee62"
+    },
+    {
+      "path": "artifacts/e1s-build/loader-session1/loader/boot.img.tar",
+      "size": 143360,
+      "sha256": "37881d96d90a983d7d4dfc507d30110af05494bf2efb27cd86480146b70979e9"
+    }
+  ]
+}

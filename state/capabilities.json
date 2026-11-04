@@ -1,0 +1,409 @@
+{
+  "schema_version": 1,
+  "target": "SM-S921B/e1s/s5e9945",
+  "first_os": "iOS 16.5",
+  "capabilities": [
+    {
+      "id": "boot",
+      "title": "Boot and recovery",
+      "implementation": "host-tested",
+      "native_status": "not-tested",
+      "local_observation": "Owner reports unlock; Android properties disagree; recovery untested",
+      "upstream": "Exact port authored, no device boot",
+      "next_check": "Supply full-kernel inputs and qualify actual BYH3 recovery; loader format pass is not a boot",
+      "acceptance": "Real XNU entry and verified return to daily Android",
+      "tasks": [
+        "BLD-001",
+        "TST-001",
+        "KRN-001",
+        "NAT-001",
+        "NAT-002",
+        "NAT-004",
+        "NAT-003"
+      ],
+      "sources": [
+        "s24-port",
+        "silicium"
+      ],
+      "local_evidence": [
+        {
+          "path": "state/evidence/DEV-001.json",
+          "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ],
+      "implementation_evidence": [
+        {
+          "path": "state/evidence/BLD-001.json",
+          "sha256": "77193d49ddcacc6d59dfd2352cdbf7e2b72ec9f0c6eb270c56cbf071a755429d"
+        },
+        {
+          "path": "state/evidence/BOOTCHECK-001.json",
+          "sha256": "1c683c7d010f4766992f2662eab4072c092eb1bf7aaaa71733229fb7be024dbe"
+        }
+      ]
+    },
+    {
+      "id": "cpu",
+      "title": "CPU, memory and interrupts",
+      "implementation": "source-reviewed",
+      "native_status": "not-tested",
+      "local_observation": "10 cores; Android 4 KiB pages; reserved-memory properties unavailable",
+      "upstream": "SMP code exists; S24 hardware execution untested",
+      "next_check": "Compile full E1S kernel, then verify live reserved memory and CPUs under a native gate",
+      "acceptance": "All claimed CPUs, timers, IRQ/xcall and stable memory",
+      "tasks": [
+        "BLD-001",
+        "TST-001",
+        "DRV-003",
+        "KRN-001"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "local_evidence": [
+        {
+          "path": "state/evidence/DEV-001.json",
+          "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ]
+    },
+    {
+      "id": "vm",
+      "title": "Isolated XNU guest",
+      "implementation": "planned",
+      "native_status": "not-tested",
+      "local_observation": "KVM configured; shell access and execution unverified",
+      "upstream": "Scion reports Pixel AVF PID 1",
+      "next_check": "Assess accessible S24 VM interfaces",
+      "acceptance": "Guest starts and stops; this does not qualify native peripherals",
+      "tasks": [
+        "VM-001",
+        "VM-002",
+        "VM-003"
+      ],
+      "sources": [
+        "avf-docs",
+        "scion-avf"
+      ],
+      "local_evidence": [
+        {
+          "path": "state/evidence/DEV-001.json",
+          "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ]
+    },
+    {
+      "id": "display",
+      "title": "Display and touch",
+      "implementation": "planned",
+      "native_status": "not-tested",
+      "local_observation": "1080x2340; advertised refresh modes; sec_touchscreen 10 slots",
+      "upstream": "S24 framebuffer/touch code untested",
+      "next_check": "Validate presentation and HID contract",
+      "acceptance": "Correct native pixels, touch, brightness and scanout",
+      "tasks": [
+        "UI-001",
+        "UI-002",
+        "DRV-001"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "local_evidence": [
+        {
+          "path": "state/evidence/DEV-001.json",
+          "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ]
+    },
+    {
+      "id": "gpu",
+      "title": "Xclipse GPU and Metal",
+      "implementation": "host-tested",
+      "native_status": "not-tested",
+      "local_observation": "Xclipse 940; stock Vulkan 1.3.279; sgpu loaded",
+      "upstream": "Android RADV reported; native S24 backend missing",
+      "next_check": "TST-002: finish isolated APK runtime/UI qualification, then separately authorized GPU-003 S24 measurement; native backend/runtime missing",
+      "acceptance": "Native multiprocess Metal/CoreAnimation, correct pixels and cleanup",
+      "tasks": [
+        "GPU-001",
+        "GPU-002",
+        "GPU-003",
+        "GPU-004",
+        "GPU-005",
+        "GPU-006",
+        "GPU-007",
+        "GPU-008",
+        "GPU-009",
+        "GPU-010",
+        "TST-002"
+      ],
+      "sources": [
+        "radv-xclipse",
+        "metal2vulkan",
+        "unixnu"
+      ],
+      "local_evidence": [
+        {
+          "path": "state/evidence/DEV-001.json",
+          "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ],
+      "implementation_evidence": [
+        {
+          "path": "state/evidence/VULKANHOST-001.json",
+          "sha256": "4f09b5b3ca78f0cdfb609453ec3ff424b57bbb1e8e49c2c965db2bcec289fdbf"
+        },
+        {
+          "path": "state/evidence/METAL-001.json",
+          "sha256": "aa874a479aff1db061a48e4caef1e5bce9078dae24e6f4e7a3e8fbf956c8e9ad"
+        }
+      ]
+    },
+    {
+      "id": "storage",
+      "title": "Experimental storage and USB",
+      "implementation": "planned",
+      "native_status": "not-tested",
+      "local_observation": "Partition sizes known; no partition backup or XNU reads",
+      "upstream": "S24 UFS/MCQ authored, untested",
+      "next_check": "Host-only UFS and memory contract checks",
+      "acceptance": "Verified read-only root/overlay with Android data preserved",
+      "tasks": [
+        "DRV-002",
+        "USB-001",
+        "USB-002"
+      ],
+      "sources": [
+        "s24-port",
+        "s24-bsp-reference"
+      ],
+      "local_evidence": [
+        {
+          "path": "state/evidence/DEV-001.json",
+          "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ]
+    },
+    {
+      "id": "wifi",
+      "title": "Wi-Fi",
+      "implementation": "planned",
+      "native_status": "not-tested",
+      "local_observation": "kiwi_v2/cnss2 loaded; endpoint ID unavailable",
+      "upstream": "E1S KIWI overlay; UniXNU interface donor",
+      "next_check": "Measure exact endpoint and match firmware",
+      "acceptance": "WPA2/WPA3, DHCP/DNS/HTTPS, iOS controls and reconnect",
+      "tasks": [
+        "NET-001",
+        "NET-002",
+        "NET-003"
+      ],
+      "sources": [
+        "s24-linux",
+        "unixnu"
+      ],
+      "local_evidence": [
+        {
+          "path": "state/evidence/DEV-001.json",
+          "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ]
+    },
+    {
+      "id": "bluetooth",
+      "title": "Bluetooth",
+      "implementation": "planned",
+      "native_status": "not-tested",
+      "local_observation": "btpower loaded; exact transport not qualified",
+      "upstream": "Board source available; no S24 XNU port",
+      "next_check": "Identify controller and firmware transport",
+      "acceptance": "Pairing, BLE and every claimed profile",
+      "tasks": [
+        "BT-001",
+        "BT-002"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "local_evidence": [
+        {
+          "path": "state/evidence/DEV-001.json",
+          "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ]
+    },
+    {
+      "id": "audio",
+      "title": "Audio",
+      "implementation": "planned",
+      "native_status": "not-tested",
+      "local_observation": "ABOX/exynos9945_audio/CS35L43 modules loaded",
+      "upstream": "Older Exynos audio donors differ",
+      "next_check": "Specify ABOX IPC, PCM and codec path",
+      "acceptance": "Speaker, microphone, OS routing and duplex",
+      "tasks": [
+        "AUD-001",
+        "AUD-002"
+      ],
+      "sources": [
+        "s24-linux",
+        "y2sios",
+        "scion-starlte"
+      ],
+      "local_evidence": [
+        {
+          "path": "state/evidence/DEV-001.json",
+          "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ]
+    },
+    {
+      "id": "camera",
+      "title": "Cameras",
+      "implementation": "planned",
+      "native_status": "not-tested",
+      "local_observation": "Android camera features; no native capture",
+      "upstream": "S24 ID/presence probe only",
+      "next_check": "Separate CSIS/DMA and ISP requirements",
+      "acceptance": "Real frames for every claimed sensor and OS integration",
+      "tasks": [
+        "CAM-001",
+        "CAM-002"
+      ],
+      "sources": [
+        "s24-port",
+        "s24-linux"
+      ],
+      "local_evidence": [
+        {
+          "path": "state/evidence/DEV-001.json",
+          "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ]
+    },
+    {
+      "id": "power",
+      "title": "Power, thermal and sleep",
+      "implementation": "planned",
+      "native_status": "not-tested",
+      "local_observation": "Battery/thermal snapshot and CPU policies captured",
+      "upstream": "S24 read-only PMIC/gauge code; no native DVFS acceptance",
+      "next_check": "Review exact tables and suspend requirements",
+      "acceptance": "Thermal limits, DVFS, idle, sleep/wake and charging",
+      "tasks": [
+        "PWR-001",
+        "PWR-002"
+      ],
+      "sources": [
+        "s24-linux",
+        "y2sios"
+      ],
+      "local_evidence": [
+        {
+          "path": "state/evidence/DEV-001.json",
+          "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ]
+    },
+    {
+      "id": "sensors",
+      "title": "Sensors and GNSS",
+      "implementation": "planned",
+      "native_status": "not-tested",
+      "local_observation": "Android sensor identities captured; native hub unknown",
+      "upstream": "BSP interfaces available",
+      "next_check": "Specify hub/GNSS transport and timestamp handling",
+      "acceptance": "Correct native services for each claimed sensor and GNSS",
+      "tasks": [
+        "SEN-001",
+        "SEN-002"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "local_evidence": [
+        {
+          "path": "state/evidence/DEV-001.json",
+          "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ]
+    },
+    {
+      "id": "cellular",
+      "title": "Modem, SIM, data and voice",
+      "implementation": "planned",
+      "native_status": "not-tested",
+      "local_observation": "CPIF/S5000AP/shared memory; no native tests",
+      "upstream": "Qualcomm bridge has LTE/IPv4 claims; not Samsung transport",
+      "next_check": "Specify CPIF and select carrier/test subscription",
+      "acceptance": "Registration, IPv4/IPv6, SMS, IMS and duplex incoming/outgoing calls",
+      "tasks": [
+        "CELL-001",
+        "CELL-002",
+        "CELL-003",
+        "CELL-004",
+        "CELL-005",
+        "CELL-006"
+      ],
+      "sources": [
+        "s24-linux",
+        "qcom-baseband",
+        "hakios"
+      ],
+      "local_evidence": [
+        {
+          "path": "state/evidence/DEV-001.json",
+          "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ]
+    },
+    {
+      "id": "esim",
+      "title": "eSIM",
+      "implementation": "planned",
+      "native_status": "not-tested",
+      "local_observation": "Android declares eUICC/MEP; no APDU/provisioning test",
+      "upstream": "Partial Qualcomm eSIM bridge; provisioning unverified",
+      "next_check": "Define logical-channel transport and test-profile policy",
+      "acceptance": "Active-profile use and each LPA lifecycle operation qualified",
+      "tasks": [
+        "ESIM-001",
+        "ESIM-002",
+        "ESIM-003"
+      ],
+      "sources": [
+        "lpac",
+        "qcom-baseband"
+      ],
+      "local_evidence": [
+        {
+          "path": "state/evidence/DEV-001.json",
+          "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ]
+    },
+    {
+      "id": "other",
+      "title": "Other peripherals",
+      "implementation": "planned",
+      "native_status": "not-tested",
+      "local_observation": "Android reports NFC/fingerprint; native untested",
+      "upstream": "No equivalent Apple security established",
+      "next_check": "Inventory individual hardware and define native tests",
+      "acceptance": "Haptics/NFC/biometrics/codecs/external display individually qualified",
+      "tasks": [
+        "MISC-001"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "local_evidence": [
+        {
+          "path": "state/evidence/DEV-001.json",
+          "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ]
+    }
+  ]
+}

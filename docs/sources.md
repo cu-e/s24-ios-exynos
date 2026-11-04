@@ -1,6 +1,8 @@
 # Sources and examples
 
-`python3 tools/lab.py sources` lists primary sources. Only the exact S24 snapshot currently has a full SHA. Other sources have revision=null: pin a revision and record it in research/sources.json before reusing code.
+`python3 tools/lab.py sources` lists primary sources. The selected S24, graphics, Exynos and platform snapshots now have full SHAs. Entries with revision=null remain research leads and cannot be fetched/reused by the source tool until pinned. [Reuse decisions](../research/notes/RES-001-reuse-map.md) record licensing and compatibility boundaries.
+
+Use `python3 tools/sources.py fetch ID` for an explicit pinned checkout and `python3 tools/sources.py verify ID ...` for read-only provenance checks. Donor checkouts are sparse documentation reviews unless their registry entry says otherwise. Submodules, firmware and SDKs are not fetched automatically. See [procedure](procedures/sources-check.md).
 
 | Example needed | Starting point |
 |---|---|

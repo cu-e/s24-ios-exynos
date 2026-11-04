@@ -2,6 +2,8 @@
 
 **Status: recovery is not prepared or tested on the owner's device.** This document is a research template, not a flashing procedure.
 
+NAT-001 remains blocked on exact matching stock images and dated/hash-verified backups. [Session template](procedures/recovery/session-template.json) records the missing concrete inputs without authorizing operations. NAT-004 is the separately gated measured recovery qualification; NAT-003 now depends on it and the full kernel build KRN-001. The newly built freestanding loaders do not satisfy either gate.
+
 | Requirement | Current state |
 |---|---|
 | Exact model/firmware/bootloader version | SM-S921B / S921BXXS9BYH3 measured through ADB; actual unlock state unresolved |

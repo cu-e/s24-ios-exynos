@@ -1,5 +1,7 @@
 # Research architecture
 
+The [implementation contract](implementation.md) defines the approved sequence. The hardware view is [CAPABILITIES.md](../CAPABILITIES.md). Native Xclipse, modem and eUICC backends remain separate from the Android experiment harness.
+
 The reference target is SM-S921B/e1s/Exynos 2400. The owner's phone was confirmed to match through ADB on 2026-11-05; see the [device baseline](../research/notes/DEV-001-profile.md).
 
 ## Three execution environments

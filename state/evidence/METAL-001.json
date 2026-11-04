@@ -1,0 +1,85 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-04T23:20:20+00:00",
+  "summary": "Owned synthetic AIR-shaped fixture translated, independently SPIR-V validated and executed with exact host output",
+  "commit": "8fa104ac04ffd3dda8a594729345e22a765d12f1",
+  "commands": [
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-as",
+        "--version"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-as",
+        "/home/egor/dev/pet/s24-ios-exynos/src/graphics/fixtures/write_marker.ll",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/metal-fixture/fixture-session2/write_marker.air"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/metal-build/session1/source/target/debug/metal2vulkan",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/metal-fixture/fixture-session2/write_marker.air",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/metal-fixture/fixture-session2/write_marker.spv",
+        "--profile",
+        "/home/egor/dev/pet/s24-ios-exynos/src/graphics/fixtures/host-profile.json",
+        "--function",
+        "write_marker",
+        "--emit-meta",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/metal-fixture/fixture-session2/meta.json"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/shader-tools/linux-x86_64/spirv-val",
+        "--target-env",
+        "vulkan1.2",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/metal-fixture/fixture-session2/write_marker.spv"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "c++",
+        "-std=c++17",
+        "-O2",
+        "-Wno-missing-field-initializers",
+        "/home/egor/dev/pet/s24-ios-exynos/src/graphics/run_compute.cpp",
+        "-lvulkan",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/metal-fixture/fixture-session2/run_compute"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/metal-fixture/fixture-session2/run_compute",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/metal-fixture/fixture-session2/write_marker.spv"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/graphics/metal-session2.json",
+    "src/graphics/fixtures/write_marker.ll",
+    "src/graphics/fixtures/host-profile.json"
+  ],
+  "sha256": {
+    "fixtures/public/graphics/metal-session2.json": "46194e9132825927f3a4e02ea9714856bc5d381dd19896985294c329ee0f9d79",
+    "src/graphics/fixtures/write_marker.ll": "65fe019e64717f8d735edb22aa21e791ccb6dcc92ecf5a483046f928799943b5",
+    "src/graphics/fixtures/host-profile.json": "7d0b2cdf87585cee8f64c809122e0e8d6bf78bc4fb314ece932a6c2a6a3fa1d7"
+  },
+  "limitations": [
+    "Synthetic project-owned AIR-shaped compute input, not Apple Metal compiler output",
+    "Lavapipe host Vulkan execution; no S24 GPU, XNU backend, Metal runtime or GUI acceptance",
+    "Expected integer 9212400 and all 15 guard words compared exactly; permitted error zero"
+  ],
+  "working_tree": "Implementation sources were uncommitted at execution; artifact/source digests identify the tested inputs"
+}
