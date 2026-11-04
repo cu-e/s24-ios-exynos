@@ -1,5 +1,5 @@
-# Графическая прослойка
+# Graphics layer
 
-Место для авторских shader fixtures, reference outputs, адаптеров Metal-to-Vulkan и app-local Vulkan experiments. Рабочего слоя iOS GUI пока нет.
+Home for project-owned shader fixtures, reference outputs, Metal-to-Vulkan adapters and app-local Vulkan experiments. No working iOS GUI layer exists yet.
 
-Начинать с GPU-004: один небольшой тест, закреплённый переводчик, ожидаемые пиксели, допустимая ошибка. Пользовательские API отделять от платформенного memory/queue/firmware backend. Xclipse, Mali и Adreno не взаимозаменяемы.
+Start with GPU-004: one small test, a pinned translator, expected pixels and an error tolerance. Separate user-facing APIs from the platform memory/queue/firmware backend. Xclipse, Mali and Adreno are not interchangeable.

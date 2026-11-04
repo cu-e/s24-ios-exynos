@@ -1,5 +1,5 @@
-# Проверяемые публичные fixtures
+# Public test fixtures
 
-Только небольшие авторские синтетические примеры или обезличенные записи с разрешённым происхождением. Рядом хранить origin, source/revision, лицензию и назначение. Не выдавать synthetic за вывод реального S24.
+Only small project-owned synthetic examples or sanitized records with appropriate provenance belong here. Record origin, source/revision, license and purpose alongside each fixture. Do not present synthetic data as real S24 output.
 
-Настоящие private dump, firmware, серийники и полные логи сюда не попадают. Для них artifacts/ или внешний приватный backup.
+Private dumps, firmware, serial numbers and complete logs belong in artifacts/ or an external private backup, not here.

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-04T21:58:29+00:00",
+  "updated_at": "2026-11-04T22:12:59+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -12,39 +12,40 @@
     },
     "facts": [
       {
-        "fact": "Владелец сообщает, что загрузчик S24 разблокирован.",
+        "fact": "The owner reports that the S24 bootloader is unlocked.",
         "origin": "user-report",
         "device_verified": false
       },
       {
-        "fact": "Сохранить текущую систему и повседневную доступность телефона.",
+        "fact": "Preserve the current system and daily availability of the phone.",
         "origin": "user-requirement",
         "device_verified": false
       },
       {
-        "fact": "Измерено ADB 2026-11-05: SM-S921B/e1s, s5e9945/erd9945, Android 15, firmware S921BXXS9BYH3, kernel 6.1.93-android14-11.",
+        "fact": "ADB measurements on 2026-11-05: SM-S921B/e1s, s5e9945/erd9945, Android 15, firmware S921BXXS9BYH3, kernel 6.1.93-android14-11.",
         "origin": "local-device",
         "device_verified": true,
         "evidence": "state/evidence/DEV-001.json"
       },
       {
-        "fact": "Android сообщает locked/green; найден Magisk 96221b69-alpha:MAGISK:R. Фактический unlock и доступ su не установлены.",
+        "fact": "Android reports locked/green; Magisk 96221b69-alpha:MAGISK:R is present. Actual unlock state and su access are not established.",
         "origin": "local-device",
         "device_verified": true,
         "evidence": "state/evidence/DEV-001.json"
       },
       {
-        "fact": "Прочитанный kernel config: KEXEC/KEXEC_FILE выключены, KVM=y; доступ VM и восстановление не проверены.",
+        "fact": "Measured kernel config: KEXEC/KEXEC_FILE disabled, KVM=y; VM access and recovery are untested.",
         "origin": "local-device",
         "device_verified": true,
         "evidence": "state/evidence/DEV-001.json"
       }
-    ]
+    ],
+    "language": "en"
   },
   "tasks": [
     {
       "id": "FND-001",
-      "title": "Подготовить и проверить основу проекта",
+      "title": "Prepare and verify the project foundation",
       "status": "done",
       "owner": "codex",
       "scope": "host",
@@ -57,23 +58,24 @@
         "state/"
       ],
       "acceptance": [
-        "CLI проходит проверки; конкурирующие агенты не могут забрать одну задачу.",
-        "Созданы документация, реестр источников и начальный backlog.",
-        "Ни одна команда не пишет в разделы телефона."
+        "The CLI passes checks; competing agents cannot claim the same task.",
+        "Documentation, the source registry and the initial backlog exist.",
+        "No command writes to phone partitions."
       ],
       "sources": [],
       "steps": [
-        "Проверить CLI и отрицательные сценарии.",
-        "Записать реальные результаты проверки и сгенерировать STATUS.md."
+        "Test the CLI and negative cases.",
+        "Save actual verification results and generate STATUS.md."
       ],
       "started_at": "2026-11-04T21:39:57+00:00",
       "evidence": "state/evidence/FND-001.json",
       "evidence_sha256": "dda6434b3eb314ae74ec0414fc0fbff7d6e51e5ec521f4311762dc07a337d8d4",
-      "finished_at": "2026-11-04T21:41:05+00:00"
+      "finished_at": "2026-11-04T21:41:05+00:00",
+      "evidence_translation": "state/evidence/FND-001.en.json"
     },
     {
       "id": "RES-001",
-      "title": "Зафиксировать upstream S24 и происхождение доноров",
+      "title": "Pin S24 upstream and document donor provenance",
       "status": "pending",
       "owner": null,
       "scope": "host",
@@ -86,9 +88,9 @@
         "references/"
       ],
       "acceptance": [
-        "Точный S24 checkout закреплён полным commit SHA; рабочее дерево не меняет upstream.",
-        "Для выбранных доноров указаны SHA, лицензия и назначение.",
-        "Статусы authored/build-tested/device-observed разделены."
+        "The exact S24 checkout is pinned to a full commit SHA; the working tree does not modify upstream.",
+        "Selected donors have a SHA, license and documented purpose.",
+        "Authored, build-tested and device-observed statuses are distinct."
       ],
       "sources": [
         "s24-port",
@@ -96,14 +98,14 @@
         "y2sios"
       ],
       "steps": [
-        "Читать research/sources.json.",
-        "Клонировать только выбранные исходники в references/, без загрузки firmware/IPSW.",
-        "Составить карту reuse/replace/missing."
+        "Read research/sources.json.",
+        "Clone only selected sources into references/ without downloading firmware/IPSW.",
+        "Create a reuse/replace/missing map."
       ]
     },
     {
       "id": "DEV-001",
-      "title": "Получить обезличенную read-only инвентаризацию S24",
+      "title": "Collect sanitized read-only S24 inventory",
       "status": "done",
       "owner": "codex",
       "scope": "android-readonly",
@@ -117,27 +119,28 @@
         "artifacts/"
       ],
       "acceptance": [
-        "Модель, codename и прошивка измерены, не предположены.",
-        "Разблокировка помечена отдельно от root; root не запрашивается автоматически.",
-        "Отчёт не содержит IMEI/серийников, настроек телефона не меняет."
+        "Model, codename and firmware are measured rather than assumed.",
+        "Unlock status is separate from root; root is not requested automatically.",
+        "The report contains no IMEI/serial numbers and does not change phone settings."
       ],
       "sources": [
         "adb-docs",
         "s24-port"
       ],
       "steps": [
-        "Дождаться авторизованного ADB-подключения; не выполнять pairing автоматически.",
-        "Запустить tools/device_inventory.py с новым путём вывода.",
-        "Сохранить evidence с origin local-device."
+        "Wait for authorized ADB connectivity; do not pair automatically.",
+        "Run tools/device_inventory.py with a fresh output path.",
+        "Save evidence with local-device origin."
       ],
       "started_at": "2026-11-04T21:44:45+00:00",
       "evidence": "state/evidence/DEV-001.json",
       "evidence_sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f",
-      "finished_at": "2026-11-04T21:58:29+00:00"
+      "finished_at": "2026-11-04T21:58:29+00:00",
+      "evidence_translation": "state/evidence/DEV-001.en.json"
     },
     {
       "id": "RES-002",
-      "title": "Сверить карту аппаратуры e1s по первичным источникам",
+      "title": "Cross-check the e1s hardware map against primary sources",
       "status": "pending",
       "owner": null,
       "scope": "host",
@@ -150,9 +153,9 @@
         "fixtures/public/"
       ],
       "acceptance": [
-        "CPU/GIC/timer/RAM/UFS/touch/GPU описаны со ссылками на DTS/исходные файлы.",
-        "Неизвестные и зависящие от прошивки значения перечислены явно.",
-        "Никакие MMIO-пробы на живом телефоне не запускаются."
+        "CPU/GIC/timer/RAM/UFS/touch/GPU are documented with DTS/source references.",
+        "Unknown and firmware-dependent values are explicit.",
+        "No MMIO probes run on the live phone."
       ],
       "sources": [
         "s24-port",
@@ -160,14 +163,14 @@
         "silicium"
       ],
       "steps": [
-        "Сопоставить DTS и таблицы upstream.",
-        "Завести таблицу оборудования с provenance.",
-        "Подготовить только синтетические fixtures для парсеров."
+        "Compare DTS with upstream tables.",
+        "Create a hardware table with provenance.",
+        "Prepare only synthetic parser fixtures."
       ]
     },
     {
       "id": "BLD-001",
-      "title": "Сделать воспроизводимую host-сборку загрузчика и E1S delta",
+      "title": "Make the host loader and E1S delta build reproducible",
       "status": "pending",
       "owner": null,
       "scope": "host",
@@ -182,24 +185,24 @@
         "docs/procedures/"
       ],
       "acceptance": [
-        "Toolchain и upstream закреплены версиями.",
-        "Сборка или точная ошибка воспроизводятся из чистого окружения.",
-        "check_all_exports и неполная сборка не объявлены успехом boot.",
-        "Образы только в artifacts/; никакой прошивки."
+        "Toolchain and upstream versions are pinned.",
+        "A build or its precise failure is reproducible from a clean environment.",
+        "check_all_exports failures and incomplete builds are not reported as successful boot.",
+        "Images stay in artifacts/; no flashing."
       ],
       "sources": [
         "s24-port",
         "hakios"
       ],
       "steps": [
-        "Начать с загрузчика без Apple userland.",
-        "Сохранить команды, exit codes, версии и хэши.",
-        "Описать отдельно доступность SDK и разрешённый источник."
+        "Start with the loader without Apple userland.",
+        "Save commands, exit codes, versions and hashes.",
+        "Document SDK availability and its authorized source separately."
       ]
     },
     {
       "id": "TST-001",
-      "title": "Проверить boot-пакет, ADT и границы памяти на host",
+      "title": "Validate the boot package, ADT and memory boundaries on the host",
       "status": "pending",
       "owner": null,
       "scope": "host",
@@ -215,22 +218,22 @@
         "docs/procedures/"
       ],
       "acceptance": [
-        "Есть отрицательные случаи: перекрытие reserved memory, неверный размер и адрес entry.",
-        "QEMU virt и экранные превью обозначены synthetic.",
-        "Не заявлена эмуляция аппаратуры Exynos 2400."
+        "Negative cases cover reserved-memory overlap, invalid size and invalid entry address.",
+        "QEMU virt and screen previews are labeled synthetic.",
+        "No Exynos 2400 hardware emulation is claimed."
       ],
       "sources": [
         "s24-port"
       ],
       "steps": [
-        "Создать маленькие synthetic fixtures.",
-        "Проверять структуру и диапазоны без исполнения на телефоне.",
-        "Опубликовать ограничения проверки."
+        "Create small synthetic fixtures.",
+        "Validate structures and ranges without executing on the phone.",
+        "Publish verification limitations."
       ]
     },
     {
       "id": "GPU-001",
-      "title": "Спроектировать Android-приложение для измерений GUI/GPU",
+      "title": "Design an Android app for GUI/GPU measurements",
       "status": "pending",
       "owner": null,
       "scope": "host",
@@ -243,23 +246,23 @@
         "docs/architecture.md"
       ],
       "acceptance": [
-        "APK не требует root, Device Admin, accessibility или записи в разделы.",
-        "Описаны Stop, таймаут, ограничение нагрузки и экспорт обезличенных результатов.",
-        "Есть минимальный Vulkan baseline и критерии сравнения кадров."
+        "The APK needs no root, Device Admin, accessibility or partition writes.",
+        "Stop, timeout, load limits and sanitized result export are documented.",
+        "A minimal Vulkan baseline and frame comparison criteria are defined."
       ],
       "sources": [
         "radv-xclipse",
         "metal2vulkan"
       ],
       "steps": [
-        "Начать с коротких offscreen-тестов.",
-        "Задать формат отчёта и отдельный каталог приложения.",
-        "Спланировать корректное завершение и обработку GPU timeout."
+        "Start with short offscreen tests.",
+        "Define the report format and a dedicated app directory.",
+        "Plan clean termination and GPU timeout handling."
       ]
     },
     {
       "id": "GPU-002",
-      "title": "Реализовать минимальный Android Vulkan probe",
+      "title": "Implement a minimal Android Vulkan probe",
       "status": "pending",
       "owner": null,
       "scope": "host",
@@ -273,23 +276,23 @@
         "docs/procedures/"
       ],
       "acceptance": [
-        "APK собирается закреплённым toolchain.",
-        "Есть версии, исходный commit и sha256 APK.",
-        "Тесты остановки/таймаута проверены на доступном host/emulator; ограничения перечислены.",
-        "APK не установлен на основной телефон без согласованной области android-app."
+        "The APK builds with a pinned toolchain.",
+        "Versions, source commit and APK SHA256 are recorded.",
+        "Stop/timeout tests run on an available host/emulator; limitations are explicit.",
+        "The APK is not installed on the primary phone without authorized android-app scope."
       ],
       "sources": [
         "radv-xclipse"
       ],
       "steps": [
-        "Реализовать минимальный probe и экспорт JSON.",
-        "Проверить жизненный цикл и timeout.",
-        "Подготовить reviewable APK и инструкцию."
+        "Implement the minimal probe and JSON export.",
+        "Test lifecycle and timeout.",
+        "Prepare a reviewable APK and instructions."
       ]
     },
     {
       "id": "GPU-003",
-      "title": "Измерить штатный Vulkan на S24 внутри Android",
+      "title": "Measure stock Vulkan on the S24 inside Android",
       "status": "pending",
       "owner": null,
       "scope": "android-app",
@@ -304,23 +307,23 @@
         "devices/"
       ],
       "acceptance": [
-        "Есть датированный inventory и хэш APK.",
-        "Сохранены renderer/extensions/frame results/temperature observations.",
-        "Проверена команда Stop без перезагрузки; отрицательные случаи описаны."
+        "Dated inventory and the APK hash are available.",
+        "Renderer, extensions, frame results and temperature observations are saved.",
+        "Stop is tested without rebooting; negative cases are documented."
       ],
       "sources": [
         "radv-xclipse",
         "adb-docs"
       ],
       "steps": [
-        "Только после согласования установки приложения.",
-        "Короткие тесты на штатном драйвере; без стрессового цикла.",
-        "Ввести baseline до смены драйвера."
+        "Proceed only after app installation is authorized.",
+        "Run short tests using the stock driver, without a stress loop.",
+        "Establish a baseline before changing drivers."
       ]
     },
     {
       "id": "GPU-004",
-      "title": "Проверить минимальный Metal-to-Vulkan путь на host",
+      "title": "Validate a minimal Metal-to-Vulkan path on the host",
       "status": "pending",
       "owner": null,
       "scope": "host",
@@ -336,23 +339,23 @@
         "tests/"
       ],
       "acceptance": [
-        "Шейдерные fixtures авторские или имеют проверенную лицензию.",
-        "Есть reference pixels и описание допустимой ошибки.",
-        "Host pass не выдаётся за Xclipse/XNU pass."
+        "Shader fixtures are project-owned or have a verified license.",
+        "Reference pixels and permitted error are documented.",
+        "Host pass is not presented as Xclipse/XNU pass."
       ],
       "sources": [
         "metal2vulkan",
         "radv-xclipse"
       ],
       "steps": [
-        "Выбрать один compute/render пример.",
-        "Закрепить переводчик и формат SPIR-V.",
-        "Сравнить reference output."
+        "Select one compute/render example.",
+        "Pin the translator and SPIR-V format.",
+        "Compare with reference output."
       ]
     },
     {
       "id": "GPU-005",
-      "title": "Сравнить штатный драйвер и RADV Xclipse в test APK",
+      "title": "Compare the stock driver and Xclipse RADV in the test APK",
       "status": "pending",
       "owner": null,
       "scope": "android-app",
@@ -368,23 +371,23 @@
         "research/notes/"
       ],
       "acceptance": [
-        "RADV загружается только внутри тестового процесса, без системной подмены.",
-        "Каждая сборка и набор шейдеров имеют SHA/хэш.",
-        "Сравниваются корректность, стабильность и время кадра; сбои не скрываются."
+        "RADV loads only inside the test process, without system library replacement.",
+        "Each build and shader set has a revision/hash.",
+        "Compare correctness, stability and frame time; preserve failures."
       ],
       "sources": [
         "radv-xclipse",
         "metal2vulkan"
       ],
       "steps": [
-        "Проверить возможность app-local загрузки на данной прошивке.",
-        "Начать с одного кадра и короткого timeout.",
-        "При GPU hang прекратить серию, сохранить доступные логи."
+        "Check app-local loading on the measured firmware.",
+        "Start with one frame and a short timeout.",
+        "On GPU hang, stop the series and preserve available logs."
       ]
     },
     {
       "id": "DRV-001",
-      "title": "Подготовить STM SPI touch driver и host-адаптер",
+      "title": "Prepare an STM SPI touch driver and host adapter",
       "status": "pending",
       "owner": null,
       "scope": "host",
@@ -399,23 +402,23 @@
         "tests/"
       ],
       "acceptance": [
-        "Протокол выделен из MMIO-слоя.",
-        "Парсер проверен на усечённых/некорректных событиях и диапазонах координат.",
-        "Питание, IRQ и сенсор на устройстве обозначены unverified."
+        "The protocol is separated from the MMIO layer.",
+        "The parser is tested with truncated/invalid events and coordinate ranges.",
+        "Device power, IRQ and sensor behavior remain labeled unverified."
       ],
       "sources": [
         "s24-port",
         "s24-linux"
       ],
       "steps": [
-        "Использовать авторские fixtures протокола.",
-        "Сохранить лицензию и provenance переносимого кода.",
-        "Не читать MMIO на рабочем Android."
+        "Use project-owned protocol fixtures.",
+        "Preserve licenses and provenance for reused code.",
+        "Do not read MMIO on the daily Android system."
       ]
     },
     {
       "id": "DRV-002",
-      "title": "Проверить read-only UFS/MCQ контракт на host",
+      "title": "Validate the read-only UFS/MCQ contract on the host",
       "status": "pending",
       "owner": null,
       "scope": "host",
@@ -431,9 +434,9 @@
         "fixtures/public/"
       ],
       "acceptance": [
-        "Имеются проверки границ DMA/GPT/LUN, timeout и запрета write-команд.",
-        "Возможность чтения зашифрованного Android userdata не предполагается.",
-        "Аппаратная PHY/IOMMU/MCQ-совместимость не заявлена без измерений."
+        "Checks cover DMA/GPT/LUN boundaries, timeouts and rejection of write commands.",
+        "Reading encrypted Android userdata is not assumed possible.",
+        "Hardware PHY/IOMMU/MCQ compatibility is not claimed without measurements."
       ],
       "sources": [
         "s24-port",
@@ -441,14 +444,14 @@
         "y2sios"
       ],
       "steps": [
-        "Проверить минимальный command whitelist.",
-        "Моделировать ошибки completion и неполные ответы.",
-        "Подготовить описание RAM-root первого запуска."
+        "Validate a minimal command allowlist.",
+        "Model completion failures and incomplete responses.",
+        "Describe the RAM root for an initial boot."
       ]
     },
     {
       "id": "NAT-001",
-      "title": "Подготовить проверяемый план восстановления именно этого S24",
+      "title": "Prepare a verifiable recovery plan for this exact S24",
       "status": "pending",
       "owner": null,
       "scope": "host",
@@ -463,24 +466,24 @@
         "devices/"
       ],
       "acceptance": [
-        "Известны точная модель, firmware/bootloader и доступный recovery-путь.",
-        "Для backup указаны дата, размер, хэш и место хранения вне git.",
-        "Отличены наличие backup и проверенное восстановление; неиспытанное не помечено ready.",
-        "Работа с разделами сама по себе этой задачей не разрешается."
+        "The exact model, firmware/bootloader and an available recovery path are known.",
+        "Backups have a date, size, hash and location outside Git.",
+        "Backup availability is distinct from tested recovery; untested steps are not marked ready.",
+        "This task does not itself authorize partition operations."
       ],
       "sources": [
         "s24-port",
         "twrp-e1s"
       ],
       "steps": [
-        "Описать путь восстановления без исполнения write-команд.",
-        "Указать недостающие наблюдения.",
-        "Сформировать отдельное предложение аппаратного сеанса."
+        "Describe the recovery path without executing write commands.",
+        "List missing observations.",
+        "Prepare a separate proposal for a hardware session."
       ]
     },
     {
       "id": "NAT-002",
-      "title": "Спроектировать управление и возврат из нативного теста",
+      "title": "Design control and return paths for a native test",
       "status": "pending",
       "owner": null,
       "scope": "host",
@@ -494,23 +497,23 @@
         "research/notes/"
       ],
       "acceptance": [
-        "Указано, где исчезает ADB и каким будет независимый control plane.",
-        "Watchdog/one-shot boot имеют отдельный план валидации.",
-        "Указаны ручной fallback и условия, при которых автономный цикл запрещён."
+        "Document where ADB becomes unavailable and the independent control plane.",
+        "Watchdog/one-shot boot have a separate validation plan.",
+        "Document manual fallback and conditions prohibiting an autonomous loop."
       ],
       "sources": [
         "watchdog-docs",
         "s24-port"
       ],
       "steps": [
-        "Не обещать возврат по Stop до измерений.",
-        "Планировать RAM-root и отсутствие доступа к личным данным.",
-        "Разделить software timeout и аппаратный watchdog."
+        "Do not promise return via Stop before measuring it.",
+        "Plan a RAM root with no personal data access.",
+        "Separate software timeout from hardware watchdog."
       ]
     },
     {
       "id": "NAT-003",
-      "title": "Первый нативный BOOT-сеанс с журналом и восстановлением",
+      "title": "Run the first native BOOT session with logs and recovery",
       "status": "pending",
       "owner": null,
       "scope": "native",
@@ -526,23 +529,23 @@
         "docs/procedures/"
       ],
       "acceptance": [
-        "Есть отдельное явное разрешение на конкретный аппаратный сеанс и изменения.",
-        "Recovery подготовлен; пользователь доступен для ручного fallback.",
-        "Есть настоящий журнал/фото, commit/image hash и итог возврата в Android.",
-        "Синтетическое превью не используется как аппаратное доказательство."
+        "A concrete hardware session and its changes have separate explicit authorization.",
+        "Recovery is prepared and the owner is available for manual fallback.",
+        "Real logs/photos, commit/image hash and the Android return outcome are recorded.",
+        "Synthetic previews are not used as hardware evidence."
       ],
       "sources": [
         "s24-port"
       ],
       "steps": [
-        "Оставить заблокированным до отдельного согласования.",
-        "Без автоматических повторов после потери связи.",
-        "Записать fail/inconclusive, если подтверждения исполнения XNU нет."
+        "Keep this stage gated until separately authorized.",
+        "Do not retry automatically after losing connectivity.",
+        "Record fail/inconclusive if XNU execution is not established."
       ]
     },
     {
       "id": "DRV-003",
-      "title": "Аппаратно проверить минимальные драйверы XNU",
+      "title": "Validate minimal XNU drivers on hardware",
       "status": "pending",
       "owner": null,
       "scope": "native",
@@ -558,22 +561,22 @@
         "research/notes/"
       ],
       "acceptance": [
-        "Каждая подсистема проверяется отдельным коротким экспериментом.",
-        "Известны восстановление, таймаут и условия остановки.",
-        "Android userdata не форматируется; запись UFS не включается."
+        "Each subsystem is tested in a separate short experiment.",
+        "Recovery, timeout and stop criteria are known.",
+        "Android userdata is not formatted and UFS writes remain disabled."
       ],
       "sources": [
         "s24-port"
       ],
       "steps": [
-        "Начать с RAM-root/консоли и измерения фактов.",
-        "Не объединять touch, UFS и GPU в первый эксперимент.",
-        "Переносить только подтверждённые результаты в status."
+        "Start with RAM root/console and observed facts.",
+        "Do not combine touch, UFS and GPU in the first experiment.",
+        "Promote only verified results into status."
       ]
     },
     {
       "id": "DEV-002",
-      "title": "Подготовить расширенный read-only сборщик технического профиля",
+      "title": "Prepare an extended read-only technical profile collector",
       "status": "done",
       "owner": "codex",
       "scope": "host",
@@ -589,24 +592,65 @@
         "research/notes/"
       ],
       "acceptance": [
-        "Команды ограничены чтением технической информации и не вызывают su/reboot/install/flash.",
-        "До записи очищаются аппаратные идентификаторы Vulkan; из device tree сохраняется только allowlist свойств.",
-        "Недоступные данные записываются как unavailable, не подменяются предположениями.",
-        "Есть тесты обезличивания, фильтра device tree и ограничений сбора."
+        "Commands only read technical metadata and do not invoke su/reboot/install/flash.",
+        "Vulkan hardware identifiers are removed before saving; device-tree properties use an allowlist.",
+        "Unavailable data is recorded as unavailable, not replaced by assumptions.",
+        "Tests cover sanitization, device-tree filtering and collection boundaries."
       ],
       "sources": [
         "adb-docs",
         "s24-port"
       ],
       "steps": [
-        "Добавить профиль CPU/GPU/kernel/storage/input/power и происхождение данных.",
-        "Проверить фильтры на synthetic fixtures.",
-        "Сохранить настоящие данные в DEV-001 отдельно от host-тестов."
+        "Add CPU/GPU/kernel/storage/input/power metadata with provenance.",
+        "Test filters using synthetic fixtures.",
+        "Save actual device observations under DEV-001 separately from host tests."
       ],
       "started_at": "2026-11-04T21:45:51+00:00",
       "evidence": "state/evidence/DEV-002.json",
       "evidence_sha256": "164fbfac6b7ce7c746bd999907e1338677de6392f7f05956e82c8009189cd219",
-      "finished_at": "2026-11-04T21:58:29+00:00"
+      "finished_at": "2026-11-04T21:58:29+00:00",
+      "evidence_translation": "state/evidence/DEV-002.en.json"
+    },
+    {
+      "id": "DOC-001",
+      "title": "Make English the project and agent working language",
+      "status": "done",
+      "owner": "codex",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "FND-001"
+      ],
+      "paths": [
+        "AGENTS.md",
+        "README.md",
+        "NOTICE.md",
+        "docs/",
+        "research/",
+        "devices/",
+        "fixtures/",
+        "src/",
+        "patches/",
+        "state/",
+        "tools/lab.py"
+      ],
+      "acceptance": [
+        "Active documentation, task/source prose and generated CLI status use English.",
+        "Identifiers, commands, numeric observations, authorization boundaries and original evidence hashes are preserved.",
+        "English evidence translations point to immutable originals and do not claim new measurements.",
+        "Registry validation, relevant tests and local link checks pass."
+      ],
+      "sources": [],
+      "steps": [
+        "Translate maintained documentation, task specifications and registry prose.",
+        "Provide English views of historical evidence and the local device report.",
+        "Validate, regenerate status and record the language migration."
+      ],
+      "started_at": "2026-11-04T22:04:21+00:00",
+      "evidence": "state/evidence/DOC-001.json",
+      "evidence_sha256": "a08059a67d5f830c2d4222785c9129bde5dcbd99aa585c9ebf3ccf9984455c4c",
+      "finished_at": "2026-11-04T22:12:59+00:00"
     }
   ],
   "experiments": [
@@ -616,14 +660,30 @@
       "owner": "codex",
       "kind": "host-test",
       "status": "recorded",
-      "hypothesis": "Реестр обеспечивает зависимости, владение задачами и различение доказательств; inventory не изменяет телефон",
+      "hypothesis": "The registry enforces dependencies and ownership and distinguishes evidence categories; inventory does not modify the phone",
       "procedure": "docs/procedures/foundation-check.md",
       "timeout_seconds": 120,
       "created_at": "2026-11-04T21:39:57+00:00",
       "evidence": "state/evidence/FND-001.json",
       "evidence_sha256": "dda6434b3eb314ae74ec0414fc0fbff7d6e51e5ec521f4311762dc07a337d8d4",
       "outcome": "pass",
-      "recorded_at": "2026-11-04T21:41:05+00:00"
+      "recorded_at": "2026-11-04T21:41:05+00:00",
+      "evidence_translation": "state/evidence/FND-001.en.json"
+    },
+    {
+      "id": "LANGUAGE-001",
+      "task": "DOC-001",
+      "owner": "codex",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Maintained project text is English while historical evidence, captures and authorization remain intact",
+      "procedure": "docs/procedures/english-migration-check.md",
+      "timeout_seconds": 120,
+      "created_at": "2026-11-04T22:11:49+00:00",
+      "evidence": "state/evidence/DOC-001.json",
+      "evidence_sha256": "a08059a67d5f830c2d4222785c9129bde5dcbd99aa585c9ebf3ccf9984455c4c",
+      "outcome": "pass",
+      "recorded_at": "2026-11-04T22:12:59+00:00"
     }
   ],
   "events": [
@@ -680,6 +740,36 @@
     {
       "at": "2026-11-04T21:58:29+00:00",
       "action": "task.done:DEV-001",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T22:04:21+00:00",
+      "action": "task.add:DOC-001",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T22:04:21+00:00",
+      "action": "task.claim:DOC-001",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T22:07:58+00:00",
+      "action": "project.language:English; user-requested translation, no new device measurements",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T22:11:49+00:00",
+      "action": "experiment.plan:LANGUAGE-001",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T22:12:59+00:00",
+      "action": "experiment.record:LANGUAGE-001",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T22:12:59+00:00",
+      "action": "task.done:DOC-001",
       "owner": "codex"
     }
   ]

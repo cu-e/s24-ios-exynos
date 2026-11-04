@@ -1,5 +1,5 @@
-# Исторические локальные копии
+# Historical local snapshots
 
-Импорт из /home/egor/hackios-s24-research от 2026-11-05. Файлы исключены из Git, чтобы не переносить чужие большие тексты и Reddit-архив в исходный код проекта. Источники и проверенная ревизия указаны в research/sources.json и research/notes/2026-11-05-initial-research.txt.
+Imported from /home/egor/hackios-s24-research on 2026-11-05. Files are excluded from Git to avoid embedding large upstream texts and a Reddit archive in project sources. Sources and reviewed revisions are recorded in research/sources.json and research/notes/2026-11-05-initial-research.txt.
 
-Это результаты чтения первоисточников, не измерения телефона владельца. После обновления upstream сохранять новый snapshot отдельно; старый не считать текущим без сверки.
+These are source-review results, not measurements of the owner's phone. Save new upstream snapshots separately; do not treat an old snapshot as current without comparison. Preserve original source language and bytes.

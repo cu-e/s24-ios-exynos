@@ -1,23 +1,23 @@
-# Архитектура исследования
+# Research architecture
 
-Целевой reference — SM-S921B/e1s/Exynos 2400. Совпадение с телефоном владельца пока не измерено.
+The reference target is SM-S921B/e1s/Exynos 2400. The owner's phone was confirmed to match through ADB on 2026-11-05; see the [device baseline](../research/notes/DEV-001-profile.md).
 
-## Три контура
+## Three execution environments
 
-1. **Host:** закреплённые исходники → сборка → статическая проверка образа/ADT → синтетические тесты. Телефон не требуется.
-2. **Android userland:** отдельный probe APK → штатный Vulkan/драйвер Samsung → короткие тесты Xclipse. Android продолжает работать; процесс имеет собственную остановку.
-3. **Native:** загрузчик → XNU → RAM-root → драйверы e1s. Android/adbd не работают; нужен отдельный control plane и проверенное восстановление.
+1. **Host:** pinned sources → build → static image/ADT validation → synthetic tests. No phone required.
+2. **Android userland:** a separate probe APK → stock Vulkan/Samsung driver → short Xclipse tests. Android stays running; the process has its own stop mechanism.
+3. **Native:** loader → XNU → RAM root → e1s drivers. Android/adbd are unavailable; an independent control plane and verified recovery are required.
 
-Результат переносится между контурами как гипотеза для следующей проверки, не как доказательство совместимости.
+Results transfer between environments as hypotheses for further checks, not as proof of compatibility.
 
-## Графика
+## Graphics
 
-Исследуемая цепочка: авторские Metal/AIR fixtures → metal2vulkan → Vulkan → штатный драйвер или app-local RADV Xclipse. Сначала один кадр и проверка пикселей, затем ограниченная серия и производительность.
+Candidate path: project-owned Metal/AIR fixtures → metal2vulkan → Vulkan → stock driver or app-local Xclipse RADV. Start with one frame and pixel comparison, then bounded runs and performance measurements.
 
-Будущая цепочка под XNU потребует иной нижней части: управление памятью, очередями, firmware, IRQ, питанием и IOMMU из нового ядра. Android RADV-библиотека сама по себе эту часть не создаёт.
+A future XNU path needs a different backend: memory management, queues, firmware, IRQs, power and IOMMU support from the new kernel. An Android RADV library does not provide those services by itself.
 
-## Изоляция данных
+## Data isolation
 
-Приложение хранит результаты в своём каталоге; экспериментальные образы и исходники — на host. Не выделяем разделы, не используем Android USERDATA как iOS root и не предполагаем возможность расшифровать его из XNU. Первый возможный native root — RAM-only.
+The app stores results in its own directory; experimental images and source trees stay on the host. Do not allocate partitions, use Android USERDATA as an iOS root or assume it can be decrypted from XNU. The first potential native root is RAM-only.
 
-Stop в приложении, таймаут runner и аппаратный watchdog — три разных механизма. Только после независимой проверки каждого можно оценивать автономность.
+App Stop, runner timeout and hardware watchdog are separate mechanisms. Assess autonomy only after each has been tested independently.

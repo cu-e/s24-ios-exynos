@@ -1,11 +1,11 @@
-# ADR 0001: сначала работа поверх Android
+# ADR 0001: prioritize work on top of Android
 
-Дата: 2026-11-05. Статус: принято как исходное ограничение владельца.
+Date: 2026-11-05. Status: accepted as the owner's initial constraint.
 
-Владелец ежедневно пользуется S24 и хочет прерывать исследование без потери системы. Точный upstream e1s находится до первого аппаратного запуска и не имеет собственного USB/network control plane.
+The owner uses the S24 daily and wants to interrupt research without losing the current system. The exact e1s upstream is still before its first hardware boot and has no independent USB/network control plane.
 
-Решение: приоритет host-инструментам и Android userland probe. Нативная работа не запускается фоновым циклом. Она требует отдельного измеренного recovery/control этапа.
+Decision: prioritize host tooling and an Android userland probe. Do not run native work as a background loop. It requires a separate, measured recovery/control stage.
 
-Следствие: прогресс графики на Android переносим как материал исследования, не как доказательство готового XNU GPU-драйвера. Полностью автономный возврат в Android не обещается.
+Consequence: graphics progress on Android supplies research material, not proof of a working XNU GPU driver. Fully autonomous return to Android is not promised.
 
-Пересмотр возможен после измеренного восстановления и согласования владельцем нового scope. Один переключатель в JSON этих условий не заменяет.
+Revisit after measured recovery and the owner's authorization for a new scope. A JSON toggle does not satisfy these conditions.

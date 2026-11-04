@@ -1,20 +1,20 @@
-# Источники и примеры
+# Sources and examples
 
-`python3 tools/lab.py sources` показывает первичные источники. Полный SHA есть только у точного S24 snapshot. У остальных revision=null: перед использованием кода закрепить ревизию и сохранить её в research/sources.json.
+`python3 tools/lab.py sources` lists primary sources. Only the exact S24 snapshot currently has a full SHA. Other sources have revision=null: pin a revision and record it in research/sources.json before reusing code.
 
-| Для чего нужен пример | С чего начинать |
+| Example needed | Starting point |
 |---|---|
-| Точный загрузчик/патчи e1s | s24-port: README, E1S_PROGRESS, xnu/e1s/README, docs/e1s-hackios-port-map |
-| Протоколы и адреса S24 | s24-linux, DTS точной прошивки; сравнить с hardware map s24-port |
-| Exynos UFS, питание и организация порта | y2sios, scion-starlte; адреса не переносить автоматически |
-| Графика Xclipse внутри Android | radv-xclipse |
+| Exact e1s loader/patches | s24-port: README, E1S_PROGRESS, xnu/e1s/README, docs/e1s-hackios-port-map |
+| S24 protocols and addresses | s24-linux, DTS from the exact firmware; compare with the s24-port hardware map |
+| Exynos UFS, power and port structure | y2sios, scion-starlte; do not copy addresses automatically |
+| Xclipse graphics inside Android | radv-xclipse |
 | Metal/AIR → Vulkan | metal2vulkan |
-| Общий XNU и слои userland | hakios, unixnu |
-| Ограничения UEFI e1s | silicium, Status.md |
-| Отдельный эмулятор старого iOS | un1box; другое направление, не нативная проверка |
+| Common XNU and userland layers | hakios, unixnu |
+| e1s UEFI limitations | silicium, Status.md |
+| Separate emulator for older iOS | un1box; a different approach, not native validation |
 
-Клонировать выбранный источник в references/<source-id>, переключать на полный SHA, проверять git status и license. Не скачивать все репозитории, submodules, toolchain или firmware без потребности задачи. Не исполнять flash/install-скрипты upstream при исследовании.
+Clone selected sources into references/<source-id>, check out a full SHA, and inspect git status and licenses. Do not fetch all repositories, submodules, toolchains or firmware without a task requirement. Do not execute upstream flash/install scripts during research.
 
-Собственный патч сопровождается source URL, base SHA, исходными файлами, лицензией/авторством, причиной, проверкой и ограничениями. Чужие большие деревья не коммитить поверх src/.
+Each project patch needs a source URL, base SHA, source file list, license/attribution, rationale, checks and limitations. Do not commit large upstream trees over src/.
 
-research/snapshots содержит импорт прежней проверки 2026-11-05: он исключён из Git и остаётся историческим. Состояние владельца в нём не измерялось. Публичные заметки research/notes могут устаревать; оперативные факты находятся в state/lab.json и датированных evidence.
+research/snapshots contains a historical import from the 2026-11-05 review and is excluded from Git. That review did not measure the owner's device. Public research/notes can become stale; operational facts belong in state/lab.json and dated evidence.

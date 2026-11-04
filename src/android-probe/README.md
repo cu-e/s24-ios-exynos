@@ -1,7 +1,7 @@
-# Android probe — место будущего приложения
+# Android probe — future app
 
-Реализации пока нет. Задачи GPU-001/GPU-002 определят минимальную архитектуру и toolchain.
+No implementation exists yet. GPU-001/GPU-002 will define the minimal architecture and toolchain.
 
-Цель: отдельный APK без root, короткие Vulkan-тесты, Stop, таймаут, экспорт JSON и кадров, версия/commit в отчёте. Сначала системный драйвер, затем отдельный app-local RADV эксперимент. Не добавлять accessibility/device-admin или системную подмену библиотек.
+Target: a separate APK without root, short Vulkan tests, Stop, timeout, JSON/frame export and version/commit in each report. Start with the stock driver, then a separate app-local RADV experiment. Do not add accessibility, device-admin or system library replacement.
 
-Нельзя обещать защиту Android от сбоя kernel GPU-драйвера. Установка на аппарат — scope android-app, сейчас не согласован.
+The app cannot guarantee protection from a kernel GPU driver failure. Installing it requires android-app scope, which is not currently authorized.

@@ -1,5 +1,5 @@
-# Патчи
+# Patches
 
-`e1s/` — загрузчик/ядро/устройство; `graphics/` — пользовательская графика. Исходные donor checkout не менять без отдельной ветки.
+`e1s/` covers loader/kernel/device changes; `graphics/` covers user-space graphics. Do not modify donor checkouts without a separate branch.
 
-Каждый набор: README с source URL/base SHA/license, упорядоченные patches, команда применения, проверка и известные ограничения. Не коммитить образы, SDK или firmware. Пока собственных аппаратных патчей нет.
+Each series needs a README with source URL/base SHA/license, ordered patches, an application command, checks and known limitations. Do not commit images, SDKs or firmware. No project-owned hardware patches exist yet.

@@ -1,7 +1,7 @@
-# Происхождение и лицензии
+# Provenance and licenses
 
-Этот репозиторий содержит собственную инфраструктуру исследования и документацию. Общая лицензия для будущего распространения пока не выбрана владельцем.
+This repository contains project-owned research infrastructure and documentation. The owner has not yet selected a general license for future distribution.
 
-Сторонний код и крупные исходные деревья сюда пока не импортированы. Их лицензии определяются исходными файлами и upstream, перечисленными в research/sources.json. Перед переносом сохранять заголовки, авторство и применимые NOTICE/LICENSE. Один общий LICENSE не должен переопределять APSL, GPL или иные условия сторонних компонентов.
+No third-party source trees have been imported yet. Their licenses are defined by the original files and upstream projects listed in research/sources.json. Preserve headers, attribution and applicable NOTICE/LICENSE files when reusing code. A single project LICENSE must not override APSL, GPL or other third-party terms.
 
-Локальные research/snapshots содержат исторические материалы и исключены из Git. Apple binaries, IPSW, vendor firmware, SDK и личные данные не распространяются этим проектом.
+Local research/snapshots contain historical material and are excluded from Git. This project does not distribute Apple binaries, IPSWs, vendor firmware, SDKs or personal data.

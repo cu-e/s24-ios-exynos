@@ -1,7 +1,7 @@
-# Локальные артефакты
+# Local artifacts
 
-Содержимое исключено из Git. Структура: artifacts/<experiment-id>/{evidence.json,stdout.txt,stderr.txt,...}. Для каждого запуска новый каталог. Не перезаписывать evidence уже записанного эксперимента.
+Contents are excluded from Git. Layout: artifacts/<experiment-id>/{evidence.json,stdout.txt,stderr.txt,...}. Use a new directory per run. Never overwrite evidence from a recorded experiment.
 
-Хранить бинарники, кадры, логи и датированные inventory отдельно от публичных заметок. Штатные образы и backup с личными данными не держать в Git; место и политику хранения согласовать отдельно.
+Keep binaries, frames, logs and dated inventory separate from public notes. Stock images and backups containing personal data must remain outside Git; agree their location and retention separately.
 
-Git clone этого проекта не переносит artifacts. Проверка done-задачи потребует её локальных evidence; не заменять потерянные данные выдуманным pass.
+Cloning this project does not transfer artifacts. Validating completed tasks may require their private local evidence. Do not replace missing data with invented pass results.

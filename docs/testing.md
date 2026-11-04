@@ -1,35 +1,34 @@
-# Проверки и результаты
+# Testing and evidence
 
-## Классы доказательств
+## Evidence categories
 
-| kind | origin для собственного результата | Подтверждает |
+| kind | origin for a local result | Establishes |
 |---|---|---|
-| source-review | upstream / local-host | Вывод по конкретной ревизии исходников |
-| host-test | synthetic / local-host | Измеренный результат на host или модели |
-| android-userland | local-device | Результат процесса внутри Android на указанном аппарате |
-| native-device | local-device | Результат собственного ядра на проверенном reference-target |
+| source-review | upstream / local-host | Findings about a specific source revision |
+| host-test | synthetic / local-host | An observed result on the host or a model |
+| android-userland | local-device | Results inside Android on the identified device |
+| native-device | local-device | Results from a custom kernel on the verified reference target |
 
-Поля не доказывают истинность сами по себе. Человек или агент сверяет acceptance, логи и ограничения. `local-host` не означает `local-device`. Копия данных автора upstream остаётся upstream.
+Fields alone do not prove truth. A person or agent checks acceptance criteria, logs and limitations. `local-host` does not mean `local-device`. Copied upstream results retain upstream provenance.
 
-## Минимальный эксперимент
+## Minimal experiment
 
-До запуска записать гипотезу, процедуру, timeout, команду остановки и ожидаемые наблюдения. CLI хранит план, но не запускает процесс и не обеспечивает timeout. Реальный runner должен иметь собственную реализацию таймаута и cleanup, прежде чем используется на устройстве.
+Before execution, record the hypothesis, procedure, timeout, stop command and expected observations. The CLI stores the plan but does not run the process or enforce a timeout. A device runner must implement timeout and cleanup before use.
 
-После запуска сохранить evidence.json, stdout/stderr, exit code, commit, версии инструмента и входных файлов. Для бинарников нужны SHA-256. Для аппаратного теста — датированный inventory. Отсутствие данных — inconclusive, не pass.
+After execution, save evidence.json, stdout/stderr, exit code, commit, tool versions and input versions. Record SHA-256 for binaries and dated inventory for hardware tests. Missing evidence is inconclusive, not pass.
 
 ```sh
-python3 tools/lab.py experiment plan HOST-001 --task BLD-001 --owner agent-a \
-  --hypothesis 'Загрузчик собирается закреплённым toolchain' \
-  --procedure docs/procedures/host-build.md --timeout-seconds 300
-# Фактически выполнить описанную проверку с таймаутом и сохранить artifacts.
-python3 tools/lab.py experiment record HOST-001 --owner agent-a \
-  --evidence artifacts/host-001/evidence.json
+python3 tools/lab.py experiment plan HOST-001 --task BLD-001 --owner agent-a   --hypothesis 'The loader builds with the pinned toolchain'   --procedure docs/procedures/host-build.md --timeout-seconds 300
+# Execute the actual procedure with a timeout and save artifacts.
+python3 tools/lab.py experiment record HOST-001 --owner agent-a   --evidence artifacts/host-001/evidence.json
 ```
 
-Пример предполагает существование реальной процедуры host-build.md; создаётся в задаче BLD-001. Нельзя регистрировать выдуманную процедуру или повторно изменять recorded-эксперимент: новый запуск получает новый ID.
+This example requires a real host-build.md procedure, to be created during BLD-001. Do not register imaginary procedures or edit recorded experiments. Give each new run a new ID.
 
-## Проверки самой инфраструктуры
+## Infrastructure checks
 
-`make check`: валидность реестра/источников/зависимостей, тесты переходов состояния, подмена типа доказательства, границы путей, два конкурентных claim и отрицательная запись эксперимента. Это тесты инфраструктуры, не аппаратных драйверов.
+`make check` validates the registry, sources and dependencies, and tests state transitions, evidence category mismatches, path boundaries, concurrent claims and failed experiment recording. Inventory/profile tests cover read-only commands, privacy filters, unavailable data and timeouts. These are infrastructure tests, not hardware driver tests.
 
-Дорогие toolchain, QEMU и Android SDK пока необязательны. Не скачивать их только ради зелёной строки doctor. Добавлять по потребности выбранной задачи.
+Large toolchains, QEMU and the Android SDK are not currently mandatory. Install them when the selected task needs them, not merely to make doctor report every tool as available.
+
+Historical evidence retains its original bytes. English translations are reading aids; see [evidence translations](../state/evidence/README.md).

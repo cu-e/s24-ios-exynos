@@ -1,5 +1,7 @@
-# Инвентаризация
+# Device inventory
 
-`example.public.json` — схема с неизвестными значениями, не аппаратный результат. `local*.json` — приватные наблюдения, исключены из Git. Имя каждого наблюдения новое; один запуск не меняет историю предыдущего.
+`example.public.json` is a schema with unknown values, not a hardware observation. `local*.json` files are private observations excluded from Git. Use a new filename for each observation; a new run must not rewrite earlier history.
 
-Для completion DEV-001 приложить настоящий inventory и evidence kind android-userland / origin local-device. Отдельно обозначить отсутствие тестирования root. Публичную заметку составить после обезличивания.
+Completing DEV-001 requires actual inventory and android-userland / local-device evidence. Explicitly document whether root was tested. Publish a research note only after sanitization.
+
+The local English report is `local-2026-11-05-session1.en.md`. Its original `.md` report is retained unchanged because historical evidence hashes refer to it.

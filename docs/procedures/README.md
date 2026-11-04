@@ -1,5 +1,5 @@
-# Процедуры
+# Procedures
 
-Каждая реальная процедура содержит: цель; точный контур host/android/native; версии и входы; команды; ожидаемые наблюдения; timeout и настоящий механизм его исполнения; Stop/cleanup; ограничения; расположение artifacts; условия pass/fail/inconclusive.
+Each real procedure defines its objective, exact host/android/native environment, versions and inputs, commands, expected observations, timeout and actual enforcement mechanism, stop/cleanup, limitations, artifact locations and pass/fail/inconclusive criteria.
 
-Сначала существуют проверяемые процедуры host-инфраструктуры и read-only inventory. Рецептов прошивки здесь нет.
+The initial procedures cover host infrastructure and read-only inventory. No flashing recipes are provided here.

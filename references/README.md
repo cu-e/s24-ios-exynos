@@ -1,3 +1,3 @@
-# Локальные upstream-деревья
+# Local upstream trees
 
-Код клонируется сюда по потребности задачи RES-001. Деревья исключены из Git. Источники и ревизии фиксируются в research/sources.json. Полный SHA обязателен перед переносом кода; source branch main без SHA не обеспечивает воспроизводимость.
+Clone code here as needed for RES-001. Trees are excluded from Git. Record sources and revisions in research/sources.json. A full SHA is required before reusing code; a branch name such as main is insufficient for reproducibility.

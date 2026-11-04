@@ -1,5 +1,5 @@
-# Собственные компоненты XNU/e1s
+# Project-owned XNU/e1s components
 
-Сюда добавляются небольшие независимые адаптеры. Полный upstream живёт в references/, изменения к нему — patches/e1s/. До RES-001/BLD-001 нет закреплённого собственного build path.
+Add small independent adapters here. Full upstream trees belong in references/, with local changes in patches/e1s/. No project build path is pinned before RES-001/BLD-001.
 
-Выделять чистый parser/protocol слой для host-тестов; MMIO, IRQ, DMA и питание — отдельный backend. Аппаратные значения снабжать DTS/firmware provenance. Наличие compile-time E1S-конфигурации не подтверждает работу десяти ядер на устройстве.
+Separate a pure parser/protocol layer for host tests from the MMIO, IRQ, DMA and power backend. Attach DTS/firmware provenance to hardware values. A compile-time E1S configuration does not establish ten-core operation on the device.

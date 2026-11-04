@@ -1,12 +1,12 @@
 # S24 iOS / Exynos
 
-Исследовательская площадка для Galaxy S24 на Exynos 2400: от измерений внутри работающего Android до возможного XNU-порта. Главный практический приоритет — сохранить текущий Android и данные владельца.
+A research workspace for the Galaxy S24 with Exynos 2400, from measurements inside running Android to a possible XNU port. Preserving the owner's current Android system and data is the primary practical requirement.
 
-Подготовлены инструменты и план работы; 2026-11-05 через ADB измерен **SM-S921B / e1s**, Exynos s5e9945, Android 15, S921BXXS9BYH3. [Результат инвентаризации](research/notes/DEV-001-profile.md). Собственного iOS-порта и APK ещё нет. Разблокировка сообщена владельцем, но свойства Android показывают locked/green; найден Magisk. Фактические unlock, root-доступ и восстановление пока не подтверждены. Основной upstream нацелен на **SM-S921B / e1s**; совместимость других S24 не предполагается.
+Tooling and a task plan are available. On 2026-11-05, ADB measurements identified **SM-S921B / e1s**, Exynos s5e9945, Android 15 and S921BXXS9BYH3. See the [device baseline](research/notes/DEV-001-profile.md). This project has no working iOS port or APK yet. The owner reports an unlocked bootloader, while Android properties show locked/green; Magisk is present. Actual unlock state, root access and recovery remain unverified. The primary upstream targets **SM-S921B / e1s**; compatibility with other S24 variants is not assumed.
 
-## Быстрый вход
+## Quick start
 
-Нужны Python 3.11+ и Git. Сторонних Python-пакетов нет.
+Requires Python 3.11+ and Git. No third-party Python packages are needed.
 
 ```sh
 cd /home/egor/dev/pet/s24-ios-exynos
@@ -16,46 +16,46 @@ python3 tools/lab.py task next
 python3 tools/lab.py task show RES-001
 ```
 
-[STATUS.md](STATUS.md) — сохранённая сводка. `python3 tools/lab.py status` всегда строит свежий вид реестра; `make status` обновляет файл. [AGENTS.md](AGENTS.md) — рабочий контракт агента.
+[STATUS.md](STATUS.md) is a saved summary. `python3 tools/lab.py status` renders the current registry; `make status` updates the file. [AGENTS.md](AGENTS.md) defines the agent working agreement. English is the working language; see the [language policy](docs/language.md).
 
-## Где что находится
+## Directory map
 
-| Каталог | Назначение |
+| Path | Purpose |
 |---|---|
-| `state/lab.json` | Единственный реестр задач, экспериментов, фактов и истории изменений |
-| `tools/` | CLI учёта, read-only inventory и расширенный технический профиль ADB |
-| `docs/` | Архитектура, этапы, тестирование, доступ и восстановление |
-| `docs/procedures/` | Конкретные воспроизводимые процедуры |
-| `research/sources.json` | Источники, назначение, лицензии и закреплённые ревизии |
-| `research/notes/` | Выводы исследования со ссылками и ограничениями |
-| `research/snapshots/` | Локальные копии прежнего исследования; исключены из Git |
-| `references/` | Локальные upstream-checkout; исключены из Git |
-| `src/android-probe/` | Будущее приложение измерений внутри Android |
-| `src/graphics/` | Пользовательская графическая прослойка и тестовые сцены |
-| `src/xnu/`, `patches/` | Собственный код и небольшие патчи к закреплённым upstream |
-| `fixtures/public/` | Обезличенные/синтетические тестовые данные с provenance |
-| `devices/` | Публичный образец и приватная локальная инвентаризация |
-| `artifacts/` | Логи, APK, образы и результаты запусков; исключены из Git |
-| `worktrees/` | Изолированные рабочие деревья при согласованной параллельной работе |
+| `state/lab.json` | Canonical tasks, experiments, facts and change history |
+| `tools/` | Registry CLI, read-only ADB inventory and extended device profiling |
+| `docs/` | Architecture, stages, testing, device access and recovery |
+| `docs/procedures/` | Reproducible procedures |
+| `research/sources.json` | Sources, purpose, licenses and pinned revisions |
+| `research/notes/` | Findings and handoffs with citations and limitations |
+| `research/snapshots/` | Historical local research snapshots; excluded from Git |
+| `references/` | Local upstream checkouts; excluded from Git |
+| `src/android-probe/` | Future Android measurement app |
+| `src/graphics/` | User-space graphics adapters and test scenes |
+| `src/xnu/`, `patches/` | Project code and small patches against pinned upstream |
+| `fixtures/public/` | Sanitized or synthetic test data with provenance |
+| `devices/` | Public schema and private local inventory/reports |
+| `artifacts/` | Logs, APKs, images and run outputs; excluded from Git |
+| `worktrees/` | Separate checkouts for explicitly authorized parallel work |
 
-## Рабочий цикл
+## Work cycle
 
 ```sh
 python3 tools/lab.py task claim RES-001 --owner agent-a
-# Работа в границах задачи; запись фактов и реальных проверок.
-# Создать evidence.json по docs/procedures/evidence.example.json.
+# Work within scope; record actual observations and checks.
+# Create evidence.json using docs/procedures/evidence.example.json.
 python3 tools/lab.py task done RES-001 --owner agent-a --evidence artifacts/res-001/evidence.json
 make status
 ```
 
-Для нового измерения сначала `experiment plan`, после фактического запуска — `experiment record`. Реестр не выполняет эксперименты и не управляет телефоном. Его timeout — обязательная запись плана, а не реализованный watchdog.
+For a new experiment, register `experiment plan` before execution and `experiment record` afterward. The registry does not run experiments or control the phone. Its timeout field records a plan; it is not an implemented watchdog.
 
-Положительный результат проверки на компьютере не подтверждает работу на S24. Поле `origin` отделяет собственное измерение от заявления upstream и синтетического теста. [Подробный workflow](docs/agent-workflow.md).
+A passing host check does not establish operation on the S24. The `origin` field distinguishes local observations, upstream claims and synthetic tests. See the [agent workflow](docs/agent-workflow.md).
 
-## Текущие границы
+## Current scope
 
-Подготовка кода, исследование и host-тесты разрешены. Инвентаризация допускает только узкий read-only доступ к уже авторизованному ADB. Установка тестового приложения и нативные эксперименты ещё не согласованы. Флаги учёта не заменяют разрешение владельца.
+Code preparation, research and host tests are authorized. Inventory is limited to read-only access through already-authorized ADB. Test app installation and native experiments are not authorized yet. Registry flags do not replace the owner's authorization.
 
-Полностью автономный возврат из зависшего XNU не подтверждён. В upstream e1s отсутствует собственный USB/network control plane. Отказ от форматирования USERDATA сам по себе не гарантирует загрузку Android после ошибки BOOT.
+Fully autonomous return from a hung XNU kernel has not been demonstrated. Upstream e1s has no independent USB/network control plane. Avoiding USERDATA formatting does not guarantee Android will boot after a BOOT failure.
 
-Ссылки: [архитектура](docs/architecture.md), [этапы](docs/roadmap.md), [тестирование](docs/testing.md), [восстановление](docs/recovery.md), [работа с исходниками](docs/sources.md).
+Further reading: [architecture](docs/architecture.md), [roadmap](docs/roadmap.md), [testing](docs/testing.md), [recovery](docs/recovery.md), [sources](docs/sources.md).

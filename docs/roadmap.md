@@ -1,15 +1,15 @@
-# Этапы и критерии перехода
+# Stages and transition criteria
 
-| Этап | Проверяемый результат | Чего он не подтверждает |
+| Stage | Verifiable outcome | What it does not establish |
 |---|---|---|
-| 0. Основа | Реестр, источники, тесты инструментов, инструкции | Работу кода на телефоне |
-| 1. Inventory | Датированные факты конкретного устройства | Доступность root/KVM или восстановление |
-| 2. Host | Воспроизводимая сборка и структурно корректные образы | Загрузку S24 |
-| 3. Android GPU | Свои измерения и управляемая остановка APK | Совместимость драйвера с XNU |
-| 4. Recovery/control | Документированная и затем испытанная процедура возврата | Безусловный возврат при любом отказе |
-| 5. Native entry | Настоящий журнал XNU и восстановление Android | Запуск пользовательской части iOS |
-| 6. Native services | Отдельно проверенные RAM-root, input, storage | Готовую телефонную ОС |
+| 0. Foundation | Registry, sources, tooling tests and instructions | Execution on the phone |
+| 1. Inventory | Dated facts from the actual device | Root/KVM access or recovery |
+| 2. Host | Reproducible builds and structurally valid images | S24 boot |
+| 3. Android GPU | Local measurements and controlled APK termination | XNU driver compatibility |
+| 4. Recovery/control | Documented, then tested return procedure | Guaranteed return after every failure |
+| 5. Native entry | Real XNU log and Android recovery | iOS userland execution |
+| 6. Native services | Separately verified RAM root, input and storage | A complete phone OS |
 
-Текущая фаза задаётся state/lab.json. Задачи не закрываются из-за написанного плана или наличия upstream-скриншота.
+state/lab.json defines the current phase. A written plan or an upstream screenshot does not complete a task.
 
-Очередь и зависимости уже заведены в реестр. Начать с RES-001, затем RES-002/BLD-001; DEV-001 возможна при появлении авторизованного подключения. Не оценивать процент готовности iOS по количеству завершённых карточек.
+The registry contains the backlog and dependencies. Continue with RES-001, then RES-002/BLD-001. DEV-001 completed the initial authorized ADB inventory on 2026-11-05. Do not estimate iOS completion percentage from the number of closed tasks.

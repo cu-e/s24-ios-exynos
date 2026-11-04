@@ -1,13 +1,13 @@
-# FND-001: передача основы проекта
+# FND-001: foundation handoff
 
-Дата: 2026-11-05. Статус задачи: done. Владелец: codex.
+Date: 2026-11-05. Task status: done. Owner: codex. This is a historical account of the foundation stage, not the current device baseline.
 
-Созданы реестр 17 задач с зависимостями, 16 первичных источников, CLI coordination/evidence, narrow read-only ADB inventory, документация архитектуры/тестирования/recovery и инструкции агентам. Импорт старого исследования находится в локальных research/snapshots и исключён из Git.
+Created a registry of 17 tasks with dependencies, 16 primary sources, coordination/evidence CLI, narrow read-only ADB inventory, architecture/testing/recovery documentation and agent instructions. Previous research was imported into local research/snapshots, excluded from Git.
 
-Проверка: make check — exit 0, 20 tests. Проверенный исходный commit: 3315832. Доказательства: state/evidence/FND-001.json; логи в fixtures/public/foundation. Дополнительно проверены локальные Markdown-ссылки и git diff --check. После закрытия задачи make validate проходит; STATUS.md обновлён.
+Verification: make check — exit 0, 20 tests. Tested base commit: 3315832. Evidence: state/evidence/FND-001.json; English translation: state/evidence/FND-001.en.json. Logs: fixtures/public/foundation. Local Markdown links and git diff --check were also checked. After task completion, make validate passed and STATUS.md was updated.
 
-Телефон на этом этапе не опрашивался и не изменялся. ADB в тестах заменён имитацией. Загрузчик известен как разблокированный со слов владельца; модель, firmware, root и recovery неизвестны. Нативное управление, watchdog, XNU boot и APK в этом проекте ещё не реализованы.
+The phone was not queried or modified during this stage. Tests used mocked ADB. At that time, unlock was owner-reported and model, firmware, root and recovery were unknown. Native control, watchdog, XNU boot and an APK had not been implemented. For later measured device facts, read DEV-001-profile.md.
 
-Следующий независимый шаг: RES-001. Прочитать AGENTS.md, затем `python3 tools/lab.py task show RES-001`; получить задачу через claim под собственным owner. Склонировать точный s24-port в references/ и зафиксировать ревизии только необходимых доноров. Старое исследование не повторять целиком. DEV-001 выполняется отдельно при уже авторизованном ADB.
+Next independent step at handoff: RES-001. Read AGENTS.md, then `python3 tools/lab.py task show RES-001`; claim under your own owner. Clone the exact s24-port into references/ and pin only required donors. Do not repeat the entire previous review. DEV-001 was a separate task requiring already-authorized ADB.
 
-Не превращать следующий шаг в прошивку или установку APK: эти области ещё не согласованы. Подготовленные каталоги src/* пока содержат проектные требования, а не рабочую реализацию iOS.
+Do not turn source work into flashing or APK installation; these scopes were not authorized. src/* directories contain design requirements, not a working iOS implementation.
