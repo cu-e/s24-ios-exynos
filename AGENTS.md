@@ -1,6 +1,6 @@
 # Agent working agreement
 
-Read this file, README.md, docs/agent-workflow.md and the current output of `python3 tools/lab.py status`. Open the relevant task before working on it. Do not reread the entire research archive without a reason.
+Read this file, README.md, docs/agent-workflow.md and docs/planning.md, then current `python3 tools/lab.py board` output. Open the relevant task before working on it. Do not reread the entire research archive without a reason.
 
 ## Objective and established facts
 
@@ -21,6 +21,10 @@ If asked to stop, stop issuing new actions. Stopping an agent does not undo comp
 ## Organizing large tasks
 
 state/lab.json is the sole task registry. Use tools/lab.py for state transitions. Claim a task with a stable owner name. Dependencies require real evidence. Do not take over another owner's task or complete it under their name.
+
+Use a unique owner per agent session. Prefer atomic `task claim-next --owner NAME --scope host`, then inspect the returned task. Report meaningful progress with `task update ID --owner NAME --note ... --next-step ...` and attach an existing handoff before yielding. Record branch/worktree context when known; metadata does not create a worktree. Heartbeats are reports, not proof of a live process. Never reclaim stale work automatically or impersonate another owner.
+
+Active and blocked tasks reserve their literal file/directory boundaries. Claims that overlap existing reservations are rejected. Keep task paths narrow. Only the owner may resume, release or complete a claim. Blocked reservations remain until release/completion; a release does not revert files. BOARD.md, planning/tasks/*, state/board.json and STATUS.md are generated views, refreshed under the ledger lock. Do not edit them to change state. Use `board --check` for consistency and `board --write` to repair views. If an error says the registry was saved, inspect current state before retrying the action.
 
 If work grows beyond one verifiable outcome, add narrowly scoped child tasks with new IDs using `task add --file ... --owner ...`, dependencies and paths. Separate research, implementation and device measurement. Do not create a single task to implement all of iOS.
 

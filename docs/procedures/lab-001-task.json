@@ -1,0 +1,41 @@
+{
+  "id": "LAB-001",
+  "title": "Implement a file-based Kanban and agent coordination workflow",
+  "status": "pending",
+  "owner": null,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": [
+    "FND-001",
+    "DOC-001"
+  ],
+  "paths": [
+    "tools/lab.py",
+    "tests/test_lab.py",
+    "tests/test_planning.py",
+    "docs/agent-workflow.md",
+    "docs/planning.md",
+    "docs/procedures/lab-001-task.json",
+    "docs/procedures/planning-check.md",
+    "AGENTS.md",
+    "README.md",
+    "Makefile",
+    "planning/",
+    "research/notes/LAB-001-handoff.md",
+    ".gitignore"
+  ],
+  "priority": 80,
+  "acceptance": [
+    "A generated Markdown Kanban, per-task cards and JSON view share the canonical ledger and refresh under its lock.",
+    "Agents can atomically claim the next eligible task, report progress/heartbeat, block, resume and release without stealing ownership.",
+    "Claims respect dependencies, authorization, priority and overlapping task paths; stale reports never imply reassignment.",
+    "Concurrency, ownership, stale snapshots and publication failure behavior have meaningful host tests.",
+    "Agent instructions explain the complete workflow and its local-filesystem limits."
+  ],
+  "sources": [],
+  "steps": [
+    "Add generated planning views and task readiness/ownership metadata.",
+    "Extend atomic CLI transitions and protect file ownership.",
+    "Test concurrency and failure cases, document and record host evidence."
+  ]
+}

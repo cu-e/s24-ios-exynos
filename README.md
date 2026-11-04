@@ -18,11 +18,14 @@ python3 tools/lab.py task show RES-001
 
 [STATUS.md](STATUS.md) is a saved summary. `python3 tools/lab.py status` renders the current registry; `make status` updates the file. [AGENTS.md](AGENTS.md) defines the agent working agreement. English is the working language; see the [language policy](docs/language.md).
 
+[BOARD.md](BOARD.md) is the file-based Kanban with owner reports, progress, dependencies and task-card links. `python3 tools/lab.py board` renders current state; `make board` refreshes all planning files. See the [planning workflow](docs/planning.md). Every successful registry mutation automatically refreshes the board, cards, machine view and status under the shared lock.
+
 ## Directory map
 
 | Path | Purpose |
 |---|---|
 | `state/lab.json` | Canonical tasks, experiments, facts and change history |
+| `BOARD.md`, `planning/tasks/`, `state/board.json` | Generated Kanban, task cards and machine-readable coordination view |
 | `tools/` | Registry CLI, read-only ADB inventory and extended device profiling |
 | `docs/` | Architecture, stages, testing, device access and recovery |
 | `docs/procedures/` | Reproducible procedures |
@@ -41,12 +44,17 @@ python3 tools/lab.py task show RES-001
 ## Work cycle
 
 ```sh
-python3 tools/lab.py task claim RES-001 --owner agent-a
+python3 tools/lab.py task claim-next --owner agent-research-session-a --scope host
+# Inspect the returned task with task show ID before implementation.
+python3 tools/lab.py task update RES-001 --owner agent-research-session-a \
+  --note 'Pinned the selected source revision' --next-step 'Check donor licenses'
 # Work within scope; record actual observations and checks.
 # Create evidence.json using docs/procedures/evidence.example.json.
-python3 tools/lab.py task done RES-001 --owner agent-a --evidence artifacts/res-001/evidence.json
+python3 tools/lab.py task done RES-001 --owner agent-research-session-a --evidence artifacts/res-001/evidence.json
 make status
 ```
+
+The example update/done commands assume the returned task was RES-001. Use the actual returned ID. Claims respect priority, dependencies, authorization and active file reservations. Owner-only progress, heartbeat, block, resume and release commands are documented in docs/planning.md. A stale heartbeat never transfers ownership automatically.
 
 For a new experiment, register `experiment plan` before execution and `experiment record` afterward. The registry does not run experiments or control the phone. Its timeout field records a plan; it is not an implemented watchdog.
 

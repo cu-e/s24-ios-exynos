@@ -1,0 +1,66 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-04T22:26:03.500739+00:00",
+  "summary": "Implemented generated file-based Kanban, task cards and machine view with atomic claim-next, owner progress/heartbeat, block/resume/release, priority and path reservations. make check passes 42 tests; 99 local Markdown links and all 20 cards were reviewed. Concurrent and partial-publication failure cases pass.",
+  "commit": "e4d9998359cfef61bbd16685317ff01d0e626cb3",
+  "working_tree_changes": true,
+  "commands": [
+    {
+      "argv": [
+        "make",
+        "check"
+      ],
+      "exit_code": 0,
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/lab.py",
+        "board",
+        "--check"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "test_count": 42,
+  "new_planning_test_count": 13,
+  "artifacts": [
+    "fixtures/public/planning/make-check.stdout.txt",
+    "fixtures/public/planning/make-check.stderr.txt",
+    "fixtures/public/planning/verification.json",
+    "tools/lab.py",
+    "tests/test_planning.py",
+    "docs/planning.md",
+    "docs/procedures/planning-check.md",
+    "research/notes/LAB-001-handoff.md"
+  ],
+  "sha256": {
+    "fixtures/public/planning/make-check.stdout.txt": "364ff6223a565107f34c6ee16f309469e77bac25e701e0498d3a788f6d0bb783",
+    "fixtures/public/planning/make-check.stderr.txt": "57f683db2b2b42033d33fbfe2695a03774331773e8c4d8e457c06b5da1a2906c",
+    "fixtures/public/planning/verification.json": "3f3bfc3b6001dfa137eb19e69373bbccbfedf69b358f1f961a9f39ba8e7b45ec",
+    "tools/lab.py": "a28581ac21adbf32d0c54cdfb06582088543f13bf94a310877098e0b167985ed",
+    "tests/test_planning.py": "017c717bbf3576c3a4653121b5a758f9c945805a2f6cea8559558f7a2db55ac1",
+    "docs/planning.md": "c23094f5936feb32b8d39b5682135f4ebff0e54309e3accc73523aa4f6054c42",
+    "docs/procedures/planning-check.md": "5f9ac50cfd1b0b8f83f8cdc41aecd1e2750f0f2779b195de062bbef2b40b99e6",
+    "research/notes/LAB-001-handoff.md": "8243e757704314c3823af1a54e11ec0f054f9ccd1ed1e1f71a774bf1ff1e5ed5"
+  },
+  "limitations": [
+    "Owner labels and heartbeats are cooperative reports, not authentication or process liveness detection. Stale claims are never reassigned automatically.",
+    "fcntl coordinates one shared local filesystem ledger; it does not coordinate independent machines or copied worktree ledgers.",
+    "Path reservations enforce CLI claims, not arbitrary filesystem edits. Broad pending boundaries intentionally serialize overlapping work.",
+    "Multi-file publication is not one filesystem transaction. Canonical state commits first; the checksum index is written last, and repair is explicit after a publication error.",
+    "This does not spawn agents or run calendar jobs; parallel implementation still requires explicit authorization and separate worktrees.",
+    "Host-only work: no phone commands, APK installation or native actions. Historical evidence, existing task/experiment records and scope permissions were preserved."
+  ]
+}

@@ -8,11 +8,13 @@ import copy
 from datetime import datetime, timezone
 import fcntl
 import hashlib
+import html
 import json
 import os
 from pathlib import Path
 import re
 import shutil
+import shlex
 import sys
 import tempfile
 
@@ -20,6 +22,9 @@ SCOPES = {"host", "android-readonly", "android-app", "native"}
 KINDS = {"source-review", "host-test", "android-userland", "native-device"}
 ORIGINS = {"synthetic", "upstream", "user-report", "local-host", "local-device"}
 STATUSES = {"pending", "in_progress", "blocked", "done"}
+ACTIVE = {"in_progress", "blocked"}
+COLUMNS = [("ready", "Ready"), ("in_progress", "In progress"), ("blocked", "Blocked"),
+           ("waiting", "Waiting"), ("gated", "Needs authorization"), ("done", "Done")]
 
 
 class LabError(Exception):
@@ -59,6 +64,20 @@ def atomic_json(path, data):
             os.unlink(name)
 
 
+def atomic_text(path, text):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    handle, name = tempfile.mkstemp(prefix=".lab-", dir=path.parent)
+    try:
+        with os.fdopen(handle, "w") as stream:
+            stream.write(text)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(name, path)
+    finally:
+        if os.path.exists(name):
+            os.unlink(name)
+
+
 def item(items, identifier):
     for obj in items:
         if obj["id"] == identifier:
@@ -72,6 +91,51 @@ def permitted(state, scope):
 
 def prerequisites(state, task):
     return [dep for dep in task["depends_on"] if item(state["tasks"], dep)["status"] != "done"]
+
+
+def path_conflicts(state, task):
+    """Literal relative path ownership, including parent/child directory overlap."""
+    result = []
+    for other in state["tasks"]:
+        if other["id"] == task["id"] or other["status"] not in ACTIVE:
+            continue
+        for left in task["paths"]:
+            a = Path(left).parts
+            if any(a[:len(b)] == b or b[:len(a)] == a for b in (Path(p).parts for p in other["paths"])):
+                result.append(other["id"])
+                break
+    return result
+
+
+def readiness(state, task):
+    if task["status"] != "pending":
+        return task["status"], [task["blocked_reason"]] if task["status"] == "blocked" else []
+    reasons = []
+    deps = prerequisites(state, task)
+    if deps:
+        reasons.append("Dependencies: " + ", ".join(deps))
+    conflicts = path_conflicts(state, task)
+    if conflicts:
+        reasons.append("Paths reserved by: " + ", ".join(conflicts))
+    if not permitted(state, task["scope"]):
+        return "gated", ["Scope not authorized: " + task["scope"], *reasons]
+    return ("waiting", reasons) if reasons else ("ready", [])
+
+
+def ordered_tasks(state):
+    return sorted(state["tasks"], key=lambda t: -t.get("priority", 50))
+
+
+def claim_task(state, task, owner, branch=None, worktree=None):
+    column, reasons = readiness(state, task)
+    if column != "ready":
+        raise LabError("Task is not claimable: " + ("; ".join(reasons) or task["status"]))
+    task.update(status="in_progress", owner=owner, started_at=now(), last_heartbeat=now(), updated_at=now())
+    for key, value in {"branch": branch, "worktree": worktree}.items():
+        if value is not None:
+            task[key] = value
+        else:
+            task.pop(key, None)
 
 
 def evidence(root, relative, expected_kind=None):
@@ -152,9 +216,33 @@ def validate(root, state):
         if not task.get("acceptance") or not task.get("paths"):
             raise LabError(f"Task needs acceptance criteria and file boundaries: {task['id']}")
         for name in task["paths"]:
-            within(root, name)
-        if task["status"] == "in_progress" and not task.get("owner"):
+            if Path(name).is_absolute() or ".." in Path(name).parts or any(c in name for c in "*?[]"):
+                raise LabError("Task boundaries must be literal relative paths without traversal or globs")
+            if within(root, name) != root.resolve() / name:
+                raise LabError("Use canonical task paths, not symlink aliases")
+        if type(task.get("priority", 50)) is not int or not 0 <= task.get("priority", 50) <= 100:
+            raise LabError("Task priority must be an integer from 0 to 100")
+        if task.get("owner") and not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.:@/-]{0,79}", task["owner"]):
+            raise LabError("Owner must be a stable identifier without whitespace, up to 80 characters")
+        if task["status"] in ACTIVE and not task.get("owner"):
             raise LabError(f"Unowned active task: {task['id']}")
+        if task["status"] == "pending" and task.get("owner"):
+            raise LabError(f"Pending task must be unowned: {task['id']}")
+        if task["status"] == "blocked" and not str(task.get("blocked_reason", "")).strip():
+            raise LabError("Blocked tasks require a concrete reason")
+        for key in ["progress_note", "next_step", "branch", "worktree", "priority_reason"]:
+            if key in task and (not isinstance(task[key], str) or len(task[key]) > 4000):
+                raise LabError(f"Invalid task context: {key}")
+        if task.get("handoff") and not within(root, task["handoff"]).is_file():
+            raise LabError("Handoff must reference an existing project file")
+        if task.get("last_heartbeat"):
+            try:
+                if datetime.fromisoformat(task["last_heartbeat"]).tzinfo is None:
+                    raise ValueError("timezone required")
+            except (ValueError, TypeError) as exc:
+                raise LabError("Heartbeat requires an ISO timestamp with timezone") from exc
+        if task["status"] in ACTIVE and path_conflicts(state, task):
+            raise LabError(f"Active task paths overlap: {task['id']}")
         if task["status"] == "done":
             if prerequisites(state, task):
                 raise LabError(f"Completed task has incomplete dependencies: {task['id']}")
@@ -205,14 +293,166 @@ def transaction(root, action, owner):
         yield state
         if state != original:
             state["updated_at"] = now()
-            state["events"].append({"at": now(), "action": action, "owner": owner})
+            event = {"at": now(), "action": action, "owner": owner}
+            changes = []
+            for task in state["tasks"]:
+                old = next((t for t in original["tasks"] if t["id"] == task["id"]), {})
+                if task != old:
+                    changes.append({k: task[k] for k in ["id", "status", "owner", "priority", "priority_reason", "progress_note", "next_step", "blocked_reason", "last_heartbeat", "branch", "worktree", "handoff"] if k in task})
+            if changes:
+                event["tasks"] = changes
+            state["events"].append(event)
             validate(root, state)
             atomic_json(path, state)
+            try:
+                publish_views(root, state)
+            except (OSError, LabError) as exc:
+                raise LabError("Registry saved; generated views need refresh with 'board --write': " + str(exc)) from exc
 
 
 def owned(task, owner):
     if task.get("owner") != owner:
         raise LabError(f"Task belongs to {task.get('owner')!r}, not {owner!r}")
+
+
+def md(value):
+    return html.escape(str(value)).replace("|", "&#124;").replace("\n", "<br>")
+
+
+def board_snapshot(root, state, stamp=None):
+    stamp = stamp or now()
+    columns = {key: [] for key, _ in COLUMNS}
+    cards, agents = [], {}
+    for task in ordered_tasks(state):
+        column, reasons = readiness(state, task)
+        card = copy.deepcopy(task)
+        card.update(column=column, reasons=reasons, priority=task.get("priority", 50),
+                    card_path=f"planning/tasks/{task['id']}.md")
+        columns[column].append(task["id"])
+        if task["status"] in ACTIVE:
+            heartbeat = task.get("last_heartbeat")
+            age = max(0, (datetime.fromisoformat(stamp) - datetime.fromisoformat(heartbeat)).total_seconds()) if heartbeat else None
+            card["report_health"] = "unknown" if age is None else ("stale" if age > 1800 else "recent")
+            agents.setdefault(task["owner"], []).append({k: card.get(k) for k in ["id", "status", "last_heartbeat", "report_health", "progress_note", "next_step", "handoff", "branch", "worktree"]})
+        cards.append(card)
+    return {"schema_version": 1, "generated_at": stamp, "ledger_updated_at": state["updated_at"],
+            "registry_sha256": hashlib.sha256((root / "state/lab.json").read_bytes()).hexdigest(),
+            "phase": state["project"]["phase"], "columns": columns, "tasks": cards, "agents": agents,
+            "recent_events": state["events"][-20:]}
+
+
+def render_board(snapshot):
+    lines = ["# S24 iOS / Exynos — Kanban", "",
+             "> Generated from state/lab.json. Use the CLI; do not edit this board or its task cards.", "",
+             f"Phase: **{md(snapshot['phase'])}**. Snapshot: {snapshot['generated_at']}.", "",
+             f"Registry SHA256: `{snapshot['registry_sha256']}`. Run `python3 tools/lab.py board --check` to detect stale files.", "",
+             "[Workflow](docs/planning.md) · [All task details](planning/README.md) · [Machine view](state/board.json) · [Status](STATUS.md)", "",
+             "| " + " | ".join(f"{label} ({len(snapshot['columns'][key])})" for key, label in COLUMNS) + " |",
+             "| " + " | ".join("---" for _ in COLUMNS) + " |"]
+    tasks = {t["id"]: t for t in snapshot["tasks"]}
+    for row in range(max((len(v) for v in snapshot["columns"].values()), default=0)):
+        cells = []
+        for key, _ in COLUMNS:
+            ids = snapshot["columns"][key]
+            if row >= len(ids):
+                cells.append("—")
+                continue
+            card = tasks[ids[row]]
+            detail = [f"[**{card['id']}**]({card['card_path']}) · P{card['priority']}", md(card["title"]),
+                      f"{md(card['scope'])} · {md(card.get('owner') or 'unassigned')}"]
+            if card["reasons"]:
+                detail.append(md("; ".join(card["reasons"])))
+            cells.append("<br>".join(detail))
+        lines.append("| " + " | ".join(cells) + " |")
+    lines += ["", "## Claimed work and agent reports", "",
+              "Owner names identify cooperating agents, not authenticated processes. A recent report is not proof that an agent is running. Reports older than 30 minutes are marked stale at snapshot time; claims never expire automatically.", "",
+              "| Owner | Task | State | Last heartbeat (UTC) | Report | Progress / next step | Context |",
+              "|---|---|---|---|---|---|---|"]
+    for owner, reports in sorted(snapshot["agents"].items()):
+        for report in reports:
+            context = "; ".join(f"{k}: {report[k]}" for k in ["branch", "worktree", "handoff"] if report.get(k))
+            progress = (report.get("progress_note") or "No progress note") + " / " + (report.get("next_step") or "Next step not reported")
+            lines.append("| " + " | ".join(md(x) for x in [owner, report["id"], report["status"], report.get("last_heartbeat") or "not reported", report["report_health"], progress, context or "—"]) + " |")
+    if not snapshot["agents"]:
+        lines.append("| — | — | No claimed work | — | — | — | — |")
+    lines += ["", "## Recent activity", ""]
+    for event in snapshot["recent_events"]:
+        lines.append(f"- {event['at']} · {md(event['owner'])} · {md(event['action'])}")
+        for change in event.get("tasks", []):
+            detail = change.get("progress_note") or change.get("blocked_reason") or change["status"]
+            lines.append(f"  - {change['id']}: {md(detail)}")
+    lines += ["", "Use a unique owner per agent session. Atomically take ready work:", "",
+              "```sh", "python3 tools/lab.py task claim-next --owner agent-your-session --scope host", "```", ""]
+    return "\n".join(lines)
+
+
+def render_card(task):
+    lines = [f"# {task['id']} — {md(task['title'])}", "",
+             "> Generated task card. Edit state through tools/lab.py, not this file.", "",
+             "[Kanban](../../BOARD.md) · [Workflow](../../docs/planning.md)", "",
+             "| Field | Value |", "|---|---|",
+             f"| State / column | {task['status']} / {task['column']} |",
+             f"| Owner | {md(task.get('owner') or 'unassigned')} |",
+             f"| Priority | {task['priority']} (higher first; default 50) |",
+             f"| Scope / evidence | {task['scope']} / {task['evidence_kind']} |",
+             f"| Dependencies | {md(', '.join(task['depends_on']) or 'none')} |"]
+    for key in ["started_at", "last_heartbeat", "report_health", "progress_note", "next_step", "branch", "worktree", "handoff"]:
+        if task.get(key):
+            lines.append(f"| {key} | {md(task[key])} |")
+    lines += ["", "## Readiness", "", md("; ".join(task["reasons"]) or task["column"]),
+              "", "## Reserved paths", ""]
+    lines += [f"- `{name}`" for name in task["paths"]]
+    lines += ["", "## Acceptance", ""] + [f"- {md(text)}" for text in task["acceptance"]]
+    lines += ["", "## Steps", ""] + [f"{i}. {md(text)}" for i, text in enumerate(task.get("steps", []), 1)]
+    if task.get("evidence"):
+        path = task.get("evidence_translation") or task["evidence"]
+        lines += ["", f"Evidence: [{path}](../../{path}).", f"Original evidence SHA256: `{task.get('evidence_sha256', 'unrecorded')}`."]
+    lines += ["", "## CLI", "", "```sh", f"python3 tools/lab.py task show {task['id']}"]
+    if task["status"] == "pending":
+        lines.append(f"python3 tools/lab.py task claim {task['id']} --owner agent-your-session")
+    elif task["status"] in ACTIVE:
+        lines.append(f"python3 tools/lab.py task update {task['id']} --owner {shlex.quote(task['owner'])} --note 'Observed result' --next-step 'Next concrete check'")
+    lines += ["```", ""]
+    return "\n".join(lines)
+
+
+def publish_views(root, state):
+    """Caller holds the ledger lock. Publish the JSON index last to detect partial refreshes."""
+    snapshot = board_snapshot(root, state)
+    views = view_texts(state, snapshot)
+    for name, text in views.items():
+        atomic_text(within(root, name), text)
+    snapshot["view_sha256"] = {name: hashlib.sha256(text.encode()).hexdigest() for name, text in views.items()}
+    atomic_json(within(root, "state/board.json"), snapshot)
+
+
+def view_texts(state, snapshot):
+    return {"STATUS.md": render(state), "BOARD.md": render_board(snapshot),
+            **{card["card_path"]: render_card(card) for card in snapshot["tasks"]}}
+
+
+def check_views(root):
+    snapshot = read_json(within(root, "state/board.json"))
+    if snapshot.get("registry_sha256") != hashlib.sha256((root / "state/lab.json").read_bytes()).hexdigest():
+        raise LabError("Planning views are stale; run 'board --write'")
+    state = read_json(root / "state/lab.json")
+    try:
+        if datetime.fromisoformat(snapshot["generated_at"]).tzinfo is None:
+            raise ValueError("timezone required")
+        expected = board_snapshot(root, state, snapshot["generated_at"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise LabError("Invalid planning snapshot timestamp; run 'board --write'") from exc
+    texts = view_texts(state, expected)
+    expected["view_sha256"] = {name: hashlib.sha256(text.encode()).hexdigest() for name, text in texts.items()}
+    if snapshot != expected:
+        raise LabError("Planning machine view or renderer is out of date; run 'board --write'")
+    required = {"BOARD.md", "STATUS.md"} | {f"planning/tasks/{t['id']}.md" for t in read_json(root / "state/lab.json")["tasks"]}
+    if set(snapshot.get("view_sha256", {})) != required:
+        raise LabError("Planning view index is incomplete; run 'board --write'")
+    for name, expected in snapshot["view_sha256"].items():
+        path = within(root, name)
+        if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+            raise LabError(f"Planning view missing or edited: {name}; run 'board --write'")
 
 
 def render(state):
@@ -240,6 +480,11 @@ def parser():
     sub.add_parser("doctor")
     status = sub.add_parser("status")
     status.add_argument("--write", action="store_true")
+    board = sub.add_parser("board")
+    board_mode = board.add_mutually_exclusive_group()
+    board_mode.add_argument("--write", action="store_true")
+    board_mode.add_argument("--check", action="store_true")
+    board_mode.add_argument("--json", action="store_true")
     sub.add_parser("sources")
     sub.add_parser("history")
     task = sub.add_parser("task").add_subparsers(dest="operation", required=True)
@@ -249,9 +494,14 @@ def parser():
     add.add_argument("--owner", required=True)
     nxt = task.add_parser("next")
     nxt.add_argument("--scope", choices=sorted(SCOPES), default="host")
+    take = task.add_parser("claim-next")
+    take.add_argument("--scope", choices=sorted(SCOPES), default="host")
+    take.add_argument("--owner", required=True)
+    take.add_argument("--branch")
+    take.add_argument("--worktree")
     show = task.add_parser("show")
     show.add_argument("id")
-    for name in ["claim", "release", "block", "done"]:
+    for name in ["claim", "release", "block", "resume", "done", "update", "heartbeat", "prioritize"]:
         q = task.add_parser(name)
         q.add_argument("id")
         q.add_argument("--owner", required=True)
@@ -259,6 +509,16 @@ def parser():
             q.add_argument("--reason", required=True)
         if name == "done":
             q.add_argument("--evidence", required=True)
+        if name in {"claim", "update"}:
+            q.add_argument("--branch")
+            q.add_argument("--worktree")
+        if name == "update":
+            q.add_argument("--note", required=True)
+            q.add_argument("--next-step")
+            q.add_argument("--handoff")
+        if name == "prioritize":
+            q.add_argument("--priority", type=int, required=True)
+            q.add_argument("--reason", required=True)
     exp = sub.add_parser("experiment").add_subparsers(dest="operation", required=True)
     plan = exp.add_parser("plan")
     plan.add_argument("id")
@@ -284,17 +544,27 @@ def main(argv=None):
         print("Host:", sys.version.split()[0], "; project:", root)
         for name in ["git", "python3", "adb", "clang", "cmake", "ninja", "qemu-system-aarch64", "aarch64-linux-gnu-gcc", "java", "gradle"]:
             print(f"{name}: {shutil.which(name) or 'not installed (only needed for the relevant task)'}")
-        print("No phone commands executed. Bootloader unlock is user-reported; root, model and firmware are unverified.")
-    elif args.command == "status":
-        if args.write:
+        print("No phone commands executed. Consult dated device evidence for model/firmware; actual unlock, root access and recovery are not established by this tool.")
+    elif args.command in {"status", "board"}:
+        if args.write or getattr(args, "check", False):
             # Lock through the read and publication so another agent cannot publish a stale snapshot.
             with (root / "state/.lab.lock").open("a") as lock:
                 fcntl.flock(lock, fcntl.LOCK_EX)
                 state = validate(root, read_json(root / "state/lab.json"))
-                (root / "STATUS.md").write_text(render(state))
-            print("Updated STATUS.md")
+                if args.write:
+                    publish_views(root, state)
+                else:
+                    check_views(root)
+            print("Updated STATUS.md, BOARD.md, task cards and state/board.json" if args.write else "OK: planning views match the current registry")
         else:
-            print(render(state), end="")
+            with (root / "state/.lab.lock").open("a") as lock:
+                fcntl.flock(lock, fcntl.LOCK_SH)
+                state = validate(root, read_json(root / "state/lab.json"))
+                if args.command == "status":
+                    print(render(state), end="")
+                else:
+                    snapshot = board_snapshot(root, state)
+                    print(json.dumps(snapshot, ensure_ascii=False, indent=2) if args.json else render_board(snapshot), end="\n" if args.json else "")
     elif args.command == "sources":
         for source in read_json(root / "research/sources.json")["sources"]:
             pin = source.get("revision") or "UNPINNED — inspect and pin before code reuse"
@@ -303,6 +573,8 @@ def main(argv=None):
         for event in state["events"]:
             print(f"{event['at']} {event['owner']}: {event['action']}")
     elif args.command == "task":
+        if hasattr(args, "owner") and not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.:@/-]{0,79}", args.owner):
+            raise LabError("Use a stable owner identifier without whitespace (up to 80 characters)")
         if args.operation == "add":
             task = read_json(within(root, args.file))
             if task.get("status") != "pending" or task.get("owner"):
@@ -313,39 +585,66 @@ def main(argv=None):
         elif args.operation == "show":
             print(json.dumps(item(state["tasks"], args.id), ensure_ascii=False, indent=2))
         elif args.operation in {"list", "next"}:
-            for task in state["tasks"]:
-                deps = prerequisites(state, task)
-                if args.operation == "next" and not (task["status"] == "pending" and not deps and task["scope"] == args.scope and permitted(state, task["scope"])):
+            for task in ordered_tasks(state):
+                column, reasons = readiness(state, task)
+                if args.operation == "next" and not (column == "ready" and task["scope"] == args.scope):
                     continue
-                reason = f"waiting: {','.join(deps)}" if deps else ("scope not authorized" if not permitted(state, task["scope"]) else "dependencies ready")
-                print(f"{task['id']} [{task['status']}] {task['title']} — {reason}")
+                print(f"{task['id']} [{column}] P{task.get('priority', 50)} owner={task.get('owner') or 'unassigned'} {task['title']} — {'; '.join(reasons) or column}")
+        elif args.operation == "claim-next":
+            with transaction(root, "task.claim-next", args.owner) as state:
+                candidate = next((t for t in ordered_tasks(state) if t["scope"] == args.scope and readiness(state, t)[0] == "ready"), None)
+                if candidate is None:
+                    raise LabError("No eligible task in the requested scope; no claim changed")
+                claim_task(state, candidate, args.owner, args.branch, args.worktree)
+                identifier = candidate["id"]
+            print(f"Claimed {identifier} for {args.owner}")
         else:
             with transaction(root, f"task.{args.operation}:{args.id}", args.owner) as state:
                 task = item(state["tasks"], args.id)
                 if args.operation == "claim":
+                    claim_task(state, task, args.owner, args.branch, args.worktree)
+                elif args.operation == "prioritize":
                     if task["status"] != "pending":
-                        raise LabError("Only a pending task can be claimed; resolve or release an old claim explicitly")
-                    if prerequisites(state, task):
-                        raise LabError("Complete dependencies before claiming this task")
-                    if not permitted(state, task["scope"]):
-                        raise LabError("Execution scope is not authorized; a ledger flag is not user consent")
-                    task.update(status="in_progress", owner=args.owner, started_at=now())
+                        raise LabError("Only pending work can be reprioritized")
+                    if not args.reason.strip():
+                        raise LabError("Priority changes need a reason")
+                    task.update(priority=args.priority, priority_reason=args.reason, updated_at=now())
                 else:
                     owned(task, args.owner)
                     if task["status"] not in {"in_progress", "blocked"}:
                         raise LabError("Task must be in progress or blocked")
                     if args.operation == "release":
-                        task.update(status="pending", owner=None)
+                        task.update(status="pending", owner=None, released_at=now(), updated_at=now())
                         task.pop("blocked_reason", None)
+                        task.pop("last_heartbeat", None)
                     elif args.operation == "block":
-                        task.update(status="blocked", blocked_reason=args.reason)
+                        if not args.reason.strip():
+                            raise LabError("A blocked task requires a concrete reason")
+                        task.update(status="blocked", blocked_reason=args.reason, updated_at=now(), last_heartbeat=now())
+                    elif args.operation == "resume":
+                        if task["status"] != "blocked":
+                            raise LabError("Only blocked work can be resumed")
+                        if prerequisites(state, task) or not permitted(state, task["scope"]) or path_conflicts(state, task):
+                            raise LabError("Dependencies, scope or path reservations prevent resuming")
+                        task.update(status="in_progress", updated_at=now(), last_heartbeat=now())
+                        task.pop("blocked_reason", None)
+                    elif args.operation in {"update", "heartbeat"}:
+                        if args.operation == "update":
+                            if not args.note.strip():
+                                raise LabError("Progress notes must describe an actual observation")
+                            task["progress_note"] = args.note
+                            for key in ["next_step", "handoff", "branch", "worktree"]:
+                                value = getattr(args, key)
+                                if value is not None:
+                                    task[key] = value
+                        task.update(updated_at=now(), last_heartbeat=now())
                     elif args.operation == "done":
                         if not permitted(state, task["scope"]):
                             raise LabError("Execution scope is not authorized")
                         doc = evidence(root, args.evidence, task["evidence_kind"])
                         if doc["outcome"] != "pass":
                             raise LabError("A failing or inconclusive result cannot complete a task")
-                        task.update(status="done", evidence=args.evidence, evidence_sha256=evidence_hash(root, args.evidence), finished_at=now())
+                        task.update(status="done", evidence=args.evidence, evidence_sha256=evidence_hash(root, args.evidence), finished_at=now(), updated_at=now())
                         task.pop("blocked_reason", None)
             print(f"Task {args.id}: {args.operation}")
     elif args.command == "experiment":

@@ -1,0 +1,1002 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-04T22:26:04+00:00",
+  "ledger_updated_at": "2026-11-04T22:26:03+00:00",
+  "registry_sha256": "588b1843c6df842ef692869c6187f4a7ab159ecdf3a821c7a6853b6f38bccf7d",
+  "phase": "device baseline captured; Android-preserving research",
+  "columns": {
+    "ready": [
+      "RES-001"
+    ],
+    "in_progress": [],
+    "blocked": [],
+    "waiting": [
+      "RES-002",
+      "BLD-001",
+      "TST-001",
+      "GPU-001",
+      "GPU-002",
+      "GPU-004",
+      "DRV-001",
+      "DRV-002",
+      "NAT-001",
+      "NAT-002"
+    ],
+    "gated": [
+      "GPU-003",
+      "GPU-005",
+      "NAT-003",
+      "DRV-003"
+    ],
+    "done": [
+      "LAB-001",
+      "FND-001",
+      "DEV-001",
+      "DEV-002",
+      "DOC-001"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "LAB-001",
+      "title": "Implement a file-based Kanban and agent coordination workflow",
+      "status": "done",
+      "owner": "codex-coordination",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "FND-001",
+        "DOC-001"
+      ],
+      "paths": [
+        "tools/lab.py",
+        "tests/test_lab.py",
+        "tests/test_planning.py",
+        "docs/agent-workflow.md",
+        "docs/planning.md",
+        "docs/procedures/lab-001-task.json",
+        "docs/procedures/planning-check.md",
+        "AGENTS.md",
+        "README.md",
+        "Makefile",
+        "planning/",
+        "research/notes/LAB-001-handoff.md",
+        ".gitignore"
+      ],
+      "priority": 80,
+      "acceptance": [
+        "A generated Markdown Kanban, per-task cards and JSON view share the canonical ledger and refresh under its lock.",
+        "Agents can atomically claim the next eligible task, report progress/heartbeat, block, resume and release without stealing ownership.",
+        "Claims respect dependencies, authorization, priority and overlapping task paths; stale reports never imply reassignment.",
+        "Concurrency, ownership, stale snapshots and publication failure behavior have meaningful host tests.",
+        "Agent instructions explain the complete workflow and its local-filesystem limits."
+      ],
+      "sources": [],
+      "steps": [
+        "Add generated planning views and task readiness/ownership metadata.",
+        "Extend atomic CLI transitions and protect file ownership.",
+        "Test concurrency and failure cases, document and record host evidence."
+      ],
+      "started_at": "2026-11-04T22:18:32+00:00",
+      "progress_note": "42 tests, 99 local links and view consistency checks passed; original tasks/evidence and permissions preserved",
+      "next_step": "Record host evidence and complete the coordination task",
+      "branch": "main",
+      "updated_at": "2026-11-04T22:26:03+00:00",
+      "last_heartbeat": "2026-11-04T22:26:03+00:00",
+      "handoff": "research/notes/LAB-001-handoff.md",
+      "evidence": "state/evidence/LAB-001.json",
+      "evidence_sha256": "1f2a98dbc2701e28e762311d92b216b56a8272af4f72ea9fc456b50ff3fc41ac",
+      "finished_at": "2026-11-04T22:26:03+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/LAB-001.md"
+    },
+    {
+      "id": "FND-001",
+      "title": "Prepare and verify the project foundation",
+      "status": "done",
+      "owner": "codex",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [],
+      "paths": [
+        "tools/",
+        "tests/",
+        "docs/",
+        "state/"
+      ],
+      "acceptance": [
+        "The CLI passes checks; competing agents cannot claim the same task.",
+        "Documentation, the source registry and the initial backlog exist.",
+        "No command writes to phone partitions."
+      ],
+      "sources": [],
+      "steps": [
+        "Test the CLI and negative cases.",
+        "Save actual verification results and generate STATUS.md."
+      ],
+      "started_at": "2026-11-04T21:39:57+00:00",
+      "evidence": "state/evidence/FND-001.json",
+      "evidence_sha256": "dda6434b3eb314ae74ec0414fc0fbff7d6e51e5ec521f4311762dc07a337d8d4",
+      "finished_at": "2026-11-04T21:41:05+00:00",
+      "evidence_translation": "state/evidence/FND-001.en.json",
+      "column": "done",
+      "reasons": [],
+      "priority": 50,
+      "card_path": "planning/tasks/FND-001.md"
+    },
+    {
+      "id": "RES-001",
+      "title": "Pin S24 upstream and document donor provenance",
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "FND-001"
+      ],
+      "paths": [
+        "research/",
+        "references/"
+      ],
+      "acceptance": [
+        "The exact S24 checkout is pinned to a full commit SHA; the working tree does not modify upstream.",
+        "Selected donors have a SHA, license and documented purpose.",
+        "Authored, build-tested and device-observed statuses are distinct."
+      ],
+      "sources": [
+        "s24-port",
+        "hakios",
+        "y2sios"
+      ],
+      "steps": [
+        "Read research/sources.json.",
+        "Clone only selected sources into references/ without downloading firmware/IPSW.",
+        "Create a reuse/replace/missing map."
+      ],
+      "column": "ready",
+      "reasons": [],
+      "priority": 50,
+      "card_path": "planning/tasks/RES-001.md"
+    },
+    {
+      "id": "DEV-001",
+      "title": "Collect sanitized read-only S24 inventory",
+      "status": "done",
+      "owner": "codex",
+      "scope": "android-readonly",
+      "evidence_kind": "android-userland",
+      "depends_on": [
+        "FND-001"
+      ],
+      "paths": [
+        "devices/",
+        "docs/device-access.md",
+        "artifacts/"
+      ],
+      "acceptance": [
+        "Model, codename and firmware are measured rather than assumed.",
+        "Unlock status is separate from root; root is not requested automatically.",
+        "The report contains no IMEI/serial numbers and does not change phone settings."
+      ],
+      "sources": [
+        "adb-docs",
+        "s24-port"
+      ],
+      "steps": [
+        "Wait for authorized ADB connectivity; do not pair automatically.",
+        "Run tools/device_inventory.py with a fresh output path.",
+        "Save evidence with local-device origin."
+      ],
+      "started_at": "2026-11-04T21:44:45+00:00",
+      "evidence": "state/evidence/DEV-001.json",
+      "evidence_sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f",
+      "finished_at": "2026-11-04T21:58:29+00:00",
+      "evidence_translation": "state/evidence/DEV-001.en.json",
+      "column": "done",
+      "reasons": [],
+      "priority": 50,
+      "card_path": "planning/tasks/DEV-001.md"
+    },
+    {
+      "id": "RES-002",
+      "title": "Cross-check the e1s hardware map against primary sources",
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-001"
+      ],
+      "paths": [
+        "research/notes/",
+        "fixtures/public/"
+      ],
+      "acceptance": [
+        "CPU/GIC/timer/RAM/UFS/touch/GPU are documented with DTS/source references.",
+        "Unknown and firmware-dependent values are explicit.",
+        "No MMIO probes run on the live phone."
+      ],
+      "sources": [
+        "s24-port",
+        "s24-linux",
+        "silicium"
+      ],
+      "steps": [
+        "Compare DTS with upstream tables.",
+        "Create a hardware table with provenance.",
+        "Prepare only synthetic parser fixtures."
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: RES-001"
+      ],
+      "priority": 50,
+      "card_path": "planning/tasks/RES-002.md"
+    },
+    {
+      "id": "BLD-001",
+      "title": "Make the host loader and E1S delta build reproducible",
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-001"
+      ],
+      "paths": [
+        "tools/build/",
+        "src/xnu/",
+        "patches/e1s/",
+        "docs/procedures/"
+      ],
+      "acceptance": [
+        "Toolchain and upstream versions are pinned.",
+        "A build or its precise failure is reproducible from a clean environment.",
+        "check_all_exports failures and incomplete builds are not reported as successful boot.",
+        "Images stay in artifacts/; no flashing."
+      ],
+      "sources": [
+        "s24-port",
+        "hakios"
+      ],
+      "steps": [
+        "Start with the loader without Apple userland.",
+        "Save commands, exit codes, versions and hashes.",
+        "Document SDK availability and its authorized source separately."
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: RES-001"
+      ],
+      "priority": 50,
+      "card_path": "planning/tasks/BLD-001.md"
+    },
+    {
+      "id": "TST-001",
+      "title": "Validate the boot package, ADT and memory boundaries on the host",
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-002",
+        "BLD-001"
+      ],
+      "paths": [
+        "tools/verify/",
+        "fixtures/public/",
+        "tests/",
+        "docs/procedures/"
+      ],
+      "acceptance": [
+        "Negative cases cover reserved-memory overlap, invalid size and invalid entry address.",
+        "QEMU virt and screen previews are labeled synthetic.",
+        "No Exynos 2400 hardware emulation is claimed."
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "steps": [
+        "Create small synthetic fixtures.",
+        "Validate structures and ranges without executing on the phone.",
+        "Publish verification limitations."
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: RES-002, BLD-001"
+      ],
+      "priority": 50,
+      "card_path": "planning/tasks/TST-001.md"
+    },
+    {
+      "id": "GPU-001",
+      "title": "Design an Android app for GUI/GPU measurements",
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002"
+      ],
+      "paths": [
+        "src/android-probe/",
+        "docs/architecture.md"
+      ],
+      "acceptance": [
+        "The APK needs no root, Device Admin, accessibility or partition writes.",
+        "Stop, timeout, load limits and sanitized result export are documented.",
+        "A minimal Vulkan baseline and frame comparison criteria are defined."
+      ],
+      "sources": [
+        "radv-xclipse",
+        "metal2vulkan"
+      ],
+      "steps": [
+        "Start with short offscreen tests.",
+        "Define the report format and a dedicated app directory.",
+        "Plan clean termination and GPU timeout handling."
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: RES-002"
+      ],
+      "priority": 50,
+      "card_path": "planning/tasks/GPU-001.md"
+    },
+    {
+      "id": "GPU-002",
+      "title": "Implement a minimal Android Vulkan probe",
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "GPU-001"
+      ],
+      "paths": [
+        "src/android-probe/",
+        "tests/",
+        "docs/procedures/"
+      ],
+      "acceptance": [
+        "The APK builds with a pinned toolchain.",
+        "Versions, source commit and APK SHA256 are recorded.",
+        "Stop/timeout tests run on an available host/emulator; limitations are explicit.",
+        "The APK is not installed on the primary phone without authorized android-app scope."
+      ],
+      "sources": [
+        "radv-xclipse"
+      ],
+      "steps": [
+        "Implement the minimal probe and JSON export.",
+        "Test lifecycle and timeout.",
+        "Prepare a reviewable APK and instructions."
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: GPU-001"
+      ],
+      "priority": 50,
+      "card_path": "planning/tasks/GPU-002.md"
+    },
+    {
+      "id": "GPU-003",
+      "title": "Measure stock Vulkan on the S24 inside Android",
+      "status": "pending",
+      "owner": null,
+      "scope": "android-app",
+      "evidence_kind": "android-userland",
+      "depends_on": [
+        "DEV-001",
+        "GPU-002"
+      ],
+      "paths": [
+        "artifacts/",
+        "research/notes/",
+        "devices/"
+      ],
+      "acceptance": [
+        "Dated inventory and the APK hash are available.",
+        "Renderer, extensions, frame results and temperature observations are saved.",
+        "Stop is tested without rebooting; negative cases are documented."
+      ],
+      "sources": [
+        "radv-xclipse",
+        "adb-docs"
+      ],
+      "steps": [
+        "Proceed only after app installation is authorized.",
+        "Run short tests using the stock driver, without a stress loop.",
+        "Establish a baseline before changing drivers."
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: android-app",
+        "Dependencies: GPU-002"
+      ],
+      "priority": 50,
+      "card_path": "planning/tasks/GPU-003.md"
+    },
+    {
+      "id": "GPU-004",
+      "title": "Validate a minimal Metal-to-Vulkan path on the host",
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-001",
+        "GPU-001"
+      ],
+      "paths": [
+        "src/graphics/",
+        "patches/graphics/",
+        "fixtures/public/",
+        "tests/"
+      ],
+      "acceptance": [
+        "Shader fixtures are project-owned or have a verified license.",
+        "Reference pixels and permitted error are documented.",
+        "Host pass is not presented as Xclipse/XNU pass."
+      ],
+      "sources": [
+        "metal2vulkan",
+        "radv-xclipse"
+      ],
+      "steps": [
+        "Select one compute/render example.",
+        "Pin the translator and SPIR-V format.",
+        "Compare with reference output."
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: RES-001, GPU-001"
+      ],
+      "priority": 50,
+      "card_path": "planning/tasks/GPU-004.md"
+    },
+    {
+      "id": "GPU-005",
+      "title": "Compare the stock driver and Xclipse RADV in the test APK",
+      "status": "pending",
+      "owner": null,
+      "scope": "android-app",
+      "evidence_kind": "android-userland",
+      "depends_on": [
+        "GPU-003",
+        "GPU-004"
+      ],
+      "paths": [
+        "src/android-probe/",
+        "src/graphics/",
+        "artifacts/",
+        "research/notes/"
+      ],
+      "acceptance": [
+        "RADV loads only inside the test process, without system library replacement.",
+        "Each build and shader set has a revision/hash.",
+        "Compare correctness, stability and frame time; preserve failures."
+      ],
+      "sources": [
+        "radv-xclipse",
+        "metal2vulkan"
+      ],
+      "steps": [
+        "Check app-local loading on the measured firmware.",
+        "Start with one frame and a short timeout.",
+        "On GPU hang, stop the series and preserve available logs."
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: android-app",
+        "Dependencies: GPU-003, GPU-004"
+      ],
+      "priority": 50,
+      "card_path": "planning/tasks/GPU-005.md"
+    },
+    {
+      "id": "DRV-001",
+      "title": "Prepare an STM SPI touch driver and host adapter",
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-002"
+      ],
+      "paths": [
+        "src/xnu/",
+        "patches/e1s/",
+        "fixtures/public/",
+        "tests/"
+      ],
+      "acceptance": [
+        "The protocol is separated from the MMIO layer.",
+        "The parser is tested with truncated/invalid events and coordinate ranges.",
+        "Device power, IRQ and sensor behavior remain labeled unverified."
+      ],
+      "sources": [
+        "s24-port",
+        "s24-linux"
+      ],
+      "steps": [
+        "Use project-owned protocol fixtures.",
+        "Preserve licenses and provenance for reused code.",
+        "Do not read MMIO on the daily Android system."
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: RES-002"
+      ],
+      "priority": 50,
+      "card_path": "planning/tasks/DRV-001.md"
+    },
+    {
+      "id": "DRV-002",
+      "title": "Validate the read-only UFS/MCQ contract on the host",
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-002",
+        "BLD-001"
+      ],
+      "paths": [
+        "src/xnu/",
+        "patches/e1s/",
+        "tests/",
+        "fixtures/public/"
+      ],
+      "acceptance": [
+        "Checks cover DMA/GPT/LUN boundaries, timeouts and rejection of write commands.",
+        "Reading encrypted Android userdata is not assumed possible.",
+        "Hardware PHY/IOMMU/MCQ compatibility is not claimed without measurements."
+      ],
+      "sources": [
+        "s24-port",
+        "s24-linux",
+        "y2sios"
+      ],
+      "steps": [
+        "Validate a minimal command allowlist.",
+        "Model completion failures and incomplete responses.",
+        "Describe the RAM root for an initial boot."
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: RES-002, BLD-001"
+      ],
+      "priority": 50,
+      "card_path": "planning/tasks/DRV-002.md"
+    },
+    {
+      "id": "NAT-001",
+      "title": "Prepare a verifiable recovery plan for this exact S24",
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "DEV-001",
+        "RES-002"
+      ],
+      "paths": [
+        "docs/recovery.md",
+        "docs/procedures/",
+        "devices/"
+      ],
+      "acceptance": [
+        "The exact model, firmware/bootloader and an available recovery path are known.",
+        "Backups have a date, size, hash and location outside Git.",
+        "Backup availability is distinct from tested recovery; untested steps are not marked ready.",
+        "This task does not itself authorize partition operations."
+      ],
+      "sources": [
+        "s24-port",
+        "twrp-e1s"
+      ],
+      "steps": [
+        "Describe the recovery path without executing write commands.",
+        "List missing observations.",
+        "Prepare a separate proposal for a hardware session."
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: RES-002"
+      ],
+      "priority": 50,
+      "card_path": "planning/tasks/NAT-001.md"
+    },
+    {
+      "id": "NAT-002",
+      "title": "Design control and return paths for a native test",
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "NAT-001",
+        "TST-001"
+      ],
+      "paths": [
+        "docs/procedures/",
+        "research/notes/"
+      ],
+      "acceptance": [
+        "Document where ADB becomes unavailable and the independent control plane.",
+        "Watchdog/one-shot boot have a separate validation plan.",
+        "Document manual fallback and conditions prohibiting an autonomous loop."
+      ],
+      "sources": [
+        "watchdog-docs",
+        "s24-port"
+      ],
+      "steps": [
+        "Do not promise return via Stop before measuring it.",
+        "Plan a RAM root with no personal data access.",
+        "Separate software timeout from hardware watchdog."
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: NAT-001, TST-001"
+      ],
+      "priority": 50,
+      "card_path": "planning/tasks/NAT-002.md"
+    },
+    {
+      "id": "NAT-003",
+      "title": "Run the first native BOOT session with logs and recovery",
+      "status": "pending",
+      "owner": null,
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "depends_on": [
+        "NAT-002",
+        "BLD-001",
+        "TST-001"
+      ],
+      "paths": [
+        "artifacts/",
+        "research/notes/",
+        "docs/procedures/"
+      ],
+      "acceptance": [
+        "A concrete hardware session and its changes have separate explicit authorization.",
+        "Recovery is prepared and the owner is available for manual fallback.",
+        "Real logs/photos, commit/image hash and the Android return outcome are recorded.",
+        "Synthetic previews are not used as hardware evidence."
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "steps": [
+        "Keep this stage gated until separately authorized.",
+        "Do not retry automatically after losing connectivity.",
+        "Record fail/inconclusive if XNU execution is not established."
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native",
+        "Dependencies: NAT-002, BLD-001, TST-001"
+      ],
+      "priority": 50,
+      "card_path": "planning/tasks/NAT-003.md"
+    },
+    {
+      "id": "DRV-003",
+      "title": "Validate minimal XNU drivers on hardware",
+      "status": "pending",
+      "owner": null,
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "depends_on": [
+        "NAT-003",
+        "DRV-001",
+        "DRV-002"
+      ],
+      "paths": [
+        "artifacts/",
+        "patches/e1s/",
+        "research/notes/"
+      ],
+      "acceptance": [
+        "Each subsystem is tested in a separate short experiment.",
+        "Recovery, timeout and stop criteria are known.",
+        "Android userdata is not formatted and UFS writes remain disabled."
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "steps": [
+        "Start with RAM root/console and observed facts.",
+        "Do not combine touch, UFS and GPU in the first experiment.",
+        "Promote only verified results into status."
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native",
+        "Dependencies: NAT-003, DRV-001, DRV-002"
+      ],
+      "priority": 50,
+      "card_path": "planning/tasks/DRV-003.md"
+    },
+    {
+      "id": "DEV-002",
+      "title": "Prepare an extended read-only technical profile collector",
+      "status": "done",
+      "owner": "codex",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "FND-001"
+      ],
+      "paths": [
+        "tools/",
+        "tests/",
+        "docs/",
+        "devices/",
+        "research/notes/"
+      ],
+      "acceptance": [
+        "Commands only read technical metadata and do not invoke su/reboot/install/flash.",
+        "Vulkan hardware identifiers are removed before saving; device-tree properties use an allowlist.",
+        "Unavailable data is recorded as unavailable, not replaced by assumptions.",
+        "Tests cover sanitization, device-tree filtering and collection boundaries."
+      ],
+      "sources": [
+        "adb-docs",
+        "s24-port"
+      ],
+      "steps": [
+        "Add CPU/GPU/kernel/storage/input/power metadata with provenance.",
+        "Test filters using synthetic fixtures.",
+        "Save actual device observations under DEV-001 separately from host tests."
+      ],
+      "started_at": "2026-11-04T21:45:51+00:00",
+      "evidence": "state/evidence/DEV-002.json",
+      "evidence_sha256": "164fbfac6b7ce7c746bd999907e1338677de6392f7f05956e82c8009189cd219",
+      "finished_at": "2026-11-04T21:58:29+00:00",
+      "evidence_translation": "state/evidence/DEV-002.en.json",
+      "column": "done",
+      "reasons": [],
+      "priority": 50,
+      "card_path": "planning/tasks/DEV-002.md"
+    },
+    {
+      "id": "DOC-001",
+      "title": "Make English the project and agent working language",
+      "status": "done",
+      "owner": "codex",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "FND-001"
+      ],
+      "paths": [
+        "AGENTS.md",
+        "README.md",
+        "NOTICE.md",
+        "docs/",
+        "research/",
+        "devices/",
+        "fixtures/",
+        "src/",
+        "patches/",
+        "state/",
+        "tools/lab.py"
+      ],
+      "acceptance": [
+        "Active documentation, task/source prose and generated CLI status use English.",
+        "Identifiers, commands, numeric observations, authorization boundaries and original evidence hashes are preserved.",
+        "English evidence translations point to immutable originals and do not claim new measurements.",
+        "Registry validation, relevant tests and local link checks pass."
+      ],
+      "sources": [],
+      "steps": [
+        "Translate maintained documentation, task specifications and registry prose.",
+        "Provide English views of historical evidence and the local device report.",
+        "Validate, regenerate status and record the language migration."
+      ],
+      "started_at": "2026-11-04T22:04:21+00:00",
+      "evidence": "state/evidence/DOC-001.json",
+      "evidence_sha256": "a08059a67d5f830c2d4222785c9129bde5dcbd99aa585c9ebf3ccf9984455c4c",
+      "finished_at": "2026-11-04T22:12:59+00:00",
+      "column": "done",
+      "reasons": [],
+      "priority": 50,
+      "card_path": "planning/tasks/DOC-001.md"
+    }
+  ],
+  "agents": {},
+  "recent_events": [
+    {
+      "at": "2026-11-04T21:45:51+00:00",
+      "action": "task.add:DEV-002",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T21:45:51+00:00",
+      "action": "task.claim:DEV-002",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T21:58:29+00:00",
+      "action": "project.facts:DEV-001",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T21:58:29+00:00",
+      "action": "task.done:DEV-002",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T21:58:29+00:00",
+      "action": "task.done:DEV-001",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T22:04:21+00:00",
+      "action": "task.add:DOC-001",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T22:04:21+00:00",
+      "action": "task.claim:DOC-001",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T22:07:58+00:00",
+      "action": "project.language:English; user-requested translation, no new device measurements",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T22:11:49+00:00",
+      "action": "experiment.plan:LANGUAGE-001",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T22:12:59+00:00",
+      "action": "experiment.record:LANGUAGE-001",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T22:12:59+00:00",
+      "action": "task.done:DOC-001",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T22:18:32+00:00",
+      "action": "task.add:LAB-001",
+      "owner": "codex-coordination"
+    },
+    {
+      "at": "2026-11-04T22:18:32+00:00",
+      "action": "task.claim:LAB-001",
+      "owner": "codex-coordination"
+    },
+    {
+      "at": "2026-11-04T22:22:57+00:00",
+      "action": "task.update:LAB-001",
+      "owner": "codex-coordination",
+      "tasks": [
+        {
+          "id": "LAB-001",
+          "status": "in_progress",
+          "owner": "codex-coordination",
+          "priority": 80,
+          "progress_note": "Implemented generated Kanban/cards, atomic claim-next, owner reports, resume, priorities and path reservations; running behavioral checks",
+          "next_step": "Verify races, ownership, snapshot drift and publication recovery",
+          "last_heartbeat": "2026-11-04T22:22:57+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T22:25:00+00:00",
+      "action": "task.refine:LAB-001 generated temporary-file exclusions",
+      "owner": "codex-coordination",
+      "tasks": [
+        {
+          "id": "LAB-001",
+          "status": "in_progress",
+          "owner": "codex-coordination",
+          "priority": 80,
+          "progress_note": "Implemented generated Kanban/cards, atomic claim-next, owner reports, resume, priorities and path reservations; running behavioral checks",
+          "next_step": "Verify races, ownership, snapshot drift and publication recovery",
+          "last_heartbeat": "2026-11-04T22:22:57+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T22:25:00+00:00",
+      "action": "task.update:LAB-001",
+      "owner": "codex-coordination",
+      "tasks": [
+        {
+          "id": "LAB-001",
+          "status": "in_progress",
+          "owner": "codex-coordination",
+          "priority": 80,
+          "progress_note": "Initial 40 behavioral tests passed; added checks for overlapping-task races, partial publication and machine-view tampering",
+          "next_step": "Run final host checks and record evidence",
+          "last_heartbeat": "2026-11-04T22:25:00+00:00",
+          "branch": "main",
+          "handoff": "research/notes/LAB-001-handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T22:25:00+00:00",
+      "action": "experiment.plan:COORDINATION-001",
+      "owner": "codex-coordination"
+    },
+    {
+      "at": "2026-11-04T22:26:03+00:00",
+      "action": "task.update:LAB-001",
+      "owner": "codex-coordination",
+      "tasks": [
+        {
+          "id": "LAB-001",
+          "status": "in_progress",
+          "owner": "codex-coordination",
+          "priority": 80,
+          "progress_note": "42 tests, 99 local links and view consistency checks passed; original tasks/evidence and permissions preserved",
+          "next_step": "Record host evidence and complete the coordination task",
+          "last_heartbeat": "2026-11-04T22:26:03+00:00",
+          "branch": "main",
+          "handoff": "research/notes/LAB-001-handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T22:26:03+00:00",
+      "action": "experiment.record:COORDINATION-001",
+      "owner": "codex-coordination"
+    },
+    {
+      "at": "2026-11-04T22:26:03+00:00",
+      "action": "task.done:LAB-001",
+      "owner": "codex-coordination",
+      "tasks": [
+        {
+          "id": "LAB-001",
+          "status": "done",
+          "owner": "codex-coordination",
+          "priority": 80,
+          "progress_note": "42 tests, 99 local links and view consistency checks passed; original tasks/evidence and permissions preserved",
+          "next_step": "Record host evidence and complete the coordination task",
+          "last_heartbeat": "2026-11-04T22:26:03+00:00",
+          "branch": "main",
+          "handoff": "research/notes/LAB-001-handoff.md"
+        }
+      ]
+    }
+  ],
+  "view_sha256": {
+    "STATUS.md": "6ec4b49c5840e404a92b295e70720a78c76591988939625c08bc167ca898dc7c",
+    "BOARD.md": "cb816d5ccc09c6fa365e7bf24c9dbd839ebe290ed0f9a6be66e58b5a1e4f495e",
+    "planning/tasks/LAB-001.md": "3bf5f0b07bfe3944559f6520646498c1e907611d0f34201115ad0e39e3240e8c",
+    "planning/tasks/FND-001.md": "ee81357df48cbcec414e6dc2f58f1325d8936e16bbbe8022d8b771c316d6b0f8",
+    "planning/tasks/RES-001.md": "11a45bf19e8f778151542a88351a7482aced829d5805f93be845c50be4000551",
+    "planning/tasks/DEV-001.md": "387a0fc684445f6526c8517869714a41d884f7be2ebb11738782afaf0b404926",
+    "planning/tasks/RES-002.md": "ae71955ede74809f25fc6d3a4936eba7040726195d0786583d87abb741f7c9e3",
+    "planning/tasks/BLD-001.md": "185821a06a5edf922e536937cd2c5d6321d1a3944a5cd8d221b4df76addc1bc4",
+    "planning/tasks/TST-001.md": "d5558f3e8db1f9950bdc47b41efc8026e7ae9cf4e84f60220424bd27e7329200",
+    "planning/tasks/GPU-001.md": "16f7de3a51deceb2b212b8a0b0e7e370c7adbc80253a14122c761f78af7ffcab",
+    "planning/tasks/GPU-002.md": "be0e0c2a024e537fca2d208cc23b67a00360ba34e8dad4d6eed28b8e4776c3ed",
+    "planning/tasks/GPU-003.md": "ef6a185994b8b16482367dad1624cc3596d1dd1281e252e4db1874b34db4d4b3",
+    "planning/tasks/GPU-004.md": "8b281dbb48a533fd3950a85893c3d925d84d083ad197fcdf7da5af2cbe388955",
+    "planning/tasks/GPU-005.md": "af8b3fadabe21d91e9f38730b800f14d5e5e74f09290620d40e6f98435dda301",
+    "planning/tasks/DRV-001.md": "19f3696046c176821bb91d950aceac12f9f88718461fb87d7b2fe9f09b71fc35",
+    "planning/tasks/DRV-002.md": "7893d1388441ebdb03706b60f741d780978f14548517d33e42556e583f53334f",
+    "planning/tasks/NAT-001.md": "e0c4bce50f51b0ee7835751e18106ccc703aab7f2931ab38381115fe61194ff8",
+    "planning/tasks/NAT-002.md": "d3379b907e11af012b93df227437327cd1c86430a61f3333dbd0da20f87f028b",
+    "planning/tasks/NAT-003.md": "0094ffbf8cfedca15168664480d4d7da91e1773f5376533340297e807e74e853",
+    "planning/tasks/DRV-003.md": "9f4b0c2d613ce1afaa691fc3bc5618c13c8993ce197974af081e885ea0f113f4",
+    "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
+    "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace"
+  }
+}

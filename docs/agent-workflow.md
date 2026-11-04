@@ -4,6 +4,7 @@
 
 ```sh
 python3 tools/lab.py status
+python3 tools/lab.py board
 python3 tools/lab.py task next
 python3 tools/lab.py task show RES-001
 python3 tools/lab.py history
@@ -19,7 +20,7 @@ python3 tools/lab.py task block RES-001 --owner agent-a --reason 'Access to the 
 python3 tools/lab.py task release RES-001 --owner agent-a
 ```
 
-Claims are atomic and protected by a local filesystem lock. State is saved by replacing a temporary file. Do not edit the registry manually in parallel. Claims do not expire automatically: inspect unfinished work before explicitly releasing it. Independent agents must not share an owner name.
+Claims are atomic and protected by a local filesystem lock. `task claim-next --owner UNIQUE-SESSION --scope host` chooses and claims an eligible task in one transaction. State is saved by replacing a temporary file. Active/blocked tasks reserve their paths; overlapping claims are rejected. Do not edit the registry manually in parallel. Claims do not expire automatically: inspect unfinished work before explicitly releasing it. Independent agents must not share an owner name. The [planning workflow](planning.md) documents priorities, owner reports, heartbeat, resume and failure recovery.
 
 ## New tasks
 
@@ -41,6 +42,6 @@ Save real artifacts and evidence first, then run task done and make status. `don
 
 For sustained work, maintain `research/notes/ID-handoff.md`: objective, sources read and SHAs, changes, commands and actual exit codes, known defects, device boundaries and the next concrete step. Update before stopping. Keep failed experiments.
 
-The next agent resumes from handoff and history rather than repeating the entire review. STATUS.md is derived; resolve conflicts by regenerating it after reconciling state/lab.json.
+The next agent resumes from handoff and history rather than repeating the entire review. Use `task update` to attach the handoff, progress and next step before yielding. STATUS.md, BOARD.md, task cards and state/board.json are derived; resolve conflicts by regenerating them after reconciling state/lab.json. Every successful mutation refreshes the views. `make board-check` detects stale or edited generated files.
 
 Use English for maintained project text. Preserve original evidence and provide attributed translations as described in [the language policy](language.md).

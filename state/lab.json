@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-04T22:12:59+00:00",
+  "updated_at": "2026-11-04T22:26:03+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -651,6 +651,57 @@
       "evidence": "state/evidence/DOC-001.json",
       "evidence_sha256": "a08059a67d5f830c2d4222785c9129bde5dcbd99aa585c9ebf3ccf9984455c4c",
       "finished_at": "2026-11-04T22:12:59+00:00"
+    },
+    {
+      "id": "LAB-001",
+      "title": "Implement a file-based Kanban and agent coordination workflow",
+      "status": "done",
+      "owner": "codex-coordination",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "FND-001",
+        "DOC-001"
+      ],
+      "paths": [
+        "tools/lab.py",
+        "tests/test_lab.py",
+        "tests/test_planning.py",
+        "docs/agent-workflow.md",
+        "docs/planning.md",
+        "docs/procedures/lab-001-task.json",
+        "docs/procedures/planning-check.md",
+        "AGENTS.md",
+        "README.md",
+        "Makefile",
+        "planning/",
+        "research/notes/LAB-001-handoff.md",
+        ".gitignore"
+      ],
+      "priority": 80,
+      "acceptance": [
+        "A generated Markdown Kanban, per-task cards and JSON view share the canonical ledger and refresh under its lock.",
+        "Agents can atomically claim the next eligible task, report progress/heartbeat, block, resume and release without stealing ownership.",
+        "Claims respect dependencies, authorization, priority and overlapping task paths; stale reports never imply reassignment.",
+        "Concurrency, ownership, stale snapshots and publication failure behavior have meaningful host tests.",
+        "Agent instructions explain the complete workflow and its local-filesystem limits."
+      ],
+      "sources": [],
+      "steps": [
+        "Add generated planning views and task readiness/ownership metadata.",
+        "Extend atomic CLI transitions and protect file ownership.",
+        "Test concurrency and failure cases, document and record host evidence."
+      ],
+      "started_at": "2026-11-04T22:18:32+00:00",
+      "progress_note": "42 tests, 99 local links and view consistency checks passed; original tasks/evidence and permissions preserved",
+      "next_step": "Record host evidence and complete the coordination task",
+      "branch": "main",
+      "updated_at": "2026-11-04T22:26:03+00:00",
+      "last_heartbeat": "2026-11-04T22:26:03+00:00",
+      "handoff": "research/notes/LAB-001-handoff.md",
+      "evidence": "state/evidence/LAB-001.json",
+      "evidence_sha256": "1f2a98dbc2701e28e762311d92b216b56a8272af4f72ea9fc456b50ff3fc41ac",
+      "finished_at": "2026-11-04T22:26:03+00:00"
     }
   ],
   "experiments": [
@@ -684,6 +735,21 @@
       "evidence_sha256": "a08059a67d5f830c2d4222785c9129bde5dcbd99aa585c9ebf3ccf9984455c4c",
       "outcome": "pass",
       "recorded_at": "2026-11-04T22:12:59+00:00"
+    },
+    {
+      "id": "COORDINATION-001",
+      "task": "LAB-001",
+      "owner": "codex-coordination",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "File-based planning stays consistent under competing owners, overlapping paths and interrupted view publication",
+      "procedure": "docs/procedures/planning-check.md",
+      "timeout_seconds": 120,
+      "created_at": "2026-11-04T22:25:00+00:00",
+      "evidence": "state/evidence/LAB-001.json",
+      "evidence_sha256": "1f2a98dbc2701e28e762311d92b216b56a8272af4f72ea9fc456b50ff3fc41ac",
+      "outcome": "pass",
+      "recorded_at": "2026-11-04T22:26:03+00:00"
     }
   ],
   "events": [
@@ -771,6 +837,114 @@
       "at": "2026-11-04T22:12:59+00:00",
       "action": "task.done:DOC-001",
       "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T22:18:32+00:00",
+      "action": "task.add:LAB-001",
+      "owner": "codex-coordination"
+    },
+    {
+      "at": "2026-11-04T22:18:32+00:00",
+      "action": "task.claim:LAB-001",
+      "owner": "codex-coordination"
+    },
+    {
+      "at": "2026-11-04T22:22:57+00:00",
+      "action": "task.update:LAB-001",
+      "owner": "codex-coordination",
+      "tasks": [
+        {
+          "id": "LAB-001",
+          "status": "in_progress",
+          "owner": "codex-coordination",
+          "priority": 80,
+          "progress_note": "Implemented generated Kanban/cards, atomic claim-next, owner reports, resume, priorities and path reservations; running behavioral checks",
+          "next_step": "Verify races, ownership, snapshot drift and publication recovery",
+          "last_heartbeat": "2026-11-04T22:22:57+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T22:25:00+00:00",
+      "action": "task.refine:LAB-001 generated temporary-file exclusions",
+      "owner": "codex-coordination",
+      "tasks": [
+        {
+          "id": "LAB-001",
+          "status": "in_progress",
+          "owner": "codex-coordination",
+          "priority": 80,
+          "progress_note": "Implemented generated Kanban/cards, atomic claim-next, owner reports, resume, priorities and path reservations; running behavioral checks",
+          "next_step": "Verify races, ownership, snapshot drift and publication recovery",
+          "last_heartbeat": "2026-11-04T22:22:57+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T22:25:00+00:00",
+      "action": "task.update:LAB-001",
+      "owner": "codex-coordination",
+      "tasks": [
+        {
+          "id": "LAB-001",
+          "status": "in_progress",
+          "owner": "codex-coordination",
+          "priority": 80,
+          "progress_note": "Initial 40 behavioral tests passed; added checks for overlapping-task races, partial publication and machine-view tampering",
+          "next_step": "Run final host checks and record evidence",
+          "last_heartbeat": "2026-11-04T22:25:00+00:00",
+          "branch": "main",
+          "handoff": "research/notes/LAB-001-handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T22:25:00+00:00",
+      "action": "experiment.plan:COORDINATION-001",
+      "owner": "codex-coordination"
+    },
+    {
+      "at": "2026-11-04T22:26:03+00:00",
+      "action": "task.update:LAB-001",
+      "owner": "codex-coordination",
+      "tasks": [
+        {
+          "id": "LAB-001",
+          "status": "in_progress",
+          "owner": "codex-coordination",
+          "priority": 80,
+          "progress_note": "42 tests, 99 local links and view consistency checks passed; original tasks/evidence and permissions preserved",
+          "next_step": "Record host evidence and complete the coordination task",
+          "last_heartbeat": "2026-11-04T22:26:03+00:00",
+          "branch": "main",
+          "handoff": "research/notes/LAB-001-handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T22:26:03+00:00",
+      "action": "experiment.record:COORDINATION-001",
+      "owner": "codex-coordination"
+    },
+    {
+      "at": "2026-11-04T22:26:03+00:00",
+      "action": "task.done:LAB-001",
+      "owner": "codex-coordination",
+      "tasks": [
+        {
+          "id": "LAB-001",
+          "status": "done",
+          "owner": "codex-coordination",
+          "priority": 80,
+          "progress_note": "42 tests, 99 local links and view consistency checks passed; original tasks/evidence and permissions preserved",
+          "next_step": "Record host evidence and complete the coordination task",
+          "last_heartbeat": "2026-11-04T22:26:03+00:00",
+          "branch": "main",
+          "handoff": "research/notes/LAB-001-handoff.md"
+        }
+      ]
     }
   ]
 }
