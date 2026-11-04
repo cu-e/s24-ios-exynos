@@ -2,13 +2,13 @@
 
 > Сгенерировано tools/lab.py из state/lab.json. Не редактировать вручную.
 
-Фаза: **foundation; Android-preserving research**. Обновление реестра: 2026-11-04T21:39:57+00:00.
+Фаза: **foundation; Android-preserving research**. Обновление реестра: 2026-11-04T21:41:05+00:00.
 
 Разрешённые области: android-readonly, host.
 
 | Задача | Статус | Область | Исполнитель | Зависимости |
 |---|---|---|---|---|
-| FND-001 — Подготовить и проверить основу проекта | in_progress | host | codex | — |
+| FND-001 — Подготовить и проверить основу проекта | done | host | codex | — |
 | RES-001 — Зафиксировать upstream S24 и происхождение доноров | pending | host | — | FND-001 |
 | DEV-001 — Получить обезличенную read-only инвентаризацию S24 | pending | android-readonly | — | FND-001 |
 | RES-002 — Сверить карту аппаратуры e1s по первичным источникам | pending | host | — | RES-001 |
@@ -28,6 +28,6 @@
 
 ## Эксперименты
 
-- FOUNDATION-001: planned, host-test, результат: не измерен.
+- FOUNDATION-001: recorded, host-test, результат: pass.
 
 Подробности: `python3 tools/lab.py task show ID`; доступная следующая задача: `python3 tools/lab.py task next`.
