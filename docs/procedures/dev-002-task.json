@@ -1,0 +1,33 @@
+{
+  "id": "DEV-002",
+  "title": "Подготовить расширенный read-only сборщик технического профиля",
+  "status": "pending",
+  "owner": null,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": [
+    "FND-001"
+  ],
+  "paths": [
+    "tools/",
+    "tests/",
+    "docs/",
+    "devices/",
+    "research/notes/"
+  ],
+  "acceptance": [
+    "Команды ограничены чтением технической информации и не вызывают su/reboot/install/flash.",
+    "До записи очищаются аппаратные идентификаторы Vulkan; из device tree сохраняется только allowlist свойств.",
+    "Недоступные данные записываются как unavailable, не подменяются предположениями.",
+    "Есть тесты обезличивания, фильтра device tree и ограничений сбора."
+  ],
+  "sources": [
+    "adb-docs",
+    "s24-port"
+  ],
+  "steps": [
+    "Добавить профиль CPU/GPU/kernel/storage/input/power и происхождение данных.",
+    "Проверить фильтры на synthetic fixtures.",
+    "Сохранить настоящие данные в DEV-001 отдельно от host-тестов."
+  ]
+}

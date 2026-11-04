@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-04T21:41:05+00:00",
+  "updated_at": "2026-11-04T21:58:29+00:00",
   "project": {
     "name": "s24-ios-exynos",
-    "phase": "foundation; Android-preserving research",
+    "phase": "device baseline captured; Android-preserving research",
     "permissions": {
       "host": true,
       "android-readonly": true,
@@ -17,14 +17,27 @@
         "device_verified": false
       },
       {
-        "fact": "Точная модель, firmware, root и recovery владельца ещё не измерены.",
-        "origin": "unknown",
-        "device_verified": false
-      },
-      {
         "fact": "Сохранить текущую систему и повседневную доступность телефона.",
         "origin": "user-requirement",
         "device_verified": false
+      },
+      {
+        "fact": "Измерено ADB 2026-11-05: SM-S921B/e1s, s5e9945/erd9945, Android 15, firmware S921BXXS9BYH3, kernel 6.1.93-android14-11.",
+        "origin": "local-device",
+        "device_verified": true,
+        "evidence": "state/evidence/DEV-001.json"
+      },
+      {
+        "fact": "Android сообщает locked/green; найден Magisk 96221b69-alpha:MAGISK:R. Фактический unlock и доступ su не установлены.",
+        "origin": "local-device",
+        "device_verified": true,
+        "evidence": "state/evidence/DEV-001.json"
+      },
+      {
+        "fact": "Прочитанный kernel config: KEXEC/KEXEC_FILE выключены, KVM=y; доступ VM и восстановление не проверены.",
+        "origin": "local-device",
+        "device_verified": true,
+        "evidence": "state/evidence/DEV-001.json"
       }
     ]
   },
@@ -91,8 +104,8 @@
     {
       "id": "DEV-001",
       "title": "Получить обезличенную read-only инвентаризацию S24",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex",
       "scope": "android-readonly",
       "evidence_kind": "android-userland",
       "depends_on": [
@@ -116,7 +129,11 @@
         "Дождаться авторизованного ADB-подключения; не выполнять pairing автоматически.",
         "Запустить tools/device_inventory.py с новым путём вывода.",
         "Сохранить evidence с origin local-device."
-      ]
+      ],
+      "started_at": "2026-11-04T21:44:45+00:00",
+      "evidence": "state/evidence/DEV-001.json",
+      "evidence_sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f",
+      "finished_at": "2026-11-04T21:58:29+00:00"
     },
     {
       "id": "RES-002",
@@ -553,6 +570,43 @@
         "Не объединять touch, UFS и GPU в первый эксперимент.",
         "Переносить только подтверждённые результаты в status."
       ]
+    },
+    {
+      "id": "DEV-002",
+      "title": "Подготовить расширенный read-only сборщик технического профиля",
+      "status": "done",
+      "owner": "codex",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "FND-001"
+      ],
+      "paths": [
+        "tools/",
+        "tests/",
+        "docs/",
+        "devices/",
+        "research/notes/"
+      ],
+      "acceptance": [
+        "Команды ограничены чтением технической информации и не вызывают su/reboot/install/flash.",
+        "До записи очищаются аппаратные идентификаторы Vulkan; из device tree сохраняется только allowlist свойств.",
+        "Недоступные данные записываются как unavailable, не подменяются предположениями.",
+        "Есть тесты обезличивания, фильтра device tree и ограничений сбора."
+      ],
+      "sources": [
+        "adb-docs",
+        "s24-port"
+      ],
+      "steps": [
+        "Добавить профиль CPU/GPU/kernel/storage/input/power и происхождение данных.",
+        "Проверить фильтры на synthetic fixtures.",
+        "Сохранить настоящие данные в DEV-001 отдельно от host-тестов."
+      ],
+      "started_at": "2026-11-04T21:45:51+00:00",
+      "evidence": "state/evidence/DEV-002.json",
+      "evidence_sha256": "164fbfac6b7ce7c746bd999907e1338677de6392f7f05956e82c8009189cd219",
+      "finished_at": "2026-11-04T21:58:29+00:00"
     }
   ],
   "experiments": [
@@ -596,6 +650,36 @@
     {
       "at": "2026-11-04T21:41:05+00:00",
       "action": "task.done:FND-001",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T21:44:45+00:00",
+      "action": "task.claim:DEV-001",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T21:45:51+00:00",
+      "action": "task.add:DEV-002",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T21:45:51+00:00",
+      "action": "task.claim:DEV-002",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T21:58:29+00:00",
+      "action": "project.facts:DEV-001",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T21:58:29+00:00",
+      "action": "task.done:DEV-002",
+      "owner": "codex"
+    },
+    {
+      "at": "2026-11-04T21:58:29+00:00",
+      "action": "task.done:DEV-001",
       "owner": "codex"
     }
   ]

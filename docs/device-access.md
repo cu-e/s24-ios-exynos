@@ -13,3 +13,7 @@ python3 tools/device_inventory.py --output devices/local-2026-11-05.json
 Беспроводной ADB можно настроить отдельно с владельцем. Он не переживает переход к ядру без собственного USB/Wi-Fi драйвера. Даже постоянный USB-кабель не создаёт управляющий канал в зависшем XNU.
 
 Android-app этап — отдельная согласованная установка test APK с понятным удалением и ограничениями. Только после неё доступны GPU-003/GPU-005.
+
+Расширенный профиль: [процедура](procedures/device-profile.md), `tools/device_profile.py --output-dir artifacts/device-profile/NEW`. Он сохраняет CPU/GPU, kernel config, разделы и доступные аппаратные метаданные с командами, временем, SHA256 и статусами недоступности. Свойства device tree и /proc/iomem на измеренном аппарате закрыты для shell; не обходить это автоматическим su.
+
+Сеанс 2026-11-05: [обезличенные выводы](../research/notes/DEV-001-profile.md). Локальная подробная сводка — `devices/local-2026-11-05-session1.md`, профиль — `artifacts/device-profile/2026-11-05-session1/` и `2026-11-05-session1-extra/`. Эти приватные данные не входят в Git.

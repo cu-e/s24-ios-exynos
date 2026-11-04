@@ -2,7 +2,7 @@
 
 > Сгенерировано tools/lab.py из state/lab.json. Не редактировать вручную.
 
-Фаза: **foundation; Android-preserving research**. Обновление реестра: 2026-11-04T21:41:05+00:00.
+Фаза: **device baseline captured; Android-preserving research**. Обновление реестра: 2026-11-04T21:58:29+00:00.
 
 Разрешённые области: android-readonly, host.
 
@@ -10,7 +10,7 @@
 |---|---|---|---|---|
 | FND-001 — Подготовить и проверить основу проекта | done | host | codex | — |
 | RES-001 — Зафиксировать upstream S24 и происхождение доноров | pending | host | — | FND-001 |
-| DEV-001 — Получить обезличенную read-only инвентаризацию S24 | pending | android-readonly | — | FND-001 |
+| DEV-001 — Получить обезличенную read-only инвентаризацию S24 | done | android-readonly | codex | FND-001 |
 | RES-002 — Сверить карту аппаратуры e1s по первичным источникам | pending | host | — | RES-001 |
 | BLD-001 — Сделать воспроизводимую host-сборку загрузчика и E1S delta | pending | host | — | RES-001 |
 | TST-001 — Проверить boot-пакет, ADT и границы памяти на host | pending | host | — | RES-002, BLD-001 |
@@ -25,6 +25,7 @@
 | NAT-002 — Спроектировать управление и возврат из нативного теста | pending | host | — | NAT-001, TST-001 |
 | NAT-003 — Первый нативный BOOT-сеанс с журналом и восстановлением | pending | native | — | NAT-002, BLD-001, TST-001 |
 | DRV-003 — Аппаратно проверить минимальные драйверы XNU | pending | native | — | NAT-003, DRV-001, DRV-002 |
+| DEV-002 — Подготовить расширенный read-only сборщик технического профиля | done | host | codex | FND-001 |
 
 ## Эксперименты
 
