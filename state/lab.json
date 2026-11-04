@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-04T23:34:25+00:00",
+  "updated_at": "2026-11-04T23:55:15+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -1601,8 +1601,8 @@
     {
       "id": "CELL-001",
       "title": "Specify Samsung CPIF control and packet transports",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-radio-research-20261105-b",
       "priority": 70,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -1611,7 +1611,8 @@
       ],
       "paths": [
         "src/platform/cellular/contracts",
-        "docs/procedures/cell-001"
+        "docs/procedures/cell-001",
+        "tests/test_cellular_framing.py"
       ],
       "acceptance": [
         "Document S5000AP/shared-memory/SIPC inputs and unresolved firmware commands",
@@ -1625,7 +1626,17 @@
         "Inspect the task dependencies and pinned inputs",
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
-      ]
+      ],
+      "started_at": "2026-11-04T23:39:53+00:00",
+      "last_heartbeat": "2026-11-04T23:53:15+00:00",
+      "updated_at": "2026-11-04T23:55:15+00:00",
+      "branch": "main",
+      "progress_note": "Versioned Samsung input contract and bounded SIPC5/SIT host parser implemented; six boundary-test groups passed; seven donor model targets pass under Clang with sanitizers and initial GCC failure retained",
+      "next_step": "Recover matching vendor schema under CELL-009 and verified DT/queue/SMC inputs before native control work",
+      "handoff": "docs/procedures/cell-001/README.md",
+      "evidence": "state/evidence/CELL-001.json",
+      "evidence_sha256": "c163815802805266ee6a76c41650fd966deccd9bc5e88ca51cc0b58ae9ade6ad",
+      "finished_at": "2026-11-04T23:55:15+00:00"
     },
     {
       "id": "CELL-002",
@@ -1695,7 +1706,8 @@
       "depends_on": [
         "CELL-001",
         "BLD-001",
-        "KRN-001"
+        "KRN-001",
+        "CELL-009"
       ],
       "paths": [
         "src/platform/cellular/ios",
@@ -1835,7 +1847,8 @@
       "evidence_kind": "native-device",
       "depends_on": [
         "ESIM-002",
-        "CELL-005"
+        "CELL-005",
+        "ESIM-004"
       ],
       "paths": [
         "artifacts/esim-lifecycle",
@@ -2033,6 +2046,128 @@
       ],
       "status": "pending",
       "owner": null
+    },
+    {
+      "id": "RES-003",
+      "title": "Deepen radio, eSIM and related donor research with pinned primary sources and explicit Reddit coverage",
+      "status": "done",
+      "owner": "codex-radio-research-20261105-b",
+      "priority": 80,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-001",
+        "RES-002"
+      ],
+      "paths": [
+        "research/sources.json",
+        "research/notes/RES-003-radio-donors.md",
+        "research/radio-coverage.json",
+        "fixtures/public/radio-research/",
+        "docs/procedures/radio-research.md",
+        "docs/implementation.md",
+        "state/capabilities.json",
+        "CAPABILITIES.md",
+        "README.md"
+      ],
+      "acceptance": [
+        "Pin and inspect QcomBaseband, lpac and Scion AVF donors with license boundaries and exact source references",
+        "Record actual Reddit/archive queries, returned threads and inaccessible/deleted content without claiming exhaustive coverage",
+        "Map Samsung-specific CPIF/SIPC/SIT, eUICC and iOS integration gaps to concrete implementation and verification steps",
+        "Keep public evidence minimal and exclude firmware, SDKs, keys, private subscriptions and phone operations"
+      ],
+      "sources": [
+        "s24-linux",
+        "qcom-baseband",
+        "lpac",
+        "scion-avf",
+        "radv-xclipse",
+        "iosplus10",
+        "ios-lemonadep",
+        "base-mirror",
+        "firmwire",
+        "apple-esim-docs",
+        "android-esim-docs"
+      ],
+      "steps": [
+        "Inspect primary donor files at recorded revisions",
+        "Cross-check selected Reddit claims against source and preserve access failures",
+        "Publish source-level decisions and follow-up acceptance gates"
+      ],
+      "started_at": "2026-11-04T23:36:35+00:00",
+      "last_heartbeat": "2026-11-04T23:53:15+00:00",
+      "updated_at": "2026-11-04T23:55:15+00:00",
+      "branch": "main",
+      "progress_note": "Seven additional donor/tool repositories pinned; actual archive coverage deduplicated; eSIM frontend and vendor-RIL schema gates integrated without changing the first OS or device permissions",
+      "next_step": "Preserve checked evidence and continue GPU/display/Wi-Fi/native work through their separate gates",
+      "handoff": "research/notes/RES-003-radio-donors.md",
+      "evidence": "state/evidence/RES-003.json",
+      "evidence_sha256": "dd6b22522a74a1ef4166b97157af85c35e58cc950a84ab51e159a5ee5e864ecf",
+      "finished_at": "2026-11-04T23:55:15+00:00"
+    },
+    {
+      "id": "ESIM-004",
+      "title": "Verify selected iOS 16.5 eSIM frontend and hardware-profile compatibility",
+      "priority": 80,
+      "depends_on": [
+        "RES-003"
+      ],
+      "paths": [
+        "tools/research/esim-profile/",
+        "docs/procedures/esim-profile/",
+        "fixtures/public/esim-profile/"
+      ],
+      "acceptance": [
+        "Inventory actual locally supplied OS components, version and digests without committing Apple files or silently switching the approved first OS",
+        "Determine whether the selected iPhone X identity/image includes the required eSIM frontend and matching CommCenter/IOKit ABI; a later eSIM-capable reference is not assumed compatible",
+        "Record a concrete adaptation/profile decision and host validation; missing binaries or indirect documentation are not a compatibility pass"
+      ],
+      "sources": [
+        "qcom-baseband",
+        "lpac",
+        "apple-esim-docs"
+      ],
+      "steps": [
+        "Accept explicit local inputs and verify provenance",
+        "Inspect frontend capabilities and ABI boundaries without executing or downloading Apple binaries",
+        "Publish the evidence required before native eSIM lifecycle qualification"
+      ],
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test"
+    },
+    {
+      "id": "CELL-009",
+      "title": "Recover matching Samsung vendor command schemas through offline RIL analysis",
+      "priority": 80,
+      "depends_on": [
+        "RES-003",
+        "CELL-001"
+      ],
+      "paths": [
+        "tools/research/ril/",
+        "docs/procedures/ril/",
+        "fixtures/public/ril/"
+      ],
+      "acceptance": [
+        "Analyze an explicitly supplied matching SM-S921B/BYH3 vendor RIL with recorded hashes and a pinned isolated analyzer/toolchain",
+        "Separate transport headers from SIM/APDU/registration/PDP/SMS/IMS request and event schemas, preserving uncertainty and unsupported commands",
+        "No automatic command replay, device fuzzing, modem reset, profile operation or proprietary binary publication; static inference is not a hardware pass"
+      ],
+      "sources": [
+        "base-mirror",
+        "s24-linux"
+      ],
+      "steps": [
+        "Review analyzer/runtime requirements and local binary provenance",
+        "Perform static extraction and independent checks on synthetic or offline inputs",
+        "Version only sanitized schema facts and reproducible analysis reports"
+      ],
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test"
     }
   ],
   "experiments": [
@@ -2291,6 +2426,36 @@
       "evidence_sha256": "2ba065d28368701a120096ec95c2a148a7d3445623bf87263528e87e2751617a",
       "outcome": "fail",
       "recorded_at": "2026-11-04T23:31:02+00:00"
+    },
+    {
+      "id": "QCOMMODEL-001",
+      "task": "CELL-001",
+      "owner": "codex-radio-research-20261105-b",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The pinned Qualcomm donor protocol/register models pass with host address/undefined-behavior sanitizers, establishing reusable model-test references but no Samsung radio support",
+      "procedure": "docs/procedures/cell-001/donor-model-check.md",
+      "timeout_seconds": 90,
+      "created_at": "2026-11-04T23:39:55+00:00",
+      "evidence": "state/evidence/QCOMMODEL-001.json",
+      "evidence_sha256": "08f324237a64062811645008a0cec06e8cce8369718d976f5e0b427aae21e89a",
+      "outcome": "fail",
+      "recorded_at": "2026-11-04T23:41:01+00:00"
+    },
+    {
+      "id": "QCOMMODEL-002",
+      "task": "CELL-001",
+      "owner": "codex-radio-research-20261105-b",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Explicit Clang with the unchanged C11 warning/error and ASan/UBSan policy can build and execute all seven unmodified donor host models; GNU cc failure remains separate evidence",
+      "procedure": "docs/procedures/cell-001/donor-model-check.md",
+      "timeout_seconds": 90,
+      "created_at": "2026-11-04T23:41:02+00:00",
+      "evidence": "state/evidence/QCOMMODEL-002.json",
+      "evidence_sha256": "d5976b9774d87e565817ea80302e7c5ce356d257314a191d2139b04b455d1317",
+      "outcome": "pass",
+      "recorded_at": "2026-11-04T23:44:39+00:00"
     }
   ],
   "events": [
@@ -3748,6 +3913,249 @@
           "next_step": "Finish isolated emulator evidence, audit links/digests and commit a resumable handoff",
           "last_heartbeat": "2026-11-04T23:23:32+00:00",
           "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:36:35+00:00",
+      "action": "task.add:RES-003",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "RES-003",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:36:35+00:00",
+      "action": "task.claim:RES-003",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "RES-003",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 80,
+          "last_heartbeat": "2026-11-04T23:36:35+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:39:53+00:00",
+      "action": "task.claim:CELL-001",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "CELL-001",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 70,
+          "last_heartbeat": "2026-11-04T23:39:53+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:39:55+00:00",
+      "action": "experiment.plan:QCOMMODEL-001",
+      "owner": "codex-radio-research-20261105-b"
+    },
+    {
+      "at": "2026-11-04T23:41:01+00:00",
+      "action": "experiment.record:QCOMMODEL-001",
+      "owner": "codex-radio-research-20261105-b"
+    },
+    {
+      "at": "2026-11-04T23:41:02+00:00",
+      "action": "experiment.plan:QCOMMODEL-002",
+      "owner": "codex-radio-research-20261105-b"
+    },
+    {
+      "at": "2026-11-04T23:42:59+00:00",
+      "action": "task.refine_paths:CELL-001",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "CELL-001",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 70,
+          "progress_note": "Pinned CPIF headers expose both SIPC5 and SIT; exact live protocol remains unknown. Add host parser negative cases under a narrow test path.",
+          "last_heartbeat": "2026-11-04T23:39:53+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:44:39+00:00",
+      "action": "experiment.record:QCOMMODEL-002",
+      "owner": "codex-radio-research-20261105-b"
+    },
+    {
+      "at": "2026-11-04T23:44:39+00:00",
+      "action": "task.refine_paths:RES-003",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "RES-003",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 80,
+          "progress_note": "Donor model checks pass under explicit Clang; default GCC check fails without executing models. Added iPhone X/eSIM profile and SIPC/SIT selection gates.",
+          "last_heartbeat": "2026-11-04T23:36:35+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:46:36+00:00",
+      "action": "task.add:ESIM-004",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:46:36+00:00",
+      "action": "task.add:CELL-009",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "CELL-009",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:46:37+00:00",
+      "action": "task.refine_dependencies:radio-evidence-gates",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "CELL-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 70
+        },
+        {
+          "id": "ESIM-003",
+          "status": "pending",
+          "owner": null,
+          "priority": 50
+        },
+        {
+          "id": "RES-003",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 80,
+          "progress_note": "Donor model checks pass under explicit Clang; default GCC check fails without executing models. Added iPhone X/eSIM profile and SIPC/SIT selection gates.",
+          "last_heartbeat": "2026-11-04T23:36:35+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:51:30+00:00",
+      "action": "task.refine_sources:esim-profile-gate",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "RES-003",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 80,
+          "progress_note": "Donor model checks pass under explicit Clang; default GCC check fails without executing models. Added iPhone X/eSIM profile and SIPC/SIT selection gates.",
+          "last_heartbeat": "2026-11-04T23:36:35+00:00",
+          "branch": "main"
+        },
+        {
+          "id": "ESIM-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:53:15+00:00",
+      "action": "task.update:CELL-001",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "CELL-001",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 70,
+          "progress_note": "Versioned Samsung input contract and bounded SIPC5/SIT host parser implemented; six boundary-test groups passed; seven donor model targets pass under Clang with sanitizers and initial GCC failure retained",
+          "next_step": "Recover matching vendor schema under CELL-009 and verified DT/queue/SMC inputs before native control work",
+          "last_heartbeat": "2026-11-04T23:53:15+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/cell-001/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:53:15+00:00",
+      "action": "task.update:RES-003",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "RES-003",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 80,
+          "progress_note": "Seven additional donor/tool repositories pinned; actual archive coverage deduplicated; eSIM frontend and vendor-RIL schema gates integrated without changing the first OS or device permissions",
+          "next_step": "Preserve checked evidence and continue GPU/display/Wi-Fi/native work through their separate gates",
+          "last_heartbeat": "2026-11-04T23:53:15+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-003-radio-donors.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:55:15+00:00",
+      "action": "task.done:CELL-001",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "CELL-001",
+          "status": "done",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 70,
+          "progress_note": "Versioned Samsung input contract and bounded SIPC5/SIT host parser implemented; six boundary-test groups passed; seven donor model targets pass under Clang with sanitizers and initial GCC failure retained",
+          "next_step": "Recover matching vendor schema under CELL-009 and verified DT/queue/SMC inputs before native control work",
+          "last_heartbeat": "2026-11-04T23:53:15+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/cell-001/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:55:15+00:00",
+      "action": "task.done:RES-003",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "RES-003",
+          "status": "done",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 80,
+          "progress_note": "Seven additional donor/tool repositories pinned; actual archive coverage deduplicated; eSIM frontend and vendor-RIL schema gates integrated without changing the first OS or device permissions",
+          "next_step": "Preserve checked evidence and continue GPU/display/Wi-Fi/native work through their separate gates",
+          "last_heartbeat": "2026-11-04T23:53:15+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-003-radio-donors.md"
         }
       ]
     }

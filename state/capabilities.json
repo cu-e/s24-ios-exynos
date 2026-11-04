@@ -332,11 +332,11 @@
     {
       "id": "cellular",
       "title": "Modem, SIM, data and voice",
-      "implementation": "planned",
+      "implementation": "source-reviewed",
       "native_status": "not-tested",
-      "local_observation": "CPIF/S5000AP/shared memory; no native tests",
-      "upstream": "Qualcomm bridge has LTE/IPv4 claims; not Samsung transport",
-      "next_check": "Specify CPIF and select carrier/test subscription",
+      "local_observation": "CPIF/S5000AP/shared memory; SBD and RX/UL PKTPROC configured; DIT disabled; live protocol unknown",
+      "upstream": "Pinned Qualcomm iOS17 donor models pass on host; Samsung wire headers reviewed, vendor commands missing",
+      "next_check": "CELL-009: matching offline RIL schemas; verify live protocol/queue profile before native transport",
       "acceptance": "Registration, IPv4/IPv6, SMS, IMS and duplex incoming/outgoing calls",
       "tasks": [
         "CELL-001",
@@ -344,12 +344,15 @@
         "CELL-003",
         "CELL-004",
         "CELL-005",
-        "CELL-006"
+        "CELL-006",
+        "CELL-009"
       ],
       "sources": [
         "s24-linux",
         "qcom-baseband",
-        "hakios"
+        "hakios",
+        "base-mirror",
+        "firmwire"
       ],
       "local_evidence": [
         {
@@ -361,20 +364,23 @@
     {
       "id": "esim",
       "title": "eSIM",
-      "implementation": "planned",
+      "implementation": "source-reviewed",
       "native_status": "not-tested",
       "local_observation": "Android declares eUICC/MEP; no APDU/provisioning test",
-      "upstream": "Partial Qualcomm eSIM bridge; provisioning unverified",
-      "next_check": "Define logical-channel transport and test-profile policy",
+      "upstream": "Pinned lpac/APDU architecture; iOS17 donor provisioning unverified; iPhone X frontend gap",
+      "next_check": "ESIM-004: verify selected iOS16.5 frontend/profile; exact native logical-channel transport remains missing",
       "acceptance": "Active-profile use and each LPA lifecycle operation qualified",
       "tasks": [
         "ESIM-001",
         "ESIM-002",
-        "ESIM-003"
+        "ESIM-003",
+        "ESIM-004"
       ],
       "sources": [
         "lpac",
-        "qcom-baseband"
+        "qcom-baseband",
+        "apple-esim-docs",
+        "android-esim-docs"
       ],
       "local_evidence": [
         {

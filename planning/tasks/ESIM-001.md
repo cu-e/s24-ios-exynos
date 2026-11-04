@@ -6,7 +6,7 @@
 
 | Field | Value |
 |---|---|
-| State / column | pending / waiting |
+| State / column | pending / ready |
 | Owner | unassigned |
 | Priority | 70 (higher first; default 50) |
 | Scope / evidence | host / host-test |
@@ -14,7 +14,7 @@
 
 ## Readiness
 
-Dependencies: CELL-001
+ready
 
 ## Reserved paths
 

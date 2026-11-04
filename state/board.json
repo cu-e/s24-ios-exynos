@@ -1,12 +1,14 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-04T23:34:46+00:00",
-  "ledger_updated_at": "2026-11-04T23:34:25+00:00",
-  "registry_sha256": "85059b60226f660121f3da748087717a3c7e2496965cc70f2d98c11dd1bed3e3",
+  "generated_at": "2026-11-04T23:55:16+00:00",
+  "ledger_updated_at": "2026-11-04T23:55:15+00:00",
+  "registry_sha256": "66a35d93a10d0afdb689bd603dd5fbc1663a56320f643d91ff0914008ae9c139",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
       "TST-002",
+      "ESIM-004",
+      "CELL-009",
       "VM-002",
       "UI-001",
       "USB-001",
@@ -14,7 +16,7 @@
       "NET-001",
       "BT-001",
       "SEN-001",
-      "CELL-001",
+      "ESIM-001",
       "MISC-001",
       "VM-001"
     ],
@@ -31,7 +33,6 @@
       "PWR-001",
       "CELL-002",
       "CELL-004",
-      "ESIM-001",
       "DRV-001",
       "DRV-002",
       "NAT-002"
@@ -66,6 +67,8 @@
       "SRC-001",
       "INT-001",
       "LAB-001",
+      "RES-003",
+      "CELL-001",
       "FND-001",
       "RES-001",
       "DEV-001",
@@ -270,7 +273,7 @@
         "No explicit iPhoneOS16.5 SDK or matching pinned XNU dependency/build tool directory is configured; see fixtures/public/build/kernel-preflight.json"
       ],
       "card_path": "planning/tasks/KRN-001.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "LAB-001",
@@ -360,6 +363,137 @@
       "column": "ready",
       "reasons": [],
       "card_path": "planning/tasks/TST-002.md"
+    },
+    {
+      "id": "RES-003",
+      "title": "Deepen radio, eSIM and related donor research with pinned primary sources and explicit Reddit coverage",
+      "status": "done",
+      "owner": "codex-radio-research-20261105-b",
+      "priority": 80,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-001",
+        "RES-002"
+      ],
+      "paths": [
+        "research/sources.json",
+        "research/notes/RES-003-radio-donors.md",
+        "research/radio-coverage.json",
+        "fixtures/public/radio-research/",
+        "docs/procedures/radio-research.md",
+        "docs/implementation.md",
+        "state/capabilities.json",
+        "CAPABILITIES.md",
+        "README.md"
+      ],
+      "acceptance": [
+        "Pin and inspect QcomBaseband, lpac and Scion AVF donors with license boundaries and exact source references",
+        "Record actual Reddit/archive queries, returned threads and inaccessible/deleted content without claiming exhaustive coverage",
+        "Map Samsung-specific CPIF/SIPC/SIT, eUICC and iOS integration gaps to concrete implementation and verification steps",
+        "Keep public evidence minimal and exclude firmware, SDKs, keys, private subscriptions and phone operations"
+      ],
+      "sources": [
+        "s24-linux",
+        "qcom-baseband",
+        "lpac",
+        "scion-avf",
+        "radv-xclipse",
+        "iosplus10",
+        "ios-lemonadep",
+        "base-mirror",
+        "firmwire",
+        "apple-esim-docs",
+        "android-esim-docs"
+      ],
+      "steps": [
+        "Inspect primary donor files at recorded revisions",
+        "Cross-check selected Reddit claims against source and preserve access failures",
+        "Publish source-level decisions and follow-up acceptance gates"
+      ],
+      "started_at": "2026-11-04T23:36:35+00:00",
+      "last_heartbeat": "2026-11-04T23:53:15+00:00",
+      "updated_at": "2026-11-04T23:55:15+00:00",
+      "branch": "main",
+      "progress_note": "Seven additional donor/tool repositories pinned; actual archive coverage deduplicated; eSIM frontend and vendor-RIL schema gates integrated without changing the first OS or device permissions",
+      "next_step": "Preserve checked evidence and continue GPU/display/Wi-Fi/native work through their separate gates",
+      "handoff": "research/notes/RES-003-radio-donors.md",
+      "evidence": "state/evidence/RES-003.json",
+      "evidence_sha256": "dd6b22522a74a1ef4166b97157af85c35e58cc950a84ab51e159a5ee5e864ecf",
+      "finished_at": "2026-11-04T23:55:15+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/RES-003.md"
+    },
+    {
+      "id": "ESIM-004",
+      "title": "Verify selected iOS 16.5 eSIM frontend and hardware-profile compatibility",
+      "priority": 80,
+      "depends_on": [
+        "RES-003"
+      ],
+      "paths": [
+        "tools/research/esim-profile/",
+        "docs/procedures/esim-profile/",
+        "fixtures/public/esim-profile/"
+      ],
+      "acceptance": [
+        "Inventory actual locally supplied OS components, version and digests without committing Apple files or silently switching the approved first OS",
+        "Determine whether the selected iPhone X identity/image includes the required eSIM frontend and matching CommCenter/IOKit ABI; a later eSIM-capable reference is not assumed compatible",
+        "Record a concrete adaptation/profile decision and host validation; missing binaries or indirect documentation are not a compatibility pass"
+      ],
+      "sources": [
+        "qcom-baseband",
+        "lpac",
+        "apple-esim-docs"
+      ],
+      "steps": [
+        "Accept explicit local inputs and verify provenance",
+        "Inspect frontend capabilities and ABI boundaries without executing or downloading Apple binaries",
+        "Publish the evidence required before native eSIM lifecycle qualification"
+      ],
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/ESIM-004.md"
+    },
+    {
+      "id": "CELL-009",
+      "title": "Recover matching Samsung vendor command schemas through offline RIL analysis",
+      "priority": 80,
+      "depends_on": [
+        "RES-003",
+        "CELL-001"
+      ],
+      "paths": [
+        "tools/research/ril/",
+        "docs/procedures/ril/",
+        "fixtures/public/ril/"
+      ],
+      "acceptance": [
+        "Analyze an explicitly supplied matching SM-S921B/BYH3 vendor RIL with recorded hashes and a pinned isolated analyzer/toolchain",
+        "Separate transport headers from SIM/APDU/registration/PDP/SMS/IMS request and event schemas, preserving uncertainty and unsupported commands",
+        "No automatic command replay, device fuzzing, modem reset, profile operation or proprietary binary publication; static inference is not a hardware pass"
+      ],
+      "sources": [
+        "base-mirror",
+        "s24-linux"
+      ],
+      "steps": [
+        "Review analyzer/runtime requirements and local binary provenance",
+        "Perform static extraction and independent checks on synthetic or offline inputs",
+        "Version only sanitized schema facts and reproducible analysis reports"
+      ],
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/CELL-009.md"
     },
     {
       "id": "VM-002",
@@ -767,8 +901,8 @@
     {
       "id": "CELL-001",
       "title": "Specify Samsung CPIF control and packet transports",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-radio-research-20261105-b",
       "priority": 70,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -777,7 +911,8 @@
       ],
       "paths": [
         "src/platform/cellular/contracts",
-        "docs/procedures/cell-001"
+        "docs/procedures/cell-001",
+        "tests/test_cellular_framing.py"
       ],
       "acceptance": [
         "Document S5000AP/shared-memory/SIPC inputs and unresolved firmware commands",
@@ -792,7 +927,17 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "ready",
+      "started_at": "2026-11-04T23:39:53+00:00",
+      "last_heartbeat": "2026-11-04T23:53:15+00:00",
+      "updated_at": "2026-11-04T23:55:15+00:00",
+      "branch": "main",
+      "progress_note": "Versioned Samsung input contract and bounded SIPC5/SIT host parser implemented; six boundary-test groups passed; seven donor model targets pass under Clang with sanitizers and initial GCC failure retained",
+      "next_step": "Recover matching vendor schema under CELL-009 and verified DT/queue/SMC inputs before native control work",
+      "handoff": "docs/procedures/cell-001/README.md",
+      "evidence": "state/evidence/CELL-001.json",
+      "evidence_sha256": "c163815802805266ee6a76c41650fd966deccd9bc5e88ca51cc0b58ae9ade6ad",
+      "finished_at": "2026-11-04T23:55:15+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/CELL-001.md"
     },
@@ -827,7 +972,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Dependencies: CELL-001, KRN-001"
+        "Dependencies: KRN-001"
       ],
       "card_path": "planning/tasks/CELL-002.md"
     },
@@ -842,7 +987,8 @@
       "depends_on": [
         "CELL-001",
         "BLD-001",
-        "KRN-001"
+        "KRN-001",
+        "CELL-009"
       ],
       "paths": [
         "src/platform/cellular/ios",
@@ -863,7 +1009,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Dependencies: CELL-001, KRN-001"
+        "Dependencies: KRN-001, CELL-009"
       ],
       "card_path": "planning/tasks/CELL-004.md"
     },
@@ -895,10 +1041,8 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
-      "reasons": [
-        "Dependencies: CELL-001"
-      ],
+      "column": "ready",
+      "reasons": [],
       "card_path": "planning/tasks/ESIM-001.md"
     },
     {
@@ -1499,7 +1643,7 @@
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-001.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "NAT-002",
@@ -2312,7 +2456,8 @@
       "evidence_kind": "native-device",
       "depends_on": [
         "ESIM-002",
-        "CELL-005"
+        "CELL-005",
+        "ESIM-004"
       ],
       "paths": [
         "artifacts/esim-lifecycle",
@@ -2331,7 +2476,7 @@
       "column": "gated",
       "reasons": [
         "Scope not authorized: native",
-        "Dependencies: ESIM-002, CELL-005"
+        "Dependencies: ESIM-002, CELL-005, ESIM-004"
       ],
       "card_path": "planning/tasks/ESIM-003.md"
     },
@@ -2382,7 +2527,7 @@
         "id": "KRN-001",
         "status": "blocked",
         "last_heartbeat": "2026-11-04T23:25:13+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "Exact XNU patch preparation passes; full kernel not compiled because SDK/build-tool inputs are unconfigured",
         "next_step": "Provide and verify explicit iPhoneOS16.5 SDK and pinned dependency-tool paths, then resume this claim",
         "handoff": "research/notes/implementation-handoff.md",
@@ -2393,7 +2538,7 @@
         "id": "NAT-001",
         "status": "blocked",
         "last_heartbeat": "2026-11-04T23:25:13+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "Recovery template records unavailable matching BYH3 images, hashed backups and measured restore; no phone operation performed",
         "next_step": "Establish matching local image/backup provenance and separately scoped recovery qualification",
         "handoff": "research/notes/implementation-handoff.md",
@@ -2403,168 +2548,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-04T23:16:19+00:00",
-      "action": "task.add:INT-001",
-      "owner": "codex-implementation-20261105",
-      "tasks": [
-        {
-          "id": "INT-001",
-          "status": "pending",
-          "owner": null,
-          "priority": 90
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:16:20+00:00",
-      "action": "task.claim:INT-001",
-      "owner": "codex-implementation-20261105",
-      "tasks": [
-        {
-          "id": "INT-001",
-          "status": "in_progress",
-          "owner": "codex-implementation-20261105",
-          "priority": 90,
-          "last_heartbeat": "2026-11-04T23:16:20+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:19:43+00:00",
-      "action": "experiment.record:EMULATOR-004",
-      "owner": "codex-implementation-20261105"
-    },
-    {
-      "at": "2026-11-04T23:19:43+00:00",
-      "action": "experiment.plan:EMULATOR-005",
-      "owner": "codex-implementation-20261105"
-    },
-    {
-      "at": "2026-11-04T23:20:20+00:00",
-      "action": "experiment.record:METAL-001",
-      "owner": "codex-implementation-20261105"
-    },
-    {
-      "at": "2026-11-04T23:20:21+00:00",
-      "action": "experiment.record:BOOTCHECK-001",
-      "owner": "codex-implementation-20261105"
-    },
-    {
-      "at": "2026-11-04T23:20:21+00:00",
-      "action": "experiment.record:VULKANHOST-001",
-      "owner": "codex-implementation-20261105"
-    },
-    {
-      "at": "2026-11-04T23:20:22+00:00",
-      "action": "task.done:GPU-004",
-      "owner": "codex-implementation-20261105",
-      "tasks": [
-        {
-          "id": "GPU-004",
-          "status": "done",
-          "owner": "codex-implementation-20261105",
-          "progress_note": "Pinned translator compiled with Rust 1.98.1; owned AIR fixture translated and initial host compute returned exact marker with guard words intact",
-          "next_step": "Record reproducible SPIR-V validation and host execution evidence",
-          "last_heartbeat": "2026-11-04T23:12:42+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:20:22+00:00",
-      "action": "task.done:TST-001",
-      "owner": "codex-implementation-20261105",
-      "tasks": [
-        {
-          "id": "TST-001",
-          "status": "done",
-          "owner": "codex-implementation-20261105",
-          "last_heartbeat": "2026-11-04T23:05:35+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:22:51+00:00",
-      "action": "experiment.record:EMULATOR-005",
-      "owner": "codex-implementation-20261105"
-    },
-    {
-      "at": "2026-11-04T23:22:52+00:00",
-      "action": "experiment.plan:EMULATOR-006",
-      "owner": "codex-implementation-20261105"
-    },
-    {
-      "at": "2026-11-04T23:23:32+00:00",
-      "action": "task.update:INT-001",
-      "owner": "codex-implementation-20261105",
-      "tasks": [
-        {
-          "id": "INT-001",
-          "status": "in_progress",
-          "owner": "codex-implementation-20261105",
-          "priority": 90,
-          "progress_note": "62 full checks passed; graphics translation, exact native-core host readback and boot validation recorded; integrating actual capabilities and missing kernel/recovery inputs",
-          "next_step": "Finish isolated emulator evidence, audit links/digests and commit a resumable handoff",
-          "last_heartbeat": "2026-11-04T23:23:32+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:25:13+00:00",
-      "action": "task.update:KRN-001",
-      "owner": "codex-implementation-20261105",
-      "tasks": [
-        {
-          "id": "KRN-001",
-          "status": "blocked",
-          "owner": "codex-implementation-20261105",
-          "priority": 85,
-          "progress_note": "Exact XNU patch preparation passes; full kernel not compiled because SDK/build-tool inputs are unconfigured",
-          "next_step": "Provide and verify explicit iPhoneOS16.5 SDK and pinned dependency-tool paths, then resume this claim",
-          "blocked_reason": "No explicit iPhoneOS16.5 SDK or matching pinned XNU dependency/build tool directory is configured; see fixtures/public/build/kernel-preflight.json",
-          "last_heartbeat": "2026-11-04T23:25:13+00:00",
-          "branch": "main",
-          "handoff": "research/notes/implementation-handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:25:13+00:00",
-      "action": "task.update:NAT-001",
-      "owner": "codex-implementation-20261105",
-      "tasks": [
-        {
-          "id": "NAT-001",
-          "status": "blocked",
-          "owner": "codex-implementation-20261105",
-          "progress_note": "Recovery template records unavailable matching BYH3 images, hashed backups and measured restore; no phone operation performed",
-          "next_step": "Establish matching local image/backup provenance and separately scoped recovery qualification",
-          "blocked_reason": "Exact S921BXXS9BYH3 stock images, dated/hash-verified backups and Download Mode/recovery observations are unavailable; no restoration can be qualified",
-          "last_heartbeat": "2026-11-04T23:25:13+00:00",
-          "branch": "main",
-          "handoff": "research/notes/implementation-handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:26:05+00:00",
-      "action": "experiment.record:EMULATOR-006",
-      "owner": "codex-implementation-20261105"
-    },
-    {
-      "at": "2026-11-04T23:26:06+00:00",
-      "action": "experiment.plan:EMULATOR-007",
-      "owner": "codex-implementation-20261105"
-    },
-    {
-      "at": "2026-11-04T23:31:02+00:00",
-      "action": "experiment.record:EMULATOR-007",
-      "owner": "codex-implementation-20261105"
-    },
     {
       "at": "2026-11-04T23:31:52+00:00",
       "action": "task.add:TST-002",
@@ -2610,17 +2593,263 @@
           "branch": "main"
         }
       ]
+    },
+    {
+      "at": "2026-11-04T23:36:35+00:00",
+      "action": "task.add:RES-003",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "RES-003",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:36:35+00:00",
+      "action": "task.claim:RES-003",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "RES-003",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 80,
+          "last_heartbeat": "2026-11-04T23:36:35+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:39:53+00:00",
+      "action": "task.claim:CELL-001",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "CELL-001",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 70,
+          "last_heartbeat": "2026-11-04T23:39:53+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:39:55+00:00",
+      "action": "experiment.plan:QCOMMODEL-001",
+      "owner": "codex-radio-research-20261105-b"
+    },
+    {
+      "at": "2026-11-04T23:41:01+00:00",
+      "action": "experiment.record:QCOMMODEL-001",
+      "owner": "codex-radio-research-20261105-b"
+    },
+    {
+      "at": "2026-11-04T23:41:02+00:00",
+      "action": "experiment.plan:QCOMMODEL-002",
+      "owner": "codex-radio-research-20261105-b"
+    },
+    {
+      "at": "2026-11-04T23:42:59+00:00",
+      "action": "task.refine_paths:CELL-001",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "CELL-001",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 70,
+          "progress_note": "Pinned CPIF headers expose both SIPC5 and SIT; exact live protocol remains unknown. Add host parser negative cases under a narrow test path.",
+          "last_heartbeat": "2026-11-04T23:39:53+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:44:39+00:00",
+      "action": "experiment.record:QCOMMODEL-002",
+      "owner": "codex-radio-research-20261105-b"
+    },
+    {
+      "at": "2026-11-04T23:44:39+00:00",
+      "action": "task.refine_paths:RES-003",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "RES-003",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 80,
+          "progress_note": "Donor model checks pass under explicit Clang; default GCC check fails without executing models. Added iPhone X/eSIM profile and SIPC/SIT selection gates.",
+          "last_heartbeat": "2026-11-04T23:36:35+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:46:36+00:00",
+      "action": "task.add:ESIM-004",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:46:36+00:00",
+      "action": "task.add:CELL-009",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "CELL-009",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:46:37+00:00",
+      "action": "task.refine_dependencies:radio-evidence-gates",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "CELL-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 70
+        },
+        {
+          "id": "ESIM-003",
+          "status": "pending",
+          "owner": null,
+          "priority": 50
+        },
+        {
+          "id": "RES-003",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 80,
+          "progress_note": "Donor model checks pass under explicit Clang; default GCC check fails without executing models. Added iPhone X/eSIM profile and SIPC/SIT selection gates.",
+          "last_heartbeat": "2026-11-04T23:36:35+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:51:30+00:00",
+      "action": "task.refine_sources:esim-profile-gate",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "RES-003",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 80,
+          "progress_note": "Donor model checks pass under explicit Clang; default GCC check fails without executing models. Added iPhone X/eSIM profile and SIPC/SIT selection gates.",
+          "last_heartbeat": "2026-11-04T23:36:35+00:00",
+          "branch": "main"
+        },
+        {
+          "id": "ESIM-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:53:15+00:00",
+      "action": "task.update:CELL-001",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "CELL-001",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 70,
+          "progress_note": "Versioned Samsung input contract and bounded SIPC5/SIT host parser implemented; six boundary-test groups passed; seven donor model targets pass under Clang with sanitizers and initial GCC failure retained",
+          "next_step": "Recover matching vendor schema under CELL-009 and verified DT/queue/SMC inputs before native control work",
+          "last_heartbeat": "2026-11-04T23:53:15+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/cell-001/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:53:15+00:00",
+      "action": "task.update:RES-003",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "RES-003",
+          "status": "in_progress",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 80,
+          "progress_note": "Seven additional donor/tool repositories pinned; actual archive coverage deduplicated; eSIM frontend and vendor-RIL schema gates integrated without changing the first OS or device permissions",
+          "next_step": "Preserve checked evidence and continue GPU/display/Wi-Fi/native work through their separate gates",
+          "last_heartbeat": "2026-11-04T23:53:15+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-003-radio-donors.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:55:15+00:00",
+      "action": "task.done:CELL-001",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "CELL-001",
+          "status": "done",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 70,
+          "progress_note": "Versioned Samsung input contract and bounded SIPC5/SIT host parser implemented; six boundary-test groups passed; seven donor model targets pass under Clang with sanitizers and initial GCC failure retained",
+          "next_step": "Recover matching vendor schema under CELL-009 and verified DT/queue/SMC inputs before native control work",
+          "last_heartbeat": "2026-11-04T23:53:15+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/cell-001/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:55:15+00:00",
+      "action": "task.done:RES-003",
+      "owner": "codex-radio-research-20261105-b",
+      "tasks": [
+        {
+          "id": "RES-003",
+          "status": "done",
+          "owner": "codex-radio-research-20261105-b",
+          "priority": 80,
+          "progress_note": "Seven additional donor/tool repositories pinned; actual archive coverage deduplicated; eSIM frontend and vendor-RIL schema gates integrated without changing the first OS or device permissions",
+          "next_step": "Preserve checked evidence and continue GPU/display/Wi-Fi/native work through their separate gates",
+          "last_heartbeat": "2026-11-04T23:53:15+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-003-radio-donors.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "062d6d1b5ab968d1549a1255f4b1c651d26459e7f5d3de8ee9ec0b0ef8d9361f",
-    "BOARD.md": "7a8f996b21e06d2240e58071f773dceb3b1a859cebad54661abfe683c677a34c",
+    "STATUS.md": "867197aabcce5b14d717df5d0dd27941893da362ea213ba204f35a11277c832f",
+    "BOARD.md": "b339af46890a6f99c265fc2c4848c7bfb19d653dbd7dad7ba46efdc7437e4ae5",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
     "planning/tasks/INT-001.md": "9d68fa75fae4c21f31f5ea4734c3f592ed0b41c6ed897d7b045a892c63549760",
-    "planning/tasks/KRN-001.md": "3307949c2ea9a6e26893db9f02aadaf016091997219fcb4bb4468f587c545bd0",
+    "planning/tasks/KRN-001.md": "be7d3f89bd84d7679d09c3a1f0fff5afc6a08359c99a924a32ef23878f827bd3",
     "planning/tasks/LAB-001.md": "3bf5f0b07bfe3944559f6520646498c1e907611d0f34201115ad0e39e3240e8c",
     "planning/tasks/TST-002.md": "4e2aa7871bb2483148c5d7d57e4934d3f0e2c84a4c1a4b9c1f35e1afcec45279",
+    "planning/tasks/RES-003.md": "0818cb4fa8ca49d7acad01a7d80cc67041f504e381b68cfc74e8cfa6d369ce50",
+    "planning/tasks/ESIM-004.md": "e4415ff12ece854323f178e57751d6977b25f93dec41ee135288f7e1b5480931",
+    "planning/tasks/CELL-009.md": "66ea4f72cf2188c549d905d23ebd40d47f4665721a52a8f939b58e066357ecd9",
     "planning/tasks/VM-002.md": "d5451a25c99b8cdf14afc268bbafe4a12df15e62282b31b4f243cc54ac5f5dd8",
     "planning/tasks/UI-001.md": "cff7f24088dc0dd280965b81b735654985ab3f14be737424ef62bf42e1cfa695",
     "planning/tasks/USB-001.md": "aeb1f6cdd25c31a8ae88b49778bfe5fb25ef173807996a58bb8af652a62bb07e",
@@ -2633,10 +2862,10 @@
     "planning/tasks/CAM-001.md": "22314f5add985fc2ca3de9f94e21c03f71a8289248b7b8a6e640e4cd434a2f84",
     "planning/tasks/PWR-001.md": "4845edf6b466d79887e056b3760de4f17c9da9b4527d0af7371e649ccf3b2320",
     "planning/tasks/SEN-001.md": "6f26f36aea8de216e49cfd9ceaf9b0388785a2a759b493ed0cfae0bd01144212",
-    "planning/tasks/CELL-001.md": "b99ba8878c07f4d36847b924e50fd44762b180e15bb521cfea0faabce86e360a",
-    "planning/tasks/CELL-002.md": "33d2b477191190d3476da540819ce7a5c1f8a49032b560166aacb7e1fa4a5aaf",
-    "planning/tasks/CELL-004.md": "3d8adadf76b57494bc0dabf39573497d082252b4c098003968cfc5e52f746c2c",
-    "planning/tasks/ESIM-001.md": "d248b274e8a0418de57a0a4c526297020413cc337a8e611b87b76316b6e3a868",
+    "planning/tasks/CELL-001.md": "1daa2c0f314edeeda07b368ca4d7cfa93de97865d45186208754b781f40a715f",
+    "planning/tasks/CELL-002.md": "c2bb9100905400e0956657ba95d37ac92efe7749f1fe3bf362e01ff66719db07",
+    "planning/tasks/CELL-004.md": "405eb4534873c8285637644c1f4a913afd663fb4e8dbc628d2eea10440fafc51",
+    "planning/tasks/ESIM-001.md": "35d2eb01fcc3c31f09383f73868dc8b03b0c619d14d3b255f4ea38f229e2569e",
     "planning/tasks/MISC-001.md": "d2d92669c56ccc428feedd6af2f3c5bad4f0117107f1518c73999fb68d5c0270",
     "planning/tasks/FND-001.md": "ee81357df48cbcec414e6dc2f58f1325d8936e16bbbe8022d8b771c316d6b0f8",
     "planning/tasks/RES-001.md": "956b0cf0fe59602b13d98565c02c1486438c7f0451c2800e8d5c1a77e8e1d9fe",
@@ -2651,7 +2880,7 @@
     "planning/tasks/GPU-005.md": "181529961c422d48a66b2735db0db7d5634029395209e2fad9ef0db9be0adfea",
     "planning/tasks/DRV-001.md": "afbd675895a31e4643b5641be4b19e3ea1f98b25a3d5f5635fb7a55d42efc27c",
     "planning/tasks/DRV-002.md": "4703fbdca6bded8e74343c2594cd79b972f866e3c97886d2da04230f8c672d4b",
-    "planning/tasks/NAT-001.md": "e1465ce7b29f57d9248b78987fa34579705473082fbf26279c862dd01f634f0b",
+    "planning/tasks/NAT-001.md": "555b180dd2cfda5c6a7e4623041660bfd01b1c074d7fd82a9be75e83b4af7bcf",
     "planning/tasks/NAT-002.md": "f34fe5715fa2ad4191c245a616a5085603880a4e3cde470ecf07a88b0dafa607",
     "planning/tasks/NAT-003.md": "2f832c66883cfbcb8a2b00c747837a6f441137e26bc61a42f872a413009f162c",
     "planning/tasks/DRV-003.md": "9f4b0c2d613ce1afaa691fc3bc5618c13c8993ce197974af081e885ea0f113f4",
@@ -2675,7 +2904,7 @@
     "planning/tasks/CELL-005.md": "f4d56657b1532f99561638e25a1b544d1f344725befb8d77c61ef05514d87c79",
     "planning/tasks/CELL-006.md": "6b306fabb59cc3ccd33b0263d2024ad0e0c0c69dfb961c8970f21ee47880f367",
     "planning/tasks/ESIM-002.md": "f155be473727b4387c7179e85e3b59013b1d88469b6b0864662cf2ab153d9cea",
-    "planning/tasks/ESIM-003.md": "0b6e443d5174795b0ccce3747296c3911a1cc7c454b7404497b9ff9abd2e3ce6",
+    "planning/tasks/ESIM-003.md": "f8771c136a5fa36d900bdca732abec23c437850a53a146c61c8cb5437553f8e7",
     "planning/tasks/QUAL-001.md": "4020ee988ac818444ec3437118f2f0974065cfbed39d0a498d83c4f1511e884a"
   }
 }

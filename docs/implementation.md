@@ -31,6 +31,10 @@ Start with one worker, at most 128 MiB experimental GPU resources, five-second r
 
 VM-001 inventories availability using already-authorized read-only access. VM-002 prepares a pinned guest on the host. VM-003 tests the guest only after an accessible interface and appropriate device scope. CONFIG_KVM, an existing device node or ARM64 alone is insufficient. No automatic SELinux, root or kernel changes.
 
+The reviewed Scion AVF launcher grants VM permissions and changes hidden-API exemptions before attempting restoration. It is not VM-001 read-only inventory and must not be run as a shortcut around the device gate. Its Pixel PID 1/SMP result is not S24 guest or full iOS acceptance. See [the donor follow-up](../research/notes/RES-003-radio-donors.md).
+
+A future launcher must require an explicit target, record original individual grants/settings and verify their exact restoration. An EXIT trap or unconditional permission revocation does not prove that the previous Android state was restored.
+
 ## Stage C: recovery and native control
 
 NAT-001 prepares matching stock images, hashes, backups, host recovery requirements and exact return steps. NAT-002 designs the actual control channel, loss-of-link behavior and manual fallback. A verified restoration is a separately gated native task; documenting it does not establish it. NAT-003 cannot run until that evidence exists and a concrete image/session has separate authorization.
@@ -80,6 +84,8 @@ Local Android modules indicate KIWI V2/CNSS for Wi-Fi and CS35L43/ABOX for sound
 
 CELL-001 specifies the actual CPIF/shared-memory transport using the captured S5000AP configuration. The hardware path is not Qualcomm QRTR/QMI/IPA. QcomBaseband is a reference for the iOS-side boundary; its tested OS ABI is different and its eSIM provisioning is unverified.
 
+The captured configuration also selects SBD and RX/UL PKTPROC; DIT is disabled. The public CPIF source supports separate SIPC5 and SIT layouts selected through `mif,protocol`. The exact live BYH3 protocol, queue/channel map and secure-monitor ABI remain unverified. The bounded host framing model requires explicit selection and does not interpret vendor payloads. CELL-009 recovers matching command schemas offline from explicitly supplied local RIL inputs; CELL-004 depends on that evidence. No inferred command is automatically replayed against the daily phone.
+
 Acceptance is split: CP boot/shutdown → framed control/replies/events → SIM/slot/PIN and network registration → packet data/IPv4 → IPv6/reconnect → CommCenter/CoreTelephony → SMS → IMS/voice with bidirectional audio. A service icon, SIM detection or successful web request does not establish calls.
 
 Carrier identity, test subscription and agreed endpoints are prerequisites for real network tests. Never use a personal number, EID, ICCID, IMSI or activation code in public fixtures. Emergency-service behavior remains an explicit unqualified limitation unless a suitable controlled qualification exists; no automatic live emergency calls.
@@ -87,6 +93,8 @@ Carrier identity, test subscription and agreed endpoints are prerequisites for r
 ## Stage I: eSIM
 
 ESIM-001 specifies eUICC access and APDU models. ESIM-002 first tests an already-active test profile with native radio support. ESIM-003 develops profile lifecycle/LPA integration only after transport and test-subscription readiness. Distinguish these outcomes from one another and from an eSIM Settings page.
+
+ESIM-004 additionally qualifies the selected iOS frontend/profile before ESIM-003 can pass. The first iPhone X reference is nano-SIM hardware; Apple's eSIM requirements start with XS/XR. This raises an unverified frontend/ABI compatibility question, not proof that adaptation is impossible. Inspect actual locally supplied components and record the adaptation/profile decision; do not silently replace the approved first OS. Android's ordinary-app APIs and lpac linkage do not establish system-LPA privileges or an XNU eUICC transport.
 
 Use lpac only after pin/license review and a working logical-channel transport. Existing production profiles must not be automatically downloaded, deleted, switched or reset. Android's eUICC features and system APIs do not grant an ordinary app equivalent privileges.
 

@@ -152,7 +152,13 @@
         "arch/arm64/boot/dts/exynos/s5e9945-sgpu.dtsi",
         "arch/arm64/boot/dts/samsung/e1s/s5e9945-e1s_wifi_03.dtsi",
         "drivers/soc/samsung/cpif/Kconfig",
-        "drivers/soc/samsung/cpif/include/sipc5.h"
+        "drivers/soc/samsung/cpif/include/sipc5.h",
+        "drivers/soc/samsung/cpif/include/exynos_ipc.h",
+        "drivers/soc/samsung/cpif/modem_main.c",
+        "drivers/soc/samsung/cpif/modem_io_device.c",
+        "drivers/soc/samsung/cpif/link_device.c",
+        "drivers/soc/samsung/cpif/link_device_memory_legacy.c",
+        "drivers/soc/samsung/cpif/modem_ctrl_s5000ap.c"
       ],
       "checkout_policy": "Explicit sparse source review; no submodules, toolchains, IPSWs or firmware"
     },
@@ -227,27 +233,134 @@
     {
       "id": "qcom-baseband",
       "url": "https://github.com/UniXNU/QcomBaseband",
-      "revision": null,
+      "revision": "dd0199cf3300764ed52b23f4a47761f91fab21a2",
       "relevance": "Published Qualcomm/iOS baseband and partial eSIM bridge; architectural reference only for Samsung CPIF. Pin before code reuse.",
-      "license_notes": "BSD-2-Clause as reported upstream; verify file provenance before reuse.",
+      "license_notes": "BSD-2-Clause verified in LICENSE; UPSTREAM.json records the original Trogdor source revision and patches. iOS17 Qualcomm donor, not an E1S driver.",
       "trust": "primary-upstream",
-      "local_device_verified": false
+      "local_device_verified": false,
+      "review_files": [
+        "README.md",
+        "LICENSE",
+        "UPSTREAM.json",
+        "baseband/QcomBaseband.h",
+        "baseband/coachz_baseband.cpp",
+        "baseband/coachz_bb_esim.h",
+        "baseband/coachz_bb_control.h",
+        "scripts/check.py",
+        "tests/coachz_bb_model_test.c"
+      ],
+      "checkout_policy": "Explicit sparse source/document review; no upstream execution, submodules, firmware or SDK"
     },
     {
       "id": "scion-avf",
       "url": "https://github.com/Scion-Project/hackios-xnu-kernel",
-      "revision": null,
+      "revision": "a6f4bc38aa244359cd365c976244a88c9d6b3304",
       "relevance": "AVF/crosvm XNU guest demonstrated upstream on Pixel; S24 permissions and VM support remain unverified. Pin before reuse.",
       "license_notes": "APSL/MIT and component notices; inspect before reuse.",
       "trust": "primary-upstream",
-      "local_device_verified": false
+      "local_device_verified": false,
+      "review_files": [
+        "README.md",
+        "LICENSE",
+        "LICENSE.APSL",
+        "avf/README.md",
+        "avf/run-probe.sh"
+      ],
+      "checkout_policy": "Explicit sparse source/document review; no upstream execution, submodules, firmware or SDK"
     },
     {
       "id": "lpac",
       "url": "https://github.com/estkme-group/lpac",
-      "revision": null,
+      "revision": "a43e46aef6f8b5b1d144bf3b3fc5999d8fcefacc",
       "relevance": "LPA/APDU architecture for later eUICC research; no verified S24 transport or provisioning.",
-      "license_notes": "REUSE.toml and per-file notices; pin before reuse.",
+      "license_notes": "REUSE.toml: euicc library LGPL-2.1-only OR LicenseRef-ESTKME-Commercial; src/driver/utils/tests AGPL-3.0-only; docs/build files MIT. Preserve per-file notices.",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "README.md",
+        "REUSE.toml",
+        "euicc/interface.h",
+        "docs/backends/gbinder.md",
+        "docs/backends/stdio.md",
+        "driver/apdu/gbinder_hidl.c",
+        "driver/apdu/stdio.c"
+      ],
+      "checkout_policy": "Explicit sparse source/document review; no upstream execution, submodules, firmware or SDK"
+    },
+    {
+      "id": "iosplus10",
+      "url": "https://github.com/akshaynexus/iOSPlus10",
+      "revision": "146e889430bab755329dde7104cc0fa002f44bfb",
+      "relevance": "Reddit-linked OnePlus 10 Pro donor for Wi-Fi/Bluetooth/Metal integration and unresolved power/audio/camera; different Qualcomm platform",
+      "license_notes": "Documentation-only initial review; inspect per-file notices before reuse",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "README.md",
+        "LICENSE",
+        "THIRD_PARTY_NOTICES.md",
+        "docs/plan.md"
+      ],
+      "checkout_policy": "Sparse documentation/source review only; no submodules, firmware, SDK or upstream execution"
+    },
+    {
+      "id": "ios-lemonadep",
+      "url": "https://github.com/popovluka/ios-lemonadep",
+      "revision": "d952f7d97ea075de9f6686cbbafbd55db6517e65",
+      "relevance": "Public Metal donor linked by another developer in the Pixel Fold discussion; Qualcomm Adreno, not Xclipse",
+      "license_notes": "Documentation-only initial review; inspect per-file notices before reuse",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "README.md",
+        "lemonadep/hackios/FINDINGS-2026-11-01-03.md"
+      ],
+      "checkout_policy": "Sparse documentation/source review only; no submodules, firmware, SDK or upstream execution"
+    },
+    {
+      "id": "base-mirror",
+      "url": "https://github.com/OSUSecLab/BaseMirror",
+      "revision": "b210841cf9f04c72b0d64259d39bb656e77da543",
+      "relevance": "Offline extraction of command schemas from an explicitly supplied matching vendor RIL binary; automatic real-device testing is outside current scope",
+      "license_notes": "Apache-2.0 repository license; inspect analyzer/dependency files before execution",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "README.md",
+        "LICENSE"
+      ],
+      "checkout_policy": "Explicit sparse source review; no submodules, firmware, vendor binaries, SDK or upstream execution"
+    },
+    {
+      "id": "firmwire",
+      "url": "https://github.com/FirmWire/FirmWire",
+      "revision": "8b540a63bfe80850d338df15a671e5bab08214eb",
+      "relevance": "Offline Samsung baseband firmware emulation research; exact S24 CP support is unverified and no firmware is supplied",
+      "license_notes": "BSD-3-Clause repository license; dependencies retain their notices",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "README.md",
+        "LICENSE.txt",
+        "firmwire/vendor/shannon/soc/__init__.py"
+      ],
+      "checkout_policy": "Explicit sparse source review; no submodules, firmware, vendor binaries, SDK or upstream execution"
+    },
+    {
+      "id": "apple-esim-docs",
+      "url": "https://support.apple.com/en-us/109317",
+      "revision": null,
+      "relevance": "Official eSIM-capable model requirements; compare initial iPhone X profile with frontend compatibility requirements",
+      "license_notes": "Apple documentation; no Apple binaries or implementation code included",
+      "trust": "primary-upstream",
+      "local_device_verified": false
+    },
+    {
+      "id": "android-esim-docs",
+      "url": "https://source.android.com/docs/core/connect/esim-euicc-api",
+      "revision": null,
+      "relevance": "Official carrier-privilege versus system-LPA API boundary; not a measured S24 transport",
+      "license_notes": "AOSP documentation; inspect linked implementation licenses before reuse",
       "trust": "primary-upstream",
       "local_device_verified": false
     }

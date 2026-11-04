@@ -10,11 +10,11 @@
 | Owner | unassigned |
 | Priority | 70 (higher first; default 50) |
 | Scope / evidence | host / host-test |
-| Dependencies | CELL-001, BLD-001, KRN-001 |
+| Dependencies | CELL-001, BLD-001, KRN-001, CELL-009 |
 
 ## Readiness
 
-Dependencies: CELL-001, KRN-001
+Dependencies: KRN-001, CELL-009
 
 ## Reserved paths
 

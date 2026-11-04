@@ -24,6 +24,8 @@ python3 tools/lab.py task show KRN-001
 
 [Implementation contract](docs/implementation.md) records the approved iOS 16.5 sequence through graphics, radios, telephony and eSIM. [CAPABILITIES.md](CAPABILITIES.md) separates local Android observations, authored implementations and native acceptance. Use `make capabilities-check` to validate its evidence and generated view. [Feasibility review](research/notes/2026-11-05-feasibility.md) records sources, unavailable inputs and research limits.
 
+[Radio/donor follow-up](research/notes/RES-003-radio-donors.md) adds pinned primary research, explicit Reddit coverage, the SIPC5/SIT framing model, and the missing vendor-command and eSIM-frontend gates. [Cellular contract](src/platform/cellular/contracts/README.md) is host preparation; it does not establish a working modem or eSIM.
+
 ## Run the host lab
 
 Source fetches and heavy builds are explicit. These commands do not select a phone:
@@ -55,6 +57,7 @@ Run names must be new. See [build requirements](docs/procedures/e1s-build.md), t
 | `references/` | Local upstream checkouts; excluded from Git |
 | `src/android-probe/` | Android Vulkan measurement app, manual build and isolated emulator harness |
 | `src/graphics/` | User-space graphics adapters and test scenes |
+| `src/platform/cellular/contracts/` | Versioned radio inputs and a bounded host-only CPIF frame parser |
 | `src/xnu/`, `patches/` | Project code and small patches against pinned upstream |
 | `fixtures/public/` | Sanitized or synthetic test data with provenance |
 | `devices/` | Public schema and private local inventory/reports |

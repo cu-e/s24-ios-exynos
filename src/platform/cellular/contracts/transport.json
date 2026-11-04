@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "target": "SM-S921B/e1s/s5e9945",
+  "firmware_baseline": "S921BXXS9BYH3",
+  "kind": "host-contract",
+  "native_verified": false,
+  "selected_protocol": null,
+  "profile_status": "unresolved: no exact live mif,protocol or CPIF channel/queue DT profile recovered",
+  "inventory_config": {
+    "origin": "existing DEV-001 capture, not a new device measurement",
+    "S5000AP": "m",
+    "shared_memory": "m",
+    "SBD": "m",
+    "PKTPROC_RX": "m",
+    "PKTPROC_UL": "m",
+    "secure_boot": "m",
+    "REINIT_VSS": "m",
+    "PCIe": false,
+    "DIT": false
+  },
+  "candidate_protocols": {
+    "sipc5": {
+      "base_header_bytes": 4,
+      "control_header_bytes": 5,
+      "extended_length_header_bytes": 6,
+      "alignment_if_padding_flag": 8,
+      "length_includes_header": true
+    },
+    "sit": {
+      "header_bytes": 12,
+      "declared_packed_fields_bytes": 10,
+      "sync_word": "0xABCD",
+      "alignment": 8,
+      "uninterpreted_header_bytes": [
+        10,
+        11
+      ],
+      "length_includes_header": true
+    }
+  },
+  "model_policy": {
+    "max_frame_bytes": 1048576,
+    "explicit_protocol_required": true,
+    "fragment_reassembly": false,
+    "payload_interpretation": false,
+    "device_io": false,
+    "padding_must_be_zero": false
+  },
+  "missing_inputs": [
+    "Exact matching CPIF device-tree profile: protocol, channels, shared-memory reservations, queue geometry, IRQ/mailbox and clock/SMC ABI",
+    "Signed matching CP firmware and secure-monitor startup acceptance, without altering calibration/NV data",
+    "Vendor command/reply/event schema and version; framing alone does not supply SIM, registration, PDP, SMS or IMS commands",
+    "Selected iOS16.5 CommCenter/IOKit/eSIM frontend ABI; iPhone X hardware identity is not an eSIM-capable reference",
+    "eUICC logical-channel/APDU routing, slot ownership, reset/reconnect and profile-state semantics",
+    "Carrier/test subscription, IMS/audio routing and independent recovery for later native measurements"
+  ],
+  "acceptance_layers": [
+    "signed CP boot and control channel",
+    "framed request/reply/event with bounded teardown",
+    "SIM slot/PIN/registration",
+    "IPv4/IPv6 contexts and reconnect",
+    "iOS CommCenter/CoreTelephony interface matching",
+    "SMS transport",
+    "IMS signaling and duplex audio",
+    "existing test eSIM profile use",
+    "controlled test-profile lifecycle/LPA"
+  ]
+}
