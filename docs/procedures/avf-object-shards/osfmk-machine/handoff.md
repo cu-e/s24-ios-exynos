@@ -117,3 +117,54 @@ executor is exclusively root-coordinated, with a total cap of two compiler jobs
 and 2GiB new owned RSS. Preserve the plan and all prior source-preparation history.
 Actual dependencies, object hashes/Mach-O validation and failures remain required
 before recording the real experiment outcome or claiming build acceptance.
+
+## Actual VM015BUILD-001 object execution
+
+Root explicitly granted the original owner slot
+`guest-kernel-wave2-20261106-11/VM-015`, paired only with VM-013. Approval SHA256
+`447e26ffc26265d670d7a51f9b88178f95f75b5cd5565a7fa05cc276ce033cff`
+binds the accepted runner, source plan and 600-second same-process launcher.
+The bound argv template was filled only with the fresh `execute-001` output and
+that root approval. `os.execv` replaced the initial invocation process; no outer
+waiting Python controller or second supervisor surrounded the accepted launcher.
+
+Actual pipeline exit 0; final outcome PASS after all immutable input and namespace
+revalidation. All 77 objects passed genuine ARM64 Mach-O and actual dependency
+validation: 53 C and 24 assembly, 77 compiler commands with exit 0, 77 dependency
+files, 673 unique consumed dependency files and 4,780,936 object bytes. All 77
+source/input keys match the approved source plan. No object was reused, no
+failure occurred and no rerun was performed. This resolves the selected shard's
+previously unmeasured active dependency closure under this exact guest profile;
+it does not qualify other profiles or a linked kernel.
+
+Every compiler invocation received three stable >=4GiB admission samples, a
+120-second deadline and one serial compiler slot. Maximum measured combined
+controller/compiler RSS was 229,482,496 bytes, below 268,435,456. Final controller
+executable-image VmHWM was 128,348,160 bytes; inherited ru_maxrss remains a
+separate historical value. The final evidence file was written 287.306 seconds
+after launch, within the whole-pipeline 600-second deadline.
+
+The owned root PID 2579947 is gone. Every command's after-sample contains no live
+owned child; a final read-only scan of exactly the 77 recorded compiler sessions
+also finds no live process. Root was notified `RELEASE ONLY VM-015 SLOT`.
+This worker did not edit the shared lease/group or VM-013 slot.
+
+Artifacts under this worktree:
+
+| Artifact | SHA256 |
+| --- | --- |
+| `artifacts/avf-object-shards/osfmk-machine/execute-001/evidence.json` | `781466df96b2c38d81f486e1183b658a00e679089f337c221493f2f35eca8494` |
+| Maintained `build-001-result.json` beside this handoff | `8ca0923789176c31b425f52b0ed36bb84fb1e5aea7bb343a5667b85eee08ca3a` |
+
+`execute-001-completion.json` beside the output directory enumerates all 77
+actual objects, source/input keys, object/dependency hashes and object sidecars.
+The full runner evidence hashes every actual output, compiler diagnostic,
+dependency file, memory sample and exact command. Launch argv/stdout/stderr and
+approval/launcher bindings are retained outside the immutable output directory.
+
+The real experiment can now be recorded from the final runner capsule. Keep the
+task in progress until independent review, integrator acceptance and fresh MAIN
+common checks. No source/config/flags were changed and no E1S product was reused.
+No linker, kernel image, QEMU/guest, console, PID1/stop, private ABI or physical
+phone operation occurred. A passing object shard is not a complete kernel or
+native-provider acceptance.
