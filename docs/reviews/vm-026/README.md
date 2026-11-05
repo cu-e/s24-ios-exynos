@@ -1,6 +1,6 @@
 # REV-031: guest boot memory preflight review
 
-**P2-ENTRY-ALIGN remains open.** Exact code `ffd08db8616f7a486762b951dc69a9ace8716dea`, final metadata `a47a378dac38a0e86f6e7abd66c12f28390fa245`. Owner `codex-review-boot-gates-20261106-eb`; reviewer worktree `worktrees/rev-boot-eb-20261106`.
+**Initial finding P2-ENTRY-ALIGN, now resolved by the exact correction in [closure.md](closure.md).** Exact code `ffd08db8616f7a486762b951dc69a9ace8716dea`, final metadata `a47a378dac38a0e86f6e7abd66c12f28390fa245`. Owner `codex-review-boot-gates-20261106-eb`; reviewer worktree `worktrees/rev-boot-eb-20261106`.
 
 `tools/build/avf_guest_boot_memory.py:260` verifies that the ARM64 LC_UNIXTHREAD PC is within an executable file-backed segment, but does not require four-byte instruction alignment. Independently packed synthetic XNUP/Mach-O control bytes with PCs `0xfffffff007000801`, `...802`, and `...803` pass `payload`, `macho`, `qemu_plan` and `layout_check`. They produce physical entries `0x43000801`, `...802`, `...803`. An unchanged, hash-identical tool snapshot also accepted the first case through its actual CLI, returning exit 0 and `outcome=pass`, `layout_preflight=pass`. An aligned `...804` control passes; BSS, exclusive segment end, VM overlap, source extent, payload-size and RAM/placement mutations reject. AArch64 instruction addresses must be four-byte aligned; the pinned shim jumps directly to `entry_va + slide` without fixing low bits. This input will fail instruction entry, despite passing the static gate. No guest was executed to claim an observed fault.
 
