@@ -97,12 +97,13 @@ def main():
     if digest(MAIN/name)!=sha:raise ValueError('host phase artifact changed '+name)
    report['host_phase']={'path':str(resume.relative_to(MAIN)),'sha256':digest(resume),'commit':host['commit']};extra_hashes=dict(host['artifact_hashes']);extra_hashes[str(resume.relative_to(MAIN))]=digest(resume);extra_artifacts=[str(resume.relative_to(MAIN)),*host['artifacts']]
    for key in ['host_checks','host_vectors','cbc_fixture_vectors','corpus','target_layout','fixture_target_layout','profile_rejections','sanitizer_controls','native_symbols','tools','dependency_hashes','selected_header_checks','images','typed_negative_rejected','stack_usage_artifacts','single_AES_and_zeroizer_definitions','fortified_memory_boundary','adapter_compile_argv','corpus_path']:report[key]=host[key]
+   if 'audit_continuation'in host:report['audit_continuation']=host['audit_continuation']
    image_dir=resume.parent;corpus=json.loads(Path(host['corpus_path']).read_text())
   elif a.audit_resume:
    preserved=a.audit_resume.resolve()
    if not preserved.is_relative_to(ROOT/'artifacts/crypto-cts3')or digest(preserved)!='26edb172fd4f023b0b0659f23cdf02d466befe579a5321051b6bc326947442f3':raise ValueError('only exact preserved real audit-failure capsule is admitted')
    host=json.loads(preserved.read_text())
-   if host['outcome']!='fail'or host['error']!="ValueError('production is no longer generic/memory-only imports')"or host['owned_dirty_at_start']or host['host_checks']!=28794or host['host_vectors']!=381or host['cbc_fixture_vectors']!=18:raise ValueError('preserved actual host/typed proof differs')
+   if host['outcome']!='fail'or host['error']!="ValueError('production is no longer generic/memory-only imports')"or host['owned_dirty_at_start']or host['host_checks']!=28794 or host['host_vectors']!=381 or host['cbc_fixture_vectors']!=18:raise ValueError('preserved actual host/typed proof differs')
    if not all(x['rejected']for x in host['profile_rejections'])or not all(x['detected']for x in host['sanitizer_controls'])or not host['typed_negative_rejected']:raise ValueError('existing real negative proof incomplete')
    current={str(p.relative_to(ROOT)):digest(p)for p in sorted(HERE.rglob('*'))if p.is_file()and'__pycache__'not in str(p)}
    allowed={'src/platform/crypto/cts3/check.py','src/platform/crypto/cts3/production.json'}
@@ -115,7 +116,7 @@ def main():
    for name,sha in host['dependency_hashes'].items():
     if digest(name)!=sha:raise ValueError('actual consumed compilation input changed '+name)
    extra_hashes=dict(host['artifact_hashes']);extra_hashes[str(preserved.relative_to(MAIN))]=digest(preserved)
-   report['audit_continuation']={'preserved_path':str(preserved.relative_to(MAIN)),'sha256':digest(preserved),'original_failure':host['error'],'compiled_source_commit':host['commit'],'qualification_commit':report['commit'],'changed_uncompiled_metadata_only':sorted(allowed),'unchanged_compiled_and_oracle_sources':{k:v for k,v in current.items()if k not in allowed},'host_algorithm_replayed':False,'object_recompiled':False}
+   report['audit_continuation']={'preserved_path':str(preserved.relative_to(MAIN)),'sha256':digest(preserved),'original_failure':host['error'],'compiled_source_commit':host['commit'],'qualification_commit':report['commit'],'changed_qualification_script_and_manifest_only':sorted(allowed),'unchanged_compiled_and_oracle_sources':{k:v for k,v in current.items()if k not in allowed},'host_algorithm_replayed':False,'object_recompiled':False}
    for key in ['host_checks','host_vectors','cbc_fixture_vectors','corpus','tools','dependency_hashes','selected_header_checks','profile_rejections','sanitizer_controls','typed_negative_rejected']:report[key]=host[key]
    report['adapter_compile_argv']=next(x['argv']for x in host['commands']if str(preserved.parent/'arm-adapter.o')in x['argv']and'-c'in x['argv'])
    report['corpus_path']=str(preserved.parent/'regenerated/vectors.json');corpus=json.loads(Path(report['corpus_path']).read_text());image_dir=out
