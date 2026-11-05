@@ -27,3 +27,11 @@ Keep the original evidence immutable. Store new dated report/index/evidence in
 owned paths. One compiler job, <=256 MiB sampled total owned RSS, 20-second
 command deadlines, owned-session cleanup, no heavy build or device operations.
 Leave task in_progress for coordinator/reviewer followup.
+
+Measured followup: implementation `08ec46d92ae3e4b95ecf9d56d2ac180b53183208` passed the single
+commit-bound run with 380,534 assertions (21 added lifecycle assertions),
+1,920 plans, 122,880 genuine source pointer comparisons and 40,000 mutations.
+Actual ASan/UBSan fault controls each exited -6; all four ARM64 object checks
+passed. Sampled total owned RSS peaked at 138.32421875 MiB; no owned child
+remained. See [`evidence-lifetime.json`](evidence-lifetime.json) for commands,
+exact hashes and bound artifact index. The original evidence remains unchanged.
