@@ -767,6 +767,10 @@ def run_child(argv, cwd, out, label, supervise, timeout=120, admit=True, budget=
     rss_limit = budget.rss_limit if budget else 256*1024**2
     if budget:
         admission['project_before'] = budget.sample()
+        own = next(work for work in admission['project_before']['workloads'] if work.get('task') == budget.args.task)
+        if any(p['pid'] != budget.identity['pid'] for p in own['processes']):
+            admission['previous_owned_command_still_alive'] = True
+            admission['admitted'] = False
         if admission['project_before']['MemAvailable_bytes'] < 4*GIB or admission['project_before']['violations'] or admission['project_before']['project_rss_bytes'] > 6*GIB:
             admission['admitted'] = False
     record = {'argv': [str(a) for a in argv], 'cwd': str(cwd), 'started_at': stamp(), 'timeout_seconds': timeout, 'rss_budget_bytes': rss_limit, 'admission': admission}

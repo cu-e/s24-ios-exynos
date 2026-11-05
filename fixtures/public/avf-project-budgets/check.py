@@ -129,6 +129,10 @@ def main():
             check('old outside-cwd orphan remains in union after new session', any(p['pid'] == orphan_pid and p['start_ticks'] == orphan_start for p in later['project_processes']))
             supervise.terminate(second)
             rejects('release refuses old orphan after latest session ended', lambda: budget.release())
+            prior_sandbox = out/'prior-command-sandbox'; prior_sandbox.mkdir()
+            blocked = e.run_child([sys.executable, '-c', 'raise SystemExit(99)'], ROOT, prior_sandbox, 'prior-command', supervise, timeout=1, admit=False, budget=budget)
+            commands.append(blocked)
+            check('old owned command prevents another compiler-slot child launch', blocked['outcome'] == 'resource-deferred' and blocked['child_started'] is False and blocked['admission']['previous_owned_command_still_alive'])
         finally:
             supervise.terminate(leader)
             if second is not None:supervise.terminate(second)
