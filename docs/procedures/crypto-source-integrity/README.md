@@ -103,7 +103,7 @@ From this task's worktree, with the existing read-only source inputs available:
 
 ```sh
 PYTHONDONTWRITEBYTECODE=1 GIT_NO_LAZY_FETCH=1 GIT_OPTIONAL_LOCKS=0 \
-python3 tools/research/crypto-source-integrity/audit.py \
+python3 tools/research/crypto-source-integrity/run.py \
   --run fresh-source-audit --experiment CRYSRC-002
 ```
 
@@ -117,8 +117,11 @@ Mbed TLS's dual component license is preserved with the Apache-2.0 choice;
 BearSSL's MIT license and per-file notices are preserved. The fixtures publish
 metadata, not restricted implementation bodies.
 
-The command compares its generated manifests with the published correction.
-`--publish` deliberately writes only these new owned fixture paths when
+The recorder saves the actual audit exit, stdout/stderr and a MAIN-relative
+`ledger-evidence.json` envelope; the inner `evidence.json` retains detailed
+source identities, command output hashes and controls. The audit compares its
+generated manifests with the published correction. Calling `audit.py` directly
+with `--publish` deliberately writes only these new owned fixture paths when
 preparing a correction. Existing run names are rejected. All logs go to this
 worktree's ignored `artifacts/crypto-source-integrity/` tree. Negative controls
 use the real partial header, same-length modified bytes with a self-consistent
