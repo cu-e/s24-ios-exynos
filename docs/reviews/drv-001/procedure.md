@@ -1,0 +1,5 @@
+# DRV-001 independent source review procedure
+
+2026-11-05; REV-002; reviewer codex-team-review-touch-20261105-ap.
+
+Review exact candidate deb2f861160e6407f95de7f18e41b87603e651e9 and actual implementation capsules, without changing implementation or reference inputs. Read parser/adapter and shared UI transition contract, source profile, synthetic vectors, tests, pinned Samsung declarations/status handling, and corrected E1S pure-decoder oracle. Check bit ranges, extents, integer overflow, contact policy, frame/record boundaries, callback atomicity, retry, Stop, reentrancy and provenance. Extract exact candidate files into ignored reviewer artifacts and compile an independent bounded C harness with at most two compiler jobs and 1 GiB resident memory. Exercise meaningful lifecycle/range/status cases and record actual exits. Save source hashes, tool identities, commands, logs and bounded conclusions. No phone, ADB, root, MMIO, flash, reboot, heavy kernel builds, upstream mutation or native qualification. Report actionable severity/location/reproduction or bounded no-finding conclusion.
