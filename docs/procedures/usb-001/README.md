@@ -35,7 +35,7 @@ owner's newer `S921BXXS9BYH3` firmware or live register state.
 | Same PHY node | `samsung,exynos-usbdrd-phy`; six register windows: `0x178a0000/0x200`, `0x178b0000/0x200`, `0x178c0000/0x200`, `0x178d0000/0x800`, `0x178e0000/0x800`, `0x17900000/0x10000`. Version `0x600`, combo `0x801`, RAM mode1; PMU offsets `0x61c,0x620`; clocks `ext_xtal,aclk`. |
 | `include/dt-bindings/interrupt-controller/s5e9945.h` | DWC3 SPI index403; PHY remote wake/connect/REWA indices401/399/405. These are source SPI indices, not measured interrupt routing. |
 | `arch/arm64/boot/dts/samsung/e1s/s5e9945-e1s_common.dtsi` | Enables UDC/DWC3/PHY, permits SuperSpeed, selects `gpc7-1`; supplies `s5_l2_reg,s4_l4_reg,l7_reg,l11_reg` for USB0.75/1.2/1.8/3.3V. No negotiated speed or GPIO operation is measured. |
-| `arch/arm64/boot/dts/samsung/e1s/e1s_eur_openx_w01_r17.dts` | Enabled `hsi2c_34` TUSB2E11 repeater, 7-bit I2C address `0x3e`. A repeater GPIO template occurs inside `#if 0`; it does not establish the active GPIO. |
+| `arch/arm64/boot/dts/samsung/e1s/e1s_eur_openx_w01_r17.dts` | Declares both `hsi2c_34` repeater nodes enabled: `tusb2e11-repeater@3E` at 7-bit address `0x3e` (lines2755–2762), and `ptn3222-repeater@4F` at `0x4f` (lines3418–3425). This does not identify the fitted component or active selection on BYH3. A TUSB2E11 GPIO template occurs inside `#if 0`; it does not establish the active GPIO. |
 | [dwc3-exynos.c](https://github.com/dx4m/android-kernel-samsung-e1s/blob/f85e53cfa5497ead5d78821efbac84e51f37a4e1/drivers/usb/dwc3/dwc3-exynos.c) | Parent and DWC3 core request 36-bit coherent DMA masks. `core.c` also contains a conditional 64-bit capability path; neither proves actual controller width, valid IOVA mappings or cache coherency. |
 | `drivers/usb/dwc3/dwc3-exynos-otg.c`, `drivers/phy/samsung/phy-exynos-usbdrd.c` | Vendor role/PHY sequencing must be studied before a native driver can claim enumeration. No Linux implementation is copied into project-owned adapter code. |
 | `Documentation/devicetree/bindings/usb/samsung,exynos-dwc3.yaml` | The generic older Exynos binding does not describe vendor compatible `samsung,exynos-dwusb`; using it alone would miss S5E9945 dependencies. |
@@ -53,7 +53,9 @@ All hardware qualification flags remain false. The next native driver needs:
 1. A proven kernel entry/MMU/interrupt/timebase and independent recovery/log path.
    USB failure cannot safely be the sole mechanism that returns to Android.
 2. Explicit ownership and sequencing of HSI0 power/clocks/sysreg/PMU, Type-C
-   role and VBUS, regulators, PHY RAM/tuning, and the external I2C repeater.
+   role and VBUS, regulators, PHY RAM/tuning, and the actually fitted external
+   I2C repeater. Both declared source candidates must remain represented until
+   board/firmware selection is independently qualified.
 3. Verified controller version and interrupt routing, bounded event rings/TRBs,
    enumeration and descriptors, endpoint stalls/reset and cancellation policy.
 4. Pinned controller-visible buffers with measured address width, explicit
@@ -84,6 +86,18 @@ file hashes, target headers and immutable output under
 | USBHOST-003 / `host-session3` | Added fresh-session-after-late-reply, near-UINT64_MAX geometry and full64-bit DMA-window edges; 63,482 assertions passed. All four target objects have no undefined imports. |
 | USBHOST-004 / `host-session4` | Both source pins independently checked, including retail repeater;18 runner checks and63,482 fixture assertions passed. |
 | USBHOST-005 / `host-session5` | Passed20 runner checks and63,482 fixture assertions; deliberate ASan heap-overflow and UBSan signed-overflow controls each exited1 with the expected diagnostic, confirming the runtime detects both faults. |
+| USBHOST-006 / `host-session6` | REV-001 followup passed28 runner checks and63,482 fixture assertions: both enabled repeater nodes match the structured profile at both pins, and each omitted profile node or altered source compatible is rejected. Hashes and actual extracted sets are in `repeater-review-evidence.json`. |
+
+REV-001 identified that the earlier profile covered only TUSB2E11. The corrected
+`USB2_repeaters.enabled_source_nodes` includes PTN3222 as well. Source checks now
+extract the two enabled children beneath `hsi2c_34`, rather than merely finding
+TUSB2E11 tokens anywhere in the file. They compare the full structured set,
+including node name, compatible, address and enabled status. For each pin and
+each candidate, an intentionally incomplete profile must fail; an independently
+altered source compatible must also fail. This is a narrow pinned-source
+extractor, not full DTS preprocessing, a compiled live DTB or component probing.
+Literal `#if 0` templates are excluded, and unexpected directives inside the
+selected controller are rejected rather than interpreted as board selection.
 
 The host compiler is existing `/home/egor/.local/bin/clang`, NDK27 Clang18.
 Its native sanitizer archives live under the resource directory's

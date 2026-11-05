@@ -30,6 +30,55 @@ FILES=[
 
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 
+def enabled_repeater_nodes(text):
+    """Extract declared enabled children of hsi2c_34 in the pinned retail DTS.
+
+    This bounded source-fact extractor is not a DTS preprocessor or live-DTB
+    validator. Literal #if 0 templates are excluded; unexpected directives
+    inside a selected controller fail rather than guessing board selection.
+    """
+    text=re.sub(r'/\*.*?\*/|//[^\n]*','',text,flags=re.S)
+    text=re.sub(r'^\s*#if\s+0\s*$.*?^\s*#endif\s*$','',text,flags=re.M|re.S)
+    def body_at(start):
+        depth=1;at=start
+        while at<len(text) and depth:
+            if text[at]=='"':
+                at+=1
+                while at<len(text) and text[at]!='"':
+                    at+=2 if text[at]=='\\' else 1
+            elif text[at]=='{':depth+=1
+            elif text[at]=='}':depth-=1
+            at+=1
+        if depth:raise ValueError('Unbalanced pinned DTS source')
+        return text[start:at-1],at
+    def direct_properties(body):
+        # Child nodes cannot supply their parent's status or compatible.
+        depth=0;direct=[]
+        for char in body:
+            if char=='{':depth+=1
+            elif char=='}':depth-=1
+            elif depth==0:direct.append(char)
+        return ''.join(direct)
+    nodes=[]
+    for controller in re.finditer(r'&hsi2c_34\s*\{',text):
+        body,end=body_at(controller.end())
+        if re.search(r'^\s*#(?!address-cells|size-cells)',body,re.M):
+            raise ValueError('Unsupported conditional inside repeater controller')
+        if not re.search(r'\bstatus\s*=\s*"okay"',direct_properties(body)):continue
+        for child in re.finditer(r'([\w-]+-repeater@[\da-fA-F]+)\s*\{',body):
+            child_body,_=body_at(controller.end()+child.end())
+            props=direct_properties(child_body)
+            if not re.search(r'\bstatus\s*=\s*"okay"',props):continue
+            compatible=re.search(r'\bcompatible\s*=\s*"([^"\n]+)"',props)
+            address=re.search(r'\breg\s*=\s*<(0x[\da-fA-F]+)>',props)
+            if not compatible or not address:raise ValueError('Incomplete repeater source node')
+            nodes.append(dict(node=child[1],compatible=compatible[1],I2C_7bit_address=hex(int(address[1],16)),status='okay'))
+    return sorted(nodes,key=lambda node:node['compatible'])
+
+def repeater_profile_matches(text,profile):
+    nodes=enabled_repeater_nodes(text)
+    return len(nodes)==2 and profile['I2C_controller']=='hsi2c_34' and nodes==sorted(profile['enabled_source_nodes'],key=lambda node:node['compatible'])
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--run',required=True)
@@ -61,6 +110,7 @@ def main():
         for name in ['readonly.h','readonly.c','fixture.c','layout.cpp','sanitizer-control.c','check.py','profile.json','README.md']:
             shutil.copyfile(SRC/name,snap/name)
         source_review={}
+        profile=json.loads((snap/'profile.json').read_text())['USB2_repeaters']
         for label,repo,revision in [('reference',lab/'references/s24-bsp-reference',BSP_REV),('comparison',lab/'references/s24-linux',CURRENT_REV)]:
             actual=run(['git','-C',repo,'rev-parse','HEAD'],label+'-revision').strip()
             check(label+'-pinned-head',actual==revision)
@@ -74,7 +124,13 @@ def main():
                     elif name.endswith('s5e9945-e1s_common.dtsi'):
                         check(label+'-exact-board-enable-supplies-port',all(s in text for s in ['&udc {','&usbdrd_dwc3 {','maximum-speed = "super-speed"','phy,gpio_phy_port = <&gpc7 1 0x0>','vdd075_usb-supply = <&s5_l2_reg>','vdd12_usb-supply = <&s4_l4_reg>']))
                     elif name.endswith('e1s_eur_openx_w01_r17.dts'):
-                        check(label+'-exact-retail-eUSB-repeater','&hsi2c_34 {' in text and 'compatible = "tusb2e11-repeater"' in text and 'reg = <0x3E>' in text)
+                        nodes=enabled_repeater_nodes(text)
+                        check(label+'-complete-retail-eUSB-repeater-profile',repeater_profile_matches(text,profile),extracted_source_nodes=nodes)
+                        for omitted in profile['enabled_source_nodes']:
+                            incomplete={**profile,'enabled_source_nodes':[node for node in profile['enabled_source_nodes'] if node!=omitted]}
+                            check(label+'-reject-profile-omission-'+omitted['compatible'],not repeater_profile_matches(text,incomplete))
+                            disabled=text.replace('compatible = "'+omitted['compatible']+'"','compatible = "removed-for-negative-control"')
+                            check(label+'-reject-source-mismatch-'+omitted['compatible'],not repeater_profile_matches(disabled,profile))
                     elif name.endswith('interrupt-controller/s5e9945.h'):
                         check(label+'-exact-source-IRQ-tokens',re.search(r'#define INTREQ__USB32DRD_GIC0\s+403\b',text) is not None and re.search(r'#define INTREQ__USB2_REMOTE_WAKEUP_GIC\s+401\b',text) is not None)
                     elif name.endswith('dwc3-exynos.c'):

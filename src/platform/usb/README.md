@@ -6,6 +6,10 @@ arithmetic. It allocates no memory and performs no I/O. The server has only a
 read callback. A real host test opens an owned image with `O_RDONLY`; native USB
 enumeration, endpoint I/O, PHY, clocks, IRQ, IOMMU and XNU block-device integration
 are separate work. `profile.json` records source-derived E1S requirements.
+Its repeater set includes both enabled retail-source candidates, TUSB2E11 at
+`0x3e` and PTN3222 at `0x4f`; fitted hardware and BYH3 selection remain unknown.
+The source check compares all extracted repeater facts with that set and rejects
+each candidate's omission from the profile or mismatch in the source.
 
 ## Wire format S24R1
 
