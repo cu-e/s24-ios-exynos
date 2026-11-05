@@ -1,0 +1,20 @@
+Owned adapter, tests and qualification driver: S24 project.
+GCM, inline block cipher and constant-time source/header files are unchanged
+Mbed TLS 3.6.7, commit 068ff080b369adfac81509f9b57b2afabaf82dc5.
+Copyright notices and SPDX declarations are preserved in each file. These
+components are used under the upstream Apache-2.0 license option; the complete
+license is src/platform/crypto/gcm/vendor/LICENSE. No Mbed TLS endorsement or
+validation is implied.
+
+The adapter imports the accepted src/platform/crypto/xts AES profile, AES source,
+headers and sole mbedtls_platform_zeroize implementation read-only. Its common.h
+has the previously accepted explicit freestanding include-only patch, whose
+upstream and local hashes are verified against the complete official archive.
+No GCM upstream primitive body is modified. New GCM/block-cipher/constant-time
+entry symbols are namespaced via s24_gcm_profile.h; AES and zeroizer globals
+remain owned by XTS. Any later provider must link the shared objects once.
+
+The primary NIST GCM CAVP corpus is public test data from NIST. Running this
+bounded subset is not CAVP, FIPS, Apple interoperability or side-channel validation.
+Independent OpenSSL EVP execution uses the exact locally pinned shared library;
+this does not claim that the library was reproduced from source by this task.
