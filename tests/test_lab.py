@@ -2,11 +2,13 @@
 import copy
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 SCRIPT = Path(__file__).resolve().parents[1] / "tools/lab.py"
 spec = importlib.util.spec_from_file_location("lab", SCRIPT)
@@ -159,6 +161,154 @@ class LedgerTests(unittest.TestCase):
         result = self.cli("experiment", "plan", "EXP-001", "--task", "HOST-001", "--owner", "a", "--hypothesis", "test", "--procedure", "docs/missing.md", "--timeout-seconds", "0")
         self.assertEqual(result.returncode, 2)
         self.assertEqual(lab.read_json(self.root / "state/lab.json")["experiments"], [])
+
+
+class ViewPublicationTests(unittest.TestCase):
+    tearDown = LedgerTests.tearDown
+    save = LedgerTests.save
+    cli = LedgerTests.cli
+    stamp = "2026-11-05T12:00:00+00:00"
+
+    def setUp(self):
+        LedgerTests.setUp(self)
+        self.state["updated_at"] = self.stamp
+        self.save()
+
+    def publish(self, stamp=None):
+        with (self.root / "state/.lab.lock").open("a") as lock:
+            lab.fcntl.flock(lock, lab.fcntl.LOCK_EX)
+            with patch.object(lab, "now", return_value=stamp or self.stamp):
+                lab.publish_views(self.root, self.state)
+
+    def versions(self):
+        paths = [self.root / name for name in ["STATUS.md", "BOARD.md", "state/lab.json", "state/board.json"]]
+        paths += sorted((self.root / "planning/tasks").glob("*.md"))
+        result = {}
+        for path in paths:
+            # A distinct old mtime makes replacement observable even on coarse clocks.
+            os.utime(path, ns=(1_000_000_000, 1_000_000_000))
+            result[str(path.relative_to(self.root))] = (path.stat().st_ino, path.stat().st_mtime_ns, path.read_bytes())
+        return result
+
+    def assert_preserved(self, before, names):
+        for name in names:
+            path = self.root / name
+            self.assertEqual((path.stat().st_ino, path.stat().st_mtime_ns, path.read_bytes()), before[name], name)
+
+    def test_identical_publication_preserves_files_and_only_syncs_index(self):
+        self.state["tasks"][0]["title"] = "Unicode view: café Δ"
+        self.save()
+        self.publish()
+        before = self.versions()
+        with patch.object(lab, "atomic_text", wraps=lab.atomic_text) as texts, patch.object(lab.os, "fsync", wraps=lab.os.fsync) as syncs:
+            self.publish()
+        self.assertEqual(texts.call_count, 0)
+        self.assertEqual(syncs.call_count, 1)
+        self.assert_preserved(before, set(before) - {"state/board.json"})
+        self.assertEqual((self.root / "state/board.json").read_bytes(), before["state/board.json"][2])
+        lab.check_views(self.root)
+
+    def test_advancing_snapshot_only_replaces_board_and_index(self):
+        self.publish()
+        before = self.versions()
+        with patch.object(lab, "atomic_text", wraps=lab.atomic_text) as texts:
+            self.publish("2026-11-05T12:00:01+00:00")
+        self.assertEqual([call.args[0].relative_to(self.root).as_posix() for call in texts.call_args_list], ["BOARD.md"])
+        self.assert_preserved(before, set(before) - {"BOARD.md", "state/board.json"})
+        lab.check_views(self.root)
+
+    def test_task_change_replaces_only_affected_views_and_authoritative_state(self):
+        self.publish()
+        before = self.versions()
+        with patch.object(lab, "atomic_text", wraps=lab.atomic_text) as texts, patch.object(lab, "atomic_json", wraps=lab.atomic_json) as jsons:
+            with patch.object(lab, "now", return_value=self.stamp):
+                with lab.transaction(self.root, "test.title", "fixture") as state:
+                    state["tasks"][0]["title"] = "Changed title"
+        self.assertEqual([call.args[0].relative_to(self.root).as_posix() for call in texts.call_args_list], ["STATUS.md", "BOARD.md", "planning/tasks/HOST-001.md"])
+        self.assertEqual([call.args[0].relative_to(self.root).as_posix() for call in jsons.call_args_list], ["state/lab.json", "state/board.json"])
+        changed = {"STATUS.md", "BOARD.md", "planning/tasks/HOST-001.md", "state/lab.json", "state/board.json"}
+        self.assert_preserved(before, set(before) - changed)
+        for name in changed:
+            self.assertNotEqual((self.root / name).stat().st_mtime_ns, before[name][1], name)
+        self.assertEqual(lab.read_json(self.root / "state/lab.json")["events"][-1]["action"], "test.title")
+        lab.check_views(self.root)
+
+    def test_missing_and_corrupt_bytes_are_repaired_selectively(self):
+        self.publish()
+        card = self.root / "planning/tasks/HOST-001.md"
+        expected = card.read_bytes()
+        for corruption in [None, b"\xff\xfe", expected.replace(b"\n", b"\r\n")]:
+            with self.subTest(corruption=corruption is None and "missing" or "corrupt"):
+                if corruption is None:
+                    card.unlink()
+                else:
+                    card.write_bytes(corruption)
+                with self.assertRaises(lab.LabError):
+                    lab.check_views(self.root)
+                with patch.object(lab, "atomic_text", wraps=lab.atomic_text) as texts:
+                    self.publish()
+                self.assertEqual([call.args[0] for call in texts.call_args_list], [card])
+                self.assertEqual(card.read_bytes(), expected)
+                lab.check_views(self.root)
+
+    def test_containment_is_checked_before_skipping_identical_symlink(self):
+        self.publish()
+        path = self.root / "STATUS.md"
+        with tempfile.TemporaryDirectory() as external:
+            outside = Path(external) / "same.md"
+            outside.write_bytes(path.read_bytes())
+            before = outside.stat()
+            path.unlink()
+            path.symlink_to(outside)
+            with self.assertRaisesRegex(lab.LabError, "including symlinks"):
+                self.publish()
+            self.assertEqual(outside.stat(), before)
+
+    def test_unreadable_view_uses_real_atomic_repair_and_fifo_is_not_read(self):
+        self.publish()
+        card = self.root / "planning/tasks/HOST-001.md"
+        expected = card.read_bytes()
+        original = Path.read_bytes
+        def unreadable(path):
+            if path == card:
+                raise PermissionError("Injected read denial; parent remains writable")
+            return original(path)
+        with patch.object(Path, "read_bytes", unreadable), patch.object(lab, "atomic_text", wraps=lab.atomic_text) as texts:
+            self.publish()
+        self.assertEqual([call.args[0] for call in texts.call_args_list], [card])
+        self.assertEqual(card.read_bytes(), expected)
+        card.unlink()
+        os.mkfifo(card)
+        self.publish()
+        self.assertTrue(card.is_file())
+        self.assertEqual(card.read_bytes(), expected)
+        lab.check_views(self.root)
+
+    def test_interrupted_publication_keeps_old_index_after_registry_and_event_save(self):
+        self.publish()
+        before = self.versions()
+        writer = lab.atomic_text
+        writes = []
+        def interrupted(path, text):
+            writes.append(path.relative_to(self.root).as_posix())
+            if path.name == "HOST-001.md":
+                raise OSError("Interrupted after changed board; equal status was skipped")
+            writer(path, text)
+        with patch.object(lab, "atomic_text", side_effect=interrupted), patch.object(lab, "atomic_json", wraps=lab.atomic_json) as jsons:
+            with patch.object(lab, "now", return_value=self.stamp):
+                with self.assertRaisesRegex(lab.LabError, "Registry saved"):
+                    with lab.transaction(self.root, "test.interrupt", "fixture") as state:
+                        state["tasks"][0]["progress_note"] = "Changed progress"
+        self.assertEqual(writes, ["BOARD.md", "planning/tasks/HOST-001.md"])
+        self.assertEqual([call.args[0].relative_to(self.root).as_posix() for call in jsons.call_args_list], ["state/lab.json"])
+        saved = lab.read_json(self.root / "state/lab.json")
+        self.assertEqual(saved["tasks"][0]["progress_note"], "Changed progress")
+        self.assertEqual(saved["events"][-1]["action"], "test.interrupt")
+        self.assert_preserved(before, ["STATUS.md", "planning/tasks/HOST-001.md", "state/board.json"])
+        self.assertEqual(self.cli("board", "--check").returncode, 2)
+        self.state = saved
+        self.publish()
+        lab.check_views(self.root)
 
 
 if __name__ == "__main__":

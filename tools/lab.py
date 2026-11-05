@@ -421,7 +421,13 @@ def publish_views(root, state):
     snapshot = board_snapshot(root, state)
     views = view_texts(state, snapshot)
     for name, text in views.items():
-        atomic_text(within(root, name), text)
+        path = within(root, name)
+        try:
+            unchanged = path.is_file() and path.read_bytes() == text.encode()
+        except OSError:
+            unchanged = False  # Preserve atomic replacement when an existing view cannot be read.
+        if not unchanged:
+            atomic_text(path, text)
     snapshot["view_sha256"] = {name: hashlib.sha256(text.encode()).hexdigest() for name, text in views.items()}
     atomic_json(within(root, "state/board.json"), snapshot)
 
