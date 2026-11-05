@@ -11,6 +11,7 @@ def main():
     root,main=check.ROOT,check.MAIN;source=root/'artifacts/crypto-chacha'/args.from_run
     out=root/'artifacts/crypto-chacha'/args.run;out.mkdir(parents=True,exist_ok=False)
     report=dict(task='KRN-034',kind='host-test',origin='local-host',outcome='inconclusive',supported_cpu='fail',recorded_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),commands=[],complete_table_qualified=False,incnonce_supported=False,provider_registered=False,native_device=False,xnu_executed=False,root_lease=args.lease)
+    report['summary']='Actual typed ARM explicit-nonce fixture attempt; supported CPU outcome recorded separately and full nonce compatibility remains incomplete'
     report['resource_admission']={'policy':'Three consecutive MemAvailable>=4GiB samples1s apart; at most45s/command and180s total admission waits; no child below floor','floor_bytes':4*1024**3,'per_command_wait_seconds':45,'total_wait_budget_seconds':180,'waits':[]}
     waited=0.0
     def admit(name):

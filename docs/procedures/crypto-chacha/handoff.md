@@ -55,3 +55,35 @@ is separately hashed/snapshotted rather than falsely called a compiler change.
 Request fresh finite exclusive256MiB QEMU lease, then execute already built
 images with positive/wrong-cookie/corrupted-vector/3s spin cases. Do not rerun
 passed host/ARM compilation to handle resource admission.
+
+CHACHA004 ran under an explicit finite lease, then immediately released after
+the positive case failed (no other cases started). Handoff verified; instruction
+abort ELR0xfffffff007003b3c equals actual linked_s24_chacha_info; LRphysical
+0x43005b94 is the first suite indirect call. QEMU exit0 was shutdown, not a
+vector pass. Immutable CPU report/console retained under cpu-session1; honest
+cpu-failure-envelope1 recorded through MAIN (initial direct record was rejected
+for missing summary, preserving that failure too). Address diagnosis is under
+table-address-diagnosis1. Shared runtime/MMU and phone remain untouched.
+
+Approved fix adds exact typed volatile runtime stores using the owned accepted
+XTS pattern and a shared ten-binding macro. Native static table relocation
+proof remains separate. CHACHA_CPU_FIXTURE prepares its bounded single-thread
+table before the completely unchanged suite; no production mutable provider
+singleton. Core/primitives/profile/corpus AND suite.c remain byte-identical to
+the123999-check host pass. selective bindings.py verifies this chain, reuses
+those exact objects and recompiles only native/runtime bindings+guest. Actual
+assembly must prove ten PC-relative callback addresses and ten volatile stores.
+CHACHA005 is genuinely planned; first selective run deferred before any child
+due host MemAvailable below4GiB. Resume when floor permits, commit the fix, then
+request a fresh finite CPU lease/new prospective experiment. No guest is active.
+
+Selective requalification now PASS in bindings-session3/evidence.json: native
+constant ten relocations remain exact80/8; actual linked A64 instructions in
+BOTH prepare/fill produce ten direct callback addresses at the correct fields.
+Compiler initially emitted GOTPAGE; proof did not assume relaxation. Real final
+bytes resolve direct addresses, including physical load-bias projection. Own
+linked STR-field mutation is rejected by the address proof. New symbols come
+from independent llvm-nm. Crypto/primitives/profile/corpus/suite bytes remain
+exactly unchanged and reuse59vector/123999sanitized host proof. No guest has
+executed the corrected binding yet. Plan fresh CHACHA006(timeout300), commit,
+then wait explicit finite exclusive QEMU lease. Existing unused003 unchanged.

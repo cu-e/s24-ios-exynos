@@ -96,16 +96,26 @@ detectors. Three unsupported primitive profiles must fail compilation.
 
 The same suite compiles through the genuine selected native header and table,
 with exact ten relocations and a single imported zeroizer in both outputs.
+Native constant table relocations are qualified separately from the MMU-off
+fixture. The latter prepares a genuine selected table with volatile typed
+runtime field stores, using the accepted owned XTS descriptor pattern. Both
+forms use one shared binding list. Actual target assembly must show ten
+PC-relative callback addresses and ten stores, rather than a copied pool of
+linked virtual addresses. `CHACHA_CPU_FIXTURE` confines mutable initialization
+to single-thread fixture startup before the unchanged suite; no mutable
+provider singleton is introduced. The original physical instruction abort at
+the exact first callback linked VA is retained as failed evidence.
 Assembly is retained for bounded tag-comparison review: the observed target
 loop compares16 bytes with public-index control and accumulation, and tests the
 result after the loop. This is not whole-primitive or timing/side-channel proof.
 
-Only after the coordinator grants an exclusive256MiB CPU lease and plans
-`CHACHA-003`, run already qualified immutable outputs:
+Only after the coordinator grants an exclusive256MiB CPU lease and a matching
+prospective experiment with sufficient timeout, run qualified immutable outputs:
 
 ```sh
 python3 src/platform/crypto/chacha/cpu.py --from-run qualified-host-arm-name \
-  --run fresh-cpu-name --lease 'exact coordinator lease reference'
+  --run fresh-cpu-name --experiment YOUR_PLANNED_CPU_ID \
+  --lease 'exact coordinator lease reference'
 ```
 
 The unchanged accepted runtime requires its historical `_xts_entry`, cookie and
@@ -122,3 +132,18 @@ supported host/ARM/CPU outcomes are separate fields. A zero process exit means
 the requested supported-subset check passed, not complete KRN-034 acceptance.
 Reports include exact commands, exit/outcome, source snapshots, tool/object/
 header/oracle hashes and process/resource cleanup. Failed sessions are retained.
+
+For an exclusively binding/guest change, `bindings.py --from-run ORIGINAL
+--run FRESH --experiment YOUR_PLANNED_BINDING_ID` verifies unchanged core,
+primitives, profile, corpus and suite hashes and reuses their exact proven
+objects/host results. It recompiles only native/runtime table bindings and
+guest, checks actual runtime address generation, and links fresh fixture images.
+The old source/header snapshot and new binding inputs retain distinct provenance.
+No already passing algorithm test is rerun to resolve address admission.
+
+CPU admission needs three consecutive samples at least4GiB MemAvailable,1s
+apart, with45s maximum per command and180s total wait budget. A final floor
+check precedes each child. Resource deferral starts no child below the floor;
+wait samples and finite process cleanup remain in evidence. The planned whole
+experiment and finite coordinator lease must accommodate the maximum wait and
+execution budget. Earlier unused `CHACHA-003` is not retrospectively rewritten.

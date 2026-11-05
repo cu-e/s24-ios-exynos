@@ -1,5 +1,6 @@
 /* Own algorithm entry/stack; accepted immutable runtime retains XTS names. */
 #include "runtime.h"
+#include "functions.h"
 extern int chacha_suite(unsigned *count);
 __attribute__((used,aligned(16))) unsigned char chacha_stack[65536];
 __attribute__((noreturn)) void chacha_guest(const struct boot_args *args)
@@ -8,6 +9,9 @@ __attribute__((noreturn)) void chacha_guest(const struct boot_args *args)
 #ifdef CHACHA_SPIN
     text("CHACHA SYNTHETIC SPIN-CONTROL\n");for (;;) __asm__ volatile("wfe");
 #else
+    /* The real selected table is initialized with runtime addresses; the
+     * unchanged suite then performs genuine indirect table dispatch. */
+    if(s24_chacha_cpu_prepare())reject("chacha-runtime-table");
     unsigned count;int failure=chacha_suite(&count);
     text(failure?"CHACHA ARM FAIL checks=":"CHACHA ARM PASS checks=");hex(count);
     text(" failure_line=");hex((unsigned)failure);text(" incnonce=UNQUALIFIED\n");

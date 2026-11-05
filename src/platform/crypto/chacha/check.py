@@ -91,8 +91,8 @@ def main():
         flags=[x for x in flags if not x.startswith('-W') and x not in ['-c','-MD','-MP','-enable-trivial-auto-var-init-zero-knowing-it-will-be-removed-from-clang'] and x!=str(source)]
         flags=['-I'+recipe['cwd'] if x=='-I.' else x for x in flags]
         flags += [*common,'-isystem',str(MAIN/'references/xnu-tapi/src/clang/lib/Headers'),'-I'+str(MAIN/'fixtures/public/avf-handoff'),'-DS24_CHACHA_FREESTANDING','-ffreestanding','-fno-pic','-fno-pie','-fno-stack-protector','-fno-jump-tables','-mstrict-align','-mgeneral-regs-only','-mno-outline-atomics']
-        for name,p in [*units,('functions',HERE/'functions.c'),('guest',HERE/'guest.c'),('spin',HERE/'guest.c')]:
-            command([arm,*flags,*(['-DCHACHA_SPIN'] if name=='spin' else []),'-MMD','-MF',out/('arm-'+name+'.d'),'-c',p,'-o',out/('arm-'+name+'.o')],'arm-'+name)
+        for name,p in [*units,('functions',HERE/'functions.c'),('cpu-functions',HERE/'functions.c'),('guest',HERE/'guest.c'),('spin',HERE/'guest.c')]:
+            command([arm,*flags,*(['-DCHACHA_CPU_FIXTURE'] if name in ['cpu-functions','guest','spin'] else []),*(['-DCHACHA_SPIN'] if name=='spin' else []),'-MMD','-MF',out/('arm-'+name+'.d'),'-c',p,'-o',out/('arm-'+name+'.o')],'arm-'+name)
         command([arm,*flags,'-S',HERE/'chacha.c','-o',out/'arm-adapter.s'],'arm-adapter-assembly')
         command([host,*hf,'-S',HERE/'chacha.c','-o',out/'host-adapter.s'],'host-adapter-assembly')
         r['dependency_hashes']={}
@@ -118,7 +118,7 @@ def main():
             if relocation['name']!='_s24_chacha_'+name or relocation['addend']!=0:raise ValueError('Actual typed table method binding mismatch')
             r['typed_method_relocations'].append(relocation)
         for mode,last in [('normal','guest'),('spin','spin')]:
-            command([ld,'-arch','arm64','-static','-e','_xts_entry','-iphoneos_version_min','16.5','-pagezero_size','0','-seg1addr','0xfffffff007000000','-no_uuid',*[out/('arm-'+n+'.o') for n in ['adapter','chacha','poly','suite','functions',last]],dep/'arm-adapter.o',dep/'arm-aes.o',dep/'arm-memory.o','-o',out/(mode+'.macho')],mode+'-link')
+            command([ld,'-arch','arm64','-static','-e','_xts_entry','-iphoneos_version_min','16.5','-pagezero_size','0','-seg1addr','0xfffffff007000000','-no_uuid',*[out/('arm-'+n+'.o') for n in ['adapter','chacha','poly','suite','cpu-functions',last]],dep/'arm-adapter.o',dep/'arm-aes.o',dep/'arm-memory.o','-o',out/(mode+'.macho')],mode+'-link')
         r['images']={mode:accepted.avf.macho(out/(mode+'.macho')) for mode in ['normal','spin']}
         nm=host.parent/'llvm-nm';r['tools']['nm']={'path':str(nm),'sha256':sha(nm)}
         command([nm,'--defined-only',out/'normal.macho'],'arm-defined-symbols')
@@ -126,6 +126,8 @@ def main():
         for arch in ['arm','host']:
             definitions=(out/(arch+'-defined-symbols.log')).read_text().splitlines()
             if sum(line.split()[-1] in ['_mbedtls_platform_zeroize','mbedtls_platform_zeroize'] for line in definitions if line.split())!=1:raise ValueError('Single imported zeroizer required')
+        import addresses
+        r['linked_runtime_address_proof']=addresses.prove(out/'normal.macho',(out/'arm-defined-symbols.log').read_text(),r['images']['normal'])
         r['supported_host_arm']='pass';r['summary']='Supported explicit-nonce subset host tests and genuine ARM compilation passed; CPU runtime pending separate lease and incnonce contract still unavailable'
     except Exception as error:r['error']=repr(error)
     finally:
