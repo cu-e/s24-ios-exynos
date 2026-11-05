@@ -323,7 +323,7 @@ def main():
     if not path.is_absolute():raise ValueError('Native dependency must bind absolute header input '+name)
     report['component_dependency_hashes'][str(path.relative_to(m)) if path.is_relative_to(m) else str(path)]=sha(path)
   report['owned_source_hashes']={str(path.relative_to(WT)):sha(path) for base in [WT/'src/platform/crypto/xts/kernel_provider.c',WT/'src/platform/crypto/xts/kernel_provider.h',WT/'tools/build/xnu_kernel_xts.py',WT/'fixtures/public/xnu-kernel-xts',WT/'patches/kernel-xts-provider'] for path in ([base] if base.is_file() else sorted(base.rglob('*'))) if path.is_file()}
-  report['outcome']='pass';report['summary']='Actual native two-slot provider/caller replacement and real backend components; no full kernel link or native-device result' 
+  report['outcome']='pass';report['summary']='Actual native two-slot provider/caller replacement and real backend components; no full kernel link or native-device result'
  except Exception as error:report['error']=repr(error)
  finally:
   report['finished_at']=datetime.datetime.now(datetime.timezone.utc).isoformat();report['artifacts']=[str(p.relative_to(m)) for p in sorted(out.rglob('*')) if p.is_file()];report['sha256']={str(p.relative_to(m)):sha(p) for p in sorted(out.rglob('*')) if p.is_file()};dump(out/'evidence.json',report)
