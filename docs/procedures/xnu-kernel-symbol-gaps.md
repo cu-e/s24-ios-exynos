@@ -127,13 +127,23 @@ measured by KLINK-007. KRN-004 retains the private Apple IIG/type ABI/oracle
 scope;KRN-003 retains SDK/library dependency work. None of their original
 reserved prefixes or owners was changed.
 
-Real pthread/profile integration is queued separately as KRN-022. Its
-historical archive still used fake allocator metadata and has three genuine
-external imports absent from this graph:mach_vm_allocate,mach_vm_map,vm_fault.
-The two current-profile attempts retained header/type failures. A coherent
-kext header/build context and actual implementations/callback integration
-remain necessary. The required cc_kext archive/full crypto callbacks are
-also unsupplied. The qualified source-built firehose archive remains distinct
+At this symbol-gap measurement, pthread/profile integration was queued as
+KRN-022. The historical archive used fake allocator metadata; its three VM
+imports were absent by their direct public names. KRN-022 subsequently built
+the genuine component and verified native aliases to the existing external
+VM providers, callback types/layouts and real allocator metadata. Use its
+[qualified archive and witnesses](xnu-kernel-pthread-profile.md), not the
+historical archive or the earlier failed header profiles.
+
+KRN-024 also corrected the cc_kext identity. The selected Clang driver source
+at `fa9443738c1a18accef4244732ec6d6ee97a8133` rewrites `-lcc_kext` to a reserved
+option selecting compiler-rt `libclang_rt.cc_kext_ios.a`; if the resource file
+is absent it silently adds nothing to the backend command. This is compiler
+support, not evidence of a corecrypto/KEC provider. KRN-025 qualifies that
+runtime; KRN-023 independently audits missing crypto callbacks and startup,
+and KRN-026 investigates the later export-only gaps. The pinned driver paths
+and primary links are in the pthread procedure's handoff. The qualified
+source-built firehose archive remains distinct
 from unavailable SDK binaries. Full exports/aliases,symbolsets,segment layout,
 full kernel link,SDK and Apple-private ABI,crypto/runtime,userland,recovery,
 native GPU/Wi-Fi/SIM/eSIM remain unqualified. No phone scope is added.

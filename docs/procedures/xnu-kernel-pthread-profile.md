@@ -124,9 +124,23 @@ hashes only; Apple headers and binaries stay local.
 
 Next link integration can consume this exact archive and native alias list
 alongside current 982 genuine objects and matched firehose. KRN-023 separately
-traces the still-required genuine cc_kext/corecrypto provider and missing
-callbacks. No empty library or successful crypto/RPC/CPU stub may fill a gap.
+traces the genuine corecrypto registration/provider and missing callbacks.
+KRN-025 separately qualifies the cc_kext compiler-support runtime. No empty
+library or successful crypto/RPC/CPU stub may fill either gap.
 Full link/layout, complete SDK, DriverKit private ABI (KRN-004), complete crypto,
 runtime and native-device evidence remain absent. Preserve KRN-003, KRN-004,
 KRN-008 and blocked recovery owners and their paths. Native GPU, Wi-Fi, SIM,
 eSIM and return to Android require their own authorized tasks and evidence.
+
+The KRN-024 driver audit corrects the earlier cc_kext/corecrypto inference.
+In the actual selected compiler source at
+`fa9443738c1a18accef4244732ec6d6ee97a8133`,
+[Driver.cpp](https://github.com/tpoechtrager/apple-libtapi/blob/fa9443738c1a18accef4244732ec6d6ee97a8133/src/clang/lib/Driver/Driver.cpp#L482)
+rewrites `-lcc_kext` to its reserved compiler-driver option;
+[Darwin.cpp](https://github.com/tpoechtrager/apple-libtapi/blob/fa9443738c1a18accef4244732ec6d6ee97a8133/src/clang/lib/Driver/ToolChains/Darwin.cpp#L2839)
+selects `libclang_rt.cc_kext_ios.a` and adds it only if the resource file exists.
+The library spelling alone identifies neither a corecrypto implementation nor
+its startup registration. KRN-023's unsupported crypto callbacks remain a
+separate source-backed limitation. KRN-024 also preserves the actual driver
+expansion and its omission, while KRN-026 investigates export-only symbol gaps.
+These corrections do not alter any recorded pthread object or passing capsule.
