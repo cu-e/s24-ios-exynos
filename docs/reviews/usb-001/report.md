@@ -3,10 +3,15 @@
 2026-11-05 · reviewer `codex-team-review-usb-20261105-ao` · REV-001.
 
 Reviewed implementation: **`e1785878045751213cb1e8e49e42a364333ed496`**.
-Result: **one P2 source-profile completeness finding; no P0/P1 or protocol
+Initial result: **one P2 source-profile completeness finding; no P0/P1 or protocol
 correctness defect reproduced within the documented host contract.** Correct
 USBREV-F01 before accepting the task's exact-board-input completeness claim.
 This is a bounded source/host review, not native USB qualification.
+
+**Followup verdict:** USBREV-F01 is resolved by exact commit
+`f3d705d737f1c863be019bd4b5d0cd78cb26ff26`. No unresolved P0/P1/P2 findings
+remain within this review's host/source scope. The initial finding below is
+preserved as history; the dated followup and independent evidence follow it.
 
 ## USBREV-F01 — P2: include the second enabled repeater in exact-source inputs
 
@@ -111,3 +116,36 @@ S24R reply alone provides no cryptographic payload integrity.
 The coordinator owns shared repository checks and integration acceptance.
 REV-001 remains in progress pending correction review and coordinator
 acceptance; the reviewer does not complete USB-001 or REV-001.
+
+## Followup — USBREV-002, 2026-11-05
+
+Reviewed exact corrective commit `f3d705d737f1c863be019bd4b5d0cd78cb26ff26`.
+The profile now enumerates both enabled source nodes with their compatible,
+address and status, while explicitly leaving fitted component and BYH3
+selection unqualified. The procedure describes both source alternatives.
+The checker compares extracted structured source sets with the profile and
+contains per-candidate omission/source-mismatch negatives. Its limitation to
+these pinned text inputs, rather than general DTS preprocessing or a live DTB,
+is explicit and appropriate for this source-fact check.
+
+Independent `verify_followup.py` execution exited 0 after USBREV-002 was
+planned: both pins produce the independently specified exact two-node set;
+34 omission/property/source/conditional negatives reject, plus two positive
+source-set checks. The 34 negatives cover each candidate's profile omission,
+profile compatible/address/status/node mismatches, source compatible/status/
+address mismatches, and an unexpected controller conditional, at each pin.
+All 107 host-session6 hashes and three committed witness links match. The
+runner/profile snapshots match the exact fix commit. Its original 28 runner
+checks and 63,482 fixture assertions were hash-audited, not independently
+rerun. The C/header/fixture/control/layout files are byte-identical across the
+fix, so the earlier independent sanitizer and DMA evidence remains applicable.
+
+See [followup-evidence.json](followup-evidence.json) for actual commands,
+exit codes, 36 check labels, source/script hashes and local artifacts. The
+first followup run's summary miscounted negatives as 32; its 36 actual check
+labels were correct. The summary was corrected to 34 and the inexpensive
+source-only check repeated with fresh local outputs; no C tests or builds
+were repeated. USBREV-F01 is resolved, with no new bounded review finding.
+The coordinator still owns integration acceptance and shared checks. Native
+USB, fitted hardware, firmware, kernel/framework and Apple ABI claims remain
+unqualified.
