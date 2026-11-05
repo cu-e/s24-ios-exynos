@@ -70,3 +70,50 @@ belong to the permanent kernel integrator under `state/.integration.lock`.
 No SDK/private ABI, full kernel/link, actual XNU console, boot/stop, native E1S or
 phone qualification is established. Original owner completion requires root and
 integrator acceptance following independent review and fresh MAIN common checks.
+
+## Shared build plan continuation
+
+The coordinator subsequently accepted VM-008 and VM-009 and resumed the original
+VM-015 owner for the next build wave. `VM015BUILD-001` is registered in MAIN for
+the plan and later execute phases, with a 600-second experiment bound. It remains
+planned: no final experiment outcome is recorded from source-only planning.
+
+The accepted shared MAIN runner SHA256 is
+`13213539409bade16162173c7b39709dbb3c7e78426fe1410b3f940ea01e4e47`.
+Its existing `run_child`/`supervisor` helpers invoked the exact `--mode plan` CLI
+under 120-second/256MiB supervision and three stable >=4GiB samples. There is no
+new maintained checker/executor and no source or recipe edit.
+
+Plan passed, exit 0, 95.218867 seconds, aggregate controller/child peak
+121,630,720 bytes. Inner executable-image VmHWM was 101,707,776 bytes. The planner
+selected exactly 77 objects, bound 6,721 input files, retained 32 existing roots
+and four absent search roots, started no compiler, produced no objects and left
+zero owned survivors. The fourth absence compared with the historical selected
+source scan is the compiler's genuine default resource-header search directory;
+the shared runner records the complete graph namespace without repairing it.
+
+The artifact root is
+`artifacts/avf-object-shards/osfmk-machine/plan-001` inside this worktree:
+
+| Artifact | SHA256 |
+| --- | --- |
+| `plan/execution-plan.json` | `7c69f19289273fd4944490d50ff539d232c1b08c9dfad3003772de198b9e494a` |
+| `selected-source-input-keys.json` | `efefaa0597a2c35e72052b3ae0d9cf66605846d008110dff19de872480666047` |
+| `build-ready-argv-template.json` | `2fae8510a44852cd20a92152f0f2be4496c026ce11a281ec817d6d70d1850e78` |
+| `supervised-plan.json` | `71b3d57e720433cd4c2d8eca9245c38bea90ef6ab63566e4264350f48b97fbe9` |
+| `plan/input-bindings.json` | `60f7b4774bcec32ff83093629d5f1fa00ade24ecddbd4c64a2d6e96c8d75221e` |
+
+Namespace SHA256 is
+`a2410326ba3560948edb9923b8dd8382d0557060ceaaf031735feef1bfbaa70a`.
+`build-001-plan-evidence.json` binds the exact command, source/input keys, output
+hashes, memory samples, cleanup, accepted runner and future same-process launcher.
+The argv template contains explicit unresolved root-approval and new-output
+placeholders; it is preparation, not execution authorization.
+
+Next: wait for the coordinator's explicit heavy-group lease and root-published
+approval descriptor. Then invoke the template through the accepted 600-second
+same-process launcher with one compiler for this shard. A possible second iokit
+executor is exclusively root-coordinated, with a total cap of two compiler jobs
+and 2GiB new owned RSS. Preserve the plan and all prior source-preparation history.
+Actual dependencies, object hashes/Mach-O validation and failures remain required
+before recording the real experiment outcome or claiming build acceptance.
