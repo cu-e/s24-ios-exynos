@@ -624,7 +624,7 @@ class ProjectBudget:
                         raise ValueError('Owned session leader PID was reused')
             if entry['status'] == 'complete':
                 continue
-            if entry['identity']['pid'] not in table:
+            if entry['identity']['pid'] not in table or table[entry['identity']['pid']]['state'] == 'Z':
                 raise ValueError('Stale executor reservation; root must reconcile survivors')
             rows = self.retained_processes(entry, table)
             rss = sum(p['rss_bytes'] for p in rows)
