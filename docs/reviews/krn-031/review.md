@@ -1,8 +1,10 @@
 # REV-017 independent KRN-031 review
 
-Status: source review has found no blocking defect. Final acceptance remains
-pending the qualified final native/host/guest capsule. Development passes and
-failed frozen replays do not satisfy the task.
+Recommendation: accept the bounded KRN-031 provider/caller component integration.
+No blocking production finding remains. The independent final audit passes
+6198 checks across 4545 bound inputs and 30 actual pinned Git commands. REV-017
+remains in progress for coordinator acceptance. Development passes were not used
+to replace the final qualification.
 
 Frozen implementation: `1bd64b4265cccf866bd1a3e1e1bcb3dde66d2877`.
 Named followups reviewed:
@@ -14,6 +16,22 @@ Named followups reviewed:
   compiler's separate strict function-pointer diagnostic and permits guest image
   lookup through a retained component manifest. It adds a targeted qualification
   procedure. Production glue, caller/provider patches and fixture bytes are unchanged.
+- `0551ab0279adbc7e1f0bae3e698f4857865c4888` binds the complete measured
+  publication, mismatch and caller check counts to acceptance.
+- `376a2f3f639d88ab954d9807220854779e995dc8` adds bounded stable memory
+  admission without lowering the 4GiB floor. Each launch requires three passing
+  samples and an immediate passing sample, with 45s per-command and 180s total
+  wait budgets. Only test/build qualification code changes.
+- `9dc0c9f92c26373263ed17439eb44d0f2ea2268d` binds the observed shifted-mapping
+  exception to the real pinned shim shutdown path, strengthens specific negative
+  case counts/lines and permits only explicitly named continuation cases. A 300s
+  whole-batch deadline includes memory admission and child-cleanup margin.
+  Source/fixture/production patches are unchanged.
+- `a84ac4ec571fd36b1d435036d453fa68982d88b3` adds only final documentation,
+  capsule and source/license metadata. Final-binding.json independently binds its
+  capsule SHA256 `b5f772163a286e2586d1a76f38640ca8e3b75d38a681d3b1b09198e91e6e2a47`,
+  all five report identities, exact 985-object coherent manifest, runtime/export
+  gates and primary source/license hashes to the independent audit.
 
 The selected compiler emitted the wrong-return signature diagnostic as
 `-Wincompatible-function-pointer-types-strict`, with exit 0, despite the original
@@ -21,6 +39,13 @@ The selected compiler emitted the wrong-return signature diagnostic as
 defect; frozen-native2 is correctly preserved as failed. The targeted correction
 must demonstrate both an actual wrong-signature error and an unchanged real
 helper positive under the strengthened policy, with source/command/object bindings.
+Strict-native3 now establishes both through exactly two selected compiler commands:
+wrong-return callback exit 1 with the actual strict type error, genuine unchanged
+helper exit 0 under the same strengthened policy. All earlier passed native/image/
+host measurements are individually rehashed and retained; the failed aggregate
+record is not rewritten or relabeled. The independent native audit passes 6016
+checks and binds 4500 inputs, including the actual graph/dependencies/recipes,
+relocations, instructions, layouts, imports, runtime and export inputs.
 
 The helper's public descriptors are const objects with static lifetime. Their
 callbacks forward to private genuine accepted factories, which never escape.
@@ -55,6 +80,52 @@ locks disabled, rehashes accepted inputs and uses its own Mach-O reader for
 symbols, relocations, instructions, metadata and linked callback addresses. It
 does not import the producer's parser/builder or execute a compiler/guest. Its
 failed-capsule admission control rejects frozen-native2 before any acceptance.
+
+The final guest evidence comprises the immutable three-case prefix in
+final-guest1, mapping-reinspection1 and the five-case final-pending-guest1
+continuation. The original prefix aggregate remains failed because its old
+classifier wrongly required a timeout for bad mapping. Each accepted prefix case
+is rehashed and qualified individually; no successful case is rerun or relabeled
+without its original outcome. Both batches bind the same strict-native3 component
+capsule and exact genuine fixture/accepted inputs. The continuation is cleanly
+bound to 9dc0c9f and names exactly the five remaining controls.
+
+| Case | Independently verified result |
+| --- | --- |
+| Positive | 1220 vectors / 7350 checks; actual mapped caller and registration, natural PSCI exit 0 |
+| Wrong cookie | Admission rejection before mapped caller execution, exit 0 |
+| Bad mapping | Exact linked entry redirected outside loaded image; pinned shim exception and natural exit 0 |
+| Corrupt expected ciphertext | Exactly one payload byte differs; real caller fails at check 18 / source line 44 |
+| Original unpatched caller | Genuine original object fails at check 7338 / source line 53, demonstrating lost error propagation |
+| Factory size mismatch | Real size-only factory variant rejected; 0 vectors / 11 checks |
+| Non-block size | Original genuine caller panic reaches stopping runtime |
+| Spin | No mapped caller execution; bounded 3s timeout and owned-process cleanup |
+
+The bad-mapping image uses L2 first index 33 rather than 32. Independent Mach-O
+decoding maps linked entry `0xfffffff007004d38` normally to `0x43004d38`, but the
+shift targets `0x42e04d38`, outside every loaded segment. The raw console records
+slot 4, ESR `0x02000000`, the exact linked ELR and FAR 0. The independently read,
+shim-build-bound avfboot_exception source calls die, whose path invokes
+PSCI_SYSTEM_OFF. This is a precise natural-shutdown negative, not a timeout or
+mapped-caller pass. A generic crash/exit marker would not satisfy these checks.
+
+The reviewer verifies exact XNUP contents against each original Mach-O, including
+the cookie and sole corrupted-vector byte; actual console addresses against
+linked descriptors/callbacks/TTBR roots; actual TCR; exact negative source lines;
+all guest admission records, process bounds and cleanup. Every command leaves no
+owned process. No compiler or QEMU was launched by the reviewer.
+
+Reviewer tooling failures are retained: the initial frozen-reference admission
+correctly rejected a newly unreviewed followup, and the first branch scan counted
+later functions in the same section. Explicitly reviewing the followups and
+bounding the initializer by the next function corrected those reader checks.
+These failures do not establish a production defect.
+
+The last binding reader initially compared the nested export entries to the
+manifest's complete path/hash/entries record; that schema mismatch is retained.
+The corrected check compares the complete preserved record and passes.
+Coordinator common checks are scheduled after implementation/review integration;
+the reviewer has not run make check, which invokes compilers.
 
 Native compilation/relocation proof concerns the full real selected provider
 object. ARM CPU execution concerns an owned two-slot table plus genuine selected

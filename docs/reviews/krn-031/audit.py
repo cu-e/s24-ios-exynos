@@ -15,6 +15,9 @@ ENV = dict(os.environ, GIT_NO_LAZY_FETCH="1", GIT_OPTIONAL_LOCKS="0")
 CANDIDATE = "1bd64b4265cccf866bd1a3e1e1bcb3dde66d2877"
 FOLLOWUP = "b87957bfd89d8ab82162e546d9c9eee3c018078f"
 STRICT_FOLLOWUP = "e3b6b7da1217a716b0a2b152207b61ab73c749cf"
+COUNT_FOLLOWUP = "0551ab0279adbc7e1f0bae3e698f4857865c4888"
+ADMISSION_FOLLOWUP = "376a2f3f639d88ab954d9807220854779e995dc8"
+MAPPING_FOLLOWUP = "9dc0c9f92c26373263ed17439eb44d0f2ea2268d"
 XNU = "c54f35ca767986246321eb901baf8f5ff7923f6a"
 DONOR = "c8860decc62c6d6180e609036d027a2997972420"
 
@@ -42,6 +45,24 @@ def apply_unified(original, patch):
                 output.append(line[1:])
     output.extend(lines[position:])
     return "".join(output)
+
+
+def xnup_records(data):
+    magic, total = struct.unpack_from("<II", data)
+    assert magic == 0x50554e58 and total == len(data) - 8
+    position, records = 8, {}
+    while position + 24 <= len(data):
+        name, count, flags = struct.unpack_from("<16sII", data, position)
+        position += 24
+        if name == b"\0" * 16:
+            assert count == flags == 0 and position == len(data)
+            return records
+        assert flags == 0 and position + count <= len(data)
+        name = name.rstrip(b"\0").decode()
+        assert name not in records
+        records[name] = data[position:position + count]
+        position += (count + 15) // 16 * 16
+    raise AssertionError("Missing XNUP terminator")
 
 
 class MachO:
@@ -107,6 +128,8 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--native", type=Path)
     parser.add_argument("--guest", type=Path)
+    parser.add_argument("--guest-prefix", type=Path)
+    parser.add_argument("--mapping-review", type=Path)
     args = parser.parse_args()
     root = args.root.resolve()
     report = dict(kind="source-review", origin="local-host", outcome="fail", recorded_at=datetime.datetime.now(datetime.timezone.utc).isoformat(), task="REV-017", candidate=CANDIDATE, followup=FOLLOWUP, commands=[], checks=[], inputs={}, final_acceptance=False, limitations=["Read-only review of existing source/artifacts; no new compiler/guest/device execution.", "Full provider startup/XNU/native device/private Apple ABI/FIPS/full crypto and 37 missing export providers remain unqualified."])
@@ -154,6 +177,17 @@ def main():
         check("strict-followup-scope", strict_names == ["docs/procedures/kernel-xts/finish_native.py", "tools/build/xnu_kernel_xts.py"])
         strict_diff = git(root, "diff", FOLLOWUP, STRICT_FOLLOWUP, "--", "tools/build/xnu_kernel_xts.py").decode()
         check("strict-followup-two-builder-lines", strict_diff.count("\n+") == 3 and "-Werror=incompatible-function-pointer-types-strict" in strict_diff and "parent['guest_images']['positive']['path']" in strict_diff)
+        for before, after in [(STRICT_FOLLOWUP, COUNT_FOLLOWUP), (COUNT_FOLLOWUP, ADMISSION_FOLLOWUP)]:
+            names = git(root, "diff", "--name-only", before, after).decode().splitlines()
+            check("followup-scope-" + after, names == ["docs/procedures/kernel-xts/finish_native.py", "tools/build/xnu_kernel_xts.py"])
+            for name in names:
+                raw = git(root, "show", after + ":" + name)
+                report["inputs"][after + ":" + name] = hashlib.sha256(raw).hexdigest()
+        mapping_names = git(root, "diff", "--name-only", ADMISSION_FOLLOWUP, MAPPING_FOLLOWUP).decode().splitlines()
+        check("mapping-followup-only-qualification", mapping_names == ["docs/procedures/kernel-xts/reinspect_guest.py", "tools/build/xnu_kernel_xts.py"])
+        for name in mapping_names:
+            raw = git(root, "show", MAPPING_FOLLOWUP + ":" + name)
+            report["inputs"][MAPPING_FOLLOWUP + ":" + name] = hashlib.sha256(raw).hexdigest()
         helper = source["src/platform/crypto/xts/kernel_provider.c"]
         check("const-public-static-lifetime", helper.count("const struct ccmode_xts s24_kernel_xts_") == 2 and "static struct ccmode_xts private_encrypt,private_decrypt;" in helper)
         check("private-factory-before-ready", helper.index("s24_xts_descriptor(&private_encrypt,0)") < helper.index("s24_xts_descriptor(&private_decrypt,1)") < helper.index("!metadata(&private_encrypt)") < helper.index("__atomic_store_n(&preparation,2,__ATOMIC_RELEASE)"))
@@ -183,7 +217,7 @@ def main():
                 bind(implementation / name, digest)
         if args.native:
             native = capsule(args.native)
-            check("frozen-native-followup", native["commit"] in [CANDIDATE, FOLLOWUP, STRICT_FOLLOWUP])
+            check("frozen-native-followup", native["commit"] in [CANDIDATE, FOLLOWUP, STRICT_FOLLOWUP, COUNT_FOLLOWUP, ADMISSION_FOLLOWUP])
             if "retained-native" in native["parents"]:
                 row = native["parents"]["retained-native"]
                 retained = json.loads(bind(root / row["path"], row["sha256"]).read_text())
@@ -193,6 +227,15 @@ def main():
                 old_commands = retained["commands"]
                 new_commands = native["commands"]
                 check("exactly-two-targeted-compiles", len(new_commands) == 2 and all("-c" in c["argv"] and "-Werror=incompatible-function-pointer-types-strict" in c["argv"] for c in new_commands) and new_commands[0]["exit_code"] != 0 and new_commands[1]["exit_code"] == 0)
+                original_positive = next(c for c in old_commands if str(implementation / "src/platform/crypto/xts/kernel_provider.c") in c["argv"] and "-c" in c["argv"])
+                for label, current, previous in [("negative", new_commands[0], old_commands[-1]), ("positive", new_commands[1], original_positive)]:
+                    expected = list(previous["argv"])
+                    for flag in ["-o", "-MF"]:
+                        expected[expected.index(flag) + 1] = current["argv"][current["argv"].index(flag) + 1]
+                    expected.append("-Werror=incompatible-function-pointer-types-strict")
+                    check("exact-strengthened-command-" + label, expected == current["argv"])
+                for admission in native.get("admission_waits", []):
+                    check("stable-memory-admission-" + admission["command"], admission["admitted"] and admission["launch_available_bytes"] >= 4 * 1024 ** 3 and all(s["available_bytes"] >= 4 * 1024 ** 3 for s in admission["samples"][-3:]) and admission["actual_wait_seconds"] <= 46)
                 negative_log = args.native.parent / "wrong-signature-strict.log"
                 check("strict-negative-is-type-error", "error: incompatible function pointer types" in bind(negative_log).read_text() and "-Wincompatible-function-pointer-types-strict" in negative_log.read_text() and not (args.native.parent / "rejected.o").exists())
                 check("retained-warning-previously-exit0", old_commands[-1]["exit_code"] == 0 and "-Wincompatible-function-pointer-types-strict" in (root / row["path"]).parent.joinpath("reject-incompatible-actual-callback.log").read_text())
@@ -213,6 +256,14 @@ def main():
             objects = {name: MachO(root / row["output"]) for name, row in components.items() if not name.startswith("fixture/")}
             provider = objects["osfmk/mc_provider.o"]
             helper_obj = objects["component/kernel_provider"]
+            strict_helper_path = args.native.parent / "matched-helper.o"
+            if strict_helper_path.exists():
+                strict_helper = MachO(bind(strict_helper_path))
+                old_text = helper_obj.sections[helper_obj.names["_s24_kernel_xts_prepare"]["section"] - 1]
+                new_text = strict_helper.sections[strict_helper.names["_s24_kernel_xts_prepare"]["section"] - 1]
+                check("strict-helper-identical-code", helper_obj.data[old_text["offset"]:old_text["offset"] + old_text["size"]] == strict_helper.data[new_text["offset"]:new_text["offset"] + new_text["size"]])
+                check("strict-helper-identical-symbols", helper_obj.imports() == strict_helper.imports() and helper_obj.definitions() == strict_helper.definitions())
+                check("strict-helper-identical-layout", helper_obj.read("_s24_kernel_xts_layout", "<11Q") == strict_helper.read("_s24_kernel_xts_layout", "<11Q"))
             original = json.loads(bind(root / native["original_graph"]["path"], native["original_graph"]["sha256"]).read_text())
             check("original982-identities", len(original) == len({r["id"] for r in original}) == 982)
             for row in original:
@@ -267,7 +318,10 @@ def main():
             empty = [k for k in range(0, 448, 8) if k not in newslots]
             check("deferred-sha-and19-unsupported", len(empty) == 20 and 48 in empty and all(provider.read("_mc_funcs", "<Q", k) == (0,) for k in empty))
             targets = ["_s24_kernel_xts_prepare", "_s24_kernel_xts_encrypt_mode", "_s24_kernel_xts_decrypt_mode", "_ccsha256_di", "_register_crypto_functions"]
-            calls = sorted((k, r) for k, rows in provider.relocations("_minicrypto_init").items() for r in rows if r["target"] in targets and r["type"] == 2)
+            init = provider.names["_minicrypto_init"]
+            later = [s["va"] for s in provider.symbols if s["kind"] & 0x0e == 0x0e and s["section"] == init["section"] and s["va"] > init["va"] and s["name"].startswith("_")]
+            function_size = min(later) - init["va"]
+            calls = sorted((k, r) for k, rows in provider.relocations("_minicrypto_init").items() for r in rows if 0 <= k < function_size and r["target"] in targets and r["type"] == 2)
             check("independent-native-BL-order", [r["target"] for _, r in calls] == targets and all(r["instruction"] & 0xfc000000 == 0x94000000 for _, r in calls))
             for label, prefix in [("_s24_kernel_xts_encrypt", "enc"), ("_s24_kernel_xts_decrypt", "dec")]:
                 check("independent-descriptor-metadata-" + prefix, helper_obj.read(label, "<3Q") == (608, 48, 16))
@@ -282,6 +336,12 @@ def main():
             provided = set().union(*(obj.definitions() for obj in objects.values()))
             imports = set().union(*(obj.imports() for obj in objects.values()))
             check("import-map-covers-actual-imports", set(native["import_provider_map"]) == imports and all(native["import_provider_map"][name] == "new-component" for name in imports & provided))
+            original_report = json.loads(bind((root / native["original_graph"]["path"]).parent / "report.json").read_text())
+            known_row = original_report["graph"]["symbol-providers"]
+            known = json.loads(bind(root / known_row["path"], known_row["sha256"]).read_text())
+            check("external-import-routes-preserved", all(native["import_provider_map"][name] == known[name] for name in imports - provided))
+            added = set().union(*(objects[name].definitions() for name in ["component/kernel_provider", "component/xts", "component/aes"]))
+            check("no-new-duplicate-providers", not added.intersection(known))
             check("remaining37-exports", len(native["remaining_exports"]["entries"]) == 37)
             for row in native["remaining_exports"]["entries"].values():
                 bind(root / row["path"], row["sha256"])
@@ -290,15 +350,52 @@ def main():
             report["native_verified"] = str(args.native)
         if args.guest:
             guest = capsule(args.guest)
+            guest["guest_cases"] = [dict(c, artifact_directory=str(args.guest.parent)) for c in guest["guest_cases"]]
+            if args.guest_prefix:
+                prefix = json.loads(bind(args.guest_prefix).read_text())
+                check("retained-prefix-precise-failure", prefix["outcome"] == "fail" and prefix["error"] == "ValueError('Actual caller/control case failed bad-mapping')" and [c["case"] for c in prefix["guest_cases"]] == ["positive", "wrong-cookie", "bad-mapping"] and [c["accepted"] for c in prefix["guest_cases"]] == [True, True, False])
+                for name, digest in prefix["sha256"].items():
+                    bind(root / name, digest)
+                mapping = capsule(args.mapping_review)
+                check("qualified-mapping-prefix-bound", mapping["retained_parent"]["path"] == str(args.guest_prefix.relative_to(root)) and mapping["retained_parent"]["sha256"] == sha(args.guest_prefix) and mapping["guest_reruns"] == 0 and all(c["accepted"] for c in mapping["guest_cases"]))
+                independent_mapping = json.loads(bind(Path(__file__).parent / "mapping-audit.json").read_text())
+                check("independent-mapping-qualified", independent_mapping["outcome"] == "pass" and independent_mapping["diagnosis"]["natural_exit_code"] == 0 and independent_mapping["diagnosis"]["outside_loaded_image"])
+                check("continuation-five-only", [c["case"] for c in guest["guest_cases"]] == ["corrupt-vector", "original-caller", "factory-mismatch", "panic", "spin"] and guest["requested_cases"] == [c["case"] for c in guest["guest_cases"]] and guest["whole_timeout_seconds"] == 300 and guest["whole_elapsed_seconds"] <= 300)
+                check("same-genuine-guest-inputs", guest["qualified_inputs"] == prefix["qualified_inputs"] and guest["component_parent"] == prefix["component_parent"])
+                check("frozen-continuation-builder", guest["commit"] == MAPPING_FOLLOWUP and guest["builder_sha256"] == sha(args.guest.parent / "builder.py") and guest["builder_sha256"] == report["inputs"][MAPPING_FOLLOWUP + ":tools/build/xnu_kernel_xts.py"])
+                cases = [dict(c, artifact_directory=str(args.guest_prefix.parent), accepted=True) for c in prefix["guest_cases"]] + guest["guest_cases"]
+                combined = dict(prefix)
+                combined.update(guest)
+                combined.update(guest_cases=cases, commands=prefix["commands"] + guest["commands"], genuine_selected_caller_executed=prefix["genuine_selected_caller_executed"], vectors=prefix["vectors"], checks=prefix["checks"], admission_waits=prefix["admission_waits"] + guest["admission_waits"], admission_total_wait_seconds=prefix["admission_total_wait_seconds"] + guest["admission_total_wait_seconds"])
+                guest = combined
             check("guest-bound-to-native", args.native is not None and root / guest["component_parent"]["path"] == args.native and sha(args.native) == guest["component_parent"]["sha256"])
-            check("actual-genuine-caller", guest["genuine_selected_caller_executed"] and guest["vectors"] == 1220 and guest["checks"] >= 7347)
+            check("actual-genuine-caller", guest["genuine_selected_caller_executed"] and guest["vectors"] == 1220 and guest["checks"] == 7350)
             check("all-eight-guest-cases", {c["case"] for c in guest["guest_cases"]} == {"positive", "wrong-cookie", "bad-mapping", "corrupt-vector", "original-caller", "factory-mismatch", "panic", "spin"} and all(c["accepted"] for c in guest["guest_cases"]))
+            tools = guest["qualified_inputs"]
+            bind(tools["qemu"], tools["pins"]["qemu_sha256"])
+            bind(tools["shim"], tools["pins"]["shim_sha256"])
+            for admission in guest.get("admission_waits", []):
+                check("guest-stable-memory-" + admission["command"], admission["admitted"] and admission["launch_available_bytes"] >= 4 * 1024 ** 3 and all(s["available_bytes"] >= 4 * 1024 ** 3 for s in admission["samples"][-3:]) and admission["actual_wait_seconds"] <= 46)
+            check("guest-total-admission-bounded", guest.get("admission_total_wait_seconds", 0) <= 181)
             for case in guest["guest_cases"]:
                 image = MachO(bind(root / case["image"], case["image_sha256"]))
                 label = case["case"]
-                console = bind(args.guest.parent / (label + ".log"), case["console_sha256"]).read_text()
+                console = bind(Path(case["artifact_directory"]) / (label + ".log"), case["console_sha256"]).read_text()
                 command = guest["commands"][[c["case"] for c in guest["guest_cases"]].index(label)]
                 check("guest-resource-and-cleanup-" + label, command["rss_budget_mib"] == 512 and command["peak_total_owned_rss_bytes"] <= 512 * 1024 ** 2 and not command["after"]["owned_processes"] and command["argv"][command["argv"].index("-m") + 1] == "256")
+                payload = bind(command["argv"][command["argv"].index("-initrd") + 1], case["payload_sha256"])
+                records = xnup_records(payload.read_bytes())
+                cookie = b"wrong" if label == "wrong-cookie" else b"owned-adapter-v1"
+                check("actual-payload-cookie-" + label, set(records) == {"kernel", "cmdline"} and records["cmdline"] == b"cpus=1 xts_cookie=" + cookie + b"\0")
+                expected_image = bytearray(image.data)
+                if label == "corrupt-vector":
+                    control = guest["algorithm_control"]
+                    point = control["offset"]
+                    expected = bytes.fromhex(control["original_expected"])
+                    check("actual-corruption-point", expected_image[point:point + len(expected)] == expected)
+                    expected_image[point] ^= 1
+                check("actual-payload-image-" + label, records["kernel"] == expected_image)
+                check("actual-pinned-guest-command-" + label, command["argv"][0] == tools["qemu"] and command["argv"][command["argv"].index("-kernel") + 1] == tools["shim"] and command["argv"][command["argv"].index("-accel") + 1] == "tcg" and command["argv"][command["argv"].index("-cpu") + 1] == "cortex-a76")
                 mapped = re.search(r"KXTS MAPPED pc=(0x[0-9a-f]+) mode=(0x[0-9a-f]+) init=(0x[0-9a-f]+) tt0=(0x[0-9a-f]+) tt1=(0x[0-9a-f]+) tcr=(0x[0-9a-f]+)", console)
                 if mapped:
                     delta = 0xffffffefc4000000
@@ -311,13 +408,17 @@ def main():
                     check("positive-console", mapped and passed and "line=0x0" in console and command["exit_code"] == 0 and "XTS SYNTHETIC PSCI_SYSTEM_OFF" in console)
                 elif label in ["corrupt-vector", "original-caller"]:
                     line = 44 if label == "corrupt-vector" else 53
-                    check("specific-negative-line-" + label, mapped and not passed and "KXTS CALLER FAIL" in console and "line=" + hex(line) in console and command["exit_code"] == 0)
-                elif label in ["bad-mapping", "spin"]:
+                    count = 18 if label == "corrupt-vector" else 7338
+                    check("specific-negative-line-" + label, mapped and not passed and "KXTS CALLER FAIL vectors=0x4c4 checks=" + hex(count) + " line=" + hex(line) in console and command["exit_code"] == 0)
+                elif label == "bad-mapping":
+                    fault = re.search(r"avfboot: exception slot=(0x[0-9a-f]+) during xnu\s+esr=(0x[0-9a-f]+) elr=(0x[0-9a-f]+) far=(0x[0-9a-f]+)", console)
+                    check("precise-natural-shim-exception", not mapped and not passed and fault and tuple(int(fault[n], 16) for n in range(1, 5)) == (4, 0x02000000, image.names["_mapped_entry"]["va"], 0) and command["exit_code"] == 0 and command["outcome"] == "pass" and "avfboot: FATAL: unexpected exception" in console and "avfboot: powering off" in console)
+                elif label == "spin":
                     check("bounded-timeout-" + label, not mapped and not passed and command["outcome"] == "timeout" and command["timeout_seconds"] == 3)
                 elif label == "wrong-cookie":
                     check("cookie-admission", not mapped and not passed and "XTS SYNTHETIC REJECT command-cookie" in console and command["exit_code"] == 0)
                 elif label == "factory-mismatch":
-                    check("factory-rejection-zero-vectors", mapped and not passed and "KXTS FACTORY PASS vectors=0x0" in console and "KXTS FACTORY MISMATCH REJECTED" in console and command["exit_code"] == 0)
+                    check("factory-rejection-zero-vectors", mapped and not passed and "KXTS FACTORY PASS vectors=0x0 checks=0xb line=0x0" in console and "KXTS FACTORY MISMATCH REJECTED" in console and command["exit_code"] == 0)
                 elif label == "panic":
                     check("actual-panic", mapped and not passed and "KXTS SYNTHETIC PANIC" in console and command["exit_code"] == 0)
                 if case["case"] == "spin":
@@ -332,7 +433,7 @@ def main():
             report["guest_verified"] = str(args.guest)
         report["outcome"] = "pass"
         report["final_acceptance"] = bool(args.native and args.guest)
-        report["summary"] = "Independent frozen source/native/guest artifact audit passed" if report["final_acceptance"] else "Independent frozen source audit passed; final qualified native/guest capsules still required"
+        report["summary"] = "Independent frozen source/native/guest artifact audit passed" if report["final_acceptance"] else "Independent source/native artifact audit passed; final qualified guest capsule required" if args.native else "Independent frozen source audit passed; final qualified native/guest capsules still required"
     except Exception as error:
         report["error"] = repr(error)
     report["finished_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
