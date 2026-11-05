@@ -16,6 +16,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 POLICY = ROOT / 'fixtures/public/avf-guest-pthread/source-policy.json'
+EXECUTION_FREEZE = ROOT / 'fixtures/public/avf-guest-pthread/execution-plan-freeze.json'
 
 
 def digest(path, algorithm='sha256', blob=False):
@@ -65,7 +66,8 @@ def fields(text):
     return result
 
 
-def validate_plan(plan):
+def validate_preparation_plan(plan):
+    """Check source preparation structure; this does not admit execution."""
     if plan['qualification'] != 'source-preparation-only' or plan['compiled_objects'] != []:
         raise ValueError('Source plan cannot claim compiled objects')
     if len(plan['translation_units']) != 3:
@@ -80,6 +82,16 @@ def validate_plan(plan):
             raise ValueError('Historical archive input forbidden')
         if '-DXNU_NO_TYPE_BUILTINS=0' not in argv:
             raise ValueError('Actual metadata builtins remain enabled')
+
+
+def validate_plan(plan):
+    """Admit only the independently frozen complete source plan and argv templates."""
+    validate_preparation_plan(plan)
+    expected = load(EXECUTION_FREEZE)['canonical_plan_sha256']
+    canonical = json.dumps(plan, sort_keys=True, separators=(',', ':'),
+                           ensure_ascii=True, allow_nan=False).encode('utf-8')
+    if hashlib.sha256(canonical).hexdigest() != expected:
+        raise ValueError('Complete plan differs from the independently frozen guest pthread recipe')
 
 
 class Preparation:
@@ -267,7 +279,7 @@ class Preparation:
                                              'argv_template': [compiler['path'], *flags, '-MD', '-MF',
                                                                '@OWNED_OUT@/' + stem + '.d', '-c', str(source),
                                                                '-o', '@OWNED_OUT@/' + stem + '.o']})
-        validate_plan(plan)
+        validate_preparation_plan(plan)
         dump(self.out / 'component-plan.json', plan)
         self.report['source_file_count'] = len(source_rows)
         self.report['callback_declaration_counts'] = {k: len(v) for k, v in declaration_rows.items()}

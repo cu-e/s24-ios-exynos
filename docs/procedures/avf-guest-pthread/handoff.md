@@ -70,3 +70,31 @@ failed attempts. No historical E1S archive or symbol closure can replace these.
 Independent review and integrator acceptance precede original-owner taskdone.
 Main publication/common checks belong solely to integrators under the shared
 primary integration lock. No physical phone work is authorized here.
+
+## Independent predicate finding and correction
+
+Platform integrator cn independently verified the original source, retained
+patches, installed headers and emitted development recipes. The original
+`validate_plan` nevertheless accepted deleting both `-DMACH_ASSERT` and
+`-DDEBUG` from every TU. The old ten controls did not detect this gate defect.
+Neither the original source result nor that old predicate accepts compiled ABI.
+
+The correction binds the full parsed plan to the independently committed
+canonical hash in `fixtures/public/avf-guest-pthread/execution-plan-freeze.json`.
+The original `prepare-2/component-plan.json` remains byte-for-byte unchanged,
+SHA256 `96065bf4ebe697cfd1a0d43eb52d0ae315275f25efe619e60ae14d66ae350298`.
+The canonical JSON hash is
+`bfb88d88d6f44d936fd1fc5758b687ba29ca50f19626e6750224d6db2d69f475`.
+The execution predicate rejects altered definitions, forwarding/response flags,
+compiler/source/output changes and any other full-plan change. Generation's
+old structural check is explicitly preparation-only and cannot admit execution.
+Newly generated plans require an independently reviewed freeze.
+
+AVFPTH-002 ran only the focused predicate controls described in
+`predicate-review.md`: 21 checks pass, including an actual Git-read reproduction
+of the original committed predicate's acceptance and corrected rejection.
+The finite command exited 0, elapsed 0.018132 seconds, controller VmHWM
+21,392 KiB. Source/header trees were not rehashed or regenerated. Original
+`e884676` / `f10dda9`, source capsules and evidence remain preserved.
+No compiler, QEMU, common check or publication occurred. Independent cn/root
+recheck remains required; no compiled ABI or execution adapter is accepted.

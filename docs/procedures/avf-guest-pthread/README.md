@@ -34,13 +34,20 @@ The unpreprocessed surface includes 45 function fields and 96 callback fields;
 the callback count includes an ARM32-only conditional slot. It is not an ARM64
 field count. Compiler preprocessing and layout measurements remain required.
 
-After a registered preparation passes, run the finite source-plan controls:
+After a preparation is independently reviewed and its execution plan frozen,
+run the finite source-plan controls. The current freeze names `prepare-2`:
 
 ```sh
 LC_ALL=C PYTHONUTF8=1 PYTHONNOUSERSITE=1 python3 -s docs/procedures/avf-guest-pthread/verify.py \
-  --plan artifacts/avf-guest-pthread/prepare-1/component-plan.json \
-  --out artifacts/avf-guest-pthread/controls-1
+  --plan artifacts/avf-guest-pthread/prepare-2/component-plan.json \
+  --out artifacts/avf-guest-pthread/controls-reviewed-new
 ```
+
+`validate_plan` binds the complete frozen plan, including every argv token, to
+an expected canonical hash committed separately from the candidate. The source
+builder's `validate_preparation_plan` checks structure only and cannot admit
+execution. New preparations need a reviewed freeze. See the focused
+[predicate correction](predicate-review.md); original evidence is preserved.
 
 `component-plan.json` is a proposed three-TU provider plan, outside the 1080
 kernel-object graph. VM-009's accepted bounded process API will execute it after
