@@ -83,6 +83,37 @@ Fresh reports preserve every run, exact argv, exits, times and implementation,
 fixture and input hashes. No common `make check` or MAIN publication occurs here.
 The task remains in progress pending independent review and integrator acceptance.
 
+## Measured handoff
+
+Implementation commit `d5b1250670692189ae1898d465b03d6eee181e0c` completed
+the read-only experiment `VMPID1ABI-001`. The six finite CLI commands returned
+their expected nonzero exits: legacy rejection 2, wrong executable hash 1,
+wrong source hash 1, structurally eligible but unreviewed UUID-changed candidate
+2, corrupt entry 1 and changed selected-source pin 1. All seventeen mutations
+of the actual legacy executable were rejected. The fixture checks nineteen
+real input hashes and verifies selected source hashes against VM-008's frozen
+`prepared_source_files` map. No input bytes were rewritten.
+
+The highest child current-image `/proc` VmHWM was 21,676,032 bytes; the fresh
+driver reported 17,158,144 bytes. No binary tool, compiler or guest executed.
+The overall evidence is deliberately **inconclusive**, because no PID1 candidate
+is admitted and no runtime ABI was measured. The negative controls have expected
+`fail` or `inconclusive` reports preserved, including exact stderr/stdout logs,
+times and hashes; they are not hidden as successful guest measurements.
+
+[`evidence.json`](evidence.json) binds the run at
+`worktrees/vm-025-20261106/artifacts/avf-guest-pid1/abi-d5b1250` relative to MAIN.
+Its SHA256 is `14fc2db3b6c95cfc6d5c7ac984d086f1de4225b9788790ab0081e6d7acc5dae8`.
+The artifact-index SHA256 is
+`b2bc924c6236f8b75bb5775e6b782fd0c1cd8d77b46059d1b242ce13666a78de`.
+Root and the permanent kernel integrator received the source finding and exact
+return-path references. VM-024 was warned that the old binary is unqualified.
+The next step is independent review, then VM-034 source-built replacement and
+its exact candidate descriptor. Integrators alone publish MAIN and run common
+checks under `state/.integration.lock`. Original owner
+`codex-guest-exec-20261106-dg` retains VM-025 until acceptance; do not mark done
+from this preparation or reuse the old executable as a qualified PID1.
+
 ## Execution remains unmeasured
 
 A new candidate still needs the accepted coherent VM-008 namespace, a complete
