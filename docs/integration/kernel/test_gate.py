@@ -269,6 +269,14 @@ class GateTests(unittest.TestCase):
                 self.plan["historical_paths"] = values
                 self.assert_history_rejected(message)
 
+    def test_history_requires_json_array_of_strings(self):
+        self.history("a")
+        for value in ["a", {"a": {"unrecognized": "ignored"}}, None, 0, True,
+                      ["a", 1], [["a"]], [{"a": "value"}]]:
+            with self.subTest(value=value):
+                self.plan["historical_paths"] = value
+                self.assert_history_rejected("JSON array of strings")
+
     def test_transient_lock_cannot_replace_held_inode(self):
         self.history("state/.integration.lock")
         with gate.integration_lock(self.root):

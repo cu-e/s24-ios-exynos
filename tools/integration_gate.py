@@ -120,8 +120,11 @@ def audit(root, plan):
         require(patch_sha(root, entry["source"]) == patch_sha(root, entry["candidate"]), "Source/candidate exact patches differ")
     paths = set(plan["paths"])
     require(len(paths) == len(plan["paths"]) and paths, "Nonempty unique exact path set required")
-    historical = set(plan.get("historical_paths", []))
-    require(len(historical) == len(plan.get("historical_paths", [])) and not paths & historical,
+    raw_historical = plan.get("historical_paths", [])
+    require(isinstance(raw_historical, list) and all(isinstance(name, str) for name in raw_historical),
+            "Historical paths must be a JSON array of strings")
+    historical = set(raw_historical)
+    require(len(historical) == len(raw_historical) and not paths & historical,
             "Historical paths must be unique and disjoint from net paths")
     all_paths = paths | historical
     for name in all_paths:
