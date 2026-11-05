@@ -1,0 +1,42 @@
+{
+  "kind": "source-review",
+  "origin": "primary-upstream-and-local-measurement",
+  "checked_on": "2026-11-05",
+  "apple_revision": "c54f35ca767986246321eb901baf8f5ff7923f6a",
+  "donor_revision": "c8860decc62c6d6180e609036d027a2997972420",
+  "primary_sources": [
+    "https://github.com/RNDMBG/iOS-On-S24/tree/c8860decc62c6d6180e609036d027a2997972420/xnu/hackios/files/osfmk",
+    "https://github.com/apple-oss-distributions/xnu/blob/c54f35ca767986246321eb901baf8f5ff7923f6a/osfmk/kern/misc_protos.h",
+    "https://github.com/apple-oss-distributions/xnu/blob/c54f35ca767986246321eb901baf8f5ff7923f6a/osfmk/kern/task.c",
+    "https://github.com/apple-oss-distributions/xnu/blob/c54f35ca767986246321eb901baf8f5ff7923f6a/bsd/sys/proc.h",
+    "https://github.com/apple-oss-distributions/xnu/blob/c54f35ca767986246321eb901baf8f5ff7923f6a/bsd/kern/kern_proc.c"
+  ],
+  "findings": [
+    "The donor printf redeclaration is redundant with canonical int printf(const char *,...) and expands incorrectly under the actual configured function-like printf macro",
+    "Direct BSD sys/proc.h inclusion into the selected Mach source imports conflicting daddr_t,dev_t and clock_t typedefs; KDECL-003 retains that measured failure",
+    "Selected osfmk/kern/task.c already supplies the exact opaque int proc_pid(struct proc *) bridge declaration; independent genuine BSD-profile controls establish proc_t compatibility and the real provider symbol",
+    "Actual target crypto_functions is 448 bytes; 8 inspected unsupported slots remain zero without relocations in both pure provider and independent table probe; full crypto and runtime support remain unqualified"
+  ],
+  "reddit": {
+    "tool": "reddit MCP search_reddit",
+    "query": "corecrypto",
+    "subreddit": "hackios",
+    "limit": 10,
+    "outcome": "archive-timeout",
+    "limitation": "Both bounded queries returned archive timeouts; search coverage is inconclusive, with no absence-of-results inference",
+    "attempts": [
+      {
+        "limit": 10,
+        "outcome": "archive-timeout"
+      },
+      {
+        "limit": 5,
+        "outcome": "archive-timeout"
+      }
+    ]
+  },
+  "sdk_used": false,
+  "device_executed": false,
+  "full_crypto_qualified": false,
+  "apple_private_abi_qualified": false
+}
