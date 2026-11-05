@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""VMSTOP-001: finite offline negative CLI observations, no guest execution."""
+"""VMSTOP-002: finite offline negative CLI observations, no guest execution."""
 
 import argparse
 import copy
@@ -33,7 +33,7 @@ def main():
     base = {name: (args.controls / name).read_bytes() for name in
             ("console.txt", "qmp.json", "supervisor.json", "source-preflight.json")}
     commands = []
-    for case in ("timeout", "host-origin", "malformed-qmp", "unreviewed-preflight"):
+    for case in ("timeout", "host-origin", "malformed-qmp", "unreviewed-preflight", "legacy-pid1"):
         folder = args.out / case
         folder.mkdir()
         content = copy.deepcopy(base)
@@ -57,7 +57,8 @@ def main():
         record = folder / "runtime.json"
         record.write_text(json.dumps(runtime, indent=2) + "\n")
         output = folder / "assessment.json"
-        argv = [sys.executable, "-s", str(tool), "--out", str(output), "assess", "--record", str(record)]
+        expected = "pid1-panic" if case == "legacy-pid1" else "halt"
+        argv = [sys.executable, "-s", str(tool), "--out", str(output), "assess", "--record", str(record), "--expected", expected]
         timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
         start = time.monotonic()
         with (folder / "stdout.txt").open("xb") as stdout, (folder / "stderr.txt").open("xb") as stderr:
@@ -78,7 +79,7 @@ def main():
                          "tool_sha256": digest(tool), "address_space_cap_bytes": 256 * 1024 * 1024})
     files = [{"path": str(path.relative_to(args.out)), "sha256": digest(path), "size": path.stat().st_size}
              for path in sorted(args.out.rglob("*")) if path.is_file()]
-    result = {"experiment": "VMSTOP-001", "task": "VM-030", "outcome": "pass",
+    result = {"experiment": "VMSTOP-002", "task": "VM-030", "outcome": "pass",
               "fixture_origin": "synthetic-authored-log", "guest_executed": False, "compiler_executed": False,
               "commands": commands, "files": files,
               "environment": {name: os.environ.get(name) for name in

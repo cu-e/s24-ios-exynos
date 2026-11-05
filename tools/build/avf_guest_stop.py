@@ -70,6 +70,8 @@ def preflight(root, descriptor):
         except (OSError, ValueError) as error:
             result["errors"].append(f"{key}: {error}")
     result["source_pins"] = data["source_pins"]
+    result["pid1_runtime_admissible"] = data.get("pid1_runtime_admissible") is True
+    result["pid1_admission_reason"] = data.get("pid1_admission_reason")
     if not result["errors"]:
         sources = read_json(relative(root, data["inputs"]["sources"]["path"]))
         composition = read_json(relative(root, data["inputs"]["composition"]["path"]))
@@ -187,6 +189,8 @@ def assess(record_path, expected):
         if any(prepared.get("inputs", {}).get(key, {}).get(field) != item[field]
                for field in ("path", "sha256", "size")):
             raise ValueError(f"Source preflight has a missing or changed input: {key}")
+    if expected == "pid1-panic" and bound.get("pid1_runtime_admissible") is not True:
+        raise ValueError("Legacy PID1 runtime admission is rejected: " + bound["pid1_admission_reason"])
     supervisor = read_json(paths["supervisor"])
     if supervisor.get("source_preflight_sha256") != inputs["preflight"]["sha256"]:
         raise ValueError("Runtime supervisor does not bind the source preflight")

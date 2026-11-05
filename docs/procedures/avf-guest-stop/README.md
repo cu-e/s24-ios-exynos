@@ -4,6 +4,10 @@ VM-030 prepares source-bound stop admission and an offline log assessor. It
 starts no compiler, QEMU, guest or phone operation. Actual guest PSCI execution
 and a complete source-qualified XNU image remain unmeasured. All apparent guest
 stops in the included controls are authored synthetic records.
+Legacy PID1 runtime admission is explicitly rejected: VM-025 found that its
+inline assembly declares x1 input-only although selected XNU overwrites x1.
+VM-034 owns a source-qualified replacement. This diagnosis does not claim a
+measured failure of the historical optimized binary.
 
 The owner is `codex-guest-exec-20261106-dl`; branch `team/vm-030-20261106`, worktree
 `worktrees/vm-030-20261106`, base `aac27cf`. Scope is this procedure directory,
@@ -14,7 +18,8 @@ checks under the shared integration lock.
 ## Exact source path
 
 The committed [input descriptor](../../../fixtures/public/avf-guest-stop/inputs.json)
-binds 15 existing inputs with streamed SHA256 and size. The genuine VM-007
+binds 17 existing inputs with streamed SHA256 and size, including the exact
+VM-025 rejection evidence and handoff. The genuine VM-007
 composition and canonical source manifests bind the Scion pin
 `a6f4bc38aa244359cd365c976244a88c9d6b3304`, public XNU pin
 `c54f35ca767986246321eb901baf8f5ff7923f6a`, and the exact composed kernel members
@@ -37,14 +42,16 @@ with their Git blob IDs. No shared source or promisor cache is modified.
    PSCI function. A panic wins over the reset flag. Firmware return prints
    `avf: the firmware refused to end the machine`; an earlier serial intent
    line is therefore insufficient to establish a completed stop.
-4. The owned [PID1 source](../../../src/virtualization/pid1.c) verifies PID1 and
+4. The legacy owned [PID1 source](../../../src/virtualization/pid1.c) attempts to verify PID1 and
    `kern.ostype`, writes the VM002 identity marker and invokes Darwin `exit(0)`.
    Composed `bsd/kern/kern_exit.c` lines 1806–1849 route initproc through
    `proc_handle_critical_exit()` and `panic_with_options()` even for exit status
    zero. Before `kern.initproc_spawned` is set, the expected prefix is
    `initproc failed to start`; it is not a normal userspace shutdown. Composed
    `osfmk/kern/debug.c` lines 1162–1184 call `loader_return()` on panic/reboot
-   paths. Some earlier faults/debugger behavior can still prevent reaching it.
+   paths. This is a source trace of intended behavior; the legacy syscall
+   wrapper is inadmissible until VM-034 and independent review resolve its ABI
+   defect. Some earlier faults/debugger behavior can still prevent reaching it.
 5. QEMU 10.2.0 source `target/arm/tcg/psci.c` lines 122–131 turns PSCI reset/off
    into `SHUTDOWN_CAUSE_GUEST_RESET`/`GUEST_SHUTDOWN`. `system/runstate.c`
    lines 691–702 converts reset into shutdown when the reboot action is
@@ -67,7 +74,7 @@ upstream implementation or binary is copied into this commit.
 | Observation | Classification |
 | --- | --- |
 | Exact stop-enabled boot args, running QEMU with `-no-reboot`, exactly one expected serial PSCI intent, one matching QMP `SHUTDOWN` with `guest: true`, exit zero before the finite deadline, no host signals and no live owned PID | Guest-origin stop evidence consistent with the bound PSCI path |
-| For the PID1 case, Darwin banner followed by owned identity, critical-initproc panic and SYSTEM_OFF intent, plus all criteria above | Expected owned-PID1 panic stop evidence |
+| For a future qualified PID1 case, Darwin banner followed by owned identity, critical-initproc panic and SYSTEM_OFF intent, plus all criteria above | Expected owned-PID1 panic stop contract; current runtime assessment rejects legacy PID1 |
 | Identity/serial intent appears, but timeout occurs or the host sends a signal | Host cleanup, regardless of exit zero or identity marker |
 | Only exit zero/serial text, missing QMP or missing signal/reaping records | Inconclusive |
 | Shim fatal, firmware refusal, host-origin or duplicate shutdown, reset loop, unexpected panic event, stale source/tool/log binding | Rejected or inconclusive |
@@ -77,6 +84,11 @@ by this program. QMP guest origin and console intent do not trace an executed
 PSCI instruction. Collector authenticity, complete QMP capture and the binding
 between a qualified kernel image and these sources require separate review.
 No complete kernel is accepted by this tool and it grants no build/guest lease.
+The current descriptor sets `pid1_runtime_admissible` false, so `assess` with
+the default `--expected pid1-panic` always rejects the legacy source. Direct
+synthetic classifier controls exercise the intended future panic/stop sequence;
+they do not bypass runtime admission. Changing the flag requires a separately
+reviewed VM-034 replacement descriptor and source-to-image provenance.
 
 The existing VM-002 supervisor records a deadline flag and exit code, but does
 not record QMP shutdown cause or exhaustive host signals/reaping. It can label
@@ -95,7 +107,7 @@ LC_ALL=C PYTHONUTF8=1 PYTHONNOUSERSITE=1 python3 -s tools/build/avf_guest_stop.p
 ```
 
 The offline runtime record schema is demonstrated by
-`artifacts/avf-guest-stop/controls-2/synthetic-runtime.json` in this worktree.
+`artifacts/avf-guest-stop/controls-3/synthetic-runtime.json` in this worktree.
 It references console, QMP JSON event array, supervisor JSON and preflight JSON
 using relative paths and exact SHA256. All paths remain under the record's
 directory; traversal and escaping symlinks are rejected. The supervisor binds
@@ -109,6 +121,7 @@ python3 -s tools/build/avf_guest_stop.py --out NEW-assessment.json assess \
 ```
 
 `--expected halt` and `--expected reset` inspect distinct future stop cases.
+The current synthetic full-artifact positive control uses `--expected halt`.
 Exit 0 accepts a source preflight or supplied guest-stop observation set;
 exit 2 rejects it or records host cleanup/inconclusive status. Output paths
 must be new to preserve previous attempts. JSON and console inspections are
@@ -124,22 +137,20 @@ LC_ALL=C PYTHONUTF8=1 PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 python3 -s \
   --out artifacts/avf-guest-stop/NEW-controls
 ```
 
-The final scoped controls exercised 43 cases with a 256 MiB address-space cap;
-current-image HWM was 40,292 KiB. Actual CLI source preflight passed, synthetic
-artifact assessment passed, and a changed console digest was rejected with
-exit 2. The preceding 38-case run remains as `controls-1`; it predates added
-malformed-record and preflight binding controls and is not the final freeze.
-Registered experiment VMSTOP-001 then exercised four actual negative Python
-CLI invocations. Timeout with exit zero was `host-cleanup`, host-origin QMP was
-`inconclusive`, and malformed QMP/unreviewed preflight failed; all exited 2.
-Each invocation completed in less than 0.12 seconds with current-image VmHWM
-at most 19,624 KiB under its inherited 256 MiB address-space cap.
-See [evidence.json](evidence.json) and [experiment.md](experiment.md) for exact
-commands, retained negative outputs and acceptance limits.
+The final scoped controls exercised 44 cases with a 256 MiB address-space cap;
+current-image HWM was 40,116 KiB. Actual CLI source preflight passed, synthetic
+halt artifact assessment passed, and legacy PID1 assessment was rejected with
+exit 2. The preceding 38/43-case runs and VMSTOP-001 four-case experiment remain
+preserved. Their positive synthetic PID1 artifact admission predates discovery
+of the legacy ABI defect and is superseded by the explicit rejection gate.
+See [evidence-final.json](evidence-final.json) and
+[experiment-2.md](experiment-2.md) for final commands and acceptance limits;
+[evidence.json](evidence.json) and [experiment.md](experiment.md) retain the
+unchanged earlier freeze.
 
 ## Handoff
 
-Independent review should inspect the 15 immutable bindings, source trace,
+Independent review should inspect the 17 immutable bindings, source trace,
 classifier's separation of guest origin and forced cleanup, and all retained
 negative logs. The kernel integrator receives the scoped commit and evidence.
 The original owner retains the task until review and integrator acceptance.

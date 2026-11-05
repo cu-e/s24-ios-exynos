@@ -117,7 +117,7 @@ def main():
     cases.append({"name": "source-path-traversal", "result": rejected})
 
     # Full artifact bindings are exercised with explicitly synthetic captures.
-    (args.out / "console.txt").write_bytes(console)
+    (args.out / "console.txt").write_bytes(tool.HALT_OFF + b"\n")
     (args.out / "qmp.json").write_text(json.dumps(events) + "\n")
     supervisor = copy.deepcopy(supervisor)
     supervisor["source_preflight_sha256"] = tool.digest(args.out / "source-preflight.json")
@@ -129,7 +129,7 @@ def main():
         runtime[key] = {"path": name, "sha256": tool.digest(args.out / name)}
     runtime_path = args.out / "synthetic-runtime.json"
     runtime_path.write_text(json.dumps(runtime, indent=2) + "\n")
-    assessed = tool.assess(runtime_path, "pid1-panic")
+    assessed = tool.assess(runtime_path, "halt")
     assert assessed["classification"] == "guest-stop"
     cases.append({"name": "synthetic-artifact-bindings", "result": assessed,
                   "fixture_origin": "synthetic-authored-log"})
@@ -139,7 +139,7 @@ def main():
         path = args.out / f"changed-{key}.json"
         path.write_text(json.dumps(changed, indent=2) + "\n")
         try:
-            tool.assess(path, "pid1-panic")
+            tool.assess(path, "halt")
         except ValueError as error:
             assert "hash mismatch" in str(error)
             cases.append({"name": f"changed-runtime-{key}", "rejected": str(error)})
@@ -155,7 +155,7 @@ def main():
         path = args.out / f"changed-{key}-record.json"
         path.write_text(json.dumps(changed_record, indent=2) + "\n")
         try:
-            tool.assess(path, "pid1-panic")
+            tool.assess(path, "halt")
         except ValueError as error:
             assert "does not bind" in str(error)
             cases.append({"name": f"changed-supervisor-{key}", "rejected": str(error)})
@@ -170,12 +170,19 @@ def main():
     path = args.out / "forged-preflight-record.json"
     path.write_text(json.dumps(changed_record, indent=2) + "\n")
     try:
-        tool.assess(path, "pid1-panic")
+        tool.assess(path, "halt")
     except ValueError as error:
         assert "reviewed descriptor" in str(error)
         cases.append({"name": "forged-preflight-descriptor", "rejected": str(error)})
     else:
         raise AssertionError("Forged preflight accepted")
+    try:
+        tool.assess(runtime_path, "pid1-panic")
+    except ValueError as error:
+        assert "Legacy PID1 runtime admission is rejected" in str(error)
+        cases.append({"name": "legacy-pid1-runtime-inadmissible", "rejected": str(error)})
+    else:
+        raise AssertionError("Legacy PID1 runtime admission accepted")
     report = {"task": "VM-030", "outcome": "pass", "case_count": len(cases), "cases": cases,
               "compiler_executed": False, "guest_executed": False,
               "synthetic_guest_stop_results_are_measurements": False,
