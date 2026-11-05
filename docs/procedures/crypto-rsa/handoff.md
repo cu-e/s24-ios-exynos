@@ -10,7 +10,7 @@ RSACOMP-001..003 were planned before their executable checks. The current
 success, genuine unchanged selected-caller dispatch, both deliberate sanitizer
 faults, full native typed component objects and synthetic CPU objects. It remains
 an overall failed capsule because CPU linking exposed missing `___memset_chk`.
-No QEMU run has occurred. Do not describe source replay/tool-version children as
+No QEMU run had occurred at that stage. Do not describe source replay/tool-version children as
 no execution: the first memory-gated attempt completed those stages, then stopped
 before compilation. The second attempt retained a host compiler-macro issue;
 Linux lacked Darwin's `__enum_decl`. The exact canonical BSD compiler-macro block
@@ -59,7 +59,8 @@ Actual native layout is `[1584,8,64,8,24,24,1568,24]`. All production stack usag
 records are static: constructor1664, verifier1280, i31 public2272, PKCS verifier592,
 unpad160, modpow176 bytes, plus smaller callees. These are component measurements,
 not a complete native caller-stack proof. The observed build process group peak
-was96,440,320 bytes. CPU stack high-water/finite execution remains pending.
+was96,440,320 bytes. CPU stack high-water/finite execution was subsequently
+measured in RSACOMP-006 below.
 
 The coordinator approved an RSA-owned CPU-only real `__memset_chk`, excluded from
 production manifests. `finish-session1` stopped on the memory gate before any
@@ -79,8 +80,18 @@ produced RSA FAIL and PSCI shutdown, and the owned spin timed out at3seconds.
 All four process groups ended with zero owned processes. The lease was released
 immediately. Total run41.61seconds included36.03seconds finite memory admission.
 
-Next: frozen Git/source-byte publication audit, scoped commits and independent
-coordinator review/integration/common checks. Keep in_progress until accepted.
+RSACOMP-007 completed the frozen Git/source-byte publication audit against
+implementation commit `a81876609fa33928f0c415f6a7d4b30013ed9ef6`: all41 compiled
+owned C/header files match their committed bytes. Real19-object native symbol
+tables contain no allocating imports. Remaining actual closure imports are
+`___memcpy_chk`, `___memset_chk`, `___stack_chk_fail`, `___stack_chk_guard`,
+`_bzero`, `_mbedtls_platform_zeroize`, `_memcmp`, `_memcpy` and `_memmove`.
+These genuine runtime dependencies require integration; synthetic fixture
+providers do not establish kernel provider availability. The published
+`qualified-evidence.json` binds all three actual stage capsules and their hashes.
+No compiler or guest ran during this audit.
+
+Next: independent coordinator review/integration/common checks. Keep in_progress until accepted.
 No native, provider/private-ABI/FIPS/side-channel qualification is established.
 This task performs no heavy kernel relink. See the component README for exact
 fixed-container, OID, status/alias and unrelated-cczp limitations.

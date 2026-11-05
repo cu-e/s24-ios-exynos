@@ -55,6 +55,7 @@ immutable; publication wrappers bind original hashes and primary-checkout paths.
 | RSACOMP-004, `finish-session1` | Frozen bytes rechecked; memory gate stopped before any new compiler/helper/link child. No new algorithm execution. |
 | RSACOMP-005, `finish-session2` | Reused frozen successful objects, added only the approved synthetic checked-fill provider, passed8,304 independent memory checks and linked two actual CPU images. Canonical selected headers and accepted complete shared dependencies matched. |
 | RSACOMP-006, `cpu-session1` | Actual ARM491-vector/782,365-check pass,10,604-byte observed stack; wrong-cookie, actual positive-signature mutation and3-second owned-spin controls passed. Zero owned processes remained; lease immediately released. |
+| RSACOMP-007, `qualified-evidence.json` | All41 compiled owned C/header files match implementation commit `a81876609fa33928f0c415f6a7d4b30013ed9ef6`; actual19-object native symbol closure has no allocating imports. No compiler or guest executed. |
 
 The final publication audit binds actual compiled C/header bytes to a frozen Git
 commit and inspects real native object symbols. It runs no compiler or guest.
