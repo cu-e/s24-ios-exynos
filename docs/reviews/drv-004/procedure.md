@@ -1,0 +1,5 @@
+# DRV-004 independent source review procedure
+
+2026-11-05; REV-007; reviewer codex-team-review-ufs-20261105-ay.
+
+Review exact candidate 1e0b86c8e5a322c60718006b053739d96a641078 and actual final-session2/commit-session1 capsules, source-cache and handoff read-only. Audit primary Git tree blob identities with lazy fetch and optional locks disabled; no shared source fetch/mutation. Inspect genuine UTRD/CQE/UPIU/PRDT and Samsung tag-address semantics, READ-only policy, integer extents, DMA lease state, stale/malformed/errors/timeout/reclaim and1088-byte UCD versus128-byte alignment. Compile a separate bounded source-derived oracle with independent descriptor/completion and adversarial lifecycle assertions, and demonstrate any contract limits honestly. Save exact source/tool/artifact hashes, commands/exits and dated review evidence; commit only this review directory. At most two small compiler jobs and256MiB resident memory when practical. No heavy build, QEMU, phone, ADB, root, MMIO, DMA mapping or hardware command. Keep task in progress until coordinator acceptance.
