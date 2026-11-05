@@ -1,0 +1,241 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T22:30:08.286618+00:00",
+  "task": "REV-030",
+  "experiment": "REVHIST-001",
+  "owner": "codex-review-history-gate-20261106-dx",
+  "commit": "d701bacf5cdc83e3084e1efba0b7fb2c6a5e55b8",
+  "reviewed_commits": [
+    "008171aeacd3d1cdf557888c811691a920a79825",
+    "e297d42e97e0589c83bb1d9e3dffd7fbc3196fc1",
+    "e59ef0eb679e2f23c34287e7ddd103d15bc61704",
+    "f9b2a61188e0f9801ec36f017b3d5b997120d322"
+  ],
+  "summary": "Accept exact optional historical path union and corrected JSON array schema. Independent real-Git controls preserve mapped patches, all union safety boundaries and legacy behavior; real eight-commit VM013 history admits exactly13 net paths plus transient inspect.py. Original P2 malformed-type acceptance is fixed and failures retained. No MAIN publication/common/compiler/guest.",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-s",
+        "docs/reviews/integration-historical/history.py"
+      ],
+      "exit_code": 0,
+      "report": "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/vm013-history.json",
+      "note": "Exact Git child commands, exits and audit decisions are retained in the report.",
+      "outer_timeout_seconds": null
+    },
+    {
+      "argv": [
+        "timeout",
+        "190s",
+        "python3",
+        "-s",
+        "docs/reviews/integration-historical/controls.py",
+        "--gate",
+        "docs/reviews/integration-historical/baseline-gate.py",
+        "--output",
+        "docs/reviews/integration-historical/baseline-controls.json",
+        "--baseline-only"
+      ],
+      "exit_code": 0,
+      "report": "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/baseline-controls.json",
+      "note": "Exact Git child commands, exits and audit decisions are retained in the report.",
+      "outer_timeout_seconds": 190
+    },
+    {
+      "argv": [
+        "timeout",
+        "190s",
+        "python3",
+        "-s",
+        "docs/reviews/integration-historical/controls.py",
+        "--gate",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/int-history-gate-20261106/tools/integration_gate.py",
+        "--output",
+        "docs/reviews/integration-historical/frozen-controls.json"
+      ],
+      "exit_code": 0,
+      "report": "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/frozen-controls.json",
+      "note": "Exact Git child commands, exits and audit decisions are retained in the report.",
+      "outer_timeout_seconds": 190
+    },
+    {
+      "argv": [
+        "timeout",
+        "190s",
+        "python3",
+        "-s",
+        "docs/reviews/integration-historical/actual-history-control.py"
+      ],
+      "exit_code": 0,
+      "report": "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/actual-history-control.json",
+      "note": "Exact Git child commands, exits and audit decisions are retained in the report.",
+      "outer_timeout_seconds": 190
+    },
+    {
+      "argv": [
+        "timeout",
+        "30s",
+        "python3",
+        "-s",
+        "docs/reviews/integration-historical/schema-control.py"
+      ],
+      "exit_code": 1,
+      "report": "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/schema-control.json",
+      "note": "Actual failed invocation filename was schema-control.py; source_snapshot preserves those exact original script bytes.",
+      "source_snapshot": "docs/reviews/integration-historical/schema-control-failed.py",
+      "outer_timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "timeout",
+        "190s",
+        "python3",
+        "-s",
+        "docs/reviews/integration-historical/controls.py",
+        "--gate",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/int-history-schema-20261106/tools/integration_gate.py",
+        "--output",
+        "docs/reviews/integration-historical/corrected-controls.json"
+      ],
+      "exit_code": 0,
+      "report": "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/corrected-controls.json",
+      "note": "Exact Git child commands, exits and audit decisions are retained in the report.",
+      "outer_timeout_seconds": 190
+    },
+    {
+      "argv": [
+        "timeout",
+        "30s",
+        "python3",
+        "-s",
+        "docs/reviews/integration-historical/schema-control.py",
+        "--gate",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/int-history-schema-20261106/tools/integration_gate.py",
+        "--output",
+        "docs/reviews/integration-historical/corrected-schema-controls.json"
+      ],
+      "exit_code": 0,
+      "report": "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/corrected-schema-controls.json",
+      "note": "Exact Git child commands, exits and audit decisions are retained in the report.",
+      "outer_timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "timeout",
+        "190s",
+        "python3",
+        "-s",
+        "docs/reviews/integration-historical/corrected-actual-history-control.py"
+      ],
+      "exit_code": 0,
+      "report": "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/corrected-actual-history-control.json",
+      "note": "Exact Git child commands, exits and audit decisions are retained in the report.",
+      "outer_timeout_seconds": 190
+    }
+  ],
+  "environment": {
+    "LC_ALL": "C",
+    "PYTHONUTF8": "1",
+    "PYTHONNOUSERSITE": "1",
+    "GIT_NO_LAZY_FETCH": "1",
+    "GIT_OPTIONAL_LOCKS": "0",
+    "GIT_CONFIG_NOSYSTEM": "1",
+    "GIT_CONFIG_GLOBAL": "/dev/null"
+  },
+  "results": {
+    "baseline_cases": 4,
+    "original_extension_cases": 32,
+    "final_extension_cases": 32,
+    "final_malformed_cases": 7,
+    "real_VM013_commits": 8,
+    "real_net_paths": 13,
+    "real_union_paths": 14,
+    "exact_historical_paths": [
+      "fixtures/public/avf-object-shards/iokit/inspect.py"
+    ],
+    "captured_MAIN_base": "12a43eef4a00da24bed6604655854ef533d2bbb2",
+    "final_suite_elapsed_seconds": 2.761,
+    "final_actual_history_elapsed_seconds": 1.879,
+    "final_suite_current_image_peak_rss_bytes": 23695360,
+    "final_actual_history_current_image_peak_rss_bytes": 24055808,
+    "original_producer_bindings": 61,
+    "corrected_producer_bindings": 49
+  },
+  "resolved_findings": [
+    {
+      "severity": "P2",
+      "issue": "New historical_paths accepted object and scalar string instead of documented array. Exact scope remained bound.",
+      "original_actual_decisions": [
+        true,
+        true
+      ],
+      "original_failure_report": "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/schema-control.json",
+      "fix_commit": "e59ef0eb679e2f23c34287e7ddd103d15bc61704",
+      "resolution": "Require JSON array and string members before set conversion; seven independent malformed-shape probes all rejected."
+    }
+  ],
+  "remaining_P0_P1_P2": [],
+  "source_bindings": {
+    "baseline_gate_sha256": "cdfe788a5542868a8b15af6e25a98568f5091d739eb1587d597641bc3c8130db",
+    "original_gate_sha256": "59c3712982483d2e1f5f33437978844605d86dd942bcf2fde1a42b00ac976688",
+    "final_gate_sha256": "a1e028140e0f1747306a4c2257c3a3f77976e03a83ae59c171991d750286b3c3",
+    "original_producer_capsule_sha256": "4cfffde860dbc4d6e14dd36d93094a2781b4383ac01bc671892a9f92146f5bae",
+    "corrected_producer_capsule_sha256": "8cc05abc231313f40c905e4287c5967c2446fdff8070a63ebbfe108d8dc34ea3"
+  },
+  "limitations": [
+    "Audits only; no publication or project common execution by reviewer.",
+    "No new resource-supervisor/approval/continuous-publication qualification; those source paths unchanged.",
+    "Nonempty net paths policy retained; malformed legacy paths schema untouched.",
+    "Temporary Git clones reference shared objects read-only with lazy fetch disabled; all branch/index/worktree writes occur only in disposable repositories.",
+    "No full kernel, linker, XNU console, PID1 or device qualification."
+  ],
+  "artifacts": [
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/actual-history-control.json",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/actual-history-control.py",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/baseline-controls.json",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/baseline-gate.py",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/controls.py",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/corrected-actual-history-control.json",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/corrected-actual-history-control.py",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/corrected-controls.json",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/corrected-schema-controls.json",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/frozen-controls.json",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/frozen-gate-008171ae.py",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/handoff.md",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/history.py",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/procedure.md",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/producer-bindings-corrected.json",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/producer-bindings-original.json",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/schema-control-failed.py",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/schema-control.json",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/schema-control.py",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/vm013-history.json"
+  ],
+  "sha256": {
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/actual-history-control.json": "289285d64206a9b7d6984442252b1e5fa0aa13f44903c0d1eb02e6d808157a99",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/actual-history-control.py": "4b2cc29111fe5ae65582428913dbebd1d1c3773918c43fa7cc5dd1a22f86f8d7",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/baseline-controls.json": "6f4cab0655f272493e029bac5b092bd03a92b3d9a3e01526891415e4e4d5f7d1",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/baseline-gate.py": "cdfe788a5542868a8b15af6e25a98568f5091d739eb1587d597641bc3c8130db",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/controls.py": "5f8368fd84474659e1cc356410326cabb0f6519c946821f4f4afca534d777171",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/corrected-actual-history-control.json": "9f11f60369e7188837f482e01c1d5a2bcdb7ea9bfc2451337d7d1e86efb8b05f",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/corrected-actual-history-control.py": "7e766b20a280ed539eb09d1d413c089b9be70eb9dcddbd3f10e5f7c9dfd2b45a",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/corrected-controls.json": "94ba475b89206f6e64f7f14a07b6f1699c47b1381660ed450be184794e4c7506",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/corrected-schema-controls.json": "f156a2a6cad6c382527d8e179efb26082c683b64ede6670dd30c179f78fa3707",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/frozen-controls.json": "617a8105d5cbab0d602c7ca94d69b7a0c5b58a46feba9e217474a92502ed341f",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/frozen-gate-008171ae.py": "59c3712982483d2e1f5f33437978844605d86dd942bcf2fde1a42b00ac976688",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/handoff.md": "247aa36d3f1e42b69781058af583269ab60b01204fe626606bef6efe64f7ec46",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/history.py": "010987f29535a20578494c29d16bdf81b24cd53ecf7846e97292f9173e5ac8ac",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/procedure.md": "3a54ef74bc29557370aa43c3aeeefea98c95001d5e7d6ed5d200b0305e70342c",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/producer-bindings-corrected.json": "1bc360f4a1863d0192cf455cdea5632431956adcceaf61a431d704ebfe8f83b1",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/producer-bindings-original.json": "fd5c14ad0f5565c0332ca27101b026c5ad9ec977c4538c3505889aed7913274a",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/schema-control-failed.py": "5a8d25c944c34f631ae680f6ca5f282fde87a69978bacc155a41d8426ec5b999",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/schema-control.json": "d92f2065f3bae4816f0f3de6efbf62a4d019d74e1d0cfff92aa5780d95428557",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/schema-control.py": "a1e094dc9d5252f00493934e0346bc8519f60887ac9fc34ecfcee73a19d6b5ac",
+    "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/vm013-history.json": "709c00bf274f55f9b7c1184c3570bc16b087a1335aae430231dc89973874c2d0"
+  },
+  "handoff": "worktrees/rev-history-gate-20261106/docs/reviews/integration-historical/handoff.md",
+  "next_step": "Root and INT002 accept scoped review and exact corrected gate, publish with refreshed approved plan and run fresh MAIN common checks under integration lock; original dx owner closes only after explicit root acceptance."
+}
