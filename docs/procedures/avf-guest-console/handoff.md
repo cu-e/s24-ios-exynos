@@ -18,7 +18,18 @@ logs and that launch/image identity gates belong with the kernel integrator.
 
 Validation commands, actual exits, streaming input/tool/output hashes, time
 and sampled `/proc` VmHWM appear in `evidence.json` and its retained artifact
-directory. Source-binding preparation initially rejected a non-unique `uart0`
+directories `artifacts/avf-guest-console/evidence-e959092` and
+`artifacts/avf-guest-console/evidence-c1520be` in this worktree. All11 controls
+pass; source preflight exits0, actual VM-005 synthetic-console rejection exits2,
+and isolated missing DEVELOPMENT flag exits1 with its expected diagnostic.
+Maximum sampled child VmHWM is73,232KiB under a256MiB per-process address-space
+limit. This is sampled evidence; a short child may exit between observations.
+Implementation commit `e95909294487b4ad7f05a13804fdf5da1066dc51` is followed
+by `c1520be` adding an isolated flag control and clearer bit-mask prose. The
+original broad missing-argument negative is preserved; it omitted multiple
+required options, so the follow-up specifically isolates the DEVELOPMENT flag.
+
+Source-binding preparation initially rejected a non-unique `uart0`
 needle; the completed fixture records both actual matching lines. Read-only
 source exploration also returned missing guessed arm64/pe_init.c,
 arm64/board_config.h, bsd/kern/tty_cons.c and build/config/vers.c paths; actual
