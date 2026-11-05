@@ -5,6 +5,29 @@ Branch/worktree: `team/krn-023-20261105` / `worktrees/krn-023-20261105`.
 Own only `tools/research/corecrypto`, `docs/procedures/corecrypto-provider`,
 `fixtures/public/corecrypto-provider`, `patches/corecrypto-provider`.
 
+Latest result supersedes the cc_kext interpretation in the initial capsules:
+CCPROV-007 is bound to correction commit
+`5e7d3bb81bbb107f908738d93e86108892af16e6`. The actual planned replay
+`python3 tools/research/corecrypto/audit.py --run driver-correction-session3`
+exits0 with56 checks/33 negatives and peak RSS160192KiB. Final capsule:
+`worktrees/krn-023-20261105/tools/research/corecrypto/local/driver-correction-session3/evidence.json`.
+Its hash and exact plan/audit timestamps are in qualified-audit.json.
+
+All three pinned Clang driver source blobs match retained source lineage.
+Actual full-argument retained-driver plans omit missing compiler runtime and
+preserve a literal -lcc_kext only through the explicit -Xlinker control.
+Rewrite/runtime-name/existence-gate/false-crypto-identity mutations reject.
+The -lcc_kext request is compiler support, not crypto-provider identity; the
+former libcc_kext search-directory/provider inference is removed. No ld64,
+compiler-runtime build or provider implementation was executed. KRN-025 owns
+runtime qualification; the crypto56-slot/21-unsupported gate is independent.
+KRN-024's current native profile is separately hash-linked, not conflated with
+the retained KLINK-011/VCOMP-002 driver actually planned here.
+
+Historical CCPROV-006 passed56 tests but began2seconds before its pending
+plan acquired the ledger lock. Its workflow deviation is preserved; final
+CCPROV-007 was registered before running. Older capsules remain unchanged.
+
 Implementation/source-audit commit:
 `e4e11be38ee3d41b233f58b8d4c9234c2af93e28`. The final evidence/summary commit
 adds only these owned reports. No shared registry/generated views are included.

@@ -112,6 +112,8 @@ or qualify any archive. No ld64 command is executed by these plans. The former
 libcc_kext search-directory inventory was irrelevant to Darwin's compiler-rt
 resolution and is removed. KRN-024 assesses the current full link; KRN-025 owns
 compiler-runtime qualification. Neither is a crypto-provider implementation.
+The local plans reproduce the retained KLINK-011/VCOMP-002 driver profile;
+KRN-024's current-profile report is a separately hash-linked owner witness.
 
 The current coherent982-object symbol-consumer graph has no reference to
 `_corecrypto_kext_start` or `_corecrypto_kext_stop`. The public provider defines
@@ -185,6 +187,14 @@ links the exact existing evidence capsule and its immutable digest.
 These historical capsules retain their original bytes and are superseded for
 the cc_kext interpretation. [driver-correction.md](driver-correction.md)
 plans the source-backed mapping check, real driver plans and correction replay.
+The corrected final capsule is **CCPROV-007**, bound to
+`5e7d3bb81bbb107f908738d93e86108892af16e6`:56 checks pass, including33 negative
+controls, with peak child RSS160192KiB. Its plan registration precedes the
+actual replay. The table/catalog is unchanged, and the driver source mapping,
+actual backend omission, explicit forwarding and source-policy negatives are
+additional evidence. CCPROV-006's56 checks also passed, but the pending plan
+acquired the ledger lock2seconds after that audit began; its workflow deviation
+is retained, and CCPROV-007 supplies the correctly planned final replay.
 
 Controls change all21 actual zero-slot bytes individually and one active
 relocation, alter a real source hash, remove the required library flag, compile
