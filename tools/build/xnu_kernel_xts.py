@@ -15,7 +15,7 @@ def memory_available():return int(re.search(r'MemAvailable:\s*(\d+)',Path('/proc
 
 def admit_memory(report,label):
  """Coordinator-approved stable launch admission; never lowers4GiB floor."""
- floor=4*1024**3;remaining=max(0,180-report.get('admission_total_wait_seconds',0));budget=min(45,remaining);start=time.monotonic();deadline=start+budget;consecutive=0
+ floor=4*1024**3;remaining=max(0,180-report.get('admission_total_wait_seconds',0));budget=min(45,remaining,max(0,report.get('_whole_deadline',float('inf'))-time.monotonic()));start=time.monotonic();deadline=start+budget;consecutive=0
  record={'command':label,'required_bytes':floor,'required_consecutive_samples':3,'sample_interval_seconds':1,'max_wait_seconds':budget,'samples':[],'child_started_below_floor':False,'admitted':False}
  report.setdefault('admission_waits',[]).append(record)
  while True:
@@ -63,12 +63,23 @@ def image_proof(path,require_table=True):
  if require_table and (table is None or read(table+144,'<2Q')!=(public['_s24_kernel_xts_encrypt']['va'],public['_s24_kernel_xts_decrypt']['va'])):raise ValueError('Actual linked caller table must reference immutable descriptors')
  return {'public_descriptors':public,'actual_test_table_va':table,'mapped_entry_va':symbol('_mapped_entry'),'tt0_va':symbol('_tt0'),'tt1_va':symbol('_tt1'),'l2_va':symbol('_high_l2'),'VA_minus_PA':0xffffffefc4000000,'TTBR1_L1_index':448,'TTBR1_L2_first_index':32,'L2_blocks':128,'L2_block_bytes':2*1024*1024,'mapped_VA_start':0xfffffff004000000,'mapped_PA_start':0x40000000,'mapped_bytes':256*1024*1024,'kernel_MMU_qualified':False}
 
+def shifted_mapping_result(console,run,proof,segments):
+ """Exact observed pinned-shim fault path, not a relaxed positive marker."""
+ fault=re.search(r'avfboot: exception slot=(0x[0-9a-f]+) during xnu\s+esr=(0x[0-9a-f]+) elr=(0x[0-9a-f]+) far=(0x[0-9a-f]+)',console)
+ expected_pc=proof['mapped_entry_va'];delta=proof['VA_minus_PA'];wrong_pa=(expected_pc-delta-0x200000)&((1<<64)-1)
+ loaded=[(x['vmaddr']-delta,(x['vmaddr']-delta)+x['vmsize']) for x in segments]
+ outside=not any(start<=wrong_pa<end for start,end in loaded)
+ accepted=bool(fault) and tuple(int(fault[i],16) for i in [1,2,3,4])==(4,0x02000000,expected_pc,0) and outside and run['exit_code']==0 and run['outcome']=='pass' and 'KXTS MAPPING START' in console and 'KXTS MAPPED' not in console and 'KXTS CALLER PASS' not in console and 'avfboot: FATAL: unexpected exception' in console and 'avfboot: powering off' in console
+ return {'accepted':bool(accepted),'classification':'controlled shifted mapping causes pinned shim exception handler and natural PSCI shutdown','expected_ELR':expected_pc,'shifted_physical_target':wrong_pa,'outside_loaded_image':outside,'actual_exception':{'slot':int(fault[1],16),'ESR':int(fault[2],16),'ELR':int(fault[3],16),'FAR':int(fault[4],16)} if fault else None,'normal_L2_first_index':32,'control_L2_first_index':33,'watchdog_timeout_required':False}
+
 def guest_main(a,m):
  if not a.native_artifacts or not a.lease_grant:raise ValueError('Existing component artifacts and explicit coordinator lease message required')
  out=WT/'artifacts/kernel-xts'/a.run;out.mkdir(parents=True,exist_ok=False);shutil.copyfile(__file__,out/'builder.py');native=a.native_artifacts.resolve();parent=load(native/'evidence.json')
  spec=importlib.util.spec_from_file_location('accepted_xts_supervisor',WT/'src/platform/crypto/xts/check.py');bounded=importlib.util.module_from_spec(spec);spec.loader.exec_module(bounded);avf=bounded.avf
  r=dict(kind='host-test',origin='local-host',outcome='fail',task='KRN-031',recorded_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),commands=[],source_reads=[],lease_grant=a.lease_grant,full_kernel_qualified=False,full_crypto_qualified=False,native_device_qualified=False,genuine_selected_caller_executed=False)
+ r['_whole_deadline']=time.monotonic()+300;r['whole_timeout_seconds']=300
  try:
+  revision=subprocess.run(['git','-C',str(WT),'rev-parse','HEAD'],env=ENV,capture_output=True,text=True,check=True,timeout=10);r['commit']=revision.stdout.strip();r['builder_sha256']=sha(__file__)
   tasks={t['id']:t for t in load(m/'state/lab.json')['tasks']}
   if tasks['KRN-031']['owner']!=OWNER or tasks['KRN-031']['status']!='in_progress':raise ValueError('Require current owner')
   if parent['outcome']!='pass' or not parent.get('guest_image_ready'):raise ValueError('Require source-qualified component image')
@@ -85,6 +96,10 @@ def guest_main(a,m):
   r['qualified_inputs']={'pins':avf.PIN,'qemu':str(qemu),'shim':str(shim),'reports':{str(p.relative_to(m)):sha(p) for p in [vm2/'report.json',vm4/'build-6/build-report.json',vm4/'release-10.2.0/source-manifest.json']},'helper_sha256':sha(WT/'src/platform/crypto/xts/check.py'),'fixture_sha256':sha(WT/'fixtures/public/xnu-kernel-xts/guest.c'),'runtime_sha256':sha(WT/'fixtures/public/avf-handoff/runtime.h')}
   images=parent.get('guest_images',{'positive':{'path':str(image.relative_to(m)),'sha256':sha(image)}})
   cases=['positive','wrong-cookie','bad-mapping','corrupt-vector','original-caller','factory-mismatch','panic','spin'] if a.all_controls else ['positive']
+  if a.guest_cases:
+   cases=a.guest_cases.split(',')
+   if not cases or len(cases)!=len(set(cases)) or any(x not in ['positive','wrong-cookie','bad-mapping','corrupt-vector','original-caller','factory-mismatch','panic','spin'] for x in cases):raise ValueError('Explicit unique valid guest cases required')
+  r['requested_cases']=cases
   r['guest_cases']=[]
   for case in cases:
    label=case if case in images else 'positive';image=m/images[label]['path']
@@ -97,7 +112,9 @@ def guest_main(a,m):
    payload=out/(case+'.xnup');cookie='xts_cookie=wrong' if case=='wrong-cookie' else 'xts_cookie=owned-adapter-v1';avf.xnup(payload,kernel,'cpus=1 '+cookie)
    command=[qemu,'-machine','virt,gic-version=3','-accel','tcg','-cpu','cortex-a76','-smp','1','-m','256','-kernel',shim,'-nodefaults','-nic','none','-display','none','-serial','stdio','-monitor','none','-no-reboot','-initrd',payload]
    admit_memory(r,case)
-   result=bounded.run(command,out,case,3 if case in ['bad-mapping','spin'] else 30,512);r['commands'].append(result);console=(out/(case+'.log')).read_text(errors='replace')
+   case_timeout=3 if case in ['bad-mapping','spin'] else 30
+   if time.monotonic()+case_timeout+5>r['_whole_deadline']:raise ValueError('whole-batch deadline defers child '+case)
+   result=bounded.run(command,out,case,case_timeout,512);r['commands'].append(result);console=(out/(case+'.log')).read_text(errors='replace')
    mapped=re.search(r'KXTS MAPPED pc=(0x[0-9a-f]+) mode=(0x[0-9a-f]+) init=(0x[0-9a-f]+) tt0=(0x[0-9a-f]+) tt1=(0x[0-9a-f]+) tcr=(0x[0-9a-f]+)',console);passed=re.search(r'KXTS CALLER PASS vectors=(0x[0-9a-f]+) checks=(0x[0-9a-f]+) line=0x0',console)
    if mapped:
     enc=proof['public_descriptors']['_s24_kernel_xts_encrypt'];delta=proof['VA_minus_PA']
@@ -108,8 +125,11 @@ def guest_main(a,m):
     if ok:
      r['vectors']=int(passed[1],16);r['checks']=int(passed[2],16);ok=r['vectors']==1220 and r['checks']==7350;r['genuine_selected_caller_executed']=bool(ok)
    elif case=='wrong-cookie':ok=not passed and not mapped and 'XTS SYNTHETIC REJECT command-cookie' in console and result['outcome']=='pass'
-   elif case=='bad-mapping':ok=not passed and not mapped and 'KXTS MAPPING START' in console and result['outcome']=='timeout'
-   elif case in ['corrupt-vector','original-caller']:ok=not passed and bool(mapped) and 'KXTS CALLER FAIL' in console and result['outcome']=='pass' and 'XTS SYNTHETIC PSCI_SYSTEM_OFF' in console
+   elif case=='bad-mapping':
+    diagnosis=shifted_mapping_result(console,result,proof,avf.macho(image)['segments']);r['mapping_control_diagnosis']=diagnosis;ok=diagnosis['accepted']
+   elif case in ['corrupt-vector','original-caller']:
+    failed=re.search(r'KXTS CALLER FAIL vectors=0x4c4 checks=(0x[0-9a-f]+) line=(0x[0-9a-f]+)',console);expected=(18,44) if case=='corrupt-vector' else (7338,53)
+    ok=not passed and bool(mapped) and bool(failed) and tuple(int(failed[i],16) for i in [1,2])==expected and result['outcome']=='pass' and 'XTS SYNTHETIC PSCI_SYSTEM_OFF' in console
    elif case=='factory-mismatch':ok=not passed and bool(mapped) and 'KXTS FACTORY PASS vectors=0x0 checks=0xb line=0x0' in console and 'KXTS FACTORY MISMATCH REJECTED' in console and result['outcome']=='pass'
    elif case=='panic':ok=not passed and bool(mapped) and 'KXTS SYNTHETIC PANIC' in console and result['outcome']=='pass'
    else:ok=not passed and not mapped and 'KXTS SPIN CONTROL' in console and result['outcome']=='timeout'
@@ -119,11 +139,12 @@ def guest_main(a,m):
   r['outcome']='pass';r['summary']='Genuine selected caller/registration plus real XTS execute through actual immutable high-VA descriptor references; bounded original-caller/algorithm/mapping/publication/runtime controls, not full mc_provider or XNU startup/MMU/native qualification'
  except Exception as error:r['error']=repr(error)
  finally:
+  r['whole_elapsed_seconds']=300-max(0,r.pop('_whole_deadline',time.monotonic())-time.monotonic())
   r['artifacts']=[str(p.relative_to(m)) for p in sorted(out.rglob('*')) if p.is_file()];r['sha256']={str(p.relative_to(m)):sha(p) for p in sorted(out.rglob('*')) if p.is_file()};dump(out/'evidence.json',r)
  print(json.dumps({k:r.get(k) for k in ['outcome','error','vectors','checks','genuine_selected_caller_executed']},indent=2));return 0 if r['outcome']=='pass' else 1
 
 def main():
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--root',type=Path,required=True);p.add_argument('--run',required=True);p.add_argument('--experiment',required=True);p.add_argument('--prepare-guest',action='store_true');p.add_argument('--host-controls',action='store_true');p.add_argument('--prepare-controls',action='store_true');p.add_argument('--execute-guest',action='store_true');p.add_argument('--all-controls',action='store_true');p.add_argument('--native-artifacts',type=Path);p.add_argument('--lease-grant');a=p.parse_args();m=a.root.resolve()
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--root',type=Path,required=True);p.add_argument('--run',required=True);p.add_argument('--experiment',required=True);p.add_argument('--prepare-guest',action='store_true');p.add_argument('--host-controls',action='store_true');p.add_argument('--prepare-controls',action='store_true');p.add_argument('--execute-guest',action='store_true');p.add_argument('--all-controls',action='store_true');p.add_argument('--guest-cases');p.add_argument('--native-artifacts',type=Path);p.add_argument('--lease-grant');a=p.parse_args();m=a.root.resolve()
  if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]*',a.run) or WT==m:raise ValueError('Fresh isolated worktree run required')
  if a.execute_guest:return guest_main(a,m)
  out=WT/'artifacts/kernel-xts'/a.run;out.mkdir(parents=True,exist_ok=False);shutil.copyfile(__file__,out/'builder.py')
