@@ -101,3 +101,14 @@ for ASCII C tokens; no source byte or input hash changes. Read-only discovery
 failures are preserved separately in `discovery-failures.json`. A documentation
 patch initially failed to match its expected sentence and was reapplied to the
 actual sentence; it changed no source or measurement output.
+
+The corrected preplanned VMCRYPTO-002 run at source qualifier
+`9fc0a5b3ced553d801481e5e1984b94d703daf89` passes: all 1080 selected source rows
+match, 3842 source/header files yield 89 direct field references, 32 relevant
+crypto/startup recipes are bound, and five altered-input controls reject. The
+registration/PRNG token inventory contains the actual definitions/declarations
+and the donor provider calls; it finds no other direct source caller. This is a
+textual inventory, with macros/external consumers and runtime still unmeasured.
+Elapsed time was 5.868 seconds, current-image VmHWM 76,724 KiB, and the minimum
+of three one-second admission samples was 13,776,150,528 bytes available.
+`evidence.json` binds both unchanged raw runs and the full route manifest.
