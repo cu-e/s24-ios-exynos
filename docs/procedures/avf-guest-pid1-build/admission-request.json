@@ -1,0 +1,130 @@
+{
+  "kind": "root-small-build-admission-request",
+  "is_authorization": false,
+  "task": "VM-034",
+  "owner": "codex-guest-pid1-20261106-dr",
+  "worktree": "worktrees/vm-034-20261106",
+  "source_plan": {
+    "path": "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/plan-1/plan.json",
+    "sha256": "ffe6f8cc47732a52d2eefd2cc18a51335df427ef6c6460b254e0f97296d0445a"
+  },
+  "producer": {
+    "path": "worktrees/vm-034-20261106/tools/build/avf_guest_pid1_build.py",
+    "sha256": "84159162726758117ff54a85871835466cf0d5bd74623db43e4fa629bd5d69b5"
+  },
+  "common_process_helper": {
+    "path": "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-009-20261106/tools/build/avf_kernel_objects.py",
+    "sha256": "13213539409bade16162173c7b39709dbb3c7e78426fe1410b3f940ea01e4e47",
+    "review_admission_required": true
+  },
+  "desired_limits": {
+    "max_jobs": 1,
+    "max_project_jobs": 2,
+    "max_owned_rss_bytes": 268435456,
+    "min_MemAvailable_bytes": 4294967296,
+    "stable_samples": 3,
+    "sample_interval_seconds": 1,
+    "command_timeout_seconds": 60,
+    "qemu_allowed": false,
+    "phone_allowed": false,
+    "MAIN_publication_allowed": false
+  },
+  "requested_commands": [
+    {
+      "name": "source-to-ir",
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-cxx-storage/source-build-session2/clang",
+        "--target=arm64-apple-ios16.5",
+        "-O2",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-pie",
+        "-std=c11",
+        "-ffreestanding",
+        "-nostdinc",
+        "-fno-builtin",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-S",
+        "-emit-llvm",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-034-20261106/src/guest/avf-pid1/pid1.c",
+        "-o",
+        "@OUTPUT@/pid1.ll"
+      ]
+    },
+    {
+      "name": "ir-to-assembly",
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-cxx-storage/source-build-session2/clang",
+        "--target=arm64-apple-ios16.5",
+        "-O2",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-pie",
+        "-x",
+        "ir",
+        "-S",
+        "@OUTPUT@/pid1.ll",
+        "-o",
+        "@OUTPUT@/pid1.s"
+      ]
+    },
+    {
+      "name": "assembly-to-object",
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-cxx-storage/source-build-session2/clang",
+        "--target=arm64-apple-ios16.5",
+        "-x",
+        "assembler",
+        "-c",
+        "@OUTPUT@/pid1.s",
+        "-o",
+        "@OUTPUT@/pid1.o"
+      ]
+    },
+    {
+      "name": "static-link",
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-ld",
+        "-arch",
+        "arm64",
+        "-static",
+        "-e",
+        "_start",
+        "-iphoneos_version_min",
+        "16.5",
+        "-pagezero_size",
+        "0x100000000",
+        "-no_uuid",
+        "@OUTPUT@/pid1.o",
+        "-o",
+        "@OUTPUT@/pid1"
+      ]
+    },
+    {
+      "name": "undefined-symbols",
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-nm",
+        "-u",
+        "@OUTPUT@/pid1"
+      ]
+    }
+  ],
+  "authority_note": "Request only. Root must separately supply a real current lease and an approval descriptor/hash binding the exact producer, source plan and independently reviewed runner. Existing INT002 integration/common must finish first. Any producer/plan/helper change requires rebinding before a compiler starts.",
+  "approval_schema_required_by_producer": {
+    "task": "VM-034",
+    "owner": "codex-guest-pid1-20261106-dr",
+    "source_plan_sha256": "ffe6f8cc47732a52d2eefd2cc18a51335df427ef6c6460b254e0f97296d0445a",
+    "producer_sha256": "84159162726758117ff54a85871835466cf0d5bd74623db43e4fa629bd5d69b5",
+    "reviewed_runner_sha256": "13213539409bade16162173c7b39709dbb3c7e78426fe1410b3f940ea01e4e47",
+    "runner_reviewed": "root must establish actual independent review, then true",
+    "root_lease": "root supplies real nonempty current lease ID/text",
+    "max_jobs": 1,
+    "max_project_jobs": 2,
+    "max_owned_rss_bytes": 268435456,
+    "qemu_allowed": false
+  }
+}
