@@ -52,6 +52,28 @@ def available():
     return int(next(line.split()[1] for line in Path("/proc/meminfo").read_text().splitlines() if line.startswith("MemAvailable:"))) * 1024
 
 
+ADMISSION_MINIMUM_BYTES = 4 * 1024**3
+ADMISSION_SAMPLE_COUNT = 3
+ADMISSION_SAMPLE_INTERVAL_SECONDS = 1.0
+
+
+def stable_admission(read_available=available, pause=time.sleep, monotonic=time.monotonic, timestamp=stamp):
+    """Require three consecutive floor observations before a new subprocess."""
+    result = {"admitted": False, "minimum_MemAvailable_bytes": ADMISSION_MINIMUM_BYTES,
+              "required_samples": ADMISSION_SAMPLE_COUNT, "interval_seconds": ADMISSION_SAMPLE_INTERVAL_SECONDS, "samples": []}
+    for index in range(ADMISSION_SAMPLE_COUNT):
+        if index:
+            pause(ADMISSION_SAMPLE_INTERVAL_SECONDS)
+        sample = {"sampled_at": timestamp(), "monotonic_seconds": monotonic(), "MemAvailable_bytes": read_available()}
+        result["samples"].append(sample)
+        if sample["MemAvailable_bytes"] < ADMISSION_MINIMUM_BYTES:
+            result["rejection"] = "MemAvailable below 4GiB"; return result
+        if index and sample["monotonic_seconds"] - result["samples"][-2]["monotonic_seconds"] < ADMISSION_SAMPLE_INTERVAL_SECONDS:
+            result["rejection"] = "Samples were not separated by at least one second"; return result
+    result["admitted"] = True
+    return result
+
+
 class Headers:
     def __init__(self, args):
         self.args, self.main, self.out = args, args.main.resolve(), args.out.resolve()
@@ -86,12 +108,15 @@ class Headers:
 
     def run(self, argv, label, cwd=None, env=None, timeout=90, admitted=True, expect=(0,)):
         record = {"argv": [str(a) for a in argv], "cwd": str(cwd or ROOT), "started_at": stamp(), "timeout_seconds": timeout,
-                  "admission_MemAvailable_bytes": available(), "environment_overrides": GUARDS | {"HAKIOS_VERSION_SUFFIX": self.env["HAKIOS_VERSION_SUFFIX"], "GIT_CEILING_DIRECTORIES": self.env["GIT_CEILING_DIRECTORIES"]} | (env or {})}
+                  "environment_overrides": GUARDS | {"HAKIOS_VERSION_SUFFIX": self.env["HAKIOS_VERSION_SUFFIX"], "GIT_CEILING_DIRECTORIES": self.env["GIT_CEILING_DIRECTORIES"]} | (env or {})}
         record["environment_overrides"]["PATH"] = self.env.get("PATH", "")
         self.report["commands"].append(record)
-        if admitted and record["admission_MemAvailable_bytes"] < 4 * 1024**3:
-            record.update(exit_code=None, not_started="MemAvailable below 4GiB")
-            raise RuntimeError("Resource admission below 4GiB; no generator/compiler started")
+        admission = stable_admission()
+        record["admission"] = admission
+        record["admission_MemAvailable_bytes"] = admission["samples"][-1]["MemAvailable_bytes"]
+        if not admission["admitted"]:
+            record.update(exit_code=None, not_started=admission["rejection"])
+            raise RuntimeError("Resource admission requires three stable >=4GiB samples one second apart; no subprocess started")
         settings = self.env | (env or {})
         started = time.monotonic(); peak = 0
         def limits():
