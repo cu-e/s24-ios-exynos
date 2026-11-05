@@ -53,7 +53,7 @@ def guest_main(a,m):
   tasks={t['id']:t for t in load(m/'state/lab.json')['tasks']}
   if tasks['KRN-031']['owner']!=OWNER or tasks['KRN-031']['status']!='in_progress':raise ValueError('Require current owner')
   if parent['outcome']!='pass' or not parent.get('guest_image_ready'):raise ValueError('Require source-qualified component image')
-  image=native/'caller.macho';r['mapping_proof']=image_proof(image);r['component_parent']={'path':str((native/'evidence.json').relative_to(m)),'sha256':sha(native/'evidence.json')};r['image']={'path':str(image.relative_to(m)),'sha256':sha(image)}
+  image=m/parent['guest_images']['positive']['path'] if parent.get('guest_images') else native/'caller.macho';r['mapping_proof']=image_proof(image);r['component_parent']={'path':str((native/'evidence.json').relative_to(m)),'sha256':sha(native/'evidence.json')};r['image']={'path':str(image.relative_to(m)),'sha256':sha(image)}
   vm2=m/'worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105';vm4=m/'worktrees/vm-004-20261105/artifacts/qemu-host';qemu=vm4/'build-6/build/qemu-system-aarch64';shim=vm2/'Image'
   if sha(qemu)!=avf.PIN['qemu_sha256'] or sha(shim)!=avf.PIN['shim_sha256']:raise ValueError('Qualified unchanged shim/QEMU')
   sb=load(vm2/'report.json');qb=load(vm4/'build-6/build-report.json');qm=load(vm4/'release-10.2.0/source-manifest.json')
@@ -270,7 +270,7 @@ def main():
      run(link,label+'-component-link');guest_images[label]=out/(label+'.macho')
     report['guest_images']={label:{'path':str(path.relative_to(m)),'sha256':sha(path),'mapping_proof':({'scope':'unmapped spin-timeout control; no TTBR/caller execution claim','image':bounded.avf.macho(path)} if label=='spin' else image_proof(path,label!='factory-mismatch'))} for label,path in guest_images.items()}
 
-  c,oldsource=recipe('osfmk/mc_provider.o');bad_argv=list(c['argv']);bad_argv[bad_argv.index(oldsource)]=str(WT/'fixtures/public/xnu-kernel-xts/reject_wrong_callback.c');bad_argv[bad_argv.index('-o')+1]=str(out/'rejected.o');bad_argv[bad_argv.index('-MF')+1]=str(out/'rejected.d');bad_argv=['-I'+c['cwd'] if x=='-I.' else x for x in bad_argv];bad_argv += ['-I'+str(xts),'-Werror=incompatible-function-pointer-types']
+  c,oldsource=recipe('osfmk/mc_provider.o');bad_argv=list(c['argv']);bad_argv[bad_argv.index(oldsource)]=str(WT/'fixtures/public/xnu-kernel-xts/reject_wrong_callback.c');bad_argv[bad_argv.index('-o')+1]=str(out/'rejected.o');bad_argv[bad_argv.index('-MF')+1]=str(out/'rejected.d');bad_argv=['-I'+c['cwd'] if x=='-I.' else x for x in bad_argv];bad_argv += ['-I'+str(xts),'-Werror=incompatible-function-pointer-types','-Werror=incompatible-function-pointer-types-strict']
   bad=run(bad_argv,'reject-incompatible-actual-callback',expected=None);check('real-genuine-header-callback-rejection',bad['exit_code']!=0 and 'incompatible function pointer types' in (out/'reject-incompatible-actual-callback.log').read_text())
   report['component_dependency_hashes']={}
   for dep in sorted(objects.glob('*.d')):
