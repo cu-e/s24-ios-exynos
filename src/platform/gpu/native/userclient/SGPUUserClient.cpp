@@ -32,6 +32,14 @@ struct Invocation {
     SGPUTransportProvider *provider;
     SGPUUserClient *client;
 };
+
+struct MethodReference {
+    OSObject *object;
+    explicit MethodReference(OSObject *value) : object(value) { object->retain(); }
+    ~MethodReference() { object->release(); }
+    MethodReference(const MethodReference &) = delete;
+    MethodReference &operator=(const MethodReference &) = delete;
+};
 } // namespace
 
 bool SGPUTransportProvider::init(OSDictionary *properties)
@@ -167,6 +175,7 @@ void SGPUTransportProvider::closeClient(SGPUUserClient *client)
 IOReturn SGPUUserClient::externalMethod(uint32_t selector, IOExternalMethodArguments *args,
     IOExternalMethodDispatch *dispatchTable, OSObject *target, void *reference)
 {
+    const MethodReference entry(this);
     if (!args) return kIOReturnBadArgument;
     const size_t capacity = args->structureOutputSize;
     args->structureOutputSize = 0; // Refusals never publish stale output bytes.
@@ -195,6 +204,7 @@ IOReturn SGPUUserClient::externalMethod(uint32_t selector, IOExternalMethodArgum
 
 IOReturn SGPUUserClient::closeConnection()
 {
+    const MethodReference entry(this);
     if (provider_) provider_->closeClient(this);
     terminate();
     return kIOReturnSuccess; // Connection close, not hardware completion.
@@ -206,6 +216,7 @@ IOService *SGPUUserClient::getService() { return provider_; }
 
 void SGPUUserClient::stop(IOService *service)
 {
+    const MethodReference entry(this);
     if (provider_) provider_->closeClient(this);
     IOUserClient::stop(service);
 }
