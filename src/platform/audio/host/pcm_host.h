@@ -39,6 +39,17 @@ int pcm_admit_plan(const void *set_buffer, size_t set_size,
                    const void *hw_params, size_t hw_size,
                    struct pcm_mapping mapping, struct pcm_plan *out);
 int pcm_offset_frames(const struct pcm_plan *plan, uint32_t absolute_iova, uint64_t *out);
+/* Constructor, never Stop/drain/reset. Requires fresh storage or a fully
+ * retired instance: all leases retired, Stop/CLOSED/provider fencing/release
+ * completed, backend access and callbacks drained, and borrowed views retired.
+ * The caller exclusively owns this storage; do not clone, restore or relocate
+ * live ownership by copying the struct. All host operations require init first.
+ * Init writes without reading old bytes; it cannot detect misuse or establish
+ * quiescence. It erases the local epoch/counters. Preserve an external epoch
+ * high-water mark across reconstruction: every bind in the same token/backend
+ * association domain must use a nonzero epoch strictly newer than ALL prior
+ * instances, including reconstructed ones. Never recycle epochs on exhaustion.
+ * Local checks cannot enforce this cross-construction caller responsibility. */
 void pcm_host_init(struct pcm_host *host);
 int pcm_host_bind(struct pcm_host *host, const struct pcm_plan *plan, uint64_t epoch);
 int pcm_host_start(struct pcm_host *host, uint64_t epoch);

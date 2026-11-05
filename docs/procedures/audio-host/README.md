@@ -61,6 +61,24 @@ profile. Incoming POINTER/CLOSED are the only admitted event types.
 Calls require external serialization; this component is not an IRQ-safe native
 driver and adds no kernel locking or cache-coherency claim.
 
+`pcm_host_init` is a constructor for fresh or fully retired storage. It is never
+Stop, drain or reset. Before reconstructing an existing instance, retire all
+leases, complete Stop/CLOSED/provider fencing/release, stop backend access,
+drain callbacks and retire every borrowed view of the host/mapping. A plain
+`PCM_IDLE` value or constructor call does not establish those external facts.
+One caller owns the storage exclusively; do not clone, restore or relocate live
+ownership through struct assignment or byte copying. Read-only diagnostic
+snapshots are not additional owners. Initialize before invoking host operations.
+
+Construction unconditionally clears local epoch/counter storage and reads no
+previous bytes. The caller must retain an epoch high-water mark **outside** this
+storage for the same token/backend association domain, and supply a nonzero
+epoch strictly newer than every previous binding, including across destruction
+and reconstruction. Never reuse an epoch after counter exhaustion. Local checks
+cannot enforce this cross-construction responsibility. Reinitializing live
+storage and reusing its epoch can make an old lease identical to a new lease;
+that sequence violates this lifetime contract and is not a supported reset.
+
 1. `pcm_admit_plan` commits output only after full validation; `pcm_host_bind`
    revalidates the plan and requires a new nonzero epoch while idle.
 2. Start permits bounded per-period leases. A unique local serial identifies
@@ -118,6 +136,9 @@ The tested implementation is `cbec42fe1921b3571f440666075ab4c69566acbb`.
 Final commit-bound measurements and artifact hashes are in [`evidence.json`](evidence.json);
 the bound artifact index covers 160 retained files including the earlier failures.
 Main common checks and acceptance remain the coordinator's review step.
+The REV-013 constructor-lifetime followup and legal reconstruction regression
+are recorded in [`review-lifetime.md`](review-lifetime.md) and
+[`evidence-lifetime.json`](evidence-lifetime.json).
 
 ## Board provenance and unavailable native inputs
 

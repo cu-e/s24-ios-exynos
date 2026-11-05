@@ -147,6 +147,44 @@ static void lifecycle(void)
     CHECK(pcm_host_event(&h,(struct pcm_stamp){UINT64_MAX,UINT64_MAX,0},message,sizeof(message),&frames)==PCM_DUPLICATE);
 }
 
+static void reconstruction(void)
+{
+    struct pcm_host h; pcm_host_init(&h);
+    struct pcm_plan p=plan(0,0,2,4096,4);
+    struct pcm_lease old,current;
+    struct pcm_stop_token stop;
+    unsigned char message[PCM_AP_MESSAGE_BYTES];
+    /* Caller-owned epoch authority survives construction; same association
+     * domain gets a strictly newer epoch, even though init clears local state. */
+    uint64_t epoch_authority=41;
+    CHECK(pcm_host_bind(&h,&p,epoch_authority)==PCM_OK);
+    CHECK(pcm_host_start(&h,epoch_authority)==PCM_OK);
+    CHECK(pcm_host_claim(&h,epoch_authority,0,&old)==PCM_OK);
+    CHECK(pcm_host_stop(&h,epoch_authority,&stop)==PCM_OK);
+    CHECK(pcm_host_retire(&h,&old,0)==PCM_OK);
+    oracle_message(0,3,0,48000,2,4096,4,0,message);
+    CHECK(pcm_host_event(&h,(struct pcm_stamp){epoch_authority,1,stop.serial},message,sizeof(message),NULL)==PCM_OK);
+    /* No real backend/borrowed views exist in this fixture. This host fence
+     * attests their retirement, as required before release and reconstruction. */
+    CHECK(pcm_host_provider_fenced(&h,stop)==PCM_OK);
+    CHECK(pcm_host_release(&h,epoch_authority)==PCM_OK);
+    pcm_host_init(&h);
+    ++epoch_authority;
+    CHECK(pcm_host_bind(&h,&p,epoch_authority)==PCM_OK);
+    CHECK(pcm_host_start(&h,epoch_authority)==PCM_OK);
+    CHECK(pcm_host_claim(&h,epoch_authority,0,&current)==PCM_OK);
+    CHECK(current.epoch!=old.epoch && current.serial==old.serial && current.slot==old.slot);
+    unsigned char before[sizeof(h)]; memcpy(before,&h,sizeof(h));
+    CHECK(pcm_host_retire(&h,&old,0)==PCM_STALE);
+    CHECK(!memcmp(before,&h,sizeof(h))); /* old token cannot clear the new lease */
+    CHECK(pcm_host_claim(&h,epoch_authority,0,&old)==PCM_BUSY);
+    CHECK(pcm_host_stop(&h,epoch_authority,&stop)==PCM_OK);
+    CHECK(pcm_host_retire(&h,&current,0)==PCM_OK);
+    CHECK(pcm_host_event(&h,(struct pcm_stamp){epoch_authority,1,stop.serial},message,sizeof(message),NULL)==PCM_OK);
+    CHECK(pcm_host_provider_fenced(&h,stop)==PCM_OK);
+    CHECK(pcm_host_release(&h,epoch_authority)==PCM_OK);
+}
+
 static void event_adversaries(void)
 {
     struct pcm_plan p=plan(1,2,3,4608,8);unsigned char canonical[PCM_AP_MESSAGE_BYTES],message[PCM_AP_MESSAGE_BYTES];
@@ -178,7 +216,7 @@ static void event_adversaries(void)
 
 int main(void)
 {
-    vectors();invalid_inputs();lifecycle();event_adversaries();
+    vectors();invalid_inputs();lifecycle();reconstruction();event_adversaries();
     printf("{\"outcome\":\"pass\",\"assertions\":%llu,\"valid_plans\":%llu,\"source_pointer_vectors\":%llu,\"mutation_cases\":%llu,\"device_executed\":false}\n",
       (unsigned long long)assertions,(unsigned long long)plans,(unsigned long long)pointer_vectors,(unsigned long long)mutations);
     return 0;
