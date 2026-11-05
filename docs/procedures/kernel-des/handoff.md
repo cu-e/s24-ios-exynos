@@ -149,3 +149,24 @@ allocation/maturity, inactive NFS/GSS/CTS, full kernel/crypto, private37 exports
 optional/general APIs, FIPS/side channels and native board/Apple ABI stay unqualified.
 Await final REV022 runtime audit and coordinator/platform acceptance. No more test
 runs are needed unless review identifies a new material concern.
+
+Publication receipt: KDES-001 recorded PASS through sole MAIN CLI at
+2026-11-05T21:21:08+00:00, actual ledger independently re-read. Its evidence is
+artifacts/kernel-des/final-binding3/evidence.json SHA256
+91a2f58c6b3f4133ce4d1885f94ce8252ade073690cc1306d431cedf8076ea0e.
+Compact qualified-evidence.json SHA256
+16ebf407f44decbf47af0b7ab12b823d4cf352a33ce6c8db7b86310f727ebf19.
+
+The initial final-binding1/2 registration attempts failed required JSON schema
+fields (summary, then artifacts); both raw receipts and exact application errors
+are preserved in record-schema1/evidence.json. Final-binding3 provides both fields,
+passes the actual MAIN lab.evidence validator for raw and compact receipts, then
+records successfully. These metadata replays perform no compiler or guest work;
+all six runtime results remain the original caller-guest4 measurement. Final
+metadata commits change no measured implementation, fixture, flags or image bytes.
+
+Independent REV022 final six-case audit reported PASS SHA256
+57f2094829c2dccf62f7ef91ab2b98e47ae8a293f7a1389f6eb25f9ebc3b1fd9.
+The reviewer is binding this final publication receipt without reruns. KRN-039
+remains in_progress awaiting coordinator/platform acceptance; do not mark it done
+or claim another task from this owner before that instruction.
