@@ -1,0 +1,7 @@
+# REV-023 independent frozen guest namespace review
+
+Owner: codex-review-integration-20261106-ct. Source freeze: VM-008 2b5aa36092a672e38c2d5ae3173a57b2fb1b7dbc.
+
+Run an independent standard-library verifier against descriptor SHA256 058451939894bd48ccc2ad1fe8b8d85c515f2176d21c8025daa034be8e98abe7 and evidence SHA256 6209dde21ba80535e3cc15139dc6165b5e120674920b9382257dddab3fa9fbf1. Stream hashes. Check relevant capsule/report/tool pins, all1905 namespace inputs/outputs/modes,1080 selected source/recipe bindings and55 generated sources,75 generated raw exports,17 IIG pairs,127 MIG outputs, all10 distinct representative Mach-O objects and dependency bindings, actual192-byte allocator section and four preserved negative-control records. Independently reconcile component OBJS lists and header query selections without executing Make. Inspect source filtering rules and retained logs for36 empty-body filters. Exercise changed-hash and invalid-object detector controls in owned temporary data. Do not run compiler, preprocessor, generator, guest, full53976 artifact sweep, MAIN common checks or publication.
+
+Record commands, exits, hashes, actual /proc current-image VmHWM, failures and limitations. Deadline180s; controller RSS<=256MiB. Save evidence and handoff under this reserved directory. Acceptance is bounded public source/header/representative evidence only; full SDK/private ABI/full kernel/provider/link/runtime/device remain unqualified.
