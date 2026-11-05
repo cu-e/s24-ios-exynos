@@ -24,8 +24,9 @@ Primary repositories are [Scion](https://github.com/Scion-Project/hackios-xnu-ke
 and [Apple public HFS](https://github.com/apple-oss-distributions/hfs/tree/31d5ec238dfab485e78a9a30b8b92d13e8914f03).
 [`inputs.json`](../../../fixtures/public/avf-kernel-source/inputs.json) binds the
 immutable acquisition manifest, complete canonical tree metadata, exclusions,
-input roots and ordered patch list. A separate qualified-source descriptor will
-bind the final composed manifest, both output trees and actual configs.
+input roots and ordered patch list. [`qualified-source.json`](../../../fixtures/public/avf-kernel-source/qualified-source.json)
+binds the final composed manifest, both output trees and actual configs. Complete
+source caches refuse reopening for acquisition; verification uses a fresh output.
 
 Scion's canonical tree has999 files. Exactly20 prebuilt kernel/loader/userland
 executables/dylibs were excluded **before content acquisition**; prebuilt notices
@@ -136,8 +137,12 @@ full-tree composition succeeds. Negative controls use real wrong/missing source,
 patch, mapped-driver and config inputs plus mixed-board/RELEASE/native-output
 reuse profiles. They do not change accepted original/source/output trees.
 
-Final commit-bound measurements, full commands/exits, resource samples, source/
-output/config/parent identities and retained failures will be in evidence.json.
+The final full-source composition at `ed9fdbf01497e3721a33839bfe2b0d35897e5247` passed100 bounded commands,
+eight negative controls and20 actual absent-prebuilt-object probes. Sampled
+owned RSS peaked at61.3828125MiB, under256MiB. The immutable reusable descriptor
+and complete-cache reopen rejection receive a separate commit-bound verify run
+with nine negative controls. Evidence will bind both exact runs, commands/exits,
+source/output/config/parent identities and retained failures.
 Main common checks and acceptance remain coordinator review steps. Stay source
 only: no compiler/header-route/fullbuild/link/QEMU/phone/MMIO, private Apple ABI,
 SDK equivalence, native operation or XNU/PID1/boot claim.

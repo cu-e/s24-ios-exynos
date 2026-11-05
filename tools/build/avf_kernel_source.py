@@ -200,6 +200,9 @@ class Session:
         return path
 
     def acquire(self, cache):
+        existing = cache / "source-manifest.json"
+        if existing.is_file() and set(json.loads(existing.read_text())) == set(PINS):
+            raise ValueError("Complete source cache is immutable; verify it or choose a fresh --cache")
         cache.mkdir(parents=True, exist_ok=True)
         manifests = {}
         for name in PINS:
@@ -508,6 +511,7 @@ class Session:
         reject("mixed-native-board", lambda: validate_profile(bad))
         reject("native-generated-output-reuse", lambda: validate_profile(PROFILE | {"native_outputs_reused": True}))
         reject("false-release-profile", lambda: validate_profile(PROFILE | {"kernel_config": "RELEASE"}))
+        reject("reopen-immutable-complete-source-cache", lambda: self.acquire(cache))
         bad_manifest = json.loads((cache / "source-manifest.json").read_text())
         bad_manifest["xnu"]["commit"] = "0" * 40
         wrong_cache = folder / "wrong-source"; wrong_cache.mkdir()
