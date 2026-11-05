@@ -67,3 +67,7 @@ _t8110dart_vo_tt_index
 _t8110dart_vo_tte
 _uat_get_desc
 ```
+
+Final checkpoint: EXPGAP-003 at implementation commit `d1d53a31ff0b69024a6b0e6640e958667425cf89` completed64 diagnostic checks and24 actual commands, preserving inconclusive outcome. All81 existing artifact hashes were independently reread and matched. The genuine wrong-source compile exits1 with explicit `Wrong architecture - this file is meant for x86_64`, unknown x86 debug state types and invalid x86 assembly constraints under the unchanged ARM64 recipe; no object is emitted. Final child peak80768KiB, actual `/proc/self/status` VmHWM64284KiB. The inherited getrusage maximum is already995980KiB at harness entry while entry VmHWM is20912KiB; both values remain in evidence to avoid confusing inherited lifetime accounting with this run's fresh footprint.
+
+Final evidence: `worktrees/krn-026-20261105/artifacts/kernel-export-gaps/audit-session3/evidence.json`. Human-readable report: matching `report.json`. `fixtures/public/kernel-export-gaps/assessment.json` binds their digests and criterion-by-criterion assessment. EXPGAP-001 failure and EXPGAP-002/003 inconclusive outcomes are recorded in the main ledger. The only proposed integration is this diagnostic helper, exact input/assessment fixtures and documentation. No provider replacement, export deletion or source patch is proposed. Next step: coordinator review these bytes and approve the original owner recording a blocked task with the precise unavailable-input reason above; no new compile or device operation is needed.
