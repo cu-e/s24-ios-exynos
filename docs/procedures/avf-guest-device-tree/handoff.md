@@ -40,3 +40,32 @@ acceptance and root admission. No physical phone action is authorized.
 Independent review, integrator acceptance and fresh MAIN common checks are
 still required. Only the original owner may complete VM027 after explicit
 acceptance; no taskdone, main publication or common checks occurred here.
+
+## Prospective actual-capture phase
+
+Original VM027 owner resumed for a bounded actual-tree capture using the existing
+qualified VM005 spin payload, unchanged VM002 Image and source-built QEMU. The
+prospective experiment VM027DT-002 is registered. Source commits0268123/f0ca634
+prepare QMP capture and post-capture parser controls. No guest or compiler ran.
+
+Root reviewed draft plan1 SHA256
+`88fe8c05b46b87db380d954f63ba8fbe66ad02124cda4fb06d8f6450e9f13425`;
+that plan and its source runner SHA256
+`5d5268ddd996fb93a8940f65ce44b967d7eb632b65b3d38b5a56484da00e2685`
+remain preserved in local artifacts and Git commit0268123. Root requested two
+guard fixes: continuously enforce the4GiB memory floor after spawning QEMU, and
+unwind SIGTERM through Python finally instead of leaving a separate guest SID.
+Commit5d03516 implements these; four targeted no-guest controls pass. The prior
+22 no-guest capture controls also remain preserved, without rerunning matrices.
+
+Updated plan2 is
+`artifacts/avf-guest-device-tree/capture-plan-2.json`, SHA256
+`d7bf134f61520b9c56dbc6a9b31ee81f940e0a49895c0484087dd45fdec877b4`,
+runner SHA256
+`8320c105c6862f832491b3937089b405c1357a8954c7b1f6d7b12cbd94a29455`.
+It requires a continuously matching root qemu lease ID, task VM-027 and original
+owner, with one256MiB guest,512MiB aggregate RSS,3x4GiB admission one second apart,
+55-second internal deadline and60-second outer timeout. Dump extent comes from
+the actual shim console and must fit guest RAM0x40000000..0x50000000 and<=1MiB;
+QMP stop/query-status/pmemsave/quit use only the canonical owned new capture path.
+No root lease has been granted yet; do not execute until explicit root approval.

@@ -17,9 +17,11 @@ TCG cortex-a76,256MiB guest RAM and512MiB total owned RSS limit remain fixed.
 
 Require three MemAvailable samples >=4GiB one second apart. The direct QEMU runs
 in a new owned session; reuse accepted qemu_host.py sample/terminate functions.
-Record samples every polling round, stop on an RSS or55-second whole-capture
-deadline, and bound cleanup by the accepted finite session cleanup. Outer timeout
-is60 seconds. Never signal unrelated processes. Recheck the exact root lease
+Record samples every polling round, stop on an RSS limit, post-spawn available
+memory below4GiB or55-second whole-capture deadline, and bound cleanup by the
+accepted finite session cleanup. SIGTERM raises KeyboardInterrupt through the
+Python cleanup path, including when raised inside a procfs helper that catches
+OSError. Outer timeout is60 seconds. Never signal unrelated processes. Recheck the exact root lease
 throughout admission and execution; absence/revocation fails closed.
 
 Connect to QMP, verify greeting and negotiate qmp_capabilities. Wait for the
