@@ -136,3 +136,23 @@ No full crypto, private Apple ABI, FIPS, side-channel assurance, encrypted-volum
 compatibility, full kernel/native image/startup, Exynos MMU or S24 operation is
 qualified. Follow-up integration must consume the coherent manifests and preserve
 all remaining unsupported/provider/runtime/hardware gates.
+
+## Final retained-measurement correction
+
+Selected Clang classifies the intentional wrong return type as
+`-Wincompatible-function-pointer-types-strict`, separately from the ordinary
+warning group. The first control unexpectedly compiled and remains recorded as
+a failure. `finish_native.py` performs only two targeted compiles with the strict
+group promoted: real negative exits1; actual unchanged helper exits0 under the
+same policy and retains identical native text bytes/layout/callback relocations.
+All successful original components/host controls/images are rehashed and retained;
+no unrelated compiler work is repeated.
+
+The bad mapping does not need a watchdog: the actual pinned shim's exception
+handler sees the exact linked entry ELR and calls its real PSCI shutdown path.
+`reinspect_guest.py` source-binds this precise negative (including ESR/FAR and the
+shifted physical target outside loaded image) while retaining the old timeout-only
+classifier failure. Already passed7350-positive/wrong-cookie cases are reused;
+only the five remaining cases execute. The owner capsule binds the combined
+exact eight cases. The negative-only raw positive flag does not claim a repeated
+positive run. Root scheduling leases were released after owned cleanup.

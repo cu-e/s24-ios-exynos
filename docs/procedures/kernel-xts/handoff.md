@@ -59,3 +59,29 @@ MemAvailable fell below4GiB. Every failed/deferred run is retained, no check is
 promoted to pass. Remaining: finish the corrected frozen native replay and all
 ready guest controls under a fresh lease, then publish final capsule/handoff.
 No guest/compiler remains running; no lease currently held.
+
+Final owner result: strict-native3 PASS exactly two targeted compiles under
+actual selected strict warning policy; wrong signature exits1, real unchanged
+helper exits0 with identical text bytes/layout/callback relocations. Prior
+frozen-native2 successful components/host controls/images are reused after exact
+rehashing; its original diagnostic-policy failure remains unchanged. Retained
+final-guest1 positive1220/7350 and wrong-cookie cases are reused, not rerun.
+Shifted mapping's exact ELRfffffff007004d38/ESR02000000/FAR0 faults outside the
+loaded image and genuine pinned shim naturally powers off (exit0,0.106s);
+mapping-reinspection1 independently source-binds that correct negative and keeps
+the original timeout-only aggregate failure. Final-pending-guest1 executes ONLY
+corrupt-vector/original-caller/factory-mismatch/panic/spin, all accepted. Wrong
+expected ciphertext fails exactly18checks/line44; genuine original wrapper fails
+exactly7338/line53; factory rejection is zero vectors/11checks. Spin terminates
+at3s with verified owned cleanup. Stable root-approved admission kept3consecutive
+>=4GiB samples1s apart,45s/command/180s totalwait; five-case whole48.839s<300s.
+All leases are RELEASED. No further tests/compiles requested or performed.
+
+Final owner capsule: docs/procedures/kernel-xts/qualified-evidence.json; it binds
+all exact raw paths/hashes, source commits, combined eight cases, unchanged native
+objects and985-object coherent manifest. Root reports independent REV0176198PASS;
+coordinator MAIN common check/integration still pending. Retain in_progress under
+original br until coordinator acceptance. Exact descriptor identity/static lifetime
+and original context ownership remain required. No fullmc_provider startup runs;
+actual native provider36-relocation proof is separate from synthetic caller's
+real registration function and owned partial two-slot test_table.

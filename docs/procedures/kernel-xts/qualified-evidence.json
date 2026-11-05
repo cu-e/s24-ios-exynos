@@ -1,0 +1,523 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T18:43:47.760233+00:00",
+  "task": "KRN-031",
+  "owner": "codex-team-kernel-xts-20261105-br",
+  "commit": "9dc0c9f92c26373263ed17439eb44d0f2ea2268d",
+  "summary": "Genuine selected provider/caller component integration: original34+two XTS relocations with deferredSHA256 and19 unsupported retained; immutable prepared modes; actual selected caller7350checks/1220vectors plus seven precise controls; two strict ABI diagnostic compiles. Full mc_provider startup/kernel/native/FIPS/private ABI remain unqualified.",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "docs/procedures/kernel-xts/finish_native.py",
+        "--root",
+        "/home/egor/dev/pet/s24-ios-exynos",
+        "--parent",
+        "artifacts/kernel-xts/frozen-native2/evidence.json",
+        "--run",
+        "strict-native3",
+        "--experiment",
+        "KXTS-004"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "docs/procedures/kernel-xts/reinspect_guest.py",
+        "--root",
+        "/home/egor/dev/pet/s24-ios-exynos",
+        "--parent",
+        "artifacts/kernel-xts/final-guest1/evidence.json",
+        "--run",
+        "mapping-reinspection1"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/build/xnu_kernel_xts.py",
+        "--root",
+        "/home/egor/dev/pet/s24-ios-exynos",
+        "--run",
+        "final-pending-guest1",
+        "--experiment",
+        "KXTS-004",
+        "--execute-guest",
+        "--guest-cases",
+        "corrupt-vector,original-caller,factory-mismatch,panic,spin",
+        "--native-artifacts",
+        "artifacts/kernel-xts/strict-native3",
+        "--lease-grant",
+        "Root explicit fresh exclusive ONLY5 remaining cases after RSA cleanup; release after quiescence"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "reports": {
+    "strict_native": {
+      "path": "worktrees/krn-031-20261105/artifacts/kernel-xts/strict-native3/evidence.json",
+      "sha256": "211f7cbc65001c74e35fad57a457b9bccb837cf5029a2bf09612dbfbd6249147"
+    },
+    "retained_cases": {
+      "path": "worktrees/krn-031-20261105/artifacts/kernel-xts/mapping-reinspection1/evidence.json",
+      "sha256": "488502ea2f85a9fe40c13d8b0e101dd1062b1540624f794b4804ae19e223a340"
+    },
+    "pending_cases": {
+      "path": "worktrees/krn-031-20261105/artifacts/kernel-xts/final-pending-guest1/evidence.json",
+      "sha256": "6aac543eea070393f51d245ea591500e3c1364bfc14330977b04a1e35f85972c"
+    },
+    "original_guest_classifier_failure": {
+      "path": "worktrees/krn-031-20261105/artifacts/kernel-xts/final-guest1/evidence.json",
+      "sha256": "4521c8e2433f27f2ec83a0d935d10995730ac4aff8441a90d76b682666ec2b2e"
+    },
+    "original_native_diagnostic_failure": {
+      "path": "worktrees/krn-031-20261105/artifacts/kernel-xts/frozen-native2/evidence.json",
+      "sha256": "5ec1cca6b02d7453dae73f9c96b7e3daa7c301e946218f53627b12534944c447"
+    }
+  },
+  "measurement_commits": {
+    "component_build": "b87957bfd89d8ab82162e546d9c9eee3c018078f",
+    "strict_policy_matched_helper": "376a2f3f639d88ab954d9807220854779e995dc8",
+    "pending_guest_runner": "9dc0c9f92c26373263ed17439eb44d0f2ea2268d"
+  },
+  "source_and_object_bindings": {
+    "native_compiler": {
+      "path": "artifacts/xnu-compiler-cxx-storage/source-build-session2/clang",
+      "sha256": "7972eb2820ae25b5bedff1ea954cef9e9a0e4a15c7a8e440628e8b6540fafc82"
+    },
+    "layout": [
+      80,
+      8,
+      1072,
+      1072,
+      16,
+      608,
+      48,
+      24,
+      32,
+      40,
+      48
+    ],
+    "private_layout": [
+      608,
+      16,
+      48,
+      16,
+      288,
+      80
+    ],
+    "strict_policy_helper_code_identical": true,
+    "source_notices": "fixtures/public/xnu-kernel-xts/inputs.json",
+    "original_static_callbacks_retained": 34,
+    "new_XTS_slot_relocations": 2,
+    "deferred_SHA256_retained": true,
+    "unsupported_fields": 19,
+    "remaining_private_ARM_exports": 37,
+    "startup_call_relocations": [
+      {
+        "offset": 28,
+        "target": "_s24_kernel_xts_prepare"
+      },
+      {
+        "offset": 36,
+        "target": "_s24_kernel_xts_encrypt_mode"
+      },
+      {
+        "offset": 56,
+        "target": "_s24_kernel_xts_decrypt_mode"
+      },
+      {
+        "offset": 76,
+        "target": "_ccsha256_di"
+      },
+      {
+        "offset": 96,
+        "target": "_register_crypto_functions"
+      }
+    ]
+  },
+  "coherent_component_manifest": {
+    "path": "worktrees/krn-031-20261105/artifacts/kernel-xts/final-binding1/coherent-component-manifest.json",
+    "sha256": "3993a2e9a5ae806c719f76302dd5a6cd5fec2acc2d224b381ce180decac7a06e",
+    "objects": 985
+  },
+  "host_publication": {
+    "sanitizers": "actual ASan+UBSan",
+    "concurrent_publication_checks": 105,
+    "sticky_factory_mismatch_checks": 5,
+    "source_variant": "Fresh real factory copies with deterministic entry gate or size-only mismatch; helper/AES unchanged"
+  },
+  "caller_CPU": {
+    "positive_vectors": 1220,
+    "positive_checks": 7350,
+    "cases": [
+      {
+        "case": "positive",
+        "accepted": true,
+        "original_validator_accepted": true,
+        "console_sha256": "ec2ed7fac41d3751f3cfa68c018e089574d3e69c04d18f33434c55f6669f88b8",
+        "image_sha256": "120d2f9d63bd696c6995150897685aed150ab00fed02ea341ca04cceacf49d3f",
+        "run_metadata_sha256": "68db9365d1dd98a37c52d1d85fb332d498d56df99da035396c3723ed6db3df70"
+      },
+      {
+        "case": "wrong-cookie",
+        "accepted": true,
+        "original_validator_accepted": true,
+        "console_sha256": "3fc329bc88bf20c7d0e168847843884f5cdb4695b115fd1928e888287069983c",
+        "image_sha256": "120d2f9d63bd696c6995150897685aed150ab00fed02ea341ca04cceacf49d3f",
+        "run_metadata_sha256": "1727d891e9b4baacb407460780ba0eb686f3dbac5b9bec48fde44dec6ab23c60"
+      },
+      {
+        "case": "bad-mapping",
+        "accepted": true,
+        "original_validator_accepted": false,
+        "console_sha256": "55f5cd0597c21a117f8985fe0d60ae2f7aa741ee9b3eaa9f705b88ea1100024f",
+        "image_sha256": "20d7c73ae70f91387866dc9e9a8eecf0b6901d310adc8f2d0618e85852e4660e",
+        "run_metadata_sha256": "885316d83e56a863c0f3eabeecd61f14df470ce1520a4c4a2d1cede214b3c85e"
+      },
+      {
+        "case": "corrupt-vector",
+        "accepted": true,
+        "image": "worktrees/krn-031-20261105/artifacts/kernel-xts/frozen-native2/caller.macho",
+        "image_sha256": "120d2f9d63bd696c6995150897685aed150ab00fed02ea341ca04cceacf49d3f",
+        "payload_sha256": "acc7199d45f0cc93a1c4a152d614abd4782909802efcdb36c59b5981fbe5baa8",
+        "console_sha256": "286f4f45218883042e0420af828b067a01ad85efa9b3b316faac02b4e2ee3fb4",
+        "mapping_proof": {
+          "public_descriptors": {
+            "_s24_kernel_xts_encrypt": {
+              "va": 18446744005107777536,
+              "pa": 1124335616,
+              "metadata": [
+                608,
+                48,
+                16
+              ],
+              "callback_VAs": [
+                18446744005107525264,
+                18446744005107525344,
+                18446744005107525400,
+                18446744005107525440
+              ]
+            },
+            "_s24_kernel_xts_decrypt": {
+              "va": 18446744005107777616,
+              "pa": 1124335696,
+              "metadata": [
+                608,
+                48,
+                16
+              ],
+              "callback_VAs": [
+                18446744005107525480,
+                18446744005107525560,
+                18446744005107525616,
+                18446744005107525656
+              ]
+            }
+          },
+          "actual_test_table_va": 18446744005107777720,
+          "mapped_entry_va": 18446744005107535160,
+          "tt0_va": 18446744005107798016,
+          "tt1_va": 18446744005107789824,
+          "l2_va": 18446744005107793920,
+          "VA_minus_PA": 18446744003983441920,
+          "TTBR1_L1_index": 448,
+          "TTBR1_L2_first_index": 32,
+          "L2_blocks": 128,
+          "L2_block_bytes": 2097152,
+          "mapped_VA_start": 18446744005057183744,
+          "mapped_PA_start": 1073741824,
+          "mapped_bytes": 268435456,
+          "kernel_MMU_qualified": false
+        },
+        "vectors": null
+      },
+      {
+        "case": "original-caller",
+        "accepted": true,
+        "image": "worktrees/krn-031-20261105/artifacts/kernel-xts/frozen-native2/original-caller.macho",
+        "image_sha256": "7ad7077693de2fea502012799e7d13794d0354142f5f71d0c54b9d33b0597533",
+        "payload_sha256": "7c43436a49297e097f7104897e39cb3a0f6825b366d2632727418445ebb49800",
+        "console_sha256": "710ad664749848a1ff20ed9dcf84393cb5bbdcfac71937c87de7f34cad7b2896",
+        "mapping_proof": {
+          "public_descriptors": {
+            "_s24_kernel_xts_encrypt": {
+              "va": 18446744005107777536,
+              "pa": 1124335616,
+              "metadata": [
+                608,
+                48,
+                16
+              ],
+              "callback_VAs": [
+                18446744005107525264,
+                18446744005107525344,
+                18446744005107525400,
+                18446744005107525440
+              ]
+            },
+            "_s24_kernel_xts_decrypt": {
+              "va": 18446744005107777616,
+              "pa": 1124335696,
+              "metadata": [
+                608,
+                48,
+                16
+              ],
+              "callback_VAs": [
+                18446744005107525480,
+                18446744005107525560,
+                18446744005107525616,
+                18446744005107525656
+              ]
+            }
+          },
+          "actual_test_table_va": 18446744005107777720,
+          "mapped_entry_va": 18446744005107535160,
+          "tt0_va": 18446744005107798016,
+          "tt1_va": 18446744005107789824,
+          "l2_va": 18446744005107793920,
+          "VA_minus_PA": 18446744003983441920,
+          "TTBR1_L1_index": 448,
+          "TTBR1_L2_first_index": 32,
+          "L2_blocks": 128,
+          "L2_block_bytes": 2097152,
+          "mapped_VA_start": 18446744005057183744,
+          "mapped_PA_start": 1073741824,
+          "mapped_bytes": 268435456,
+          "kernel_MMU_qualified": false
+        },
+        "vectors": null
+      },
+      {
+        "case": "factory-mismatch",
+        "accepted": true,
+        "image": "worktrees/krn-031-20261105/artifacts/kernel-xts/frozen-native2/factory-mismatch.macho",
+        "image_sha256": "00c60e4a344acd1a1f9f46296be1b868cfb447a7d8073e9e0697762a46e0d295",
+        "payload_sha256": "58fd13be4d255364c72b17db2b1b2fe491d1a9769d3a11e73705003e3326611c",
+        "console_sha256": "3da8f10ec45c96d25e95777cd3f9ddc099d48da239bc4d7501c3026cec244e21",
+        "mapping_proof": {
+          "public_descriptors": {
+            "_s24_kernel_xts_encrypt": {
+              "va": 18446744005107744768,
+              "pa": 1124302848,
+              "metadata": [
+                608,
+                48,
+                16
+              ],
+              "callback_VAs": [
+                18446744005107523912,
+                18446744005107523992,
+                18446744005107524048,
+                18446744005107524088
+              ]
+            },
+            "_s24_kernel_xts_decrypt": {
+              "va": 18446744005107744848,
+              "pa": 1124302928,
+              "metadata": [
+                608,
+                48,
+                16
+              ],
+              "callback_VAs": [
+                18446744005107524128,
+                18446744005107524208,
+                18446744005107524264,
+                18446744005107524304
+              ]
+            }
+          },
+          "actual_test_table_va": null,
+          "mapped_entry_va": 18446744005107533820,
+          "tt0_va": 18446744005107765248,
+          "tt1_va": 18446744005107757056,
+          "l2_va": 18446744005107761152,
+          "VA_minus_PA": 18446744003983441920,
+          "TTBR1_L1_index": 448,
+          "TTBR1_L2_first_index": 32,
+          "L2_blocks": 128,
+          "L2_block_bytes": 2097152,
+          "mapped_VA_start": 18446744005057183744,
+          "mapped_PA_start": 1073741824,
+          "mapped_bytes": 268435456,
+          "kernel_MMU_qualified": false
+        },
+        "vectors": 0
+      },
+      {
+        "case": "panic",
+        "accepted": true,
+        "image": "worktrees/krn-031-20261105/artifacts/kernel-xts/frozen-native2/panic.macho",
+        "image_sha256": "97cb1f12d446d6079be9cb4d0567c2ea8738f67a1f357ef2af06f3d2026b4908",
+        "payload_sha256": "86de2e72889bc86076d05f444a69dedc4795025f028fe85bef8a553cfe565b55",
+        "console_sha256": "4dd5ba97db12ee57fee0acc1a52c2cad4a9ba122160ddefa278c9101597c6470",
+        "mapping_proof": {
+          "public_descriptors": {
+            "_s24_kernel_xts_encrypt": {
+              "va": 18446744005107777536,
+              "pa": 1124335616,
+              "metadata": [
+                608,
+                48,
+                16
+              ],
+              "callback_VAs": [
+                18446744005107525216,
+                18446744005107525296,
+                18446744005107525352,
+                18446744005107525392
+              ]
+            },
+            "_s24_kernel_xts_decrypt": {
+              "va": 18446744005107777616,
+              "pa": 1124335696,
+              "metadata": [
+                608,
+                48,
+                16
+              ],
+              "callback_VAs": [
+                18446744005107525432,
+                18446744005107525512,
+                18446744005107525568,
+                18446744005107525608
+              ]
+            }
+          },
+          "actual_test_table_va": 18446744005107777720,
+          "mapped_entry_va": 18446744005107535112,
+          "tt0_va": 18446744005107798016,
+          "tt1_va": 18446744005107789824,
+          "l2_va": 18446744005107793920,
+          "VA_minus_PA": 18446744003983441920,
+          "TTBR1_L1_index": 448,
+          "TTBR1_L2_first_index": 32,
+          "L2_blocks": 128,
+          "L2_block_bytes": 2097152,
+          "mapped_VA_start": 18446744005057183744,
+          "mapped_PA_start": 1073741824,
+          "mapped_bytes": 268435456,
+          "kernel_MMU_qualified": false
+        },
+        "vectors": null
+      },
+      {
+        "case": "spin",
+        "accepted": true,
+        "image": "worktrees/krn-031-20261105/artifacts/kernel-xts/frozen-native2/spin.macho",
+        "image_sha256": "f75bb699d63b45649159ef7124ba425825dab8fde734faebeb1aa28dab1860c7",
+        "payload_sha256": "3e89883f0d497d4ba833a92fc3f3fe71dba6250b98b4b5c8adb83d1baf8cb26f",
+        "console_sha256": "ec52ee70f3fafcb3b52d87aed835a3a5f439ca3a7c6a35f214191bec206043b2",
+        "mapping_proof": {
+          "scope": "unmapped spin-timeout control; no TTBR/caller execution claim",
+          "image": {
+            "entry_va": 18446744005107536260,
+            "entry_pa": 1124094340,
+            "dt_pa": 1124204544,
+            "bootargs_pa": 1124270080,
+            "segments": [
+              {
+                "name": "__TEXT",
+                "vmaddr": 18446744005107515392,
+                "vmsize": 32768,
+                "fileoff": 0,
+                "filesize": 32768
+              },
+              {
+                "name": "__DATA",
+                "vmaddr": 18446744005107548160,
+                "vmsize": 81920,
+                "fileoff": 32768,
+                "filesize": 16384
+              },
+              {
+                "name": "__LINKEDIT",
+                "vmaddr": 18446744005107630080,
+                "vmsize": 16384,
+                "fileoff": 49152,
+                "filesize": 9856
+              }
+            ],
+            "sha256": "f75bb699d63b45649159ef7124ba425825dab8fde734faebeb1aa28dab1860c7"
+          }
+        },
+        "vectors": null
+      }
+    ],
+    "combined_case_count": 8,
+    "genuine_selected_patched_caller_executed": true,
+    "genuine_registration_function_executed": true,
+    "genuine_full_mc_provider_startup_executed": false,
+    "owned_partial_test_table": true,
+    "pending_raw_positive_flag_scope": "The subset raw flag is false because no positive case was repeated; combined positive execution is the retained exact1220/7350 case."
+  },
+  "mapping_control": {
+    "accepted": true,
+    "classification": "controlled shifted mapping causes pinned shim exception handler and natural PSCI shutdown",
+    "expected_ELR": 18446744005107535160,
+    "shifted_physical_target": 1121996088,
+    "outside_loaded_image": true,
+    "actual_exception": {
+      "slot": 4,
+      "ESR": 33554432,
+      "ELR": 18446744005107535160,
+      "FAR": 0
+    },
+    "normal_L2_first_index": 32,
+    "control_L2_first_index": 33,
+    "watchdog_timeout_required": false
+  },
+  "diagnostic_control": {
+    "actual_prior_counterexample_exit": 0,
+    "diagnostic": "-Wincompatible-function-pointer-types-strict",
+    "corrected_negative_exit": 1,
+    "real_matched_helper_exit": 0,
+    "unchanged_helper_code_layout_callbacks": true
+  },
+  "resource_summary": {
+    "maximum_sampled_owned_RSS_bytes": 163483648,
+    "one_compiler_at_a_time": true,
+    "one_guest_at_a_time": true,
+    "guest_RAM_MiB": 256,
+    "pending_five_whole_elapsed_seconds": 48.83827885397477,
+    "stable_admission_floor_bytes": 4294967296,
+    "samples_required": 3,
+    "sample_interval_seconds": 1,
+    "max_wait_per_command_seconds": 45,
+    "max_total_wait_seconds": 180,
+    "all_recorded_admissions_above_floor": true,
+    "no_live_owned_children_after_commands": true,
+    "QEMU_lease": "RELEASED after both batches quiesced"
+  },
+  "limitations": [
+    "Only bounded source-qualified component/caller integration, not full provider startup or XNU/kernel/native operation",
+    "Synthetic high-VA mapping/partial test_table/zeroization/panic/constant canary support are not XNU MMU/PRNG/board qualification",
+    "No full crypto,19 fields remain unsupported;37 private ARM export gates remain",
+    "No private Apple ABI,encrypted-volume,FIPS,side-channel or S24 qualification",
+    "Pointer identity/lifetime/serialization and accessible capacities remain caller preconditions",
+    "Original strict-diagnostic and timeout-only classifier failures retained unchanged; independent corrections bind exact actual evidence",
+    "Coherent manifest is not a full native link or produced kernel image; future links must preserve qualified real resource/native policy"
+  ],
+  "artifacts": [
+    "worktrees/krn-031-20261105/artifacts/kernel-xts/strict-native3/evidence.json",
+    "worktrees/krn-031-20261105/artifacts/kernel-xts/mapping-reinspection1/evidence.json",
+    "worktrees/krn-031-20261105/artifacts/kernel-xts/final-pending-guest1/evidence.json",
+    "worktrees/krn-031-20261105/artifacts/kernel-xts/final-guest1/evidence.json",
+    "worktrees/krn-031-20261105/artifacts/kernel-xts/frozen-native2/evidence.json",
+    "worktrees/krn-031-20261105/artifacts/kernel-xts/final-binding1/coherent-component-manifest.json"
+  ],
+  "sha256": {
+    "worktrees/krn-031-20261105/artifacts/kernel-xts/strict-native3/evidence.json": "211f7cbc65001c74e35fad57a457b9bccb837cf5029a2bf09612dbfbd6249147",
+    "worktrees/krn-031-20261105/artifacts/kernel-xts/mapping-reinspection1/evidence.json": "488502ea2f85a9fe40c13d8b0e101dd1062b1540624f794b4804ae19e223a340",
+    "worktrees/krn-031-20261105/artifacts/kernel-xts/final-pending-guest1/evidence.json": "6aac543eea070393f51d245ea591500e3c1364bfc14330977b04a1e35f85972c",
+    "worktrees/krn-031-20261105/artifacts/kernel-xts/final-guest1/evidence.json": "4521c8e2433f27f2ec83a0d935d10995730ac4aff8441a90d76b682666ec2b2e",
+    "worktrees/krn-031-20261105/artifacts/kernel-xts/frozen-native2/evidence.json": "5ec1cca6b02d7453dae73f9c96b7e3daa7c301e946218f53627b12534944c447",
+    "worktrees/krn-031-20261105/artifacts/kernel-xts/final-binding1/coherent-component-manifest.json": "3993a2e9a5ae806c719f76302dd5a6cd5fec2acc2d224b381ce180decac7a06e"
+  }
+}
