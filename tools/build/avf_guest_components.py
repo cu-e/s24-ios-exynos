@@ -2,6 +2,8 @@
 """Admit the two frozen genuine guest component units; no alternate process engine."""
 from __future__ import annotations
 import argparse
+from contextlib import contextmanager
+import fcntl
 from datetime import datetime, timezone
 import hashlib
 import importlib.util
@@ -247,38 +249,40 @@ def output_entries(out, commands, completed):
             raise ValueError('Unexpected/shadowing owned cwd entry: '+str(entry))
 
 
-def elf(path):
-    """Read bounded ELF64 dynamic tables, never load the frontend into memory."""
-    with Path(path).open('rb') as f:
-        header = f.read(64)
-        if len(header) != 64 or header[:6] != b'\x7fELF\x02\x01': raise ValueError('Expected little-endian ELF64 host tool')
-        phoff = struct.unpack_from('<Q',header,32)[0]; entsize,count = struct.unpack_from('<HH',header,54)
-        if entsize != 56 or count > 256: raise ValueError('Invalid ELF program table')
-        f.seek(phoff); ph = [struct.unpack('<II6Q', f.read(56)) for _ in range(count)]
-        interp = None; entries = []
-        for t,flags,offset,vaddr,paddr,filesz,memsz,align in ph:
-            if t == 3:
-                if filesz > 4096: raise ValueError('Oversized ELF interpreter')
-                f.seek(offset); interp=f.read(filesz).rstrip(b'\0').decode()
-            if t == 2:
-                if filesz > 1024**2 or filesz%16: raise ValueError('Invalid ELF dynamic extent')
-                f.seek(offset)
-                for _ in range(filesz//16):
-                    tag,value=struct.unpack('<qQ',f.read(16))
-                    if tag == 0:break
-                    entries.append((tag,value))
-        if any(tag in [0x6ffffefb,0x6ffffefc] for tag,value in entries):raise ValueError('ELF audit/depaudit modules are forbidden')
-        strings = dict(entries)
-        if 5 not in strings or 10 not in strings or strings[10] > 16*1024**2: raise ValueError('Missing bounded ELF strings')
-        address = strings[5]
-        segment = next((p for p in ph if p[0] == 1 and p[3] <= address and address+strings[10] <= p[3]+p[5]),None)
-        if segment is None: raise ValueError('ELF strings outside file-backed segment')
-        f.seek(segment[2]+address-segment[3]); table=f.read(strings[10])
-        def text(offset):
-            end=table.find(b'\0',offset)
-            if offset >= len(table) or end < 0:raise ValueError('Invalid ELF dynamic string')
-            return table[offset:end].decode()
-        return {'interpreter':interp,'needed':[text(v) for k,v in entries if k == 1], 'runpath':[text(v) for k,v in entries if k in [15,29]]}
+def elf(path, stream=None):
+    """Read bounded ELF64 tables from the caller's same open snapshot."""
+    if stream is None:
+        with Path(path).open('rb') as opened:return elf(path,opened)
+    f=stream;f.seek(0)
+    header = f.read(64)
+    if len(header) != 64 or header[:6] != b'\x7fELF\x02\x01': raise ValueError('Expected little-endian ELF64 host tool')
+    phoff = struct.unpack_from('<Q',header,32)[0]; entsize,count = struct.unpack_from('<HH',header,54)
+    if entsize != 56 or count > 256: raise ValueError('Invalid ELF program table')
+    f.seek(phoff); ph = [struct.unpack('<II6Q', f.read(56)) for _ in range(count)]
+    interp = None; entries = []
+    for t,flags,offset,vaddr,paddr,filesz,memsz,align in ph:
+        if t == 3:
+            if filesz > 4096: raise ValueError('Oversized ELF interpreter')
+            f.seek(offset); interp=f.read(filesz).rstrip(b'\0').decode()
+        if t == 2:
+            if filesz > 1024**2 or filesz%16: raise ValueError('Invalid ELF dynamic extent')
+            f.seek(offset)
+            for _ in range(filesz//16):
+                tag,value=struct.unpack('<qQ',f.read(16))
+                if tag == 0:break
+                entries.append((tag,value))
+    if any(tag in [0x6ffffefb,0x6ffffefc] for tag,value in entries):raise ValueError('ELF audit/depaudit modules are forbidden')
+    strings = dict(entries)
+    if 5 not in strings or 10 not in strings or strings[10] > 16*1024**2: raise ValueError('Missing bounded ELF strings')
+    address = strings[5]
+    segment = next((p for p in ph if p[0] == 1 and p[3] <= address and address+strings[10] <= p[3]+p[5]),None)
+    if segment is None: raise ValueError('ELF strings outside file-backed segment')
+    f.seek(segment[2]+address-segment[3]); table=f.read(strings[10])
+    def text(offset):
+        end=table.find(b'\0',offset)
+        if offset >= len(table) or end < 0:raise ValueError('Invalid ELF dynamic string')
+        return table[offset:end].decode()
+    return {'interpreter':interp,'needed':[text(v) for k,v in entries if k == 1], 'runpath':[text(v) for k,v in entries if k in [15,29]]}
 
 
 def runtime_candidates(unit):
@@ -287,17 +291,42 @@ def runtime_candidates(unit):
     return {Path(r['resolved_path']).name:{'path':r['resolved_path'],'sha256':r['sha256']} for r in unit['ELF_runtime']['host_runtime_candidates'].values()}
 
 
+def file_identity(st):
+    return [st.st_dev,st.st_ino,st.st_size,st.st_mtime_ns,st.st_ctime_ns]
+
+
+def elf_binding(path, expected):
+    """Stream hash and parse one fd; require stable file and pathname identity."""
+    path=Path(path)
+    with path.open('rb') as stream:
+        before=os.fstat(stream.fileno())
+        if before.st_size>512*1024**2:raise ValueError('Oversized qualified host ELF')
+        digest=hashlib.file_digest(stream,'sha256').hexdigest()
+        if digest not in expected:raise ValueError('Changed qualified host executable/library bytes')
+        facts=elf(path,stream)
+        identity=file_identity(before)
+        if file_identity(os.fstat(stream.fileno()))!=identity or file_identity(path.stat())!=identity:
+            raise ValueError('Host ELF changed during hash/parse snapshot')
+    return {'path':str(path),'resolved_path':str(path.resolve(strict=True)),'sha256':digest,'identity':identity,'elf':facts}
+
+
 def runtime_snapshot(binary, cwd, unit, helper, cache):
-    facts = elf(binary); candidates = runtime_candidates(unit)
-    files = {}; names = set(facts['needed'])|{'libm.so.6','libstdc++.so.6','libgcc_s.so.1','libc.so.6','ld-linux-x86-64.so.2'}
     policy=load(POLICY,POLICY_SHA256)
+    expected={policy['compiler_sha256'],policy['archiver_sha256']}
+    for role in ['compiler','archiver']:
+        if Path(binary)==Path(unit[role]['path']):expected={policy[role+'_sha256']}
+    executable=elf_binding(binary,expected)
+    facts=executable['elf'];candidates=runtime_candidates(unit)
+    files = {}; names = set(facts['needed'])|{'libm.so.6','libstdc++.so.6','libgcc_s.so.1','libc.so.6','ld-linux-x86-64.so.2'}
     diagnostics=load(ROOT/'fixtures/public/avf-guest-components/loader-diagnostics.json',policy['pins']['loader_diagnostics']['sha256'])
     values=diagnostics['values']
     directories={Path(cwd)}|{Path(v) for k,v in values.items() if k.startswith('path.system_dirs[')}
+    bindings={str(binary):executable}
     elf_files={str(binary):facts}
     for item in candidates.values():
-        if cache.get(item['path'])!=item['sha256']:raise ValueError('Changed qualified runtime candidate')
-        elf_files[item['path']]=elf(item['path'])
+        binding=elf_binding(item['path'],{item['sha256']})
+        bindings[item['path']]=binding
+        elf_files[item['path']]=binding['elf']
     for path,description in elf_files.items():
         names.update(description['needed'])
         for string in description['runpath']:
@@ -334,7 +363,7 @@ def runtime_snapshot(binary, cwd, unit, helper, cache):
     for path in ['/etc/ld.so.cache','/etc/ld.so.conf']:
         p=Path(path)
         if p.is_file():files[path]=cache.get(p)
-    return {'elf':facts,'transitive_ELF':elf_files,'lookup':lookup,'candidate_files':files,'interpreter':str(interpreter),'system_preload_sha256':preload_state,'loader_diagnostics_sha256':policy['pins']['loader_diagnostics']['sha256'],'sha256':canonical([elf_files,lookup,files,preload_state])}
+    return {'executable':executable,'host_file_bindings':bindings,'elf':facts,'transitive_ELF':elf_files,'lookup':lookup,'candidate_files':files,'interpreter':str(interpreter),'system_preload_sha256':preload_state,'loader_diagnostics_sha256':policy['pins']['loader_diagnostics']['sha256'],'sha256':canonical([bindings,lookup,files,preload_state])}
 
 
 def loaded_runtime(text, runtime):
@@ -359,30 +388,66 @@ def loaded_runtime(text, runtime):
     return mapped
 
 
+@contextmanager
+def sealed_object(path):
+    path=Path(path);fd=os.memfd_create('s24-component-object',os.MFD_CLOEXEC|os.MFD_ALLOW_SEALING)
+    digest=hashlib.sha256();length=0
+    try:
+        with path.open('rb') as source:
+            before=file_identity(os.fstat(source.fileno()))
+            if before[2]>64*1024**2:raise ValueError('Oversized component object')
+            while True:
+                block=source.read(1024**2)
+                if not block:break
+                length+=len(block)
+                if length>64*1024**2:raise ValueError('Object grew beyond snapshot bound')
+                digest.update(block);view=memoryview(block)
+                while view:
+                    written=os.write(fd,view)
+                    if written<=0:raise ValueError('Short object snapshot write')
+                    view=view[written:]
+            if file_identity(os.fstat(source.fileno()))!=before or file_identity(path.stat())!=before or length!=before[2]:
+                raise ValueError('Object changed during snapshot acquisition')
+        seals=fcntl.F_SEAL_WRITE|fcntl.F_SEAL_GROW|fcntl.F_SEAL_SHRINK|fcntl.F_SEAL_SEAL
+        fcntl.fcntl(fd,fcntl.F_ADD_SEALS,seals)
+        if fcntl.fcntl(fd,fcntl.F_GET_SEALS)&seals!=seals:raise ValueError('Object snapshot is not immutable')
+        yield {'fd':fd,'path':Path('/proc/self/fd')/str(fd),'sha256':digest.hexdigest(),'size':length,'source_identity':before}
+    finally:os.close(fd)
+
+
 def object_details(path, helper, metadata=False):
-    if Path(path).stat().st_size > 64*1024**2:raise ValueError('Oversized component object')
-    info=helper.macho(path,require_metadata=metadata); sections=[]; symbols=[]
-    with Path(path).open('rb') as f:
-        header=f.read(32); count=struct.unpack_from('<I',header,16)[0]; cursor=32
-        for _ in range(count):
-            f.seek(cursor);cmd,size=struct.unpack('<II',f.read(8))
-            if cmd==25:
-                f.seek(cursor+64);number=struct.unpack('<I',f.read(4))[0]
-                for n in range(number):
-                    f.seek(cursor+72+n*80);s=f.read(80);name,seg,addr,extent,offset=struct.unpack_from('<16s16sQQI',s)
-                    name=name.rstrip(b'\0').decode();seg=seg.rstrip(b'\0').decode()
-                    sections.append({'name':name,'segment':seg,'address':addr,'size':extent,'offset':offset})
-            if cmd==2:
-                f.seek(cursor+8);off,n,stroff,strsize=struct.unpack('<4I',f.read(16))
-                if strsize>16*1024**2 or n>1024**2:raise ValueError('Oversized component symbol table')
-                f.seek(stroff);strings=f.read(strsize)
-                f.seek(off)
-                for ordinal in range(n):
-                    index,kind,sect,desc,value=struct.unpack('<IBBHQ',f.read(16))
-                    if index>=len(strings) or strings.find(b'\0',index)<0:raise ValueError('Malformed raw Mach-O symbol name')
-                    name=strings[index:strings.find(b'\0',index)].decode()
-                    symbols.append({'name':name,'type':kind,'section':sect,'value':value,'external':bool(kind&1),'undefined':kind&14==0})
-            cursor+=size
+    with sealed_object(path) as captured:
+        info=helper.macho(captured['path'],require_metadata=metadata)
+        if info['sha256']!=captured['sha256'] or info['file_size']!=captured['size']:raise ValueError('Object helper did not validate the captured snapshot')
+        info['snapshot_source_identity']=captured['source_identity']
+        info['snapshot_sealed']=True
+        sections=[];symbols=[]
+        with os.fdopen(os.dup(captured['fd']),'rb') as f:
+            f.seek(0)
+            header=f.read(32); count=struct.unpack_from('<I',header,16)[0]; cursor=32
+            for _ in range(count):
+                f.seek(cursor);cmd,size=struct.unpack('<II',f.read(8))
+                if cmd==25:
+                    f.seek(cursor+64);number=struct.unpack('<I',f.read(4))[0]
+                    for n in range(number):
+                        f.seek(cursor+72+n*80);s=f.read(80);name,seg,addr,extent,offset=struct.unpack_from('<16s16sQQI',s)
+                        name=name.rstrip(b'\0').decode();seg=seg.rstrip(b'\0').decode()
+                        section={'name':name,'segment':seg,'address':addr,'size':extent,'offset':offset}
+                        if name=='__s24fh':
+                            if extent>4096:raise ValueError('Oversized component probe record')
+                            f.seek(offset);section['captured_data_hex']=f.read(extent).hex()
+                        sections.append(section)
+                if cmd==2:
+                    f.seek(cursor+8);off,n,stroff,strsize=struct.unpack('<4I',f.read(16))
+                    if strsize>16*1024**2 or n>1024**2:raise ValueError('Oversized component symbol table')
+                    f.seek(stroff);strings=f.read(strsize)
+                    f.seek(off)
+                    for ordinal in range(n):
+                        index,kind,sect,desc,value=struct.unpack('<IBBHQ',f.read(16))
+                        if index>=len(strings) or strings.find(b'\0',index)<0:raise ValueError('Malformed raw Mach-O symbol name')
+                        name=strings[index:strings.find(b'\0',index)].decode()
+                        symbols.append({'name':name,'type':kind,'section':sect,'value':value,'external':bool(kind&1),'undefined':kind&14==0})
+                cursor+=size
     info.update(sections=sections,symbols=symbols)
     return info
 
@@ -401,7 +466,8 @@ def inspect_object(command, kind, helper):
             section=info['sections'][symbol['section']-1];count=9 if command['id'].endswith('provider-layout') else 11
             relative=symbol['value']-section['address']
             if section['name']!='__s24fh' or section['segment']!='__DATA_CONST' or relative<0 or relative+count*8>section['size']:raise ValueError('Wrong/truncated Firehose record section')
-            with Path(command['object']).open('rb') as f:f.seek(section['offset']+relative);record=list(struct.unpack('<'+'Q'*count,f.read(count*8)))
+            data=bytes.fromhex(section['captured_data_hex'])
+            record=list(struct.unpack_from('<'+'Q'*count,data,relative))
             if count==9:
                 if record[:3]!=[8,1,8] or record[6:8]!=[24,24] or any(v==0 for v in record):raise ValueError('Wrong target-derived provider layout')
             elif record!=[20180226,24,24,4096,16,4,8,16,16,64,8]:raise ValueError('Wrong actual interface probe values')
@@ -417,48 +483,90 @@ def inspect_object(command, kind, helper):
     return info
 
 
-def archive_members(path):
-    """Bounded BSD/GNU short-name ar reader; reject unsupported name indirection."""
-    result=[]
-    with Path(path).open('rb') as f:
+TOC_NAMES={'__.SYMDEF','__.SYMDEF SORTED','__.SYMDEF_64','__.SYMDEF_64 SORTED'}
+
+
+def validate_toc(name,body,member_offsets):
+    width=8 if '_64' in name else 4;word='<Q' if width==8 else '<I'
+    if len(body)<2*width:raise ValueError('Truncated genuine archive TOC')
+    table_size=struct.unpack_from(word,body)[0]
+    if table_size%(2*width) or table_size>len(body)-2*width:raise ValueError('Invalid archive ranlib extent')
+    string_size=struct.unpack_from(word,body,width+table_size)[0]
+    start=2*width+table_size
+    if start+string_size!=len(body) or string_size%8:raise ValueError('Invalid archive TOC string extent/padding')
+    strings=body[start:];ranges=[];names=[]
+    for cursor in range(width,width+table_size,2*width):
+        index,offset=struct.unpack_from('<QQ' if width==8 else '<II',body,cursor)
+        if offset not in member_offsets:raise ValueError('Archive TOC references a foreign/nonmember offset')
+        end=strings.find(b'\0',index)
+        if index>=len(strings) or end<=index or (index and strings[index-1]!=0):raise ValueError('Invalid archive TOC symbol string index')
+        names.append(strings[index:end]);ranges.append((index,end+1))
+    covered=0
+    for start,end in sorted(set(ranges)):
+        if start!=covered:raise ValueError('Unreferenced/overlapping foreign archive TOC payload')
+        covered=end
+    if string_size-covered>7 or any(strings[covered:]):raise ValueError('Foreign archive TOC string/padding payload')
+    if 'SORTED' in name and names!=sorted(names):raise ValueError('Unsorted genuine sorted TOC')
+
+
+def archive_members(path, with_metadata=False):
+    """Read bounded BSD ar, permitting only one genuine validated leading TOC."""
+    path=Path(path);result=[];offsets=set();toc=None
+    with path.open('rb') as f:
+        before=file_identity(os.fstat(f.fileno()))
+        if before[2]>256*1024**2:raise ValueError('Oversized component archive')
         if f.read(8)!=b'!<arch>\n':raise ValueError('Not an actual ar archive')
         while True:
-            header=f.read(60)
+            offset=f.tell();header=f.read(60)
             if not header:break
             if len(header)!=60 or header[58:]!=b'`\n' or not header[48:58].strip().isdigit():raise ValueError('Truncated/invalid ar header')
             size=int(header[48:58]);name=header[:16].decode('ascii').strip();remaining=size
-            if size>64*1024**2:raise ValueError('Oversized member')
+            if size>64*1024**2 or offset+60+size>before[2]:raise ValueError('Oversized/truncated archive member')
             if name.startswith('#1/'):
-                n=int(name[3:])
-                if n>size:raise ValueError('Truncated BSD member name')
-                raw=f.read(n)
+                extent=name[3:]
+                if not extent.isdigit() or not 0<int(extent)<=min(size,4096):raise ValueError('Invalid bounded BSD member-name extent')
+                n=int(extent);raw=f.read(n)
                 if len(raw)!=n:raise ValueError('Truncated BSD member name')
-                name=raw.rstrip(b'\0').decode();remaining-=n
+                head,separator,padding=raw.partition(b'\0')
+                if separator and any(padding):raise ValueError('Nonzero BSD name padding')
+                name=head.decode();remaining-=n
             else:name=name.rstrip('/')
-            h=hashlib.sha256()
-            while remaining:
-                block=f.read(min(1024**2,remaining))
-                if not block:raise ValueError('Truncated archive member')
-                h.update(block);remaining-=len(block)
-            if size%2 and len(f.read(1))!=1:raise ValueError('Truncated archive padding')
-            if name.startswith('__.SYMDEF'):continue
-            if '/' in name or not name:raise ValueError('Unsupported/unsafe archive member name')
-            result.append({'name':name,'sha256':h.hexdigest()})
-    return result
+            if name.startswith('__.SYMDEF') and name not in TOC_NAMES:raise ValueError('Unknown reserved archive TOC member')
+            if name in TOC_NAMES:
+                if toc is not None or offset!=8:raise ValueError('Duplicate/nonleading archive TOC')
+                if remaining>16*1024**2:raise ValueError('Oversized archive TOC')
+                body=f.read(remaining)
+                if len(body)!=remaining:raise ValueError('Truncated archive TOC')
+                toc=(name,body)
+            else:
+                if '/' in name or name in ['','.','..']:raise ValueError('Unsupported/unsafe archive member name')
+                h=hashlib.sha256()
+                while remaining:
+                    block=f.read(min(1024**2,remaining))
+                    if not block:raise ValueError('Truncated archive member')
+                    h.update(block);remaining-=len(block)
+                offsets.add(offset);result.append({'name':name,'sha256':h.hexdigest()})
+            if size%2 and f.read(1)!=b'\n':raise ValueError('Invalid/truncated archive padding')
+        if toc:validate_toc(*toc,offsets)
+        f.seek(0);digest=hashlib.file_digest(f,'sha256').hexdigest()
+        if file_identity(os.fstat(f.fileno()))!=before or file_identity(path.stat())!=before:raise ValueError('Archive changed during inspection/hash snapshot')
+    metadata={'members':result,'sha256':digest,'snapshot_source_identity':before,'toc_name':toc[0] if toc else None}
+    return metadata if with_metadata else result
 
 
 def inspect_archive(command, accepted):
     expected=[{'name':Path(p).name,'sha256':accepted[p]['sha256']} for p in command['members']]
     for p in command['members']:
         if sha(p)!=accepted[p]['sha256']:raise ValueError('Generated archive input changed after inspection')
-    actual=archive_members(command['archive'])
+    captured=archive_members(command['archive'],with_metadata=True)
+    actual=captured['members']
     if actual!=expected:raise ValueError('Archive order/set/member bytes differ from just-validated genuine objects')
     definitions={}
     for path in command['members']:
         for name in accepted[path]['definitions']:
             if name in definitions:raise ValueError('Duplicate external provider definition: '+name)
             definitions[name]=path
-    return {'sha256':sha(command['archive']),'members':actual,'definitions':definitions}
+    return {**captured,'definitions':definitions}
 
 
 def verify_dependencies(command, inputs, helper, cache):
