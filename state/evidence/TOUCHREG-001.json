@@ -1,0 +1,36 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "recorded_at": "2026-11-05T01:10:54+00:00",
+  "summary": "Expected negative: actual original pinned E1S decoder reverses coordinate low nibbles; executable exits3 with960/1024 mismatches",
+  "commit": "8c16c82340ccd9ddbef1d916b235b3bc94ab0db3",
+  "working_tree": "Uncommitted inputs; exact tested bytes retained by report hashes/generated host source and copied public reports",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tests/test_e1s_touch_regression.py",
+        "--run",
+        "original-touch-session1",
+        "--original"
+      ],
+      "exit_code": 3,
+      "expected_negative": true
+    }
+  ],
+  "artifacts": [
+    "artifacts/touch-regression/original-touch-session1/report.json",
+    "fixtures/public/display-input-research/original-touch-session1.json"
+  ],
+  "sha256": {
+    "artifacts/touch-regression/original-touch-session1/report.json": "61f6be5be420176915f1e0d4723da2df04ec2de2365bec27e1d48a2baf54487f",
+    "fixtures/public/display-input-research/original-touch-session1.json": "61f6be5be420176915f1e0d4723da2df04ec2de2365bec27e1d48a2baf54487f"
+  },
+  "limitations": [
+    "Host source regression/model only; no Apple SDK, full XNU build/link or ARM/native execution",
+    "No phone command, framebuffer/HID dispatch, SPI/GPIO/MMIO or firmware operation",
+    "Native display, input, selected OS interfaces and lifetime remain UI-003/004/005 and UI-002 gates"
+  ],
+  "expected_negative": "Exit3 is the confirmed original defect, not a passing implementation or test-runner failure"
+}

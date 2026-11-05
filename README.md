@@ -34,6 +34,8 @@ The [experimental SGPU transport](src/platform/gpu/abi/README.md) now has compil
 
 [Bluetooth research](research/notes/RES-006-bluetooth-donors.md) traces E1S UART1/shared power, unknown controller firmware inputs and native iOS donor semantics. The [owned H4/command models](src/platform/bluetooth/README.md) pass host sanitizer and ARM compile checks. Real UART/power/firmware, iOS16.5 integration, pairing and audio remain separate BT-003/004/002/005 tasks.
 
+[Display/input research](research/notes/RES-007-display-input.md) confirms and [corrects a real E1S STM coordinate defect](patches/display-input/README.md), with regression tests against the actual decoder and integration into source preparation. [Owned display/input contracts](src/platform/display/README.md) check byte extents, mapping and event lifecycle; actual panel/DSC/scanout, SPI touch and iOS16.5 services remain UI-003/004/005 before native UI-002 qualification.
+
 ## Run the host lab
 
 Source fetches and heavy builds are explicit. These commands do not select a phone:

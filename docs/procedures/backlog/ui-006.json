@@ -1,0 +1,34 @@
+{
+  "id": "UI-006",
+  "title": "Correct and regress the pinned E1S STM coordinate nibble extraction",
+  "status": "pending",
+  "owner": null,
+  "priority": 80,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": [
+    "RES-002",
+    "BLD-001"
+  ],
+  "paths": [
+    "patches/display-input",
+    "tools/build/prepare_xnu.py",
+    "tests/test_e1s_touch_regression.py",
+    "docs/procedures/ui-006"
+  ],
+  "acceptance": [
+    "Reproduce actual pinned E1S post_event nibble disagreement against Samsung coordinate layout with asymmetric vectors",
+    "Apply a minimal separately attributed correction after exact embedded/E1S source preparation; preserve source pin and fail on patch mismatch",
+    "Host-compile only the extracted pure post_event function with explicit shims and compare corrected outputs; no MMIO or kernel execution",
+    "Retain original failing observation and distinguish source preparation/regression from full XNU or native touch qualification"
+  ],
+  "sources": [
+    "s24-port",
+    "s24-linux"
+  ],
+  "steps": [
+    "Record failing source regression",
+    "Add minimal patch and reproducible preparation integration",
+    "Run corrected source and project checks"
+  ]
+}

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T01:07:15+00:00",
-  "ledger_updated_at": "2026-11-05T01:07:14+00:00",
-  "registry_sha256": "af5244e56a7d93fb627f7e97a7d4cb337261cddb451927fe053d624b7f3360d7",
+  "generated_at": "2026-11-05T01:21:02+00:00",
+  "ledger_updated_at": "2026-11-05T01:21:02+00:00",
+  "registry_sha256": "a390266d6674f0179d8ec648c960675a03ed7d3f2f8eaf40325810e96cc30483",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -10,11 +10,11 @@
       "ESIM-004",
       "CELL-009",
       "VM-002",
-      "UI-001",
       "USB-001",
       "SEN-001",
       "ESIM-001",
       "MISC-001",
+      "DRV-001",
       "VM-001"
     ],
     "in_progress": [],
@@ -34,7 +34,9 @@
       "NET-005",
       "BT-003",
       "BT-004",
-      "DRV-001",
+      "UI-003",
+      "UI-004",
+      "UI-005",
       "DRV-002",
       "NAT-002"
     ],
@@ -74,6 +76,9 @@
       "GPU-011",
       "RES-005",
       "RES-006",
+      "RES-007",
+      "UI-006",
+      "UI-001",
       "GPU-006",
       "NET-001",
       "BT-001",
@@ -721,6 +726,105 @@
       "card_path": "planning/tasks/RES-006.md"
     },
     {
+      "id": "RES-007",
+      "title": "Audit E1S display scanout, STM input and selected iOS16.5 donor contracts",
+      "status": "done",
+      "owner": "codex-display-research-20261105-g",
+      "priority": 80,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002"
+      ],
+      "paths": [
+        "research/sources.json",
+        "research/notes/RES-007-display-input.md",
+        "research/display-input-coverage.json",
+        "fixtures/public/display-input-research",
+        "docs/procedures/display-input-research.md",
+        "docs/implementation.md",
+        "state/capabilities.json",
+        "CAPABILITIES.md",
+        "README.md"
+      ],
+      "acceptance": [
+        "Trace pinned retail panel/scanout and STM packet, coordinate, IRQ/power facts without guessing live MMIO or firmware",
+        "Inspect actual iOS16.5 display/IOSurface/HID donor source, lifetime/error and software-vsync limits; retain OS/runtime unknowns",
+        "Bound web/Reddit/source coverage and licensing; integrate concrete display and input implementation gates before native UI acceptance"
+      ],
+      "sources": [
+        "s24-port",
+        "s24-linux",
+        "hakios",
+        "s24-bsp-reference"
+      ],
+      "steps": [
+        "Inspect board plus vendor display/STM source",
+        "Audit iOS surface/framebuffer/HID contracts and source failures",
+        "Publish coverage and actionable build/native qualification gates"
+      ],
+      "started_at": "2026-11-05T01:08:18+00:00",
+      "last_heartbeat": "2026-11-05T01:21:01+00:00",
+      "updated_at": "2026-11-05T01:21:02+00:00",
+      "branch": "main",
+      "progress_note": "Audited four clean pins,90 hashes, retail60Hz DSC, STM nibble defect and current donor bounds fixes; added actual scanout/STM/iOS gates and narrowed pending DRV-001 reservations",
+      "next_step": "Implement bounded STM protocol adapter or review concrete selected native build inputs; keep no native acceptance claims",
+      "handoff": "research/notes/RES-007-display-input.md",
+      "evidence": "state/evidence/RES-007.json",
+      "evidence_sha256": "741475662da9475d00a7c64db8c770f52cec976dc57523933125a150994e040f",
+      "finished_at": "2026-11-05T01:21:02+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/RES-007.md"
+    },
+    {
+      "id": "UI-006",
+      "title": "Correct and regress the pinned E1S STM coordinate nibble extraction",
+      "status": "done",
+      "owner": "codex-display-research-20261105-g",
+      "priority": 80,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-002",
+        "BLD-001"
+      ],
+      "paths": [
+        "patches/display-input",
+        "tools/build/prepare_xnu.py",
+        "tests/test_e1s_touch_regression.py",
+        "docs/procedures/ui-006"
+      ],
+      "acceptance": [
+        "Reproduce actual pinned E1S post_event nibble disagreement against Samsung coordinate layout with asymmetric vectors",
+        "Apply a minimal separately attributed correction after exact embedded/E1S source preparation; preserve source pin and fail on patch mismatch",
+        "Host-compile only the extracted pure post_event function with explicit shims and compare corrected outputs; no MMIO or kernel execution",
+        "Retain original failing observation and distinguish source preparation/regression from full XNU or native touch qualification"
+      ],
+      "sources": [
+        "s24-port",
+        "s24-linux"
+      ],
+      "steps": [
+        "Record failing source regression",
+        "Add minimal patch and reproducible preparation integration",
+        "Run corrected source and project checks"
+      ],
+      "started_at": "2026-11-05T01:09:58+00:00",
+      "last_heartbeat": "2026-11-05T01:21:00+00:00",
+      "updated_at": "2026-11-05T01:21:01+00:00",
+      "branch": "main",
+      "progress_note": "Actual original post_event fails960/1024 vectors; two-line correction passesall1024 and matches full prepared XNU file byte-for-byte",
+      "next_step": "Native STM/IRQ/power/firmware remains UI-004; full kernel requires KRN-001 inputs",
+      "handoff": "patches/display-input/README.md",
+      "evidence": "state/evidence/UI-006.json",
+      "evidence_sha256": "af29c2948830e874b0d14e5c5e77626a7f0db7dfffa5f005f873148b77ac361a",
+      "finished_at": "2026-11-05T01:21:01+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/UI-006.md"
+    },
+    {
       "id": "VM-002",
       "title": "Build a pinned minimal XNU guest and host launch harness",
       "status": "pending",
@@ -755,8 +859,8 @@
     {
       "id": "UI-001",
       "title": "Implement host-testable display and HID contracts for iOS 16.5",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-display-research-20261105-g",
       "priority": 70,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -766,21 +870,34 @@
       ],
       "paths": [
         "src/platform/display",
-        "docs/procedures/ui-001"
+        "docs/procedures/ui-001",
+        "tests/test_display_contract.py"
       ],
       "acceptance": [
         "Specify framebuffer/stride/format, presentation ownership and HID event version",
         "Test coordinate mapping, buffer bounds and malformed events"
       ],
       "sources": [
-        "s24-port"
+        "s24-port",
+        "s24-linux",
+        "hakios"
       ],
       "steps": [
         "Inspect the task dependencies and pinned inputs",
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "ready",
+      "started_at": "2026-11-05T01:08:18+00:00",
+      "last_heartbeat": "2026-11-05T01:20:59+00:00",
+      "updated_at": "2026-11-05T01:21:00+00:00",
+      "branch": "main",
+      "next_step": "Real display and input backends remain UI-003/004/005; do not treat logical Stop or timer as retirement",
+      "progress_note": "Checked single-plane extents, normalized mapping and proposed loss/cancel input state;4096 sanitizer cases,four ARM objects and101 project tests pass; no pixels/HID dispatched",
+      "handoff": "src/platform/display/README.md",
+      "evidence": "state/evidence/UI-001.json",
+      "evidence_sha256": "58c44a6dfc975075eb0668777bb9d00f0b31b4bacee0798458e438bd36b6409e",
+      "finished_at": "2026-11-05T01:21:00+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/UI-001.md"
     },
@@ -908,7 +1025,8 @@
       "evidence_kind": "host-test",
       "depends_on": [
         "GPU-004",
-        "GPU-007"
+        "GPU-007",
+        "UI-005"
       ],
       "paths": [
         "src/graphics/native",
@@ -930,7 +1048,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Dependencies: GPU-007"
+        "Dependencies: GPU-007, UI-005"
       ],
       "card_path": "planning/tasks/GPU-009.md"
     },
@@ -1498,6 +1616,126 @@
       "card_path": "planning/tasks/BT-004.md"
     },
     {
+      "id": "UI-003",
+      "title": "Implement E1S native display and scanout ownership",
+      "status": "pending",
+      "owner": null,
+      "priority": 70,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "UI-001",
+        "GPU-006",
+        "KRN-001"
+      ],
+      "paths": [
+        "src/platform/display/native",
+        "docs/procedures/ui-003"
+      ],
+      "acceptance": [
+        "Compile/link real DECON/DPP/DSIM/DSC, panel reset/rails/clocks/TE and brightness support against pinned XNU; start with verified 60 Hz profile",
+        "Resolve actual boot framebuffer ownership/format/stride/reservations/cache and DPU SysMMU mappings; reject guessed fallback addresses or fake VSYNC as native readiness",
+        "Enforce producer fences and source/destination/scanout lifetime, bounded queue cancellation/fault/Stop; timeout cannot show an unfinished GPU surface or authorize reuse",
+        "Qualify hardware TE/frame-done/retirement and panel power separately on the native S24; source/build checks cannot satisfy them"
+      ],
+      "sources": [
+        "s24-port",
+        "s24-linux",
+        "s24-bsp-reference"
+      ],
+      "steps": [
+        "Match selected pinned inputs and ownership boundaries",
+        "Implement actual backend/frontend without success stubs",
+        "Compile/link and test bounded failure/lifecycle paths; retain native qualification gates"
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: KRN-001"
+      ],
+      "card_path": "planning/tasks/UI-003.md"
+    },
+    {
+      "id": "UI-004",
+      "title": "Implement and link E1S STM SPI9, IRQ, firmware and power lifecycle",
+      "status": "pending",
+      "owner": null,
+      "priority": 70,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "DRV-001",
+        "UI-001",
+        "UI-006",
+        "KRN-001"
+      ],
+      "paths": [
+        "src/platform/input/native",
+        "docs/procedures/ui-004"
+      ],
+      "acceptance": [
+        "Compile/link actual verified SPI9/USI9/pins/CS/IRQ42/wake/regulator integration against XNU; no guessed donor pin swaps or success-only transport",
+        "Verify board/controller/runtime firmware identity and full conditional power/init sequence; firmware transfer is not autonomous read-only inventory",
+        "Use validated STM packets and bounded worker/IRQ drain with cancellation, reset/loss handling, ten contact states and suspend/stop cleanup",
+        "Keep native firmware/IRQ/SPI/power and actual touch orientation unverified until separately authorized measurements"
+      ],
+      "sources": [
+        "s24-port",
+        "s24-linux"
+      ],
+      "steps": [
+        "Match selected pinned inputs and ownership boundaries",
+        "Implement actual backend/frontend without success stubs",
+        "Compile/link and test bounded failure/lifecycle paths; retain native qualification gates"
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: DRV-001, KRN-001"
+      ],
+      "card_path": "planning/tasks/UI-004.md"
+    },
+    {
+      "id": "UI-005",
+      "title": "Integrate selected iOS16.5 IOSurface, framebuffer and HID services",
+      "status": "pending",
+      "owner": null,
+      "priority": 70,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "UI-001",
+        "UI-003",
+        "UI-004",
+        "KRN-001"
+      ],
+      "paths": [
+        "src/platform/display/ios16",
+        "src/platform/input/ios16",
+        "docs/procedures/ui-005"
+      ],
+      "acceptance": [
+        "Verify selected local iOS16.5 surface/framebuffer selectors, serialization, IOHID callbacks and timebase; do not assume newer donor binary offsets",
+        "Compile authenticated per-client IOSurface/registry/framebuffer and backboardd/HID lifecycle integration; validate actual allocation/format/crop/fence ownership",
+        "Coordinate physical 1080x2340 and logical OS render profile with consistent crop/rotation/normalized touch mapping and actual power/frame completion",
+        "Handle input overflow/copyout failure, loss/cancel/reconnect/daemon restart, short/partial records and sequence wrap without stuck contacts; restrict injection/read access",
+        "Reject unsupported compression/plane/modifier/power features truthfully; retain native UI qualification separate from host tests"
+      ],
+      "sources": [
+        "s24-port",
+        "hakios",
+        "s24-linux"
+      ],
+      "steps": [
+        "Match selected pinned inputs and ownership boundaries",
+        "Implement actual backend/frontend without success stubs",
+        "Compile/link and test bounded failure/lifecycle paths; retain native qualification gates"
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: UI-003, UI-004, KRN-001"
+      ],
+      "card_path": "planning/tasks/UI-005.md"
+    },
+    {
       "id": "FND-001",
       "title": "Prepare and verify the project foundation",
       "status": "done",
@@ -1954,10 +2192,10 @@
         "RES-002"
       ],
       "paths": [
-        "src/xnu/",
-        "patches/e1s/",
-        "fixtures/public/",
-        "tests/"
+        "src/platform/input/stm",
+        "docs/procedures/drv-001",
+        "fixtures/public/stm-touch",
+        "tests/test_stm_touch.py"
       ],
       "acceptance": [
         "The protocol is separated from the MMIO layer.",
@@ -1973,10 +2211,8 @@
         "Preserve licenses and provenance for reused code.",
         "Do not read MMIO on the daily Android system."
       ],
-      "column": "waiting",
-      "reasons": [
-        "Paths reserved by: KRN-001"
-      ],
+      "column": "ready",
+      "reasons": [],
       "priority": 50,
       "card_path": "planning/tasks/DRV-001.md"
     },
@@ -2379,7 +2615,10 @@
       "evidence_kind": "native-device",
       "depends_on": [
         "DRV-003",
-        "UI-001"
+        "UI-001",
+        "UI-003",
+        "UI-004",
+        "UI-005"
       ],
       "paths": [
         "artifacts/ui-device",
@@ -2387,7 +2626,9 @@
       ],
       "acceptance": [
         "Actual Apple launchd/backboardd/SpringBoard and Settings execute",
-        "Real touch and pixels are recorded; owned PID 1 or preview images cannot pass"
+        "Real touch and pixels are recorded; owned PID 1 or preview images cannot pass",
+        "Measure native panel TE/frame completion, correct orientation/crop and ten-contact release/cancel/restart/sleep behavior; timer callbacks do not prove scanout",
+        "Retain boot framebuffer, actual DPU takeover and GPU/CoreAnimation qualification as distinct evidence; no unfinished GPU surface shown after a timeout"
       ],
       "sources": [
         "s24-port"
@@ -2400,7 +2641,7 @@
       "column": "gated",
       "reasons": [
         "Scope not authorized: native",
-        "Dependencies: DRV-003, UI-001"
+        "Dependencies: DRV-003, UI-003, UI-004, UI-005"
       ],
       "card_path": "planning/tasks/UI-002.md"
     },
@@ -3017,104 +3258,42 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-05T00:43:58+00:00",
-      "action": "experiment.record:WIFIABI-002",
-      "owner": "codex-wifi-research-20261105-e"
-    },
-    {
-      "at": "2026-11-05T00:45:44+00:00",
-      "action": "task.update:NET-001",
-      "owner": "codex-wifi-research-20261105-e",
+      "at": "2026-11-05T01:08:18+00:00",
+      "action": "task.claim:UI-001",
+      "owner": "codex-display-research-20261105-g",
       "tasks": [
         {
-          "id": "NET-001",
+          "id": "UI-001",
           "status": "in_progress",
-          "owner": "codex-wifi-research-20261105-e",
+          "owner": "codex-display-research-20261105-g",
           "priority": 70,
-          "progress_note": "Owned admission/DMA boundary compiles against exact current ABI; old ABI rejected; 16 donor vectors separated from controller capacity; sanitizers/four ARM objects and 86 project tests pass, with zero callback execution",
-          "next_step": "NET-004 actual Exynos/XNU backend and NET-005 iOS16.5 frontend; live endpoint/profile remains unknown",
-          "last_heartbeat": "2026-11-05T00:45:44+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/net-001/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T00:45:45+00:00",
-      "action": "task.update:RES-005",
-      "owner": "codex-wifi-research-20261105-e",
-      "tasks": [
-        {
-          "id": "RES-005",
-          "status": "in_progress",
-          "owner": "codex-wifi-research-20261105-e",
-          "priority": 80,
-          "progress_note": "Five donor/reference checkouts pinned separately; catalog/current ABI and vendor/donor MSI mismatches documented; Exynos DMA obligations, licensing and bounded Reddit coverage preserved",
-          "next_step": "Implement real native callbacks and selected OS frontend under NET-004/005; continue independent subsystem research while kernel/recovery inputs remain missing",
-          "last_heartbeat": "2026-11-05T00:45:45+00:00",
-          "branch": "main",
-          "handoff": "research/notes/RES-005-wifi-donors.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T00:45:46+00:00",
-      "action": "task.done:NET-001",
-      "owner": "codex-wifi-research-20261105-e",
-      "tasks": [
-        {
-          "id": "NET-001",
-          "status": "done",
-          "owner": "codex-wifi-research-20261105-e",
-          "priority": 70,
-          "progress_note": "Owned admission/DMA boundary compiles against exact current ABI; old ABI rejected; 16 donor vectors separated from controller capacity; sanitizers/four ARM objects and 86 project tests pass, with zero callback execution",
-          "next_step": "NET-004 actual Exynos/XNU backend and NET-005 iOS16.5 frontend; live endpoint/profile remains unknown",
-          "last_heartbeat": "2026-11-05T00:45:44+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/net-001/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T00:45:46+00:00",
-      "action": "task.done:RES-005",
-      "owner": "codex-wifi-research-20261105-e",
-      "tasks": [
-        {
-          "id": "RES-005",
-          "status": "done",
-          "owner": "codex-wifi-research-20261105-e",
-          "priority": 80,
-          "progress_note": "Five donor/reference checkouts pinned separately; catalog/current ABI and vendor/donor MSI mismatches documented; Exynos DMA obligations, licensing and bounded Reddit coverage preserved",
-          "next_step": "Implement real native callbacks and selected OS frontend under NET-004/005; continue independent subsystem research while kernel/recovery inputs remain missing",
-          "last_heartbeat": "2026-11-05T00:45:45+00:00",
-          "branch": "main",
-          "handoff": "research/notes/RES-005-wifi-donors.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T00:47:33+00:00",
-      "action": "task.claim:BT-001",
-      "owner": "codex-bluetooth-research-20261105-f",
-      "tasks": [
-        {
-          "id": "BT-001",
-          "status": "in_progress",
-          "owner": "codex-bluetooth-research-20261105-f",
-          "priority": 70,
-          "last_heartbeat": "2026-11-05T00:47:33+00:00",
+          "last_heartbeat": "2026-11-05T01:08:18+00:00",
           "branch": "main"
         }
       ]
     },
     {
-      "at": "2026-11-05T00:51:55+00:00",
-      "action": "task.add:RES-006",
-      "owner": "codex-bluetooth-research-20261105-f",
+      "at": "2026-11-05T01:08:19+00:00",
+      "action": "task.refine:UI-001-own-host-contract-tests",
+      "owner": "codex-display-research-20261105-g",
       "tasks": [
         {
-          "id": "RES-006",
+          "id": "UI-001",
+          "status": "in_progress",
+          "owner": "codex-display-research-20261105-g",
+          "priority": 70,
+          "last_heartbeat": "2026-11-05T01:08:18+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T01:09:58+00:00",
+      "action": "task.add:UI-006",
+      "owner": "codex-display-research-20261105-g",
+      "tasks": [
+        {
+          "id": "UI-006",
           "status": "pending",
           "owner": null,
           "priority": 80
@@ -3122,49 +3301,42 @@
       ]
     },
     {
-      "at": "2026-11-05T00:51:56+00:00",
-      "action": "task.claim:RES-006",
-      "owner": "codex-bluetooth-research-20261105-f",
+      "at": "2026-11-05T01:09:58+00:00",
+      "action": "task.claim:UI-006",
+      "owner": "codex-display-research-20261105-g",
       "tasks": [
         {
-          "id": "RES-006",
+          "id": "UI-006",
           "status": "in_progress",
-          "owner": "codex-bluetooth-research-20261105-f",
+          "owner": "codex-display-research-20261105-g",
           "priority": 80,
-          "last_heartbeat": "2026-11-05T00:51:56+00:00",
+          "last_heartbeat": "2026-11-05T01:09:58+00:00",
           "branch": "main"
         }
       ]
     },
     {
-      "at": "2026-11-05T00:53:40+00:00",
-      "action": "task.refine_paths:BT-001-owned-transport-tests",
-      "owner": "codex-bluetooth-research-20261105-f",
-      "tasks": [
-        {
-          "id": "BT-001",
-          "status": "in_progress",
-          "owner": "codex-bluetooth-research-20261105-f",
-          "priority": 70,
-          "progress_note": "E1S qcom,kiwi GPIO/UART source and QCA HCI/firmware references reviewed; selected donor contains vendor-success rewrites, so host framing/timeout checks will preserve raw replies and unknown controller identity",
-          "next_step": "Implement bounded H4/optional IBS decoding and exclusive command-credit/deadline model; review additional linked donors and native OS gates",
-          "last_heartbeat": "2026-11-05T00:53:40+00:00",
-          "branch": "main"
-        }
-      ]
+      "at": "2026-11-05T01:10:53+00:00",
+      "action": "experiment.plan:TOUCHREG-001",
+      "owner": "codex-display-research-20261105-g"
     },
     {
-      "at": "2026-11-05T01:00:16+00:00",
-      "action": "experiment.plan:BTMODEL-001",
-      "owner": "codex-bluetooth-research-20261105-f"
+      "at": "2026-11-05T01:11:19+00:00",
+      "action": "experiment.plan:TOUCHREG-002",
+      "owner": "codex-display-research-20261105-g"
     },
     {
-      "at": "2026-11-05T01:01:28+00:00",
-      "action": "task.add:BT-003",
-      "owner": "codex-bluetooth-research-20261105-f",
+      "at": "2026-11-05T01:15:12+00:00",
+      "action": "experiment.plan:UICONTRACT-001",
+      "owner": "codex-display-research-20261105-g"
+    },
+    {
+      "at": "2026-11-05T01:16:40+00:00",
+      "action": "task.add:UI-003",
+      "owner": "codex-display-research-20261105-g",
       "tasks": [
         {
-          "id": "BT-003",
+          "id": "UI-003",
           "status": "pending",
           "owner": null,
           "priority": 70
@@ -3172,12 +3344,12 @@
       ]
     },
     {
-      "at": "2026-11-05T01:01:29+00:00",
-      "action": "task.add:BT-004",
-      "owner": "codex-bluetooth-research-20261105-f",
+      "at": "2026-11-05T01:16:41+00:00",
+      "action": "task.add:UI-004",
+      "owner": "codex-display-research-20261105-g",
       "tasks": [
         {
-          "id": "BT-004",
+          "id": "UI-004",
           "status": "pending",
           "owner": null,
           "priority": 70
@@ -3185,143 +3357,186 @@
       ]
     },
     {
-      "at": "2026-11-05T01:01:30+00:00",
-      "action": "task.add:BT-005",
-      "owner": "codex-bluetooth-research-20261105-f",
+      "at": "2026-11-05T01:16:41+00:00",
+      "action": "task.add:UI-005",
+      "owner": "codex-display-research-20261105-g",
       "tasks": [
         {
-          "id": "BT-005",
+          "id": "UI-005",
           "status": "pending",
           "owner": null,
-          "priority": 50
+          "priority": 70
         }
       ]
     },
     {
-      "at": "2026-11-05T01:01:30+00:00",
-      "action": "task.refine_dependencies:Bluetooth-native-and-profile-qualification",
-      "owner": "codex-bluetooth-research-20261105-f",
+      "at": "2026-11-05T01:16:41+00:00",
+      "action": "task.refine:display-input-native-and-selected-OS-gates; narrow pending DRV-001 to avoid unrelated blocked kernel reservation",
+      "owner": "codex-display-research-20261105-g",
       "tasks": [
         {
-          "id": "BT-002",
+          "id": "DRV-001",
+          "status": "pending",
+          "owner": null
+        },
+        {
+          "id": "UI-001",
+          "status": "in_progress",
+          "owner": "codex-display-research-20261105-g",
+          "priority": 70,
+          "next_step": "Finish contract/source documentation and evidence; no native presentation/HID or packet-transport acceptance",
+          "last_heartbeat": "2026-11-05T01:08:18+00:00",
+          "branch": "main"
+        },
+        {
+          "id": "UI-002",
           "status": "pending",
           "owner": null,
           "priority": 50
         },
         {
-          "id": "QUAL-001",
+          "id": "GPU-009",
           "status": "pending",
           "owner": null,
-          "priority": 50
+          "priority": 70
         },
         {
-          "id": "RES-006",
+          "id": "RES-007",
           "status": "in_progress",
-          "owner": "codex-bluetooth-research-20261105-f",
+          "owner": "codex-display-research-20261105-g",
           "priority": 80,
-          "last_heartbeat": "2026-11-05T00:51:56+00:00",
+          "last_heartbeat": "2026-11-05T01:08:18+00:00",
           "branch": "main"
         }
       ]
     },
     {
-      "at": "2026-11-05T01:04:48+00:00",
-      "action": "refine BT-001 into host H4/initialization model; live identity and real UART/power/firmware implementation remain explicit BT-003 prerequisites",
-      "owner": "codex-bluetooth-research-20261105-f",
-      "tasks": [
-        {
-          "id": "BT-001",
-          "status": "in_progress",
-          "owner": "codex-bluetooth-research-20261105-f",
-          "priority": 70,
-          "progress_note": "E1S qcom,kiwi GPIO/UART source and QCA HCI/firmware references reviewed; selected donor contains vendor-success rewrites, so host framing/timeout checks will preserve raw replies and unknown controller identity",
-          "next_step": "Implement bounded H4/optional IBS decoding and exclusive command-credit/deadline model; review additional linked donors and native OS gates",
-          "last_heartbeat": "2026-11-05T00:53:40+00:00",
-          "branch": "main"
-        }
-      ]
+      "at": "2026-11-05T01:20:02+00:00",
+      "action": "experiment.record:TOUCHREG-001",
+      "owner": "codex-display-research-20261105-g"
     },
     {
-      "at": "2026-11-05T01:06:32+00:00",
-      "action": "experiment.record:BTMODEL-001",
-      "owner": "codex-bluetooth-research-20261105-f"
+      "at": "2026-11-05T01:20:02+00:00",
+      "action": "experiment.record:TOUCHREG-002",
+      "owner": "codex-display-research-20261105-g"
     },
     {
-      "at": "2026-11-05T01:07:13+00:00",
-      "action": "task.update:BT-001",
-      "owner": "codex-bluetooth-research-20261105-f",
+      "at": "2026-11-05T01:20:03+00:00",
+      "action": "experiment.record:UICONTRACT-001",
+      "owner": "codex-display-research-20261105-g"
+    },
+    {
+      "at": "2026-11-05T01:20:59+00:00",
+      "action": "task.update:UI-001",
+      "owner": "codex-display-research-20261105-g",
       "tasks": [
         {
-          "id": "BT-001",
+          "id": "UI-001",
           "status": "in_progress",
-          "owner": "codex-bluetooth-research-20261105-f",
+          "owner": "codex-display-research-20261105-g",
           "priority": 70,
-          "progress_note": "H4 and exclusive initialization model pass 93 project tests, registered 20000 sanitizer attempts and four ARM object checks; live identity/UART/firmware remain BT-003",
-          "next_step": "Implement real E1S native backend only with verified inputs and XNU build prerequisites",
-          "last_heartbeat": "2026-11-05T01:07:13+00:00",
+          "progress_note": "Checked single-plane extents, normalized mapping and proposed loss/cancel input state;4096 sanitizer cases,four ARM objects and101 project tests pass; no pixels/HID dispatched",
+          "next_step": "Real display and input backends remain UI-003/004/005; do not treat logical Stop or timer as retirement",
+          "last_heartbeat": "2026-11-05T01:20:59+00:00",
           "branch": "main",
-          "handoff": "src/platform/bluetooth/README.md"
+          "handoff": "src/platform/display/README.md"
         }
       ]
     },
     {
-      "at": "2026-11-05T01:07:13+00:00",
-      "action": "task.done:BT-001",
-      "owner": "codex-bluetooth-research-20261105-f",
+      "at": "2026-11-05T01:21:00+00:00",
+      "action": "task.done:UI-001",
+      "owner": "codex-display-research-20261105-g",
       "tasks": [
         {
-          "id": "BT-001",
+          "id": "UI-001",
           "status": "done",
-          "owner": "codex-bluetooth-research-20261105-f",
+          "owner": "codex-display-research-20261105-g",
           "priority": 70,
-          "progress_note": "H4 and exclusive initialization model pass 93 project tests, registered 20000 sanitizer attempts and four ARM object checks; live identity/UART/firmware remain BT-003",
-          "next_step": "Implement real E1S native backend only with verified inputs and XNU build prerequisites",
-          "last_heartbeat": "2026-11-05T01:07:13+00:00",
+          "progress_note": "Checked single-plane extents, normalized mapping and proposed loss/cancel input state;4096 sanitizer cases,four ARM objects and101 project tests pass; no pixels/HID dispatched",
+          "next_step": "Real display and input backends remain UI-003/004/005; do not treat logical Stop or timer as retirement",
+          "last_heartbeat": "2026-11-05T01:20:59+00:00",
           "branch": "main",
-          "handoff": "src/platform/bluetooth/README.md"
+          "handoff": "src/platform/display/README.md"
         }
       ]
     },
     {
-      "at": "2026-11-05T01:07:14+00:00",
-      "action": "task.update:RES-006",
-      "owner": "codex-bluetooth-research-20261105-f",
+      "at": "2026-11-05T01:21:00+00:00",
+      "action": "task.update:UI-006",
+      "owner": "codex-display-research-20261105-g",
       "tasks": [
         {
-          "id": "RES-006",
+          "id": "UI-006",
           "status": "in_progress",
-          "owner": "codex-bluetooth-research-20261105-f",
+          "owner": "codex-display-research-20261105-g",
           "priority": 80,
-          "progress_note": "Verified five clean pins and 71 selected file hashes; documented donor fake-success policy, missing iOS16.5 contract and firmware identity; added BT-003/004/005 gates",
-          "next_step": "Recover explicit selected native build/frontend inputs; do not guess firmware or use donor binary offsets",
-          "last_heartbeat": "2026-11-05T01:07:14+00:00",
+          "progress_note": "Actual original post_event fails960/1024 vectors; two-line correction passesall1024 and matches full prepared XNU file byte-for-byte",
+          "next_step": "Native STM/IRQ/power/firmware remains UI-004; full kernel requires KRN-001 inputs",
+          "last_heartbeat": "2026-11-05T01:21:00+00:00",
           "branch": "main",
-          "handoff": "research/notes/RES-006-bluetooth-donors.md"
+          "handoff": "patches/display-input/README.md"
         }
       ]
     },
     {
-      "at": "2026-11-05T01:07:14+00:00",
-      "action": "task.done:RES-006",
-      "owner": "codex-bluetooth-research-20261105-f",
+      "at": "2026-11-05T01:21:01+00:00",
+      "action": "task.done:UI-006",
+      "owner": "codex-display-research-20261105-g",
       "tasks": [
         {
-          "id": "RES-006",
+          "id": "UI-006",
           "status": "done",
-          "owner": "codex-bluetooth-research-20261105-f",
+          "owner": "codex-display-research-20261105-g",
           "priority": 80,
-          "progress_note": "Verified five clean pins and 71 selected file hashes; documented donor fake-success policy, missing iOS16.5 contract and firmware identity; added BT-003/004/005 gates",
-          "next_step": "Recover explicit selected native build/frontend inputs; do not guess firmware or use donor binary offsets",
-          "last_heartbeat": "2026-11-05T01:07:14+00:00",
+          "progress_note": "Actual original post_event fails960/1024 vectors; two-line correction passesall1024 and matches full prepared XNU file byte-for-byte",
+          "next_step": "Native STM/IRQ/power/firmware remains UI-004; full kernel requires KRN-001 inputs",
+          "last_heartbeat": "2026-11-05T01:21:00+00:00",
           "branch": "main",
-          "handoff": "research/notes/RES-006-bluetooth-donors.md"
+          "handoff": "patches/display-input/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T01:21:01+00:00",
+      "action": "task.update:RES-007",
+      "owner": "codex-display-research-20261105-g",
+      "tasks": [
+        {
+          "id": "RES-007",
+          "status": "in_progress",
+          "owner": "codex-display-research-20261105-g",
+          "priority": 80,
+          "progress_note": "Audited four clean pins,90 hashes, retail60Hz DSC, STM nibble defect and current donor bounds fixes; added actual scanout/STM/iOS gates and narrowed pending DRV-001 reservations",
+          "next_step": "Implement bounded STM protocol adapter or review concrete selected native build inputs; keep no native acceptance claims",
+          "last_heartbeat": "2026-11-05T01:21:01+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-007-display-input.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T01:21:02+00:00",
+      "action": "task.done:RES-007",
+      "owner": "codex-display-research-20261105-g",
+      "tasks": [
+        {
+          "id": "RES-007",
+          "status": "done",
+          "owner": "codex-display-research-20261105-g",
+          "priority": 80,
+          "progress_note": "Audited four clean pins,90 hashes, retail60Hz DSC, STM nibble defect and current donor bounds fixes; added actual scanout/STM/iOS gates and narrowed pending DRV-001 reservations",
+          "next_step": "Implement bounded STM protocol adapter or review concrete selected native build inputs; keep no native acceptance claims",
+          "last_heartbeat": "2026-11-05T01:21:01+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-007-display-input.md"
         }
       ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "54e6fcbc64ab0fdd868005c9fdc9e5795d3c8a22b838502a38ae50ee137ea434",
-    "BOARD.md": "009fc90830c37f4199cb1b3b877ecec6bf2cad299b290c073a2a06541741dd0e",
+    "STATUS.md": "e6f419450e275f1673d97447623c7a428b3bf282b38e612bdda6881c6ab87742",
+    "BOARD.md": "b59ccb39861593a2be766b2553409a22a6e493cdabe2080496b7c55926e68a9a",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
     "planning/tasks/INT-001.md": "9d68fa75fae4c21f31f5ea4734c3f592ed0b41c6ed897d7b045a892c63549760",
@@ -3335,12 +3550,14 @@
     "planning/tasks/GPU-011.md": "80d1aa7ea8b4a3374af3e3373d65fdb0f18f581cfd9297d29b4e707dfb732580",
     "planning/tasks/RES-005.md": "8bed1c3def30237963fab381a9b7130571df463daeb0a727c2c367496c02d5b8",
     "planning/tasks/RES-006.md": "fded3b24adc468781d4354b2a7680ddd8266abe8e2dd808b90926f5c2f436ccd",
+    "planning/tasks/RES-007.md": "5a800737008f7de03e4cf7254db0be8c36c33e524ad56b27c1ecefe6dbafc82b",
+    "planning/tasks/UI-006.md": "3f0b011218a7184215c921772df69609f1b52f14c0c5b058d4e513c9506c5bfb",
     "planning/tasks/VM-002.md": "d5451a25c99b8cdf14afc268bbafe4a12df15e62282b31b4f243cc54ac5f5dd8",
-    "planning/tasks/UI-001.md": "cff7f24088dc0dd280965b81b735654985ab3f14be737424ef62bf42e1cfa695",
+    "planning/tasks/UI-001.md": "c625d98b72bb9f1d80a6d5bb3d2a74922ae72d9ab758fb7d12bdf71a7f474320",
     "planning/tasks/USB-001.md": "aeb1f6cdd25c31a8ae88b49778bfe5fb25ef173807996a58bb8af652a62bb07e",
     "planning/tasks/GPU-006.md": "c4420e384a9ce1eaccb816f017b6212f8b8601974b7de2218916f3115d40464f",
     "planning/tasks/GPU-007.md": "6a2532661ad2838c05dbd0ccb16545e5849ce2ad209d00c3ba69d84197372508",
-    "planning/tasks/GPU-009.md": "e9555218bd44f1bb576a6323c398f4bf63e9cd689a8bee3b0267d4a10fc1e915",
+    "planning/tasks/GPU-009.md": "aa54b72a7a488c031763ae199c237ade1e352378c30d9df2b4e72eb6cacae591",
     "planning/tasks/NET-001.md": "937e2d60c5901f29bf0ea1aaea7b8d897e14dc07d522e34e91df7fd09ef817b3",
     "planning/tasks/BT-001.md": "64148c911356de46bf5704d514dd8e35c7c30311e6a4c9fdfb8430d71042ca5a",
     "planning/tasks/AUD-001.md": "ad24878acc1e855423ab6d5f45b1a0cb7289bce59ed8c2621bb837679baa96f2",
@@ -3356,6 +3573,9 @@
     "planning/tasks/NET-005.md": "14907c958852b82d97046f0aeefe666073dd6309b0a26f3a119f1a7b4c0acc9f",
     "planning/tasks/BT-003.md": "875fae9ca53d4b1c01f04ac369dcf004479e5d8a77b3c13617ee74c788dad6bc",
     "planning/tasks/BT-004.md": "38b9ed3159c61b1d8d77e676045b37931edab22f57f43d6cd90ec339d04cd431",
+    "planning/tasks/UI-003.md": "cdd6c5ef5d563473531a5635079591d0c13fa8309ddf4234743325fb13690c64",
+    "planning/tasks/UI-004.md": "a5363156aa64fa4c018c340ef93aed61f17bdb784bd59c3d83739be423714f6e",
+    "planning/tasks/UI-005.md": "893df8898fdf7ee6e20f600417d9461b52488f4560f7b34659b08cde9edba4b5",
     "planning/tasks/FND-001.md": "ee81357df48cbcec414e6dc2f58f1325d8936e16bbbe8022d8b771c316d6b0f8",
     "planning/tasks/RES-001.md": "956b0cf0fe59602b13d98565c02c1486438c7f0451c2800e8d5c1a77e8e1d9fe",
     "planning/tasks/DEV-001.md": "387a0fc684445f6526c8517869714a41d884f7be2ebb11738782afaf0b404926",
@@ -3367,7 +3587,7 @@
     "planning/tasks/GPU-003.md": "88c23557dd987fe37a6c57bbd6f512374aa4b3ef6819d891581daf992c3027eb",
     "planning/tasks/GPU-004.md": "4f7b914361a5ff47439410c701bd907e3a3020383d4b33c91ce59b5fbdab2579",
     "planning/tasks/GPU-005.md": "181529961c422d48a66b2735db0db7d5634029395209e2fad9ef0db9be0adfea",
-    "planning/tasks/DRV-001.md": "afbd675895a31e4643b5641be4b19e3ea1f98b25a3d5f5635fb7a55d42efc27c",
+    "planning/tasks/DRV-001.md": "0e15c9a93f74cbd15da5e1507551c8599a25ac14bf857b1fc3cf62a672459ade",
     "planning/tasks/DRV-002.md": "4703fbdca6bded8e74343c2594cd79b972f866e3c97886d2da04230f8c672d4b",
     "planning/tasks/NAT-001.md": "555b180dd2cfda5c6a7e4623041660bfd01b1c074d7fd82a9be75e83b4af7bcf",
     "planning/tasks/NAT-002.md": "f34fe5715fa2ad4191c245a616a5085603880a4e3cde470ecf07a88b0dafa607",
@@ -3378,7 +3598,7 @@
     "planning/tasks/VM-001.md": "1bdf1cd15a3f5b52db67c8865eede9f5039648dafb2a7c5c3f3e63143846ab29",
     "planning/tasks/VM-003.md": "50d42060d8983e4466e45c806e7f4310bfeb901594a729ffa7678b6cd9327439",
     "planning/tasks/NAT-004.md": "92ee8663bb250f96bdbd463a941d9b1c595eab5ac2055c8a0d9649f37161c232",
-    "planning/tasks/UI-002.md": "b80cb657fe91df52c44d8dd08fdb1b2353dbc9aa97595f2d6d2635514532c3aa",
+    "planning/tasks/UI-002.md": "5669ba2f32f4ec7d2645872861f8386ed6c8c5de8e89b251743f940b593caac4",
     "planning/tasks/USB-002.md": "9f1e7d8d4951abdd4453efd531ee26d37d31e754957605894eafb6534a2ab46e",
     "planning/tasks/GPU-008.md": "8b10873253b9ad1f4cab2298e05f5359e7b9917aa4c7525bf7fb954ad06b74fb",
     "planning/tasks/GPU-010.md": "4749d305f26f3c16f7a9e7180a76696bbccdbe43ad5c29c46229e1bf68b27d8c",

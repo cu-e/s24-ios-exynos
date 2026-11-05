@@ -1,0 +1,34 @@
+{
+  "id": "UI-003",
+  "title": "Implement E1S native display and scanout ownership",
+  "status": "pending",
+  "owner": null,
+  "priority": 70,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": [
+    "UI-001",
+    "GPU-006",
+    "KRN-001"
+  ],
+  "paths": [
+    "src/platform/display/native",
+    "docs/procedures/ui-003"
+  ],
+  "acceptance": [
+    "Compile/link real DECON/DPP/DSIM/DSC, panel reset/rails/clocks/TE and brightness support against pinned XNU; start with verified 60 Hz profile",
+    "Resolve actual boot framebuffer ownership/format/stride/reservations/cache and DPU SysMMU mappings; reject guessed fallback addresses or fake VSYNC as native readiness",
+    "Enforce producer fences and source/destination/scanout lifetime, bounded queue cancellation/fault/Stop; timeout cannot show an unfinished GPU surface or authorize reuse",
+    "Qualify hardware TE/frame-done/retirement and panel power separately on the native S24; source/build checks cannot satisfy them"
+  ],
+  "sources": [
+    "s24-port",
+    "s24-linux",
+    "s24-bsp-reference"
+  ],
+  "steps": [
+    "Match selected pinned inputs and ownership boundaries",
+    "Implement actual backend/frontend without success stubs",
+    "Compile/link and test bounded failure/lifecycle paths; retain native qualification gates"
+  ]
+}

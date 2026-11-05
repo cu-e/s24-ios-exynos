@@ -1,0 +1,34 @@
+{
+  "id": "UI-004",
+  "title": "Implement and link E1S STM SPI9, IRQ, firmware and power lifecycle",
+  "status": "pending",
+  "owner": null,
+  "priority": 70,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": [
+    "DRV-001",
+    "UI-001",
+    "UI-006",
+    "KRN-001"
+  ],
+  "paths": [
+    "src/platform/input/native",
+    "docs/procedures/ui-004"
+  ],
+  "acceptance": [
+    "Compile/link actual verified SPI9/USI9/pins/CS/IRQ42/wake/regulator integration against XNU; no guessed donor pin swaps or success-only transport",
+    "Verify board/controller/runtime firmware identity and full conditional power/init sequence; firmware transfer is not autonomous read-only inventory",
+    "Use validated STM packets and bounded worker/IRQ drain with cancellation, reset/loss handling, ten contact states and suspend/stop cleanup",
+    "Keep native firmware/IRQ/SPI/power and actual touch orientation unverified until separately authorized measurements"
+  ],
+  "sources": [
+    "s24-port",
+    "s24-linux"
+  ],
+  "steps": [
+    "Match selected pinned inputs and ownership boundaries",
+    "Implement actual backend/frontend without success stubs",
+    "Compile/link and test bounded failure/lifecycle paths; retain native qualification gates"
+  ]
+}

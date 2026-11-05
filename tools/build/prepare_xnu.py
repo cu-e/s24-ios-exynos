@@ -22,6 +22,10 @@ def main():
         raise ValueError('Use a unique simple run name')
     data = json.loads((root / 'research/sources.json').read_text())['sources']
     provenance = [sources.verify(root, next(s for s in data if s['id'] == i)) for i in ['s24-port', 'apple-xnu']]
+    # This reviewed correction targets the generated file from one exact E1S
+    # series. A later donor pin must receive its own source/regression review.
+    if provenance[0]['revision'] != 'c8860decc62c6d6180e609036d027a2997972420':
+        raise ValueError('Local STM correction requires its reviewed E1S source pin')
     out = root / 'artifacts/xnu-prepare' / args.run
     if out.resolve() != out:
         raise ValueError('Run path cannot use symlinks')
@@ -34,7 +38,8 @@ def main():
         # the parent project and skip paths outside its prefix while exiting 0.
         sources.git(work, 'init', '--quiet')
         donor = root / 'references/s24-port'
-        patches = [donor / 'xnu/hackios/redwood.patch', *sorted((donor / 'xnu/e1s/patches').glob('[0-9][0-9][0-9][0-9]-*.patch'))]
+        local_patch = root / 'patches/display-input/0001-e1s-stm-coordinate-nibbles.patch'
+        patches = [donor / 'xnu/hackios/redwood.patch', *sorted((donor / 'xnu/e1s/patches').glob('[0-9][0-9][0-9][0-9]-*.patch')), local_patch]
         report['patches'] = []
         for i, patch in enumerate(patches):
             for mode in ['--check', '--apply']:
@@ -43,12 +48,14 @@ def main():
                 report['commands'].append(dict(argv=argv, exit_code=x.returncode, stdout=x.stdout, stderr=x.stderr))
                 if x.returncode:
                     raise RuntimeError(f'Patch {patch.name} failed: {x.stderr}')
-            report['patches'].append(dict(name=str(patch.relative_to(donor)), sha256=hashlib.sha256(patch.read_bytes()).hexdigest()))
+            report['patches'].append(dict(name=str(patch.relative_to(root if patch == local_patch else donor)),
+                                          origin='local-project' if patch == local_patch else 'pinned-upstream',
+                                          sha256=hashlib.sha256(patch.read_bytes()).hexdigest()))
             if i == 0:
                 shutil.copytree(donor / 'xnu/hackios/files', work, dirs_exist_ok=True)
         required = ['config/MASTER.arm64.e1s', 'pexpert/pexpert/arm64/E1S.h', 'bsd/dev/e1s_touch.c', 'bsd/dev/e1s_ufs.c']
         report['required_files'] = {f: hashlib.sha256((work / f).read_bytes()).hexdigest() for f in required}
-        report.update(outcome='pass', summary='Exact open XNU plus embedded HakiOS and all E1S patches apply; no kernel compiled')
+        report.update(outcome='pass', summary='Exact open XNU plus embedded HakiOS, all E1S patches and reviewed local STM nibble correction apply; no kernel compiled')
     except Exception as exc:
         report.update(outcome='fail', error=str(exc))
     (out / 'report.json').write_text(json.dumps(report, indent=2) + '\n')

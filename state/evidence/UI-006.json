@@ -1,0 +1,97 @@
+{
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T01:20:59+00:00",
+  "commit": "8c16c82340ccd9ddbef1d916b235b3bc94ab0db3",
+  "working_tree": "Uncommitted source/docs/evidence with exact listed hashes; committed together with ledger and generated views",
+  "kind": "host-test",
+  "summary": "Confirmed original E1S coordinate regression (960/1024 mismatches), corrected to0/1024 and integrated minimal patch into complete pinned XNU source preparation;101 project tests pass",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tests/test_e1s_touch_regression.py",
+        "--run",
+        "original-touch-session1",
+        "--original"
+      ],
+      "exit_code": 3,
+      "expected_negative": true
+    },
+    {
+      "argv": [
+        "python3",
+        "tests/test_e1s_touch_regression.py",
+        "--run",
+        "corrected-touch-session1"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/build/prepare_xnu.py",
+        "--run",
+        "corrected-touch-xnu-session1"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_e1s_touch_regression.py",
+        "-v"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "make",
+        "check"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "patches/display-input/README.md",
+    "patches/display-input/0001-e1s-stm-coordinate-nibbles.patch",
+    "tools/build/prepare_xnu.py",
+    "tests/test_e1s_touch_regression.py",
+    "docs/procedures/ui-006/README.md",
+    "docs/procedures/backlog/ui-006.json",
+    "fixtures/public/display-input-research/original-touch-session1.json",
+    "fixtures/public/display-input-research/corrected-touch-session1.json",
+    "fixtures/public/display-input-research/corrected-touch-xnu-session1.json",
+    "fixtures/public/display-input-research/prepared-decoder-equivalence.json",
+    "fixtures/public/display-input-research/make-check.stdout.txt",
+    "fixtures/public/display-input-research/make-check.stderr.txt"
+  ],
+  "sha256": {
+    "patches/display-input/README.md": "e253f8910088326a2c56ced10afd89119d1852fcd7b14225f74009ee470d43e5",
+    "patches/display-input/0001-e1s-stm-coordinate-nibbles.patch": "705cba452a520ee98fd0ed93d37bbdb22a7f3004513c7c7dc8acdd63d78dd5bf",
+    "tools/build/prepare_xnu.py": "b479bfecf9bc68bce7850a9bc0f1ef2ad9ba9e500176902fee8885fcfd0b420a",
+    "tests/test_e1s_touch_regression.py": "7553a34524eac2b5ffc5f9b7909ef8896e8bbfbbebf59ba21aab2c8ba3ca56da",
+    "docs/procedures/ui-006/README.md": "d2b3579c42293cf4de26795ac7bb0181be852423f3f5469cc12d680ba35ad772",
+    "docs/procedures/backlog/ui-006.json": "7805ee9764dc0ba03b21b897dc89f9c3657b8d40873b68f079fa51ed4aa33086",
+    "fixtures/public/display-input-research/original-touch-session1.json": "61f6be5be420176915f1e0d4723da2df04ec2de2365bec27e1d48a2baf54487f",
+    "fixtures/public/display-input-research/corrected-touch-session1.json": "8f9ddf8c0941f4c5a4fcae9293ad28242d059e05bafbc7d3589e16db603608f2",
+    "fixtures/public/display-input-research/corrected-touch-xnu-session1.json": "716745a946ad86b0d5c92255a276a30bfdf8edae3820d7550c0462714e395378",
+    "fixtures/public/display-input-research/prepared-decoder-equivalence.json": "8450cb2e651922a9087ecd1089c22f9109c4c04b72d7366046603c564a1519bb",
+    "fixtures/public/display-input-research/make-check.stdout.txt": "460ae0171eede76ebfc1255bf81988b1bc9a7383ab369a4f9de295e3766d00fa",
+    "fixtures/public/display-input-research/make-check.stderr.txt": "230b3ac3e5aa6ae2de0cb0a91470083f99509fdb7e803dd5d5ba9cd1a64de996"
+  },
+  "limitations": [
+    "No phone command, framebuffer/HID dispatch, SPI/GPIO/MMIO operation, firmware blob or Apple component fetched",
+    "No full XNU compile/link or ARM execution; all native capability states remain not-tested",
+    "Native display/DSC/scanout, STM transport/firmware/power and selected iOS16.5 services remain UI-003/004/005 before UI-002 qualification",
+    "Only actual extracted pure post_event is host-compiled with capture shims; no hardware portions run",
+    "Correction proves source-layout agreement, not real SPI packet/firmware/orientation behavior",
+    "Expected exit3 from original decoder is preserved as failed TOUCHREG-001, not hidden or relabeled successful implementation"
+  ]
+}

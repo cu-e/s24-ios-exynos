@@ -7,7 +7,7 @@
       "url": "https://github.com/RNDMBG/iOS-On-S24",
       "relevance": "Exact SM-S921B/e1s loader, E1S patches and hardware map. Before the first hardware boot.",
       "revision": "c8860decc62c6d6180e609036d027a2997972420",
-      "license_notes": "Mixed licenses: GPL-2.0-only loader, APSL XNU; inspect individual files.",
+      "license_notes": "GPL-2.0-only loader; embedded HakiOS APSL-2.0 reviewed. Selected E1S root/patch additions have no explicit blanket grant established; preserve component provenance before redistribution. Local STM correction is separately attributed.",
       "trust": "primary-upstream",
       "local_device_verified": false,
       "review_files": [
@@ -17,7 +17,19 @@
         "docs/e1s-hardware-map.md",
         "docs/e1s-userland.md",
         "docs/e1s-hackios-port-map.md",
-        "shim/e1s-xnu/loader.c"
+        "shim/e1s-xnu/loader.c",
+        "xnu/e1s/patches/0003-e1s-touch.patch",
+        "xnu/e1s/patches/0010-e1s-display.patch",
+        "xnu/e1s/patches/0002-e1s-input.patch",
+        "xnu/hackios/LICENSE",
+        "xnu/hackios/files/iokit/Kernel/MiniIOMobileFramebuffer.cpp",
+        "xnu/hackios/files/iokit/Kernel/MiniIOSurface.cpp",
+        "xnu/hackios/files/iokit/Kernel/MiniIOSurface.h",
+        "xnu/hackios/files/bsd/sys/redwood_input.h",
+        "xnu/hackios/files/bsd/dev/redwood_input.c",
+        "xnu/hackios/files/osfmk/arm64/gic_v3_irq.c",
+        "shim/e1s-xnu/fdt.c",
+        "tools/e1s/test_e1s_touch.py"
       ]
     },
     {
@@ -31,7 +43,15 @@
       "review_files": [
         "README.md",
         "LICENSE",
-        "LICENSE.APSL"
+        "LICENSE.APSL",
+        "docs/driver-review/input.md",
+        "drivers/input/hakios.input.c",
+        "userland/src/rwtouch.c",
+        "userland/src/inject.c",
+        "userland/src/hakios.input.h",
+        "xnu/files/iokit/Kernel/MiniIOMobileFramebuffer.cpp",
+        "xnu/files/iokit/Kernel/MiniIOSurface.cpp",
+        "xnu/files/iokit/Kernel/MiniIOSurface.h"
       ],
       "checkout_policy": "Explicit sparse source review; no submodules, toolchains, IPSWs or firmware"
     },
@@ -212,7 +232,17 @@
         "drivers/bluetooth/btqca.c",
         "drivers/bluetooth/btqca.h",
         "drivers/bluetooth/h4_recv.h",
-        "drivers/bluetooth/Kconfig"
+        "drivers/bluetooth/Kconfig",
+        "arch/arm64/boot/dts/samsung/display_s6e3fae_e1s.dtsi",
+        "arch/arm64/boot/dts/samsung/e1s/s5e9945.e1s_eur_openx.17.dtsi",
+        "arch/arm64/boot/dts/samsung/e1s/s5e9945-e1s_common.dtsi",
+        "arch/arm64/boot/dts/samsung/e1s/e1s_eur_openx_w01_r13.dts",
+        "arch/arm64/boot/dts/exynos/s5e9945-pinctrl.dtsi",
+        "drivers/input/sec_input/sec_input.c",
+        "drivers/input/sec_input/stm_spi/stm_core.c",
+        "drivers/input/sec_input/stm_spi/stm_dev.h",
+        "drivers/input/sec_input/stm_spi/stm_reg.h",
+        "drivers/input/sec_input/stm_spi/stm_spi.c"
       ],
       "checkout_policy": "Explicit sparse source review; no submodules, toolchains, IPSWs or firmware"
     },
@@ -277,7 +307,8 @@
       "review_files": [
         "COPYING",
         "arch/arm64/boot/dts/exynos/s5e9945-sgpu.dtsi",
-        "arch/arm64/boot/dts/samsung/e1s/s5e9945-e1s_common.dtsi"
+        "arch/arm64/boot/dts/samsung/e1s/s5e9945-e1s_common.dtsi",
+        "arch/arm64/boot/dts/exynos/s5e9945-drm-dpu.dtsi"
       ],
       "relevance": "Android 15/S921BXXS8BYG2 BSP used by the upstream S24 hardware map; differs from the owner S921BXXS9BYH3.",
       "license_notes": "Linux GPL-2.0 and individual file notices; protocol/register research does not authorize wholesale incorporation into APSL XNU.",

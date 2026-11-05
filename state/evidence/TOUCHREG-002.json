@@ -1,0 +1,51 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T01:11:20+00:00",
+  "summary": "Actual corrected E1S decoder passes1024 synthetic vectors; minimal patch applies after full exact XNU/embedded/E1S preparation",
+  "commit": "8c16c82340ccd9ddbef1d916b235b3bc94ab0db3",
+  "working_tree": "Uncommitted inputs; exact tested bytes retained by report hashes/generated host source and copied public reports",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tests/test_e1s_touch_regression.py",
+        "--run",
+        "corrected-touch-session1"
+      ],
+      "exit_code": 0,
+      "expected_negative": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/build/prepare_xnu.py",
+        "--run",
+        "corrected-touch-xnu-session1"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "artifacts/touch-regression/corrected-touch-session1/report.json",
+    "fixtures/public/display-input-research/corrected-touch-session1.json",
+    "artifacts/xnu-prepare/corrected-touch-xnu-session1/report.json",
+    "fixtures/public/display-input-research/corrected-touch-xnu-session1.json",
+    "tools/build/prepare_xnu.py",
+    "patches/display-input/0001-e1s-stm-coordinate-nibbles.patch"
+  ],
+  "sha256": {
+    "artifacts/touch-regression/corrected-touch-session1/report.json": "8f9ddf8c0941f4c5a4fcae9293ad28242d059e05bafbc7d3589e16db603608f2",
+    "fixtures/public/display-input-research/corrected-touch-session1.json": "8f9ddf8c0941f4c5a4fcae9293ad28242d059e05bafbc7d3589e16db603608f2",
+    "artifacts/xnu-prepare/corrected-touch-xnu-session1/report.json": "716745a946ad86b0d5c92255a276a30bfdf8edae3820d7550c0462714e395378",
+    "fixtures/public/display-input-research/corrected-touch-xnu-session1.json": "716745a946ad86b0d5c92255a276a30bfdf8edae3820d7550c0462714e395378",
+    "tools/build/prepare_xnu.py": "b479bfecf9bc68bce7850a9bc0f1ef2ad9ba9e500176902fee8885fcfd0b420a",
+    "patches/display-input/0001-e1s-stm-coordinate-nibbles.patch": "705cba452a520ee98fd0ed93d37bbdb22a7f3004513c7c7dc8acdd63d78dd5bf"
+  },
+  "limitations": [
+    "Host source regression/model only; no Apple SDK, full XNU build/link or ARM/native execution",
+    "No phone command, framebuffer/HID dispatch, SPI/GPIO/MMIO or firmware operation",
+    "Native display, input, selected OS interfaces and lifetime remain UI-003/004/005 and UI-002 gates"
+  ]
+}

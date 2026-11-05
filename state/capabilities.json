@@ -95,24 +95,42 @@
     {
       "id": "display",
       "title": "Display and touch",
-      "implementation": "planned",
+      "implementation": "host-tested",
       "native_status": "not-tested",
-      "local_observation": "1080x2340; advertised refresh modes; sec_touchscreen 10 slots",
-      "upstream": "S24 framebuffer/touch code untested",
-      "next_check": "Validate presentation and HID contract",
-      "acceptance": "Correct native pixels, touch, brightness and scanout",
+      "local_observation": "1080x2340 and10 input slots; historical stm_ts gpa1[2] Level activity; native mapping/orientation unverified",
+      "upstream": "Pinned E1S STM nibble bug corrected and source-regressed; layout/event host model passes; real scanout/DSC/STM/OS integration missing",
+      "next_check": "UI-003 real panel/scanout, UI-004 actual STM SPI/IRQ/firmware and UI-005 selected iOS16.5 surfaces/HID before UI-002 native acceptance",
+      "acceptance": "Correct actual pixels/scanout, brightness/power, calibrated ten-contact HID and Apple UI lifecycle",
       "tasks": [
         "UI-001",
+        "UI-006",
+        "DRV-001",
+        "UI-003",
+        "UI-004",
+        "UI-005",
         "UI-002",
-        "DRV-001"
+        "RES-007"
       ],
       "sources": [
-        "s24-port"
+        "s24-port",
+        "s24-linux",
+        "s24-bsp-reference",
+        "hakios"
       ],
       "local_evidence": [
         {
           "path": "state/evidence/DEV-001.json",
           "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ],
+      "implementation_evidence": [
+        {
+          "path": "state/evidence/UICONTRACT-001.json",
+          "sha256": "b60191939f98f9275e02e426828c0d3eec127faf7656a233ce477dede498c45b"
+        },
+        {
+          "path": "state/evidence/TOUCHREG-002.json",
+          "sha256": "ec698d19563718408170a8cea272efb9bd2701e3a47b1a2def320877b91173c5"
         }
       ]
     },
