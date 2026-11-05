@@ -1,0 +1,1 @@
+Mbed TLS, Copyright The Mbed TLS Contributors. Source is pinned in provenance.json. We select Apache-2.0 from the upstream dual license; LICENSE is retained unchanged. Only common.h has the documented unused-include portability patch. DES tables, schedules and block/CBC algorithms are unchanged. DES/TDES are legacy, insecure for new designs; no FIPS or side-channel claim.

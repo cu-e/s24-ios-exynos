@@ -1,0 +1,10 @@
+#ifndef S24_DES_PROFILE_H
+#define S24_DES_PROFILE_H
+#define MBEDTLS_DES_C
+#define MBEDTLS_CIPHER_MODE_CBC
+#define MBEDTLS_PLATFORM_NO_STD_FUNCTIONS
+#define MBEDTLS_PLATFORM_ZEROIZE_ALT
+#if defined(MBEDTLS_DES_ALT) || defined(MBEDTLS_DES_SETKEY_ALT) || defined(MBEDTLS_DES_CRYPT_ECB_ALT) || defined(MBEDTLS_DES3_CRYPT_ECB_ALT) || defined(MBEDTLS_HAVE_ASM)
+#error Unqualified DES profile
+#endif
+#endif
