@@ -10,7 +10,6 @@ import json
 import os
 from pathlib import Path
 import re
-import resource
 import subprocess
 import sys
 import tempfile
@@ -171,16 +170,14 @@ def common_check(root, out, fd, report):
     supervisor = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(supervisor)
     report["supervisor_sha256"] = sha(supervisor_path)
-    def limits():
-        resource.setrlimit(resource.RLIMIT_AS, (2 * 1024**3, 2 * 1024**3))
     environment = dict(ENV, MAKEFLAGS="-j2", CMAKE_BUILD_PARALLEL_LEVEL="2", MAX_JOBS="2")
-    record = {"argv": ["make", "check"], "address_space_limit_bytes": 2 * 1024**3,
+    record = {"argv": ["make", "check"], "address_space_limit_bytes": None,
               "aggregate_rss_stop_bytes": 2 * 1024**3, "max_jobs": 2, "peak_owned_tree_rss_bytes": 0}
     report["common_check"] = record
     with (out / "make-check.log").open("xb") as log, (out / "make-check.samples.jsonl").open("x") as samples:
         process = subprocess.Popen(["make", "check"], cwd=root, env=environment, stdout=log,
                                    stderr=subprocess.STDOUT, start_new_session=True,
-                                   pass_fds=(fd,), preexec_fn=limits)
+                                   pass_fds=(fd,))
         started = time.monotonic()
         record["owned_session"] = process.pid
         try:

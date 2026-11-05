@@ -41,12 +41,11 @@ tests do not execute the real admission/supervisor/common-check path and do not
 establish real-host publication qualification. No actual primary Git publication,
 project `make check`, compiler, QEMU, phone or ADB operation has occurred here.
 
-The future common path has stable 4 GiB admission before publication and check,
-two-job configuration, a 2 GiB per-process address-space cap plus live sampled
-aggregate-RSS stopping, a 180-second deadline and owned-session cleanup through
-the unchanged existing supervisor. This path needs independent review and the
-first explicitly leased real integration. A sampled RSS threshold is not a hard
-cgroup cap. No resource lease is invented or consumed by the initial audit.
+The common path has stable 4 GiB admission before publication and check,
+two-job configuration, live sampled aggregate-RSS stopping at 2 GiB, a
+180-second deadline and owned-session cleanup through the unchanged supervisor.
+A sampled RSS threshold is not a hard cgroup cap. The initial audit consumed no
+resource lease; the first real root-leased integration is recorded below.
 
 Next critical path: root-approved independent review of this gate, then a frozen
 VM-008 source/capsule review and candidate. VM-009 executor and ten disjoint
@@ -58,3 +57,32 @@ coordination authority. This integrator does not claim original component work.
 
 Pending: independent gate review, concrete root approval, first leased guarded
 publication/common check, and actual VM-008 acceptance. Task remains in progress.
+
+## First publication and virtual-address correction
+
+Root accepted the gate and REV-024, then approved exact plan SHA256
+`419209ae1c71bdc783c9b7eb05507364f3e312a5971c8f79f99e1c62076adaea`.
+The shared gate published MAIN from `aac27cf` to exact candidate
+`4bea9b59d1d24c2f7f53f4028769b6e420be556e`, retaining the unrelated dirty ledger.
+The common test phase ran 153 tests and failed one JVM startup; the overall make
+exit was 2, with no timeout/pressure stop. Peak owned RSS was 180,826,112 bytes
+and no owned PIDs survived. The failed capsule is
+`artifacts/integration-gate/gate-publication-1/evidence.json` in this worktree.
+The matching heavy lease was released and the published HEAD retained.
+
+Root's `artifacts/team-coordination/20261106-team/javac-as-diagnostic.json`
+establishes the cause: `javac -version` cannot reserve 1,073,741,824 bytes of
+compressed class space under the additional 2 GiB virtual-address cap and exits
+1 with empty stderr; without that cap it exits 0 (`javac 25.0.1`). The policy
+limits aggregate owned RSS, not virtual reservations. The minimal correction
+removes only the gate's AS override, retaining all RSS/job/pressure/deadline and
+cleanup controls. The evidence field is now null for no gate AS override.
+No test is skipped and no JVM options are added. Independent review of this
+exact delta and a fresh root-approved plan precede the justified common rerun.
+
+VM-008 historical source/capsules remain bound to their original frozen
+measurement entrypoint. A prospective three-sample admission guard is a separate
+component; it must not relabel historical measurements or invalidate their
+unchanged generated namespace. Future execution always needs stable three
+samples and an admitted root lease. VM-009 verification and execution contracts
+must distinguish those historical and prospective roles explicitly.

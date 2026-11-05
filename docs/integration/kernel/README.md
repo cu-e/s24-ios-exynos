@@ -76,16 +76,24 @@ paths are forbidden, including both lock files. Ignored data at a new candidate
 path and symlink parents are rejected too. The common check records live
 0.2-second session samples and peak aggregate RSS, terminates its owned session
 on the 2 GiB RSS stop threshold, low-memory/pressure condition or deadline, and
-records remaining owned PIDs after cleanup. The 2 GiB per-process address-space
-limit is additional protection; sampled aggregate stopping is not a cgroup hard
+records remaining owned PIDs after cleanup. Sampled aggregate stopping is not a cgroup hard
 limit and can observe overshoot between samples. Stable 4 GiB admission is
 required before publication and again before the common check.
 
 Future common checks require three consecutive available-memory samples at or
-above 4 GiB, a root resource lease, at most two jobs and a 2 GiB address-space
-limit for the new job. Guest execution remains a separate root-admitted queue
+above 4 GiB, a root resource lease, at most two jobs and a 2 GiB sampled
+aggregate owned-RSS stop threshold. Guest execution remains a separate root-admitted queue
 with at most one QEMU; the gate does not grant a guest lease. Preserve existing
 source tools and immutable artifacts.
+
+The first actual common check failed because the initial extra 2 GiB
+`RLIMIT_AS` prevented the JVM from reserving compressed class space, despite a
+180,826,112-byte peak owned RSS. Root independently reproduced this with
+`javac -version`: exit 1 under that cap, exit 0 without it. The gate now leaves
+inherited address-space limits unchanged and records
+`address_space_limit_bytes: null` for no gate override. This does not remove the
+RSS/job/pressure/deadline/cleanup policy, skip tests, or add JVM options. The
+original failed publication and diagnostic remain immutable artifacts.
 
 Next component: independently reviewed/frozen VM-008, followed by guest object
 components. The supplied immutable object graph is
