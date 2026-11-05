@@ -29,8 +29,10 @@ executor, so it was correctly charged to that executor. `control-002` exposed a
 fixture PID-file creation/write race. These fixture issues were corrected with
 a bounded detached helper and a nonempty PID-file wait; no production guard was
 weakened. `control-007` passed 46 controls before whitespace normalization and
-the one-line process-read race correction. The final frozen official capsule is
-listed in evidence.json when available; earlier capsules remain in
+the one-line process-read race correction. The final frozen official capsule passed47 controls at
+`artifacts/avf-project-budgets/frozen-001/evidence.json`, SHA256
+`b21a0c901fabca37ec4502776edf4e42ab6027907120db2d84bf149ddc98e677`.
+It follows MAIN pre-registration `VM037BUDGET-002`; earlier capsules remain in
 `artifacts/avf-project-budgets/` in this worktree.
 
 Controls use real Python/sleep processes, real /proc identities and RSS, a stable
