@@ -130,10 +130,14 @@ PYTHONDONTWRITEBYTECODE=1 python3 tools/research/avf-kernel-profile/verify.py \
 ```
 
 Acquisition uses `source.py` and an explicit named request list; never run donor
-setup/phone scripts to obtain missing inputs. Evidence and artifact index will
-bind the final tested implementation commit and exact existing output paths.
-All commands have 20-second deadlines and owned-session cleanup; measured source
-checks use a 256MiB address-space/session RSS budget, no compiler/build/guest.
+setup/phone scripts to obtain missing inputs. The final tested implementation is `30495d7358a32240a00b4912b31d11a9de3daf59`.
+[`evidence.json`](evidence.json) binds the actual 46 child commands, 25 source facts, eight
+negative controls and 295 retained artifacts. Sampled verifier session plus
+supervisor RSS peaked at 26.34375 MiB; every after sample has no owned process.
+Verifier child commands have 20-second deadlines, owned-session cleanup and a
+256MiB address-space/sampled total RSS budget. No compiler/build/guest ran.
+Source acquisition has separate bounded Git/HTTP operations; its peak RSS was
+not independently measured.
 Final acceptance and common repository checks belong to coordinator review.
 
 Scion root license covers loader/tools with MIT and kernel derivatives APSL2;
