@@ -1,0 +1,61 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "recorded_at": "2026-11-05T02:41:21+00:00",
+  "summary": "LLVM Darwin linker returns0 but warns that XNU-required static/image_base/segment_order are unimplemented; source-derived compatibility subset fails despite simple dylib success",
+  "commit": "aac30c9fdc6205e961a940ce8b211977099f5047",
+  "commands": [
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/lld",
+        "-flavor",
+        "darwin",
+        "-arch",
+        "arm64",
+        "-platform_version",
+        "ios",
+        "16.5",
+        "16.5",
+        "-static",
+        "-pie",
+        "-image_base",
+        "0xfffffff007004000",
+        "-e",
+        "_s24_host_fixture",
+        "-rename_section",
+        "__TEXT",
+        "__text",
+        "__TEXT_EXEC",
+        "__text",
+        "-segment_order",
+        "__TEXT:__TEXT_EXEC:__DATA:__LINKEDIT",
+        "-segprot",
+        "__TEXT",
+        "r--",
+        "r--",
+        "-segprot",
+        "__TEXT_EXEC",
+        "r-x",
+        "r-x",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session2/kernel-style",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.o"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/xnu-host-tools/llvm-session2.json",
+    "artifacts/xnu-host-tools/llvm-session2/report.json"
+  ],
+  "sha256": {
+    "fixtures/public/xnu-host-tools/llvm-session2.json": "9659f8e1760d18bfe89047a58412ea9d190a233e52f2f97a77ee564374b74d09",
+    "artifacts/xnu-host-tools/llvm-session2/report.json": "9659f8e1760d18bfe89047a58412ea9d190a233e52f2f97a77ee564374b74d09"
+  },
+  "limitations": [
+    "No Apple SDK, full kernel, generated RPC ABI/IPC execution or hardware qualification",
+    "Host-generator and simple Mach-O fixture results do not qualify full cctools/TAPI or static XNU layout semantics",
+    "KRN-002 remains in progress until real compatible linker/tool coverage is established; earlier failed attempts remain immutable"
+  ]
+}

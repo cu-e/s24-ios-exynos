@@ -1,12 +1,11 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T02:32:54+00:00",
-  "ledger_updated_at": "2026-11-05T02:32:54+00:00",
-  "registry_sha256": "00d34940209d2696af8f23e5318711338ad48970c7a6a188fbea8b1bcd2977be",
+  "generated_at": "2026-11-05T02:42:33+00:00",
+  "ledger_updated_at": "2026-11-05T02:41:56+00:00",
+  "registry_sha256": "44236ab34d4fb7be54f5d3e964efc0bd4bfe77e07ed1522defdb84b57de785e6",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
-      "KRN-002",
       "ESIM-004",
       "CELL-009",
       "VM-002",
@@ -17,7 +16,9 @@
       "DRV-001",
       "VM-001"
     ],
-    "in_progress": [],
+    "in_progress": [
+      "KRN-002"
+    ],
     "blocked": [
       "KRN-001",
       "NAT-001"
@@ -154,14 +155,17 @@
       "card_path": "planning/tasks/RES-008.md"
     },
     {
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "codex-xnu-host-tools-20261105-j",
       "scope": "host",
       "evidence_kind": "host-test",
       "priority": 95,
       "sources": [
         "hakios-e1s-tools",
-        "apple-xnu"
+        "apple-xnu",
+        "xnu-mig",
+        "xnu-unifdef",
+        "xnu-tcsh"
       ],
       "depends_on": [
         "RES-008"
@@ -174,7 +178,8 @@
         "research/sources.json",
         "research/notes/KRN-002-host-tools.md",
         "docs/procedures/xnu-host-tools.md",
-        "fixtures/public/xnu-host-tools"
+        "fixtures/public/xnu-host-tools",
+        "patches/build-tools"
       ],
       "acceptance": [
         "Pin and review actual host-generator/cctools/TAPI dependency sources and licenses; do not invoke rolling SDK installers",
@@ -187,9 +192,17 @@
         "Build source-only host dependencies and Mach-O tooling with bounded parallelism",
         "Publish actual usable tool prefix and remaining gaps for KRN-003/KRN-001"
       ],
-      "column": "ready",
+      "started_at": "2026-11-05T02:33:14+00:00",
+      "last_heartbeat": "2026-11-05T02:41:56+00:00",
+      "updated_at": "2026-11-05T02:41:56+00:00",
+      "branch": "main",
+      "progress_note": "Three pinned host generators genuinely built and tested in a private prefix; simple LLVM Mach-O operations pass, but actual kernel flag subset fails because static/image_base/segment_order are unimplemented despite linker exit0",
+      "next_step": "Pin/review/build compatible cctools ld64/TAPI and qualify real static layout/symbol/tool operations; keep KRN-002 in progress",
+      "handoff": "research/notes/KRN-002-host-tools.md",
+      "column": "in_progress",
       "reasons": [],
-      "card_path": "planning/tasks/KRN-002.md"
+      "card_path": "planning/tasks/KRN-002.md",
+      "report_health": "recent"
     },
     {
       "status": "pending",
@@ -2243,7 +2256,7 @@
       "column": "gated",
       "reasons": [
         "Scope not authorized: android-app",
-        "Paths reserved by: NAT-001"
+        "Paths reserved by: NAT-001, KRN-002"
       ],
       "priority": 50,
       "card_path": "planning/tasks/GPU-003.md"
@@ -2327,7 +2340,8 @@
       "column": "gated",
       "reasons": [
         "Scope not authorized: android-app",
-        "Dependencies: GPU-003"
+        "Dependencies: GPU-003",
+        "Paths reserved by: KRN-002"
       ],
       "priority": 50,
       "card_path": "planning/tasks/GPU-005.md"
@@ -2401,7 +2415,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Paths reserved by: KRN-001"
+        "Paths reserved by: KRN-001, KRN-002"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-002.md"
@@ -2485,7 +2499,7 @@
       "column": "waiting",
       "reasons": [
         "Dependencies: NAT-001",
-        "Paths reserved by: NAT-001, KRN-001"
+        "Paths reserved by: NAT-001, KRN-001, KRN-002"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-002.md"
@@ -2529,7 +2543,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-002, NAT-004, KRN-001",
-        "Paths reserved by: NAT-001, KRN-001"
+        "Paths reserved by: NAT-001, KRN-001, KRN-002"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -2567,7 +2581,8 @@
       "column": "gated",
       "reasons": [
         "Scope not authorized: native",
-        "Dependencies: NAT-003, DRV-001, DRV-002"
+        "Dependencies: NAT-003, DRV-001, DRV-002",
+        "Paths reserved by: KRN-002"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -3382,6 +3397,19 @@
     }
   ],
   "agents": {
+    "codex-xnu-host-tools-20261105-j": [
+      {
+        "id": "KRN-002",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-05T02:41:56+00:00",
+        "report_health": "recent",
+        "progress_note": "Three pinned host generators genuinely built and tested in a private prefix; simple LLVM Mach-O operations pass, but actual kernel flag subset fails because static/image_base/segment_order are unimplemented despite linker exit0",
+        "next_step": "Pin/review/build compatible cctools ld64/TAPI and qualify real static layout/symbol/tool operations; keep KRN-002 in progress",
+        "handoff": "research/notes/KRN-002-host-tools.md",
+        "branch": "main",
+        "worktree": null
+      }
+    ],
     "codex-implementation-20261105": [
       {
         "id": "KRN-001",
@@ -3408,120 +3436,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-05T01:58:53+00:00",
-      "action": "task.refine:TST-002-publish-runtime-capability-and-handoff-evidence",
-      "owner": "codex-emulator-qualification-20261105-h",
-      "tasks": [
-        {
-          "id": "TST-002",
-          "status": "in_progress",
-          "owner": "codex-emulator-qualification-20261105-h",
-          "priority": 80,
-          "progress_note": "Exact APK5 now passes65536-pixel SwiftShader guest fixture and real semantic restoration/theme captures; broader export/error/lifecycle acceptance remains open",
-          "next_step": "Run separately signed instrumentation under private filtered ADB; test actual AtomicFile commit failure and retain source/version identity",
-          "last_heartbeat": "2026-11-05T01:38:49+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/emulator-qualification.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T02:02:27+00:00",
-      "action": "experiment.record:EMULATOR-013",
-      "owner": "codex-emulator-qualification-20261105-h"
-    },
-    {
-      "at": "2026-11-05T02:04:08+00:00",
-      "action": "experiment.plan:EMULATOR-014",
-      "owner": "codex-emulator-qualification-20261105-h"
-    },
-    {
-      "at": "2026-11-05T02:05:12+00:00",
-      "action": "task.update:TST-002",
-      "owner": "codex-emulator-qualification-20261105-h",
-      "tasks": [
-        {
-          "id": "TST-002",
-          "status": "in_progress",
-          "owner": "codex-emulator-qualification-20261105-h",
-          "priority": 80,
-          "progress_note": "APK6 passes all16 guest cases; independent review fix verdict retained for light system-bar contrast. APK7 now applies theme-correct bar appearance and is in the registered confirmation run.",
-          "next_step": "Finish APK7 confirmation, score the two review findings, run full checks and publish evidence; no physical S24 scope",
-          "last_heartbeat": "2026-11-05T02:05:12+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/emulator-qualification.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T02:09:40+00:00",
-      "action": "experiment.record:EMULATOR-014",
-      "owner": "codex-emulator-qualification-20261105-h"
-    },
-    {
-      "at": "2026-11-05T02:09:41+00:00",
-      "action": "experiment.plan:EMULATOR-015",
-      "owner": "codex-emulator-qualification-20261105-h"
-    },
-    {
-      "at": "2026-11-05T02:12:33+00:00",
-      "action": "task.add:RES-008",
-      "owner": "codex-emulator-qualification-20261105-h",
-      "tasks": [
-        {
-          "id": "RES-008",
-          "status": "pending",
-          "owner": null,
-          "priority": 95
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T02:19:11+00:00",
-      "action": "experiment.record:EMULATOR-015",
-      "owner": "codex-emulator-qualification-20261105-h"
-    },
-    {
-      "at": "2026-11-05T02:19:12+00:00",
-      "action": "experiment.plan:EMULATOR-016",
-      "owner": "codex-emulator-qualification-20261105-h"
-    },
-    {
-      "at": "2026-11-05T02:24:24+00:00",
-      "action": "experiment.record:EMULATOR-016",
-      "owner": "codex-emulator-qualification-20261105-h"
-    },
-    {
-      "at": "2026-11-05T02:25:14+00:00",
-      "action": "task.refine:GPU-003-requires-exact-host-APK-qualification",
-      "owner": "codex-emulator-qualification-20261105-h",
-      "tasks": [
-        {
-          "id": "GPU-003",
-          "status": "pending",
-          "owner": null
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T02:25:14+00:00",
-      "action": "task.done:TST-002",
-      "owner": "codex-emulator-qualification-20261105-h",
-      "tasks": [
-        {
-          "id": "TST-002",
-          "status": "done",
-          "owner": "codex-emulator-qualification-20261105-h",
-          "priority": 80,
-          "progress_note": "APK6 passes all16 guest cases; independent review fix verdict retained for light system-bar contrast. APK7 now applies theme-correct bar appearance and is in the registered confirmation run.",
-          "next_step": "Finish APK7 confirmation, score the two review findings, run full checks and publish evidence; no physical S24 scope",
-          "last_heartbeat": "2026-11-05T02:05:12+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/emulator-qualification.md"
-        }
-      ]
-    },
     {
       "at": "2026-11-05T02:25:35+00:00",
       "action": "task.claim:RES-008",
@@ -3647,13 +3561,122 @@
           "handoff": "research/notes/RES-008-xnu-build-inputs.md"
         }
       ]
+    },
+    {
+      "at": "2026-11-05T02:33:14+00:00",
+      "action": "task.claim:KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T02:33:14+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:34:23+00:00",
+      "action": "task.update:KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Source-only host tooling investigation started; installed NDK28 LLVM has candidate Mach-O utilities, no Darwin link or generator coverage inferred yet",
+          "next_step": "Run preregistered LLVM capability fixture and inspect exact MIG/unifdef/tcsh source build definitions",
+          "last_heartbeat": "2026-11-05T02:34:23+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:34:23+00:00",
+      "action": "experiment.plan:LLVMTOOLS-001",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:35:02+00:00",
+      "action": "experiment.record:LLVMTOOLS-001",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:36:50+00:00",
+      "action": "task.refine:KRN-002-owned-MIG-failure-propagation-patch",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Source-only host tooling investigation started; installed NDK28 LLVM has candidate Mach-O utilities, no Darwin link or generator coverage inferred yet",
+          "next_step": "Run preregistered LLVM capability fixture and inspect exact MIG/unifdef/tcsh source build definitions",
+          "last_heartbeat": "2026-11-05T02:34:23+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:38:19+00:00",
+      "action": "experiment.plan:HOSTGEN-001",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:39:31+00:00",
+      "action": "experiment.record:HOSTGEN-001",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:39:32+00:00",
+      "action": "experiment.plan:HOSTGEN-002",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:40:18+00:00",
+      "action": "experiment.plan:LLVMTOOLS-002",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:41:21+00:00",
+      "action": "experiment.record:HOSTGEN-002",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:41:21+00:00",
+      "action": "experiment.record:LLVMTOOLS-002",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:41:56+00:00",
+      "action": "task.update:KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Three pinned host generators genuinely built and tested in a private prefix; simple LLVM Mach-O operations pass, but actual kernel flag subset fails because static/image_base/segment_order are unimplemented despite linker exit0",
+          "next_step": "Pin/review/build compatible cctools ld64/TAPI and qualify real static layout/symbol/tool operations; keep KRN-002 in progress",
+          "last_heartbeat": "2026-11-05T02:41:56+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "cb3712ac1487255baac58a15d7cc3ba694318e7b5e2db919a0eeea01b445f803",
-    "BOARD.md": "e89cd1249400a7911623f8ef442b2071eac1641469f72f33255e7aa0fc2336d6",
+    "STATUS.md": "1e34e6416a9e3e12f3e992460f88f46fc69d0af808c3b0fe7b71349eb9cbfc92",
+    "BOARD.md": "181ceec51b692cfb3a69e11c104be33df74b6fc523bb0b9ead74f6feb470bb8a",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
-    "planning/tasks/KRN-002.md": "8f64782e204ac3d9c5cba0590739b427e91a232b746d3b854cc2999e62a11a30",
+    "planning/tasks/KRN-002.md": "b938e703dc282682cd90947765520e8dc49ebe218de235f71ec8816ab8d919a9",
     "planning/tasks/KRN-003.md": "4e46374fe8abf04cbf675698986ebc4184560b673f16428c2e020b149e54ffd9",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
@@ -3702,15 +3725,15 @@
     "planning/tasks/TST-001.md": "3142333fb7f8007775cb83ea67cb783be49b72664aaf32849d2449a19b36585b",
     "planning/tasks/GPU-001.md": "54d110d5d5bd67afb776017c7220e3e6ca7a1ffcad9289a3af35f2a7b5a992fa",
     "planning/tasks/GPU-002.md": "ed6a2e320b8b805c8d6ec97f1537439282c02f999c4a7542c95e2e31e7b76eca",
-    "planning/tasks/GPU-003.md": "5ac7cf14b7416e233ab949c38ab82df99fc6ec912e0df09f373c33e7765de2d0",
+    "planning/tasks/GPU-003.md": "7fc4f402306b7bc9c859d11db6ac66c35f6d5ddc529883e81065ab025b086ac0",
     "planning/tasks/GPU-004.md": "4f7b914361a5ff47439410c701bd907e3a3020383d4b33c91ce59b5fbdab2579",
-    "planning/tasks/GPU-005.md": "181529961c422d48a66b2735db0db7d5634029395209e2fad9ef0db9be0adfea",
+    "planning/tasks/GPU-005.md": "d10060606eecccc1a9b6f8080acb228e502706c375664961c15b67672d025d6d",
     "planning/tasks/DRV-001.md": "0e15c9a93f74cbd15da5e1507551c8599a25ac14bf857b1fc3cf62a672459ade",
-    "planning/tasks/DRV-002.md": "4703fbdca6bded8e74343c2594cd79b972f866e3c97886d2da04230f8c672d4b",
+    "planning/tasks/DRV-002.md": "fbfcc9309e9635092efe668540290f4c1581a3d09ec9cea738f6321d0a71c417",
     "planning/tasks/NAT-001.md": "555b180dd2cfda5c6a7e4623041660bfd01b1c074d7fd82a9be75e83b4af7bcf",
-    "planning/tasks/NAT-002.md": "f34fe5715fa2ad4191c245a616a5085603880a4e3cde470ecf07a88b0dafa607",
-    "planning/tasks/NAT-003.md": "2f832c66883cfbcb8a2b00c747837a6f441137e26bc61a42f872a413009f162c",
-    "planning/tasks/DRV-003.md": "9f4b0c2d613ce1afaa691fc3bc5618c13c8993ce197974af081e885ea0f113f4",
+    "planning/tasks/NAT-002.md": "02de9cc2489cd9bcb082040cff0a7764805ea251554e2851e093d163632d9985",
+    "planning/tasks/NAT-003.md": "9e2cb1b0947aa0545f6d323be2bb29078971fdd3ce3e084076c2cb62bb0d677c",
+    "planning/tasks/DRV-003.md": "da500aa4f722d3f2a1de0357d335ac0322bc039a6a9ab17488b5d1839ef1498f",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "1bdf1cd15a3f5b52db67c8865eede9f5039648dafb2a7c5c3f3e63143846ab29",

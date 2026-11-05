@@ -1,0 +1,42 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "recorded_at": "2026-11-05T02:39:31+00:00",
+  "summary": "Actual pinned MIG generation/preprocessor-failure and unifdef branch fixtures pass; tcsh configure cannot link tgetent because unversioned termcap/tinfo development libraries are missing. Full three-generator run fails and is retained.",
+  "commit": "aac30c9fdc6205e961a940ce8b211977099f5047",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/build/xnu_host_tools.py",
+        "--run",
+        "generators-session1",
+        "--cc",
+        "/usr/bin/cc",
+        "--preprocessor",
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang",
+        "--jobs",
+        "2"
+      ],
+      "exit_code": 1
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/xnu-host-tools/generators-session1.json",
+    "artifacts/xnu-host-tools/generators-session1/builder.py",
+    "artifacts/xnu-host-tools/generators-session1/logs/13.stderr.txt",
+    "artifacts/xnu-host-tools/generators-session1/logs/13.stdout.txt"
+  ],
+  "sha256": {
+    "fixtures/public/xnu-host-tools/generators-session1.json": "d5e11f61b573e92f991445e258ae16f38b6d8518b0dfc9ed0dc1924097be8dcd",
+    "artifacts/xnu-host-tools/generators-session1/builder.py": "ca09b97ccc1bf8aae6fbe0ff930d72e8e548f0c0a58cb226752946bb5f4077b3",
+    "artifacts/xnu-host-tools/generators-session1/logs/13.stderr.txt": "6637d0a46e29d529d1b85af72b24937fd4a71faf8567e30f29e0274415063987",
+    "artifacts/xnu-host-tools/generators-session1/logs/13.stdout.txt": "1c5e110ed6c9fdb0667f2b94fe998055a3f6d50d92ff6766c5dcf47d6789e700"
+  },
+  "limitations": [
+    "Partial MIG/unifdef result does not complete the registered three-generator experiment or KRN-002",
+    "Installed versioned libtinfo exists but was not passed to this configure run; next attempt must have a distinct identity",
+    "No global library/compiler symlink, package install, SDK download, kernel or device operation"
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T02:34:43+00:00",
+  "commit": "aac30c9fdc6205e961a940ce8b211977099f5047",
+  "commands": [
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "Android (13624864, +pgo, +bolt, +lto, +mlgo, based on r530567e) clang version 19.0.1 (https://android.googlesource.com/toolchain/llvm-project 97a699bf4812a18fb657c2779f5296a4ab2694d2)\nTarget: x86_64-unknown-linux-gnu\nThread model: posix\nInstalledDir: /home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang",
+        "-target",
+        "arm64-apple-ios16.5",
+        "-ffreestanding",
+        "-fno-stack-protector",
+        "-fno-unwind-tables",
+        "-fno-asynchronous-unwind-tables",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readobj",
+        "--file-headers",
+        "--symbols",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.o"
+      ],
+      "exit_code": 0,
+      "stdout": "\nFile: /home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.o\nFormat: Mach-O arm64\nArch: aarch64\nAddressSize: 64bit\nMachHeader {\n  Magic: Magic64 (0xFEEDFACF)\n  CpuType: Arm64 (0x100000C)\n  CpuSubType: CPU_SUBTYPE_ARM64_ALL (0x0)\n  FileType: Relocatable (0x1)\n  NumOfLoadCommands: 4\n  SizeOfLoadCommands: 280\n  Flags [ (0x2000)\n    MH_SUBSECTIONS_VIA_SYMBOLS (0x2000)\n  ]\n  Reserved: 0x0\n}\nSymbols [\n  Symbol {\n    Name: ltmp0 (19)\n    Type: Section (0xE)\n    Section: __text (0x1)\n    RefType: UndefinedNonLazy (0x0)\n    Flags [ (0x0)\n    ]\n    Value: 0x0\n  }\n  Symbol {\n    Name: _s24_host_fixture (1)\n    Extern\n    Type: Section (0xE)\n    Section: __text (0x1)\n    RefType: UndefinedNonLazy (0x0)\n    Flags [ (0x0)\n    ]\n    Value: 0x0\n  }\n]\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-nm",
+        "-gU",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.o"
+      ],
+      "exit_code": 0,
+      "stdout": "0000000000000000 T _s24_host_fixture\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar",
+        "crs",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/libfixture.a",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar",
+        "t",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/libfixture.a"
+      ],
+      "exit_code": 0,
+      "stdout": "fixture.o\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/lld",
+        "-flavor",
+        "darwin",
+        "-arch",
+        "arm64",
+        "-platform_version",
+        "ios",
+        "16.5",
+        "16.5",
+        "-dylib",
+        "-install_name",
+        "/lab/s24-host-fixture.dylib",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.dylib",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readobj",
+        "--file-headers",
+        "--symbols",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.dylib"
+      ],
+      "exit_code": 0,
+      "stdout": "\nFile: /home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.dylib\nFormat: Mach-O arm64\nArch: aarch64\nAddressSize: 64bit\nMachHeader {\n  Magic: Magic64 (0xFEEDFACF)\n  CpuType: Arm64 (0x100000C)\n  CpuSubType: CPU_SUBTYPE_ARM64_ALL (0x0)\n  FileType: DynamicLibrary (0x6)\n  NumOfLoadCommands: 11\n  SizeOfLoadCommands: 544\n  Flags [ (0x100085)\n    MH_DYLDLINK (0x4)\n    MH_NOUNDEFS (0x1)\n    MH_NO_REEXPORTED_DYLIBS (0x100000)\n    MH_TWOLEVEL (0x80)\n  ]\n  Reserved: 0x0\n}\nSymbols [\n  Symbol {\n    Name: _s24_host_fixture (2)\n    Extern\n    Type: Section (0xE)\n    Section: __text (0x1)\n    RefType: UndefinedNonLazy (0x0)\n    Flags [ (0x0)\n    ]\n    Value: 0x4000\n  }\n]\n",
+      "stderr": ""
+    }
+  ],
+  "sdk_used": false,
+  "device_executed": false,
+  "limits": [
+    "Freestanding object/archive/dylib fixture only; no complete cctools/TAPI or kernel flag/ABI qualification"
+  ],
+  "summary": "Actual installed LLVM compiles inspects archives and Darwin-links a freestanding arm64 Mach-O fixture without SDK",
+  "files_sha256": {
+    "fixture.c": "87a65ae6c289c526c039f25b5fce9ed148ce37272d2f4dfb2c2d0a232c0bc621",
+    "command-0.stdout.txt": "c137d97c0f878f10e3647ac5a14eb8d7cd5ea4b2885351bf17ba06b9b23b66d7",
+    "command-0.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "fixture.o": "a8777c24a42edd2273164cf7a292e165045a2c744de56b9a669155a8a7fe806e",
+    "command-1.stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "command-1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "command-2.stdout.txt": "20f08f3317bab3827de7a3d39e1457ff9b89d43bfde3a47dc0ed547b26580d98",
+    "command-2.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "command-3.stdout.txt": "62e892976911132203a6ff812d45fc0c83b23f95f4b80f6f13fd52c2c2f3be3b",
+    "command-3.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "libfixture.a": "8ab1894e8355108fa8043a6dbf7e238280a20df174b15b68e018d0749b752324",
+    "command-4.stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "command-4.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "command-5.stdout.txt": "26fb71e4f1a6361f91de93ccfa7203777db3b9414d13a3341afbadd6d2242374",
+    "command-5.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "fixture.dylib": "d4cdf450273d7c43a858171d9f16a461daa39c7bbbe523fc2a7161dcd16e0e5e",
+    "command-6.stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "command-6.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "command-7.stdout.txt": "0c1e2afc5e267e00b666f64c8a28205e2793adb478ad3cf17e0f36d2024f709a",
+    "command-7.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

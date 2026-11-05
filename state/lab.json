@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T02:32:54+00:00",
+  "updated_at": "2026-11-05T02:41:56+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -2874,14 +2874,17 @@
       "finished_at": "2026-11-05T02:32:54+00:00"
     },
     {
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "codex-xnu-host-tools-20261105-j",
       "scope": "host",
       "evidence_kind": "host-test",
       "priority": 95,
       "sources": [
         "hakios-e1s-tools",
-        "apple-xnu"
+        "apple-xnu",
+        "xnu-mig",
+        "xnu-unifdef",
+        "xnu-tcsh"
       ],
       "depends_on": [
         "RES-008"
@@ -2894,7 +2897,8 @@
         "research/sources.json",
         "research/notes/KRN-002-host-tools.md",
         "docs/procedures/xnu-host-tools.md",
-        "fixtures/public/xnu-host-tools"
+        "fixtures/public/xnu-host-tools",
+        "patches/build-tools"
       ],
       "acceptance": [
         "Pin and review actual host-generator/cctools/TAPI dependency sources and licenses; do not invoke rolling SDK installers",
@@ -2906,7 +2910,14 @@
         "Start with declared MIG/unifdef/tcsh pins and inspect configure/autotools requirements",
         "Build source-only host dependencies and Mach-O tooling with bounded parallelism",
         "Publish actual usable tool prefix and remaining gaps for KRN-003/KRN-001"
-      ]
+      ],
+      "started_at": "2026-11-05T02:33:14+00:00",
+      "last_heartbeat": "2026-11-05T02:41:56+00:00",
+      "updated_at": "2026-11-05T02:41:56+00:00",
+      "branch": "main",
+      "progress_note": "Three pinned host generators genuinely built and tested in a private prefix; simple LLVM Mach-O operations pass, but actual kernel flag subset fails because static/image_base/segment_order are unimplemented despite linker exit0",
+      "next_step": "Pin/review/build compatible cctools ld64/TAPI and qualify real static layout/symbol/tool operations; keep KRN-002 in progress",
+      "handoff": "research/notes/KRN-002-host-tools.md"
     },
     {
       "status": "pending",
@@ -3501,6 +3512,66 @@
       "evidence_sha256": "84be99f581888ac3074ce06f0f8c4c63df11be58d6aa17e90fcbbbc05c9cd96c",
       "outcome": "pass",
       "recorded_at": "2026-11-05T02:24:24+00:00"
+    },
+    {
+      "id": "LLVMTOOLS-001",
+      "task": "KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Installed NDK28 LLVM can compile inspect archive and Darwin-link an actual freestanding arm64 Mach-O fixture without an Apple SDK; claimed scope excludes full cctools/TAPI and kernel flags",
+      "procedure": "docs/procedures/xnu-host-tools.md",
+      "timeout_seconds": 180,
+      "created_at": "2026-11-05T02:34:23+00:00",
+      "evidence": "state/evidence/LLVMTOOLS-001.json",
+      "evidence_sha256": "e86c6b119d65d40b129084889d2757a3fb7fd6f39bcbfd1308ee7254dfb114bb",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T02:35:02+00:00"
+    },
+    {
+      "id": "HOSTGEN-001",
+      "task": "KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Exact pinned MIG unifdef and tcsh can build in a private prefix with explicit host compiler and pass actual source-generation filtering shell and preprocessor-failure fixtures without SDK or global installation",
+      "procedure": "docs/procedures/xnu-host-tools.md",
+      "timeout_seconds": 600,
+      "created_at": "2026-11-05T02:38:19+00:00",
+      "evidence": "state/evidence/HOSTGEN-001.json",
+      "evidence_sha256": "a770bf72fa0dcc4d4219c26024075e56213f48274d33f2e8d70365961f148e87",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T02:39:31+00:00"
+    },
+    {
+      "id": "HOSTGEN-002",
+      "task": "KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The same exact source generators pass all actual fixtures when tcsh links the explicitly observed installed versioned libtinfo, with no global development symlink or package installation",
+      "procedure": "docs/procedures/xnu-host-tools.md",
+      "timeout_seconds": 600,
+      "created_at": "2026-11-05T02:39:32+00:00",
+      "evidence": "state/evidence/HOSTGEN-002.json",
+      "evidence_sha256": "0cd37ec190f73bb32a22785febafef9d0541941551ddbdb30775683137419c0f",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T02:41:21+00:00"
+    },
+    {
+      "id": "LLVMTOOLS-002",
+      "task": "KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Installed LLVM Darwin linker honors a source-derived static ARM64 XNU layout flag subset without ignored or unimplemented semantics; simple dylib success is insufficient",
+      "procedure": "docs/procedures/xnu-host-tools.md",
+      "timeout_seconds": 60,
+      "created_at": "2026-11-05T02:40:18+00:00",
+      "evidence": "state/evidence/LLVMTOOLS-002.json",
+      "evidence_sha256": "5a7a79afcc50e8f8a26dc1d960ed70032bae1052c7316d58984c61545fadb06e",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T02:41:21+00:00"
     }
   ],
   "events": [
@@ -6548,6 +6619,115 @@
           "last_heartbeat": "2026-11-05T02:32:06+00:00",
           "branch": "main",
           "handoff": "research/notes/RES-008-xnu-build-inputs.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:33:14+00:00",
+      "action": "task.claim:KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T02:33:14+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:34:23+00:00",
+      "action": "task.update:KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Source-only host tooling investigation started; installed NDK28 LLVM has candidate Mach-O utilities, no Darwin link or generator coverage inferred yet",
+          "next_step": "Run preregistered LLVM capability fixture and inspect exact MIG/unifdef/tcsh source build definitions",
+          "last_heartbeat": "2026-11-05T02:34:23+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:34:23+00:00",
+      "action": "experiment.plan:LLVMTOOLS-001",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:35:02+00:00",
+      "action": "experiment.record:LLVMTOOLS-001",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:36:50+00:00",
+      "action": "task.refine:KRN-002-owned-MIG-failure-propagation-patch",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Source-only host tooling investigation started; installed NDK28 LLVM has candidate Mach-O utilities, no Darwin link or generator coverage inferred yet",
+          "next_step": "Run preregistered LLVM capability fixture and inspect exact MIG/unifdef/tcsh source build definitions",
+          "last_heartbeat": "2026-11-05T02:34:23+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:38:19+00:00",
+      "action": "experiment.plan:HOSTGEN-001",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:39:31+00:00",
+      "action": "experiment.record:HOSTGEN-001",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:39:32+00:00",
+      "action": "experiment.plan:HOSTGEN-002",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:40:18+00:00",
+      "action": "experiment.plan:LLVMTOOLS-002",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:41:21+00:00",
+      "action": "experiment.record:HOSTGEN-002",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:41:21+00:00",
+      "action": "experiment.record:LLVMTOOLS-002",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:41:56+00:00",
+      "action": "task.update:KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Three pinned host generators genuinely built and tested in a private prefix; simple LLVM Mach-O operations pass, but actual kernel flag subset fails because static/image_base/segment_order are unimplemented despite linker exit0",
+          "next_step": "Pin/review/build compatible cctools ld64/TAPI and qualify real static layout/symbol/tool operations; keep KRN-002 in progress",
+          "last_heartbeat": "2026-11-05T02:41:56+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
         }
       ]
     }

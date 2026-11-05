@@ -1,0 +1,116 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T02:35:02+00:00",
+  "summary": "Installed NDK28 LLVM19 genuinely compiles inspects archives and Darwin-links an owned freestanding arm64 Mach-O fixture without an Apple SDK. Full cctools/TAPI and XNU compatibility remain unqualified.",
+  "commit": "aac30c9fdc6205e961a940ce8b211977099f5047",
+  "commands": [
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang",
+        "--version"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang",
+        "-target",
+        "arm64-apple-ios16.5",
+        "-ffreestanding",
+        "-fno-stack-protector",
+        "-fno-unwind-tables",
+        "-fno-asynchronous-unwind-tables",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.o"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readobj",
+        "--file-headers",
+        "--symbols",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.o"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-nm",
+        "-gU",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.o"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar",
+        "crs",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/libfixture.a",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.o"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar",
+        "t",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/libfixture.a"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/lld",
+        "-flavor",
+        "darwin",
+        "-arch",
+        "arm64",
+        "-platform_version",
+        "ios",
+        "16.5",
+        "16.5",
+        "-dylib",
+        "-install_name",
+        "/lab/s24-host-fixture.dylib",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.dylib",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.o"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readobj",
+        "--file-headers",
+        "--symbols",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/llvm-session1/fixture.dylib"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/xnu-host-tools/llvm-session1.json",
+    "artifacts/xnu-host-tools/llvm-session1/report.json",
+    "artifacts/xnu-host-tools/llvm-session1/fixture.c",
+    "artifacts/xnu-host-tools/llvm-session1/fixture.o",
+    "artifacts/xnu-host-tools/llvm-session1/libfixture.a",
+    "artifacts/xnu-host-tools/llvm-session1/fixture.dylib"
+  ],
+  "sha256": {
+    "fixtures/public/xnu-host-tools/llvm-session1.json": "f986a9bff3dcf34c604d7298fe705271991026fcff318ef7468f76074336e066",
+    "artifacts/xnu-host-tools/llvm-session1/report.json": "f986a9bff3dcf34c604d7298fe705271991026fcff318ef7468f76074336e066",
+    "artifacts/xnu-host-tools/llvm-session1/fixture.c": "87a65ae6c289c526c039f25b5fce9ed148ce37272d2f4dfb2c2d0a232c0bc621",
+    "artifacts/xnu-host-tools/llvm-session1/fixture.o": "a8777c24a42edd2273164cf7a292e165045a2c744de56b9a669155a8a7fe806e",
+    "artifacts/xnu-host-tools/llvm-session1/libfixture.a": "8ab1894e8355108fa8043a6dbf7e238280a20df174b15b68e018d0749b752324",
+    "artifacts/xnu-host-tools/llvm-session1/fixture.dylib": "d4cdf450273d7c43a858171d9f16a461daa39c7bbbe523fc2a7161dcd16e0e5e"
+  },
+  "limitations": [
+    "No SDK, full kernel, process execution on ARM64 or device command",
+    "Minimal dylib fixture only; XNU linker options, TAPI text stubs, otool/nmedit/symbolsets and full cctools coverage not qualified"
+  ]
+}
