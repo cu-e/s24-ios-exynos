@@ -1,0 +1,80 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "recorded_at": "2026-11-05T06:43:38+00:00",
+  "summary": "Actual compiler compiles ordinary pointer/data metadata but rejects the equal-storage AtomicType pair; broader real XNU metadata support remains incomplete",
+  "commit": "ae79e6fe5cb4ebc5972ddfb965267a39c32e9c58",
+  "commands": [
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/ast-patch-session1/clang",
+        "-target",
+        "arm64-apple-ios16.5",
+        "-ffreestanding",
+        "-nostdinc",
+        "-std=gnu11",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/fixtures/public/xnu-kernel-objects/atomic-metadata.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-kernel-objects/atomic-edge-session1/plain.o"
+      ],
+      "exit_code": 0,
+      "stdout": "artifacts/xnu-kernel-objects/atomic-edge-session1/plain.stdout.txt",
+      "stderr": "artifacts/xnu-kernel-objects/atomic-edge-session1/plain.stderr.txt"
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/ast-patch-session1/clang",
+        "-target",
+        "arm64-apple-ios16.5",
+        "-ffreestanding",
+        "-nostdinc",
+        "-std=gnu11",
+        "-DS24_ATOMIC=1",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/fixtures/public/xnu-kernel-objects/atomic-metadata.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-kernel-objects/atomic-edge-session1/atomic.o"
+      ],
+      "exit_code": 1,
+      "stdout": "artifacts/xnu-kernel-objects/atomic-edge-session1/atomic.stdout.txt",
+      "stderr": "artifacts/xnu-kernel-objects/atomic-edge-session1/atomic.stderr.txt"
+    }
+  ],
+  "cases": [
+    {
+      "case": "plain",
+      "exit_code": 0,
+      "arm64_object": true,
+      "diagnostic": ""
+    },
+    {
+      "case": "atomic",
+      "exit_code": 1,
+      "arm64_object": false,
+      "diagnostic": "/home/egor/dev/pet/s24-ios-exynos/fixtures/public/xnu-kernel-objects/atomic-metadata.c:16:16: error: experimental XNU metadata does not support this type/layout\n   16 | _Static_assert(__builtin_xnu_type_summary(struct PointerBox) == 2, \"pointer granule\");\n      |                ^\n/home/egor/dev/pet/s24-ios-exynos/fixtures/public/xnu-kernel-objects/atomic-metadata.c:17:16: error: experimental XNU metadata does not support this type/layout\n   17 | _Static_assert(__builtin_xnu_type_summary(struct DataBox) == 4, \"data granule\");\n      |                ^\n/home/egor/dev/pet/s24-ios-exynos/fixtures/public/xnu-kernel-objects/atomic-metadata.c:18:33: error: experimental XNU metadata does not support this type/layout\n   18 | const char *pointer_signature = __builtin_xnu_type_signature(struct PointerBox);\n      |                                 ^\n/home/egor/dev/pet/s24-ios-exynos/fixtures/public/xnu-kernel-objects/atomic-metadata.c:19:30: error: experimental XNU metadata does not support this type/layout\n   19 | const char *data_signature = __builtin_xnu_type_signature(struct DataBox);\n      |                              ^\n/home/egor/dev/pet/s24-ios-exynos/fixtures/public/xnu-kernel-objects/atomic-metadata.c:20:41: error: experimental XNU metadata does not support this type/layout\n   20 | unsigned pointer_summary(void) { return __builtin_xnu_type_summary(struct PointerBox); }\n      |                                         ^\n/home/egor/dev/pet/s24-ios-exynos/fixtures/public/xnu-kernel-objects/atomic-metadata.c:20:88: warning: non-void function does not return a value [-Wreturn-type]\n   20 | unsigned pointer_summary(void) { return __builtin_xnu_type_summary(struct PointerBox); }\n      |                                                                                        ^\n/home/egor/dev/pet/s24-ios-exynos/fixtures/public/xnu-kernel-objects/atomic-metadata.c:21:38: error: experimental XNU metadata does not support this type/layout\n   21 | unsigned data_summary(void) { return __builtin_xnu_type_summary(struct DataBox); }\n      |                                      ^\n/home/egor/dev/pet/s24-ios-exynos/fixtures/public/xnu-kernel-objects/atomic-metadata.c:21:82: warning: non-void function does not return a value [-Wreturn-type]\n   21 | unsigned data_summary(void) { return __builtin_xnu_type_summary(struct DataBox); }\n      |                                                                                  ^\n2 warnings and 6 errors generated.\n"
+    }
+  ],
+  "compiler_sha256": "3e00352f47a31504c731e70e592a3d407ac3a6176c59b1638cbb7b8f98a3bd27",
+  "artifacts": [
+    "artifacts/xnu-kernel-objects/atomic-edge-session1/run.py",
+    "artifacts/xnu-kernel-objects/atomic-edge-session1/plain.stdout.txt",
+    "artifacts/xnu-kernel-objects/atomic-edge-session1/plain.stderr.txt",
+    "artifacts/xnu-kernel-objects/atomic-edge-session1/plain.o",
+    "artifacts/xnu-kernel-objects/atomic-edge-session1/atomic.stdout.txt",
+    "artifacts/xnu-kernel-objects/atomic-edge-session1/atomic.stderr.txt",
+    "fixtures/public/xnu-kernel-objects/atomic-metadata.c"
+  ],
+  "sha256": {
+    "artifacts/xnu-kernel-objects/atomic-edge-session1/run.py": "9da44f64afbd82d24569a8b2eb5a16df61ca23ea60590e4810b72ad6fde1e7d6",
+    "artifacts/xnu-kernel-objects/atomic-edge-session1/plain.stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/xnu-kernel-objects/atomic-edge-session1/plain.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/xnu-kernel-objects/atomic-edge-session1/plain.o": "5a7aebec5d4d5e0354877f80de302a82a42dbce00ce062fc857bf959c47ebb7a",
+    "artifacts/xnu-kernel-objects/atomic-edge-session1/atomic.stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/xnu-kernel-objects/atomic-edge-session1/atomic.stderr.txt": "532a517f0201976e458b0d209048ed810b13f73501618e9363cf18a82057a522",
+    "fixtures/public/xnu-kernel-objects/atomic-metadata.c": "158fad6276156ea79eb2c434dfbac638f2b7d092321e27f6f7865ef04fd69753"
+  },
+  "device_executed": false,
+  "full_kernel_qualified": false
+}

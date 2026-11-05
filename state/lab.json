@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T06:27:04+00:00",
+  "updated_at": "2026-11-05T06:56:28+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -3271,8 +3271,8 @@
     {
       "id": "KRN-008",
       "title": "Build actual selected E1S kernel object closure from genuine component recipes",
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "codex-kernel-objects-20261105-s",
       "scope": "host",
       "evidence_kind": "host-test",
       "priority": 99,
@@ -3301,6 +3301,81 @@
         "Verify the KCONFIG-005/006 component manifest and source/compiler/IIG/MIG/header witnesses",
         "Inspect generated Makefile file selections, per-component imports and architecture/per-file recipes before invoking builds",
         "Build actual exports/generated inputs and all selected objects with bounded host jobs and deterministic failure retention; split additional independent outcomes into narrow child tasks when needed"
+      ],
+      "started_at": "2026-11-05T06:28:07+00:00",
+      "last_heartbeat": "2026-11-05T06:56:28+00:00",
+      "updated_at": "2026-11-05T06:56:28+00:00",
+      "branch": "main",
+      "progress_note": "Checkpoint:679/978 actual component objects emit ARM64;925 real compile attempts,246 failures and53 missing generated sources. Four top-level direct objects/archives/link metadata are additional requirements. Independent audit verifies16383 code definitions,2598 dependency files and10674 artifact digests across15 capsules.132 repository tests pass; original10889 compiler sources/198 build inputs/5111 kernel sources and other owners/scopes unchanged. Task remains in_progress.",
+      "next_step": "KRN-009 atomic metadata and KRN-010 coherent MIG generation are ready; preserve compile-session2 and recorded dependency graph, then resolve all remaining component/top-level/generated/link prerequisites. No native capability is qualified.",
+      "handoff": "docs/procedures/xnu-kernel-objects.md"
+    },
+    {
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "id": "KRN-009",
+      "title": "Implement actual atomic type metadata for genuine selected XNU allocator uses",
+      "priority": 100,
+      "depends_on": [
+        "KRN-006",
+        "KRN-007"
+      ],
+      "sources": [
+        "xnu-tapi",
+        "apple-xnu"
+      ],
+      "paths": [
+        "tools/build/xnu_compiler_atomics.py",
+        "patches/compiler-atomics",
+        "fixtures/public/xnu-compiler-atomics",
+        "docs/procedures/xnu-compiler-atomics.md",
+        "research/sources.json"
+      ],
+      "acceptance": [
+        "Reproduce KOBJECT-004 plain/atomic target-layout discrepancy and trace actual atomic-containing selected kernel types; do not assume all80 unsupported-metadata translation units have the same cause",
+        "Implement source-backed AtomicType handling using actual target storage/value layout and meaningful independent pointer/data/aggregate/padding/annotation controls; preserve PAC/reference/virtual-base/scalable and unsupported limits, with no constant replacements or disabled allocator checks",
+        "Rebuild every actual consuming compiler translation unit/archive in new paths with unchanged recorded Parse/Sema/AST mangling fixes; verify members/relink/source/build witnesses and exact input/compiler provenance",
+        "Compile representative previously failing genuine restartable/core-analytics/SMR and other affected selected source units using the original full expanded KOBJECT-003 recipes, plus retained allocator/PCH/template/mangling/negative/mutation controls; publish exact remaining causes and do not claim all kernel/native support"
+      ],
+      "steps": [
+        "Verify HARDEN-002/005 and KCONFIG-005/006 plus KOBJECT-003/004 source/compiler/object evidence",
+        "Inspect AtomicType and target ASTRecordLayout/storage semantics before editing the owned helper copy",
+        "Compile new source archive objects and genuine failed callers; retain every outcome and publish a bounded component only after complete acceptance"
+      ]
+    },
+    {
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "id": "KRN-010",
+      "title": "Generate genuine selected kernel MIG sources and headers with matching component profiles",
+      "priority": 99,
+      "depends_on": [
+        "KRN-007"
+      ],
+      "sources": [
+        "apple-xnu",
+        "xnu-mig"
+      ],
+      "paths": [
+        "tools/build/xnu_kernel_mig.py",
+        "patches/kernel-mig",
+        "fixtures/public/xnu-kernel-mig",
+        "docs/procedures/xnu-kernel-mig.md"
+      ],
+      "acceptance": [
+        "Use the actual KOBJECT-003 selected configurations/inventory and original Makefile MIG input/rule declarations; bind all selected generated client/server C and header requirements, with no silent source omission",
+        "Generate genuine selected MIG artifacts using the recorded public HOSTGEN-002 tool and real source .defs/profile flags in new paths; verify expected includes, names, target types and command failure propagation without fabricated declarations",
+        "Compile actual previously failing resource_notify/host/server consumers and mach_make_memory_entry conflicting-type cases with coherent real generated headers; preserve precise remaining failures and do not qualify private Apple IPC/DriverKit ABI or native-device operation from compile passes",
+        "Keep KRN-004 owner/reservations, prior generated header/source bytes, compiler/source/build witnesses and device scopes unchanged; provide exact reusable generated-input manifest for KRN-008"
+      ],
+      "steps": [
+        "Inspect actual osfmk component MIG subdirectory rules and complete selected .defs dependency closure",
+        "Expand generator flags/source/header/output names from genuine recipes and execute the qualified public generator in new paths",
+        "Compile genuine failed callers against coherent outputs, retain all diagnostics and hand off remaining syscall/assym/version/IIG gaps separately"
       ]
     }
   ],
@@ -4760,6 +4835,111 @@
       "evidence_sha256": "cba6dc4c09df36979d5b3456e4d0620e40b8fcfe0a256f96438afc10e6a1d6cf",
       "outcome": "pass",
       "recorded_at": "2026-11-05T06:27:01+00:00"
+    },
+    {
+      "id": "KOBJECT-001",
+      "task": "KRN-008",
+      "owner": "codex-kernel-objects-20261105-s",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "All eight genuine component configurations and GNU Make-expanded actual compile/export recipes yield a complete selected object inventory with explicit missing generated inputs, preserving donor Linux profile and actual type-check compiler",
+      "procedure": "docs/procedures/xnu-kernel-objects.md",
+      "timeout_seconds": 600,
+      "created_at": "2026-11-05T06:35:07+00:00",
+      "evidence": "state/evidence/KOBJECT-001.json",
+      "evidence_sha256": "d065040984963c692256d9f5928ba3008e3c139022c8a515b1f41ed43f970edd",
+      "outcome": "inconclusive",
+      "recorded_at": "2026-11-05T06:36:51+00:00"
+    },
+    {
+      "id": "KOBJECT-002",
+      "task": "KRN-008",
+      "owner": "codex-kernel-objects-20261105-s",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The full genuine eight-component selected inventory contains978 required objects; compiling all925 existing-source recipe entries with donor Linux profile, actual expanded per-file rules and real exported headers measures complete initial object coverage and exact remaining failures",
+      "procedure": "docs/procedures/xnu-kernel-objects.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T06:36:53+00:00",
+      "evidence": "state/evidence/KOBJECT-002.json",
+      "evidence_sha256": "d27a9e384f323581c5c820c486eb3d8c6ff03cca689ef9424006b9cbcc8ad55e",
+      "outcome": "inconclusive",
+      "recorded_at": "2026-11-05T06:39:12+00:00"
+    },
+    {
+      "id": "KOBJECT-003",
+      "task": "KRN-008",
+      "owner": "codex-kernel-objects-20261105-s",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Explicit inventoried source-basename substitution supplies Make automatic prerequisite context and correct component SOURCE roots; three real full-recipe controls must emit genuine objects before attempting the remaining selected sources",
+      "procedure": "docs/procedures/xnu-kernel-objects.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T06:39:14+00:00",
+      "evidence": "state/evidence/KOBJECT-003.json",
+      "evidence_sha256": "144df2295589f07d4e9b790abf76bca9bef84fabe500f0089567dbd8905cbcee",
+      "outcome": "inconclusive",
+      "recorded_at": "2026-11-05T06:43:33+00:00"
+    },
+    {
+      "id": "KOBJECT-004",
+      "task": "KRN-008",
+      "owner": "codex-kernel-objects-20261105-s",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "An independent plain/atomic C11 pointer/data layout pair isolates actual AtomicType metadata rejection in the recorded compiler, with ordinary metadata compilation as a positive control; no driver/source checks are disabled",
+      "procedure": "docs/procedures/xnu-kernel-objects.md",
+      "timeout_seconds": 120,
+      "created_at": "2026-11-05T06:43:36+00:00",
+      "evidence": "state/evidence/KOBJECT-004.json",
+      "evidence_sha256": "c0079f31aa6d113f23713bb5c09a2f2a3ee9fe5b05e6580ca3deb36d89f47bb3",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T06:46:09+00:00"
+    },
+    {
+      "id": "KOBJECT-005",
+      "task": "KRN-008",
+      "owner": "codex-kernel-objects-20261105-s",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Independent exact-command/dependency/digest and LLVM header/symbol inspection confirms679 real ARM64 objects and925 actual compile attempts while preserving299 explicit unresolved objects; an audit pass does not complete the object-closure task",
+      "procedure": "docs/procedures/xnu-kernel-objects.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T06:47:36+00:00",
+      "evidence": "state/evidence/KOBJECT-005.json",
+      "evidence_sha256": "ce290ef3cd62c19714e5f74c3c66af04001fbd6ec1f4cd9b034745c6219bf142",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T06:51:16+00:00"
+    },
+    {
+      "id": "KOBJECT-006",
+      "task": "KRN-008",
+      "owner": "codex-kernel-objects-20261105-s",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Source-bound top-level MakeInc.kernel prerequisites add four direct objects beyond the978 component entries, with explicit external archives and link metadata; the component coverage cannot be presented as the complete kernel object set",
+      "procedure": "docs/procedures/xnu-kernel-objects.md",
+      "timeout_seconds": 180,
+      "created_at": "2026-11-05T06:51:17+00:00",
+      "evidence": "state/evidence/KOBJECT-006.json",
+      "evidence_sha256": "d4da64ccde4ddb55db0e0f253afd3ae4735b7d87fb3b41a4971cb4cc61048ac9",
+      "outcome": "inconclusive",
+      "recorded_at": "2026-11-05T06:53:50+00:00"
+    },
+    {
+      "id": "KOBJECT-007",
+      "task": "KRN-008",
+      "owner": "codex-kernel-objects-20261105-s",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Repository and independent source/compiler/build/partial-object/dependency/evidence/ownership checks preserve measured679-object progress while keeping KRN-008 and full native goal explicitly incomplete",
+      "procedure": "docs/procedures/xnu-kernel-objects.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T06:54:32+00:00",
+      "evidence": "state/evidence/KOBJECT-007.json",
+      "evidence_sha256": "4f164c1282830ea67c62d4e1f125e37d2a5de893ebb5447a82c2131e751e09ed",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T06:56:26+00:00"
     }
   ],
   "events": [
@@ -9591,6 +9771,153 @@
           "last_heartbeat": "2026-11-05T06:27:03+00:00",
           "branch": "main",
           "handoff": "docs/procedures/xnu-kernel-config.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:28:07+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-kernel-objects-20261105-s",
+      "tasks": [
+        {
+          "id": "KRN-008",
+          "status": "in_progress",
+          "owner": "codex-kernel-objects-20261105-s",
+          "priority": 99,
+          "last_heartbeat": "2026-11-05T06:28:07+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:35:07+00:00",
+      "action": "experiment.plan:KOBJECT-001",
+      "owner": "codex-kernel-objects-20261105-s"
+    },
+    {
+      "at": "2026-11-05T06:36:51+00:00",
+      "action": "experiment.record:KOBJECT-001",
+      "owner": "codex-kernel-objects-20261105-s"
+    },
+    {
+      "at": "2026-11-05T06:36:53+00:00",
+      "action": "experiment.plan:KOBJECT-002",
+      "owner": "codex-kernel-objects-20261105-s"
+    },
+    {
+      "at": "2026-11-05T06:39:12+00:00",
+      "action": "experiment.record:KOBJECT-002",
+      "owner": "codex-kernel-objects-20261105-s"
+    },
+    {
+      "at": "2026-11-05T06:39:14+00:00",
+      "action": "experiment.plan:KOBJECT-003",
+      "owner": "codex-kernel-objects-20261105-s"
+    },
+    {
+      "at": "2026-11-05T06:43:33+00:00",
+      "action": "experiment.record:KOBJECT-003",
+      "owner": "codex-kernel-objects-20261105-s"
+    },
+    {
+      "at": "2026-11-05T06:43:36+00:00",
+      "action": "experiment.plan:KOBJECT-004",
+      "owner": "codex-kernel-objects-20261105-s"
+    },
+    {
+      "at": "2026-11-05T06:46:09+00:00",
+      "action": "experiment.record:KOBJECT-004",
+      "owner": "codex-kernel-objects-20261105-s"
+    },
+    {
+      "at": "2026-11-05T06:46:11+00:00",
+      "action": "task.add:KRN-009",
+      "owner": "codex-kernel-objects-20261105-s",
+      "tasks": [
+        {
+          "id": "KRN-009",
+          "status": "pending",
+          "owner": null,
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:46:13+00:00",
+      "action": "task.add:KRN-010",
+      "owner": "codex-kernel-objects-20261105-s",
+      "tasks": [
+        {
+          "id": "KRN-010",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:47:36+00:00",
+      "action": "experiment.plan:KOBJECT-005",
+      "owner": "codex-kernel-objects-20261105-s"
+    },
+    {
+      "at": "2026-11-05T06:51:16+00:00",
+      "action": "experiment.record:KOBJECT-005",
+      "owner": "codex-kernel-objects-20261105-s"
+    },
+    {
+      "at": "2026-11-05T06:51:17+00:00",
+      "action": "experiment.plan:KOBJECT-006",
+      "owner": "codex-kernel-objects-20261105-s"
+    },
+    {
+      "at": "2026-11-05T06:53:50+00:00",
+      "action": "experiment.record:KOBJECT-006",
+      "owner": "codex-kernel-objects-20261105-s"
+    },
+    {
+      "at": "2026-11-05T06:54:29+00:00",
+      "action": "task.update:KRN-008",
+      "owner": "codex-kernel-objects-20261105-s",
+      "tasks": [
+        {
+          "id": "KRN-008",
+          "status": "in_progress",
+          "owner": "codex-kernel-objects-20261105-s",
+          "priority": 99,
+          "progress_note": "Actual eight-component selection has978 objects:925 real compiler calls produce679 ARM64 objects;246 fail and53 generated sources are absent. Independent LLVM/command/dependency audit verifies16383 code symbols and2598 actual dependency hashes. Four extra top-level direct objects and archive/link metadata remain. C11 AtomicType gap independently reproduced; KRN-009/010 are ready. KRN-008 is incomplete.",
+          "next_step": "Implement source-backed atomic metadata in KRN-009 and coherent selected MIG generation in KRN-010, then close syscall/version/assym/IIG/source-profile and all remaining component/top-level/link-input requirements without changing recorded prefixes",
+          "last_heartbeat": "2026-11-05T06:54:29+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-kernel-objects.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:54:32+00:00",
+      "action": "experiment.plan:KOBJECT-007",
+      "owner": "codex-kernel-objects-20261105-s"
+    },
+    {
+      "at": "2026-11-05T06:56:26+00:00",
+      "action": "experiment.record:KOBJECT-007",
+      "owner": "codex-kernel-objects-20261105-s"
+    },
+    {
+      "at": "2026-11-05T06:56:28+00:00",
+      "action": "task.update:KRN-008",
+      "owner": "codex-kernel-objects-20261105-s",
+      "tasks": [
+        {
+          "id": "KRN-008",
+          "status": "in_progress",
+          "owner": "codex-kernel-objects-20261105-s",
+          "priority": 99,
+          "progress_note": "Checkpoint:679/978 actual component objects emit ARM64;925 real compile attempts,246 failures and53 missing generated sources. Four top-level direct objects/archives/link metadata are additional requirements. Independent audit verifies16383 code definitions,2598 dependency files and10674 artifact digests across15 capsules.132 repository tests pass; original10889 compiler sources/198 build inputs/5111 kernel sources and other owners/scopes unchanged. Task remains in_progress.",
+          "next_step": "KRN-009 atomic metadata and KRN-010 coherent MIG generation are ready; preserve compile-session2 and recorded dependency graph, then resolve all remaining component/top-level/generated/link prerequisites. No native capability is qualified.",
+          "last_heartbeat": "2026-11-05T06:56:28+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-kernel-objects.md"
         }
       ]
     }
