@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-05",
+  "scope": "Source review and host tests only",
+  "samsung": {
+    "repository": "https://github.com/dx4m/android-kernel-samsung-e1s",
+    "commit": "417484173abc2c4fa93e738ea82ad9f2e84911b1",
+    "sources": [
+      {
+        "path": "include/ufs/ufshci.h",
+        "url": "https://raw.githubusercontent.com/dx4m/android-kernel-samsung-e1s/417484173abc2c4fa93e738ea82ad9f2e84911b1/include/ufs/ufshci.h",
+        "origin": "pinned-public-raw-fetch",
+        "git_blob": "689318fc187d80fbf927d19afcddffd16c26904a",
+        "sha256": "85f72f394b5d6fa12500549a0775f4e621baecb0df6ca09697e832bcdb872b5a",
+        "bytes": 15586
+      },
+      {
+        "path": "include/ufs/ufs.h",
+        "url": "https://raw.githubusercontent.com/dx4m/android-kernel-samsung-e1s/417484173abc2c4fa93e738ea82ad9f2e84911b1/include/ufs/ufs.h",
+        "origin": "pinned-public-raw-fetch",
+        "git_blob": "816d7f987a605337e85226693542682d02a8f634",
+        "sha256": "99239d946fcdc5acb3e2bb650418d4bb8442c445f5f99abec28dce3db713cb3e",
+        "bytes": 20025
+      },
+      {
+        "path": "drivers/ufs/core/ufs-mcq.c",
+        "url": "https://raw.githubusercontent.com/dx4m/android-kernel-samsung-e1s/417484173abc2c4fa93e738ea82ad9f2e84911b1/drivers/ufs/core/ufs-mcq.c",
+        "origin": "pinned-public-raw-fetch",
+        "git_blob": "e5874c9057267e460ae6f0f4e7e0cde1a235f39f",
+        "sha256": "a4902133ca444a406b78afd8f0c89705f7d6639db907834c459142727ca8d4b3",
+        "bytes": 19353
+      },
+      {
+        "path": "arch/arm64/boot/dts/exynos/s5e9945-ufs.dtsi",
+        "url": "https://raw.githubusercontent.com/dx4m/android-kernel-samsung-e1s/417484173abc2c4fa93e738ea82ad9f2e84911b1/arch/arm64/boot/dts/exynos/s5e9945-ufs.dtsi",
+        "origin": "pinned-public-raw-fetch",
+        "git_blob": "bd7697a7c04407d6cbb8f80589ef1e136a473d04",
+        "sha256": "f4fc4ca70954495b0cc8ffc4b82ac083d05f27dcf26419c5e2e4025598c34b95",
+        "bytes": 3799
+      },
+      {
+        "path": "include/uapi/scsi/scsi_bsg_ufs.h",
+        "url": "https://raw.githubusercontent.com/dx4m/android-kernel-samsung-e1s/417484173abc2c4fa93e738ea82ad9f2e84911b1/include/uapi/scsi/scsi_bsg_ufs.h",
+        "git_blob": "ad6f5e1be2ab1ce8d417ac84eef6731d877a6117",
+        "sha256": "381d38cf4f365da1a0507dcf21b9be30948cf0db64a3e66494a85d4d1f27acd9",
+        "bytes": 3656
+      }
+    ]
+  },
+  "donor": {
+    "repository": "https://github.com/RNDMBG/iOS-On-S24",
+    "commit": "c8860decc62c6d6180e609036d027a2997972420",
+    "path": "xnu/e1s/patches/0005-e1s-ufs.patch",
+    "sha256": "0bf2b97da6e5525ce893e3f2bcf99fbb2dd7a3a4a5c6531a9a5cef8030d3f0bb"
+  },
+  "licensing": [
+    "include/ufs/ufshci.h and ufs.h retain GPL-2.0-or-later, Samsung India copyright and author notices in unmodified source artifacts.",
+    "include/uapi/scsi/scsi_bsg_ufs.h retains GPL-2.0 WITH Linux-syscall-note and Samsung/Western Digital copyrights.",
+    "drivers/ufs/core/ufs-mcq.c retains GPL-2.0-only, Copyright (c) 2022 Qualcomm Innovation Center and its author notices. Device-tree source retains GPL-2.0-only and Samsung Electronics 2020 notice. Complete unmodified source copies and oracle prefixes preserve original notices.",
+    "E1S patch has no per-file grant established; no blanket grant is inferred from the containing XNU/APSL tree. Actual donor extraction is local evidence only.",
+    "host.c and host.h are project-authored factual byte admission and lifecycle code; generated source oracle is never committed."
+  ],
+  "qualification": {
+    "utrd_bytes": 32,
+    "cqe_bytes": 32,
+    "prdt_bytes": 16,
+    "upiu_slot_bytes": 512,
+    "ucd_bytes": 1088,
+    "response_min_bytes": 52,
+    "cqe_ucd_address": "bits63:7",
+    "cqe_sqid": "bits4:0",
+    "cqe_reserved": "bits6:5",
+    "response_and_prdt_order": "little-endian 16-bit length then offset in DWORDs",
+    "upiu_endianness": "big-endian multi-byte fields",
+    "read_allowlist": [
+      "READ(10) only, opcode0x28, no ancillary flags or zero transfer count"
+    ]
+  },
+  "unverified": [
+    "Exact BYH3 S9 UFS source/firmware and current controller state",
+    "Actual PHY, power, IOMMU mapping, MCQ handoff and interrupts",
+    "Actual DMA ownership, cache coherency and barriers",
+    "Queue publication, drain, abort/reset and safe reuse after timeout",
+    "Capacity, partition/GPT provenance and selected LUN authorization",
+    "Native kernel link, execution and encrypted Android userdata access"
+  ],
+  "device_executed": false
+}
