@@ -1,0 +1,44 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "recorded_at": "2026-11-05T02:09:41+00:00",
+  "summary": "Unchanged APK7 passes all light cases and several dark cases with correct system-bar appearance; dark lifecycle instrumentation reads a null report before UI update, while its retained status/capture already shows the actual cancelled report. Test observation race requires correction.",
+  "commit": "27451a28ff21e4ab69aa6305cb0ffd94ccd2aed4",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "src/android-probe/emulator_check.py",
+        "--apk",
+        "artifacts/android-probe/apk-session7/s24-vulkan-probe.apk",
+        "--qualifier-apk",
+        "artifacts/android-probe/qualifier-build-session8/qualifier.apk",
+        "--run",
+        "emulator-session15",
+        "--port",
+        "5582",
+        "--adb-server-port",
+        "5482"
+      ],
+      "exit_code": 1
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/android-ui/session15-report.json",
+    "fixtures/public/android-ui/session15-lifecycle-observation.json",
+    "artifacts/android-probe/emulator-session15/report.json",
+    "artifacts/android-probe/emulator-session15/emulator_check.py"
+  ],
+  "sha256": {
+    "fixtures/public/android-ui/session15-report.json": "3bf5ffdc8425cdd717335e3e3e3ab769df2298ca18c57322db832087b6e3e5a7",
+    "fixtures/public/android-ui/session15-lifecycle-observation.json": "b2530750a37ec6d6312ba337f60e6674c93e91ecc5f042ed6712bfd0e7771324",
+    "artifacts/android-probe/emulator-session15/report.json": "3bf5ffdc8425cdd717335e3e3e3ab769df2298ca18c57322db832087b6e3e5a7",
+    "artifacts/android-probe/emulator-session15/emulator_check.py": "cc967c1af9665485e7523503fcebe448c12305c2be2d5f4718ca2838223247a3"
+  },
+  "limitations": [
+    "No offline recovery was exercised in this run; the bounded retry allowlist is separately unit tested",
+    "The observation does not prove an application lost its result; screenshot/status show Previous result:cancelled",
+    "No physical S24/ARM64/Android15 or native XNU qualification; full current APK confirmation is incomplete"
+  ]
+}

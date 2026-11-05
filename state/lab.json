@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T01:21:02+00:00",
+  "updated_at": "2026-11-05T02:25:14+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -344,7 +344,8 @@
       "evidence_kind": "android-userland",
       "depends_on": [
         "DEV-001",
-        "GPU-002"
+        "GPU-002",
+        "TST-002"
       ],
       "paths": [
         "artifacts/",
@@ -361,7 +362,7 @@
         "adb-docs"
       ],
       "steps": [
-        "Proceed only after app installation is authorized.",
+        "Proceed only after app installation is separately authorized and TST-002 qualifies the exact current APK; rebuild/requalify changed compiled inputs.",
         "Run short tests using the stock driver, without a stress loop.",
         "Establish a baseline before changing drivers."
       ]
@@ -2095,7 +2096,12 @@
         "src/android-probe/",
         "fixtures/public/android-ui/",
         "tests/test_probe_ui.py",
-        "docs/procedures/emulator-qualification.md"
+        "docs/procedures/emulator-qualification.md",
+        "README.md",
+        "docs/implementation.md",
+        "state/capabilities.json",
+        "CAPABILITIES.md",
+        "research/notes/TST-002-runtime-qualification.md"
       ],
       "acceptance": [
         "The exact current APK digest executes the genuine 65536-pixel fixture on a task-owned emulator; no physical device selected",
@@ -2111,8 +2117,18 @@
         "Plan a bounded isolated run and preserve actual outputs and screenshot hashes",
         "Address the existing read-only review recapture verdict; keep primary S24 tests behind GPU-003"
       ],
-      "status": "pending",
-      "owner": null
+      "status": "done",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "started_at": "2026-11-05T01:23:32+00:00",
+      "last_heartbeat": "2026-11-05T02:05:12+00:00",
+      "updated_at": "2026-11-05T02:25:14+00:00",
+      "branch": "main",
+      "progress_note": "APK6 passes all16 guest cases; independent review fix verdict retained for light system-bar contrast. APK7 now applies theme-correct bar appearance and is in the registered confirmation run.",
+      "next_step": "Finish APK7 confirmation, score the two review findings, run full checks and publish evidence; no physical S24 scope",
+      "handoff": "docs/procedures/emulator-qualification.md",
+      "evidence": "state/evidence/TST-002.json",
+      "evidence_sha256": "b48abc7e5ef192126eb682648873e315ce96c127ad548639adee547918a8cf38",
+      "finished_at": "2026-11-05T02:25:14+00:00"
     },
     {
       "id": "RES-003",
@@ -2806,6 +2822,43 @@
         "Implement actual backend/frontend without success stubs",
         "Compile/link and test bounded failure/lifecycle paths; retain native qualification gates"
       ]
+    },
+    {
+      "id": "RES-008",
+      "title": "Validate actual XNU sysroot, SDK and donor build-tool requirements",
+      "status": "pending",
+      "owner": null,
+      "priority": 95,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002",
+        "BLD-001"
+      ],
+      "paths": [
+        "research/sources.json",
+        "research/notes/RES-008-xnu-build-inputs.md",
+        "fixtures/public/xnu-build-inputs",
+        "docs/procedures/xnu-build-inputs.md",
+        "tools/build/describe_kernel_inputs.py",
+        "docs/implementation.md"
+      ],
+      "acceptance": [
+        "Distinguish selected iOS16.5 runtime/XNU profile, official Xcode SDK version and a custom Theos sysroot label using pinned build scripts and official Apple release data",
+        "Trace exact embedded-compatible build tools, headers/linker/MIG/dependency/exports and host requirements rather than assuming a numeric SDK equality is sufficient or necessary",
+        "Identify which inputs are actually available, unavailable or independently buildable from pinned open source; no Apple binaries or upstream setup execution",
+        "Integrate corrected explicit input checks/next build steps while preserving KRN-001 owner reservations and historical evidence; source presence alone cannot qualify a full kernel build"
+      ],
+      "sources": [
+        "s24-port",
+        "apple-xnu",
+        "hakios"
+      ],
+      "steps": [
+        "Review exact donor and embedded-era tool scripts as data",
+        "Compare official SDK/runtime matrix and actual script/header assumptions",
+        "Publish an input manifest and concrete build path or precise external gaps"
+      ]
     }
   ],
   "experiments": [
@@ -3229,6 +3282,141 @@
       "evidence_sha256": "b60191939f98f9275e02e426828c0d3eec127faf7656a233ce477dede498c45b",
       "outcome": "pass",
       "recorded_at": "2026-11-05T01:20:03+00:00"
+    },
+    {
+      "id": "EMULATOR-008",
+      "task": "TST-002",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Exact APK5 reaches real65536-pixel Vulkan pass in a smaller process-owned API36 guest after semantic control readiness, with saved result and theme captures; no physical device",
+      "procedure": "docs/procedures/emulator-qualification.md",
+      "timeout_seconds": 720,
+      "created_at": "2026-11-05T01:29:08+00:00",
+      "evidence": "state/evidence/EMULATOR-008.json",
+      "evidence_sha256": "fb0525fdefedd5283d759107c05a7687f212d1035db9eaeee63ecf9cf97684db",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T01:54:06+00:00"
+    },
+    {
+      "id": "EMULATOR-009",
+      "task": "TST-002",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Syntax-checked helper runs exact APK5 on smaller unique API36 AVD and obtains real Vulkan pixels and semantic light/dark saved-result coverage",
+      "procedure": "docs/procedures/emulator-qualification.md",
+      "timeout_seconds": 720,
+      "created_at": "2026-11-05T01:29:29+00:00",
+      "evidence": "state/evidence/EMULATOR-009.json",
+      "evidence_sha256": "3d3ed3238296086a64c8dd1d856d87cbd12ecca67db0f3556a1faca2807cb5b3",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T01:54:08+00:00"
+    },
+    {
+      "id": "EMULATOR-010",
+      "task": "TST-002",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Private filtered ADB isolates the exact APK5 guest; instrumentation qualifies real export/lifecycle/themes and exposes any silent AtomicFile commit-loss bug with genuine measured bytes",
+      "procedure": "docs/procedures/emulator-qualification.md",
+      "timeout_seconds": 1200,
+      "created_at": "2026-11-05T01:39:00+00:00",
+      "evidence": "state/evidence/EMULATOR-010.json",
+      "evidence_sha256": "45acfdb42883f7b49ef3221c3c052cb4a7f80516e2f0d94267a817710a25680e",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T01:54:09+00:00"
+    },
+    {
+      "id": "EMULATOR-011",
+      "task": "TST-002",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Correct private loopback socket syntax isolates APK5 guest; real instrumentation covers lifecycle/export/storage/restart/theme or retains precise failure including possible silent AtomicFile commit loss",
+      "procedure": "docs/procedures/emulator-qualification.md",
+      "timeout_seconds": 1200,
+      "created_at": "2026-11-05T01:39:23+00:00",
+      "evidence": "state/evidence/EMULATOR-011.json",
+      "evidence_sha256": "503ae59998d1b1e17feb9da254394e4651e092948ea44bff7895c813fe9fb303",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T01:54:11+00:00"
+    },
+    {
+      "id": "EMULATOR-012",
+      "task": "TST-002",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "APK5 genuine readback and instrumentation expose/retain AtomicFile commit failure; corrected lifecycle trigger observes a real worker before recreation, with isolated ADB and no manufactured GPU result",
+      "procedure": "docs/procedures/emulator-qualification.md",
+      "timeout_seconds": 1200,
+      "created_at": "2026-11-05T01:44:01+00:00",
+      "evidence": "state/evidence/EMULATOR-012.json",
+      "evidence_sha256": "4582d2170aece49efb0440b7064f9c3267950aab5220184f5a76fee578f6629a",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T01:54:12+00:00"
+    },
+    {
+      "id": "EMULATOR-013",
+      "task": "TST-002",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Rebuilt APK6 verifies actual committed bytes and preserves genuine GPU results through startWrite/commit faults; private isolated guest qualifies both themes, lifecycle, restart UI, real export and live theme recreation",
+      "procedure": "docs/procedures/emulator-qualification.md",
+      "timeout_seconds": 1200,
+      "created_at": "2026-11-05T01:49:34+00:00",
+      "evidence": "state/evidence/EMULATOR-013.json",
+      "evidence_sha256": "45facb3bc01a381cd5a95d7b3f5083368f182eaeb0922c09c4b8741340dd25fa",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T02:02:27+00:00"
+    },
+    {
+      "id": "EMULATOR-014",
+      "task": "TST-002",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "APK7 corrects independent-review light status/navigation icon appearance while all16 genuine guest qualification cases and system-bars theme assertions pass; bounded post-fix native capture review remains separate",
+      "procedure": "docs/procedures/emulator-qualification.md",
+      "timeout_seconds": 1200,
+      "created_at": "2026-11-05T02:04:08+00:00",
+      "evidence": "state/evidence/EMULATOR-014.json",
+      "evidence_sha256": "fe1c69537fb113f872f5d68e42aebb0b251fcb9cbc3debeeedb718561205bbd7",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T02:09:40+00:00"
+    },
+    {
+      "id": "EMULATOR-015",
+      "task": "TST-002",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Unchanged APK7/qualifier pass all16 bar/theme/runtime cases; bounded same-owned-boot transport observation retries only reads or fixed-file idempotent cleanup and never replays measurements",
+      "procedure": "docs/procedures/emulator-qualification.md",
+      "timeout_seconds": 1200,
+      "created_at": "2026-11-05T02:09:41+00:00",
+      "evidence": "state/evidence/EMULATOR-015.json",
+      "evidence_sha256": "9977def3f697d8841a232b68965cb8780dae61661a929f9f78b2c802a8b9bea9",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T02:19:11+00:00"
+    },
+    {
+      "id": "EMULATOR-016",
+      "task": "TST-002",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Unchanged APK7 passes all16 cases with correct system-bar appearance and UI-thread-safe result observation; no replayed native measurements or manufactured results",
+      "procedure": "docs/procedures/emulator-qualification.md",
+      "timeout_seconds": 1200,
+      "created_at": "2026-11-05T02:19:12+00:00",
+      "evidence": "state/evidence/EMULATOR-016.json",
+      "evidence_sha256": "84be99f581888ac3074ce06f0f8c4c63df11be58d6aa17e90fcbbbc05c9cd96c",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T02:24:24+00:00"
     }
   ],
   "events": [
@@ -5948,6 +6136,208 @@
           "last_heartbeat": "2026-11-05T01:21:01+00:00",
           "branch": "main",
           "handoff": "research/notes/RES-007-display-input.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T01:23:32+00:00",
+      "action": "task.claim:TST-002",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "tasks": [
+        {
+          "id": "TST-002",
+          "status": "in_progress",
+          "owner": "codex-emulator-qualification-20261105-h",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T01:23:32+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T01:29:08+00:00",
+      "action": "experiment.plan:EMULATOR-008",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:29:29+00:00",
+      "action": "experiment.plan:EMULATOR-009",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:38:49+00:00",
+      "action": "task.update:TST-002",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "tasks": [
+        {
+          "id": "TST-002",
+          "status": "in_progress",
+          "owner": "codex-emulator-qualification-20261105-h",
+          "priority": 80,
+          "progress_note": "Exact APK5 now passes65536-pixel SwiftShader guest fixture and real semantic restoration/theme captures; broader export/error/lifecycle acceptance remains open",
+          "next_step": "Run separately signed instrumentation under private filtered ADB; test actual AtomicFile commit failure and retain source/version identity",
+          "last_heartbeat": "2026-11-05T01:38:49+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/emulator-qualification.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T01:39:00+00:00",
+      "action": "experiment.plan:EMULATOR-010",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:39:23+00:00",
+      "action": "experiment.plan:EMULATOR-011",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:44:01+00:00",
+      "action": "experiment.plan:EMULATOR-012",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:49:34+00:00",
+      "action": "experiment.plan:EMULATOR-013",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:54:06+00:00",
+      "action": "experiment.record:EMULATOR-008",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:54:08+00:00",
+      "action": "experiment.record:EMULATOR-009",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:54:09+00:00",
+      "action": "experiment.record:EMULATOR-010",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:54:11+00:00",
+      "action": "experiment.record:EMULATOR-011",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:54:12+00:00",
+      "action": "experiment.record:EMULATOR-012",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:58:53+00:00",
+      "action": "task.refine:TST-002-publish-runtime-capability-and-handoff-evidence",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "tasks": [
+        {
+          "id": "TST-002",
+          "status": "in_progress",
+          "owner": "codex-emulator-qualification-20261105-h",
+          "priority": 80,
+          "progress_note": "Exact APK5 now passes65536-pixel SwiftShader guest fixture and real semantic restoration/theme captures; broader export/error/lifecycle acceptance remains open",
+          "next_step": "Run separately signed instrumentation under private filtered ADB; test actual AtomicFile commit failure and retain source/version identity",
+          "last_heartbeat": "2026-11-05T01:38:49+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/emulator-qualification.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:02:27+00:00",
+      "action": "experiment.record:EMULATOR-013",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T02:04:08+00:00",
+      "action": "experiment.plan:EMULATOR-014",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T02:05:12+00:00",
+      "action": "task.update:TST-002",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "tasks": [
+        {
+          "id": "TST-002",
+          "status": "in_progress",
+          "owner": "codex-emulator-qualification-20261105-h",
+          "priority": 80,
+          "progress_note": "APK6 passes all16 guest cases; independent review fix verdict retained for light system-bar contrast. APK7 now applies theme-correct bar appearance and is in the registered confirmation run.",
+          "next_step": "Finish APK7 confirmation, score the two review findings, run full checks and publish evidence; no physical S24 scope",
+          "last_heartbeat": "2026-11-05T02:05:12+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/emulator-qualification.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:09:40+00:00",
+      "action": "experiment.record:EMULATOR-014",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T02:09:41+00:00",
+      "action": "experiment.plan:EMULATOR-015",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T02:12:33+00:00",
+      "action": "task.add:RES-008",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "tasks": [
+        {
+          "id": "RES-008",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:19:11+00:00",
+      "action": "experiment.record:EMULATOR-015",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T02:19:12+00:00",
+      "action": "experiment.plan:EMULATOR-016",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T02:24:24+00:00",
+      "action": "experiment.record:EMULATOR-016",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T02:25:14+00:00",
+      "action": "task.refine:GPU-003-requires-exact-host-APK-qualification",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "tasks": [
+        {
+          "id": "GPU-003",
+          "status": "pending",
+          "owner": null
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:25:14+00:00",
+      "action": "task.done:TST-002",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "tasks": [
+        {
+          "id": "TST-002",
+          "status": "done",
+          "owner": "codex-emulator-qualification-20261105-h",
+          "priority": 80,
+          "progress_note": "APK6 passes all16 guest cases; independent review fix verdict retained for light system-bar contrast. APK7 now applies theme-correct bar appearance and is in the registered confirmation run.",
+          "next_step": "Finish APK7 confirmation, score the two review findings, run full checks and publish evidence; no physical S24 scope",
+          "last_heartbeat": "2026-11-05T02:05:12+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/emulator-qualification.md"
         }
       ]
     }

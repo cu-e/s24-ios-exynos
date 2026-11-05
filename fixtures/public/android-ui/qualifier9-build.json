@@ -1,0 +1,106 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T02:16:58+00:00",
+  "commit": "27451a28ff21e4ab69aa6305cb0ffd94ccd2aed4",
+  "commands": [
+    {
+      "argv": [
+        "javac",
+        "--release",
+        "8",
+        "-classpath",
+        "/home/egor/Android/Sdk/platforms/android-35/android.jar",
+        "-d",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/android-probe/qualifier-build-session9/classes",
+        "/home/egor/dev/pet/s24-ios-exynos/src/android-probe/qualification/Qualifier.java"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "warning: [options] source value 8 is obsolete and will be removed in a future release\nwarning: [options] target value 8 is obsolete and will be removed in a future release\nwarning: [options] To suppress warnings about obsolete options, use -Xlint:-options.\nNote: /home/egor/dev/pet/s24-ios-exynos/src/android-probe/qualification/Qualifier.java uses or overrides a deprecated API.\nNote: Recompile with -Xlint:deprecation for details.\n3 warnings\n"
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/build-tools/35.0.0/d8",
+        "--lib",
+        "/home/egor/Android/Sdk/platforms/android-35/android.jar",
+        "--min-api",
+        "29",
+        "--output",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/android-probe/qualifier-build-session9/dex",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/android-probe/qualifier-build-session9/classes/dev/egor/s24probe/qualifier/Qualifier.class"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/build-tools/35.0.0/aapt2",
+        "link",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/android-probe/qualifier-build-session9/unsigned.apk",
+        "--manifest",
+        "/home/egor/dev/pet/s24-ios-exynos/src/android-probe/qualification/AndroidManifest.xml",
+        "-I",
+        "/home/egor/Android/Sdk/platforms/android-35/android.jar"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/build-tools/35.0.0/zipalign",
+        "-P",
+        "16",
+        "-f",
+        "4",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/android-probe/qualifier-build-session9/unsigned.apk",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/android-probe/qualifier-build-session9/aligned.apk"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/build-tools/35.0.0/apksigner",
+        "sign",
+        "--ks",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/android-probe/apk-session7/development.jks",
+        "--ks-key-alias",
+        "development",
+        "--ks-pass",
+        "pass:android",
+        "--key-pass",
+        "pass:android",
+        "--out",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/android-probe/qualifier-build-session9/qualifier.apk",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/android-probe/qualifier-build-session9/aligned.apk"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "WARNING: A restricted method in java.lang.System has been called\nWARNING: java.lang.System::loadLibrary has been called by org.conscrypt.NativeLibraryUtil in an unnamed module (file:/home/egor/Android/Sdk/build-tools/35.0.0/lib/apksigner.jar)\nWARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module\nWARNING: Restricted methods will be blocked in a future release unless native access is enabled\n\n"
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/build-tools/35.0.0/apksigner",
+        "verify",
+        "--verbose",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/android-probe/qualifier-build-session9/qualifier.apk"
+      ],
+      "exit_code": 0,
+      "stdout": "Verifies\nVerified using v1 scheme (JAR signing): false\nVerified using v2 scheme (APK Signature Scheme v2): false\nVerified using v3 scheme (APK Signature Scheme v3): true\nVerified using v3.1 scheme (APK Signature Scheme v3.1): false\nVerified using v4 scheme (APK Signature Scheme v4): false\nVerified for SourceStamp: false\nNumber of signers: 1\n",
+      "stderr": "WARNING: A restricted method in java.lang.System has been called\nWARNING: java.lang.System::loadLibrary has been called by org.conscrypt.NativeLibraryUtil in an unnamed module (file:/home/egor/Android/Sdk/build-tools/35.0.0/lib/apksigner.jar)\nWARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module\nWARNING: Restricted methods will be blocked in a future release unless native access is enabled\n\n"
+    }
+  ],
+  "target_apk_sha256": "1187f632f1b1bd20d4e8ce0c29d21959b4f51760de3e17e55064fe2d8f23afd6",
+  "source_sha256": {
+    "src/android-probe/qualification/Qualifier.java": "722a60e7b83a28b5d2568c5ce4929483f95bea14d04804742391d5ebf0dddc62",
+    "src/android-probe/qualification/AndroidManifest.xml": "f79138b80199dff25feb9bd10fd28ae977c53e6bab55834cc1243b029f0f0510",
+    "src/android-probe/qualification/build.py": "2a3ce1cfd96db4b3fcbb10886c116c93bce39d1ca346a5f055a654722e96e24e"
+  },
+  "apk_sha256": "0d777ddf942857e97ff4844fbdc74d65cf850d652804ad2beca29fe406967441"
+}

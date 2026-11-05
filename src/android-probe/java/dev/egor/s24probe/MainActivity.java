@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.util.AtomicFile;
 import android.view.View;
 import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -71,7 +72,7 @@ public final class MainActivity extends Activity {
             } else view.setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(), insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom());
             return insets;
         });
-        setContentView(scroll); scroll.requestApplyInsets();
+        setContentView(scroll); scroll.requestApplyInsets(); applySystemBarAppearance();
         start.setOnClickListener(view -> begin());
         stop.setOnClickListener(view -> requestStop());
         save.setOnClickListener(view -> {
@@ -122,7 +123,13 @@ public final class MainActivity extends Activity {
             // Storage failure must not replace a genuine measurement or poison the GPU session.
             AtomicFile file = new AtomicFile(new File(getFilesDir(), "last-report.json"));
             FileOutputStream stream = null; boolean storageFailed = false;
-            try { stream = file.startWrite(); stream.write(completed.getBytes(StandardCharsets.UTF_8)); file.finishWrite(stream); }
+            try {
+                stream = file.startWrite(); stream.write(completed.getBytes(StandardCharsets.UTF_8)); file.finishWrite(stream); stream = null;
+                // AtomicFile logs some commit failures without throwing. Verify
+                // the committed bytes before claiming private storage succeeded.
+                String stored = new String(java.nio.file.Files.readAllBytes(file.getBaseFile().toPath()), StandardCharsets.UTF_8);
+                if (!completed.equals(stored)) throw new java.io.IOException("Stored report does not match the measured result");
+            }
             catch (Exception error) { if (stream != null) file.failWrite(stream); storageFailed = true; }
             final Completed result = new Completed(completed, storageFailed);
             latest = result;
@@ -136,6 +143,25 @@ public final class MainActivity extends Activity {
         }, "vulkan-probe").start();
     }
     private void requestStop() { if (running) { cancel(); stop.setEnabled(false); status.setText("Stopping after the submitted image completes…"); } }
+    private void applySystemBarAppearance() {
+        boolean dark = (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        View decor = getWindow().getDecorView();
+        if (android.os.Build.VERSION.SDK_INT >= 30) {
+            WindowInsetsController controller = decor.getWindowInsetsController();
+            if (controller != null) {
+                int lightBackground = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+                controller.setSystemBarsAppearance(dark ? 0 : lightBackground, lightBackground);
+                return;
+            }
+        }
+        int lightBackground = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        int flags = decor.getSystemUiVisibility() & ~lightBackground;
+        decor.setSystemUiVisibility(dark ? flags : flags | lightBackground);
+    }
+    @Override public void onWindowFocusChanged(boolean focused) {
+        super.onWindowFocusChanged(focused);
+        if (focused) applySystemBarAppearance();
+    }
     @Override protected void onResume() {
         super.onResume();
         if (!running && GATE.isBusy()) {

@@ -36,6 +36,8 @@ The [experimental SGPU transport](src/platform/gpu/abi/README.md) now has compil
 
 [Display/input research](research/notes/RES-007-display-input.md) confirms and [corrects a real E1S STM coordinate defect](patches/display-input/README.md), with regression tests against the actual decoder and integration into source preparation. [Owned display/input contracts](src/platform/display/README.md) check byte extents, mapping and event lifecycle; actual panel/DSC/scanout, SPI touch and iOS16.5 services remain UI-003/004/005 before native UI-002 qualification.
 
+[Android probe runtime qualification](research/notes/TST-002-runtime-qualification.md) now includes genuine65536-pixel SwiftShader readback and16 actual guest cases covering both themes, larger text, export, storage errors and worker/restart lifecycle. The helper owns an isolated ADB server; committed-byte verification preserves honest storage status. This is host Android evidence, with no physical S24 installation or native GPU qualification.
+
 ## Run the host lab
 
 Source fetches and heavy builds are explicit. These commands do not select a phone:

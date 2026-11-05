@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T01:21:02+00:00",
-  "ledger_updated_at": "2026-11-05T01:21:02+00:00",
-  "registry_sha256": "a390266d6674f0179d8ec648c960675a03ed7d3f2f8eaf40325810e96cc30483",
+  "generated_at": "2026-11-05T02:25:15+00:00",
+  "ledger_updated_at": "2026-11-05T02:25:14+00:00",
+  "registry_sha256": "e55aa9805d427292f3dce0ab42650b2ec3d052a1b43935acdb83cfd9e401c1b4",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
-      "TST-002",
+      "RES-008",
       "ESIM-004",
       "CELL-009",
       "VM-002",
@@ -71,6 +71,7 @@
       "SRC-001",
       "INT-001",
       "LAB-001",
+      "TST-002",
       "RES-003",
       "RES-004",
       "GPU-011",
@@ -97,6 +98,46 @@
     ]
   },
   "tasks": [
+    {
+      "id": "RES-008",
+      "title": "Validate actual XNU sysroot, SDK and donor build-tool requirements",
+      "status": "pending",
+      "owner": null,
+      "priority": 95,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002",
+        "BLD-001"
+      ],
+      "paths": [
+        "research/sources.json",
+        "research/notes/RES-008-xnu-build-inputs.md",
+        "fixtures/public/xnu-build-inputs",
+        "docs/procedures/xnu-build-inputs.md",
+        "tools/build/describe_kernel_inputs.py",
+        "docs/implementation.md"
+      ],
+      "acceptance": [
+        "Distinguish selected iOS16.5 runtime/XNU profile, official Xcode SDK version and a custom Theos sysroot label using pinned build scripts and official Apple release data",
+        "Trace exact embedded-compatible build tools, headers/linker/MIG/dependency/exports and host requirements rather than assuming a numeric SDK equality is sufficient or necessary",
+        "Identify which inputs are actually available, unavailable or independently buildable from pinned open source; no Apple binaries or upstream setup execution",
+        "Integrate corrected explicit input checks/next build steps while preserving KRN-001 owner reservations and historical evidence; source presence alone cannot qualify a full kernel build"
+      ],
+      "sources": [
+        "s24-port",
+        "apple-xnu",
+        "hakios"
+      ],
+      "steps": [
+        "Review exact donor and embedded-era tool scripts as data",
+        "Compare official SDK/runtime matrix and actual script/header assumptions",
+        "Publish an input manifest and concrete build path or precise external gaps"
+      ],
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/RES-008.md"
+    },
     {
       "id": "PLN-001",
       "title": "Implement the staged hardware roadmap and evidence-backed capability matrix",
@@ -356,7 +397,12 @@
         "src/android-probe/",
         "fixtures/public/android-ui/",
         "tests/test_probe_ui.py",
-        "docs/procedures/emulator-qualification.md"
+        "docs/procedures/emulator-qualification.md",
+        "README.md",
+        "docs/implementation.md",
+        "state/capabilities.json",
+        "CAPABILITIES.md",
+        "research/notes/TST-002-runtime-qualification.md"
       ],
       "acceptance": [
         "The exact current APK digest executes the genuine 65536-pixel fixture on a task-owned emulator; no physical device selected",
@@ -372,9 +418,19 @@
         "Plan a bounded isolated run and preserve actual outputs and screenshot hashes",
         "Address the existing read-only review recapture verdict; keep primary S24 tests behind GPU-003"
       ],
-      "status": "pending",
-      "owner": null,
-      "column": "ready",
+      "status": "done",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "started_at": "2026-11-05T01:23:32+00:00",
+      "last_heartbeat": "2026-11-05T02:05:12+00:00",
+      "updated_at": "2026-11-05T02:25:14+00:00",
+      "branch": "main",
+      "progress_note": "APK6 passes all16 guest cases; independent review fix verdict retained for light system-bar contrast. APK7 now applies theme-correct bar appearance and is in the registered confirmation run.",
+      "next_step": "Finish APK7 confirmation, score the two review findings, run full checks and publish evidence; no physical S24 scope",
+      "handoff": "docs/procedures/emulator-qualification.md",
+      "evidence": "state/evidence/TST-002.json",
+      "evidence_sha256": "b48abc7e5ef192126eb682648873e315ce96c127ad548639adee547918a8cf38",
+      "finished_at": "2026-11-05T02:25:14+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/TST-002.md"
     },
@@ -2068,7 +2124,8 @@
       "evidence_kind": "android-userland",
       "depends_on": [
         "DEV-001",
-        "GPU-002"
+        "GPU-002",
+        "TST-002"
       ],
       "paths": [
         "artifacts/",
@@ -2085,7 +2142,7 @@
         "adb-docs"
       ],
       "steps": [
-        "Proceed only after app installation is authorized.",
+        "Proceed only after app installation is separately authorized and TST-002 qualifies the exact current APK; rebuild/requalify changed compiled inputs.",
         "Run short tests using the stock driver, without a stress loop.",
         "Establish a baseline before changing drivers."
       ],
@@ -3258,291 +3315,170 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-05T01:08:18+00:00",
-      "action": "task.claim:UI-001",
-      "owner": "codex-display-research-20261105-g",
-      "tasks": [
-        {
-          "id": "UI-001",
-          "status": "in_progress",
-          "owner": "codex-display-research-20261105-g",
-          "priority": 70,
-          "last_heartbeat": "2026-11-05T01:08:18+00:00",
-          "branch": "main"
-        }
-      ]
+      "at": "2026-11-05T01:39:23+00:00",
+      "action": "experiment.plan:EMULATOR-011",
+      "owner": "codex-emulator-qualification-20261105-h"
     },
     {
-      "at": "2026-11-05T01:08:19+00:00",
-      "action": "task.refine:UI-001-own-host-contract-tests",
-      "owner": "codex-display-research-20261105-g",
-      "tasks": [
-        {
-          "id": "UI-001",
-          "status": "in_progress",
-          "owner": "codex-display-research-20261105-g",
-          "priority": 70,
-          "last_heartbeat": "2026-11-05T01:08:18+00:00",
-          "branch": "main"
-        }
-      ]
+      "at": "2026-11-05T01:44:01+00:00",
+      "action": "experiment.plan:EMULATOR-012",
+      "owner": "codex-emulator-qualification-20261105-h"
     },
     {
-      "at": "2026-11-05T01:09:58+00:00",
-      "action": "task.add:UI-006",
-      "owner": "codex-display-research-20261105-g",
-      "tasks": [
-        {
-          "id": "UI-006",
-          "status": "pending",
-          "owner": null,
-          "priority": 80
-        }
-      ]
+      "at": "2026-11-05T01:49:34+00:00",
+      "action": "experiment.plan:EMULATOR-013",
+      "owner": "codex-emulator-qualification-20261105-h"
     },
     {
-      "at": "2026-11-05T01:09:58+00:00",
-      "action": "task.claim:UI-006",
-      "owner": "codex-display-research-20261105-g",
+      "at": "2026-11-05T01:54:06+00:00",
+      "action": "experiment.record:EMULATOR-008",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:54:08+00:00",
+      "action": "experiment.record:EMULATOR-009",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:54:09+00:00",
+      "action": "experiment.record:EMULATOR-010",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:54:11+00:00",
+      "action": "experiment.record:EMULATOR-011",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:54:12+00:00",
+      "action": "experiment.record:EMULATOR-012",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T01:58:53+00:00",
+      "action": "task.refine:TST-002-publish-runtime-capability-and-handoff-evidence",
+      "owner": "codex-emulator-qualification-20261105-h",
       "tasks": [
         {
-          "id": "UI-006",
+          "id": "TST-002",
           "status": "in_progress",
-          "owner": "codex-display-research-20261105-g",
+          "owner": "codex-emulator-qualification-20261105-h",
           "priority": 80,
-          "last_heartbeat": "2026-11-05T01:09:58+00:00",
-          "branch": "main"
+          "progress_note": "Exact APK5 now passes65536-pixel SwiftShader guest fixture and real semantic restoration/theme captures; broader export/error/lifecycle acceptance remains open",
+          "next_step": "Run separately signed instrumentation under private filtered ADB; test actual AtomicFile commit failure and retain source/version identity",
+          "last_heartbeat": "2026-11-05T01:38:49+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/emulator-qualification.md"
         }
       ]
     },
     {
-      "at": "2026-11-05T01:10:53+00:00",
-      "action": "experiment.plan:TOUCHREG-001",
-      "owner": "codex-display-research-20261105-g"
+      "at": "2026-11-05T02:02:27+00:00",
+      "action": "experiment.record:EMULATOR-013",
+      "owner": "codex-emulator-qualification-20261105-h"
     },
     {
-      "at": "2026-11-05T01:11:19+00:00",
-      "action": "experiment.plan:TOUCHREG-002",
-      "owner": "codex-display-research-20261105-g"
+      "at": "2026-11-05T02:04:08+00:00",
+      "action": "experiment.plan:EMULATOR-014",
+      "owner": "codex-emulator-qualification-20261105-h"
     },
     {
-      "at": "2026-11-05T01:15:12+00:00",
-      "action": "experiment.plan:UICONTRACT-001",
-      "owner": "codex-display-research-20261105-g"
-    },
-    {
-      "at": "2026-11-05T01:16:40+00:00",
-      "action": "task.add:UI-003",
-      "owner": "codex-display-research-20261105-g",
+      "at": "2026-11-05T02:05:12+00:00",
+      "action": "task.update:TST-002",
+      "owner": "codex-emulator-qualification-20261105-h",
       "tasks": [
         {
-          "id": "UI-003",
+          "id": "TST-002",
+          "status": "in_progress",
+          "owner": "codex-emulator-qualification-20261105-h",
+          "priority": 80,
+          "progress_note": "APK6 passes all16 guest cases; independent review fix verdict retained for light system-bar contrast. APK7 now applies theme-correct bar appearance and is in the registered confirmation run.",
+          "next_step": "Finish APK7 confirmation, score the two review findings, run full checks and publish evidence; no physical S24 scope",
+          "last_heartbeat": "2026-11-05T02:05:12+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/emulator-qualification.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:09:40+00:00",
+      "action": "experiment.record:EMULATOR-014",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T02:09:41+00:00",
+      "action": "experiment.plan:EMULATOR-015",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T02:12:33+00:00",
+      "action": "task.add:RES-008",
+      "owner": "codex-emulator-qualification-20261105-h",
+      "tasks": [
+        {
+          "id": "RES-008",
           "status": "pending",
           "owner": null,
-          "priority": 70
+          "priority": 95
         }
       ]
     },
     {
-      "at": "2026-11-05T01:16:41+00:00",
-      "action": "task.add:UI-004",
-      "owner": "codex-display-research-20261105-g",
-      "tasks": [
-        {
-          "id": "UI-004",
-          "status": "pending",
-          "owner": null,
-          "priority": 70
-        }
-      ]
+      "at": "2026-11-05T02:19:11+00:00",
+      "action": "experiment.record:EMULATOR-015",
+      "owner": "codex-emulator-qualification-20261105-h"
     },
     {
-      "at": "2026-11-05T01:16:41+00:00",
-      "action": "task.add:UI-005",
-      "owner": "codex-display-research-20261105-g",
-      "tasks": [
-        {
-          "id": "UI-005",
-          "status": "pending",
-          "owner": null,
-          "priority": 70
-        }
-      ]
+      "at": "2026-11-05T02:19:12+00:00",
+      "action": "experiment.plan:EMULATOR-016",
+      "owner": "codex-emulator-qualification-20261105-h"
     },
     {
-      "at": "2026-11-05T01:16:41+00:00",
-      "action": "task.refine:display-input-native-and-selected-OS-gates; narrow pending DRV-001 to avoid unrelated blocked kernel reservation",
-      "owner": "codex-display-research-20261105-g",
+      "at": "2026-11-05T02:24:24+00:00",
+      "action": "experiment.record:EMULATOR-016",
+      "owner": "codex-emulator-qualification-20261105-h"
+    },
+    {
+      "at": "2026-11-05T02:25:14+00:00",
+      "action": "task.refine:GPU-003-requires-exact-host-APK-qualification",
+      "owner": "codex-emulator-qualification-20261105-h",
       "tasks": [
         {
-          "id": "DRV-001",
+          "id": "GPU-003",
           "status": "pending",
           "owner": null
-        },
-        {
-          "id": "UI-001",
-          "status": "in_progress",
-          "owner": "codex-display-research-20261105-g",
-          "priority": 70,
-          "next_step": "Finish contract/source documentation and evidence; no native presentation/HID or packet-transport acceptance",
-          "last_heartbeat": "2026-11-05T01:08:18+00:00",
-          "branch": "main"
-        },
-        {
-          "id": "UI-002",
-          "status": "pending",
-          "owner": null,
-          "priority": 50
-        },
-        {
-          "id": "GPU-009",
-          "status": "pending",
-          "owner": null,
-          "priority": 70
-        },
-        {
-          "id": "RES-007",
-          "status": "in_progress",
-          "owner": "codex-display-research-20261105-g",
-          "priority": 80,
-          "last_heartbeat": "2026-11-05T01:08:18+00:00",
-          "branch": "main"
         }
       ]
     },
     {
-      "at": "2026-11-05T01:20:02+00:00",
-      "action": "experiment.record:TOUCHREG-001",
-      "owner": "codex-display-research-20261105-g"
-    },
-    {
-      "at": "2026-11-05T01:20:02+00:00",
-      "action": "experiment.record:TOUCHREG-002",
-      "owner": "codex-display-research-20261105-g"
-    },
-    {
-      "at": "2026-11-05T01:20:03+00:00",
-      "action": "experiment.record:UICONTRACT-001",
-      "owner": "codex-display-research-20261105-g"
-    },
-    {
-      "at": "2026-11-05T01:20:59+00:00",
-      "action": "task.update:UI-001",
-      "owner": "codex-display-research-20261105-g",
+      "at": "2026-11-05T02:25:14+00:00",
+      "action": "task.done:TST-002",
+      "owner": "codex-emulator-qualification-20261105-h",
       "tasks": [
         {
-          "id": "UI-001",
-          "status": "in_progress",
-          "owner": "codex-display-research-20261105-g",
-          "priority": 70,
-          "progress_note": "Checked single-plane extents, normalized mapping and proposed loss/cancel input state;4096 sanitizer cases,four ARM objects and101 project tests pass; no pixels/HID dispatched",
-          "next_step": "Real display and input backends remain UI-003/004/005; do not treat logical Stop or timer as retirement",
-          "last_heartbeat": "2026-11-05T01:20:59+00:00",
-          "branch": "main",
-          "handoff": "src/platform/display/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T01:21:00+00:00",
-      "action": "task.done:UI-001",
-      "owner": "codex-display-research-20261105-g",
-      "tasks": [
-        {
-          "id": "UI-001",
+          "id": "TST-002",
           "status": "done",
-          "owner": "codex-display-research-20261105-g",
-          "priority": 70,
-          "progress_note": "Checked single-plane extents, normalized mapping and proposed loss/cancel input state;4096 sanitizer cases,four ARM objects and101 project tests pass; no pixels/HID dispatched",
-          "next_step": "Real display and input backends remain UI-003/004/005; do not treat logical Stop or timer as retirement",
-          "last_heartbeat": "2026-11-05T01:20:59+00:00",
-          "branch": "main",
-          "handoff": "src/platform/display/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T01:21:00+00:00",
-      "action": "task.update:UI-006",
-      "owner": "codex-display-research-20261105-g",
-      "tasks": [
-        {
-          "id": "UI-006",
-          "status": "in_progress",
-          "owner": "codex-display-research-20261105-g",
+          "owner": "codex-emulator-qualification-20261105-h",
           "priority": 80,
-          "progress_note": "Actual original post_event fails960/1024 vectors; two-line correction passesall1024 and matches full prepared XNU file byte-for-byte",
-          "next_step": "Native STM/IRQ/power/firmware remains UI-004; full kernel requires KRN-001 inputs",
-          "last_heartbeat": "2026-11-05T01:21:00+00:00",
+          "progress_note": "APK6 passes all16 guest cases; independent review fix verdict retained for light system-bar contrast. APK7 now applies theme-correct bar appearance and is in the registered confirmation run.",
+          "next_step": "Finish APK7 confirmation, score the two review findings, run full checks and publish evidence; no physical S24 scope",
+          "last_heartbeat": "2026-11-05T02:05:12+00:00",
           "branch": "main",
-          "handoff": "patches/display-input/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T01:21:01+00:00",
-      "action": "task.done:UI-006",
-      "owner": "codex-display-research-20261105-g",
-      "tasks": [
-        {
-          "id": "UI-006",
-          "status": "done",
-          "owner": "codex-display-research-20261105-g",
-          "priority": 80,
-          "progress_note": "Actual original post_event fails960/1024 vectors; two-line correction passesall1024 and matches full prepared XNU file byte-for-byte",
-          "next_step": "Native STM/IRQ/power/firmware remains UI-004; full kernel requires KRN-001 inputs",
-          "last_heartbeat": "2026-11-05T01:21:00+00:00",
-          "branch": "main",
-          "handoff": "patches/display-input/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T01:21:01+00:00",
-      "action": "task.update:RES-007",
-      "owner": "codex-display-research-20261105-g",
-      "tasks": [
-        {
-          "id": "RES-007",
-          "status": "in_progress",
-          "owner": "codex-display-research-20261105-g",
-          "priority": 80,
-          "progress_note": "Audited four clean pins,90 hashes, retail60Hz DSC, STM nibble defect and current donor bounds fixes; added actual scanout/STM/iOS gates and narrowed pending DRV-001 reservations",
-          "next_step": "Implement bounded STM protocol adapter or review concrete selected native build inputs; keep no native acceptance claims",
-          "last_heartbeat": "2026-11-05T01:21:01+00:00",
-          "branch": "main",
-          "handoff": "research/notes/RES-007-display-input.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T01:21:02+00:00",
-      "action": "task.done:RES-007",
-      "owner": "codex-display-research-20261105-g",
-      "tasks": [
-        {
-          "id": "RES-007",
-          "status": "done",
-          "owner": "codex-display-research-20261105-g",
-          "priority": 80,
-          "progress_note": "Audited four clean pins,90 hashes, retail60Hz DSC, STM nibble defect and current donor bounds fixes; added actual scanout/STM/iOS gates and narrowed pending DRV-001 reservations",
-          "next_step": "Implement bounded STM protocol adapter or review concrete selected native build inputs; keep no native acceptance claims",
-          "last_heartbeat": "2026-11-05T01:21:01+00:00",
-          "branch": "main",
-          "handoff": "research/notes/RES-007-display-input.md"
+          "handoff": "docs/procedures/emulator-qualification.md"
         }
       ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "e6f419450e275f1673d97447623c7a428b3bf282b38e612bdda6881c6ab87742",
-    "BOARD.md": "b59ccb39861593a2be766b2553409a22a6e493cdabe2080496b7c55926e68a9a",
+    "STATUS.md": "3891b1e4c31674691ca7fb8697cc35c4a2540d07d3e42a35946afac9819d00f7",
+    "BOARD.md": "16dd5a412253fc3ccdb919554ed806d4cf263dcff50514e4bb2379c0f367f51c",
+    "planning/tasks/RES-008.md": "b9d7026cef37288a35a54045252628e92aa79f83a8ec01fed5ca84331412680c",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
     "planning/tasks/INT-001.md": "9d68fa75fae4c21f31f5ea4734c3f592ed0b41c6ed897d7b045a892c63549760",
     "planning/tasks/KRN-001.md": "be7d3f89bd84d7679d09c3a1f0fff5afc6a08359c99a924a32ef23878f827bd3",
     "planning/tasks/LAB-001.md": "3bf5f0b07bfe3944559f6520646498c1e907611d0f34201115ad0e39e3240e8c",
-    "planning/tasks/TST-002.md": "4e2aa7871bb2483148c5d7d57e4934d3f0e2c84a4c1a4b9c1f35e1afcec45279",
+    "planning/tasks/TST-002.md": "d78a91ef43894923e022402e9c91dd075e4a7bc4697e33fb7b99263486c544aa",
     "planning/tasks/RES-003.md": "0818cb4fa8ca49d7acad01a7d80cc67041f504e381b68cfc74e8cfa6d369ce50",
     "planning/tasks/ESIM-004.md": "e4415ff12ece854323f178e57751d6977b25f93dec41ee135288f7e1b5480931",
     "planning/tasks/CELL-009.md": "66ea4f72cf2188c549d905d23ebd40d47f4665721a52a8f939b58e066357ecd9",
@@ -3584,7 +3520,7 @@
     "planning/tasks/TST-001.md": "3142333fb7f8007775cb83ea67cb783be49b72664aaf32849d2449a19b36585b",
     "planning/tasks/GPU-001.md": "54d110d5d5bd67afb776017c7220e3e6ca7a1ffcad9289a3af35f2a7b5a992fa",
     "planning/tasks/GPU-002.md": "ed6a2e320b8b805c8d6ec97f1537439282c02f999c4a7542c95e2e31e7b76eca",
-    "planning/tasks/GPU-003.md": "88c23557dd987fe37a6c57bbd6f512374aa4b3ef6819d891581daf992c3027eb",
+    "planning/tasks/GPU-003.md": "5ac7cf14b7416e233ab949c38ab82df99fc6ec912e0df09f373c33e7765de2d0",
     "planning/tasks/GPU-004.md": "4f7b914361a5ff47439410c701bd907e3a3020383d4b33c91ce59b5fbdab2579",
     "planning/tasks/GPU-005.md": "181529961c422d48a66b2735db0db7d5634029395209e2fad9ef0db9be0adfea",
     "planning/tasks/DRV-001.md": "0e15c9a93f74cbd15da5e1507551c8599a25ac14bf857b1fc3cf62a672459ade",

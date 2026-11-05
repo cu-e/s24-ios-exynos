@@ -1,0 +1,37 @@
+{
+  "id": "RES-008",
+  "title": "Validate actual XNU sysroot, SDK and donor build-tool requirements",
+  "status": "pending",
+  "owner": null,
+  "priority": 95,
+  "scope": "host",
+  "evidence_kind": "source-review",
+  "depends_on": [
+    "RES-002",
+    "BLD-001"
+  ],
+  "paths": [
+    "research/sources.json",
+    "research/notes/RES-008-xnu-build-inputs.md",
+    "fixtures/public/xnu-build-inputs",
+    "docs/procedures/xnu-build-inputs.md",
+    "tools/build/describe_kernel_inputs.py",
+    "docs/implementation.md"
+  ],
+  "acceptance": [
+    "Distinguish selected iOS16.5 runtime/XNU profile, official Xcode SDK version and a custom Theos sysroot label using pinned build scripts and official Apple release data",
+    "Trace exact embedded-compatible build tools, headers/linker/MIG/dependency/exports and host requirements rather than assuming a numeric SDK equality is sufficient or necessary",
+    "Identify which inputs are actually available, unavailable or independently buildable from pinned open source; no Apple binaries or upstream setup execution",
+    "Integrate corrected explicit input checks/next build steps while preserving KRN-001 owner reservations and historical evidence; source presence alone cannot qualify a full kernel build"
+  ],
+  "sources": [
+    "s24-port",
+    "apple-xnu",
+    "hakios"
+  ],
+  "steps": [
+    "Review exact donor and embedded-era tool scripts as data",
+    "Compare official SDK/runtime matrix and actual script/header assumptions",
+    "Publish an input manifest and concrete build path or precise external gaps"
+  ]
+}

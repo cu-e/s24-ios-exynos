@@ -1,0 +1,43 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "recorded_at": "2026-11-05T02:04:08+00:00",
+  "summary": "APK7 light-theme initial/run/startWrite-error cases pass with actual bar appearance24; guest ADB went offline during idempotent private cleanup. Confirmation is incomplete and both owned processes exited.",
+  "commit": "27451a28ff21e4ab69aa6305cb0ffd94ccd2aed4",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "src/android-probe/emulator_check.py",
+        "--apk",
+        "artifacts/android-probe/apk-session7/s24-vulkan-probe.apk",
+        "--qualifier-apk",
+        "artifacts/android-probe/qualifier-build-session8/qualifier.apk",
+        "--run",
+        "emulator-session14",
+        "--port",
+        "5582",
+        "--adb-server-port",
+        "5482"
+      ],
+      "exit_code": 1
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/android-ui/session14-report.json",
+    "artifacts/android-probe/emulator-session14/report.json",
+    "artifacts/android-probe/emulator-session14/emulator_check.py"
+  ],
+  "sha256": {
+    "fixtures/public/android-ui/session14-report.json": "2034bc5dbfacd6cf1d34e040c1a1ed7646240f225755b28c9fdac898612dbc8a",
+    "artifacts/android-probe/emulator-session14/report.json": "2034bc5dbfacd6cf1d34e040c1a1ed7646240f225755b28c9fdac898612dbc8a",
+    "artifacts/android-probe/emulator-session14/emulator_check.py": "00fbf68665996202080abc46c7c8a060fc806c3e04c745bd919fddfb45dd0904"
+  },
+  "limitations": [
+    "Cause of ADB disconnect is unproven; an offline transport is not itself proof of a terminal guest or app failure",
+    "The launcher subsequently terminated normally through its failure cleanup; report/handle confirm it is now stopped",
+    "Error diagnostics also encountered offline and propagated RuntimeError; the next helper catches that diagnostic failure",
+    "No physical S24 or native XNU/ARM64 qualification; no full post-fix visual pass yet"
+  ]
+}

@@ -27,6 +27,8 @@ Source fetch is explicit, SHA-pinned, does not run upstream scripts and does not
 
 GPU-001/002/004 prepare a native Vulkan probe APK, owned fixtures and Metal/AIR translation tests. GPU-003 measures the stock driver after app scope authorization. GPU-005 compares app-local RADV only after the stock baseline and a reviewed custom-driver loading path.
 
+[TST-002 guest evidence](../research/notes/TST-002-runtime-qualification.md) now records exact APK7 readback and16 runtime/error/lifecycle/export cases in an owned API36/SwiftShader emulator. It improves app qualification before GPU-003, not S24 GPU support. The physical phone is Android15; ARM64 JNI, physical-driver behavior and measured phone recovery remain separate. Atomic report commit is verified by reading stored bytes, while power-loss durability is not claimed. Restart UI is a controlled gate-state test, not an induced GPU hang. Use the private filtered ADB launcher for future host guests; never inherit a donor's broad device selection or shared-server reset.
+
 Start with one worker, at most 128 MiB experimental GPU resources, five-second runs, bounded fence waits and a host deadline. Stop requests prevent new submissions. Do not destroy in-use GPU resources as a cancellation shortcut. A blocked kernel driver can outlive a stopped app: process cancellation does not guarantee phone recovery. Stop new runs on DEVICE_LOST.
 
 VM-001 inventories availability using already-authorized read-only access. VM-002 prepares a pinned guest on the host. VM-003 tests the guest only after an accessible interface and appropriate device scope. CONFIG_KVM, an existing device node or ARM64 alone is insufficient. No automatic SELinux, root or kernel changes.

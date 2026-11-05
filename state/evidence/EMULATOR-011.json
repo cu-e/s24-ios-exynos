@@ -1,0 +1,42 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "recorded_at": "2026-11-05T01:39:23+00:00",
+  "summary": "Private ADB guest and real APK5 result pass, but instrumentation could not observe a worker still busy after the pointer-trigger delay; lifecycle qualification fails",
+  "commit": "27451a28ff21e4ab69aa6305cb0ffd94ccd2aed4",
+  "working_tree": "Uncommitted helper/qualifier changes; per-run artifacts and available source snapshots retained",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "src/android-probe/emulator_check.py",
+        "--apk",
+        "artifacts/android-probe/apk-session5/s24-vulkan-probe.apk",
+        "--qualifier-apk",
+        "artifacts/android-probe/qualifier-build-session4/qualifier.apk",
+        "--run",
+        "emulator-session11",
+        "--port",
+        "5582",
+        "--adb-server-port",
+        "5482"
+      ],
+      "exit_code": 1
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/android-ui/emulator-session11.json",
+    "artifacts/android-probe/emulator-session11/report.json"
+  ],
+  "sha256": {
+    "fixtures/public/android-ui/emulator-session11.json": "300711755c9a1f1649ff79c148c1a95bfbcfb6a52d588175ac7f257215829a54",
+    "artifacts/android-probe/emulator-session11/report.json": "300711755c9a1f1649ff79c148c1a95bfbcfb6a52d588175ac7f257215829a54"
+  },
+  "limitations": [
+    "Host Android emulator/SwiftShader only; not primary S24 or native XNU/GPU evidence",
+    "No physical-phone command, root, APK install, setting change, reboot or partition operation",
+    "A basic guest pass cannot complete expanded TST-002; restart/storage/export/lifecycle and independent UI assessment remain separate",
+    "No contemporaneous helper-source hash was recorded for this run; commands, input APK/qualifier hashes, source copies in qualifier build4 and actual outputs remain retained. No exact helper-byte reproducibility is claimed."
+  ]
+}
