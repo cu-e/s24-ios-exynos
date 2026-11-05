@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Bounded source-qualified native XTS provider/caller integration; no full link."""
-import argparse,datetime,hashlib,importlib.util,json,os,re,shutil,struct,subprocess,sys
+import argparse,datetime,hashlib,importlib.util,json,os,re,shutil,struct,subprocess,sys,time
 from pathlib import Path
 sys.dont_write_bytecode=True
 WT=Path(__file__).resolve().parents[2]
@@ -12,6 +12,25 @@ def sha(p):
 def load(p):return json.loads(Path(p).read_text())
 def dump(p,r):Path(p).write_text(json.dumps(r,indent=2)+'\n')
 def memory_available():return int(re.search(r'MemAvailable:\s*(\d+)',Path('/proc/meminfo').read_text())[1])*1024
+
+def admit_memory(report,label):
+ """Coordinator-approved stable launch admission; never lowers4GiB floor."""
+ floor=4*1024**3;remaining=max(0,180-report.get('admission_total_wait_seconds',0));budget=min(45,remaining);start=time.monotonic();deadline=start+budget;consecutive=0
+ record={'command':label,'required_bytes':floor,'required_consecutive_samples':3,'sample_interval_seconds':1,'max_wait_seconds':budget,'samples':[],'child_started_below_floor':False,'admitted':False}
+ report.setdefault('admission_waits',[]).append(record)
+ while True:
+  available=memory_available();consecutive=consecutive+1 if available>=floor else 0
+  record['samples'].append({'recorded_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'available_bytes':available,'consecutive':consecutive})
+  if consecutive>=3:
+   final=memory_available();record['launch_available_bytes']=final
+   if final>=floor:
+    record['admitted']=True;break
+   consecutive=0
+  if time.monotonic()>=deadline:break
+  time.sleep(min(1,max(0,deadline-time.monotonic())))
+ record['actual_wait_seconds']=time.monotonic()-start;report['admission_total_wait_seconds']=report.get('admission_total_wait_seconds',0)+record['actual_wait_seconds']
+ if not record['admitted']:
+  report['resource_deferred']=True;raise ValueError('resource-deferred stable4GiB admission '+label)
 
 def image_proof(path,require_table=True):
  data=path.read_bytes();at=32;symbols=None;segments=[]
@@ -77,7 +96,7 @@ def guest_main(a,m):
     offset=kernel.index(pattern);kernel[offset]^=1;r['algorithm_control']={'offset':offset,'original_expected':pattern.hex(),'mutation':'xor1 in actual owned expected vector blob; real AES/caller unchanged'}
    payload=out/(case+'.xnup');cookie='xts_cookie=wrong' if case=='wrong-cookie' else 'xts_cookie=owned-adapter-v1';avf.xnup(payload,kernel,'cpus=1 '+cookie)
    command=[qemu,'-machine','virt,gic-version=3','-accel','tcg','-cpu','cortex-a76','-smp','1','-m','256','-kernel',shim,'-nodefaults','-nic','none','-display','none','-serial','stdio','-monitor','none','-no-reboot','-initrd',payload]
-   if memory_available()<4*1024**3:raise ValueError('4GiB floor before guest')
+   admit_memory(r,case)
    result=bounded.run(command,out,case,3 if case in ['bad-mapping','spin'] else 30,512);r['commands'].append(result);console=(out/(case+'.log')).read_text(errors='replace')
    mapped=re.search(r'KXTS MAPPED pc=(0x[0-9a-f]+) mode=(0x[0-9a-f]+) init=(0x[0-9a-f]+) tt0=(0x[0-9a-f]+) tt1=(0x[0-9a-f]+) tcr=(0x[0-9a-f]+)',console);passed=re.search(r'KXTS CALLER PASS vectors=(0x[0-9a-f]+) checks=(0x[0-9a-f]+) line=0x0',console)
    if mapped:

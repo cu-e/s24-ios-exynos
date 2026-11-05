@@ -21,7 +21,7 @@ def main():
   r['checks'].append({'name':name,'passed':bool(ok),**details})
   if not ok:raise ValueError(name)
  def run(argv,label,expected):
-  check('4GiB-floor-'+label,builder.memory_available()>=4*1024**3)
+  builder.admit_memory(r,label)
   v=bounded.run(argv,out,label,30,256);r['commands'].append(v)
   if expected==0:check('matched-header-positive',v['exit_code']==0 and v['outcome']=='pass')
   else:check('actual-wrong-signature-error',v['exit_code']!=0 and 'error: incompatible function pointer types' in (out/(label+'.log')).read_text() and '-Wincompatible-function-pointer-types-strict' in (out/(label+'.log')).read_text() and not(out/'rejected.o').exists())
