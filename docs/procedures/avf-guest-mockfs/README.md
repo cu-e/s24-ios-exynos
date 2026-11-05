@@ -108,3 +108,30 @@ process group is signalled on a deadline. No build or VM lease is used.
 Measured evidence and preserved artifacts are listed in `evidence.json`. Review,
 integrator acceptance, MAIN publication and fresh common checks remain separate;
 the original owner alone completes the ledger after those gates.
+
+## Measured handoff
+
+At code commit `19965c7a47c0123dfb2c8a746e35dba12b06bd91`, all 52 controls pass:
+13 source/license bindings, 37 actual bounded CLI child commands, and two
+independent image-prefix/padding/determinism comparisons. An additional pack and
+verify retain one pristine synthetic package alongside all intentionally damaged
+negative artifacts. All 146 generated artifacts are indexed by streamed hash in
+`results/artifact-index.json`; the full command report and two source-discovery
+failures are preserved in `results/`. No unexpected test failure was observed.
+
+The control checker's actual `/proc` VmHWM was 21,225,472 bytes. Maximum child
+self-reported VmHWM was 20,115,456 bytes; highest parent-observed child VmHWM was
+20,119,552 bytes. Three one-second-spaced MemAvailable samples were all above
+15 GiB. These are per-process high-water reports/samples, not a proof of continuous
+aggregate RSS. All children ran serially with the inherited 256 MiB address-space
+limit. Image SHA256 is
+`b14c346509d7304120ba682ea31de041221f091ff1830d4096c64f889d3e076a`;
+the pristine image remains at
+`artifacts/avf-guest-mockfs/controls-19965c7/pristine/root.ramdisk` in this worktree.
+It is a structural fixture, not a real PID1 candidate.
+
+Next: independent review of the exact scoped commits, then kernel integrator
+acceptance/publication/common checks. VM-034 must separately build and qualify a
+real owned executable. VM-025 must independently bind that candidate's ABI and
+provenance before integration uses its real bytes. This task has not consumed the
+legacy ABI-defective candidate and has not changed `src/virtualization/host.py`.
