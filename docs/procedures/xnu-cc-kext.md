@@ -159,3 +159,56 @@ incomplete controls, then retains a fixture prerequisite failure: the selected
 compiler has only an AArch64 backend. The foreign-x86 negative uses the existing
 multi-target NDK Clang with its actual tool hash; positive/platform probes retain
 the selected original compiler. No compiler rebuild or native-runtime change.
+
+## Final integration handoff — 2026-11-05
+
+Host acceptance is ready for coordinator/independent review. Implementation is
+frozen in commits `c512e44` and `c0c69ee`; the final handoff update changes prose
+only. KRN-025 stays in progress until coordinator review/integration and main
+checks. The exclusive heavy-build lease is released; no compiler/linker/test
+process remains running.
+
+- Corrected arithmetic/native component: CCKEXT-015,
+  `worktrees/krn-025-20261105/artifacts/xnu-cc-kext/corrected-session1/evidence.json`,
+  SHA256 `3f9695b97c1525f77282814c2652e9e3bf1d4b989b6cb97224d3cc08b94bb34b`.
+  Actual305 checks across16 commands pass, including the expected original UBSan
+  negative exit1. Full ASan+UBSan success applies to the tested integer harness
+  and functions, including the corrected shift source; all287 runtime behaviors
+  were not executed or qualified.
+- Final driver/resource/archive/stop component: CCKEXT-017,
+  `worktrees/krn-025-20261105/artifacts/xnu-cc-kext/controls-session2/evidence.json`,
+  SHA256 `27244be434d4f27a45734f4c18565646bb3138a1888294d0303b431353ec1c96`.
+  Actual343 checks across32 commands pass at implementation commit
+  `c0c69ee1fe8d0ac84dbc7700dfaf5e03b2e1cce6`.
+- Integration descriptor:
+  `worktrees/krn-025-20261105/artifacts/xnu-cc-kext/controls-session2/qualified-component.json`.
+  Link-only resource root:
+  `worktrees/krn-025-20261105/artifacts/xnu-cc-kext/controls-session2/resource-positive`.
+  Actual287-member archive SHA256:
+  `67304a15d82a6213d1ab2c10ff75181eaccc7cba251ed67beb168ad005bebed5`.
+
+The positive native helper image exists, has no unresolved imports, and contains
+actual div/mod/multiply/corrected-shift providers. Executed native linker argv
+matches Clang expansion exactly. All six negative link cases exit1 with no image:
+missing, corrupt, incomplete, foreign CPU, wrong platform and literal-library
+bypass. Independent profile diagnostics reject x86 as non-ARM64 and macOS as
+non-iOS16.5. Two native deterministic archive rebuilds match byte-for-byte.
+The intentional owned parent/child timeout exits -9 after SIGKILL escalation
+in3.556seconds and leaves no live owned descendants. The control run observed
+43,724,800bytes peak owned-child RSS; this is a sampled measurement.
+
+Acceptance assessment: source mapping/pins/native selection are established;
+actual compatible public runtime build/member/ABI-surface/resource/negative
+controls are established within the stated source/header/target scope;
+reproducible hashes, original failures and integration handoff are retained.
+No empty success archive, synthetic provider or skipped selected function was
+supplied. One explicit licensed source correction is recorded, with the other
+286 native member bytes retained and the current native machine code unchanged.
+
+Coordinator next: independently review the frozen implementation and capsules,
+integrate owned commits, run main `make check`, then decide completion. Feed the
+qualified link-only resource root to the original driver for the current coherent
+kernel graph, preserving outer `-lcc_kext` and native flags/FHDR/current-pthread
+inputs. The new full native link will measure remaining export/private-IIG/
+crypto/runtime gaps. This executor did not run or claim the common main checks,
+full-kernel construction, native ARM64 execution or any phone operation.
