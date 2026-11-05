@@ -83,6 +83,24 @@ process. The final commit-bound measurements, target/object/payload/console
 hashes and exact commands are in `evidence.json` and its existing artifacts.
 `run-1` and `run-2-bound` remain preserved; neither is rewritten.
 
+Final guarded validation ran at implementation commit
+`221923b2a7ee28bd2bb4c5f56a73a777a9d29476`:
+
+| Measurement | Actual result |
+| --- | --- |
+| Positive CPU handoff / natural PSCI stop | Exit 0 in 0.134 seconds |
+| Wrong-cookie guest assertion | Rejected, no pass marker; exit 0 in 0.141 seconds |
+| Bad-Mach-O genuine shim assertion | Rejected before entry; exit 0 in 0.140 seconds |
+| Executed spin control / host stopping | Three-second deadline; stopped/reaped in 3.105 seconds |
+| Largest sampled source-build total RSS | 81.67578125 MiB |
+| Largest sampled guest total RSS | 64.72265625 MiB |
+| Read-only source proof | Fourteen successful guarded Git reads; thirteen shim bindings and three QEMU source bindings |
+| False-source metadata controls | Two expected exit-2 rejections before target compilation or guest execution |
+
+The guest RSS value includes the peak from the preserved bound validation as
+well as the final validation; the final guarded guest maximum was
+54.73046875 MiB. No live owned process remained after any final case.
+
 The wrapper samples total owned session plus supervisor RSS at 50 ms intervals:
 256 MiB budget for one small compiler/linker job and 512 MiB for a QEMU fixture.
 Build children additionally have a 512 MiB virtual-address-space cap; core dumps

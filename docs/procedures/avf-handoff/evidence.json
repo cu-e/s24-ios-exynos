@@ -1,0 +1,1229 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T15:18:12.957177+00:00",
+  "task": "VM-005",
+  "experiment": "AVFHOST-001",
+  "owner": "codex-team-avf-handoff-20261105-bd",
+  "summary": "Actual unchanged pinned AVF Image relocates and hands control to owned synthetic arm64 MachO under qualified QEMU. Executed EL1/MMUoff/entry/bootargs/DRAM/cookie/AppleDT/PSCI checks pass;natural HVC SYSTEM_OFF exit0 in0.134s. Actual wrong-cookie and badMagic rejections plus executed-spin timeout/cleanup pass. No XNU,PID1,iOS or phone execution.",
+  "commit": "221923b2a7ee28bd2bb4c5f56a73a777a9d29476",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/verify/avf_handoff.py",
+        "--qemu",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "--shim",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+        "--scion",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "--qemu-source",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0",
+        "--clang",
+        "/home/egor/.local/bin/clang",
+        "--ld",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-ld",
+        "--qemu-build-report",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build-report.json",
+        "--out",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b",
+        "--shim-build-report",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/report.json",
+        "--qemu-source-manifest",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source-manifest.json"
+      ],
+      "exit_code": 0,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "stdout": "{\n  \"outcome\": \"pass\",\n  \"owned_synthetic\": true,\n  \"xnu_executed\": false,\n  \"cases\": [\n    {\n      \"name\": \"positive\",\n      \"outcome\": \"pass\",\n      \"elapsed_seconds\": 0.134\n    },\n    {\n      \"name\": \"wrong-cookie\",\n      \"outcome\": \"pass\",\n      \"elapsed_seconds\": 0.141\n    },\n    {\n      \"name\": \"bad-magic\",\n      \"outcome\": \"pass\",\n      \"elapsed_seconds\": 0.14\n    },\n    {\n      \"name\": \"spin-timeout\",\n      \"outcome\": \"pass\",\n      \"elapsed_seconds\": 3.105\n    }\n  ],\n  \"error\": null,\n  \"report\": \"/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/report.json\"\n}\n"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "show",
+        "a6f4bc38aa244359cd365c976244a88c9d6b3304:avf/shim/start.S"
+      ],
+      "exit_code": 0,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "stdout_sha256": "27bc457985bbc76b007b4a9d924a458a4a3d4af48719ce6f5f736db1e3de080a",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "show",
+        "a6f4bc38aa244359cd365c976244a88c9d6b3304:avf/shim/avfboot.c"
+      ],
+      "exit_code": 0,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "stdout_sha256": "2957f3c8b17009b1d96191f6ccb782e90b135e7dc22208df2e3045b69d5f2c75",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "show",
+        "a6f4bc38aa244359cd365c976244a88c9d6b3304:avf/shim/fdtx.c"
+      ],
+      "exit_code": 0,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "stdout_sha256": "115aabba3c26f259b8f0fb16a3ad581a1b9af8060c4c4cac50e01aee69a5e68c",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "show",
+        "a6f4bc38aa244359cd365c976244a88c9d6b3304:avf/shim/fdtx.h"
+      ],
+      "exit_code": 0,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "stdout_sha256": "4c6ab0aa8169391d7b7756fb9f821f7a689bdf186edbd93b3ee95709daa81459",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "show",
+        "a6f4bc38aa244359cd365c976244a88c9d6b3304:avf/shim/uart.c"
+      ],
+      "exit_code": 0,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "stdout_sha256": "a722a88573f8ef5428e95b9e8a3a547837757685dcc3c6f00d89c8dbd40de4ba",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "show",
+        "a6f4bc38aa244359cd365c976244a88c9d6b3304:avf/shim/uart.h"
+      ],
+      "exit_code": 0,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "stdout_sha256": "56de944b18c9076182582732c611d97622b87ff8b1e609dda30fac9d1e01b664",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "show",
+        "a6f4bc38aa244359cd365c976244a88c9d6b3304:avf/shim/pci.c"
+      ],
+      "exit_code": 0,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "stdout_sha256": "e70bbfd81270657ad517fbda75ce4b3b832396aa85028cd956635f98264dd420",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "show",
+        "a6f4bc38aa244359cd365c976244a88c9d6b3304:avf/shim/pci.h"
+      ],
+      "exit_code": 0,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "stdout_sha256": "f6ac2c38fe27aa8b72a7372865aa1bb0b465c6af2bc4eb8e59400c7928b40509",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "show",
+        "a6f4bc38aa244359cd365c976244a88c9d6b3304:avf/shim/avfboot.ld"
+      ],
+      "exit_code": 0,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "stdout_sha256": "6680d3d662c22a768b6b0c50da5dd57306fade527f5cb53c5ddf5539d754a781",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "show",
+        "a6f4bc38aa244359cd365c976244a88c9d6b3304:avf/shim/build.sh"
+      ],
+      "exit_code": 0,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "stdout_sha256": "8c4db4bcfa769bc4f6f1b720383b1300eb662bb74ef8dbeaf2136dabd46939e3",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "show",
+        "a6f4bc38aa244359cd365c976244a88c9d6b3304:xnuloader/mkidentity.py"
+      ],
+      "exit_code": 0,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "stdout_sha256": "ae6cebdcfa22994661211e0bc35fd14770484173f951ceef6a65e9b84ad3ff99",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "show",
+        "a6f4bc38aa244359cd365c976244a88c9d6b3304:LICENSE"
+      ],
+      "exit_code": 0,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "stdout_sha256": "15c02b5b5f49938db79fbc85ff1905ece5d3da7a2c32db5de5b9897eb4fa5f4a",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "show",
+        "a6f4bc38aa244359cd365c976244a88c9d6b3304:LICENSE.APSL"
+      ],
+      "exit_code": 0,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "stdout_sha256": "e5881019d8766c1e88a5fe1dbca4ba40c78011d41fcb18f6e9f50df60182685b",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "show",
+        "a6f4bc38aa244359cd365c976244a88c9d6b3304:xnuloader/mkpayload.py"
+      ],
+      "exit_code": 0,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "stdout_sha256": "936d9f0ddb3215b34026f348146e750fb19a11888423e1fd58ded94589510518",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "-machine",
+        "virt,gic-version=3",
+        "-accel",
+        "tcg",
+        "-cpu",
+        "cortex-a76",
+        "-smp",
+        "1",
+        "-m",
+        "256",
+        "-kernel",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+        "-nodefaults",
+        "-nic",
+        "none",
+        "-display",
+        "none",
+        "-serial",
+        "stdio",
+        "-monitor",
+        "none",
+        "-no-reboot",
+        "-initrd",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/bad-magic.xnup"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "elapsed_seconds": 0.14,
+      "peak_total_owned_rss_bytes": 56328192
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/bin/clang-18",
+        "--version"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "elapsed_seconds": 0.145,
+      "peak_total_owned_rss_bytes": 28487680
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "-machine",
+        "virt,gic-version=3,dumpdtb=/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/qemu.dtb",
+        "-accel",
+        "tcg",
+        "-cpu",
+        "cortex-a76",
+        "-smp",
+        "1",
+        "-m",
+        "256",
+        "-kernel",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+        "-nodefaults",
+        "-nic",
+        "none",
+        "-display",
+        "none",
+        "-serial",
+        "stdio",
+        "-monitor",
+        "none",
+        "-no-reboot",
+        "-initrd",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/positive.xnup"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "elapsed_seconds": 0.133,
+      "peak_total_owned_rss_bytes": 47538176
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-ld",
+        "-v"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "elapsed_seconds": 0.123,
+      "peak_total_owned_rss_bytes": 28528640
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/bin/clang-18",
+        "--target=arm64-apple-macos12",
+        "-O1",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-pic",
+        "-fno-pie",
+        "-nostdlib",
+        "-fno-stack-protector",
+        "-fno-jump-tables",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/fixtures/public/avf-handoff/synthetic.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/normal.o"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "elapsed_seconds": 0.196,
+      "peak_total_owned_rss_bytes": 85643264
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-ld",
+        "-arch",
+        "arm64",
+        "-static",
+        "-e",
+        "_synthetic_entry",
+        "-macosx_version_min",
+        "12.0",
+        "-pagezero_size",
+        "0",
+        "-seg1addr",
+        "0xfffffff007000000",
+        "-no_uuid",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/normal.o",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/normal.macho"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "elapsed_seconds": 0.131,
+      "peak_total_owned_rss_bytes": 28545024
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "-machine",
+        "virt,gic-version=3",
+        "-accel",
+        "tcg",
+        "-cpu",
+        "cortex-a76",
+        "-smp",
+        "1",
+        "-m",
+        "256",
+        "-kernel",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+        "-nodefaults",
+        "-nic",
+        "none",
+        "-display",
+        "none",
+        "-serial",
+        "stdio",
+        "-monitor",
+        "none",
+        "-no-reboot",
+        "-initrd",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/positive.xnup"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "elapsed_seconds": 0.134,
+      "peak_total_owned_rss_bytes": 52666368
+    },
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/bin/clang-18",
+        "--target=arm64-apple-macos12",
+        "-O1",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-pic",
+        "-fno-pie",
+        "-nostdlib",
+        "-fno-stack-protector",
+        "-fno-jump-tables",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-DVM005_SPIN=1",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/fixtures/public/avf-handoff/synthetic.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin.o"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "elapsed_seconds": 0.187,
+      "peak_total_owned_rss_bytes": 79724544
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-ld",
+        "-arch",
+        "arm64",
+        "-static",
+        "-e",
+        "_synthetic_entry",
+        "-macosx_version_min",
+        "12.0",
+        "-pagezero_size",
+        "0",
+        "-seg1addr",
+        "0xfffffff007000000",
+        "-no_uuid",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin.o",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin.macho"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "elapsed_seconds": 0.125,
+      "peak_total_owned_rss_bytes": 28545024
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "-machine",
+        "virt,gic-version=3",
+        "-accel",
+        "tcg",
+        "-cpu",
+        "cortex-a76",
+        "-smp",
+        "1",
+        "-m",
+        "256",
+        "-kernel",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+        "-nodefaults",
+        "-nic",
+        "none",
+        "-display",
+        "none",
+        "-serial",
+        "stdio",
+        "-monitor",
+        "none",
+        "-no-reboot",
+        "-initrd",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin-timeout.xnup"
+      ],
+      "exit_code": 0,
+      "outcome": "timeout",
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "elapsed_seconds": 3.105,
+      "peak_total_owned_rss_bytes": 57389056
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "-machine",
+        "virt,gic-version=3",
+        "-accel",
+        "tcg",
+        "-cpu",
+        "cortex-a76",
+        "-smp",
+        "1",
+        "-m",
+        "256",
+        "-kernel",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+        "-nodefaults",
+        "-nic",
+        "none",
+        "-display",
+        "none",
+        "-serial",
+        "stdio",
+        "-monitor",
+        "none",
+        "-no-reboot",
+        "-initrd",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/wrong-cookie.xnup"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "elapsed_seconds": 0.141,
+      "peak_total_owned_rss_bytes": 56508416
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "py_compile",
+        "tools/verify/avf_handoff.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/final-invocation.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/clang-version.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/clang-version.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/clang-version.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/ld-version.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/ld-version.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/ld-version.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/normal-compile.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/normal-compile.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/normal.o",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/normal-compile.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/normal-link.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/normal-link.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/normal.macho",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/normal-link.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/spin-compile.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/spin-compile.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/spin.o",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/spin-compile.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/spin-link.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/spin-link.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/spin.macho",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/spin-link.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/positive.xnup",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/dtb-dump.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/dtb-dump.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/qemu.dtb",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/dtb-dump.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/positive.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/positive.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/positive.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/wrong-cookie.xnup",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/wrong-cookie.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/wrong-cookie.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/wrong-cookie.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/bad-magic.xnup",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/bad-magic.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/bad-magic.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/bad-magic.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/spin-timeout.xnup",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/spin-timeout.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/spin-timeout.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/spin-timeout.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-1/report.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/clang-version.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/clang-version.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/clang-version.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/ld-version.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/ld-version.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/ld-version.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/normal-compile.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/normal-compile.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/normal.o",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/normal-compile.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/normal-link.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/normal-link.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/normal.macho",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/normal-link.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/spin-compile.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/spin-compile.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/spin.o",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/spin-compile.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/spin-link.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/spin-link.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/spin.macho",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/spin-link.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/positive.xnup",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/dtb-dump.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/dtb-dump.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/qemu.dtb",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/dtb-dump.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/positive.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/positive.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/positive.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/wrong-cookie.xnup",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/wrong-cookie.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/wrong-cookie.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/wrong-cookie.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/bad-magic.xnup",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/bad-magic.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/bad-magic.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/bad-magic.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/spin-timeout.xnup",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/spin-timeout.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/spin-timeout.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/spin-timeout.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-2-bound/report.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls/false-shim-report.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls/false-qemu-manifest.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls/wrong-donor.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls/wrong-board-manifest.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls/report.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/clang-version.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/clang-version.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/clang-version.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/ld-version.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/ld-version.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/ld-version.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/normal-compile.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/normal-compile.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/normal.o",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/normal-compile.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/normal-link.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/normal-link.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/normal.macho",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/normal-link.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin-compile.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin-compile.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin.o",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin-compile.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin-link.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin-link.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin.macho",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin-link.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/positive.xnup",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/dtb-dump.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/dtb-dump.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/qemu.dtb",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/dtb-dump.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/positive.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/positive.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/positive.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/wrong-cookie.xnup",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/wrong-cookie.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/wrong-cookie.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/wrong-cookie.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/bad-magic.xnup",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/bad-magic.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/bad-magic.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/bad-magic.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin-timeout.xnup",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin-timeout.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin-timeout.samples.jsonl",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin-timeout.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/report.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls-final/wrong-donor.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls-final/wrong-board-manifest.log",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls-final/report.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls-final/wrong-donor/report.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls-final/wrong-board-manifest/report.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls/wrong-donor/report.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls/wrong-board-manifest/report.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/artifact-sha256.json"
+  ],
+  "provenance": {
+    "pin": {
+      "kind": "owned-synthetic-handoff-fixture",
+      "scion_commit": "a6f4bc38aa244359cd365c976244a88c9d6b3304",
+      "shim_sha256": "283f6740424011959ebe03e71ce910a81bbfa3b7ba31c6395ab6f8aab77eaf87",
+      "qemu_commit": "698104725efad4b29079d857dfdebbd804e34c99",
+      "qemu_sha256": "bca8564182c786eb00e9f43c3153328f68e2edf50bfabe28236dbaac438acc11",
+      "guest_memory_mib": 256,
+      "virtual_ram_base": "0x40000000",
+      "virtual_pl011_base": "0x09000000",
+      "shim_virtual_base": "0xfffffff004000000",
+      "synthetic_macho_base": "0xfffffff007000000",
+      "command_cookie": "vm005_cookie=owned-synthetic-v1",
+      "xnu_kernel": false,
+      "pid1": false,
+      "ios": false,
+      "native_phone": false
+    },
+    "qemu": "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+    "shim": "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+    "source_sha256": {
+      "avf/shim/start.S": "27bc457985bbc76b007b4a9d924a458a4a3d4af48719ce6f5f736db1e3de080a",
+      "avf/shim/avfboot.c": "2957f3c8b17009b1d96191f6ccb782e90b135e7dc22208df2e3045b69d5f2c75",
+      "avf/shim/fdtx.c": "115aabba3c26f259b8f0fb16a3ad581a1b9af8060c4c4cac50e01aee69a5e68c",
+      "avf/shim/fdtx.h": "4c6ab0aa8169391d7b7756fb9f821f7a689bdf186edbd93b3ee95709daa81459",
+      "avf/shim/uart.c": "a722a88573f8ef5428e95b9e8a3a547837757685dcc3c6f00d89c8dbd40de4ba",
+      "avf/shim/uart.h": "56de944b18c9076182582732c611d97622b87ff8b1e609dda30fac9d1e01b664",
+      "avf/shim/pci.c": "e70bbfd81270657ad517fbda75ce4b3b832396aa85028cd956635f98264dd420",
+      "avf/shim/pci.h": "f6ac2c38fe27aa8b72a7372865aa1bb0b465c6af2bc4eb8e59400c7928b40509",
+      "avf/shim/avfboot.ld": "6680d3d662c22a768b6b0c50da5dd57306fade527f5cb53c5ddf5539d754a781",
+      "avf/shim/build.sh": "8c4db4bcfa769bc4f6f1b720383b1300eb662bb74ef8dbeaf2136dabd46939e3",
+      "xnuloader/mkidentity.py": "ae6cebdcfa22994661211e0bc35fd14770484173f951ceef6a65e9b84ad3ff99",
+      "LICENSE": "15c02b5b5f49938db79fbc85ff1905ece5d3da7a2c32db5de5b9897eb4fa5f4a",
+      "LICENSE.APSL": "e5881019d8766c1e88a5fe1dbca4ba40c78011d41fcb18f6e9f50df60182685b",
+      "xnuloader/mkpayload.py": "936d9f0ddb3215b34026f348146e750fb19a11888423e1fd58ded94589510518",
+      "qemu/hw/arm/virt.c": "516dab0ef92b1f8694e69bbae26f6bbebe364fd519686910d76cc1c6d00e0b0e",
+      "qemu/hw/arm/boot.c": "87d532e800bacb4a10f2f8e9a4e11be355cec973793d809ba0e85540c4199297",
+      "qemu/target/arm/tcg/psci.c": "a975c875030a41b8840295cf2031da97b135269a44cc0ce0f1d5a683809393d0"
+    },
+    "clang_sha256": "0e14b158c3e11fc5da5e585d01e8a586aa14b6e57f544f9db737745b18201a79",
+    "ld_sha256": "f3cab070fef2c3fb39687e31bab86193f34ab95215fc4dbc8783f2a4f741563e",
+    "supervisor_sha256": "faaa9b707a8bb48b1ee502a2c58c9b876eb7859ad5b0ff6541bae27c20ed9f99",
+    "fixture_source_sha256": "c08a582cf4e63b511c87457594bb64ae1c0e654eeb88f56fdd3f2b49457c960a",
+    "build_reports_and_source_manifest": {
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/report.json": "71cb3aaeca47238fc370c1be3696ecc75066b6398fef3112698add35ea8cf700",
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build-report.json": "86eb11a2d46206884fe16321f35d1c6dc3fc9034a29b87be04756c5d47703eb4",
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source-manifest.json": "033a3c476e9f917ea81dc1b367d20a59fd76744b83a8b62a7b18842764723871"
+    },
+    "compiled_shim_source_bindings_verified": 5,
+    "shim_source_header_linker_license_bindings_verified": 13,
+    "qemu_board_boot_psci_source_bindings_verified": 3
+  },
+  "observations": {
+    "owned_synthetic": true,
+    "actual_pinned_shim_cpu_execution": true,
+    "actual_owned_synthetic_cpu_entry": true,
+    "xnu_executed": false,
+    "pid1_executed": false,
+    "ios_executed": false,
+    "native_phone_executed": false,
+    "actual_qemu_generated_dtb": {
+      "sha256": "5746c9c0398905f9c5152240e02fd7b72c378a71dde1e74d4bff49fafb7d3c1d",
+      "ram_base": 1073741824,
+      "ram_size": 268435456,
+      "psci_method": "hvc",
+      "uart_reg_hex": "00000000090000000000000000001000",
+      "gic_reg_hex": "0000000008000000000000000001000000000000080a00000000000000f60000",
+      "initrd_start": 1207959552,
+      "initrd_end": 1207976336
+    },
+    "synthetic_macho": {
+      "normal": {
+        "entry_va": 18446744005107527140,
+        "entry_pa": 1124085220,
+        "dt_pa": 1124122624,
+        "bootargs_pa": 1124188160,
+        "segments": [
+          {
+            "name": "__TEXT",
+            "vmaddr": 18446744005107515392,
+            "vmsize": 16384,
+            "fileoff": 0,
+            "filesize": 16384
+          },
+          {
+            "name": "__DATA",
+            "vmaddr": 18446744005107531776,
+            "vmsize": 16384,
+            "fileoff": 0,
+            "filesize": 0
+          },
+          {
+            "name": "__LINKEDIT",
+            "vmaddr": 18446744005107548160,
+            "vmsize": 16384,
+            "fileoff": 16384,
+            "filesize": 256
+          }
+        ],
+        "sha256": "6e10f3fffbfed9a4c3453375d043012b4bbe1de3b0ebe3e2d4e8c0c89ca068da"
+      },
+      "spin": {
+        "entry_va": 18446744005107527416,
+        "entry_pa": 1124085496,
+        "dt_pa": 1124122624,
+        "bootargs_pa": 1124188160,
+        "segments": [
+          {
+            "name": "__TEXT",
+            "vmaddr": 18446744005107515392,
+            "vmsize": 16384,
+            "fileoff": 0,
+            "filesize": 16384
+          },
+          {
+            "name": "__DATA",
+            "vmaddr": 18446744005107531776,
+            "vmsize": 16384,
+            "fileoff": 0,
+            "filesize": 0
+          },
+          {
+            "name": "__LINKEDIT",
+            "vmaddr": 18446744005107548160,
+            "vmsize": 16384,
+            "fileoff": 16384,
+            "filesize": 208
+          }
+        ],
+        "sha256": "a4e93770fb95342c49dc6ac2b2975f0501e7f970ae5e8e3f1315036dc7a6899a"
+      }
+    },
+    "positive_console": "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/positive.log",
+    "positive_console_sha256": "e861383dcb4ae1f27df0111758ccc0aa8855937398e680bad30498c663d951ba",
+    "entry_pa": "0x43002de4",
+    "bootargs_pa": "0x4301c000",
+    "apple_dt_pa": "0x4300c000",
+    "ram_base": "0x40000000",
+    "guest_memory_mib": 256,
+    "window_size": "0x0e000000",
+    "runtime_shim_load": "0x40200000",
+    "runtime_qemu_fdt": "0x48200000",
+    "psci_version": "0x00010001",
+    "natural_psci_exit_code": 0,
+    "natural_psci_elapsed_seconds": 0.134
+  },
+  "cases": [
+    {
+      "name": "positive",
+      "outcome": "pass",
+      "run": {
+        "argv": [
+          "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+          "-machine",
+          "virt,gic-version=3",
+          "-accel",
+          "tcg",
+          "-cpu",
+          "cortex-a76",
+          "-smp",
+          "1",
+          "-m",
+          "256",
+          "-kernel",
+          "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+          "-nodefaults",
+          "-nic",
+          "none",
+          "-display",
+          "none",
+          "-serial",
+          "stdio",
+          "-monitor",
+          "none",
+          "-no-reboot",
+          "-initrd",
+          "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/positive.xnup"
+        ],
+        "started_at": "2026-11-05T15:14:46.285644+00:00",
+        "timeout_seconds": 5,
+        "rss_budget_mib": 512,
+        "outcome": "pass",
+        "environment_overrides": {
+          "GIT_NO_LAZY_FETCH": "1",
+          "GIT_OPTIONAL_LOCKS": "0"
+        },
+        "owned_session": 1333245,
+        "exit_code": 0,
+        "elapsed_seconds": 0.134,
+        "peak_total_owned_rss_bytes": 52666368,
+        "after": {
+          "recorded_at": "2026-11-05T15:14:46.419395+00:00",
+          "MemAvailable_bytes": 12532097024,
+          "SwapCached_bytes": 22528000,
+          "SwapTotal_bytes": 30064762880,
+          "SwapFree_bytes": 180224,
+          "pressure": {
+            "some": {
+              "avg10": 0.28,
+              "avg60": 0.11,
+              "avg300": 0.03,
+              "total": 606973386.0
+            },
+            "full": {
+              "avg10": 0.28,
+              "avg60": 0.11,
+              "avg300": 0.03,
+              "total": 508343577.0
+            }
+          },
+          "owned_tree_rss_bytes": 0,
+          "owned_processes": []
+        }
+      },
+      "payload_sha256": "e845d009898991cf985bde6540815be2690a15013ae39c6f79909fd8f732d538",
+      "console_sha256": "e861383dcb4ae1f27df0111758ccc0aa8855937398e680bad30498c663d951ba"
+    },
+    {
+      "name": "wrong-cookie",
+      "outcome": "pass",
+      "run": {
+        "argv": [
+          "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+          "-machine",
+          "virt,gic-version=3",
+          "-accel",
+          "tcg",
+          "-cpu",
+          "cortex-a76",
+          "-smp",
+          "1",
+          "-m",
+          "256",
+          "-kernel",
+          "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+          "-nodefaults",
+          "-nic",
+          "none",
+          "-display",
+          "none",
+          "-serial",
+          "stdio",
+          "-monitor",
+          "none",
+          "-no-reboot",
+          "-initrd",
+          "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/wrong-cookie.xnup"
+        ],
+        "started_at": "2026-11-05T15:14:46.420618+00:00",
+        "timeout_seconds": 5,
+        "rss_budget_mib": 512,
+        "outcome": "pass",
+        "environment_overrides": {
+          "GIT_NO_LAZY_FETCH": "1",
+          "GIT_OPTIONAL_LOCKS": "0"
+        },
+        "owned_session": 1333248,
+        "exit_code": 0,
+        "elapsed_seconds": 0.141,
+        "peak_total_owned_rss_bytes": 56508416,
+        "after": {
+          "recorded_at": "2026-11-05T15:14:46.561446+00:00",
+          "MemAvailable_bytes": 12534710272,
+          "SwapCached_bytes": 22528000,
+          "SwapTotal_bytes": 30064762880,
+          "SwapFree_bytes": 180224,
+          "pressure": {
+            "some": {
+              "avg10": 0.28,
+              "avg60": 0.11,
+              "avg300": 0.03,
+              "total": 606973802.0
+            },
+            "full": {
+              "avg10": 0.28,
+              "avg60": 0.11,
+              "avg300": 0.03,
+              "total": 508343992.0
+            }
+          },
+          "owned_tree_rss_bytes": 0,
+          "owned_processes": []
+        }
+      },
+      "payload_sha256": "ef33c7165da64c8a0c5ac80adeb1154729e37e6e5f6625bf1c21a1fd70927a7b",
+      "console_sha256": "2094d950ff9a0e01f2c669cbee871a147d77d99d4369fc197ecccd7e5dfa31e7"
+    },
+    {
+      "name": "bad-magic",
+      "outcome": "pass",
+      "run": {
+        "argv": [
+          "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+          "-machine",
+          "virt,gic-version=3",
+          "-accel",
+          "tcg",
+          "-cpu",
+          "cortex-a76",
+          "-smp",
+          "1",
+          "-m",
+          "256",
+          "-kernel",
+          "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+          "-nodefaults",
+          "-nic",
+          "none",
+          "-display",
+          "none",
+          "-serial",
+          "stdio",
+          "-monitor",
+          "none",
+          "-no-reboot",
+          "-initrd",
+          "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/bad-magic.xnup"
+        ],
+        "started_at": "2026-11-05T15:14:46.562292+00:00",
+        "timeout_seconds": 5,
+        "rss_budget_mib": 512,
+        "outcome": "pass",
+        "environment_overrides": {
+          "GIT_NO_LAZY_FETCH": "1",
+          "GIT_OPTIONAL_LOCKS": "0"
+        },
+        "owned_session": 1333251,
+        "exit_code": 0,
+        "elapsed_seconds": 0.14,
+        "peak_total_owned_rss_bytes": 56328192,
+        "after": {
+          "recorded_at": "2026-11-05T15:14:46.702248+00:00",
+          "MemAvailable_bytes": 12528062464,
+          "SwapCached_bytes": 22528000,
+          "SwapTotal_bytes": 30064762880,
+          "SwapFree_bytes": 180224,
+          "pressure": {
+            "some": {
+              "avg10": 0.28,
+              "avg60": 0.11,
+              "avg300": 0.03,
+              "total": 606973935.0
+            },
+            "full": {
+              "avg10": 0.28,
+              "avg60": 0.11,
+              "avg300": 0.03,
+              "total": 508344125.0
+            }
+          },
+          "owned_tree_rss_bytes": 0,
+          "owned_processes": []
+        }
+      },
+      "payload_sha256": "90c4b5d61044ef01547f4c0082f39c8570905588513884ea7b59db91f13a2db2",
+      "console_sha256": "d7ec81909ebc4403297600cf40dfb2f5baff346f920d811b2e2215053c5bfffe"
+    },
+    {
+      "name": "spin-timeout",
+      "outcome": "pass",
+      "run": {
+        "argv": [
+          "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+          "-machine",
+          "virt,gic-version=3",
+          "-accel",
+          "tcg",
+          "-cpu",
+          "cortex-a76",
+          "-smp",
+          "1",
+          "-m",
+          "256",
+          "-kernel",
+          "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+          "-nodefaults",
+          "-nic",
+          "none",
+          "-display",
+          "none",
+          "-serial",
+          "stdio",
+          "-monitor",
+          "none",
+          "-no-reboot",
+          "-initrd",
+          "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin-timeout.xnup"
+        ],
+        "started_at": "2026-11-05T15:14:46.702991+00:00",
+        "timeout_seconds": 3,
+        "rss_budget_mib": 512,
+        "outcome": "timeout",
+        "environment_overrides": {
+          "GIT_NO_LAZY_FETCH": "1",
+          "GIT_OPTIONAL_LOCKS": "0"
+        },
+        "owned_session": 1333254,
+        "exit_code": 0,
+        "elapsed_seconds": 3.105,
+        "peak_total_owned_rss_bytes": 57389056,
+        "after": {
+          "recorded_at": "2026-11-05T15:14:49.807645+00:00",
+          "MemAvailable_bytes": 12321681408,
+          "SwapCached_bytes": 22507520,
+          "SwapTotal_bytes": 30064762880,
+          "SwapFree_bytes": 221184,
+          "pressure": {
+            "some": {
+              "avg10": 0.33,
+              "avg60": 0.13,
+              "avg300": 0.04,
+              "total": 606980320.0
+            },
+            "full": {
+              "avg10": 0.33,
+              "avg60": 0.13,
+              "avg300": 0.04,
+              "total": 508349772.0
+            }
+          },
+          "owned_tree_rss_bytes": 0,
+          "owned_processes": []
+        }
+      },
+      "payload_sha256": "f9028141a8fd1bb95edf47017937a621912bdd089733d0ed1379a04b15db0c04",
+      "console_sha256": "f2b3e72a986bba4e5333e685fe319ac75ae588536a6826b004f90ee30786053b"
+    }
+  ],
+  "resources": {
+    "compiler_jobs": 1,
+    "one_guest_at_a_time": true,
+    "guest_ram_mib": 256,
+    "build_rss_budget_mib": 256,
+    "guest_rss_budget_mib": 512,
+    "final_build_peak_sampled_total_owned_rss_bytes": 85643264,
+    "final_guest_peak_sampled_total_owned_rss_bytes": 57389056,
+    "all_preserved_guest_runs_peak_sampled_total_owned_rss_bytes": 67866624,
+    "normal_deadline_seconds": 5,
+    "spin_deadline_seconds": 3,
+    "cleanup": "Qualified owned-session supervisor;only new session process groups signaled;no live survivor after every final case.",
+    "heavy_build_lease_used": false
+  },
+  "source_guards": {
+    "environment_overrides": {
+      "GIT_NO_LAZY_FETCH": "1",
+      "GIT_OPTIONAL_LOCKS": "0"
+    },
+    "successful_guarded_source_reads": 14,
+    "compiled_shim_source_bindings_verified": 5,
+    "all_shim_source_header_linker_license_bindings_verified": 13,
+    "qemu_board_boot_psci_source_bindings_verified": 3
+  },
+  "limitations": [
+    "Owned synthetic privileged fixture only;neither an XNU kernel nor any PID1/iOS/native-port acceptance. VM002 still needs a complete qualified QEMU/AVF XNU kernel and actual ownedPID1/guest-stop evidence.",
+    "Inherited upstream shim console text names XNU;actual supplied code is explicitly owned synthetic MachO. No shim bypass/header patch or host-manufactured console was used.",
+    "Independent QEMU-generated DTB is from a separate dump-only invocation with the same board/payload options;ephemeral randomness may differ from the runtime FDT. Actual runtime shim console and guest AppleDT assertions cover handoff properties.",
+    "ld64 warned about its missing default framework search directory;fixture links no libc,dyld,SDK or frameworks.",
+    "VM002 files/original artifacts and shared source data stayed read-only;all final child commands use GIT_NO_LAZY_FETCH1 and GIT_OPTIONAL_LOCKS0.",
+    "No heavy build,guestRAMincrease,phone/ADB/root,realhardwareMMIO,flash,reboot,globalinstall,SDK/Applebinaryacquisition or unrelated-process signal.",
+    "Main common checks and final task acceptance remain coordinator integration/review steps;VM005 stays in_progress ready for review."
+  ],
+  "artifact_sha256_index": {
+    "path": "worktrees/vm-005-20261105/artifacts/avf-handoff/artifact-sha256.json",
+    "sha256": "abd2f05bc8606b7ffe5264e074727ed8b23c08a7ca6738c89fcbc6eaa4b3d8e7"
+  }
+}

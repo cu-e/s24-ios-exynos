@@ -1,0 +1,177 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T15:18:12.957177+00:00",
+  "task": "VM-005",
+  "experiment": "AVFHOST-002",
+  "owner": "codex-team-avf-handoff-20261105-bd",
+  "summary": "Final commit-bound verifier rejects false donor/build report and false QEMU board-source manifest with exit2 before target compilation or guest execution;original qualified inputs remain read-only.",
+  "commit": "221923b2a7ee28bd2bb4c5f56a73a777a9d29476",
+  "commands": [
+    {
+      "name": "wrong-donor",
+      "argv": [
+        "python3",
+        "tools/verify/avf_handoff.py",
+        "--qemu",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "--shim",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+        "--scion",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "--qemu-source",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0",
+        "--clang",
+        "/home/egor/.local/bin/clang",
+        "--ld",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-ld",
+        "--qemu-build-report",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build-report.json",
+        "--out",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls-final/wrong-donor",
+        "--shim-build-report",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls/false-shim-report.json",
+        "--qemu-source-manifest",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source-manifest.json"
+      ],
+      "exit_code": 2,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "error": "Pinned image is not bound to the genuine shim build report",
+      "no_cases_executed": true,
+      "no_target_object_created": true
+    },
+    {
+      "name": "wrong-board-manifest",
+      "argv": [
+        "python3",
+        "tools/verify/avf_handoff.py",
+        "--qemu",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "--shim",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+        "--scion",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "--qemu-source",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0",
+        "--clang",
+        "/home/egor/.local/bin/clang",
+        "--ld",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-ld",
+        "--qemu-build-report",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build-report.json",
+        "--out",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls-final/wrong-board-manifest",
+        "--shim-build-report",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/report.json",
+        "--qemu-source-manifest",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls/false-qemu-manifest.json"
+      ],
+      "exit_code": 2,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "error": "QEMU board/boot/PSCI source differs from qualified source manifest",
+      "no_cases_executed": true,
+      "no_target_object_created": true
+    }
+  ],
+  "artifacts": [
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls-final/report.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls-final/wrong-donor/report.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls-final/wrong-board-manifest/report.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls/false-shim-report.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls/false-qemu-manifest.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/artifact-sha256.json"
+  ],
+  "environment_overrides": {
+    "GIT_NO_LAZY_FETCH": "1",
+    "GIT_OPTIONAL_LOCKS": "0"
+  },
+  "cases": [
+    {
+      "name": "wrong-donor",
+      "argv": [
+        "python3",
+        "tools/verify/avf_handoff.py",
+        "--qemu",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "--shim",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+        "--scion",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "--qemu-source",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0",
+        "--clang",
+        "/home/egor/.local/bin/clang",
+        "--ld",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-ld",
+        "--qemu-build-report",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build-report.json",
+        "--out",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls-final/wrong-donor",
+        "--shim-build-report",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls/false-shim-report.json",
+        "--qemu-source-manifest",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source-manifest.json"
+      ],
+      "exit_code": 2,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "error": "Pinned image is not bound to the genuine shim build report",
+      "no_cases_executed": true,
+      "no_target_object_created": true
+    },
+    {
+      "name": "wrong-board-manifest",
+      "argv": [
+        "python3",
+        "tools/verify/avf_handoff.py",
+        "--qemu",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "--shim",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+        "--scion",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "--qemu-source",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0",
+        "--clang",
+        "/home/egor/.local/bin/clang",
+        "--ld",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-ld",
+        "--qemu-build-report",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build-report.json",
+        "--out",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls-final/wrong-board-manifest",
+        "--shim-build-report",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/report.json",
+        "--qemu-source-manifest",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/binding-controls/false-qemu-manifest.json"
+      ],
+      "exit_code": 2,
+      "environment_overrides": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "error": "QEMU board/boot/PSCI source differs from qualified source manifest",
+      "no_cases_executed": true,
+      "no_target_object_created": true
+    }
+  ],
+  "guest_started": false,
+  "limitations": [
+    "Host source-provenance controls only;actual synthetic CPU/PSCI and timeout evidence is AVFHOST001.",
+    "Intentionally false copies live only in this task artifacts;no original source/image/build report changed.",
+    "Does not establish XNU,PID1,iOS or physical S24 execution."
+  ],
+  "artifact_sha256_index": {
+    "path": "worktrees/vm-005-20261105/artifacts/avf-handoff/artifact-sha256.json",
+    "sha256": "abd2f05bc8606b7ffe5264e074727ed8b23c08a7ca6738c89fcbc6eaa4b3d8e7"
+  }
+}
