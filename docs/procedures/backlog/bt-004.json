@@ -1,0 +1,19 @@
+{
+  "id": "BT-004",
+  "title": "Implement the selected iOS 16.5 Bluetooth daemon and vendor adaptation",
+  "status": "pending",
+  "owner": null,
+  "priority": 70,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": ["BT-003"],
+  "paths": ["src/platform/bluetooth/ios16", "docs/procedures/bt-004"],
+  "acceptance": [
+    "Inspect explicitly supplied selected iOS16.5 transport/registry/control-socket and BlueTool XPC contracts instead of assuming iOS16.7/18 binary layouts",
+    "Compile actual authenticated stream/control and lifecycle integration with selected XNU; initialization reports ready only after real backend readiness",
+    "Audit Apple/Broadcom versus QCA opcode semantics and report unsupported features truthfully; no blanket fabricated-success rewrites or chip capability claims",
+    "Host tests cover asynchronous callbacks, command status, cancellation, daemon restart and ownership without claiming device pairing/profiles"
+  ],
+  "sources": ["iosplus10", "ios-apollo", "bergamota", "s24-linux"],
+  "steps": ["Recover selected frontend ABI from explicit local inputs", "Implement control/BlueTool and semantic command routing", "Build and test lifecycle/error paths before native OS qualification"]
+}

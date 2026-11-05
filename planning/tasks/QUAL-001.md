@@ -10,11 +10,11 @@
 | Owner | unassigned |
 | Priority | 50 (higher first; default 50) |
 | Scope / evidence | native / native-device |
-| Dependencies | GPU-010, NET-003, BT-002, AUD-002, CAM-002, PWR-002, SEN-002, CELL-006, ESIM-003 |
+| Dependencies | GPU-010, NET-003, BT-002, AUD-002, CAM-002, PWR-002, SEN-002, CELL-006, ESIM-003, BT-005 |
 
 ## Readiness
 
-Scope not authorized: native; Dependencies: GPU-010, NET-003, BT-002, AUD-002, CAM-002, PWR-002, SEN-002, CELL-006, ESIM-003
+Scope not authorized: native; Dependencies: GPU-010, NET-003, BT-002, AUD-002, CAM-002, PWR-002, SEN-002, CELL-006, ESIM-003, BT-005
 
 ## Reserved paths
 

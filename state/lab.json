@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T00:45:46+00:00",
+  "updated_at": "2026-11-05T01:07:14+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -1346,9 +1346,9 @@
     },
     {
       "id": "BT-001",
-      "title": "Specify and build the exact E1S Bluetooth transport",
-      "status": "pending",
-      "owner": null,
+      "title": "Specify E1S Bluetooth provenance and build bounded H4/initialization models",
+      "status": "done",
+      "owner": "codex-bluetooth-research-20261105-f",
       "priority": 70,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -1357,20 +1357,33 @@
       ],
       "paths": [
         "src/platform/bluetooth",
-        "docs/procedures/bt-001"
+        "docs/procedures/bt-001",
+        "tests/test_bluetooth_transport.py"
       ],
       "acceptance": [
-        "Controller identity, UART/firmware path and power sequence have provenance",
-        "HCI framing, timeout and teardown models pass"
+        "Source-backed E1S UART/power and candidate firmware path are documented; unknown live controller/ROM/baud remain explicit BT-003 inputs",
+        "Owned H4 framing, command credits, deadlines and logical Stop/quarantine models pass host checks; physical drain/reset is not claimed"
       ],
       "sources": [
-        "s24-linux"
+        "s24-linux",
+        "linux-ath12k-stable",
+        "iosplus10"
       ],
       "steps": [
         "Inspect the task dependencies and pinned inputs",
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
-      ]
+      ],
+      "started_at": "2026-11-05T00:47:33+00:00",
+      "last_heartbeat": "2026-11-05T01:07:13+00:00",
+      "updated_at": "2026-11-05T01:07:13+00:00",
+      "branch": "main",
+      "progress_note": "H4 and exclusive initialization model pass 93 project tests, registered 20000 sanitizer attempts and four ARM object checks; live identity/UART/firmware remain BT-003",
+      "next_step": "Implement real E1S native backend only with verified inputs and XNU build prerequisites",
+      "handoff": "src/platform/bluetooth/README.md",
+      "evidence": "state/evidence/BT-001.json",
+      "evidence_sha256": "f72f05318354170236bc19ea5de2f3e7cabe100a10675bac8905437922c7368d",
+      "finished_at": "2026-11-05T01:07:13+00:00"
     },
     {
       "id": "BT-002",
@@ -1382,7 +1395,9 @@
       "evidence_kind": "native-device",
       "depends_on": [
         "BT-001",
-        "DRV-003"
+        "DRV-003",
+        "BT-003",
+        "BT-004"
       ],
       "paths": [
         "artifacts/bluetooth-native",
@@ -1390,7 +1405,8 @@
       ],
       "acceptance": [
         "Actual pairing, reconnect and BLE exchange measured",
-        "Unsupported audio profiles are not reported as working"
+        "Unsupported audio profiles are not reported as working",
+        "Verify BR/EDR and LE discovery, secure pairing/bond restoration, BLE GATT and HID with agreed test peers; audio profiles require BT-005"
       ],
       "sources": [],
       "steps": [
@@ -1941,7 +1957,8 @@
         "PWR-002",
         "SEN-002",
         "CELL-006",
-        "ESIM-003"
+        "ESIM-003",
+        "BT-005"
       ],
       "paths": [
         "artifacts/qualification",
@@ -2419,6 +2436,159 @@
         "Implement bounded native station/control events and signed supplicant packaging",
         "Compile and test ownership/error paths; preserve native acceptance gates"
       ]
+    },
+    {
+      "id": "RES-006",
+      "title": "Audit E1S Bluetooth transport, firmware identity and native iOS donor semantics",
+      "status": "done",
+      "owner": "codex-bluetooth-research-20261105-f",
+      "priority": 80,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002"
+      ],
+      "paths": [
+        "research/sources.json",
+        "research/notes/RES-006-bluetooth-donors.md",
+        "research/bluetooth-coverage.json",
+        "fixtures/public/bluetooth-research",
+        "docs/procedures/bluetooth-research.md",
+        "docs/implementation.md",
+        "state/capabilities.json",
+        "CAPABILITIES.md",
+        "README.md"
+      ],
+      "acceptance": [
+        "Trace pinned E1S UART/power/wake and candidate QCA firmware-selection inputs while retaining unknown live controller/ROM identity",
+        "Review primary native iOS Bluetooth donor code and distinguish framing, firmware init, daemon/vendor adaptation and qualified profiles",
+        "Audit opcode namespace, command completion/credits, timeout, sleep and teardown boundaries with bounded source/Reddit coverage",
+        "Integrate concrete implementation and selected iOS16.5 qualification requirements without changing device scope or promising Bluetooth"
+      ],
+      "sources": [
+        "s24-linux",
+        "linux-ath12k-stable",
+        "iosplus10",
+        "ios-apollo",
+        "bergamota"
+      ],
+      "steps": [
+        "Inspect board and HCI/QCA sources",
+        "Review linked donor code and dated claims",
+        "Publish verifiable facts, unknown inputs and driver/frontend gates"
+      ],
+      "started_at": "2026-11-05T00:51:56+00:00",
+      "last_heartbeat": "2026-11-05T01:07:14+00:00",
+      "updated_at": "2026-11-05T01:07:14+00:00",
+      "branch": "main",
+      "progress_note": "Verified five clean pins and 71 selected file hashes; documented donor fake-success policy, missing iOS16.5 contract and firmware identity; added BT-003/004/005 gates",
+      "next_step": "Recover explicit selected native build/frontend inputs; do not guess firmware or use donor binary offsets",
+      "handoff": "research/notes/RES-006-bluetooth-donors.md",
+      "evidence": "state/evidence/RES-006.json",
+      "evidence_sha256": "03b63204b33a3aa25648a5366abedbb96da89aae6bf2b7357d3abcdcd9f445c7",
+      "finished_at": "2026-11-05T01:07:14+00:00"
+    },
+    {
+      "id": "BT-003",
+      "title": "Implement and link the E1S UART/wake/power and QCA firmware backend",
+      "status": "pending",
+      "owner": null,
+      "priority": 70,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "BT-001",
+        "KRN-001"
+      ],
+      "paths": [
+        "src/platform/bluetooth/native",
+        "docs/procedures/bt-003"
+      ],
+      "acceptance": [
+        "Real Samsung UART1 clocks/pins/RTS-CTS/IRQ or DMA, GPIO wake and shared regulator ownership compile and link against pinned XNU without success stubs",
+        "Controller/ROM/board-dependent patch/NVM/baud and sleep policy remain explicit verified inputs; unknown identities cannot select a guessed firmware",
+        "Implement bounded parser/command ownership, credit handling and transport drain/error teardown; Stop or epoch changes do not claim hardware reset",
+        "Keep actual controller identity, firmware boot and runtime behavior in separately authorized native qualification"
+      ],
+      "sources": [
+        "s24-linux",
+        "linux-ath12k-stable",
+        "ios-apollo",
+        "iosplus10"
+      ],
+      "steps": [
+        "Match E1S source and saved observations",
+        "Implement actual XNU UART/power and versioned firmware initialization",
+        "Build/link and retain malformed/timeout/teardown checks before native execution"
+      ]
+    },
+    {
+      "id": "BT-004",
+      "title": "Implement the selected iOS 16.5 Bluetooth daemon and vendor adaptation",
+      "status": "pending",
+      "owner": null,
+      "priority": 70,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "BT-003"
+      ],
+      "paths": [
+        "src/platform/bluetooth/ios16",
+        "docs/procedures/bt-004"
+      ],
+      "acceptance": [
+        "Inspect explicitly supplied selected iOS16.5 transport/registry/control-socket and BlueTool XPC contracts instead of assuming iOS16.7/18 binary layouts",
+        "Compile actual authenticated stream/control and lifecycle integration with selected XNU; initialization reports ready only after real backend readiness",
+        "Audit Apple/Broadcom versus QCA opcode semantics and report unsupported features truthfully; no blanket fabricated-success rewrites or chip capability claims",
+        "Host tests cover asynchronous callbacks, command status, cancellation, daemon restart and ownership without claiming device pairing/profiles"
+      ],
+      "sources": [
+        "iosplus10",
+        "ios-apollo",
+        "bergamota",
+        "s24-linux"
+      ],
+      "steps": [
+        "Recover selected frontend ABI from explicit local inputs",
+        "Implement control/BlueTool and semantic command routing",
+        "Build and test lifecycle/error paths before native OS qualification"
+      ]
+    },
+    {
+      "id": "BT-005",
+      "title": "Qualify native Bluetooth audio, controls and Wi-Fi coexistence",
+      "status": "pending",
+      "owner": null,
+      "priority": 50,
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "depends_on": [
+        "BT-002",
+        "AUD-002",
+        "NET-002",
+        "UI-002"
+      ],
+      "paths": [
+        "artifacts/bluetooth-profiles",
+        "docs/procedures/bt-005"
+      ],
+      "acceptance": [
+        "Measure A2DP stereo playback, AVRCP controls and HFP bidirectional audio/route changes with agreed test peers; UI pairing is insufficient",
+        "Verify bond persistence in the experimental data store, reconnect, radio toggle, sleep/wake and daemon failure across claimed profiles",
+        "Measure Wi-Fi coexistence, underruns/latency, resource cleanup and thermal/power effects; qualify SCO/PCM or software routing actually used",
+        "Retain unsupported profile/privacy/LE Audio/AirDrop limitations; no personal bonds, production credentials or live emergency calls in fixtures"
+      ],
+      "sources": [
+        "s24-linux",
+        "ios-apollo",
+        "iosplus10"
+      ],
+      "steps": [
+        "Select controlled peers and capture software/firmware profile",
+        "Run actual audio/control/lifecycle and coexistence checks",
+        "Publish sanitized evidence and unresolved limitations"
+      ]
     }
   ],
   "experiments": [
@@ -2782,6 +2952,21 @@
       "evidence_sha256": "daa93613d25046e19e5f357f4253745ce6ad8d5d2a43a599526c29ebec6fe6da",
       "outcome": "pass",
       "recorded_at": "2026-11-05T00:43:58+00:00"
+    },
+    {
+      "id": "BTMODEL-001",
+      "task": "BT-001",
+      "owner": "codex-bluetooth-research-20261105-f",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Owned H4/optional IBS framing and exclusive command-credit/deadline model pass 20000 sanitizer mutation/control attempts and compile for AArch64 ELF/Mach-O without any UART, firmware or iOS execution",
+      "procedure": "docs/procedures/bt-001/README.md",
+      "timeout_seconds": 180,
+      "created_at": "2026-11-05T01:00:16+00:00",
+      "evidence": "state/evidence/BTMODEL-001.json",
+      "evidence_sha256": "c89fa4f17914b3e525fac5d237e7fbff780ab6b8e9c4f87fd85284e7a3be49b2",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T01:06:32+00:00"
     }
   ],
   "events": [
@@ -4972,6 +5157,231 @@
           "last_heartbeat": "2026-11-05T00:45:45+00:00",
           "branch": "main",
           "handoff": "research/notes/RES-005-wifi-donors.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:47:33+00:00",
+      "action": "task.claim:BT-001",
+      "owner": "codex-bluetooth-research-20261105-f",
+      "tasks": [
+        {
+          "id": "BT-001",
+          "status": "in_progress",
+          "owner": "codex-bluetooth-research-20261105-f",
+          "priority": 70,
+          "last_heartbeat": "2026-11-05T00:47:33+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:51:55+00:00",
+      "action": "task.add:RES-006",
+      "owner": "codex-bluetooth-research-20261105-f",
+      "tasks": [
+        {
+          "id": "RES-006",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:51:56+00:00",
+      "action": "task.claim:RES-006",
+      "owner": "codex-bluetooth-research-20261105-f",
+      "tasks": [
+        {
+          "id": "RES-006",
+          "status": "in_progress",
+          "owner": "codex-bluetooth-research-20261105-f",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T00:51:56+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:53:40+00:00",
+      "action": "task.refine_paths:BT-001-owned-transport-tests",
+      "owner": "codex-bluetooth-research-20261105-f",
+      "tasks": [
+        {
+          "id": "BT-001",
+          "status": "in_progress",
+          "owner": "codex-bluetooth-research-20261105-f",
+          "priority": 70,
+          "progress_note": "E1S qcom,kiwi GPIO/UART source and QCA HCI/firmware references reviewed; selected donor contains vendor-success rewrites, so host framing/timeout checks will preserve raw replies and unknown controller identity",
+          "next_step": "Implement bounded H4/optional IBS decoding and exclusive command-credit/deadline model; review additional linked donors and native OS gates",
+          "last_heartbeat": "2026-11-05T00:53:40+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T01:00:16+00:00",
+      "action": "experiment.plan:BTMODEL-001",
+      "owner": "codex-bluetooth-research-20261105-f"
+    },
+    {
+      "at": "2026-11-05T01:01:28+00:00",
+      "action": "task.add:BT-003",
+      "owner": "codex-bluetooth-research-20261105-f",
+      "tasks": [
+        {
+          "id": "BT-003",
+          "status": "pending",
+          "owner": null,
+          "priority": 70
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T01:01:29+00:00",
+      "action": "task.add:BT-004",
+      "owner": "codex-bluetooth-research-20261105-f",
+      "tasks": [
+        {
+          "id": "BT-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 70
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T01:01:30+00:00",
+      "action": "task.add:BT-005",
+      "owner": "codex-bluetooth-research-20261105-f",
+      "tasks": [
+        {
+          "id": "BT-005",
+          "status": "pending",
+          "owner": null,
+          "priority": 50
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T01:01:30+00:00",
+      "action": "task.refine_dependencies:Bluetooth-native-and-profile-qualification",
+      "owner": "codex-bluetooth-research-20261105-f",
+      "tasks": [
+        {
+          "id": "BT-002",
+          "status": "pending",
+          "owner": null,
+          "priority": 50
+        },
+        {
+          "id": "QUAL-001",
+          "status": "pending",
+          "owner": null,
+          "priority": 50
+        },
+        {
+          "id": "RES-006",
+          "status": "in_progress",
+          "owner": "codex-bluetooth-research-20261105-f",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T00:51:56+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T01:04:48+00:00",
+      "action": "refine BT-001 into host H4/initialization model; live identity and real UART/power/firmware implementation remain explicit BT-003 prerequisites",
+      "owner": "codex-bluetooth-research-20261105-f",
+      "tasks": [
+        {
+          "id": "BT-001",
+          "status": "in_progress",
+          "owner": "codex-bluetooth-research-20261105-f",
+          "priority": 70,
+          "progress_note": "E1S qcom,kiwi GPIO/UART source and QCA HCI/firmware references reviewed; selected donor contains vendor-success rewrites, so host framing/timeout checks will preserve raw replies and unknown controller identity",
+          "next_step": "Implement bounded H4/optional IBS decoding and exclusive command-credit/deadline model; review additional linked donors and native OS gates",
+          "last_heartbeat": "2026-11-05T00:53:40+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T01:06:32+00:00",
+      "action": "experiment.record:BTMODEL-001",
+      "owner": "codex-bluetooth-research-20261105-f"
+    },
+    {
+      "at": "2026-11-05T01:07:13+00:00",
+      "action": "task.update:BT-001",
+      "owner": "codex-bluetooth-research-20261105-f",
+      "tasks": [
+        {
+          "id": "BT-001",
+          "status": "in_progress",
+          "owner": "codex-bluetooth-research-20261105-f",
+          "priority": 70,
+          "progress_note": "H4 and exclusive initialization model pass 93 project tests, registered 20000 sanitizer attempts and four ARM object checks; live identity/UART/firmware remain BT-003",
+          "next_step": "Implement real E1S native backend only with verified inputs and XNU build prerequisites",
+          "last_heartbeat": "2026-11-05T01:07:13+00:00",
+          "branch": "main",
+          "handoff": "src/platform/bluetooth/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T01:07:13+00:00",
+      "action": "task.done:BT-001",
+      "owner": "codex-bluetooth-research-20261105-f",
+      "tasks": [
+        {
+          "id": "BT-001",
+          "status": "done",
+          "owner": "codex-bluetooth-research-20261105-f",
+          "priority": 70,
+          "progress_note": "H4 and exclusive initialization model pass 93 project tests, registered 20000 sanitizer attempts and four ARM object checks; live identity/UART/firmware remain BT-003",
+          "next_step": "Implement real E1S native backend only with verified inputs and XNU build prerequisites",
+          "last_heartbeat": "2026-11-05T01:07:13+00:00",
+          "branch": "main",
+          "handoff": "src/platform/bluetooth/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T01:07:14+00:00",
+      "action": "task.update:RES-006",
+      "owner": "codex-bluetooth-research-20261105-f",
+      "tasks": [
+        {
+          "id": "RES-006",
+          "status": "in_progress",
+          "owner": "codex-bluetooth-research-20261105-f",
+          "priority": 80,
+          "progress_note": "Verified five clean pins and 71 selected file hashes; documented donor fake-success policy, missing iOS16.5 contract and firmware identity; added BT-003/004/005 gates",
+          "next_step": "Recover explicit selected native build/frontend inputs; do not guess firmware or use donor binary offsets",
+          "last_heartbeat": "2026-11-05T01:07:14+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-006-bluetooth-donors.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T01:07:14+00:00",
+      "action": "task.done:RES-006",
+      "owner": "codex-bluetooth-research-20261105-f",
+      "tasks": [
+        {
+          "id": "RES-006",
+          "status": "done",
+          "owner": "codex-bluetooth-research-20261105-f",
+          "priority": 80,
+          "progress_note": "Verified five clean pins and 71 selected file hashes; documented donor fake-success policy, missing iOS16.5 contract and firmware identity; added BT-003/004/005 gates",
+          "next_step": "Recover explicit selected native build/frontend inputs; do not guess firmware or use donor binary offsets",
+          "last_heartbeat": "2026-11-05T01:07:14+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-006-bluetooth-donors.md"
         }
       ]
     }

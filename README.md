@@ -32,6 +32,8 @@ The [experimental SGPU transport](src/platform/gpu/abi/README.md) now has compil
 
 [Wi-Fi research](research/notes/RES-005-wifi-donors.md) adds a pinned native ath12k donor, a catalog/current ABI mismatch and Exynos DMA/MSI requirements. The [compiled Wi-Fi input boundary](src/platform/wifi/README.md) checks those interfaces and DMA ranges; real board callbacks, firmware and iOS16.5 integration remain missing.
 
+[Bluetooth research](research/notes/RES-006-bluetooth-donors.md) traces E1S UART1/shared power, unknown controller firmware inputs and native iOS donor semantics. The [owned H4/command models](src/platform/bluetooth/README.md) pass host sanitizer and ARM compile checks. Real UART/power/firmware, iOS16.5 integration, pairing and audio remain separate BT-003/004/002/005 tasks.
+
 ## Run the host lab
 
 Source fetches and heavy builds are explicit. These commands do not select a phone:

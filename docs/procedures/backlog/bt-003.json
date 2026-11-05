@@ -1,0 +1,19 @@
+{
+  "id": "BT-003",
+  "title": "Implement and link the E1S UART/wake/power and QCA firmware backend",
+  "status": "pending",
+  "owner": null,
+  "priority": 70,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": ["BT-001", "KRN-001"],
+  "paths": ["src/platform/bluetooth/native", "docs/procedures/bt-003"],
+  "acceptance": [
+    "Real Samsung UART1 clocks/pins/RTS-CTS/IRQ or DMA, GPIO wake and shared regulator ownership compile and link against pinned XNU without success stubs",
+    "Controller/ROM/board-dependent patch/NVM/baud and sleep policy remain explicit verified inputs; unknown identities cannot select a guessed firmware",
+    "Implement bounded parser/command ownership, credit handling and transport drain/error teardown; Stop or epoch changes do not claim hardware reset",
+    "Keep actual controller identity, firmware boot and runtime behavior in separately authorized native qualification"
+  ],
+  "sources": ["s24-linux", "linux-ath12k-stable", "ios-apollo", "iosplus10"],
+  "steps": ["Match E1S source and saved observations", "Implement actual XNU UART/power and versioned firmware initialization", "Build/link and retain malformed/timeout/teardown checks before native execution"]
+}

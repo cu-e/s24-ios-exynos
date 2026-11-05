@@ -201,7 +201,18 @@
         "drivers/net/wireless/cnss2/pci_exynos.c",
         "drivers/net/wireless/cnss2/pci_platform.h",
         "drivers/pci/controller/dwc/pcie-exynos-rc.c",
-        "drivers/pci/controller/dwc/pcie-exynos-rc.h"
+        "drivers/pci/controller/dwc/pcie-exynos-rc.h",
+        "arch/arm64/boot/dts/samsung/e1s/s5e9945-e1s_bluetooth_03.dtsi",
+        "arch/arm64/boot/dts/exynos/s5e9945.dts",
+        "arch/arm64/boot/dts/exynos/s5e9945-usi.dtsi",
+        "include/dt-bindings/interrupt-controller/s5e9945.h",
+        "drivers/tty/serial/samsung_tty.c",
+        "drivers/bluetooth/btpower.c",
+        "drivers/bluetooth/hci_qca.c",
+        "drivers/bluetooth/btqca.c",
+        "drivers/bluetooth/btqca.h",
+        "drivers/bluetooth/h4_recv.h",
+        "drivers/bluetooth/Kconfig"
       ],
       "checkout_policy": "Explicit sparse source review; no submodules, toolchains, IPSWs or firmware"
     },
@@ -345,7 +356,11 @@
         "docs/plan.md",
         "docs/wifi-plan.md",
         "patches/xnu/README-wifi.md",
-        "docs/audit/2026-10-26-wifi.md"
+        "docs/audit/2026-10-26-wifi.md",
+        "docs/bluetooth-plan.md",
+        "patches/xnu/README-bluetooth.md",
+        "patches/xnu/0331-negroni-bt-hci.patch",
+        "patches/xnu/0333-negroni-bt-hci-shim.patch"
       ],
       "checkout_policy": "Sparse documentation/source review only; no submodules, firmware, SDK or upstream execution"
     },
@@ -506,9 +521,44 @@
       "review_files": [
         "COPYING",
         "drivers/net/wireless/ath/ath12k/wifi7/pci.c",
-        "drivers/net/wireless/ath/ath12k/wifi7/hw.c"
+        "drivers/net/wireless/ath/ath12k/wifi7/hw.c",
+        "drivers/bluetooth/hci_qca.c",
+        "drivers/bluetooth/btqca.c",
+        "drivers/bluetooth/btqca.h",
+        "include/net/bluetooth/hci.h"
       ],
       "checkout_policy": "Selected sparse source text; no firmware, submodules or upstream execution"
+    },
+    {
+      "id": "ios-apollo",
+      "url": "https://github.com/aTechGeekDev/ios-apollo",
+      "revision": "b5ac6999c65b03c432139af99cf47ab84eefd4e8",
+      "relevance": "Reddit-linked Mi10T Pro donor claims Bluetooth/audio/sleep; inspect native HCI/daemon adaptation and distinguish profiles from S24 transport",
+      "license_notes": "Root MIT reviewed; preserve individual dependency/file licenses. No donor implementation incorporated.",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "README.md",
+        "LICENSE",
+        "NOTES.md",
+        "xnu/patches/0136-apollo-bluetooth-qca6390.patch",
+        "userland/bt-inject/sweet_bt_inject.c"
+      ],
+      "checkout_policy": "Sparse text review, no submodules/firmware/SDK/userdata images or upstream execution"
+    },
+    {
+      "id": "bergamota",
+      "url": "https://github.com/ry-diffusion/bergamota",
+      "revision": "37a7a7a917fc09945ed2f7d1ae68b84d4525b4cb",
+      "relevance": "iOS18/WCN3990 prior art for HCI UART, BlueTool and daemon transport; different OS/SoC with unverified feature completeness",
+      "license_notes": "No root LICENSE/COPYING or explicit global grant found in selected tree/docs; resolve component rights before implementation reuse. Metadata review only.",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "README.md",
+        "docs/BT_IOS_TRANSPORT.md"
+      ],
+      "checkout_policy": "Sparse text only; no Apple/userdata images, firmware, submodules or upstream execution"
     }
   ]
 }

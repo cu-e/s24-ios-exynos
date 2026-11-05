@@ -237,23 +237,37 @@
     {
       "id": "bluetooth",
       "title": "Bluetooth",
-      "implementation": "planned",
+      "implementation": "host-tested",
       "native_status": "not-tested",
-      "local_observation": "btpower loaded; exact transport not qualified",
-      "upstream": "Board source available; no S24 XNU port",
-      "next_check": "Identify controller and firmware transport",
-      "acceptance": "Pairing, BLE and every claimed profile",
+      "local_observation": "btpower loaded; historical UART1/GIC602 and gpa0[3] wake counters corroborate source; live ROM unknown",
+      "upstream": "Pinned E1S UART/power plus QCA/iOS donors reviewed; owned host H4/command model passes, native backend/frontend absent",
+      "next_check": "BT-003 actual E1S UART/power/verified firmware and XNU linkage; BT-004 selected iOS16.5 daemon adaptation before BT-002/005 native profiles",
+      "acceptance": "Secure BR/EDR/LE pairing and bonds, BLE, claimed audio/control profiles, sleep and Wi-Fi coexistence",
       "tasks": [
         "BT-001",
-        "BT-002"
+        "BT-003",
+        "BT-004",
+        "BT-002",
+        "BT-005",
+        "RES-006"
       ],
       "sources": [
-        "s24-linux"
+        "s24-linux",
+        "linux-ath12k-stable",
+        "iosplus10",
+        "ios-apollo",
+        "bergamota"
       ],
       "local_evidence": [
         {
           "path": "state/evidence/DEV-001.json",
           "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ],
+      "implementation_evidence": [
+        {
+          "path": "state/evidence/BTMODEL-001.json",
+          "sha256": "c89fa4f17914b3e525fac5d237e7fbff780ab6b8e9c4f87fd85284e7a3be49b2"
         }
       ]
     },

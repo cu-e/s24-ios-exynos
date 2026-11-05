@@ -75,7 +75,7 @@ Android RADV and a shader translator are not sufficient by themselves. Review pe
 | Subsystem | Ordered acceptance |
 |---|---|
 | Wi-Fi | Actual PCI ID/revision and board data → Exynos PCIe/DMA/IRQ → firmware → scan → WPA2 → DHCP/DNS/HTTPS → iOS integration → WPA3/reconnect |
-| Bluetooth | Exact controller/transport → firmware/HCI → discovery/pairing → BLE → audio profiles |
+| Bluetooth | E1S provenance/host framing → verified controller/ROM and native UART/power/firmware → selected iOS16.5 frontend → secure BR/EDR/LE pairing/BLE → audio/coexistence |
 | Audio | ABOX firmware/IPC → PCM → codec/amplifier → speaker → microphone → OS routing → call duplex |
 | Cameras | Sensor identity → rails/MCLK → CSIS/DMA frame → ISP → OS camera integration |
 | Sensors/GNSS | Hub transport and timestamps → readings → OS services |
@@ -84,7 +84,11 @@ Android RADV and a shader translator are not sufficient by themselves. Review pe
 The [Wi-Fi donor audit](../research/notes/RES-005-wifi-donors.md) identifies current Ath12kWifi as a conditional native-stack candidate and retains its older catalog pin separately. Its callback/event ABI changed; current documentation cannot validate an old binary/header pair. [NET-001](../src/platform/wifi/README.md) now compiles a structural-input/callback and checked DMA-range boundary, with live endpoint/firmware/profile fields still unknown. It performs no hardware operation.
 
 NET-004 must implement and link the real Exynos PCIe/power/PHY/SysMMU/cache/MSI backend with one matched donor runtime before NET-002 hardware tests. NET-005 must compile the selected iOS16.5 station frontend before NET-003 OS/security/lifecycle qualification. Do not inherit sheng's rails, SPI 141, 128 MiB arena, no-op cache callback, firmware hashes or OS27 association layouts. The exact endpoint, chip revision, matching local firmware/board/regulatory data and actual DMA/IRQ behavior remain explicit gates. Basic upstream WPA2 reports do not establish WPA3, enterprise, privacy, roaming or sleep/wake acceptance.
-| Other | Haptics, USB-C/PD, NFC, biometrics, video codecs and external display each require separate work and evidence |
+The [Bluetooth donor review](../research/notes/RES-006-bluetooth-donors.md) corroborates UART1/11040000.uart and wake routing against an old Android IRQ capture, while retaining unknown ROM/board/firmware/baud/IBS inputs. [BT-001](../src/platform/bluetooth/README.md) supplies only bounded host H4 and exclusive initialization-command models. Credits/raw errors, timeout quarantine and Stop do not establish UART drain, power-off or pairing. Some donors fabricate vendor success to advance daemon initialization; do not inherit those capability claims.
+
+BT-003 implements actual Samsung UART/clocks/pins/IRQ or DMA, shared rail/wake ownership and controller-versioned patch/NVM initialization, linked against selected XNU. BT-004 separately recovers and implements the selected iOS16.5 control-socket/registry/BlueTool contract; donor 16.7.16 instruction offsets or Skywalk endpoint layouts are not validated 16.5 interfaces. BT-002 native discovery, secure bonds and BLE qualification requires both implementations. BT-005 further gates final acceptance on actual A2DP/AVRCP/HFP, audio routing, reconnect/sleep and Wi-Fi coexistence. Existing daily Android bonds and credentials are not test fixtures.
+
+Other subsystems: haptics, USB-C/PD, NFC, biometrics, video codecs and external display each require separate work and evidence.
 
 Local Android modules indicate KIWI V2/CNSS for Wi-Fi and CS35L43/ABOX for sound. Do not silently select Broadcom or copy S9/S20 register values. A camera ID is not a frame; battery readings are not charging control; Samsung biometrics are not Apple Secure Enclave.
 
