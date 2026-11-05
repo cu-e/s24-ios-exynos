@@ -31,6 +31,14 @@ def main():
     plan = next(entry for entry in ledger["experiments"] if entry["id"] == "AVFADMIT-001")
     if plan["task"] != "VM-008" or plan["owner"] != "codex-team-avf-kernel-headers-20261105-cd" or plan["status"] != "planned":
         raise ValueError("Require actual planned MAIN AVFADMIT-001 before probe")
+    queue_path = args.main / "artifacts/team-coordination/20261106-team/resource-queue.json"
+    queue = json.loads(queue_path.read_text())
+    limits = queue["limits"]
+    if (limits["min_mem_available_bytes"], limits["stable_samples"], limits["sample_interval_seconds"]) != (4 * 1024**3, 3, 1):
+        raise ValueError("Current resource queue no longer matches the assigned 4GiB/three/one-second contract")
+    policy = {"source": str(queue_path), "source_sha256": sha(queue_path), "limits": limits,
+              "meaning": "Read-only policy snapshot only; no heavy/QEMU/resource lease grant"}
+    (out / "resource-policy.json").write_text(json.dumps(policy, indent=2) + "\n")
     tool = ROOT / "tools/build/avf_kernel_headers.py"
     spec = importlib.util.spec_from_file_location("prospective_avf_admission", tool)
     module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
@@ -39,17 +47,18 @@ def main():
     results = []
     report = {"kind": "host-test", "origin": "local-host", "outcome": "inconclusive", "recorded_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
               "argv": [sys.executable, *sys.argv], "implementation_commit": args.implementation_commit,
-              "tool_sha256": sha(tool), "probe_sha256": sha(Path(__file__)), "registered_main_plan": plan,
+              "tool_sha256": sha(tool), "probe_sha256": sha(Path(__file__)), "registered_main_plan": plan, "resource_policy_snapshot": policy,
               "actual_subprocess_started": False, "compiler_headers_iig_matrix_or_guest_run": False, "controls": results}
     class SpawnReached(Exception):
         pass
     try:
         for name, sequence, expected in [("first-low", [floor - 1, floor, floor], False),
                                          ("middle-dip", [floor, floor - 1, floor], False),
+                                         ("too-close-monotonic", [floor, floor, floor], False),
                                          ("all-good-boundary", [floor, floor + 64 * 1024**2, floor], True)]:
             values = iter(sequence); clock = {"seconds": 0.0}; sleeps = []; reads = []
             def pause(seconds):
-                sleeps.append(seconds); clock["seconds"] += seconds
+                sleeps.append(seconds); clock["seconds"] += seconds / 2 if name == "too-close-monotonic" else seconds
             def read():
                 value = next(values); reads.append(value); return value
             def admission():
@@ -79,10 +88,12 @@ def main():
                     if expected:
                         raise
             proof = holder.report["commands"][-1]["admission"]
-            expected_reads = {"first-low": 1, "middle-dip": 2, "all-good-boundary": 3}[name]
+            expected_reads = {"first-low": 1, "middle-dip": 2, "too-close-monotonic": 2, "all-good-boundary": 3}[name]
             good = proof["admitted"] is expected and bool(attempted) is expected and len(reads) == expected_reads
             good = good and proof["required_samples"] == 3 and proof["minimum_MemAvailable_bytes"] == floor and proof["interval_seconds"] == 1.0
             good = good and sleeps == [1.0] * (expected_reads - 1)
+            if name == "too-close-monotonic":
+                good = good and "not separated" in proof.get("rejection", "")
             if expected:
                 good = good and [row["monotonic_seconds"] for row in proof["samples"]] == [0.0, 1.0, 2.0]
             results.append({"name": name, "pass": good, "admission": proof, "mock_Popen_reached": bool(attempted), "actual_child_started": False, "injected_sleeps": sleeps})

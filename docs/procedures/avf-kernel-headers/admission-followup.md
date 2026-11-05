@@ -15,7 +15,7 @@ rejects before Popen. File-only verification and this probe spawn no subprocess.
 
 Before execution register AVFADMIT-001 in sole MAIN for task VM-008. The bounded
 probe imports the actual prospective helper, injects first-low/middle-dip/all-good
-sample sequences with a simulated clock/sleep, verifies that failed admission
+sample sequences and too-close monotonic timing with a simulated clock/sleep, verifies that failed admission
 cannot reach Popen, and runs one actual read-only /proc/meminfo sequence at real
 one-second spacing. The actual observation may honestly pass or reject on low
 memory; control pass requires correct decision/spacing, not available memory.
@@ -40,3 +40,8 @@ scope. MAIN may also verify the original entrypoint before applying this guard.
 The separate admission-only descriptor/capsule pins the new tool and probe,
 parent commit, historical descriptor/tool hashes and this compatibility route;
 it does not qualify new headers, objects, IIG products or execution.
+
+The measured follow-up snapshots the relevant limits from actual MAIN
+artifacts/team-coordination/20261106-team/resource-queue.json: floor4294967296
+bytes, stable_samples3, sample_interval_seconds1. Root's assigned admission-only
+work is not a heavy/QEMU lease; the snapshot grants no additional execution.
