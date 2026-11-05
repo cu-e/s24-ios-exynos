@@ -1,5 +1,9 @@
 # Corrected VM-036 review: fixes required
 
+Resolved by the later independently reviewed d5553d00 correction; see
+resolution.md. The original failing source/counterexamples below remain the
+historical record and are not rewritten as passing observations.
+
 The frozen adapter SHA5152e733 at ada7eb2 is held for three independently
 reproduced P2 findings. Its quarantined process policy prevents current actual
 component execution. These are product-validation defects to fix before that

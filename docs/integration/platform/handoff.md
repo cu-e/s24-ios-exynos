@@ -9,6 +9,13 @@ original-owner, registry, generated-view or shared input edits.
 
 ## Current handoff: 2026-11-05 22:46 UTC
 
+VM-036's isolated d5553d00 correction now resolves all three reproduced P2s.
+Independent PLATCOMP-002 passes 21 targeted real regressions, peak49213440 bytes
+and zero survivors. See component-adapter-review-20261106/resolution.md and
+evidence-pass2. Source-only corrected acceptance is independent of later
+VM-037 policy adoption and any component compile/lease; quarantine remains
+false and original measurement ownership unchanged.
+
 VM-036 corrected adapter5152e733 is held on three independently reproduced P2
 product/runtime validation defects: mixed object hash/metadata after pathname
 replacement, silently omitted foreign `__.SYMDEF`-prefix members, and omitted
