@@ -1,0 +1,49 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "recorded_at": "2026-11-05T00:20:06+00:00",
+  "summary": "Unregistered initial ABI build failed linking NDK28 host ASan archives; no sanitizer harness or AArch64 build executed",
+  "commit": "148a70c0ef122f31fb5a4f37e056399c0566403d",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/lab.py",
+        "experiment",
+        "plan",
+        "SGPUABI-001",
+        "--task",
+        "GPU-011",
+        "--owner",
+        "codex-sgpu-abi-20261105-d",
+        "--hypothesis",
+        "Project-owned little-endian SGPU transport layouts compile identically for host C/C++ and freestanding AArch64 ELF/Mach-O; bounded malformed-frame and bad-backend tests pass with ASan/UBSan without device access",
+        "--procedure",
+        "Run src/platform/gpu/abi/check.py in a new artifacts/gpu-abi run; retain every compiler/header/sanitizer command, object format and failure; execute only host binaries",
+        "--timeout-seconds",
+        "180"
+      ],
+      "exit_code": 2
+    },
+    {
+      "argv": [
+        "python3",
+        "src/platform/gpu/abi/check.py",
+        "--run",
+        "transport-session1"
+      ],
+      "exit_code": 1
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/gpu-011/results/transport-session1.json"
+  ],
+  "sha256": {
+    "docs/procedures/gpu-011/results/transport-session1.json": "262e5c63597e5f3101ba658f675e26d08f6924225482e2cffb7c550ef8d9e474"
+  },
+  "limitations": [
+    "Plan registration failed before execution; do not treat this attempt as preregistered",
+    "Failed command linked no executable and touched no phone; source snapshot and command details retained in report"
+  ]
+}

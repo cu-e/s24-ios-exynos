@@ -1,0 +1,67 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T00:26:30+00:00",
+  "summary": "Experimental SGPU 1.0 pointer-free byte protocol, C validator/dispatcher and separate synthetic peer delivered; seven compiled-wire scenario groups pass within 82 project tests; final sanitizer/cross-object experiment passes",
+  "commit": "148a70c0ef122f31fb5a4f37e056399c0566403d",
+  "working_tree": "Uncommitted source and documentation identified by listed hashes, committed together with this evidence",
+  "commands": [
+    {
+      "argv": [
+        "make",
+        "check"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "src/platform/gpu/abi/check.py",
+        "--run",
+        "transport-session4"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "src/platform/gpu/abi/README.md",
+    "src/platform/gpu/abi/check.py",
+    "src/platform/gpu/abi/layout.c",
+    "src/platform/gpu/abi/sanity.c",
+    "src/platform/gpu/abi/sgpu_abi.c",
+    "src/platform/gpu/abi/sgpu_abi.h",
+    "src/platform/gpu/abi/sgpu_fake.c",
+    "src/platform/gpu/abi/sgpu_fake.h",
+    "tests/test_gpu_abi.py",
+    "docs/procedures/gpu-011/README.md",
+    "docs/procedures/gpu-011/results/source-review.json",
+    "docs/procedures/gpu-011/results/make-check-final.stdout.txt",
+    "docs/procedures/gpu-011/results/make-check-final.stderr.txt",
+    "docs/procedures/gpu-011/results/transport-session4.json"
+  ],
+  "sha256": {
+    "src/platform/gpu/abi/README.md": "d61fbaca1dda89541725fff0d22e03bd573d4ed5efbe7607503f48ad0f2246de",
+    "src/platform/gpu/abi/check.py": "544526f53507cdcfb361caa2174db5be4eac3fcf622247063b1f565671ca424e",
+    "src/platform/gpu/abi/layout.c": "ec9dc4c87c39f9b2648eaa6945faf8e111881aab499cf2db9954c8d215564452",
+    "src/platform/gpu/abi/sanity.c": "5e92ed6e09b3c223c3daff1991db38b6b6a0b790891f39f7f8a1b0ed006fb683",
+    "src/platform/gpu/abi/sgpu_abi.c": "e1cf79e584798006213a9420dffbd0d6748bf0d9fed07ebd3a8c35765537c945",
+    "src/platform/gpu/abi/sgpu_abi.h": "363bb88f12b9474dd03201bcac6d88e18a269723499f46f56ca06fdd7cddb5b2",
+    "src/platform/gpu/abi/sgpu_fake.c": "7e1c885503914efa0d35562ec3a2e259f17295c33c5d879270c2b918544e6bc7",
+    "src/platform/gpu/abi/sgpu_fake.h": "0b372e2bc3a2369a3096de348ac941cc83215dd136bc9cbf89eed6d44f801dfa",
+    "tests/test_gpu_abi.py": "f81873ec68a60ed52e4d420ee26c80ef94ab92bfbcb74541ee87a90994b96d31",
+    "docs/procedures/gpu-011/README.md": "7a3e1281c5817c6f3529f94fb3812de4abce0f02e23e5f24b2043acd1faf5fe5",
+    "docs/procedures/gpu-011/results/source-review.json": "a812b12b6b15f2b33d4fa04ddb57dc3a0f0693933f104ad5974ebd86b1384dc8",
+    "docs/procedures/gpu-011/results/make-check-final.stdout.txt": "a451c1a557f8cf8173a798737742d4d8b1bf194aaf2b3a71a2b7d6355a9fcfb4",
+    "docs/procedures/gpu-011/results/make-check-final.stderr.txt": "13f4b2016276dd075e2425d0e9897a288e6def6c40f65634d4a0683aab2bfd25",
+    "docs/procedures/gpu-011/results/transport-session4.json": "8a13defde07f883218b993492349823f6b1d6f67dff933e06776f4f7da45cec3"
+  },
+  "limitations": [
+    "Initial unregistered NDK28 ASan link failure and registered ELF C++ marker failure retained separately; final pass is SGPUABI-003",
+    "82 project tests execute on host only; no Apple SDK/XNU/IOKit driver build or ARM runtime test",
+    "Fake peer only supports QUERY/STOP; no real allocation, VM/cache operation, command execution, fence retirement, sharing or presentation",
+    "Shape validation does not authenticate clients or validate live BO ranges, shader/IB commands, dependency graphs, deadlines or hardware claims",
+    "Kernel inputs/recovery and separately authorized hardware gates remain unresolved; all native capability statuses remain not-tested",
+    "No phone, firmware, settings, GPU ioctl/MMIO, profile or subscription operation in this session"
+  ]
+}

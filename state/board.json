@@ -1,15 +1,14 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T00:12:19+00:00",
-  "ledger_updated_at": "2026-11-05T00:12:19+00:00",
-  "registry_sha256": "4de5df0f9289601f84d87f352973be2b84a31969f73f39bb50db9d15b79a9271",
+  "generated_at": "2026-11-05T00:26:43+00:00",
+  "ledger_updated_at": "2026-11-05T00:26:42+00:00",
+  "registry_sha256": "8d5a82f62b9ed11949088ef0ec391461b1ea0ad9c7d3e1594b7638afe5c82fc8",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
       "TST-002",
       "ESIM-004",
       "CELL-009",
-      "GPU-011",
       "VM-002",
       "UI-001",
       "USB-001",
@@ -69,6 +68,7 @@
       "LAB-001",
       "RES-003",
       "RES-004",
+      "GPU-011",
       "GPU-006",
       "CELL-001",
       "FND-001",
@@ -554,8 +554,8 @@
     {
       "id": "GPU-011",
       "title": "Freeze and compile the SGPU transport ABI with a fake backend",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-sgpu-abi-20261105-d",
       "priority": 80,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -565,7 +565,11 @@
       "paths": [
         "src/platform/gpu/abi",
         "docs/procedures/gpu-011",
-        "tests/test_gpu_abi.py"
+        "tests/test_gpu_abi.py",
+        "state/capabilities.json",
+        "CAPABILITIES.md",
+        "README.md",
+        "docs/implementation.md"
       ],
       "acceptance": [
         "Versioned pointer-free request/response layouts have explicit limits, reserved-field and size validation",
@@ -575,14 +579,25 @@
       ],
       "sources": [
         "s24-linux",
-        "radv-xclipse"
+        "radv-xclipse",
+        "apple-xnu"
       ],
       "steps": [
         "Translate GPU-006 operations into bounded transport structures and version negotiation",
         "Compile and test layout and malformed-message handling using an explicitly fake backend",
         "Record commands, artifact hashes and GPU-007 integration requirements"
       ],
-      "column": "ready",
+      "started_at": "2026-11-05T00:13:21+00:00",
+      "last_heartbeat": "2026-11-05T00:26:42+00:00",
+      "updated_at": "2026-11-05T00:26:42+00:00",
+      "branch": "main",
+      "progress_note": "Final SGPUABI-003 passes: 14 bad replies, five reply controls, 50000 mutation/control attempts and eight inspected AArch64 ELF/Mach-O objects; 82 project tests pass; no native driver or device I/O",
+      "next_step": "GPU-007 actual XNU/IOKit integration still needs KRN-001; continue independent peripheral research while external inputs remain missing",
+      "handoff": "docs/procedures/gpu-011/README.md",
+      "evidence": "state/evidence/GPU-011.json",
+      "evidence_sha256": "93d6d8b223bd0a9c560d527a8b3eb28eaccce9bb258f59392208486591586977",
+      "finished_at": "2026-11-05T00:26:42+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/GPU-011.md"
     },
@@ -760,7 +775,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Dependencies: KRN-001, GPU-011"
+        "Dependencies: KRN-001"
       ],
       "card_path": "planning/tasks/GPU-007.md"
     },
@@ -2654,190 +2669,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-04T23:44:39+00:00",
-      "action": "experiment.record:QCOMMODEL-002",
-      "owner": "codex-radio-research-20261105-b"
-    },
-    {
-      "at": "2026-11-04T23:44:39+00:00",
-      "action": "task.refine_paths:RES-003",
-      "owner": "codex-radio-research-20261105-b",
-      "tasks": [
-        {
-          "id": "RES-003",
-          "status": "in_progress",
-          "owner": "codex-radio-research-20261105-b",
-          "priority": 80,
-          "progress_note": "Donor model checks pass under explicit Clang; default GCC check fails without executing models. Added iPhone X/eSIM profile and SIPC/SIT selection gates.",
-          "last_heartbeat": "2026-11-04T23:36:35+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:46:36+00:00",
-      "action": "task.add:ESIM-004",
-      "owner": "codex-radio-research-20261105-b",
-      "tasks": [
-        {
-          "id": "ESIM-004",
-          "status": "pending",
-          "owner": null,
-          "priority": 80
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:46:36+00:00",
-      "action": "task.add:CELL-009",
-      "owner": "codex-radio-research-20261105-b",
-      "tasks": [
-        {
-          "id": "CELL-009",
-          "status": "pending",
-          "owner": null,
-          "priority": 80
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:46:37+00:00",
-      "action": "task.refine_dependencies:radio-evidence-gates",
-      "owner": "codex-radio-research-20261105-b",
-      "tasks": [
-        {
-          "id": "CELL-004",
-          "status": "pending",
-          "owner": null,
-          "priority": 70
-        },
-        {
-          "id": "ESIM-003",
-          "status": "pending",
-          "owner": null,
-          "priority": 50
-        },
-        {
-          "id": "RES-003",
-          "status": "in_progress",
-          "owner": "codex-radio-research-20261105-b",
-          "priority": 80,
-          "progress_note": "Donor model checks pass under explicit Clang; default GCC check fails without executing models. Added iPhone X/eSIM profile and SIPC/SIT selection gates.",
-          "last_heartbeat": "2026-11-04T23:36:35+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:51:30+00:00",
-      "action": "task.refine_sources:esim-profile-gate",
-      "owner": "codex-radio-research-20261105-b",
-      "tasks": [
-        {
-          "id": "RES-003",
-          "status": "in_progress",
-          "owner": "codex-radio-research-20261105-b",
-          "priority": 80,
-          "progress_note": "Donor model checks pass under explicit Clang; default GCC check fails without executing models. Added iPhone X/eSIM profile and SIPC/SIT selection gates.",
-          "last_heartbeat": "2026-11-04T23:36:35+00:00",
-          "branch": "main"
-        },
-        {
-          "id": "ESIM-004",
-          "status": "pending",
-          "owner": null,
-          "priority": 80
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:53:15+00:00",
-      "action": "task.update:CELL-001",
-      "owner": "codex-radio-research-20261105-b",
-      "tasks": [
-        {
-          "id": "CELL-001",
-          "status": "in_progress",
-          "owner": "codex-radio-research-20261105-b",
-          "priority": 70,
-          "progress_note": "Versioned Samsung input contract and bounded SIPC5/SIT host parser implemented; six boundary-test groups passed; seven donor model targets pass under Clang with sanitizers and initial GCC failure retained",
-          "next_step": "Recover matching vendor schema under CELL-009 and verified DT/queue/SMC inputs before native control work",
-          "last_heartbeat": "2026-11-04T23:53:15+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/cell-001/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:53:15+00:00",
-      "action": "task.update:RES-003",
-      "owner": "codex-radio-research-20261105-b",
-      "tasks": [
-        {
-          "id": "RES-003",
-          "status": "in_progress",
-          "owner": "codex-radio-research-20261105-b",
-          "priority": 80,
-          "progress_note": "Seven additional donor/tool repositories pinned; actual archive coverage deduplicated; eSIM frontend and vendor-RIL schema gates integrated without changing the first OS or device permissions",
-          "next_step": "Preserve checked evidence and continue GPU/display/Wi-Fi/native work through their separate gates",
-          "last_heartbeat": "2026-11-04T23:53:15+00:00",
-          "branch": "main",
-          "handoff": "research/notes/RES-003-radio-donors.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:55:15+00:00",
-      "action": "task.done:CELL-001",
-      "owner": "codex-radio-research-20261105-b",
-      "tasks": [
-        {
-          "id": "CELL-001",
-          "status": "done",
-          "owner": "codex-radio-research-20261105-b",
-          "priority": 70,
-          "progress_note": "Versioned Samsung input contract and bounded SIPC5/SIT host parser implemented; six boundary-test groups passed; seven donor model targets pass under Clang with sanitizers and initial GCC failure retained",
-          "next_step": "Recover matching vendor schema under CELL-009 and verified DT/queue/SMC inputs before native control work",
-          "last_heartbeat": "2026-11-04T23:53:15+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/cell-001/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:55:15+00:00",
-      "action": "task.done:RES-003",
-      "owner": "codex-radio-research-20261105-b",
-      "tasks": [
-        {
-          "id": "RES-003",
-          "status": "done",
-          "owner": "codex-radio-research-20261105-b",
-          "priority": 80,
-          "progress_note": "Seven additional donor/tool repositories pinned; actual archive coverage deduplicated; eSIM frontend and vendor-RIL schema gates integrated without changing the first OS or device permissions",
-          "next_step": "Preserve checked evidence and continue GPU/display/Wi-Fi/native work through their separate gates",
-          "last_heartbeat": "2026-11-04T23:53:15+00:00",
-          "branch": "main",
-          "handoff": "research/notes/RES-003-radio-donors.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:56:33+00:00",
-      "action": "task.claim:GPU-006",
-      "owner": "codex-gpu-research-20261105-c",
-      "tasks": [
-        {
-          "id": "GPU-006",
-          "status": "in_progress",
-          "owner": "codex-gpu-research-20261105-c",
-          "priority": 70,
-          "last_heartbeat": "2026-11-04T23:56:33+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
       "at": "2026-11-04T23:57:40+00:00",
       "action": "task.add:RES-004",
       "owner": "codex-gpu-research-20261105-c",
@@ -2989,11 +2820,128 @@
           "handoff": "research/notes/RES-004-xclipse-interfaces.md"
         }
       ]
+    },
+    {
+      "at": "2026-11-05T00:13:21+00:00",
+      "action": "task.claim:GPU-011",
+      "owner": "codex-sgpu-abi-20261105-d",
+      "tasks": [
+        {
+          "id": "GPU-011",
+          "status": "in_progress",
+          "owner": "codex-sgpu-abi-20261105-d",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T00:13:21+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:20:06+00:00",
+      "action": "experiment.plan:SGPUABI-001",
+      "owner": "codex-sgpu-abi-20261105-d"
+    },
+    {
+      "at": "2026-11-05T00:20:50+00:00",
+      "action": "experiment.record:SGPUABI-001",
+      "owner": "codex-sgpu-abi-20261105-d"
+    },
+    {
+      "at": "2026-11-05T00:20:51+00:00",
+      "action": "experiment.plan:SGPUABI-002",
+      "owner": "codex-sgpu-abi-20261105-d"
+    },
+    {
+      "at": "2026-11-05T00:22:54+00:00",
+      "action": "task.refine_sources_and_progress:GPU-011",
+      "owner": "codex-sgpu-abi-20261105-d",
+      "tasks": [
+        {
+          "id": "GPU-011",
+          "status": "in_progress",
+          "owner": "codex-sgpu-abi-20261105-d",
+          "priority": 80,
+          "progress_note": "Bounded C byte codec/dispatcher and separate synthetic peer implemented; 50000 ASan/UBSan mutations pass; AArch64 ELF and iOS16.5 arm64 Mach-O objects compile without SDK",
+          "next_step": "Review final wire limits and integration gaps, run full project checks, record failure/pass evidence and complete ABI-only task",
+          "last_heartbeat": "2026-11-05T00:22:54+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/gpu-011/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:23:33+00:00",
+      "action": "task.refine_paths:GPU-011-published-evidence",
+      "owner": "codex-sgpu-abi-20261105-d",
+      "tasks": [
+        {
+          "id": "GPU-011",
+          "status": "in_progress",
+          "owner": "codex-sgpu-abi-20261105-d",
+          "priority": 80,
+          "progress_note": "Bounded C byte codec/dispatcher and separate synthetic peer implemented; 50000 ASan/UBSan mutations pass; AArch64 ELF and iOS16.5 arm64 Mach-O objects compile without SDK",
+          "next_step": "Review final wire limits and integration gaps, run full project checks, record failure/pass evidence and complete ABI-only task",
+          "last_heartbeat": "2026-11-05T00:23:33+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/gpu-011/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:23:54+00:00",
+      "action": "experiment.record:SGPUABI-002",
+      "owner": "codex-sgpu-abi-20261105-d"
+    },
+    {
+      "at": "2026-11-05T00:25:14+00:00",
+      "action": "experiment.plan:SGPUABI-003",
+      "owner": "codex-sgpu-abi-20261105-d"
+    },
+    {
+      "at": "2026-11-05T00:25:56+00:00",
+      "action": "experiment.record:SGPUABI-003",
+      "owner": "codex-sgpu-abi-20261105-d"
+    },
+    {
+      "at": "2026-11-05T00:26:42+00:00",
+      "action": "task.update:GPU-011",
+      "owner": "codex-sgpu-abi-20261105-d",
+      "tasks": [
+        {
+          "id": "GPU-011",
+          "status": "in_progress",
+          "owner": "codex-sgpu-abi-20261105-d",
+          "priority": 80,
+          "progress_note": "Final SGPUABI-003 passes: 14 bad replies, five reply controls, 50000 mutation/control attempts and eight inspected AArch64 ELF/Mach-O objects; 82 project tests pass; no native driver or device I/O",
+          "next_step": "GPU-007 actual XNU/IOKit integration still needs KRN-001; continue independent peripheral research while external inputs remain missing",
+          "last_heartbeat": "2026-11-05T00:26:42+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/gpu-011/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:26:42+00:00",
+      "action": "task.done:GPU-011",
+      "owner": "codex-sgpu-abi-20261105-d",
+      "tasks": [
+        {
+          "id": "GPU-011",
+          "status": "done",
+          "owner": "codex-sgpu-abi-20261105-d",
+          "priority": 80,
+          "progress_note": "Final SGPUABI-003 passes: 14 bad replies, five reply controls, 50000 mutation/control attempts and eight inspected AArch64 ELF/Mach-O objects; 82 project tests pass; no native driver or device I/O",
+          "next_step": "GPU-007 actual XNU/IOKit integration still needs KRN-001; continue independent peripheral research while external inputs remain missing",
+          "last_heartbeat": "2026-11-05T00:26:42+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/gpu-011/README.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "288216d13771c59e9a926231857d16fba5bf99eeafb4c7cf37bbadaca344d6ff",
-    "BOARD.md": "b3b4f3037df5709db4ec8b30d4ee985cb50937568e014b1134f513232ad5bf9d",
+    "STATUS.md": "f4b475dd9052164be634d18ab6a721cd59e99a12c5a7f60473dec019a17be3fc",
+    "BOARD.md": "492a084887e4d0482fb2af69f352f53be1bd814b32fbf32ca2bfcbb667810ac2",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
     "planning/tasks/INT-001.md": "9d68fa75fae4c21f31f5ea4734c3f592ed0b41c6ed897d7b045a892c63549760",
@@ -3004,12 +2952,12 @@
     "planning/tasks/ESIM-004.md": "e4415ff12ece854323f178e57751d6977b25f93dec41ee135288f7e1b5480931",
     "planning/tasks/CELL-009.md": "66ea4f72cf2188c549d905d23ebd40d47f4665721a52a8f939b58e066357ecd9",
     "planning/tasks/RES-004.md": "08bac80e27799418f00000fe2e775a3d800660263c225e58147765b25d905e9a",
-    "planning/tasks/GPU-011.md": "163ead546a03ac3aa8d6da0601fc30186714611f26e01f3705f9d6d7fa8de287",
+    "planning/tasks/GPU-011.md": "80d1aa7ea8b4a3374af3e3373d65fdb0f18f581cfd9297d29b4e707dfb732580",
     "planning/tasks/VM-002.md": "d5451a25c99b8cdf14afc268bbafe4a12df15e62282b31b4f243cc54ac5f5dd8",
     "planning/tasks/UI-001.md": "cff7f24088dc0dd280965b81b735654985ab3f14be737424ef62bf42e1cfa695",
     "planning/tasks/USB-001.md": "aeb1f6cdd25c31a8ae88b49778bfe5fb25ef173807996a58bb8af652a62bb07e",
     "planning/tasks/GPU-006.md": "c4420e384a9ce1eaccb816f017b6212f8b8601974b7de2218916f3115d40464f",
-    "planning/tasks/GPU-007.md": "35af76bbac7dd723aa0988569bf4158981cc46cf68501ed1b4e937edc436236d",
+    "planning/tasks/GPU-007.md": "6a2532661ad2838c05dbd0ccb16545e5849ce2ad209d00c3ba69d84197372508",
     "planning/tasks/GPU-009.md": "e9555218bd44f1bb576a6323c398f4bf63e9cd689a8bee3b0267d4a10fc1e915",
     "planning/tasks/NET-001.md": "9aea34921de9656fefb4ac32fc49237bf2b80d11b8a1e0c51f5512107d6b0f37",
     "planning/tasks/BT-001.md": "b70a7eef9a79a216c5e5703c3cc6eb2dd889743824b4a4c9ab0849834aa11b6b",

@@ -28,6 +28,8 @@ python3 tools/lab.py task show KRN-001
 
 [Xclipse interface audit](research/notes/RES-004-xclipse-interfaces.md) traces SGPU/RADV, conditional XNU page sizes and missing native GPU/Metal/presentation interfaces. The [GPU contract](src/graphics/contracts/README.md) includes executable host ownership scenarios for memory, fences and Stop/fault handling. These are specification checks, with no native GPU result.
 
+The [experimental SGPU transport](src/platform/gpu/abi/README.md) now has compiled C validation, a separate synthetic peer and AArch64 ELF/arm64 Mach-O layout checks. It performs no GPU operations and does not replace the pending XNU backend build.
+
 ## Run the host lab
 
 Source fetches and heavy builds are explicit. These commands do not select a phone:
@@ -40,6 +42,7 @@ python3 tools/build/prepare_xnu.py --run my-xnu-source
 python3 tools/verify/boot.py artifacts/e1s-build/my-loader-build/probe/boot.img \
   --tar artifacts/e1s-build/my-loader-build/probe/boot.img.tar
 python3 src/android-probe/build.py --run my-apk-build
+python3 src/platform/gpu/abi/check.py --run my-transport-check
 ```
 
 Run names must be new. See [build requirements](docs/procedures/e1s-build.md), the [probe instructions](src/android-probe/README.md) and the [graphics fixture](src/graphics/README.md). The loader build does not compile a complete XNU kernel. Check required external inputs with `python3 tools/build/kernel_preflight.py`. No SDK or Apple userspace is bundled.

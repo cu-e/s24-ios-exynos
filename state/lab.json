@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T00:12:19+00:00",
+  "updated_at": "2026-11-05T00:26:42+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -2237,8 +2237,8 @@
     {
       "id": "GPU-011",
       "title": "Freeze and compile the SGPU transport ABI with a fake backend",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-sgpu-abi-20261105-d",
       "priority": 80,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -2248,7 +2248,11 @@
       "paths": [
         "src/platform/gpu/abi",
         "docs/procedures/gpu-011",
-        "tests/test_gpu_abi.py"
+        "tests/test_gpu_abi.py",
+        "state/capabilities.json",
+        "CAPABILITIES.md",
+        "README.md",
+        "docs/implementation.md"
       ],
       "acceptance": [
         "Versioned pointer-free request/response layouts have explicit limits, reserved-field and size validation",
@@ -2258,13 +2262,24 @@
       ],
       "sources": [
         "s24-linux",
-        "radv-xclipse"
+        "radv-xclipse",
+        "apple-xnu"
       ],
       "steps": [
         "Translate GPU-006 operations into bounded transport structures and version negotiation",
         "Compile and test layout and malformed-message handling using an explicitly fake backend",
         "Record commands, artifact hashes and GPU-007 integration requirements"
-      ]
+      ],
+      "started_at": "2026-11-05T00:13:21+00:00",
+      "last_heartbeat": "2026-11-05T00:26:42+00:00",
+      "updated_at": "2026-11-05T00:26:42+00:00",
+      "branch": "main",
+      "progress_note": "Final SGPUABI-003 passes: 14 bad replies, five reply controls, 50000 mutation/control attempts and eight inspected AArch64 ELF/Mach-O objects; 82 project tests pass; no native driver or device I/O",
+      "next_step": "GPU-007 actual XNU/IOKit integration still needs KRN-001; continue independent peripheral research while external inputs remain missing",
+      "handoff": "docs/procedures/gpu-011/README.md",
+      "evidence": "state/evidence/GPU-011.json",
+      "evidence_sha256": "93d6d8b223bd0a9c560d527a8b3eb28eaccce9bb258f59392208486591586977",
+      "finished_at": "2026-11-05T00:26:42+00:00"
     }
   ],
   "experiments": [
@@ -2553,6 +2568,51 @@
       "evidence_sha256": "d5976b9774d87e565817ea80302e7c5ce356d257314a191d2139b04b455d1317",
       "outcome": "pass",
       "recorded_at": "2026-11-04T23:44:39+00:00"
+    },
+    {
+      "id": "SGPUABI-001",
+      "task": "GPU-011",
+      "owner": "codex-sgpu-abi-20261105-d",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Little-endian SGPU layouts and core compile for host and freestanding AArch64 ELF/Mach-O; malformed-frame and bad-backend tests pass with separate host ASan/UBSan toolchain",
+      "procedure": "docs/procedures/gpu-011/README.md",
+      "timeout_seconds": 180,
+      "created_at": "2026-11-05T00:20:06+00:00",
+      "evidence": "state/evidence/SGPUABI-001.json",
+      "evidence_sha256": "fd469fc086dc18a1a5d39317bf841cbcd95b638e0957ea8f95ef26327f9f27ad",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T00:20:50+00:00"
+    },
+    {
+      "id": "SGPUABI-002",
+      "task": "GPU-011",
+      "owner": "codex-sgpu-abi-20261105-d",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "All transport layouts and C core compile for host/AArch64 ELF/Mach-O after removing unused marker, with unchanged strict warnings and 50000 sanitizer mutation checks",
+      "procedure": "docs/procedures/gpu-011/README.md",
+      "timeout_seconds": 180,
+      "created_at": "2026-11-05T00:20:51+00:00",
+      "evidence": "state/evidence/SGPUABI-002.json",
+      "evidence_sha256": "ad5b32ccea0b2b8bb865bbb01f5b218884b7b7d77d6658490d7048953e2ad622",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T00:23:54+00:00"
+    },
+    {
+      "id": "SGPUABI-003",
+      "task": "GPU-011",
+      "owner": "codex-sgpu-abi-20261105-d",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Final ABI rejects zero or undersized object replies and pending-success waits; 14 bad replies plus five controls and 50000 mutation/control attempts pass under sanitizers, and all eight AArch64 object headers verify",
+      "procedure": "docs/procedures/gpu-011/README.md",
+      "timeout_seconds": 180,
+      "created_at": "2026-11-05T00:25:14+00:00",
+      "evidence": "state/evidence/SGPUABI-003.json",
+      "evidence_sha256": "b3a5c64eb4ad4156c310ce2867eb5e8b4322a12628bf46316a0b7e4e7d911c2a",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T00:25:56+00:00"
     }
   ],
   "events": [
@@ -4421,6 +4481,123 @@
           "last_heartbeat": "2026-11-05T00:12:18+00:00",
           "branch": "main",
           "handoff": "research/notes/RES-004-xclipse-interfaces.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:13:21+00:00",
+      "action": "task.claim:GPU-011",
+      "owner": "codex-sgpu-abi-20261105-d",
+      "tasks": [
+        {
+          "id": "GPU-011",
+          "status": "in_progress",
+          "owner": "codex-sgpu-abi-20261105-d",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T00:13:21+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:20:06+00:00",
+      "action": "experiment.plan:SGPUABI-001",
+      "owner": "codex-sgpu-abi-20261105-d"
+    },
+    {
+      "at": "2026-11-05T00:20:50+00:00",
+      "action": "experiment.record:SGPUABI-001",
+      "owner": "codex-sgpu-abi-20261105-d"
+    },
+    {
+      "at": "2026-11-05T00:20:51+00:00",
+      "action": "experiment.plan:SGPUABI-002",
+      "owner": "codex-sgpu-abi-20261105-d"
+    },
+    {
+      "at": "2026-11-05T00:22:54+00:00",
+      "action": "task.refine_sources_and_progress:GPU-011",
+      "owner": "codex-sgpu-abi-20261105-d",
+      "tasks": [
+        {
+          "id": "GPU-011",
+          "status": "in_progress",
+          "owner": "codex-sgpu-abi-20261105-d",
+          "priority": 80,
+          "progress_note": "Bounded C byte codec/dispatcher and separate synthetic peer implemented; 50000 ASan/UBSan mutations pass; AArch64 ELF and iOS16.5 arm64 Mach-O objects compile without SDK",
+          "next_step": "Review final wire limits and integration gaps, run full project checks, record failure/pass evidence and complete ABI-only task",
+          "last_heartbeat": "2026-11-05T00:22:54+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/gpu-011/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:23:33+00:00",
+      "action": "task.refine_paths:GPU-011-published-evidence",
+      "owner": "codex-sgpu-abi-20261105-d",
+      "tasks": [
+        {
+          "id": "GPU-011",
+          "status": "in_progress",
+          "owner": "codex-sgpu-abi-20261105-d",
+          "priority": 80,
+          "progress_note": "Bounded C byte codec/dispatcher and separate synthetic peer implemented; 50000 ASan/UBSan mutations pass; AArch64 ELF and iOS16.5 arm64 Mach-O objects compile without SDK",
+          "next_step": "Review final wire limits and integration gaps, run full project checks, record failure/pass evidence and complete ABI-only task",
+          "last_heartbeat": "2026-11-05T00:23:33+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/gpu-011/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:23:54+00:00",
+      "action": "experiment.record:SGPUABI-002",
+      "owner": "codex-sgpu-abi-20261105-d"
+    },
+    {
+      "at": "2026-11-05T00:25:14+00:00",
+      "action": "experiment.plan:SGPUABI-003",
+      "owner": "codex-sgpu-abi-20261105-d"
+    },
+    {
+      "at": "2026-11-05T00:25:56+00:00",
+      "action": "experiment.record:SGPUABI-003",
+      "owner": "codex-sgpu-abi-20261105-d"
+    },
+    {
+      "at": "2026-11-05T00:26:42+00:00",
+      "action": "task.update:GPU-011",
+      "owner": "codex-sgpu-abi-20261105-d",
+      "tasks": [
+        {
+          "id": "GPU-011",
+          "status": "in_progress",
+          "owner": "codex-sgpu-abi-20261105-d",
+          "priority": 80,
+          "progress_note": "Final SGPUABI-003 passes: 14 bad replies, five reply controls, 50000 mutation/control attempts and eight inspected AArch64 ELF/Mach-O objects; 82 project tests pass; no native driver or device I/O",
+          "next_step": "GPU-007 actual XNU/IOKit integration still needs KRN-001; continue independent peripheral research while external inputs remain missing",
+          "last_heartbeat": "2026-11-05T00:26:42+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/gpu-011/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:26:42+00:00",
+      "action": "task.done:GPU-011",
+      "owner": "codex-sgpu-abi-20261105-d",
+      "tasks": [
+        {
+          "id": "GPU-011",
+          "status": "done",
+          "owner": "codex-sgpu-abi-20261105-d",
+          "priority": 80,
+          "progress_note": "Final SGPUABI-003 passes: 14 bad replies, five reply controls, 50000 mutation/control attempts and eight inspected AArch64 ELF/Mach-O objects; 82 project tests pass; no native driver or device I/O",
+          "next_step": "GPU-007 actual XNU/IOKit integration still needs KRN-001; continue independent peripheral research while external inputs remain missing",
+          "last_heartbeat": "2026-11-05T00:26:42+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/gpu-011/README.md"
         }
       ]
     }
