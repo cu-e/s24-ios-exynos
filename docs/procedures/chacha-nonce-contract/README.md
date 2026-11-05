@@ -1,0 +1,9 @@
+# KRN-037 primary nonce contract investigation
+
+Owner codex-team-chacha-nonce-contract-20261105-bx; worktree/branch worktrees/krn-037-20261105 / team/krn-037-20261105. Source-only work, independent of KRN034 implementation. No compiler, QEMU, full build, device, provider or crypto integration operation.
+
+Register the experiment before new acquisition/measurement. Start with selected XNU c54f35ca767986246321eb901baf8f5ff7923f6a declarations/forwarders/ESP consumer and current official Apple availability facts, then inspect bounded named official historical repository metadata, API documentation, implementation or tests relevant to this selected API. Pin repository/full revision/path/blob/SHA256/byte count and applicability for each actual primary observation. Shared references/artifacts and sibling worktrees remain read-only; use GIT_NO_LAZY_FETCH=1 and GIT_OPTIONAL_LOCKS=0. Missing public metadata may be cached in this worktree only.
+
+Restricted source is inspected transiently in memory for minimal semantic facts; never save, copy, quote or translate restricted implementation bodies into source/log/artifact files. Retain only identities, tiny factual observations and coverage/errors. Complete HTTP reads and canonical Git blob hashes are required before drawing absence or placeholder conclusions; truncated reads are failures. Public availability alone establishes no integration rights.
+
+Deliver a fact manifest distinguishing selected-version facts, historical/newer applicability and unresolved encoding/range/order/overflow/lifecycle inputs. No GCM analogy, inferred success from a signature, assumed compatibility or implementation patch. Changed-source/profile negative controls must reject unsupported promotion. Preserve actual source/tool/command/output hashes, limits, acquisition failures and a handoff to the original KRN034 owner. Leave KRN037 in progress for coordinator review.
