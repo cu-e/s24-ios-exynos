@@ -1,0 +1,171 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "summary": "Independent VM036 review reproduces three P2 artifact/runtime validation defects in frozen5152e733: mixed object hash/metadata, hidden reserved-prefix archive member, and missing executable byte binding. Actual component execution remains quarantined.",
+  "recorded_at": "2026-11-05T23:30:43.199246+00:00",
+  "task": "INT-003",
+  "owner": "codex-integrator-platform-20261106-cn",
+  "experiment": "PLATCOMP-001",
+  "source_commits": [
+    "8b11fb80061d18f9c0c9c34b952e67b4bd54a8d1",
+    "ada7eb273eba64256b54b34e57401dac85d8d2de"
+  ],
+  "adapter_sha256": "5152e733f95da9b0d2a01da6e1eb9b1b22d9bd75bc47187387e19d29e515d718",
+  "subject_evidence_sha256": "7d6cd9a2246f53ce428cf71b40bc019650f6a14a44ad46e56d456e2fa28413d7",
+  "findings": [
+    {
+      "id": "P2-1",
+      "file": "tools/build/avf_guest_components.py",
+      "line": 362,
+      "summary": "Object structural validation/hash and symbols/probes can come from different pathname opens; wrong object bytes are then credited and archived with borrowed provider metadata."
+    },
+    {
+      "id": "P2-2",
+      "file": "tools/build/avf_guest_components.py",
+      "line": 444,
+      "summary": "Any __.SYMDEF-prefixed member is silently skipped, so an ordinary extra foreign payload can pass the exact-member gate."
+    },
+    {
+      "id": "P2-3",
+      "file": "tools/build/avf_guest_components.py",
+      "line": 299,
+      "summary": "Runtime snapshot omits actual executable content/identity; an owned qualified-tool copy changes SHA but before/after runtime snapshots still compare equal."
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-s",
+        "docs/integration/platform/component-adapter-review-20261106/supervise.py",
+        "counter1"
+      ],
+      "exit_code": 0,
+      "result": "Both product-validation defects reproduced; not component acceptance."
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-s",
+        "docs/integration/platform/component-adapter-review-20261106/supervise.py",
+        "counter2",
+        "runtime_probe.py"
+      ],
+      "exit_code": 0,
+      "result": "Runtime executable-content omission reproduced without executing any tool copy."
+    }
+  ],
+  "runs": [
+    {
+      "name": "counter1",
+      "process_outcome": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.38368873903527856,
+      "peak_total_owned_rss_bytes": 45834240,
+      "after": {
+        "recorded_at": "2026-11-05T23:20:41.770422+00:00",
+        "MemAvailable_bytes": 12435374080,
+        "SwapCached_bytes": 44666880,
+        "SwapTotal_bytes": 30064762880,
+        "SwapFree_bytes": 5686693888,
+        "pressure": {
+          "some": {
+            "avg10": 0.56,
+            "avg60": 0.84,
+            "avg300": 0.35,
+            "total": 1342394223.0
+          },
+          "full": {
+            "avg10": 0.26,
+            "avg60": 0.63,
+            "avg300": 0.24,
+            "total": 1070851785.0
+          }
+        },
+        "owned_tree_rss_bytes": 0,
+        "owned_processes": []
+      }
+    },
+    {
+      "name": "counter2",
+      "process_outcome": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.13860602100612596,
+      "peak_total_owned_rss_bytes": 45432832,
+      "after": {
+        "recorded_at": "2026-11-05T23:24:55.741582+00:00",
+        "MemAvailable_bytes": 15217307648,
+        "SwapCached_bytes": 44597248,
+        "SwapTotal_bytes": 30064762880,
+        "SwapFree_bytes": 5785444352,
+        "pressure": {
+          "some": {
+            "avg10": 0.0,
+            "avg60": 0.6,
+            "avg300": 0.78,
+            "total": 1346062403.0
+          },
+          "full": {
+            "avg10": 0.0,
+            "avg60": 0.46,
+            "avg300": 0.57,
+            "total": 1073698803.0
+          }
+        },
+        "owned_tree_rss_bytes": 0,
+        "owned_processes": []
+      }
+    }
+  ],
+  "artifacts": [
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/probe.stdout.txt",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/probe.stderr.txt",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/probe.samples.jsonl",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/provider.o",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/race-control.a",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/genuine.o",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/reserved-prefix-extra.a",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/evidence.json",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/supervised.json",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/supervisor-source.py",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter2/probe.stdout.txt",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter2/probe.stderr.txt",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter2/probe.samples.jsonl",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter2/archiver-control-copy",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter2/evidence.json",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter2/supervised.json"
+  ],
+  "artifact_sha256": {
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/probe.stdout.txt": "9cda798de98ba864648acac79073843fe40af8cd196e1c5d972b12937500a909",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/probe.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/probe.samples.jsonl": "0e5c5d5009a24c1f61ada69f77542dcd0e666ac12a9bb657d8cbe466390406f8",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/provider.o": "6337d9285f5f1bb1a6735375bd88dbab3d2a1815e7ee287aa8872bcbf8cde551",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/race-control.a": "572aeb22c3872e8288aab0d8df322c2e9e1a94a894d39521b84ffd88ffbfd12e",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/genuine.o": "fe3b473c94d494f02cb198d2261c52a25d693a4fb8617a64e64d6f4b8542225a",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/reserved-prefix-extra.a": "a77eeb2f1608b791c9d2aa87395f8a619dc5512b134e0ff20a39d81e520fa610",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/evidence.json": "9cda798de98ba864648acac79073843fe40af8cd196e1c5d972b12937500a909",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/supervised.json": "4e3a0984c3829629fe2871af69a41dfcfdeac8de63a6db40b789469b5c0c3ecd",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter1/supervisor-source.py": "432b50b3a0ecf20e2c1a3d3aa966551443f5ff864bf0bf066f7469acc9b3453c",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter2/probe.stdout.txt": "66aeae592643caed28c5926845d5f261a0a01c5b739b040231cfb9f8a0daf77f",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter2/probe.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter2/probe.samples.jsonl": "b8f52445405c8db19897fa106f634351ec3ea3b328cffb9000fba39d15dbc326",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter2/archiver-control-copy": "d360c16864417b76e9c1d64a87942d8e2f7c92163d1f1767ccc741e7514e9cae",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter2/evidence.json": "66aeae592643caed28c5926845d5f261a0a01c5b739b040231cfb9f8a0daf77f",
+    "worktrees/int-platform-20261106/docs/integration/platform/component-adapter-review-20261106/runs/counter2/supervised.json": "8654a4f05af853845d894d3112aa7b2b8fd0b58965192ac2de5da0969ce75285"
+  },
+  "source_tools": {
+    "probe.py": "30c40f9f2a0a78fcb02a4c8e97486ee066aa373a6af232cd0044b783dd902465",
+    "runtime_probe.py": "91409a6d79ecdeea25ee72e67d4b5192be7e8051b3219179f939868efbcc534d",
+    "supervise.py": "b48257e963e3feff63f451924054ab1b7f10ad18333a95e187e3c712cca5cca8"
+  },
+  "compiler_or_archiver_or_loader_executed": false,
+  "historical_objects_used_only_as_negative_controls": true,
+  "original_tool_or_author_inputs_mutated": false,
+  "sandbox_weakened": false,
+  "actual_component_or_guest_qualified": false,
+  "discovery_note": "A supervisor syntax parse caught a missing space in else1 before any probe execution; fixed before the first actual counterexample run. No failed measurement was discarded.",
+  "next_step": "Original dz makes isolated fix worktree, preserves5152/7d6, then independent real counterexamples are rerun against exact new freeze. No VM036 adoption until source verdict and accepted037 policy/root common."
+}

@@ -9,6 +9,15 @@ original-owner, registry, generated-view or shared input edits.
 
 ## Current handoff: 2026-11-05 22:46 UTC
 
+VM-036 corrected adapter5152e733 is held on three independently reproduced P2
+product/runtime validation defects: mixed object hash/metadata after pathname
+replacement, silently omitted foreign `__.SYMDEF`-prefix members, and omitted
+executable byte/identity binding in runtime snapshots. See
+`component-adapter-review-20261106/findings.md` and evidence-fail1.
+PLATCOMP-001 records the real negative outcome; no compiler/archive/loader ran.
+Original dz is active on a new isolated correction, preserving fix1/capsules;
+the process policy remains quarantined. VM-038 and VM-039 proceed independently.
+
 Independent VM-038 implementation review now accepts exact
 `2e9956ce4d02dd13932513f3049ab2e22b4ee90d` within its source-only transition
 scope. PLATFHNS-001 passed 4369 checks and 14 real rejection controls, with
