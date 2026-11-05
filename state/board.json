@@ -1,18 +1,18 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-04T23:55:16+00:00",
-  "ledger_updated_at": "2026-11-04T23:55:15+00:00",
-  "registry_sha256": "66a35d93a10d0afdb689bd603dd5fbc1663a56320f643d91ff0914008ae9c139",
+  "generated_at": "2026-11-05T00:12:19+00:00",
+  "ledger_updated_at": "2026-11-05T00:12:19+00:00",
+  "registry_sha256": "4de5df0f9289601f84d87f352973be2b84a31969f73f39bb50db9d15b79a9271",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
       "TST-002",
       "ESIM-004",
       "CELL-009",
+      "GPU-011",
       "VM-002",
       "UI-001",
       "USB-001",
-      "GPU-006",
       "NET-001",
       "BT-001",
       "SEN-001",
@@ -68,6 +68,8 @@
       "INT-001",
       "LAB-001",
       "RES-003",
+      "RES-004",
+      "GPU-006",
       "CELL-001",
       "FND-001",
       "RES-001",
@@ -496,6 +498,95 @@
       "card_path": "planning/tasks/CELL-009.md"
     },
     {
+      "id": "RES-004",
+      "title": "Audit exact SGPU/RADV interfaces and native iOS graphics donor boundaries",
+      "status": "done",
+      "owner": "codex-gpu-research-20261105-c",
+      "priority": 80,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002"
+      ],
+      "paths": [
+        "research/sources.json",
+        "research/notes/RES-004-xclipse-interfaces.md",
+        "research/gpu-coverage.json",
+        "fixtures/public/gpu-research/",
+        "docs/procedures/gpu-research.md",
+        "docs/implementation.md",
+        "state/capabilities.json",
+        "CAPABILITIES.md",
+        "README.md"
+      ],
+      "acceptance": [
+        "Identify pinned Samsung kernel and RADV/libdrm source operations rather than infer a native backend from Android compatibility",
+        "Identify GPU mapping granularity, CPU-page mismatch, firmware/IRQ/power/presentation and OS frontend requirements with explicit unknowns",
+        "Check selected primary online sources and relevant Reddit evidence without claiming exhaustive coverage or a hardware result",
+        "Integrate concrete backend and qualification requirements into the existing plan without changing device authorization"
+      ],
+      "sources": [
+        "s24-linux",
+        "radv-xclipse",
+        "unixnu",
+        "metal2vulkan",
+        "ios-lemonadep"
+      ],
+      "steps": [
+        "Read selected UAPI, winsys and board sources at their pinned revisions",
+        "Separate wire/ownership contracts from native GPU bring-up and frontend/presentation",
+        "Publish provenance, evidence limits and the next implementation steps"
+      ],
+      "started_at": "2026-11-04T23:57:40+00:00",
+      "last_heartbeat": "2026-11-05T00:12:18+00:00",
+      "updated_at": "2026-11-05T00:12:19+00:00",
+      "branch": "main",
+      "progress_note": "Pinned SGPU/RADV interfaces, power-sensitive MMR, VM wait, memory-guard scope, page policy and bounded Reddit/web coverage documented",
+      "next_step": "GPU-011 SDK-independent transport ABI, then gated XNU backend and Metal/presentation qualification",
+      "handoff": "research/notes/RES-004-xclipse-interfaces.md",
+      "evidence": "state/evidence/RES-004.json",
+      "evidence_sha256": "9b3cf0092b2268e4b3a06875f32bccd50b6a83808e4a82f105629b9fc7124b40",
+      "finished_at": "2026-11-05T00:12:19+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/RES-004.md"
+    },
+    {
+      "id": "GPU-011",
+      "title": "Freeze and compile the SGPU transport ABI with a fake backend",
+      "status": "pending",
+      "owner": null,
+      "priority": 80,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "GPU-006"
+      ],
+      "paths": [
+        "src/platform/gpu/abi",
+        "docs/procedures/gpu-011",
+        "tests/test_gpu_abi.py"
+      ],
+      "acceptance": [
+        "Versioned pointer-free request/response layouts have explicit limits, reserved-field and size validation",
+        "Compile layout assertions for host and AArch64 without an Apple SDK or device access",
+        "Fake transport rejects malformed requests and cannot expose client-asserted fence retirement",
+        "Keep native XNU driver, actual cache/VM/IRQ operations and hardware acceptance explicitly missing"
+      ],
+      "sources": [
+        "s24-linux",
+        "radv-xclipse"
+      ],
+      "steps": [
+        "Translate GPU-006 operations into bounded transport structures and version negotiation",
+        "Compile and test layout and malformed-message handling using an explicitly fake backend",
+        "Record commands, artifact hashes and GPU-007 integration requirements"
+      ],
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/GPU-011.md"
+    },
+    {
       "id": "VM-002",
       "title": "Build a pinned minimal XNU guest and host launch harness",
       "status": "pending",
@@ -594,8 +685,8 @@
     {
       "id": "GPU-006",
       "title": "Specify the Xclipse Darwin memory and submission interface",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-gpu-research-20261105-c",
       "priority": 70,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -604,7 +695,8 @@
       ],
       "paths": [
         "src/graphics/contracts",
-        "docs/procedures/gpu-006"
+        "docs/procedures/gpu-006",
+        "tests/test_gpu_contract.py"
       ],
       "acceptance": [
         "Pinned SGPU/RADV interface and ownership are documented",
@@ -612,14 +704,26 @@
       ],
       "sources": [
         "s24-linux",
-        "radv-xclipse"
+        "radv-xclipse",
+        "apple-xnu",
+        "s24-port"
       ],
       "steps": [
         "Inspect the task dependencies and pinned inputs",
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "ready",
+      "started_at": "2026-11-04T23:56:33+00:00",
+      "last_heartbeat": "2026-11-05T00:12:18+00:00",
+      "updated_at": "2026-11-05T00:12:18+00:00",
+      "branch": "main",
+      "progress_note": "Seven synthetic lifecycle groups pass within 75 project tests; contract reconciles 4 KiB GPU and conditional XNU CPU/VM pages; no device I/O",
+      "next_step": "GPU-011 compile bounded transport ABI with fake backend; native integration stays in GPU-007",
+      "handoff": "docs/procedures/gpu-006/README.md",
+      "evidence": "state/evidence/GPU-006.json",
+      "evidence_sha256": "f2aeeaa79bcdfc572d170994af8ea094b18882320afb8cad6452764a3daf9b72",
+      "finished_at": "2026-11-05T00:12:18+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/GPU-006.md"
     },
@@ -634,7 +738,8 @@
       "depends_on": [
         "GPU-006",
         "BLD-001",
-        "KRN-001"
+        "KRN-001",
+        "GPU-011"
       ],
       "paths": [
         "src/platform/gpu",
@@ -649,13 +754,13 @@
         "radv-xclipse"
       ],
       "steps": [
-        "Inspect the task dependencies and pinned inputs",
-        "Implement or measure only this task boundary",
-        "Record real results, failure modes and next-step handoff"
+        "Integrate GPU-011 transport with authenticated XNU clients and pinned zeroed backing",
+        "Implement validated chip-profile VM/TLB/cache, bounded queues and trusted IRQ/timeline retirement",
+        "Build against the selected XNU and retain host negative tests; do not claim hardware execution"
       ],
       "column": "waiting",
       "reasons": [
-        "Dependencies: GPU-006, KRN-001"
+        "Dependencies: KRN-001, GPU-011"
       ],
       "card_path": "planning/tasks/GPU-007.md"
     },
@@ -2549,126 +2654,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-04T23:31:52+00:00",
-      "action": "task.add:TST-002",
-      "owner": "codex-implementation-20261105",
-      "tasks": [
-        {
-          "id": "TST-002",
-          "status": "pending",
-          "owner": null,
-          "priority": 80
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:33:23+00:00",
-      "action": "task.done:GPU-002",
-      "owner": "codex-implementation-20261105",
-      "tasks": [
-        {
-          "id": "GPU-002",
-          "status": "done",
-          "owner": "codex-implementation-20261105",
-          "progress_note": "ARM64/x86_64 APK built and signed; host Vulkan exact-pixel, pre-submit cancellation and injected fence-timeout checks passed; isolated emulator now authorized",
-          "next_step": "Finish emulator lifecycle/screenshots and record qualification",
-          "last_heartbeat": "2026-11-04T23:12:42+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:34:25+00:00",
-      "action": "task.done:INT-001",
-      "owner": "codex-implementation-20261105",
-      "tasks": [
-        {
-          "id": "INT-001",
-          "status": "done",
-          "owner": "codex-implementation-20261105",
-          "priority": 90,
-          "progress_note": "62 full checks passed; graphics translation, exact native-core host readback and boot validation recorded; integrating actual capabilities and missing kernel/recovery inputs",
-          "next_step": "Finish isolated emulator evidence, audit links/digests and commit a resumable handoff",
-          "last_heartbeat": "2026-11-04T23:23:32+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:36:35+00:00",
-      "action": "task.add:RES-003",
-      "owner": "codex-radio-research-20261105-b",
-      "tasks": [
-        {
-          "id": "RES-003",
-          "status": "pending",
-          "owner": null,
-          "priority": 80
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:36:35+00:00",
-      "action": "task.claim:RES-003",
-      "owner": "codex-radio-research-20261105-b",
-      "tasks": [
-        {
-          "id": "RES-003",
-          "status": "in_progress",
-          "owner": "codex-radio-research-20261105-b",
-          "priority": 80,
-          "last_heartbeat": "2026-11-04T23:36:35+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:39:53+00:00",
-      "action": "task.claim:CELL-001",
-      "owner": "codex-radio-research-20261105-b",
-      "tasks": [
-        {
-          "id": "CELL-001",
-          "status": "in_progress",
-          "owner": "codex-radio-research-20261105-b",
-          "priority": 70,
-          "last_heartbeat": "2026-11-04T23:39:53+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:39:55+00:00",
-      "action": "experiment.plan:QCOMMODEL-001",
-      "owner": "codex-radio-research-20261105-b"
-    },
-    {
-      "at": "2026-11-04T23:41:01+00:00",
-      "action": "experiment.record:QCOMMODEL-001",
-      "owner": "codex-radio-research-20261105-b"
-    },
-    {
-      "at": "2026-11-04T23:41:02+00:00",
-      "action": "experiment.plan:QCOMMODEL-002",
-      "owner": "codex-radio-research-20261105-b"
-    },
-    {
-      "at": "2026-11-04T23:42:59+00:00",
-      "action": "task.refine_paths:CELL-001",
-      "owner": "codex-radio-research-20261105-b",
-      "tasks": [
-        {
-          "id": "CELL-001",
-          "status": "in_progress",
-          "owner": "codex-radio-research-20261105-b",
-          "priority": 70,
-          "progress_note": "Pinned CPIF headers expose both SIPC5 and SIT; exact live protocol remains unknown. Add host parser negative cases under a narrow test path.",
-          "last_heartbeat": "2026-11-04T23:39:53+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
       "at": "2026-11-04T23:44:39+00:00",
       "action": "experiment.record:QCOMMODEL-002",
       "owner": "codex-radio-research-20261105-b"
@@ -2836,11 +2821,179 @@
           "handoff": "research/notes/RES-003-radio-donors.md"
         }
       ]
+    },
+    {
+      "at": "2026-11-04T23:56:33+00:00",
+      "action": "task.claim:GPU-006",
+      "owner": "codex-gpu-research-20261105-c",
+      "tasks": [
+        {
+          "id": "GPU-006",
+          "status": "in_progress",
+          "owner": "codex-gpu-research-20261105-c",
+          "priority": 70,
+          "last_heartbeat": "2026-11-04T23:56:33+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:57:40+00:00",
+      "action": "task.add:RES-004",
+      "owner": "codex-gpu-research-20261105-c",
+      "tasks": [
+        {
+          "id": "RES-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-04T23:57:40+00:00",
+      "action": "task.claim:RES-004",
+      "owner": "codex-gpu-research-20261105-c",
+      "tasks": [
+        {
+          "id": "RES-004",
+          "status": "in_progress",
+          "owner": "codex-gpu-research-20261105-c",
+          "priority": 80,
+          "last_heartbeat": "2026-11-04T23:57:40+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:05:01+00:00",
+      "action": "task.refine:GPU-006",
+      "owner": "codex-gpu-research-20261105-c",
+      "tasks": [
+        {
+          "id": "GPU-006",
+          "status": "in_progress",
+          "owner": "codex-gpu-research-20261105-c",
+          "priority": 70,
+          "progress_note": "Reviewed pinned SGPU/RADV ownership and power hazards; implementing bounded host ownership contract, no device I/O",
+          "next_step": "Test page granules, shared budget and resource retention after stop/timeout/fault",
+          "last_heartbeat": "2026-11-05T00:05:01+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:11:33+00:00",
+      "action": "task.add:GPU-011",
+      "owner": "codex-gpu-research-20261105-c",
+      "tasks": [
+        {
+          "id": "GPU-011",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:11:33+00:00",
+      "action": "task.refine:GPU-007-ABI-prerequisite",
+      "owner": "codex-gpu-research-20261105-c",
+      "tasks": [
+        {
+          "id": "GPU-006",
+          "status": "in_progress",
+          "owner": "codex-gpu-research-20261105-c",
+          "priority": 70,
+          "progress_note": "Reviewed pinned SGPU/RADV ownership and power hazards; implementing bounded host ownership contract, no device I/O",
+          "next_step": "Test page granules, shared budget and resource retention after stop/timeout/fault",
+          "last_heartbeat": "2026-11-05T00:05:01+00:00",
+          "branch": "main"
+        },
+        {
+          "id": "GPU-007",
+          "status": "pending",
+          "owner": null,
+          "priority": 70
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:12:18+00:00",
+      "action": "task.update:GPU-006",
+      "owner": "codex-gpu-research-20261105-c",
+      "tasks": [
+        {
+          "id": "GPU-006",
+          "status": "in_progress",
+          "owner": "codex-gpu-research-20261105-c",
+          "priority": 70,
+          "progress_note": "Seven synthetic lifecycle groups pass within 75 project tests; contract reconciles 4 KiB GPU and conditional XNU CPU/VM pages; no device I/O",
+          "next_step": "GPU-011 compile bounded transport ABI with fake backend; native integration stays in GPU-007",
+          "last_heartbeat": "2026-11-05T00:12:18+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/gpu-006/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:12:18+00:00",
+      "action": "task.update:RES-004",
+      "owner": "codex-gpu-research-20261105-c",
+      "tasks": [
+        {
+          "id": "RES-004",
+          "status": "in_progress",
+          "owner": "codex-gpu-research-20261105-c",
+          "priority": 80,
+          "progress_note": "Pinned SGPU/RADV interfaces, power-sensitive MMR, VM wait, memory-guard scope, page policy and bounded Reddit/web coverage documented",
+          "next_step": "GPU-011 SDK-independent transport ABI, then gated XNU backend and Metal/presentation qualification",
+          "last_heartbeat": "2026-11-05T00:12:18+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-004-xclipse-interfaces.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:12:18+00:00",
+      "action": "task.done:GPU-006",
+      "owner": "codex-gpu-research-20261105-c",
+      "tasks": [
+        {
+          "id": "GPU-006",
+          "status": "done",
+          "owner": "codex-gpu-research-20261105-c",
+          "priority": 70,
+          "progress_note": "Seven synthetic lifecycle groups pass within 75 project tests; contract reconciles 4 KiB GPU and conditional XNU CPU/VM pages; no device I/O",
+          "next_step": "GPU-011 compile bounded transport ABI with fake backend; native integration stays in GPU-007",
+          "last_heartbeat": "2026-11-05T00:12:18+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/gpu-006/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:12:19+00:00",
+      "action": "task.done:RES-004",
+      "owner": "codex-gpu-research-20261105-c",
+      "tasks": [
+        {
+          "id": "RES-004",
+          "status": "done",
+          "owner": "codex-gpu-research-20261105-c",
+          "priority": 80,
+          "progress_note": "Pinned SGPU/RADV interfaces, power-sensitive MMR, VM wait, memory-guard scope, page policy and bounded Reddit/web coverage documented",
+          "next_step": "GPU-011 SDK-independent transport ABI, then gated XNU backend and Metal/presentation qualification",
+          "last_heartbeat": "2026-11-05T00:12:18+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-004-xclipse-interfaces.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "867197aabcce5b14d717df5d0dd27941893da362ea213ba204f35a11277c832f",
-    "BOARD.md": "b339af46890a6f99c265fc2c4848c7bfb19d653dbd7dad7ba46efdc7437e4ae5",
+    "STATUS.md": "288216d13771c59e9a926231857d16fba5bf99eeafb4c7cf37bbadaca344d6ff",
+    "BOARD.md": "b3b4f3037df5709db4ec8b30d4ee985cb50937568e014b1134f513232ad5bf9d",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
     "planning/tasks/INT-001.md": "9d68fa75fae4c21f31f5ea4734c3f592ed0b41c6ed897d7b045a892c63549760",
@@ -2850,11 +3003,13 @@
     "planning/tasks/RES-003.md": "0818cb4fa8ca49d7acad01a7d80cc67041f504e381b68cfc74e8cfa6d369ce50",
     "planning/tasks/ESIM-004.md": "e4415ff12ece854323f178e57751d6977b25f93dec41ee135288f7e1b5480931",
     "planning/tasks/CELL-009.md": "66ea4f72cf2188c549d905d23ebd40d47f4665721a52a8f939b58e066357ecd9",
+    "planning/tasks/RES-004.md": "08bac80e27799418f00000fe2e775a3d800660263c225e58147765b25d905e9a",
+    "planning/tasks/GPU-011.md": "163ead546a03ac3aa8d6da0601fc30186714611f26e01f3705f9d6d7fa8de287",
     "planning/tasks/VM-002.md": "d5451a25c99b8cdf14afc268bbafe4a12df15e62282b31b4f243cc54ac5f5dd8",
     "planning/tasks/UI-001.md": "cff7f24088dc0dd280965b81b735654985ab3f14be737424ef62bf42e1cfa695",
     "planning/tasks/USB-001.md": "aeb1f6cdd25c31a8ae88b49778bfe5fb25ef173807996a58bb8af652a62bb07e",
-    "planning/tasks/GPU-006.md": "9e61cc69309bebdae937185eda77da1f13adacc2cfb3861952209262b003991e",
-    "planning/tasks/GPU-007.md": "a8ca79be5dc7b67be1a00371f0bdf44e53deaba3aed7751537c8a846cef3fa89",
+    "planning/tasks/GPU-006.md": "c4420e384a9ce1eaccb816f017b6212f8b8601974b7de2218916f3115d40464f",
+    "planning/tasks/GPU-007.md": "35af76bbac7dd723aa0988569bf4158981cc46cf68501ed1b4e937edc436236d",
     "planning/tasks/GPU-009.md": "e9555218bd44f1bb576a6323c398f4bf63e9cd689a8bee3b0267d4a10fc1e915",
     "planning/tasks/NET-001.md": "9aea34921de9656fefb4ac32fc49237bf2b80d11b8a1e0c51f5512107d6b0f37",
     "planning/tasks/BT-001.md": "b70a7eef9a79a216c5e5703c3cc6eb2dd889743824b4a4c9ab0849834aa11b6b",

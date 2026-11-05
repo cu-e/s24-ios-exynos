@@ -64,6 +64,10 @@ CoreAnimation / apps → Metal frontend for the selected OS ABI
 
 GPU-006 specifies ownership and operations for alloc/free, map/unmap, submit, fence completion/error, cache synchronization and fault teardown. GPU-007 implements the host-buildable native backend. GPU-008 is the first native clear/copy/triangle acceptance. GPU-009 adapts Metal registration, ABI and IOSurface ownership; GPU-010 measures multiprocess CoreAnimation and presentation.
 
+The [GPU-006 contract](../src/graphics/contracts/README.md) now has a synthetic ownership oracle, with 4/16 KiB CPU backing, 4 KiB GPU ranges, shared-budget checks and reference retention after Stop/timeout/fault. It performs no hardware I/O and does not define a binary transport ABI. GPU-011 freezes and compiles that ABI against a fake backend independently of the missing Apple SDK. GPU-007 then integrates it with the selected XNU and implements authenticated clients, actual cache/TLB maintenance, firmware/power/IRQ and validated queue ownership. Its mock completion/quiescence inputs must never become client-controlled retirement assertions.
+
+The [pinned interface audit](../research/notes/RES-004-xclipse-interfaces.md) identifies power-sensitive MMR queries, an unbounded RADV VM-update wait and a memory guard that can fall back to process-local accounting. CPU hardware granule and advertised XNU VM page size differ in the source policy and depend on build flags plus loader memory size. Verify both in the compiled/runtime profile. Account separately for constrained memory pools and imported/presented surfaces; an aggregate RAM limit or low CmaFree alone does not establish safe allocation behavior.
+
 Android RADV and a shader translator are not sufficient by themselves. Review per-file licenses and provenance before incorporating donor code. Turnip/Panfrost examples have different hardware command streams. Defer 120 Hz, compression tuning and ray tracing until correct pixels, cleanup, concurrency and thermal behavior pass.
 
 ## Stage G: peripherals and power

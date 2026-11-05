@@ -26,6 +26,8 @@ python3 tools/lab.py task show KRN-001
 
 [Radio/donor follow-up](research/notes/RES-003-radio-donors.md) adds pinned primary research, explicit Reddit coverage, the SIPC5/SIT framing model, and the missing vendor-command and eSIM-frontend gates. [Cellular contract](src/platform/cellular/contracts/README.md) is host preparation; it does not establish a working modem or eSIM.
 
+[Xclipse interface audit](research/notes/RES-004-xclipse-interfaces.md) traces SGPU/RADV, conditional XNU page sizes and missing native GPU/Metal/presentation interfaces. The [GPU contract](src/graphics/contracts/README.md) includes executable host ownership scenarios for memory, fences and Stop/fault handling. These are specification checks, with no native GPU result.
+
 ## Run the host lab
 
 Source fetches and heavy builds are explicit. These commands do not select a phone:

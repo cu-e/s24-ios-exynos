@@ -1,0 +1,23 @@
+{
+  "id": "GPU-011",
+  "title": "Freeze and compile the SGPU transport ABI with a fake backend",
+  "status": "pending",
+  "owner": null,
+  "priority": 80,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": ["GPU-006"],
+  "paths": ["src/platform/gpu/abi", "docs/procedures/gpu-011", "tests/test_gpu_abi.py"],
+  "acceptance": [
+    "Versioned pointer-free request/response layouts have explicit limits, reserved-field and size validation",
+    "Compile layout assertions for host and AArch64 without an Apple SDK or device access",
+    "Fake transport rejects malformed requests and cannot expose client-asserted fence retirement",
+    "Keep native XNU driver, actual cache/VM/IRQ operations and hardware acceptance explicitly missing"
+  ],
+  "sources": ["s24-linux", "radv-xclipse"],
+  "steps": [
+    "Translate GPU-006 operations into bounded transport structures and version negotiation",
+    "Compile and test layout and malformed-message handling using an explicitly fake backend",
+    "Record commands, artifact hashes and GPU-007 integration requirements"
+  ]
+}

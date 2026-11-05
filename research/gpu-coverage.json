@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-11-05",
+  "kind": "bounded-source-review",
+  "native_device_runs": 0,
+  "phone_commands": 0,
+  "firmware_fetched": false,
+  "upstream_manifest": "fixtures/public/gpu-research/source-manifest.json",
+  "source_verification": "fixtures/public/gpu-research/source-verify.jsonl",
+  "web_sources": [
+    {
+      "url": "https://semiconductor.samsung.com/processor/mobile-processor/exynos-2400/",
+      "role": "official architecture statement, not register/command specification"
+    },
+    {
+      "url": "https://github.com/JimVulkan/radv-xclipse/releases",
+      "role": "author Android test/fix and hang reports, not local acceptance"
+    },
+    {
+      "url": "https://github.com/flutter/flutter/issues/187905",
+      "role": "adjacent S25 FE memory-pressure reports; later CMA diagnostic caveat retained; not reproduced"
+    },
+    {
+      "url": "https://github.com/Droid-Deck/DroidDeck/issues/290",
+      "role": "Bionic/glibc runtime build discussion, not Darwin compatibility"
+    },
+    {
+      "url": "https://unixnu.com/porting/gpu",
+      "role": "architecture guide; pinned git version is authoritative for this review"
+    }
+  ],
+  "reddit": {
+    "archive_backend": "Reddit MCP/Arctic Shift",
+    "searches": [
+      {
+        "subreddit": "Exynos",
+        "query": "RADV",
+        "requested_limit": 20,
+        "sort": "new",
+        "outcome": "timeout",
+        "empty_result": false
+      }
+    ],
+    "posts": [
+      {
+        "id": "1x7j03x",
+        "subreddit": "EmulationOnAndroid",
+        "url": "https://www.reddit.com/r/EmulationOnAndroid/comments/1x7j03x/",
+        "post_read": true,
+        "returned_comments": 4,
+        "device_claim": "S24+ / Exynos 2400 / Xclipse 940",
+        "software_claim": "RADV v1.6.0 through GameNative",
+        "role": "author short Android game tests, not native iOS support"
+      }
+    ],
+    "private_snapshots": [
+      {
+        "name": "reddit-search-failure.json",
+        "sha256": "27e53eb04a24cac00ae13ff51c7b53df9004d969286317f0180f75d433ff7862"
+      },
+      {
+        "name": "s24plus-comments.json",
+        "sha256": "1e40a2313d002ea2a67404d9651dcbde62a53a7da2ec46ff013f9b23fc6578fa"
+      },
+      {
+        "name": "s24plus-post.json",
+        "sha256": "31bd0fd0919f3ba3082f25591b5626df53aa31336beaa85e2ec566088730d65b"
+      }
+    ],
+    "exhaustive": false
+  },
+  "limits": [
+    "Selected source sections, not whole-driver security audit",
+    "Reddit search timeout cannot establish absence; four returned comments do not prove complete thread coverage",
+    "No owner-phone GPU runtime test or driver loading in this follow-up",
+    "libdrm archive described by pinned wrap only; not downloaded or built",
+    "Exact BYH3 native firmware/profile and selected OS Metal/IOSurface ABI remain unknown",
+    "Ignored third-party snapshots are local; public files contain bounded derived metadata, not copied posts"
+  ]
+}
