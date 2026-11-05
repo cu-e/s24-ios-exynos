@@ -70,7 +70,7 @@ def guest_main(a,m):
   for case in cases:
    label=case if case in images else 'positive';image=m/images[label]['path']
    if sha(image)!=images[label]['sha256']:raise ValueError('Qualified component image changed '+case)
-   kernel=bytearray(image.read_bytes());proof=image_proof(image,case!='factory-mismatch')
+   kernel=bytearray(image.read_bytes());proof=({'scope':'unmapped spin-timeout control; no TTBR/caller execution claim','image':avf.macho(image)} if case=='spin' else image_proof(image,case!='factory-mismatch'))
    if case=='corrupt-vector':
     corpus=load(WT/'src/platform/crypto/xts/testdata/vectors.json');pattern=bytes.fromhex(corpus['vectors'][0]['ct'])
     if kernel.count(pattern)!=1:raise ValueError('Unique actual expected-ciphertext mutation point required')
@@ -268,7 +268,7 @@ def main():
       if not mismatch.exists():mismatch.write_text((xts/'xts.c').read_text().replace('m->custom = NULL; m->custom1 = NULL; m->impl = CC_IMPL_AES_XTS_GENERIC;','m->custom = NULL; m->custom1 = NULL; m->impl = CC_IMPL_AES_XTS_GENERIC; m->size += 16;'))
       _,badobj=compile('fixture/mismatch-adapter',mismatch,'osfmk/mc_provider.o',profile);link[link.index(aobj)]=badobj
      run(link,label+'-component-link');guest_images[label]=out/(label+'.macho')
-    report['guest_images']={label:{'path':str(path.relative_to(m)),'sha256':sha(path),'mapping_proof':image_proof(path,label!='factory-mismatch')} for label,path in guest_images.items()}
+    report['guest_images']={label:{'path':str(path.relative_to(m)),'sha256':sha(path),'mapping_proof':({'scope':'unmapped spin-timeout control; no TTBR/caller execution claim','image':bounded.avf.macho(path)} if label=='spin' else image_proof(path,label!='factory-mismatch'))} for label,path in guest_images.items()}
 
   c,oldsource=recipe('osfmk/mc_provider.o');bad_argv=list(c['argv']);bad_argv[bad_argv.index(oldsource)]=str(WT/'fixtures/public/xnu-kernel-xts/reject_wrong_callback.c');bad_argv[bad_argv.index('-o')+1]=str(out/'rejected.o');bad_argv[bad_argv.index('-MF')+1]=str(out/'rejected.d');bad_argv=['-I'+c['cwd'] if x=='-I.' else x for x in bad_argv];bad_argv += ['-I'+str(xts),'-Werror=incompatible-function-pointer-types']
   bad=run(bad_argv,'reject-incompatible-actual-callback',expected=None);check('real-genuine-header-callback-rejection',bad['exit_code']!=0 and 'incompatible function pointer types' in (out/'reject-incompatible-actual-callback.log').read_text())
