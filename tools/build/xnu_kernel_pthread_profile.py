@@ -82,7 +82,7 @@ class PthreadProfile(LinkInputs):
         process=next(c for c in self.object_report['commands'] if c['stdout'].endswith('/inventory-osfmk.stdout.txt'))
         args=process['argv'].copy();args[args.index('-f')+1]=str(query)
         values={'OBJROOT':str(self.out/'object-root'),'OBJPATH':str(self.out/'build'),'TARGET':str(cwd),'SOURCE':str(directory)+'/',
-            'RELATIVE_SOURCE_PATH':str(directory.relative_to(KERNEL)),'CC':str(self.compiler),'CXX':str(self.compiler),'MakeInc_cmd':str(self.shim),'SDKROOT':str(self.out/'unavailable-sdk')}
+            'RELATIVE_SOURCE_PATH':'./'+str(directory.relative_to(KERNEL)),'CC':str(self.compiler),'CXX':str(self.compiler),'MakeInc_cmd':str(self.shim),'SDKROOT':str(self.out/'unavailable-sdk')}
         args=[next((k+'='+v for k,v in values.items() if a.startswith(k+'=')),a) for a in args]
         args+=['DSTROOT='+str(self.out/'installtree')]
         return args
@@ -424,6 +424,122 @@ class PthreadProfile(LinkInputs):
             self.check('actual-real-VM-code-alias-'+name,same)
             values[name]=dict(target=target,same_real_code=same,alias=symbols.get(name),provider=symbols.get(target))
         self.report['actual_VM_alias_link']=dict(object=str(output.relative_to(ROOT)),sha256=sha(output),aliases=values,scope='Relocatable link of two genuine VM objects and exact native three-name subset;other kernel imports retained;not a full kernel')
+        wrong=self.out/'wrong-real-provider-aliases.exp'
+        wrong.write_text(subset.read_text().replace('_vm_fault_external _vm_fault','_mach_vm_allocate_external _vm_fault'))
+        changed=self.out/'wrong-real-provider-aliases.o'
+        self.must([self.ld,'-r','-arch','arm64','-alias_list',wrong,*objects,'-o',changed],'negative-wrong-real-VM-provider-link',timeout=180)
+        negative={s['name']:s for s in thin(changed)['symbols'] if s['type']&1 and s['type']&0xe==0xe}
+        name='_vm_fault';target='_vm_fault_external'
+        mismatch=(negative[name]['section'],negative[name]['value'])!=(negative[target]['section'],negative[target]['value'])
+        self.check('wrong-real-VM-provider-alias-detected',mismatch)
+        self.report['negative_VM_alias']=dict(object=str(changed.relative_to(ROOT)),sha256=sha(changed),same_public_name_binds_wrong_real_function=mismatch,runtime_executed=False)
+
+    def native_mig(self):
+        self.object_component();header=self.header_component();self.host_commands()
+        host=ROOT/'artifacts/xnu-host-tools/generators-session2/prefix/bin'
+        directory=KERNEL/'osfmk/mach';cwd=self.out/'native-MIG';cwd.mkdir()
+        query=cwd/'query.mk';query.write_text('include '+str(directory/'Makefile')+'\n$(info S24_NATIVE_MIG|$(MIG_UUHDRS))\n.PHONY: s24_query\ns24_query: ;\n')
+        args=self.header_make_args(directory,query,cwd)
+        args+=['MIG='+str(host/'mig'),'MIGCOM='+str(host/'migcom'),'MIGCC='+str(self.compiler)]
+        installed=json.loads((ROOT/self.report['installed_header_profile']['manifest']).read_text())
+        wrapper=self.out/'preprocess.py';shutil.copyfile(ROOT/'fixtures/public/xnu-kernel-mig/preprocess.py',wrapper);wrapper.chmod(0o755)
+        tmp=self.out/'tmp';tmp.mkdir();results=[]
+        for name in ['mach_port.h','task.h','mach_vm.h','thread_act.h']:
+            goal=args.copy();goal[goal.index('s24_query')]='-n';goal.append(name)
+            text=self.must(goal,'native-SDK-MIG-recipe-'+name,cwd=cwd,timeout=60)
+            commands=[shlex.split(l) for l in text.replace('\\\n',' ').splitlines() if l.startswith(str(host/'mig')+' ')]
+            if len(commands)!=1:raise ValueError('One genuine native SDK MIG command required')
+            command=commands[0];source=Path(command[-1]).resolve()
+            if not source.is_relative_to(KERNEL) or not source.is_file():raise ValueError('Actual pinned MIG defs source required')
+            trace=self.out/'preprocessing'/name;trace.mkdir(parents=True)
+            env=['env','MIGCC='+str(wrapper),'MIGCOM='+str(host/'migcom'),'SDKROOT=','TMPDIR='+str(tmp),
+                'S24_MIG_COMPILER='+str(self.compiler),'S24_MIG_TRACE='+str(trace),'S24_MIG_SOURCE='+str(source)]
+            self.must([*env,*command],'fresh-native-SDK-MIG-'+name,cwd=cwd,timeout=120)
+            private=ROOT/header['header_roots']['private']/'mach'/name
+            row=next(r for r in installed if (ROOT/r['output']).resolve()==private.resolve() and r['private'])
+            output=self.out/('native-installed-'+name)
+            code,_,error=self.run([UNIFDEF,*row['unifdef_flags'],'-o',output,cwd/name],'fresh-native-SDK-unifdef-'+name,cwd=cwd,timeout=60)
+            good=code in [0,1] and output.is_file() and sha(output)==sha(private)
+            self.check('actual-native-SDK-MIG-header-identical-'+name,good,exit_code=code,diagnostic=error[-1500:])
+            results.append(dict(name=name,defs_source=str(source.relative_to(ROOT)),defs_sha256=sha(source),fresh_raw_header=str((cwd/name).relative_to(ROOT)),fresh_raw_sha256=sha(cwd/name),
+                native_installed_header=str(output.relative_to(ROOT)),native_installed_sha256=sha(output),qualified_header=str(private.relative_to(ROOT)),qualified_sha256=sha(private),identical=good,
+                preprocessor_provenance=str((trace/'provenance.json').relative_to(ROOT)),preprocessor_provenance_sha256=sha(trace/'provenance.json')))
+        self.report['fresh_native_SDK_MIG_headers']=results
+
+    def acceptance(self):
+        """Revalidate measured bytes and assess this component's four criteria."""
+        reports={};capsules={}
+        for identifier in ['PTHP-005','PTHP-007','PTHP-008','PTHP-009','PTHP-011']:
+            doc=registered(identifier,self.ledger)
+            paths=[ROOT/p for p in doc['artifacts'] if p.endswith('/report.json')]
+            if doc['outcome']!='pass' or len(paths)!=1:raise ValueError('Passing component capsule required: '+identifier)
+            report=json.loads(paths[0].read_text())
+            self.check('revalidated-capsule-'+identifier,report['outcome']=='pass' and all(c['pass_check'] for c in report['checks']))
+            entry=next(e for e in self.ledger['experiments'] if e['id']==identifier)
+            capsules[identifier]=dict(evidence=entry['evidence'],sha256=entry['evidence_sha256'],artifacts_verified=len(doc['sha256']))
+            reports[identifier]=report
+        header=self.header_component();component=self.object_component()
+        manifest=json.loads((ROOT/self.report['installed_header_profile']['manifest']).read_text())
+        self.check('all-header-sources-and-native-declarations-unchanged',all(
+            (not row.get('source_sha256') or sha(ROOT/row['source'])==row['source_sha256']) and
+            sha(ROOT/row['declaration'])==row['declaration_sha256'] for row in manifest))
+        self.check('missing-generated-inputs-remain-explicitly-unavailable',all(
+            not (ROOT/row['output']).exists() for row in manifest if row['status']=='unavailable_generated_input'))
+        closure=component['pthread_provider_closure'];archive=ROOT/closure['archive']
+        members=archive_members(archive.read_bytes())
+        self.check('actual-three-archive-members-revalidated',sha(archive)==closure['sha256'] and len(members)==3 and all(
+            name==Path(row['output']).name and data==(ROOT/row['output']).read_bytes()
+            for (name,data),row in zip(members,component['pthread_compile_results'])))
+        definitions=self.must([NDK/'llvm-nm','--extern-only','--defined-only','--just-symbol-name',archive],'acceptance-archive-definitions')
+        required=self.must([NDK/'llvm-nm','--undefined-only','--just-symbol-name',archive],'acceptance-archive-imports')
+        defs={n for n in definitions.splitlines() if n and not n.endswith(':')}
+        imports={n for n in required.splitlines() if n and not n.endswith(':')}-defs
+        providers=json.loads((SGAP/'symbol-providers.json').read_text())
+        aliases={n:r['target'] for n,r in self.report['native_VM_aliases'].items()}
+        unresolved=sorted(n for n in imports if n not in providers and aliases.get(n) not in providers)
+        overlaps=sorted(defs & providers.keys())
+        self.check('all-actual-imports-and-exports-match-witness',sorted(defs)==closure['defined'] and sorted(imports)==closure['external_imports'])
+        self.check('all-imports-resolve-with-no-kernel-definition-overlap',not unresolved and not overlaps,unresolved=unresolved,overlaps=overlaps)
+        layout=reports['PTHP-008']['callback_layout'];count=len(layout['names']);observed={}
+        for label,probe in layout['probes'].items():
+            obj=ObjectData(ROOT/probe['object']);observed[label]=list(obj.value('_s24_pthread_layout','<'+str(count)+'Q'))
+            self.check('actual-callback-object-redecoded-'+label,observed[label]==probe['layout'] and list(obj.value('_s24_kalloc_layout','<4Q'))==[64,32,40,44])
+        self.check('all-140-declarations-and-284-layout-values-covered',count==284 and
+            {n:len(v) for n,v in layout['fields'].items()}=={'pthread_functions_s':45,'pthread_callbacks_s':95} and
+            observed['kext']==observed['kernel']==layout['clang19_values'])
+        controls={c['name']:c['pass_check'] for c in reports['PTHP-008']['checks']}
+        self.check('real-header-type-and-metadata-controls-executed',all(controls.get(n) for n in [
+            'real-wrong-header-layout-detected','real-wrong-function-pointer-type-rejected',
+            'real-two-allocation-descriptors-and-type-signatures','actual-old-fake-metadata-detected',
+            'stock-compiler-cannot-silently-replace-metadata']))
+        self.check('genuine-aliases-and-wrong-real-provider-control-executed',all(
+            c['pass_check'] for c in reports['PTHP-009']['checks']) and reports['PTHP-009']['negative_VM_alias']['same_public_name_binds_wrong_real_function'])
+        mig=reports['PTHP-011']['fresh_native_SDK_MIG_headers']
+        self.check('all-four-native-SDK-MIG-generated-bytes-revalidated',len(mig)==4 and all(
+            r['identical'] and sha(ROOT/r['native_installed_header'])==sha(ROOT/r['qualified_header'])==r['qualified_sha256'] for r in mig))
+        profile=component['pthread_compile_profile']
+        self.check('genuine-metadata-and-native-definitions-remain-enabled',profile['metadata_checks_enabled'] and
+            not profile['raw_internal_header_fallback'] and not profile['fake_metadata_header_used'] and
+            profile['native_definitions']==self.kext_definitions)
+        if not self.args.integration_evidence:raise ValueError('Acceptance requires --integration-evidence')
+        check=ROOT/self.args.integration_evidence
+        if not check.resolve().is_relative_to(ROOT):raise ValueError('Main-relative integration evidence required')
+        common=json.loads(check.read_text())
+        for name,value in common['sha256'].items():
+            if sha(ROOT/name)!=value:raise ValueError('Common check artifact changed')
+        self.check('integrated-repository-checks-pass',common['outcome']=='pass' and any(
+            c['argv']==['make','check'] and c['exit_code']==0 for c in common['commands']))
+        if any(not c['pass_check'] for c in self.report['checks']):raise ValueError('Acceptance checks failed;component is not accepted')
+        self.report['acceptance']=dict(criteria=[
+            dict(criterion=1,result='pass',scope='Pinned native definitions,installed-header rules and current provider declarations'),
+            dict(criterion=2,result='pass',scope='Three genuine ARM64 TUs,source-qualified installed headers and actual metadata builtins'),
+            dict(criterion=3,result='pass',scope='All callback declarations/layouts,allocation metadata,archive/import closure and actual negative controls'),
+            dict(criterion=4,result='pass',scope='Revalidated coherent component capsules and integrated repository checks;all full-system limits retained')],
+            capsules=capsules,common_checks=dict(path=str(check.relative_to(ROOT)),sha256=sha(check),commit=common['commit']),
+            archive=closure['archive'],archive_sha256=sha(archive),definitions=len(defs),external_imports=len(imports),
+            overlap=overlaps,unresolved=unresolved,header_counts=header['header_install_counts'],callback_fields=140,layout_values=count,
+            complete_SDK_qualified=False,stock_Xcode_release_qualified=False,private_Apple_ABI_qualified=False,
+            full_crypto_qualified=False,full_link_qualified=False,runtime_qualified=False,native_device_qualified=False)
 
     def finish(self):
         self.report['outcome']='pass' if self.report['checks'] and all(c['pass_check'] for c in self.report['checks']) and 'error' not in self.report else 'fail'
@@ -438,7 +554,8 @@ class PthreadProfile(LinkInputs):
 
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--run',required=True);p.add_argument('--mode',choices=['inventory','headers','compile','controls'],required=True)
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--run',required=True);p.add_argument('--mode',choices=['inventory','headers','compile','controls','aliases','sdk-mig','acceptance'],required=True)
+    p.add_argument('--integration-evidence')
     p.add_argument('--header-profile',default='PTHP-005');p.add_argument('--object-profile',default='PTHP-007');args=p.parse_args()
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}',args.run):p.error('Canonical fresh run required')
     args.compiler,args.compiler_evidence,args.header_evidence,args.resource_evidence=VECTOR_COMPILER,'VCOMP-002','FHDR-003','RHDR-002'
@@ -449,6 +566,9 @@ def main():
         if args.mode=='headers':build.headers()
         elif args.mode=='compile':build.compile_pthread()
         elif args.mode=='controls':build.controls()
+        elif args.mode=='aliases':build.alias_controls()
+        elif args.mode=='sdk-mig':build.native_mig()
+        elif args.mode=='acceptance':build.acceptance()
         else:build.inventory()
     except Exception as error:build.report['error']=str(error)
     return build.finish()
