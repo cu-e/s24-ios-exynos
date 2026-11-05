@@ -1,0 +1,826 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T14:25:30.326254+00:00",
+  "task": "VM-004",
+  "experiment": "QEMUHOST-001",
+  "owner": "codex-team-qemu-host-20261105-au",
+  "summary": "Genuinely built pinned generic ARM64 QEMU10.2.0 with actual virt/TCG/cortex-a76/serial help and bounded real paused empty-machine lifecycle. Corrected session-wide supervision and independent-group pause/kill controls pass. Existing VM002 runner now reports only missing complete kernel;no guest OS or XNU executed.",
+  "commit": "d46e7acccd096a25ff17cac9c7f0d4676edff68c",
+  "commands": [
+    {
+      "argv": [
+        "curl",
+        "--fail",
+        "--location",
+        "--max-time",
+        "180",
+        "--retry",
+        "1",
+        "--output",
+        "artifacts/qemu-host/release-10.2.0/qemu-10.2.0.tar.xz",
+        "https://download.qemu.org/qemu-10.2.0.tar.xz"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "git",
+        "clone",
+        "--no-checkout",
+        "--filter=blob:none",
+        "https://gitlab.com/qemu-project/dtc.git",
+        "artifacts/qemu-host/release-10.2.0/dtc-reference"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "artifacts/qemu-host/release-10.2.0/dtc-reference",
+        "archive",
+        "b6910bec11614980a21e46fbccc35934b671bd81"
+      ],
+      "exit_code": 0,
+      "stdout_artifact": "worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/dtc-b6910bec.tar"
+    },
+    {
+      "argv": [
+        "cc",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "cc (GCC) 15.3.1 20260722 (Red Hat 15.3.1-1)\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "Python 3.14.8\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "meson",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "1.8.5\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "ninja",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "1.13.0.git.kitware.jobserver-pipe-1\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "pkg-config",
+        "--modversion",
+        "glib-2.0",
+        "gthread-2.0",
+        "pixman-1",
+        "zlib"
+      ],
+      "exit_code": 0,
+      "stdout": "2.86.5\n2.86.5\n0.46.2\n1.3.1.zlib-ng\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "ls-remote",
+        "https://gitlab.com/qemu-project/qemu.git",
+        "refs/tags/v10.2.0",
+        "refs/tags/v10.2.0^{}"
+      ],
+      "exit_code": 0,
+      "stdout": "75eb8d57c6b9577c8121e28169c3512cfe2d2544\trefs/tags/v10.2.0\n698104725efad4b29079d857dfdebbd804e34c99\trefs/tags/v10.2.0^{}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/build/qemu_host.py",
+        "build",
+        "--archive",
+        "artifacts/qemu-host/release-10.2.0/qemu-10.2.0.tar.xz",
+        "--source",
+        "artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0",
+        "--out",
+        "artifacts/qemu-host/build-1",
+        "--seconds",
+        "2400"
+      ],
+      "exit_code": 1
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0/configure",
+        "--target-list=aarch64-softmmu",
+        "--with-devices-aarch64=minimal",
+        "--without-default-devices",
+        "--without-default-features",
+        "--disable-download",
+        "--enable-system",
+        "--enable-tcg",
+        "--enable-fdt=internal",
+        "--disable-rust",
+        "--disable-kvm",
+        "--disable-docs",
+        "--disable-tools",
+        "--disable-guest-agent",
+        "--disable-user",
+        "--disable-werror",
+        "--disable-debug-info",
+        "--disable-strip",
+        "--extra-cflags=-O1 -g0",
+        "--disable-lto"
+      ],
+      "exit_code": null,
+      "outcome": "resource-deferred",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/build-1/configure.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/build/qemu_host.py",
+        "build",
+        "--archive",
+        "artifacts/qemu-host/release-10.2.0/qemu-10.2.0.tar.xz",
+        "--source",
+        "artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0",
+        "--out",
+        "artifacts/qemu-host/build-2",
+        "--seconds",
+        "2400"
+      ],
+      "exit_code": 1
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0/configure",
+        "--target-list=aarch64-softmmu",
+        "--with-devices-aarch64=minimal",
+        "--without-default-devices",
+        "--without-default-features",
+        "--disable-download",
+        "--enable-system",
+        "--enable-tcg",
+        "--enable-fdt=internal",
+        "--disable-rust",
+        "--disable-kvm",
+        "--disable-docs",
+        "--disable-tools",
+        "--disable-guest-agent",
+        "--disable-user",
+        "--disable-werror",
+        "--disable-debug-info",
+        "--disable-strip",
+        "--extra-cflags=-O1 -g0",
+        "--disable-lto"
+      ],
+      "exit_code": null,
+      "outcome": "resource-deferred",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/build-2/configure.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/build/qemu_host.py",
+        "build",
+        "--archive",
+        "artifacts/qemu-host/release-10.2.0/qemu-10.2.0.tar.xz",
+        "--source",
+        "artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0",
+        "--out",
+        "artifacts/qemu-host/build-3",
+        "--seconds",
+        "2400"
+      ],
+      "exit_code": 1
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0/configure",
+        "--target-list=aarch64-softmmu",
+        "--with-devices-aarch64=minimal",
+        "--without-default-devices",
+        "--without-default-features",
+        "--disable-download",
+        "--enable-system",
+        "--enable-tcg",
+        "--enable-fdt=internal",
+        "--disable-rust",
+        "--disable-kvm",
+        "--disable-docs",
+        "--disable-tools",
+        "--disable-guest-agent",
+        "--disable-user",
+        "--disable-werror",
+        "--disable-debug-info",
+        "--disable-strip",
+        "--extra-cflags=-O1 -g0",
+        "--disable-lto"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/build-3/configure.json"
+    },
+    {
+      "argv": [
+        "ninja",
+        "-j2",
+        "qemu-system-aarch64"
+      ],
+      "exit_code": 1,
+      "outcome": "fail",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/build-3/compile.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/build/qemu_host.py",
+        "build",
+        "--archive",
+        "artifacts/qemu-host/release-10.2.0/qemu-10.2.0.tar.xz",
+        "--source",
+        "artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0",
+        "--out",
+        "artifacts/qemu-host/build-4",
+        "--seconds",
+        "2400"
+      ],
+      "exit_code": 1
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0/configure",
+        "--target-list=aarch64-softmmu",
+        "--with-devices-aarch64=vm002",
+        "--without-default-devices",
+        "--without-default-features",
+        "--disable-download",
+        "--enable-system",
+        "--enable-tcg",
+        "--enable-fdt=internal",
+        "--disable-rust",
+        "--disable-kvm",
+        "--disable-docs",
+        "--disable-tools",
+        "--disable-guest-agent",
+        "--disable-user",
+        "--disable-werror",
+        "--disable-debug-info",
+        "--disable-strip",
+        "--extra-cflags=-O1 -g0",
+        "--disable-lto"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/build-4/configure.json"
+    },
+    {
+      "argv": [
+        "ninja",
+        "-j2",
+        "qemu-system-aarch64"
+      ],
+      "exit_code": 1,
+      "outcome": "fail",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/build-4/compile.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/build/qemu_host.py",
+        "build",
+        "--archive",
+        "artifacts/qemu-host/release-10.2.0/qemu-10.2.0.tar.xz",
+        "--source",
+        "artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0",
+        "--out",
+        "artifacts/qemu-host/build-5",
+        "--seconds",
+        "2400"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0/configure",
+        "--target-list=aarch64-softmmu",
+        "--with-devices-aarch64=vm002_2f4e3286cb00",
+        "--without-default-devices",
+        "--without-default-features",
+        "--disable-download",
+        "--enable-system",
+        "--enable-tcg",
+        "--enable-fdt=internal",
+        "--disable-rust",
+        "--disable-kvm",
+        "--disable-docs",
+        "--disable-tools",
+        "--disable-guest-agent",
+        "--disable-user",
+        "--disable-werror",
+        "--disable-debug-info",
+        "--disable-strip",
+        "--extra-cflags=-O1 -g0",
+        "--disable-lto"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/build-5/configure.json"
+    },
+    {
+      "argv": [
+        "ninja",
+        "-j2",
+        "qemu-system-aarch64"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/build-5/compile.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/build/qemu_host.py",
+        "build",
+        "--archive",
+        "artifacts/qemu-host/release-10.2.0/qemu-10.2.0.tar.xz",
+        "--source",
+        "artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0",
+        "--out",
+        "artifacts/qemu-host/build-6",
+        "--seconds",
+        "2400"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source/qemu-10.2.0/configure",
+        "--target-list=aarch64-softmmu",
+        "--with-devices-aarch64=vm002_18e27e4b6107",
+        "--without-default-devices",
+        "--without-default-features",
+        "--disable-download",
+        "--enable-system",
+        "--enable-tcg",
+        "--enable-fdt=internal",
+        "--disable-rust",
+        "--disable-kvm",
+        "--disable-docs",
+        "--disable-tools",
+        "--disable-guest-agent",
+        "--disable-user",
+        "--disable-werror",
+        "--disable-debug-info",
+        "--disable-strip",
+        "--extra-cflags=-O1 -g0",
+        "--disable-lto"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/build-6/configure.json"
+    },
+    {
+      "argv": [
+        "ninja",
+        "-j2",
+        "qemu-system-aarch64"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/build-6/compile.json"
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "-accel",
+        "help"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/accelerators.json"
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "-cpu",
+        "help"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/cpu.json"
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "-machine",
+        "help"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/machines.json"
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "-help"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/options.json"
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "-machine",
+        "virt,gic-version=3",
+        "-accel",
+        "tcg",
+        "-cpu",
+        "cortex-a76",
+        "-smp",
+        "1",
+        "-m",
+        "128",
+        "-S",
+        "-nodefaults",
+        "-nic",
+        "none",
+        "-display",
+        "none",
+        "-serial",
+        "stdio",
+        "-monitor",
+        "none",
+        "-no-reboot"
+      ],
+      "exit_code": 0,
+      "outcome": "timeout",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/stopped-empty-machine.json"
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "--version"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/version.json"
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/fixtures/public/qemu-host/ignore-term.py"
+      ],
+      "exit_code": -9,
+      "outcome": "timeout",
+      "report": "worktrees/vm-004-20261105/artifacts/qemu-host/controls-final/ignore-term-control.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "src/virtualization/host.py",
+        "--qemu",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "--shim",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+        "--shim-sha256",
+        "283f6740424011959ebe03e71ce910a81bbfa3b7ba31c6395ab6f8aab77eaf87",
+        "--pid1",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/pid1",
+        "--pid1-sha256",
+        "bc7575a3690d6da52752763c5de496631032bef92777e6fe5b341e8a0e3414f7",
+        "--out",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/check-2/vm002-interface"
+      ],
+      "exit_code": 2,
+      "recorded_at": "2026-11-05T14:19:32.665528+00:00",
+      "stdout": "{\n  \"donor_commit\": \"a6f4bc38aa244359cd365c976244a88c9d6b3304\",\n  \"origin\": \"local-host\",\n  \"outcome\": \"blocked\",\n  \"recorded_at\": \"2026-11-05T14:19:32.642519+00:00\",\n  \"guest_started\": false,\n  \"pid1_observed\": false,\n  \"missing\": [\n    \"Explicit existing kernel file and reviewed build provenance\"\n  ],\n  \"inputs\": {\n    \"shim\": {\n      \"path\": \"/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image\",\n      \"sha256\": \"283f6740424011959ebe03e71ce910a81bbfa3b7ba31c6395ab6f8aab77eaf87\"\n    },\n    \"pid1\": {\n      \"path\": \"/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/pid1\",\n      \"sha256\": \"bc7575a3690d6da52752763c5de496631032bef92777e6fe5b341e8a0e3414f7\"\n    },\n    \"qemu\": {\n      \"path\": \"/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64\",\n      \"sha256\": \"bca8564182c786eb00e9f43c3153328f68e2edf50bfabe28236dbaac438acc11\"\n    }\n  },\n  \"limitations\": [\n    \"Structural checks do not qualify a complete XNU kernel.\",\n    \"Host guest evidence establishes no S24 hardware support.\"\n  ],\n  \"qemu_probes\": [\n    {\n      \"argv\": [\n        \"/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64\",\n        \"-machine\",\n        \"help\"\n      ],\n      \"exit_code\": 0,\n      \"output\": \"Supported machines are:\\nnone                 empty machine\\nvirt-10.0            QEMU 10.0 ARM Virtual Machine\\nvirt-10.1            QEMU 10.1 ARM Virtual Machine\\nvirt                 QEMU 10.2 ARM Virtual Machine (alias of virt-10.2)\\nvirt-10.2            QEMU 10.2 ARM Virtual Machine\\nvirt-5.0             QEMU 5.0 ARM Virtual Machine (deprecated)\\nvirt-5.1             QEMU 5.1 ARM Virtual Machine (deprecated)\\nvirt-5.2             QEMU 5.2 ARM Virtual Machine (deprecated)\\nvirt-6.0             QEMU 6.0 ARM Virtual Machine (deprecated)\\nvirt-6.1             QEMU 6.1 ARM Virtual Machine (deprecated)\\nvirt-6.2             QEMU 6.2 ARM Virtual Machine (deprecated)\\nvirt-7.0             QEMU 7.0 ARM Virtual Machine (deprecated)\\nvirt-7.1             QEMU 7.1 ARM Virtual Machine (deprecated)\\nvirt-7.2             QEMU 7.2 ARM Virtual Machine (deprecated)\\nvirt-8.0             QEMU 8.0 ARM Virtual Machine\\nvirt-8.1             QEMU 8.1 ARM Virtual Machine\\nvirt-8.2             QEMU 8.2 ARM Virtual Machine\\nvirt-9.0             QEMU 9.0 ARM Virtual Machine\\nvirt-9.1             QEMU 9.1 ARM Virtual Machine\\nvirt-9.2             QEMU 9.2 ARM Virtual Machine\\n\"\n    },\n    {\n      \"argv\": [\n        \"/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64\",\n        \"-accel\",\n        \"help\"\n      ],\n      \"exit_code\": 0,\n      \"output\": \"Accelerators supported in QEMU binary:\\ntcg\\n\"\n    }\n  ]\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/build/qemu_host.py",
+        "check",
+        "--binary",
+        "artifacts/qemu-host/build-5/build/qemu-system-aarch64",
+        "--out",
+        "artifacts/qemu-host/check-1"
+      ],
+      "exit_code": 1
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/build/qemu_host.py",
+        "check",
+        "--binary",
+        "artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+        "--out",
+        "artifacts/qemu-host/check-final"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/build/qemu_host.py",
+        "controls",
+        "--out",
+        "artifacts/qemu-host/controls-final"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "py_compile",
+        "tools/build/qemu_host.py",
+        "fixtures/public/qemu-host/ignore-term.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/qemu-10.2.0.tar.xz",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/dtc-b6910bec.tar",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/dependencies.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/extraction.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source-manifest.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source-delta.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/host-library-provenance.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-2/runtime-dependencies.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-2/vm002-interface-command.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-2/vm002-interface/report.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-1/provenance.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-1/configure.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-2/provenance.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-2/configure.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-3/provenance.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-3/configure.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-3/configure.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-3/configure.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-3/compile.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-3/compile.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-3/compile.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-4/provenance.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-4/profile.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-4/configure.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-4/configure.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-4/configure.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-4/compile.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-4/compile.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-4/compile.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-5/provenance.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-5/profile.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-5/configure.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-5/configure.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-5/configure.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-5/compile.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-5/compile.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-5/compile.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-5/build-report.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-6/provenance.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-6/profile.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-6/configure.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-6/configure.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-6/configure.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-6/compile.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-6/compile.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-6/compile.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build-report.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-1/version.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-1/version.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-1/version.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-1/machines.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-1/machines.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-1/machines.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-1/vm002-interface-command.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-1/binary-file.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-1/binary-libraries.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-1/target-config.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/version.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/version.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/version.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/machines.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/machines.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/machines.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/accelerators.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/accelerators.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/accelerators.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/cpu.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/cpu.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/cpu.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/options.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/options.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/options.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/stopped-empty-machine.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/stopped-empty-machine.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/stopped-empty-machine.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/check-final/check-report.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/controls-final/ignore-term-control.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/controls-final/ignore-term-control.samples.jsonl",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/controls-final/ignore-term-control.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/controls-final/pause-control.log",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/controls-final/controls-report.json",
+    "worktrees/vm-004-20261105/artifacts/qemu-host/qualification-sha256.json"
+  ],
+  "provenance": {
+    "source_pin": {
+      "id": "qemu-host-10.2.0",
+      "version": "10.2.0",
+      "source_url": "https://download.qemu.org/qemu-10.2.0.tar.xz",
+      "upstream_url": "https://gitlab.com/qemu-project/qemu",
+      "tag": "v10.2.0",
+      "tag_object": "75eb8d57c6b9577c8121e28169c3512cfe2d2544",
+      "commit": "698104725efad4b29079d857dfdebbd804e34c99",
+      "archive_sha256": "9e30ad1b8b9f7b4463001582d1ab297f39cfccea5d08540c0ca6d6672785883a",
+      "archive_size": 141093360,
+      "recorded_at": "2026-11-05T13:56:22.143532+00:00",
+      "signature_verified": false,
+      "origin": "Primary upstream HTTPS release archive;tag commit resolved independently through primary Git remote;archive hash pinned before extraction/reuse.",
+      "dependencies": [
+        {
+          "id": "qemu-dtc-libfdt",
+          "url": "https://gitlab.com/qemu-project/dtc.git",
+          "commit": "b6910bec11614980a21e46fbccc35934b671bd81",
+          "selection": "Exact revision in primary QEMU10.2.0 subprojects/dtc.wrap",
+          "archive_sha256": "1fb660c56f7c255b930f9763f58e0b3f3c59d1815fa11bc5cb01d01823540ba4",
+          "archive_kind": "git archive at pinned full SHA;no source changes",
+          "license": "libfdt GPL-2.0-or-later OR BSD-2-Clause;dtc GPL per component notices"
+        }
+      ]
+    },
+    "source_archive_sha256": "9e30ad1b8b9f7b4463001582d1ab297f39cfccea5d08540c0ca6d6672785883a",
+    "dependency_archive_sha256": "1fb660c56f7c255b930f9763f58e0b3f3c59d1815fa11bc5cb01d01823540ba4",
+    "reviewed_tools_sources_and_python_wheels": "worktrees/vm-004-20261105/artifacts/qemu-host/build-6/provenance.json",
+    "all_initial_source_files_manifest": "worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source-manifest.json",
+    "original_source_unchanged_check": "worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/source-delta.json",
+    "owned_profile": "worktrees/vm-004-20261105/artifacts/qemu-host/build-6/profile.json",
+    "actual_runtime_dependencies": "worktrees/vm-004-20261105/artifacts/qemu-host/check-2/runtime-dependencies.json",
+    "owned_source_sha256": {
+      "tools/build/qemu_host.py": "faaa9b707a8bb48b1ee502a2c58c9b876eb7859ad5b0ff6541bae27c20ed9f99",
+      "fixtures/public/qemu-host/source.json": "a8b004fc2c5ec0b497bee5a286470094848d2e73cd49d265d94f7f4ef9882691",
+      "fixtures/public/qemu-host/vm002.mak": "18e27e4b6107b22dd1d804ed6e8e9057afd02a5cd076bf75d9dc30156001ea7c",
+      "fixtures/public/qemu-host/ignore-term.py": "f7bc89f1702859863ea76c96eccf058e48724b164d93445d2421d82af81f3d40"
+    }
+  },
+  "binary": {
+    "outcome": "pass",
+    "recorded_at": "2026-11-05T14:17:08.778697+00:00",
+    "pin": {
+      "id": "qemu-host-10.2.0",
+      "version": "10.2.0",
+      "source_url": "https://download.qemu.org/qemu-10.2.0.tar.xz",
+      "upstream_url": "https://gitlab.com/qemu-project/qemu",
+      "tag": "v10.2.0",
+      "tag_object": "75eb8d57c6b9577c8121e28169c3512cfe2d2544",
+      "commit": "698104725efad4b29079d857dfdebbd804e34c99",
+      "archive_sha256": "9e30ad1b8b9f7b4463001582d1ab297f39cfccea5d08540c0ca6d6672785883a",
+      "archive_size": 141093360,
+      "recorded_at": "2026-11-05T13:56:22.143532+00:00",
+      "signature_verified": false,
+      "origin": "Primary upstream HTTPS release archive;tag commit resolved independently through primary Git remote;archive hash pinned before extraction/reuse.",
+      "dependencies": [
+        {
+          "id": "qemu-dtc-libfdt",
+          "url": "https://gitlab.com/qemu-project/dtc.git",
+          "commit": "b6910bec11614980a21e46fbccc35934b671bd81",
+          "selection": "Exact revision in primary QEMU10.2.0 subprojects/dtc.wrap",
+          "archive_sha256": "1fb660c56f7c255b930f9763f58e0b3f3c59d1815fa11bc5cb01d01823540ba4",
+          "archive_kind": "git archive at pinned full SHA;no source changes",
+          "license": "libfdt GPL-2.0-or-later OR BSD-2-Clause;dtc GPL per component notices"
+        }
+      ]
+    },
+    "binary": "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+    "binary_sha256": "bca8564182c786eb00e9f43c3153328f68e2edf50bfabe28236dbaac438acc11",
+    "binary_size": 25771232,
+    "guest_os_executed": false,
+    "limitation": "Source build alone does not qualify XNU guest execution."
+  },
+  "qualification": {
+    "outcome": "pass",
+    "recorded_at": "2026-11-05T14:21:00.668598+00:00",
+    "binary": "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+    "binary_sha256": "bca8564182c786eb00e9f43c3153328f68e2edf50bfabe28236dbaac438acc11",
+    "checks": [
+      "version",
+      "machines",
+      "accelerators",
+      "cpu",
+      "options",
+      "bounded-stopped-empty-machine"
+    ],
+    "guest_os_executed": false,
+    "xnu_executed": false,
+    "limitation": "No kernel loaded; these checks qualify only the host tool and stopping interface."
+  },
+  "resources": {
+    "compiler_jobs": 2,
+    "per_build_process_virtual_address_space_limit_bytes": 1073741824,
+    "aggregate_rss_stop_limit_bytes": 2147483648,
+    "min_memavailable_floor_bytes": 4294967296,
+    "final_compile_elapsed_seconds": 94.295,
+    "final_compile_peak_session_tree_rss_bytes": 984162304,
+    "final_compile_sample_count": 182,
+    "final_compile_minimum_MemAvailable_bytes": 14459912192,
+    "final_compile_maximum_full_PSI_avg10": 0.0,
+    "final_compile_events": [],
+    "lease": "Exclusive coordinator lease max2compilerjobs/~2GiB;released after successful build and paused-machine qualification."
+  },
+  "real_process_controls": {
+    "stopped_empty_machine_exit": 0,
+    "stopped_empty_machine_elapsed_seconds": 2.137,
+    "ignored_SIGTERM_exit": -9,
+    "ignored_SIGTERM_elapsed_seconds": 3.102,
+    "multi_process_groups_paused_and_resumed": true,
+    "no_live_owned_survivors": true
+  },
+  "retained_failures": [
+    {
+      "stage": "strict-source-extraction",
+      "exit_code": 1,
+      "reason": "Absolute EDK2 ROM symlink rejected;unsafe link never created. Partial extraction retained;retry excludes only unused roms subtree.",
+      "artifact": "worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0/extraction.json"
+    },
+    {
+      "stage": "build-1-before-configure",
+      "wrapper_exit_code": 1,
+      "reason": "Actual memory PSI prevented any configure spawn.",
+      "artifact": "worktrees/vm-004-20261105/artifacts/qemu-host/build-1/configure.json"
+    },
+    {
+      "stage": "build-2-before-configure",
+      "wrapper_exit_code": 1,
+      "reason": "Actual resource guard prevented any configure spawn.",
+      "artifact": "worktrees/vm-004-20261105/artifacts/qemu-host/build-2/configure.json"
+    },
+    {
+      "stage": "build-3-link",
+      "exit_code": 1,
+      "reason": "Missing genuine CXL cxl_fmws_get_all_sorted provider with default devices disabled. Root-PGID-only aggregate monitor on this first compile undercounted Ninja groups;aggregate measurement is unqualified.",
+      "artifact": "worktrees/vm-004-20261105/artifacts/qemu-host/build-3/compile.log"
+    },
+    {
+      "stage": "build-4-link",
+      "exit_code": 1,
+      "reason": "CXL Type3 source provider missing;resolved by genuine CXL_MEM_DEVICE selection.",
+      "artifact": "worktrees/vm-004-20261105/artifacts/qemu-host/build-4/compile.log"
+    },
+    {
+      "stage": "check-1-after-build-5",
+      "wrapper_exit_code": 1,
+      "binary_exit_code": -6,
+      "reason": "Actual QOM class registration lacked pcie-root-port-base;resolved with genuine PCIE_PORT selection.",
+      "artifact": "worktrees/vm-004-20261105/artifacts/qemu-host/check-1/machines.log"
+    }
+  ],
+  "VM002": {
+    "status": "blocked",
+    "original_owner": "codex-team-vm-20261105-am",
+    "owner_updated_primary_blocked_reason": true,
+    "existing_runner_read_only": true,
+    "implementation_files_edited": false,
+    "preflight_exit_code": 2,
+    "missing": [
+      "Explicit existing kernel file and reviewed build provenance"
+    ],
+    "guest_started": false,
+    "pid1_observed": false
+  },
+  "limitations": [
+    "Host tool/source/lifecycle qualification only;no kernel,guest OS,Linux substitute,XNU or owned guest PID1 execution.",
+    "Complete linked provenance-qualified selected QEMU/AVF XNU kernel,mockfs and PSCI exit remain external VM002 gates;no E1S object or hardware claims.",
+    "Primary release archive signature was not verified;independent primary tag resolution and pinned archive hashes are recorded without asserting signed archive-to-commit verification.",
+    "No global installation,shared references changes,phone/ADB/root/MMIO/flash/reboot,swap clearing,cache dropping or unrelated-process signaling.",
+    "Main make check remains coordinator integration step;VM004 left in_progress ready for review."
+  ]
+}
