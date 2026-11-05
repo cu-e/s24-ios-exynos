@@ -69,10 +69,10 @@ def run(argv, out, name, seconds=5, limit_mib=256):
 
 
 def main():
- ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--run',required=True);ap.add_argument('--guest',action='store_true',help='Requires exclusive coordinator lease before invocation');a=ap.parse_args()
+ ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--run',required=True);ap.add_argument('--experiment',required=True,help='Existing planned MAIN experiment for this task/owner');ap.add_argument('--guest',action='store_true',help='Requires exclusive coordinator lease before invocation');a=ap.parse_args()
  if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]*',a.run):raise ValueError('fresh simple name required')
  out=ROOT/'artifacts/crypto-des'/a.run;out.mkdir(parents=True,exist_ok=False)
- report={'experiment':'DES002','prior_host_planning_deviation':'DES001 plan rejected for prose procedure instead of existing file; host-arm1..4 not preregistered; retained honestly. DES002 registered before this fresh qualification and before every guest.', 'task':'KRN-032','kind':'host-test','origin':'local-host','outcome':'fail','recorded_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'argv':sys.argv,'commands':[],'source_reads':[],'source_pins':{'xnu':'c54f35ca767986246321eb901baf8f5ff7923f6a','mbedtls':'068ff080b369adfac81509f9b57b2afabaf82dc5'},'native_device':False,'xnu_executed':False,'provider_registered':False,'general_mode_api_qualified':False,'roundkey':'NULL, no selected caller demand, unsupported','helper_policy':'exactly8bytes; weak invalid nonzero, void parity invalid no-op','guest_requested':a.guest}
+ report={'experiment':a.experiment,'prior_host_planning_deviation':'DES001 plan rejected for prose procedure instead of existing file; host-arm1..4 not preregistered; retained honestly. Fresh runs require an actual planned MAIN experiment before any child execution.', 'task':'KRN-032','kind':'host-test','origin':'local-host','outcome':'fail','recorded_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'argv':sys.argv,'commands':[],'source_reads':[],'source_pins':{'xnu':'c54f35ca767986246321eb901baf8f5ff7923f6a','mbedtls':'068ff080b369adfac81509f9b57b2afabaf82dc5'},'native_device':False,'xnu_executed':False,'provider_registered':False,'general_mode_api_qualified':False,'roundkey':'NULL, no selected caller demand, unsupported','helper_policy':'exactly8bytes; weak invalid nonzero, void parity invalid no-op','guest_requested':a.guest}
  def command(argv,name,seconds=30,expected=0,budget=256):
   r=run(argv,out,name,seconds,budget);report['commands'].append(r)
   if expected is not None and (r['exit_code']!=expected or r['outcome']!='pass'):raise ValueError(name+' '+r['outcome']+' exit '+str(r['exit_code']))
@@ -83,6 +83,11 @@ def main():
   if p.returncode:raise ValueError('pinned Git object unavailable without lazy fetch')
   return p.stdout
  try:
+  (out/'preflight.json').write_text(json.dumps({'recorded_at':report['recorded_at'],'argv':sys.argv,'meminfo':Path('/proc/meminfo').read_text(),'memory_pressure':Path('/proc/pressure/memory').read_text()},indent=2)+'\n')
+  ledger=(MAIN/'state/lab.json').read_bytes();state=json.loads(ledger)
+  plans=[x for x in state['experiments'] if x['id']==a.experiment]
+  if len(plans)!=1 or plans[0]['status']!='planned' or plans[0]['task']!='KRN-032' or plans[0]['owner']!='codex-team-crypto-des-20261105-bs':raise ValueError('actual MAIN planned experiment for this task/owner required')
+  report['planning_record']=plans[0];report['planning_snapshot_sha256']=hashlib.sha256(ledger).hexdigest()
   report['commit']=subprocess.check_output(['git','-C',str(ROOT),'rev-parse','HEAD'],env=CHILD_ENV,text=True).strip()
   report['owned_dirty_at_start']=subprocess.check_output(['git','-C',str(ROOT),'status','--porcelain','--untracked-files=all','--','src/platform/crypto/des','docs/procedures/crypto-des'],env=CHILD_ENV,text=True)
   vendor=HERE/'vendor';prov=json.loads((vendor/'provenance.json').read_text())
@@ -179,11 +184,12 @@ def main():
    report['guest_resource_allowance']='Exclusive coordinator grant:256MiB guest RAM,512MiB total owned RSS including process/device/supervisor overhead; host/compiler runs retain256MiB. Floor4GiB and aggregate2GiB preserved.'
    guest(command,out,corpus,report,images,git)
   report['outcome']='pass';report['summary']='Genuine typed DES/TDES ECB/CBC/helper component: primary NIST and independent OpenSSL, sanitized host and typed ARM; actual CPU only if guest_cases present; no provider/general roundkey/privateApple/native/FIPS/sidechannel claim'
- except Exception as error:report['error']=repr(error)
+ except Exception as error:
+  report['error']=repr(error);report['summary']='Qualification failed/stopped without a pass claim: '+repr(error)
  finally:
   report['owned_source_hashes']={str(p.relative_to(ROOT)):digest(p) for p in sorted(HERE.rglob('*')) if p.is_file() and '__pycache__'not in str(p)}
   for p in [MAIN/'fixtures/public/avf-handoff/runtime.h',ROOT/'tools/build/qemu_host.py',ROOT/'tools/verify/avf_handoff.py']:report['owned_source_hashes'][str(p)]=digest(p)
-  report['artifact_hashes']={str(p.relative_to(ROOT)):digest(p) for p in sorted(out.rglob('*')) if p.is_file()};report['artifacts']=list(report['artifact_hashes']);report['finished_at']=datetime.datetime.now(datetime.timezone.utc).isoformat();(out/'evidence.json').write_text(json.dumps(report,indent=2)+'\n')
+  report['artifact_hashes']={str(p.relative_to(MAIN)):digest(p) for p in sorted(out.rglob('*')) if p.is_file()};report['artifacts']=list(report['artifact_hashes']);report['finished_at']=datetime.datetime.now(datetime.timezone.utc).isoformat();(out/'evidence.json').write_text(json.dumps(report,indent=2)+'\n')
  print(json.dumps({k:report.get(k) for k in ['outcome','error','commit','host_vectors','host_checks','arm_checks','target_layout','guest_cases']},indent=2));return 0 if report['outcome']=='pass' else 1
 
 def guest(command,out,corpus,report,images,git):
