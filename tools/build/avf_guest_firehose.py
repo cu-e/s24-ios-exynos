@@ -20,6 +20,9 @@ ROOT = Path(__file__).resolve().parents[2]
 NAMESPACE = 'worktrees/vm-008-20261105/artifacts/avf-kernel-headers'
 MANIFEST = NAMESPACE + '/handoff-1/next-full-object-manifest.json'
 MANIFEST_SHA256 = 'afc5cd206965de7e36a0aa17c4eb86a1f305689f386ccb22c55bd983567dd1dd'
+# SHA256 of the complete selected 261-token VM008 argv JSON, compact ASCII.
+# This is the source template; output substitutions happen only after admission.
+GUEST_ARGV_SHA256 = 'cf737937e6e6c74f00302f2bebcc1ec6a08329fb48ab35b451dd226f590113ca'
 REVISION = 'a641558f447659d90ad002ef0ee6f0212273fbfc'
 EXPORT_FLAGS = ['-DKERNEL=1', '-DOS_FIREHOSE_SPI=1',
                 '-DOS_VOUCHER_ACTIVITY_SPI_TYPES=1', '-UOS_VOUCHER_ACTIVITY_SPI']
@@ -49,6 +52,9 @@ def bound(path):
 
 def validate_guest_row(row, main, compiler):
     argv = row['next_owned_compile_argv_template']
+    frozen = json.dumps(argv, ensure_ascii=True, separators=(',', ':')).encode('ascii')
+    if hashlib.sha256(frozen).hexdigest() != GUEST_ARGV_SHA256:
+        raise ValueError('Complete frozen guest argv changed; extra, removed, reordered or overriding flags are forbidden')
     if (row['id'] != 'bsd/subr_log.o' or row['language'] != 'c' or
             argv[0] != str(compiler) or argv.count(row['bound_source']) != 1 or
             '-DARM64_BOARD_CONFIG_BCM2837' not in argv or
