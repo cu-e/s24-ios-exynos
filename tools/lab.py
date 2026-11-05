@@ -42,11 +42,42 @@ def read_json(path):
         raise LabError(f"Cannot read {path}: {exc}") from exc
 
 
-def within(root, value):
+def _within_resolved(root, value):
+    """Resolve a candidate below an already canonical project root."""
     path = (root / value).resolve()
-    if not path.is_relative_to(root.resolve()):
+    if path.parts[:len(root.parts)] != root.parts:
         raise LabError("Paths must stay inside the project, including symlinks")
     return path
+
+
+def within(root, value):
+    return _within_resolved(root.resolve(), value)
+
+
+class _ValidationFiles:
+    """Filesystem observations reused only until one validate() call returns."""
+
+    def __init__(self, root):
+        self.root = root.resolve()
+        self.paths = {}
+        self.files = {}
+
+    def within(self, value):
+        try:
+            return self.paths[value]
+        except KeyError:
+            path = _within_resolved(self.root, value)
+            self.paths[value] = path
+            return path
+
+    def is_file(self, value):
+        path = self.within(value)
+        try:
+            return self.files[path]
+        except KeyError:
+            result = path.is_file()
+            self.files[path] = result
+            return result
 
 
 def atomic_json(path, data):
@@ -138,8 +169,9 @@ def claim_task(state, task, owner, branch=None, worktree=None):
             task.pop(key, None)
 
 
-def evidence(root, relative, expected_kind=None):
-    path = within(root, relative)
+def evidence(root, relative, expected_kind=None, *, _files=None):
+    resolve = _files.within if _files is not None else lambda name: within(root, name)
+    path = resolve(relative)
     doc = read_json(path)
     if doc.get("kind") not in KINDS or doc.get("origin") not in ORIGINS:
         raise LabError("Evidence requires a valid kind and origin")
@@ -158,7 +190,7 @@ def evidence(root, relative, expected_kind=None):
     if doc["kind"] in {"android-userland", "native-device"}:
         if doc["origin"] != "local-device" or not doc.get("device_inventory"):
             raise LabError("Device evidence requires local-device origin and device_inventory")
-        inventory = read_json(within(root, doc["device_inventory"]))
+        inventory = read_json(resolve(doc["device_inventory"]))
         if inventory.get("origin") != "local-device" or not inventory.get("observed_at"):
             raise LabError("Inventory must be an actual dated local-device observation")
         if doc["kind"] == "native-device" and inventory.get("matches_reference_target") is not True:
@@ -167,13 +199,16 @@ def evidence(root, relative, expected_kind=None):
     if not isinstance(artifacts, list) or not artifacts:
         raise LabError("Evidence must reference at least one existing artifact")
     for name in artifacts:
-        if not within(root, name).is_file():
+        exists = _files.is_file(name) if _files is not None else resolve(name).is_file()
+        if not exists:
             raise LabError(f"Missing evidence artifact: {name}")
     return doc
 
 
-def evidence_hash(root, relative):
-    return hashlib.sha256(within(root, relative).read_bytes()).hexdigest()
+def evidence_hash(root, relative, *, _files=None):
+    path = _files.within(relative) if _files is not None else within(root, relative)
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
 def validate(root, state):
@@ -189,6 +224,7 @@ def validate(root, state):
         raise LabError("Task IDs must look like GPU-001")
     if len(set(ids)) != len(ids):
         raise LabError("Duplicate task IDs")
+    files = _ValidationFiles(root)
     visited, active = set(), set()
 
     def walk(identifier):
@@ -218,7 +254,7 @@ def validate(root, state):
         for name in task["paths"]:
             if Path(name).is_absolute() or ".." in Path(name).parts or any(c in name for c in "*?[]"):
                 raise LabError("Task boundaries must be literal relative paths without traversal or globs")
-            if within(root, name) != root.resolve() / name:
+            if files.within(name) != files.root / name:
                 raise LabError("Use canonical task paths, not symlink aliases")
         if type(task.get("priority", 50)) is not int or not 0 <= task.get("priority", 50) <= 100:
             raise LabError("Task priority must be an integer from 0 to 100")
@@ -233,7 +269,7 @@ def validate(root, state):
         for key in ["progress_note", "next_step", "branch", "worktree", "priority_reason"]:
             if key in task and (not isinstance(task[key], str) or len(task[key]) > 4000):
                 raise LabError(f"Invalid task context: {key}")
-        if task.get("handoff") and not within(root, task["handoff"]).is_file():
+        if task.get("handoff") and not files.is_file(task["handoff"]):
             raise LabError("Handoff must reference an existing project file")
         if task.get("last_heartbeat"):
             try:
@@ -246,10 +282,10 @@ def validate(root, state):
         if task["status"] == "done":
             if prerequisites(state, task):
                 raise LabError(f"Completed task has incomplete dependencies: {task['id']}")
-            doc = evidence(root, task.get("evidence", ""), task["evidence_kind"])
+            doc = evidence(root, task.get("evidence", ""), task["evidence_kind"], _files=files)
             if doc["outcome"] != "pass":
                 raise LabError(f"Completed task needs passing evidence: {task['id']}")
-            if task.get("evidence_sha256") != evidence_hash(root, task["evidence"]):
+            if task.get("evidence_sha256") != evidence_hash(root, task["evidence"], _files=files):
                 raise LabError(f"Recorded evidence changed: {task['id']}")
     experiments = state["experiments"]
     if len({e["id"] for e in experiments}) != len(experiments):
@@ -260,15 +296,15 @@ def validate(root, state):
             raise LabError("Experiment kind disagrees with its task")
         if exp["status"] not in {"planned", "recorded"}:
             raise LabError("Invalid experiment status")
-        if not within(root, exp["procedure"]).is_file():
+        if not files.is_file(exp["procedure"]):
             raise LabError("Experiment procedure must exist")
         if exp["timeout_seconds"] <= 0:
             raise LabError("An experiment requires a positive timeout")
         if exp["status"] == "recorded":
-            doc = evidence(root, exp["evidence"], exp["kind"])
+            doc = evidence(root, exp["evidence"], exp["kind"], _files=files)
             if exp["outcome"] != doc["outcome"]:
                 raise LabError("Experiment outcome disagrees with evidence")
-            if exp.get("evidence_sha256") != evidence_hash(root, exp["evidence"]):
+            if exp.get("evidence_sha256") != evidence_hash(root, exp["evidence"], _files=files):
                 raise LabError(f"Recorded evidence changed: {exp['id']}")
     sources = read_json(root / "research/sources.json")
     source_ids = [s["id"] for s in sources["sources"]]
