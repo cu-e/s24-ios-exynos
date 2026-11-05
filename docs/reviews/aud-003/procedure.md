@@ -1,0 +1,5 @@
+# AUD-003 independent review procedure
+
+2026-11-05; REV-013; owner codex-team-review-audio-20261105-bo.
+
+Review exact cbec42fe1921b3571f440666075ab4c69566acbb plus7854ddf6deb8af7351286385d946b6588e3cb513. Audit authoritative capsule/index, all selected pinned IPC/PCM sources and unchanged genuine pointer/frame-format/oracle fragments using read-only inputs and Git guards. Independently compile one bounded ASan/UBSan harness using the complete original IPC header and source-backed pointer oracle; challenge period-versus-ring, physical S24 containers, absolute IOVA/flooring, snapshot/extent/counters/Stop/closed/lease/error/fence transitions. Reproduce live reinitialization and stale-token aliasing to determine whether initializer lifetime preconditions are explicit enough. Exercise hardware-fallback abort as an expected host negative, never hardware. One small compiler job<=256MiB RSS, finite command timeouts; no DSP, camera/phone/ADB, real DMA/MMIO/audio, firmware, native link or broad build. Save dated evidence/source/tool/artifact hashes, commands/exits and review-only handoff/commit. Retain in-progress until coordinator acceptance.
