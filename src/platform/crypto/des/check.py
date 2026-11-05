@@ -90,6 +90,8 @@ def main():
   report['planning_record']=plans[0];report['planning_snapshot_sha256']=hashlib.sha256(ledger).hexdigest()
   report['commit']=subprocess.check_output(['git','-C',str(ROOT),'rev-parse','HEAD'],env=CHILD_ENV,text=True).strip()
   report['owned_dirty_at_start']=subprocess.check_output(['git','-C',str(ROOT),'status','--porcelain','--untracked-files=all','--','src/platform/crypto/des','docs/procedures/crypto-des'],env=CHILD_ENV,text=True)
+  sys.path.insert(0,str(HERE));from verify_vendor import verify
+  report['canonical_vendor']=verify()
   vendor=HERE/'vendor';prov=json.loads((vendor/'provenance.json').read_text())
   for name,wanted in prov['files'].items():
    if digest(vendor/name)!=wanted:raise ValueError('vendor hash '+name)
@@ -113,6 +115,9 @@ def main():
   # Exact accepted immutable XTS artifacts supply the only global zeroizer.
   shared=MAIN/'worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2';shared_report=shared/'evidence.json';sr=json.loads(shared_report.read_text())
   if digest(shared_report)!='c5064a512ba295d1cd447af1e73ac6fc4f9c0ffeaf5b78f09ca0f80fc1f6216c' or sr['outcome']!='pass':raise ValueError('accepted XTS evidence changed')
+  runtime=MAIN/'fixtures/public/avf-handoff/runtime.h'
+  if digest(runtime)!=sr['owned_source_hashes']['fixtures/public/avf-handoff/runtime.h']:raise ValueError('accepted unchanged runtime header differs')
+  report['shared_runtime']={'path':str(runtime),'sha256':digest(runtime),'unchanged_against_accepted_XTS':True}
   report['zeroizer_dependency']={'accepted_report':str(shared_report),'sha256':digest(shared_report),'objects':{}}
   for name in ['host-adapter.o','host-aes.o','arm-adapter.o','arm-aes.o','arm-memory.o']:
    p=shared/name;key=str(p.relative_to(MAIN/'worktrees/krn-029-20261105'))
