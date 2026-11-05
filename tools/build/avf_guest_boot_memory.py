@@ -190,7 +190,7 @@ def command_line(package, fdt_args, ramdisk, rules):
     require(len(fdt_args) < rules['BOOT_LINE_LENGTH'], 'FDT bootargs would truncate')
     # This task supports the console-only layout. Refuse memory carveouts rather
     # than reporting the uncarved window for them.
-    require(not any(word in fdt_args for word in ('scfb.', 'sccam.', 'scgpu.', 'scsnd.')), 'Shared-memory carveouts need a separate qualified plan')
+    require(not any(word in value for word in ('scfb.', 'sccam.', 'scgpu.', 'scsnd.') for value in (args, fdt_args)), 'Shared-memory carveouts need a separate qualified plan')
     def has(word):
         return any(part.startswith(word) for value in (args, fdt_args) for part in value.split(' '))
     command = 'debug=0x8 ' if has('serial=') else 'debug=0x8 serial=3 '
