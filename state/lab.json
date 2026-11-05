@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T03:44:36+00:00",
+  "updated_at": "2026-11-05T03:56:51+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -2257,10 +2257,18 @@
         "Perform static extraction and independent checks on synthetic or offline inputs",
         "Version only sanitized schema facts and reproducible analysis reports"
       ],
-      "status": "pending",
-      "owner": null,
+      "status": "blocked",
+      "owner": "codex-ril-inputs-20261105-m",
       "scope": "host",
-      "evidence_kind": "host-test"
+      "evidence_kind": "host-test",
+      "started_at": "2026-11-05T03:56:48+00:00",
+      "last_heartbeat": "2026-11-05T03:56:51+00:00",
+      "updated_at": "2026-11-05T03:56:51+00:00",
+      "branch": "main",
+      "progress_note": "CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.",
+      "next_step": "Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay",
+      "handoff": "docs/procedures/ril/handoff.md",
+      "blocked_reason": "No explicitly supplied matching BYH3 RIL bytes/hash or vendor-image artifact; CELL-010 verified current ordinary shell and ADB sync access denial. Static schema extraction cannot run on file metadata or another-device examples."
     },
     {
       "id": "RES-004",
@@ -2986,6 +2994,48 @@
       "next_step": "Supply provenanced local SDK and matching DriverKit headers, then compile and inspect all actual E1S dependency archives; independent host tasks may proceed meanwhile",
       "handoff": "research/notes/KRN-003-dependencies.md",
       "blocked_reason": "Actual pthread compilation lacks genuine TargetConditionals.h; complete SDK/export ABI and matching DriverKit generated-header inputs have no explicitly supplied/provenanced local paths. Firehose and wrapper component passes do not satisfy full dependency acceptance."
+    },
+    {
+      "id": "CELL-010",
+      "title": "Capture exact BYH3 vendor RIL inputs through authorized read-only ADB",
+      "priority": 85,
+      "status": "blocked",
+      "owner": "codex-ril-inputs-20261105-m",
+      "scope": "android-readonly",
+      "evidence_kind": "android-userland",
+      "depends_on": [
+        "DEV-001",
+        "CELL-001"
+      ],
+      "paths": [
+        "tools/research/ril-capture",
+        "docs/procedures/ril-capture",
+        "fixtures/public/ril-capture",
+        "tests/test_ril_capture.py"
+      ],
+      "acceptance": [
+        "Require an already-authorized selected SM-S921B/e1s endpoint and exact S921BXXS9BYH3 identity before bounded vendor-system file access; no pairing, su, root, settings, installs, reboot or modem operations",
+        "Copy only selected non-personal vendor RIL shared libraries into ignored private artifacts, recording source device/build and actual local SHA256 with remote checksums when permitted or two independent ordinary ADB sync reads with identical bytes/size; do not claim an unavailable remote hash, execute or publish the binaries",
+        "Reject wrong device/build, unbounded/non-regular/wrong-architecture/mutated file inputs and retain unavailable data honestly; host guard tests remain separate from actual device evidence"
+      ],
+      "sources": [
+        "adb-docs",
+        "base-mirror",
+        "s24-linux"
+      ],
+      "steps": [
+        "Implement a narrow metadata-first collector and host guards using the existing read-only device authorization",
+        "Register and perform one bounded passive acquisition if an authorized exact device is present",
+        "Bind captured input provenance to future offline CELL-009 analysis; no command replay or live RIL code execution"
+      ],
+      "started_at": "2026-11-05T03:48:29+00:00",
+      "last_heartbeat": "2026-11-05T03:56:50+00:00",
+      "updated_at": "2026-11-05T03:56:50+00:00",
+      "branch": "main",
+      "progress_note": "Eight host guard groups pass. Exact live BYH3/uid2000 context reverified; two regular vendor RIL files exist, but ordinary shell checksum and normal ADB sync pulls are denied. No binary bytes acquired or privileges changed.",
+      "next_step": "Use an explicitly supplied matching local RIL/vendor image for offline analysis, or a separately user-authorized future acquisition task; do not retry current access boundary",
+      "handoff": "docs/procedures/ril-capture/handoff.md",
+      "blocked_reason": "Existing exact-BYH3 vendor RIL files deny current uid2000 shell checksums and ordinary authorized ADB sync pulls; actual file bytes/hash cannot be acquired within approved current read-only access. No supplied local matching copy exists in this task."
     }
   ],
   "experiments": [
@@ -3784,6 +3834,66 @@
       "evidence_sha256": "8cd1624b495c83c418749c4c6f88a2c24abdc33d192f0bf172381cd01c18e577",
       "outcome": "pass",
       "recorded_at": "2026-11-05T03:42:26+00:00"
+    },
+    {
+      "id": "RILINPUT-001",
+      "task": "CELL-010",
+      "owner": "codex-ril-inputs-20261105-m",
+      "kind": "android-userland",
+      "status": "recorded",
+      "hypothesis": "An already-authorized exact SM-S921B/e1s/BYH3 shell can provide a bounded regular primary vendor RIL library with unchanged remote/local hashes through passive reads only",
+      "procedure": "docs/procedures/ril-capture/README.md",
+      "timeout_seconds": 240,
+      "created_at": "2026-11-05T03:50:59+00:00",
+      "evidence": "state/evidence/RILINPUT-001.json",
+      "evidence_sha256": "df40bca826c78c3323eeeb6b2b680c753f6c89f5c1be92fd1389eceec558b28f",
+      "outcome": "inconclusive",
+      "recorded_at": "2026-11-05T03:52:50+00:00"
+    },
+    {
+      "id": "RILINPUT-002",
+      "task": "CELL-010",
+      "owner": "codex-ril-inputs-20261105-m",
+      "kind": "android-userland",
+      "status": "recorded",
+      "hypothesis": "A unique USB endpoint tagged SM_S921B/e1s can be selected explicitly from passive ADB metadata and independently reverified before exact-BYH3 vendor code acquisition",
+      "procedure": "docs/procedures/ril-capture/README.md",
+      "timeout_seconds": 240,
+      "created_at": "2026-11-05T03:51:41+00:00",
+      "evidence": "state/evidence/RILINPUT-002.json",
+      "evidence_sha256": "58a301314c093f44625dc1c8fce1875d69a63d753caf483d632f6ce8808db1b4",
+      "outcome": "inconclusive",
+      "recorded_at": "2026-11-05T03:52:51+00:00"
+    },
+    {
+      "id": "RILINPUT-003",
+      "task": "CELL-010",
+      "owner": "codex-ril-inputs-20261105-m",
+      "kind": "android-userland",
+      "status": "recorded",
+      "hypothesis": "One authorized exact model/device endpoint can be selected without assuming USB tag availability and independently rechecked for exact BYH3 properties/uid before passive library copies with matching hashes",
+      "procedure": "docs/procedures/ril-capture/README.md",
+      "timeout_seconds": 240,
+      "created_at": "2026-11-05T03:52:51+00:00",
+      "evidence": "state/evidence/RILINPUT-003.json",
+      "evidence_sha256": "690fb7afa9d7e074a8627b2ce1aac0dca4e309c4807f2a6921d5b8cadcd5b9b5",
+      "outcome": "inconclusive",
+      "recorded_at": "2026-11-05T03:54:40+00:00"
+    },
+    {
+      "id": "RILINPUT-004",
+      "task": "CELL-010",
+      "owner": "codex-ril-inputs-20261105-m",
+      "kind": "android-userland",
+      "status": "recorded",
+      "hypothesis": "Existing-permission ordinary ADB sync service may provide exact-BYH3 vendor code even when shell checksums are unavailable; two independent full reads must match and unavailable remote hashes stay null, with no privilege or phone-state change",
+      "procedure": "docs/procedures/ril-capture/README.md",
+      "timeout_seconds": 240,
+      "created_at": "2026-11-05T03:54:41+00:00",
+      "evidence": "state/evidence/RILINPUT-004.json",
+      "evidence_sha256": "b02ecbb7a3e40f5923bf3dedcae4faf40cbeb7e7375cc5cc6ee024b6557f4890",
+      "outcome": "inconclusive",
+      "recorded_at": "2026-11-05T03:56:48+00:00"
     }
   ],
   "events": [
@@ -7436,6 +7546,179 @@
           "last_heartbeat": "2026-11-05T03:44:36+00:00",
           "branch": "main",
           "handoff": "docs/procedures/esim-profile/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:48:28+00:00",
+      "action": "task.add:CELL-010",
+      "owner": "codex-ril-inputs-20261105-m",
+      "tasks": [
+        {
+          "id": "CELL-010",
+          "status": "pending",
+          "owner": null,
+          "priority": 85
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:48:29+00:00",
+      "action": "task.claim:CELL-010",
+      "owner": "codex-ril-inputs-20261105-m",
+      "tasks": [
+        {
+          "id": "CELL-010",
+          "status": "in_progress",
+          "owner": "codex-ril-inputs-20261105-m",
+          "priority": 85,
+          "last_heartbeat": "2026-11-05T03:48:29+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:50:59+00:00",
+      "action": "experiment.plan:RILINPUT-001",
+      "owner": "codex-ril-inputs-20261105-m"
+    },
+    {
+      "at": "2026-11-05T03:51:41+00:00",
+      "action": "experiment.plan:RILINPUT-002",
+      "owner": "codex-ril-inputs-20261105-m"
+    },
+    {
+      "at": "2026-11-05T03:52:50+00:00",
+      "action": "experiment.record:RILINPUT-001",
+      "owner": "codex-ril-inputs-20261105-m"
+    },
+    {
+      "at": "2026-11-05T03:52:51+00:00",
+      "action": "experiment.record:RILINPUT-002",
+      "owner": "codex-ril-inputs-20261105-m"
+    },
+    {
+      "at": "2026-11-05T03:52:51+00:00",
+      "action": "experiment.plan:RILINPUT-003",
+      "owner": "codex-ril-inputs-20261105-m"
+    },
+    {
+      "at": "2026-11-05T03:54:40+00:00",
+      "action": "experiment.record:RILINPUT-003",
+      "owner": "codex-ril-inputs-20261105-m"
+    },
+    {
+      "at": "2026-11-05T03:54:41+00:00",
+      "action": "task.refine:CELL-010:actual-sync-byte-verification-without-root",
+      "owner": "codex-ril-inputs-20261105-m",
+      "tasks": [
+        {
+          "id": "CELL-010",
+          "status": "in_progress",
+          "owner": "codex-ril-inputs-20261105-m",
+          "priority": 85,
+          "progress_note": "Actual target/BYH3/uid2000 reverified. Shell checksum denied for two regular vendor libraries; no root requested. Next test ordinary existing-permission ADB sync reads twice; preserve unavailable remote checksum and require actual complete byte agreement.",
+          "last_heartbeat": "2026-11-05T03:48:29+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:54:41+00:00",
+      "action": "experiment.plan:RILINPUT-004",
+      "owner": "codex-ril-inputs-20261105-m"
+    },
+    {
+      "at": "2026-11-05T03:56:48+00:00",
+      "action": "experiment.record:RILINPUT-004",
+      "owner": "codex-ril-inputs-20261105-m"
+    },
+    {
+      "at": "2026-11-05T03:56:48+00:00",
+      "action": "task.claim:CELL-009",
+      "owner": "codex-ril-inputs-20261105-m",
+      "tasks": [
+        {
+          "id": "CELL-009",
+          "status": "in_progress",
+          "owner": "codex-ril-inputs-20261105-m",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T03:56:48+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:56:49+00:00",
+      "action": "task.update:CELL-010",
+      "owner": "codex-ril-inputs-20261105-m",
+      "tasks": [
+        {
+          "id": "CELL-010",
+          "status": "in_progress",
+          "owner": "codex-ril-inputs-20261105-m",
+          "priority": 85,
+          "progress_note": "Eight host guard groups pass. Exact live BYH3/uid2000 context reverified; two regular vendor RIL files exist, but ordinary shell checksum and normal ADB sync pulls are denied. No binary bytes acquired or privileges changed.",
+          "next_step": "Use an explicitly supplied matching local RIL/vendor image for offline analysis, or a separately user-authorized future acquisition task; do not retry current access boundary",
+          "last_heartbeat": "2026-11-05T03:56:49+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/ril-capture/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:56:50+00:00",
+      "action": "task.block:CELL-010",
+      "owner": "codex-ril-inputs-20261105-m",
+      "tasks": [
+        {
+          "id": "CELL-010",
+          "status": "blocked",
+          "owner": "codex-ril-inputs-20261105-m",
+          "priority": 85,
+          "progress_note": "Eight host guard groups pass. Exact live BYH3/uid2000 context reverified; two regular vendor RIL files exist, but ordinary shell checksum and normal ADB sync pulls are denied. No binary bytes acquired or privileges changed.",
+          "next_step": "Use an explicitly supplied matching local RIL/vendor image for offline analysis, or a separately user-authorized future acquisition task; do not retry current access boundary",
+          "blocked_reason": "Existing exact-BYH3 vendor RIL files deny current uid2000 shell checksums and ordinary authorized ADB sync pulls; actual file bytes/hash cannot be acquired within approved current read-only access. No supplied local matching copy exists in this task.",
+          "last_heartbeat": "2026-11-05T03:56:50+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/ril-capture/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:56:50+00:00",
+      "action": "task.update:CELL-009",
+      "owner": "codex-ril-inputs-20261105-m",
+      "tasks": [
+        {
+          "id": "CELL-009",
+          "status": "in_progress",
+          "owner": "codex-ril-inputs-20261105-m",
+          "priority": 80,
+          "progress_note": "CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.",
+          "next_step": "Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay",
+          "last_heartbeat": "2026-11-05T03:56:50+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/ril/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:56:51+00:00",
+      "action": "task.block:CELL-009",
+      "owner": "codex-ril-inputs-20261105-m",
+      "tasks": [
+        {
+          "id": "CELL-009",
+          "status": "blocked",
+          "owner": "codex-ril-inputs-20261105-m",
+          "priority": 80,
+          "progress_note": "CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.",
+          "next_step": "Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay",
+          "blocked_reason": "No explicitly supplied matching BYH3 RIL bytes/hash or vendor-image artifact; CELL-010 verified current ordinary shell and ADB sync access denial. Static schema extraction cannot run on file metadata or another-device examples.",
+          "last_heartbeat": "2026-11-05T03:56:51+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/ril/handoff.md"
         }
       ]
     }
