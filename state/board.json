@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T05:52:41+00:00",
-  "ledger_updated_at": "2026-11-05T05:52:41+00:00",
-  "registry_sha256": "42048c5491d6952801af1d7293ad51f7e1f76d9dce6e572c6fbc99dcfd62fe6d",
+  "generated_at": "2026-11-05T06:12:08+00:00",
+  "ledger_updated_at": "2026-11-05T06:12:07+00:00",
+  "registry_sha256": "290b2313219787ce68d12c175bcbf04fd33be9ff745a4f97531daa989498d0e8",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
-      "KRN-006",
+      "KRN-007",
       "VM-002",
       "USB-001",
       "SEN-001",
@@ -71,6 +71,7 @@
       "BT-005"
     ],
     "done": [
+      "KRN-006",
       "KRN-005",
       "RES-008",
       "KRN-002",
@@ -107,11 +108,47 @@
   },
   "tasks": [
     {
+      "id": "KRN-007",
+      "title": "Generate witnessed selected XNU component configuration and compile actual kernel units",
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 98,
+      "depends_on": [
+        "KRN-006"
+      ],
+      "paths": [
+        "tools/build/xnu_kernel_config.py",
+        "patches/kernel-config",
+        "fixtures/public/xnu-kernel-config",
+        "docs/procedures/xnu-kernel-config.md"
+      ],
+      "sources": [
+        "apple-xnu",
+        "xnu-tapi"
+      ],
+      "acceptance": [
+        "Trace exact selected RELEASE/ARM64/E1S config inputs, component Makefile private defines and generated meta_features.h without invented feature values or modifying the original KRN-001 source tree",
+        "Build/run the actual public configuration generator in a fresh isolated output tree, or preserve exact build/input failures with hashes and commands; source-only inspection cannot establish generated output correctness",
+        "Compile genuine kalloc.c, OSData.cpp and pe_identify_machine.c with real generated configuration and the recorded hardened compiler; classify each failure precisely and never claim whole-kernel/native support from object success",
+        "Keep immutable compiler/kernel/IIG witnesses and all other owners and device scopes unchanged; publish reproducible requirements for the next full-kernel step"
+      ],
+      "steps": [
+        "Verify the HARDEN-002 compiler and HARDEN-005 regression plus prepared XNU/IIG/source witnesses",
+        "Inspect SETUP/config/mkheaders.c, component config files and Makefile templates before invoking the configuration tool",
+        "Generate actual feature/export inputs with provenance, compile actual units with metadata checks enabled and retain all diagnostics"
+      ],
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/KRN-007.md"
+    },
+    {
       "id": "KRN-006",
       "title": "Harden experimental XNU compiler AST and whole-kernel expression coverage",
       "priority": 97,
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-compiler-hardening-20261105-q",
       "scope": "host",
       "evidence_kind": "host-test",
       "depends_on": [
@@ -139,7 +176,17 @@
         "Inspect actual ExprConstant/ItaniumMangle enum gaps rather than assuming unexercised expressions are safe",
         "Apply small patches in fresh copies/relinked archives, retain all failures and hand off broader real compiler/source coverage"
       ],
-      "column": "ready",
+      "started_at": "2026-11-05T05:55:05+00:00",
+      "last_heartbeat": "2026-11-05T06:12:06+00:00",
+      "updated_at": "2026-11-05T06:12:07+00:00",
+      "branch": "main",
+      "progress_note": "Bounded AST/mangling/PCH/SFINAE and actual source-unit criteria pass;132 repository tests pass. Independent integrity audit verifies11 evidence capsules/1068 artifact digests,10889 original compiler source files,198 build inputs and5111 prepared kernel files. Device scopes and all other owners unchanged.",
+      "next_step": "KRN-007: build/run genuine selected configuration generator and compile units with actual generated meta_features and component private defines; full kernel/native gates remain",
+      "handoff": "docs/procedures/xnu-compiler-hardening.md",
+      "evidence": "state/evidence/KRN-006.json",
+      "evidence_sha256": "8504033d293b7d7bcb1b6a3e1a8527477e966295ff7481178c0d403056d1378d",
+      "finished_at": "2026-11-05T06:12:07+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/KRN-006.md"
     },
@@ -3777,183 +3824,171 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-05T05:04:15+00:00",
-      "action": "experiment.plan:TYPECOMP-002",
-      "owner": "codex-compiler-types-20261105-p"
+      "at": "2026-11-05T06:03:24+00:00",
+      "action": "experiment.record:HARDEN-001",
+      "owner": "codex-compiler-hardening-20261105-q"
     },
     {
-      "at": "2026-11-05T05:06:03+00:00",
-      "action": "task.update:KRN-005",
-      "owner": "codex-compiler-types-20261105-p",
-      "tasks": [
-        {
-          "id": "KRN-005",
-          "status": "in_progress",
-          "owner": "codex-compiler-types-20261105-p",
-          "priority": 96,
-          "progress_note": "TYPECOMP-001 proves all four installed Clang profiles lack all four XNU-specific APIs and fail genuine selected allocator/metaclass compiles. A real private source Clang17 extension build is now running as TYPECOMP-002; full patched source witness and streamed Ninja logs retained, no constant wrappers.",
-          "next_step": "Observe actual compiler build session19378 and preserve result before applying separately prepared type-only parser dispatch patch0002; then qualify real target metadata and selected call sites",
-          "last_heartbeat": "2026-11-05T05:06:03+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/xnu-compiler-types.md"
-        }
-      ]
+      "at": "2026-11-05T06:03:56+00:00",
+      "action": "experiment.plan:HARDEN-002",
+      "owner": "codex-compiler-hardening-20261105-q"
     },
     {
-      "at": "2026-11-05T05:10:19+00:00",
-      "action": "experiment.plan:TYPECOMP-003",
-      "owner": "codex-compiler-types-20261105-p"
+      "at": "2026-11-05T06:04:20+00:00",
+      "action": "experiment.record:HARDEN-002",
+      "owner": "codex-compiler-hardening-20261105-q"
     },
     {
-      "at": "2026-11-05T05:10:23+00:00",
-      "action": "experiment.record:TYPECOMP-003",
-      "owner": "codex-compiler-types-20261105-p"
+      "at": "2026-11-05T06:05:19+00:00",
+      "action": "experiment.plan:HARDEN-003",
+      "owner": "codex-compiler-hardening-20261105-q"
     },
     {
-      "at": "2026-11-05T05:11:42+00:00",
-      "action": "task.refine:KRN-005:complete-compiler-source-review-files",
-      "owner": "codex-compiler-types-20261105-p",
-      "tasks": [
-        {
-          "id": "KRN-005",
-          "status": "in_progress",
-          "owner": "codex-compiler-types-20261105-p",
-          "priority": 96,
-          "progress_note": "TYPECOMP-001 proves all four installed Clang profiles lack all four XNU-specific APIs and fail genuine selected allocator/metaclass compiles. A real private source Clang17 extension build is now running as TYPECOMP-002; full patched source witness and streamed Ninja logs retained, no constant wrappers.",
-          "next_step": "Observe actual compiler build session19378 and preserve result before applying separately prepared type-only parser dispatch patch0002; then qualify real target metadata and selected call sites",
-          "last_heartbeat": "2026-11-05T05:06:03+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/xnu-compiler-types.md"
-        }
-      ]
+      "at": "2026-11-05T06:05:33+00:00",
+      "action": "experiment.record:HARDEN-003",
+      "owner": "codex-compiler-hardening-20261105-q"
     },
     {
-      "at": "2026-11-05T05:19:21+00:00",
-      "action": "experiment.plan:TYPECOMP-004",
-      "owner": "codex-compiler-types-20261105-p"
+      "at": "2026-11-05T06:05:33+00:00",
+      "action": "experiment.plan:HARDEN-004",
+      "owner": "codex-compiler-hardening-20261105-q"
     },
     {
-      "at": "2026-11-05T05:19:22+00:00",
-      "action": "experiment.record:TYPECOMP-004",
-      "owner": "codex-compiler-types-20261105-p"
+      "at": "2026-11-05T06:05:57+00:00",
+      "action": "experiment.record:HARDEN-004",
+      "owner": "codex-compiler-hardening-20261105-q"
     },
     {
-      "at": "2026-11-05T05:30:15+00:00",
-      "action": "experiment.record:TYPECOMP-002",
-      "owner": "codex-compiler-types-20261105-p"
+      "at": "2026-11-05T06:05:58+00:00",
+      "action": "experiment.plan:HARDEN-005",
+      "owner": "codex-compiler-hardening-20261105-q"
     },
     {
-      "at": "2026-11-05T05:30:29+00:00",
-      "action": "experiment.plan:TYPECOMP-005",
-      "owner": "codex-compiler-types-20261105-p"
+      "at": "2026-11-05T06:06:29+00:00",
+      "action": "experiment.record:HARDEN-005",
+      "owner": "codex-compiler-hardening-20261105-q"
     },
     {
-      "at": "2026-11-05T05:32:28+00:00",
-      "action": "experiment.record:TYPECOMP-005",
-      "owner": "codex-compiler-types-20261105-p"
-    },
-    {
-      "at": "2026-11-05T05:33:27+00:00",
-      "action": "experiment.plan:TYPECOMP-006",
-      "owner": "codex-compiler-types-20261105-p"
-    },
-    {
-      "at": "2026-11-05T05:35:20+00:00",
-      "action": "experiment.record:TYPECOMP-006",
-      "owner": "codex-compiler-types-20261105-p"
-    },
-    {
-      "at": "2026-11-05T05:35:21+00:00",
-      "action": "experiment.plan:TYPECOMP-007",
-      "owner": "codex-compiler-types-20261105-p"
-    },
-    {
-      "at": "2026-11-05T05:37:38+00:00",
-      "action": "experiment.record:TYPECOMP-007",
-      "owner": "codex-compiler-types-20261105-p"
-    },
-    {
-      "at": "2026-11-05T05:37:39+00:00",
-      "action": "experiment.plan:TYPECOMP-008",
-      "owner": "codex-compiler-types-20261105-p"
-    },
-    {
-      "at": "2026-11-05T05:40:29+00:00",
-      "action": "experiment.record:TYPECOMP-008",
-      "owner": "codex-compiler-types-20261105-p"
-    },
-    {
-      "at": "2026-11-05T05:43:23+00:00",
-      "action": "task.refine:KRN-005:publish-actual-source-compiler-profile",
-      "owner": "codex-compiler-types-20261105-p",
-      "tasks": [
-        {
-          "id": "KRN-005",
-          "status": "in_progress",
-          "owner": "codex-compiler-types-20261105-p",
-          "priority": 96,
-          "progress_note": "TYPECOMP-001 proves all four installed Clang profiles lack all four XNU-specific APIs and fail genuine selected allocator/metaclass compiles. A real private source Clang17 extension build is now running as TYPECOMP-002; full patched source witness and streamed Ninja logs retained, no constant wrappers.",
-          "next_step": "Observe actual compiler build session19378 and preserve result before applying separately prepared type-only parser dispatch patch0002; then qualify real target metadata and selected call sites",
-          "last_heartbeat": "2026-11-05T05:06:03+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/xnu-compiler-types.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T05:43:24+00:00",
-      "action": "task.add:KRN-006",
-      "owner": "codex-compiler-types-20261105-p",
+      "at": "2026-11-05T06:06:30+00:00",
+      "action": "task.update:KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
       "tasks": [
         {
           "id": "KRN-006",
+          "status": "in_progress",
+          "owner": "codex-compiler-hardening-20261105-q",
+          "priority": 97,
+          "progress_note": "Reproduced SIGTRAP and invalid template symbol names; real new AST archive fixes evaluator and all three vendor-expression mangles. C/C++ PCH controls pass; genuine OSData.cpp compiles. Prior seven metadata cases, six negatives, three mutations and17 interfaces retain pass.",
+          "next_step": "Trace per-component private defines behind kalloc/pexpert diagnostics; preserve immutable reports and complete acceptance handoff",
+          "last_heartbeat": "2026-11-05T06:06:30+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-compiler-hardening.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:07:31+00:00",
+      "action": "experiment.plan:HARDEN-006",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:07:59+00:00",
+      "action": "experiment.record:HARDEN-006",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:08:00+00:00",
+      "action": "experiment.plan:HARDEN-007",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:08:32+00:00",
+      "action": "experiment.record:HARDEN-007",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:09:16+00:00",
+      "action": "task.add:KRN-007",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "tasks": [
+        {
+          "id": "KRN-007",
           "status": "pending",
           "owner": null,
-          "priority": 97
+          "priority": 98
         }
       ]
     },
     {
-      "at": "2026-11-05T05:45:10+00:00",
-      "action": "task.update:KRN-005",
-      "owner": "codex-compiler-types-20261105-p",
+      "at": "2026-11-05T06:10:52+00:00",
+      "action": "task.update:KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
       "tasks": [
         {
-          "id": "KRN-005",
+          "id": "KRN-006",
           "status": "in_progress",
-          "owner": "codex-compiler-types-20261105-p",
-          "priority": 96,
-          "progress_note": "Real source compiler now compiles all17 actual selected E1S/private IIG interfaces. TYPECOMP-008 returns0 with seven ARM64 cases, six exact misuse/unsupported rejections, three relocation-bound typed allocator records and three byte mutations; constant fallback independently rejected. All original failures retained; full Apple/kernel/native equivalence remains unqualified.",
-          "next_step": "Finish repository/integrity checks and publish the bounded reusable compiler component; KRN-006 must harden dependent AST/mangling and representative whole-kernel cases before broader use",
-          "last_heartbeat": "2026-11-05T05:45:10+00:00",
+          "owner": "codex-compiler-hardening-20261105-q",
+          "priority": 97,
+          "progress_note": "All four bounded criteria assessed against immutable HARDEN evidence. Added source-reviewed AST/serialization/demangler paths and exact KRN-007 component configuration requirements. Preserved SIGTRAP/invalid-symbol failures and two harness failures; no native claim.",
+          "next_step": "Run repository and complete source/build/evidence integrity checks, then commit KRN-006 and hand off ready KRN-007",
+          "last_heartbeat": "2026-11-05T06:10:52+00:00",
           "branch": "main",
-          "handoff": "docs/procedures/xnu-compiler-types.md"
+          "handoff": "docs/procedures/xnu-compiler-hardening.md"
         }
       ]
     },
     {
-      "at": "2026-11-05T05:52:41+00:00",
-      "action": "task.done:KRN-005",
-      "owner": "codex-compiler-types-20261105-p",
+      "at": "2026-11-05T06:10:53+00:00",
+      "action": "experiment.plan:HARDEN-008",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:12:05+00:00",
+      "action": "experiment.record:HARDEN-008",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:12:06+00:00",
+      "action": "task.update:KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
       "tasks": [
         {
-          "id": "KRN-005",
-          "status": "done",
-          "owner": "codex-compiler-types-20261105-p",
-          "priority": 96,
-          "progress_note": "Real source compiler now compiles all17 actual selected E1S/private IIG interfaces. TYPECOMP-008 returns0 with seven ARM64 cases, six exact misuse/unsupported rejections, three relocation-bound typed allocator records and three byte mutations; constant fallback independently rejected. All original failures retained; full Apple/kernel/native equivalence remains unqualified.",
-          "next_step": "Finish repository/integrity checks and publish the bounded reusable compiler component; KRN-006 must harden dependent AST/mangling and representative whole-kernel cases before broader use",
-          "last_heartbeat": "2026-11-05T05:45:10+00:00",
+          "id": "KRN-006",
+          "status": "in_progress",
+          "owner": "codex-compiler-hardening-20261105-q",
+          "priority": 97,
+          "progress_note": "Bounded AST/mangling/PCH/SFINAE and actual source-unit criteria pass;132 repository tests pass. Independent integrity audit verifies11 evidence capsules/1068 artifact digests,10889 original compiler source files,198 build inputs and5111 prepared kernel files. Device scopes and all other owners unchanged.",
+          "next_step": "KRN-007: build/run genuine selected configuration generator and compile units with actual generated meta_features and component private defines; full kernel/native gates remain",
+          "last_heartbeat": "2026-11-05T06:12:06+00:00",
           "branch": "main",
-          "handoff": "docs/procedures/xnu-compiler-types.md"
+          "handoff": "docs/procedures/xnu-compiler-hardening.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:12:07+00:00",
+      "action": "task.done:KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "tasks": [
+        {
+          "id": "KRN-006",
+          "status": "done",
+          "owner": "codex-compiler-hardening-20261105-q",
+          "priority": 97,
+          "progress_note": "Bounded AST/mangling/PCH/SFINAE and actual source-unit criteria pass;132 repository tests pass. Independent integrity audit verifies11 evidence capsules/1068 artifact digests,10889 original compiler source files,198 build inputs and5111 prepared kernel files. Device scopes and all other owners unchanged.",
+          "next_step": "KRN-007: build/run genuine selected configuration generator and compile units with actual generated meta_features and component private defines; full kernel/native gates remain",
+          "last_heartbeat": "2026-11-05T06:12:06+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-compiler-hardening.md"
         }
       ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "11e14feacbc16a8a42e9382fefcf19d0a72a97023f8935ce8e1515fb46343e68",
-    "BOARD.md": "2208f07e8a387367b8dc0882af193f9b3eada5492d3b8880595f32c2faacbe05",
-    "planning/tasks/KRN-006.md": "38834bb7f0ce0cce6546d6f9039963487df27fea6fc0a2cd2245a3499fdf3beb",
+    "STATUS.md": "25204991b687615617ca97cd31695c84296f4f582c801a80949f7f90470d2aac",
+    "BOARD.md": "d534bf3b775973bc8b2d52d6cac0e62165cbc609c387ee4d42f43f2ee796ac42",
+    "planning/tasks/KRN-007.md": "1ee1c83d4ef6e3b99787967d8e6d6c80a01fea8c0a0fd49a553fbde33f4a60e0",
+    "planning/tasks/KRN-006.md": "17787b37e62d7cb230c248532450af8108a583aca6b6e955cee29637f8e981a1",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",

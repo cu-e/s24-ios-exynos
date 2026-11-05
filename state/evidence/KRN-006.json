@@ -1,0 +1,82 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T06:12:05+00:00",
+  "summary": "KRN-006 bounded compiler AST/mangling/PCH/source-unit acceptance against actual HARDEN artifacts and final132 passing tests; complete kernel/private Apple ABI/native iOS remains unqualified",
+  "commit": "cc02b108bed28acbe94f24c39e10364ff94d9c5f",
+  "commands": [
+    {
+      "argv": [
+        "make",
+        "check"
+      ],
+      "exit_code": 0,
+      "stdout": "artifacts/xnu-compiler-hardening/final-checks-session1/repository.stdout.txt",
+      "stderr": "artifacts/xnu-compiler-hardening/final-checks-session1/repository.stderr.txt"
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "py_compile",
+        "tools/build/xnu_compiler_hardening.py"
+      ],
+      "exit_code": 0,
+      "stdout": "artifacts/xnu-compiler-hardening/final-checks-session1/syntax.stdout.txt",
+      "stderr": "artifacts/xnu-compiler-hardening/final-checks-session1/syntax.stderr.txt"
+    },
+    {
+      "argv": [
+        "python3",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/final-checks-session1/verify.py"
+      ],
+      "exit_code": 0,
+      "stdout": "artifacts/xnu-compiler-hardening/final-checks-session1/integrity.stdout.txt",
+      "stderr": "artifacts/xnu-compiler-hardening/final-checks-session1/integrity.stderr.txt"
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "artifacts/xnu-compiler-hardening/final-checks-session1/diff.stdout.txt",
+      "stderr": "artifacts/xnu-compiler-hardening/final-checks-session1/diff.stderr.txt"
+    }
+  ],
+  "artifacts": [
+    "state/evidence/HARDEN-001.json",
+    "state/evidence/HARDEN-002.json",
+    "state/evidence/HARDEN-003.json",
+    "state/evidence/HARDEN-004.json",
+    "state/evidence/HARDEN-005.json",
+    "state/evidence/HARDEN-006.json",
+    "state/evidence/HARDEN-007.json",
+    "state/evidence/HARDEN-008.json",
+    "fixtures/public/xnu-compiler-hardening/acceptance.json",
+    "fixtures/public/xnu-compiler-hardening/qualified-component.json",
+    "docs/procedures/xnu-compiler-hardening.md",
+    "tools/build/xnu_compiler_hardening.py"
+  ],
+  "sha256": {
+    "state/evidence/HARDEN-001.json": "e0842f0883ca521e8b1bf22836252a6982bc8434e01efddf083227af1d9dd241",
+    "state/evidence/HARDEN-002.json": "6c6a4ee0bf073e4e5cfd1ea0ebe182fb082150aac813cc5756641564cdda7d08",
+    "state/evidence/HARDEN-003.json": "797e41130967c85567152d5ba68a1c3e33050f0f7d8327310941b98868370fb4",
+    "state/evidence/HARDEN-004.json": "597eb86e4c1ddf52c56cdda3ebef68e59576ceb7f8f911051ae2a6774ee4969c",
+    "state/evidence/HARDEN-005.json": "325bebd9f46e477ac51336368252e8a99f76a5f94ec8002c02ce93c608c2df24",
+    "state/evidence/HARDEN-006.json": "3fdb128a69e64ec92fab7d92dd09d7f553bfb960a2340ec9c5fbbc90c2279a0d",
+    "state/evidence/HARDEN-007.json": "469113346ee449518cc5a1472123de93092c91883904ae3a1895a68787ea5403",
+    "state/evidence/HARDEN-008.json": "619bf1f7bcd609ab4a88f42b89e143ddb4139a926462ef0c4cf3c45272fd59a8",
+    "fixtures/public/xnu-compiler-hardening/acceptance.json": "b404709ff94c3079d40c83457be4828a91564e924096f1189613bb8355582f57",
+    "fixtures/public/xnu-compiler-hardening/qualified-component.json": "f838dbe9840fec300f60ca3205b8cf507c091cab1387ebb31f0d0dd6ac26513f",
+    "docs/procedures/xnu-compiler-hardening.md": "fa0970c0f9dbf0d187b801795e80c88f33db0a06633a15dc2cc47624022544a5",
+    "tools/build/xnu_compiler_hardening.py": "5682d4da9526adbce729b01991483bda3c1608acab2aa2f0e008569a7aff575d"
+  },
+  "device_executed": false,
+  "full_kernel_qualified": false,
+  "full_apple_compiler_equivalence": false,
+  "acceptance": "fixtures/public/xnu-compiler-hardening/acceptance.json",
+  "next_task": "KRN-007"
+}

@@ -1,0 +1,141 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "summary": "Actual AST evaluator and dependent mangling audit; bounded host result, no Apple/private ABI or full kernel qualification",
+  "checks": [
+    {
+      "name": "input-witnesses",
+      "pass_check": true,
+      "source_files": 10889,
+      "build_inputs": 198,
+      "compiler_sha256": "4c1e57401ad82aaa87d84e84cb7f1aa97d2613ed22c436d344840b32b0c94d9f"
+    },
+    {
+      "name": "pch-create-c",
+      "pass_check": true,
+      "exit_code": 0,
+      "diagnostic": ""
+    },
+    {
+      "name": "textual-consume-c",
+      "pass_check": true,
+      "exit_code": 0,
+      "diagnostic": ""
+    },
+    {
+      "name": "pch-consume-c",
+      "pass_check": true,
+      "exit_code": 0,
+      "diagnostic": ""
+    },
+    {
+      "name": "pch-textual-object-equality-c",
+      "pass_check": true,
+      "object_sha256": [
+        "02a7c6de75d4de640140561177ef6f5276ed741ac1cb71299bbb7a8cc31add01",
+        "02a7c6de75d4de640140561177ef6f5276ed741ac1cb71299bbb7a8cc31add01"
+      ]
+    },
+    {
+      "name": "pch-wrong-target-c",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "error: pointer authentication intrinsics was disabled in PCH file but is currently enabled\nerror: PCH file was compiled for the target 'arm64-apple-ios16.5.0' but the current translation unit is being compiled for target 'arm64e-apple-ios16.5.0'\n2 errors generated.\n"
+    },
+    {
+      "name": "pch-truncated-c",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "fatal error: malformed block record in PCH file: '/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/pch-kernel-session1/c-truncated.pch'\n1 error generated.\n"
+    },
+    {
+      "name": "pch-create-cpp",
+      "pass_check": true,
+      "exit_code": 0,
+      "diagnostic": ""
+    },
+    {
+      "name": "textual-consume-cpp",
+      "pass_check": true,
+      "exit_code": 0,
+      "diagnostic": ""
+    },
+    {
+      "name": "pch-consume-cpp",
+      "pass_check": true,
+      "exit_code": 0,
+      "diagnostic": ""
+    },
+    {
+      "name": "pch-textual-object-equality-cpp",
+      "pass_check": true,
+      "object_sha256": [
+        "59be37e962eeea648b24850f3c4b823e102f852fd334379519717a938c9c22f0",
+        "59be37e962eeea648b24850f3c4b823e102f852fd334379519717a938c9c22f0"
+      ]
+    },
+    {
+      "name": "separate-tu-template-symbol-agreement",
+      "pass_check": true,
+      "required": [
+        "__Z11pch_summaryI5MixedEDTcmu26__builtin_xnu_type_summaryT_ELi0EEPS1_",
+        "__Z13pch_signatureI5MixedEDTcmu28__builtin_xnu_type_signatureT_ELi0EEPS1_",
+        "__Z14pch_compatibleI5MixedEDTcmu30__builtin_xnu_types_compatibleT_S1_ELi0EEPS1_"
+      ]
+    },
+    {
+      "name": "pch-wrong-target-cpp",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "error: pointer authentication intrinsics was disabled in PCH file but is currently enabled\nerror: PCH file was compiled for the target 'arm64-apple-ios16.5.0' but the current translation unit is being compiled for target 'arm64e-apple-ios16.5.0'\n2 errors generated.\n"
+    },
+    {
+      "name": "pch-truncated-cpp",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "fatal error: malformed block record in PCH file: '/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/pch-kernel-session1/cpp-truncated.pch'\n1 error generated.\n"
+    },
+    {
+      "name": "negative-reference",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/pch-kernel-session1/negative-reference.cpp:1:18: error: experimental XNU metadata does not support this type/layout\n    1 | constexpr auto x=__builtin_xnu_type_summary(int&);\n      |                  ^\n1 error generated.\n"
+    },
+    {
+      "name": "negative-virtual-base",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/pch-kernel-session1/negative-virtual-base.cpp:1:62: error: experimental XNU metadata does not support this type/layout\n    1 | struct B { int x; }; struct D:virtual B {}; constexpr auto x=__builtin_xnu_type_summary(D);\n      |                                                              ^\n1 error generated.\n"
+    },
+    {
+      "name": "negative-member-pointer",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/pch-kernel-session1/negative-member-pointer.cpp:1:30: error: experimental XNU metadata does not support this type/layout\n    1 | struct X{}; constexpr auto x=__builtin_xnu_type_summary(int X::*);\n      |                              ^\n1 error generated.\n"
+    },
+    {
+      "name": "negative-arm64e",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/pch-kernel-session1/negative-arm64e.cpp:1:18: error: experimental XNU metadata does not support this type/layout\n    1 | constexpr auto x=__builtin_xnu_type_summary(void*);\n      |                  ^\n1 error generated.\n"
+    },
+    {
+      "name": "negative-vla",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/pch-kernel-session1/negative-vla.cpp:1:33: error: experimental XNU metadata does not support this type/layout\n    1 | void f(int n) { int a[n]; (void)__builtin_xnu_type_summary(__typeof__(a)); }\n      |                                 ^\n1 error generated.\n"
+    }
+  ],
+  "error": "[Errno 2] No such file or directory: '/home/egor/dev/pet/s24-ios-exynos/artifacts/open-kernel-inputs/typed-pthread-session1/mach-headers/clock'",
+  "compiler_sha256": "3e00352f47a31504c731e70e592a3d407ac3a6176c59b1638cbb7b8f98a3bd27",
+  "serialization_limits": [
+    "Same experimental AST schema only; foreign compiler serialization is not qualified",
+    "ASTReader validates major version and full repository version before imports",
+    "No -fno-validate-pch or disabled validation is used"
+  ],
+  "source_report": "artifacts/xnu-compiler-hardening/pch-kernel-session1/report.json",
+  "source_report_sha256": "801ffea3bcb5d0c54d347bf679124e0d1dcd1d5fe53d6c3b60d7815de017e36a",
+  "evidence": "state/evidence/HARDEN-003.json",
+  "evidence_sha256": "797e41130967c85567152d5ba68a1c3e33050f0f7d8327310941b98868370fb4"
+}

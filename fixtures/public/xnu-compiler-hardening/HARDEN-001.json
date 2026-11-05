@@ -1,0 +1,96 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "summary": "Actual AST evaluator and dependent mangling audit; bounded host result, no Apple/private ABI or full kernel qualification",
+  "checks": [
+    {
+      "name": "input-witnesses",
+      "pass_check": true,
+      "source_files": 10889,
+      "build_inputs": 198,
+      "compiler_sha256": "4c1e57401ad82aaa87d84e84cb7f1aa97d2613ed22c436d344840b32b0c94d9f"
+    },
+    {
+      "name": "arm64-summary",
+      "pass_check": true
+    },
+    {
+      "name": "dependent-mangle-summary",
+      "pass_check": false,
+      "exit_code": 0,
+      "symbols": [
+        "__Z11s24_summaryI4WordEDTcmLi0EEPT_"
+      ],
+      "demangled": [
+        "_Z11s24_summaryI4WordEDTcmLi0EEPT_"
+      ],
+      "diagnostic": ""
+    },
+    {
+      "name": "arm64-signature",
+      "pass_check": true
+    },
+    {
+      "name": "dependent-mangle-signature",
+      "pass_check": false,
+      "exit_code": 0,
+      "symbols": [
+        "__Z13s24_signatureI4WordEDTcmLi0EEPT_"
+      ],
+      "demangled": [
+        "_Z13s24_signatureI4WordEDTcmLi0EEPT_"
+      ],
+      "diagnostic": ""
+    },
+    {
+      "name": "dependent-mangle-compatible",
+      "pass_check": false,
+      "exit_code": 1,
+      "symbols": [],
+      "demangled": [],
+      "diagnostic": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/baseline-session1/mangle-compatible.cpp:2:56: error: cannot yet mangle expression type TypeTraitExpr\n    2 | template<class T> auto s24_compatible(T*) -> decltype((__builtin_xnu_types_compatible(T,T),0)) { return 7; }\n      |                                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n1 error generated.\n"
+    },
+    {
+      "name": "raw-summary-pointer",
+      "pass_check": false,
+      "exit_code": -5,
+      "observed": ""
+    },
+    {
+      "name": "raw-summary-data",
+      "pass_check": false,
+      "exit_code": -5,
+      "observed": ""
+    },
+    {
+      "name": "raw-signature-pointer",
+      "pass_check": false,
+      "exit_code": 11,
+      "observed": "evaluation-failed"
+    },
+    {
+      "name": "raw-signature-data",
+      "pass_check": false,
+      "exit_code": 11,
+      "observed": "evaluation-failed"
+    },
+    {
+      "name": "raw-summary-reference",
+      "pass_check": false,
+      "exit_code": -5,
+      "observed": ""
+    },
+    {
+      "name": "raw-signature-reference",
+      "pass_check": true,
+      "exit_code": 0,
+      "observed": "unsupported-reference evaluated=0"
+    }
+  ],
+  "compiler_sha256": "4c1e57401ad82aaa87d84e84cb7f1aa97d2613ed22c436d344840b32b0c94d9f",
+  "source_report": "artifacts/xnu-compiler-hardening/baseline-session1/report.json",
+  "source_report_sha256": "f1d75f4690cd9abf3d6ea1db46a21f7851bc30326439415153ec8ad1163113e4",
+  "evidence": "state/evidence/HARDEN-001.json",
+  "evidence_sha256": "e0842f0883ca521e8b1bf22836252a6982bc8434e01efddf083227af1d9dd241"
+}

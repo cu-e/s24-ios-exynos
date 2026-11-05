@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T05:52:41+00:00",
+  "updated_at": "2026-11-05T06:12:07+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -3185,8 +3185,8 @@
       "id": "KRN-006",
       "title": "Harden experimental XNU compiler AST and whole-kernel expression coverage",
       "priority": 97,
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-compiler-hardening-20261105-q",
       "scope": "host",
       "evidence_kind": "host-test",
       "depends_on": [
@@ -3213,6 +3213,49 @@
         "Reuse the source witnesses, actual compiler4c1e57401ad82aaa87d84e84cb7f1aa97d2613ed22c436d344840b32b0c94d9f and concrete limits from KRN-005",
         "Inspect actual ExprConstant/ItaniumMangle enum gaps rather than assuming unexercised expressions are safe",
         "Apply small patches in fresh copies/relinked archives, retain all failures and hand off broader real compiler/source coverage"
+      ],
+      "started_at": "2026-11-05T05:55:05+00:00",
+      "last_heartbeat": "2026-11-05T06:12:06+00:00",
+      "updated_at": "2026-11-05T06:12:07+00:00",
+      "branch": "main",
+      "progress_note": "Bounded AST/mangling/PCH/SFINAE and actual source-unit criteria pass;132 repository tests pass. Independent integrity audit verifies11 evidence capsules/1068 artifact digests,10889 original compiler source files,198 build inputs and5111 prepared kernel files. Device scopes and all other owners unchanged.",
+      "next_step": "KRN-007: build/run genuine selected configuration generator and compile units with actual generated meta_features and component private defines; full kernel/native gates remain",
+      "handoff": "docs/procedures/xnu-compiler-hardening.md",
+      "evidence": "state/evidence/KRN-006.json",
+      "evidence_sha256": "8504033d293b7d7bcb1b6a3e1a8527477e966295ff7481178c0d403056d1378d",
+      "finished_at": "2026-11-05T06:12:07+00:00"
+    },
+    {
+      "id": "KRN-007",
+      "title": "Generate witnessed selected XNU component configuration and compile actual kernel units",
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 98,
+      "depends_on": [
+        "KRN-006"
+      ],
+      "paths": [
+        "tools/build/xnu_kernel_config.py",
+        "patches/kernel-config",
+        "fixtures/public/xnu-kernel-config",
+        "docs/procedures/xnu-kernel-config.md"
+      ],
+      "sources": [
+        "apple-xnu",
+        "xnu-tapi"
+      ],
+      "acceptance": [
+        "Trace exact selected RELEASE/ARM64/E1S config inputs, component Makefile private defines and generated meta_features.h without invented feature values or modifying the original KRN-001 source tree",
+        "Build/run the actual public configuration generator in a fresh isolated output tree, or preserve exact build/input failures with hashes and commands; source-only inspection cannot establish generated output correctness",
+        "Compile genuine kalloc.c, OSData.cpp and pe_identify_machine.c with real generated configuration and the recorded hardened compiler; classify each failure precisely and never claim whole-kernel/native support from object success",
+        "Keep immutable compiler/kernel/IIG witnesses and all other owners and device scopes unchanged; publish reproducible requirements for the next full-kernel step"
+      ],
+      "steps": [
+        "Verify the HARDEN-002 compiler and HARDEN-005 regression plus prepared XNU/IIG/source witnesses",
+        "Inspect SETUP/config/mkheaders.c, component config files and Makefile templates before invoking the configuration tool",
+        "Generate actual feature/export inputs with provenance, compile actual units with metadata checks enabled and retain all diagnostics"
       ]
     }
   ],
@@ -4447,6 +4490,126 @@
       "evidence_sha256": "5cb42b8cce7324690dc99567d10ee919f19af8e661231fc3f047036faec2b3a9",
       "outcome": "pass",
       "recorded_at": "2026-11-05T05:40:29+00:00"
+    },
+    {
+      "id": "HARDEN-001",
+      "task": "KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Actual dependent unary builtin mangling and raw Clang17 evaluator nodes expose concrete unhandled enum paths in TYPECOMP-008; preserve source-backed failures before changes",
+      "procedure": "docs/procedures/xnu-compiler-hardening.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-05T06:01:52+00:00",
+      "evidence": "state/evidence/HARDEN-001.json",
+      "evidence_sha256": "e0842f0883ca521e8b1bf22836252a6982bc8434e01efddf083227af1d9dd241",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T06:03:24+00:00"
+    },
+    {
+      "id": "HARDEN-002",
+      "task": "KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Real copied AST archive changes compute pointer/data summaries and signatures without aborts and produce parseable distinct vendor expression names for the three dependent XNU builtins",
+      "procedure": "docs/procedures/xnu-compiler-hardening.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-05T06:03:56+00:00",
+      "evidence": "state/evidence/HARDEN-002.json",
+      "evidence_sha256": "6c6a4ee0bf073e4e5cfd1ea0ebe182fb082150aac813cc5756641564cdda7d08",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T06:04:20+00:00"
+    },
+    {
+      "id": "HARDEN-003",
+      "task": "KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The recorded patched compiler preserves annotations and dependent metadata through real C/C++ PCH round trips, rejects unsupported/malformed cases and identifies actual selected XNU source closure gaps",
+      "procedure": "docs/procedures/xnu-compiler-hardening.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T06:05:19+00:00",
+      "evidence": "state/evidence/HARDEN-003.json",
+      "evidence_sha256": "797e41130967c85567152d5ba68a1c3e33050f0f7d8327310941b98868370fb4",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T06:05:33+00:00"
+    },
+    {
+      "id": "HARDEN-004",
+      "task": "KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Correctly resolve the recorded mach header manifest by interface name; repeat C/C++ PCH controls and reach genuine selected XNU units without changing compiler or input bytes",
+      "procedure": "docs/procedures/xnu-compiler-hardening.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T06:05:33+00:00",
+      "evidence": "state/evidence/HARDEN-004.json",
+      "evidence_sha256": "597eb86e4c1ddf52c56cdda3ebef68e59576ceb7f8f911051ae2a6774ee4969c",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T06:05:57+00:00"
+    },
+    {
+      "id": "HARDEN-005",
+      "task": "KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The registered hardened compiler retains the existing genuine allocator metadata and all17 selected E1S/private DriverKit object results, including six exact negative and three actual object mutation controls",
+      "procedure": "docs/procedures/xnu-compiler-hardening.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T06:05:58+00:00",
+      "evidence": "state/evidence/HARDEN-005.json",
+      "evidence_sha256": "325bebd9f46e477ac51336368252e8a99f76a5f94ec8002c02ce93c608c2df24",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T06:06:29+00:00"
+    },
+    {
+      "id": "HARDEN-006",
+      "task": "KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Additional true/false SFINAE overload selections survive same-schema C++ PCH; a real foreign LLVM19 PCH is rejected, and exact Makefile/private configuration requirements are source-bound for the genuine kernel units",
+      "procedure": "docs/procedures/xnu-compiler-hardening.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T06:07:31+00:00",
+      "evidence": "state/evidence/HARDEN-006.json",
+      "evidence_sha256": "3fdb128a69e64ec92fab7d92dd09d7f553bfb960a2340ec9c5fbbc90c2279a0d",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T06:07:59+00:00"
+    },
+    {
+      "id": "HARDEN-007",
+      "task": "KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "A direct foreign-PCH-only check accepts the exact observed deterministic PCH-format rejection; prior SFINAE and same-schema roundtrip bytes stay unchanged",
+      "procedure": "docs/procedures/xnu-compiler-hardening.md",
+      "timeout_seconds": 120,
+      "created_at": "2026-11-05T06:08:00+00:00",
+      "evidence": "state/evidence/HARDEN-007.json",
+      "evidence_sha256": "469113346ee449518cc5a1472123de93092c91883904ae3a1895a68787ea5403",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T06:08:32+00:00"
+    },
+    {
+      "id": "HARDEN-008",
+      "task": "KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Final repository checks and independent digest verification retain all recorded HARDEN/compiler/source/build inputs unchanged, preserve other owners and device permissions, and support the bounded KRN-006 acceptance assessment",
+      "procedure": "docs/procedures/xnu-compiler-hardening.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T06:10:53+00:00",
+      "evidence": "state/evidence/HARDEN-008.json",
+      "evidence_sha256": "619bf1f7bcd609ab4a88f42b89e143ddb4139a926462ef0c4cf3c45272fd59a8",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T06:12:05+00:00"
     }
   ],
   "events": [
@@ -8946,6 +9109,186 @@
           "last_heartbeat": "2026-11-05T05:45:10+00:00",
           "branch": "main",
           "handoff": "docs/procedures/xnu-compiler-types.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T05:55:05+00:00",
+      "action": "task.claim:KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "tasks": [
+        {
+          "id": "KRN-006",
+          "status": "in_progress",
+          "owner": "codex-compiler-hardening-20261105-q",
+          "priority": 97,
+          "last_heartbeat": "2026-11-05T05:55:05+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:01:52+00:00",
+      "action": "experiment.plan:HARDEN-001",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:03:24+00:00",
+      "action": "experiment.record:HARDEN-001",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:03:56+00:00",
+      "action": "experiment.plan:HARDEN-002",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:04:20+00:00",
+      "action": "experiment.record:HARDEN-002",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:05:19+00:00",
+      "action": "experiment.plan:HARDEN-003",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:05:33+00:00",
+      "action": "experiment.record:HARDEN-003",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:05:33+00:00",
+      "action": "experiment.plan:HARDEN-004",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:05:57+00:00",
+      "action": "experiment.record:HARDEN-004",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:05:58+00:00",
+      "action": "experiment.plan:HARDEN-005",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:06:29+00:00",
+      "action": "experiment.record:HARDEN-005",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:06:30+00:00",
+      "action": "task.update:KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "tasks": [
+        {
+          "id": "KRN-006",
+          "status": "in_progress",
+          "owner": "codex-compiler-hardening-20261105-q",
+          "priority": 97,
+          "progress_note": "Reproduced SIGTRAP and invalid template symbol names; real new AST archive fixes evaluator and all three vendor-expression mangles. C/C++ PCH controls pass; genuine OSData.cpp compiles. Prior seven metadata cases, six negatives, three mutations and17 interfaces retain pass.",
+          "next_step": "Trace per-component private defines behind kalloc/pexpert diagnostics; preserve immutable reports and complete acceptance handoff",
+          "last_heartbeat": "2026-11-05T06:06:30+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-compiler-hardening.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:07:31+00:00",
+      "action": "experiment.plan:HARDEN-006",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:07:59+00:00",
+      "action": "experiment.record:HARDEN-006",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:08:00+00:00",
+      "action": "experiment.plan:HARDEN-007",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:08:32+00:00",
+      "action": "experiment.record:HARDEN-007",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:09:16+00:00",
+      "action": "task.add:KRN-007",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "tasks": [
+        {
+          "id": "KRN-007",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:10:52+00:00",
+      "action": "task.update:KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "tasks": [
+        {
+          "id": "KRN-006",
+          "status": "in_progress",
+          "owner": "codex-compiler-hardening-20261105-q",
+          "priority": 97,
+          "progress_note": "All four bounded criteria assessed against immutable HARDEN evidence. Added source-reviewed AST/serialization/demangler paths and exact KRN-007 component configuration requirements. Preserved SIGTRAP/invalid-symbol failures and two harness failures; no native claim.",
+          "next_step": "Run repository and complete source/build/evidence integrity checks, then commit KRN-006 and hand off ready KRN-007",
+          "last_heartbeat": "2026-11-05T06:10:52+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-compiler-hardening.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:10:53+00:00",
+      "action": "experiment.plan:HARDEN-008",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:12:05+00:00",
+      "action": "experiment.record:HARDEN-008",
+      "owner": "codex-compiler-hardening-20261105-q"
+    },
+    {
+      "at": "2026-11-05T06:12:06+00:00",
+      "action": "task.update:KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "tasks": [
+        {
+          "id": "KRN-006",
+          "status": "in_progress",
+          "owner": "codex-compiler-hardening-20261105-q",
+          "priority": 97,
+          "progress_note": "Bounded AST/mangling/PCH/SFINAE and actual source-unit criteria pass;132 repository tests pass. Independent integrity audit verifies11 evidence capsules/1068 artifact digests,10889 original compiler source files,198 build inputs and5111 prepared kernel files. Device scopes and all other owners unchanged.",
+          "next_step": "KRN-007: build/run genuine selected configuration generator and compile units with actual generated meta_features and component private defines; full kernel/native gates remain",
+          "last_heartbeat": "2026-11-05T06:12:06+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-compiler-hardening.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:12:07+00:00",
+      "action": "task.done:KRN-006",
+      "owner": "codex-compiler-hardening-20261105-q",
+      "tasks": [
+        {
+          "id": "KRN-006",
+          "status": "done",
+          "owner": "codex-compiler-hardening-20261105-q",
+          "priority": 97,
+          "progress_note": "Bounded AST/mangling/PCH/SFINAE and actual source-unit criteria pass;132 repository tests pass. Independent integrity audit verifies11 evidence capsules/1068 artifact digests,10889 original compiler source files,198 build inputs and5111 prepared kernel files. Device scopes and all other owners unchanged.",
+          "next_step": "KRN-007: build/run genuine selected configuration generator and compile units with actual generated meta_features and component private defines; full kernel/native gates remain",
+          "last_heartbeat": "2026-11-05T06:12:06+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-compiler-hardening.md"
         }
       ]
     }

@@ -1,0 +1,33 @@
+{
+  "id": "KRN-007",
+  "title": "Generate witnessed selected XNU component configuration and compile actual kernel units",
+  "status": "pending",
+  "owner": null,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "priority": 98,
+  "depends_on": [
+    "KRN-006"
+  ],
+  "paths": [
+    "tools/build/xnu_kernel_config.py",
+    "patches/kernel-config",
+    "fixtures/public/xnu-kernel-config",
+    "docs/procedures/xnu-kernel-config.md"
+  ],
+  "sources": [
+    "apple-xnu",
+    "xnu-tapi"
+  ],
+  "acceptance": [
+    "Trace exact selected RELEASE/ARM64/E1S config inputs, component Makefile private defines and generated meta_features.h without invented feature values or modifying the original KRN-001 source tree",
+    "Build/run the actual public configuration generator in a fresh isolated output tree, or preserve exact build/input failures with hashes and commands; source-only inspection cannot establish generated output correctness",
+    "Compile genuine kalloc.c, OSData.cpp and pe_identify_machine.c with real generated configuration and the recorded hardened compiler; classify each failure precisely and never claim whole-kernel/native support from object success",
+    "Keep immutable compiler/kernel/IIG witnesses and all other owners and device scopes unchanged; publish reproducible requirements for the next full-kernel step"
+  ],
+  "steps": [
+    "Verify the HARDEN-002 compiler and HARDEN-005 regression plus prepared XNU/IIG/source witnesses",
+    "Inspect SETUP/config/mkheaders.c, component config files and Makefile templates before invoking the configuration tool",
+    "Generate actual feature/export inputs with provenance, compile actual units with metadata checks enabled and retain all diagnostics"
+  ]
+}

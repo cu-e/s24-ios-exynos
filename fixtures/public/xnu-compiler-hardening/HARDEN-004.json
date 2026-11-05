@@ -1,0 +1,202 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "summary": "Actual AST evaluator and dependent mangling audit; bounded host result, no Apple/private ABI or full kernel qualification",
+  "checks": [
+    {
+      "name": "input-witnesses",
+      "pass_check": true,
+      "source_files": 10889,
+      "build_inputs": 198,
+      "compiler_sha256": "4c1e57401ad82aaa87d84e84cb7f1aa97d2613ed22c436d344840b32b0c94d9f"
+    },
+    {
+      "name": "pch-create-c",
+      "pass_check": true,
+      "exit_code": 0,
+      "diagnostic": ""
+    },
+    {
+      "name": "textual-consume-c",
+      "pass_check": true,
+      "exit_code": 0,
+      "diagnostic": ""
+    },
+    {
+      "name": "pch-consume-c",
+      "pass_check": true,
+      "exit_code": 0,
+      "diagnostic": ""
+    },
+    {
+      "name": "pch-textual-object-equality-c",
+      "pass_check": true,
+      "object_sha256": [
+        "02a7c6de75d4de640140561177ef6f5276ed741ac1cb71299bbb7a8cc31add01",
+        "02a7c6de75d4de640140561177ef6f5276ed741ac1cb71299bbb7a8cc31add01"
+      ]
+    },
+    {
+      "name": "pch-wrong-target-c",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "error: pointer authentication intrinsics was disabled in PCH file but is currently enabled\nerror: PCH file was compiled for the target 'arm64-apple-ios16.5.0' but the current translation unit is being compiled for target 'arm64e-apple-ios16.5.0'\n2 errors generated.\n"
+    },
+    {
+      "name": "pch-truncated-c",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "fatal error: malformed block record in PCH file: '/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/pch-kernel-session2/c-truncated.pch'\n1 error generated.\n"
+    },
+    {
+      "name": "pch-create-cpp",
+      "pass_check": true,
+      "exit_code": 0,
+      "diagnostic": ""
+    },
+    {
+      "name": "textual-consume-cpp",
+      "pass_check": true,
+      "exit_code": 0,
+      "diagnostic": ""
+    },
+    {
+      "name": "pch-consume-cpp",
+      "pass_check": true,
+      "exit_code": 0,
+      "diagnostic": ""
+    },
+    {
+      "name": "pch-textual-object-equality-cpp",
+      "pass_check": true,
+      "object_sha256": [
+        "59be37e962eeea648b24850f3c4b823e102f852fd334379519717a938c9c22f0",
+        "59be37e962eeea648b24850f3c4b823e102f852fd334379519717a938c9c22f0"
+      ]
+    },
+    {
+      "name": "separate-tu-template-symbol-agreement",
+      "pass_check": true,
+      "required": [
+        "__Z11pch_summaryI5MixedEDTcmu26__builtin_xnu_type_summaryT_ELi0EEPS1_",
+        "__Z13pch_signatureI5MixedEDTcmu28__builtin_xnu_type_signatureT_ELi0EEPS1_",
+        "__Z14pch_compatibleI5MixedEDTcmu30__builtin_xnu_types_compatibleT_S1_ELi0EEPS1_"
+      ]
+    },
+    {
+      "name": "pch-wrong-target-cpp",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "error: pointer authentication intrinsics was disabled in PCH file but is currently enabled\nerror: PCH file was compiled for the target 'arm64-apple-ios16.5.0' but the current translation unit is being compiled for target 'arm64e-apple-ios16.5.0'\n2 errors generated.\n"
+    },
+    {
+      "name": "pch-truncated-cpp",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "fatal error: malformed block record in PCH file: '/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/pch-kernel-session2/cpp-truncated.pch'\n1 error generated.\n"
+    },
+    {
+      "name": "negative-reference",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/pch-kernel-session2/negative-reference.cpp:1:18: error: experimental XNU metadata does not support this type/layout\n    1 | constexpr auto x=__builtin_xnu_type_summary(int&);\n      |                  ^\n1 error generated.\n"
+    },
+    {
+      "name": "negative-virtual-base",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/pch-kernel-session2/negative-virtual-base.cpp:1:62: error: experimental XNU metadata does not support this type/layout\n    1 | struct B { int x; }; struct D:virtual B {}; constexpr auto x=__builtin_xnu_type_summary(D);\n      |                                                              ^\n1 error generated.\n"
+    },
+    {
+      "name": "negative-member-pointer",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/pch-kernel-session2/negative-member-pointer.cpp:1:30: error: experimental XNU metadata does not support this type/layout\n    1 | struct X{}; constexpr auto x=__builtin_xnu_type_summary(int X::*);\n      |                              ^\n1 error generated.\n"
+    },
+    {
+      "name": "negative-arm64e",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/pch-kernel-session2/negative-arm64e.cpp:1:18: error: experimental XNU metadata does not support this type/layout\n    1 | constexpr auto x=__builtin_xnu_type_summary(void*);\n      |                  ^\n1 error generated.\n"
+    },
+    {
+      "name": "negative-vla",
+      "pass_check": true,
+      "exit_code": 1,
+      "diagnostic": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-hardening/pch-kernel-session2/negative-vla.cpp:1:33: error: experimental XNU metadata does not support this type/layout\n    1 | void f(int n) { int a[n]; (void)__builtin_xnu_type_summary(__typeof__(a)); }\n      |                                 ^\n1 error generated.\n"
+    },
+    {
+      "name": "actual-kernel-unit-observations",
+      "pass_check": true
+    }
+  ],
+  "compiler_sha256": "3e00352f47a31504c731e70e592a3d407ac3a6176c59b1638cbb7b8f98a3bd27",
+  "whole_kernel_units": [
+    {
+      "source": "osfmk/kern/kalloc.c",
+      "source_sha256": "05381b898a98188c271bc76f798a281d5eaaaee586acf4359001fba8a28df23c",
+      "exit_code": 1,
+      "actual_arm64_object": false,
+      "missing_headers": [],
+      "diagnostic": "In file included from /home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.c:74:\nIn file included from /home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/zalloc_internal.h:68:\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/vm/vm_map_internal.h:97:2: error: unknown type name 'vm_map_entry_t'\n   97 |         vm_map_entry_t         *entry_out);\n      |         ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/vm/vm_map_internal.h:107:2: error: unknown type name 'vm_map_entry_t'\n  107 |         vm_map_entry_t          *o_entry);                              /* OUT */\n      |         ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/vm/vm_map_internal.h:111:2: error: unknown type name 'vm_map_entry_t'\n  111 |         vm_map_entry_t          entry,\n      |         ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/vm/vm_map_internal.h:116:2: error: unknown type name 'vm_map_entry_t'\n  116 |         vm_map_entry_t          entry,\n      |         ^\nfatal error: too many errors emitted, stopping now [-ferror-limit=]\n5 errors generated.\n"
+    },
+    {
+      "source": "libkern/c++/OSData.cpp",
+      "source_sha256": "61af50e2c5fc3bd22c1d05a2982ccddce6682c6b14ba35472199655074103ddc",
+      "exit_code": 0,
+      "actual_arm64_object": true,
+      "missing_headers": [],
+      "diagnostic": "                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1421:2: note: expanded from macro 'KALLOC_DISPATCH'\n 1421 |         KALLOC_DISPATCH1(base, KALLOC_COUNT_ARGS(__VA_ARGS__), ##__VA_ARGS__)\n      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1419:40: note: expanded from macro 'KALLOC_DISPATCH1'\n 1419 | #define KALLOC_DISPATCH1(base, N, ...) __CONCAT(base, N)(__VA_ARGS__)\n      |                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nnote: (skipping 1 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\n<scratch space>:135:1: note: expanded from here\n  135 | kalloc_type_2\n      | ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1266:9: note: expanded from macro 'kalloc_type_2'\n 1266 |         static _KALLOC_TYPE_DEFINE(kt_view_var, type, KT_SHARED_ACCT);         \\\n      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1505:6: note: expanded from macro '_KALLOC_TYPE_DEFINE'\n 1505 |             .kt_zv.zv_name = \"site.\" #type,                             \\\n      |             ^~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/libkern/c++/OSData.cpp:598:32: warning: ISO C++ requires field designators to be specified in declaration order; field 'kt_size' will be initialized after field 'kt_signature' [-Wreorder-init-list]\n  598 |                 reserved = (typeof(reserved))kalloc_type(ExpansionData, (zalloc_flags_t)(Z_WAITOK | Z_ZERO));\n      |                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:635:27: note: expanded from macro 'kalloc_type'\n  635 | #define kalloc_type(...)  KALLOC_DISPATCH(kalloc_type, ##__VA_ARGS__)\n      |                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1421:2: note: expanded from macro 'KALLOC_DISPATCH'\n 1421 |         KALLOC_DISPATCH1(base, KALLOC_COUNT_ARGS(__VA_ARGS__), ##__VA_ARGS__)\n      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1419:40: note: expanded from macro 'KALLOC_DISPATCH1'\n 1419 | #define KALLOC_DISPATCH1(base, N, ...) __CONCAT(base, N)(__VA_ARGS__)\n      |                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nnote: (skipping 1 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\n<scratch space>:135:1: note: expanded from here\n  135 | kalloc_type_2\n      | ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1266:9: note: expanded from macro 'kalloc_type_2'\n 1266 |         static _KALLOC_TYPE_DEFINE(kt_view_var, type, KT_SHARED_ACCT);         \\\n      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1508:6: note: expanded from macro '_KALLOC_TYPE_DEFINE'\n 1508 |             .kt_signature = KALLOC_TYPE_EMIT_SIG(type),                 \\\n      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/libkern/c++/OSData.cpp:598:32: note: previous initialization for field 'kt_size' is here\n  598 |                 reserved = (typeof(reserved))kalloc_type(ExpansionData, (zalloc_flags_t)(Z_WAITOK | Z_ZERO));\n      |                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:635:27: note: expanded from macro 'kalloc_type'\n  635 | #define kalloc_type(...)  KALLOC_DISPATCH(kalloc_type, ##__VA_ARGS__)\n      |                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1421:2: note: expanded from macro 'KALLOC_DISPATCH'\n 1421 |         KALLOC_DISPATCH1(base, KALLOC_COUNT_ARGS(__VA_ARGS__), ##__VA_ARGS__)\n      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1419:40: note: expanded from macro 'KALLOC_DISPATCH1'\n 1419 | #define KALLOC_DISPATCH1(base, N, ...) __CONCAT(base, N)(__VA_ARGS__)\n      |                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nnote: (skipping 1 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\n<scratch space>:135:1: note: expanded from here\n  135 | kalloc_type_2\n      | ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1266:9: note: expanded from macro 'kalloc_type_2'\n 1266 |         static _KALLOC_TYPE_DEFINE(kt_view_var, type, KT_SHARED_ACCT);         \\\n      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1507:17: note: expanded from macro '_KALLOC_TYPE_DEFINE'\n 1507 |             .kt_size = sizeof(type),                                    \\\n      |                        ^~~~~~~~~~~~\n17 warnings generated.\n"
+    },
+    {
+      "source": "pexpert/arm/pe_identify_machine.c",
+      "source_sha256": "3557bb1b2c17f721f5cad529299aee49d61e2000fb0768ee6c22791340343ccd",
+      "exit_code": 1,
+      "actual_arm64_object": false,
+      "missing_headers": [],
+      "diagnostic": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/pexpert/arm/pe_identify_machine.c:488:5: error: call to undeclared function 'ml_init_arm_debug_interface'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]\n  488 |                                 ml_init_arm_debug_interface(args, ml_io_map(gSocPhys + *reg_prop, *(reg_prop + 1)));\n      |                                 ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/pexpert/arm/pe_identify_machine.c:488:39: error: call to undeclared function 'ml_io_map'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]\n  488 |                                 ml_init_arm_debug_interface(args, ml_io_map(gSocPhys + *reg_prop, *(reg_prop + 1)));\n      |                                                                   ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/pexpert/arm/pe_identify_machine.c:488:39: note: did you mean 'ml_io_read'?\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/machine/machine_routines.h:189:20: note: 'ml_io_read' declared here\n  189 | unsigned long long ml_io_read(uintptr_t iovaddr, int iovsz);\n      |                    ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/pexpert/arm/pe_identify_machine.c:539:14: error: call to undeclared function 'ml_io_map'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]\n  539 |                 gPicBase = ml_io_map(soc_phys + *reg_prop, *(reg_prop + 1));\n      |                            ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/pexpert/arm/pe_identify_machine.c:550:16: error: call to undeclared function 'ml_io_map'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]\n  550 |                 gTimerBase = ml_io_map(soc_phys + *reg_prop, *(reg_prop + 1));\n      |                              ^\nfatal error: too many errors emitted, stopping now [-ferror-limit=]\n5 errors generated.\n"
+    }
+  ],
+  "whole_kernel_profile": {
+    "complete": false,
+    "definitions": [
+      "APPLE=1",
+      "KERNEL=1",
+      "KERNEL_PRIVATE=1",
+      "PRIVATE=1",
+      "DRIVERKIT_PRIVATE=1",
+      "__MACHO__=1",
+      "XNU_KERNEL_PRIVATE=1",
+      "XNU_KERN_EVENT_DATA_IS_VLA=1",
+      "ARM64_BOARD_CONFIG_E1S=1",
+      "XNU_NO_TYPE_BUILTINS=0",
+      "volatile=__volatile"
+    ],
+    "include_roots": [
+      "artifacts/open-kernel-inputs/typed-pthread-session1/header-tree/src/Libraries/AvailabilityVersions/include",
+      "artifacts/xnu-iig-abi/nyktis-invoke-guard-session1/setup-headers",
+      "artifacts/xnu-iig-abi/nyktis-invoke-guard-session1/generated",
+      "artifacts/xnu-iig-abi/nyktis-invoke-guard-session1/mach-server-headers",
+      "artifacts/open-kernel-inputs/typed-pthread-session1/mach-headers",
+      "artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk",
+      "artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/bsd",
+      "artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/iokit",
+      "artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/libkern",
+      "artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/pexpert",
+      "artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/EXTERNAL_HEADERS",
+      "artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/libsa"
+    ],
+    "source_witness_sha256": "2cbd3feacc870b5c17aa760677a1b1a9bb18473ada0f69cdb342af253b9af339",
+    "missing_configuration": "Complete generated RELEASE/ARM64/E1S config/export tree, CURRENT_MACHINE_CONFIG_LC and CONFIG_DEFINES/SEED_DEFINES are not qualified by this partial profile"
+  },
+  "serialization_limits": [
+    "Same experimental AST schema only; foreign compiler serialization is not qualified",
+    "ASTReader validates major version and full repository version before imports",
+    "No -fno-validate-pch or disabled validation is used"
+  ],
+  "source_report": "artifacts/xnu-compiler-hardening/pch-kernel-session2/report.json",
+  "source_report_sha256": "faead2b394776c2ddaf98fb7f9b1fcc1b77fb6bba9e56fa05d5b21f6a39e849b",
+  "evidence": "state/evidence/HARDEN-004.json",
+  "evidence_sha256": "597eb86e4c1ddf52c56cdda3ebef68e59576ceb7f8f911051ae2a6774ee4969c"
+}

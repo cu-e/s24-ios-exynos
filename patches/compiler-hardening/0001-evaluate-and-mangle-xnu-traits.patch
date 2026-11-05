@@ -1,0 +1,125 @@
+--- a/src/clang/lib/AST/ExprConstant.cpp
++++ b/src/clang/lib/AST/ExprConstant.cpp
+@@ -36,6 +36,7 @@
+ #include "Interp/Frame.h"
+ #include "Interp/State.h"
+ #include "clang/AST/APValue.h"
++#include "clang/AST/XnuTypeMetadata.h"
+ #include "clang/AST/ASTContext.h"
+ #include "clang/AST/ASTDiagnostic.h"
+ #include "clang/AST/ASTLambda.h"
+@@ -8781,6 +8782,7 @@
+     return true;
+   }
+ 
++  bool VisitUnaryExprOrTypeTraitExpr(const UnaryExprOrTypeTraitExpr *E);
+   bool VisitBinaryOperator(const BinaryOperator *E);
+   bool VisitCastExpr(const CastExpr* E);
+   bool VisitUnaryAddrOf(const UnaryOperator *E);
+@@ -8883,6 +8885,25 @@
+   assert(!E->isValueDependent());
+   assert(E->isPRValue() && E->getType()->hasPointerRepresentation());
+   return PointerExprEvaluator(Info, Result, InvalidBaseOK).Visit(E);
++}
++
++bool PointerExprEvaluator::VisitUnaryExprOrTypeTraitExpr(
++    const UnaryExprOrTypeTraitExpr *E) {
++  if (E->getKind() != UETT_XnuTypeSignature || !E->isArgumentType())
++    return Error(E);
++  std::string Signature;
++  uint32_t Summary;
++  if (!XnuTypeMetadata(Info.Ctx).compute(E->getArgumentType(), Signature, Summary))
++    return Error(E);
++  QualType ArrayTy = Info.Ctx.getConstantArrayType(
++      Info.Ctx.CharTy, llvm::APInt(64, Signature.size() + 1), nullptr,
++      ArrayType::Normal, 0);
++  auto *SL = StringLiteral::Create(Info.Ctx, Signature, StringLiteral::Ordinary,
++                                 false, ArrayTy, E->getExprLoc());
++  if (!evaluateLValue(SL, Result))
++    return false;
++  Result.addArray(Info, E, cast<ConstantArrayType>(ArrayTy));
++  return true;
+ }
+ 
+ bool PointerExprEvaluator::VisitBinaryOperator(const BinaryOperator *E) {
+@@ -13463,6 +13484,18 @@
+ bool IntExprEvaluator::VisitUnaryExprOrTypeTraitExpr(
+                                     const UnaryExprOrTypeTraitExpr *E) {
+   switch(E->getKind()) {
++  case UETT_XnuTypeSummary: {
++    if (!E->isArgumentType())
++      return Error(E);
++    std::string Signature;
++    uint32_t Summary;
++    if (!XnuTypeMetadata(Info.Ctx).compute(E->getArgumentType(), Signature, Summary))
++      return Error(E);
++    return Success(Summary, E);
++  }
++  case UETT_XnuTypeSignature:
++    // Signature has pointer type; integer evaluation is never a sizeof fallback.
++    return Error(E);
+   case UETT_PreferredAlignOf:
+   case UETT_AlignOf: {
+     if (E->isArgumentType())
+--- a/src/clang/lib/AST/ItaniumMangle.cpp
++++ b/src/clang/lib/AST/ItaniumMangle.cpp
+@@ -4419,6 +4419,24 @@
+   // to be preserved.
+ recurse:
+   switch (E->getStmtClass()) {
++  case Expr::TypeTraitExprClass: {
++    NotPrimaryExpr();
++    const auto *TTE = cast<TypeTraitExpr>(E);
++    if (TTE->getTrait() == BTT_XnuTypesCompatible) {
++      StringRef Name = "__builtin_xnu_types_compatible";
++      Out << 'u' << Name.size() << Name;
++      for (TypeSourceInfo *Arg : TTE->getArgs())
++        mangleType(Arg->getType());
++      Out << 'E';
++    } else if (!NullOut) {
++      DiagnosticsEngine &Diags = Context.getDiags();
++      unsigned DiagID = Diags.getCustomDiagID(
++          DiagnosticsEngine::Error, "cannot yet mangle expression type %0");
++      Diags.Report(E->getExprLoc(), DiagID)
++          << E->getStmtClassName() << E->getSourceRange();
++    }
++    break;
++  }
+   case Expr::NoStmtClass:
+ #define ABSTRACT_STMT(Type)
+ #define EXPR(Type, Base)
+@@ -4476,7 +4494,6 @@
+   case Expr::ShuffleVectorExprClass:
+   case Expr::ConvertVectorExprClass:
+   case Expr::StmtExprClass:
+-  case Expr::TypeTraitExprClass:
+   case Expr::RequiresExprClass:
+   case Expr::ArrayTypeTraitExprClass:
+   case Expr::ExpressionTraitExprClass:
+@@ -4821,7 +4838,9 @@
+     // Non-instantiation-dependent traits are an <expr-primary> integer literal.
+     const UnaryExprOrTypeTraitExpr *SAE = cast<UnaryExprOrTypeTraitExpr>(E);
+ 
+-    if (!SAE->isInstantiationDependent()) {
++    if (!SAE->isInstantiationDependent() &&
++        SAE->getKind() != UETT_XnuTypeSignature &&
++        SAE->getKind() != UETT_XnuTypeSummary) {
+       // Itanium C++ ABI:
+       //   If the operand of a sizeof or alignof operator is not
+       //   instantiation-dependent it is encoded as an integer literal
+@@ -4851,6 +4870,15 @@
+     };
+ 
+     switch(SAE->getKind()) {
++    case UETT_XnuTypeSignature:
++    case UETT_XnuTypeSummary: {
++      // Public vendor-expression encoding, not an Apple private ABI claim.
++      StringRef Name = getTraitSpelling(SAE->getKind());
++      Out << 'u' << Name.size() << Name;
++      mangleType(SAE->getArgumentType());
++      Out << 'E';
++      break;
++    }
+     case UETT_SizeOf:
+       Out << 's';
+       MangleAlignofSizeofArg();
