@@ -28,7 +28,7 @@ def verify_manifest(m):
     return True
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--main-root',type=Path,required=True);p.add_argument('--acquisition',type=Path);p.add_argument('--run');p.add_argument('--verify',type=Path)
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--main-root',type=Path,required=True);p.add_argument('--acquisition',type=Path);p.add_argument('--run');p.add_argument('--verify',type=Path);p.add_argument('--availability-facts',type=Path)
     a=p.parse_args()
     if a.verify:
         value=json.loads(a.verify.read_text());verify_manifest(value);print(json.dumps({'manifest_verified':True,'qualified_nonce_contract':False}));return 0
@@ -45,17 +45,23 @@ def main():
         base=json.loads(a.acquisition.read_text());check('passing-exact-acquisition',base['outcome']=='pass' and base['restricted_bodies_retained'] is False)
         report['acquisition']={'path':rel(a.acquisition),'sha256':sha(a.acquisition.read_bytes())}
         expected={s['path']:s for s in base['sources'] if s['revision']==APPLE}
-        refreshed=[]
-        for path in [CURRENT_SOURCE,'ccchacha20poly1305/crypto_test/crypto_test_chacha.c','ccchacha20poly1305/crypto_test/crypto_test_chacha20poly1305_runner.c']:
-            wanted=expected[path];url=wanted['url']+'?availability-correction=complete';record={'url':url,'method':'GET'};report['http'].append(record)
-            # Canonical identities are mandatory; no raw body is persisted.
-            with urlopen(Request(url,headers={'User-Agent':'S24-nonce-contract-facts','Accept-Encoding':'identity'}),timeout=20) as response:
-                data=response.read(2*1024*1024+1);length=response.headers.get('Content-Length')
-                check('complete-response-'+path,len(data)<=2*1024*1024 and (length is None or int(length)==len(data)))
-                check('exact-canonical-source-'+path,git_blob(data)==wanted['git_blob'] and sha(data)==wanted['sha256'])
-                facts=minimal_facts(data,path);facts['all_incnonce_substring_occurrences']=data.decode('utf-8').count('incnonce')
-                record.update(status=response.status,bytes=len(data),content_length=length,git_blob=git_blob(data),sha256=sha(data))
-                refreshed.append({'path':path,'revision':APPLE,'git_blob':git_blob(data),'sha256':sha(data),'bytes':len(data),'facts':facts})
+        if a.availability_facts:
+            cached=json.loads(a.availability_facts.read_text())
+            refreshed=cached['refreshed_minimal_facts']
+            check('retained-complete-availability-identities',len(refreshed)==3 and all(x['revision']==APPLE and x['git_blob']==expected[x['path']]['git_blob'] and x['sha256']==expected[x['path']]['sha256'] and x['bytes']==expected[x['path']]['bytes'] for x in refreshed))
+            report['availability_witness']={'path':rel(a.availability_facts),'sha256':sha(a.availability_facts.read_bytes()),'scope':'Reuse only verified completed source-identity/minimal-fact stage;overall prior checker failure remains unchanged.'}
+        else:
+            refreshed=[]
+            for path in [CURRENT_SOURCE,'ccchacha20poly1305/crypto_test/crypto_test_chacha.c','ccchacha20poly1305/crypto_test/crypto_test_chacha20poly1305_runner.c']:
+                wanted=expected[path];url=wanted['url']+'?availability-correction=complete';record={'url':url,'method':'GET'};report['http'].append(record)
+                # Canonical identities are mandatory; no raw body is persisted.
+                with urlopen(Request(url,headers={'User-Agent':'S24-nonce-contract-facts','Accept-Encoding':'identity'}),timeout=20) as response:
+                    data=response.read(2*1024*1024+1);length=response.headers.get('Content-Length')
+                    check('complete-response-'+path,len(data)<=2*1024*1024 and (length is None or int(length)==len(data)))
+                    check('exact-canonical-source-'+path,git_blob(data)==wanted['git_blob'] and sha(data)==wanted['sha256'])
+                    facts=minimal_facts(data,path);facts['all_incnonce_substring_occurrences']=data.decode('utf-8').count('incnonce')
+                    record.update(status=response.status,bytes=len(data),content_length=length,git_blob=git_blob(data),sha256=sha(data))
+                    refreshed.append({'path':path,'revision':APPLE,'git_blob':git_blob(data),'sha256':sha(data),'bytes':len(data),'facts':facts})
         availability=refreshed[0]['facts']['incnonce_availability']
         check('actual-only-explicit-return-one-no-nonce-context-access',availability['only_explicit_return_is_one'] and not availability['context_argument_access'] and not availability['nonce_argument_access'])
         check('both-named-tests-have-no-increment-reference',all(s['facts']['all_incnonce_substring_occurrences']==0 for s in refreshed[1:]))
@@ -77,7 +83,15 @@ def main():
         check('selected-esp-does-not-use-increment-method',surfaces[-1]['incnonce_substring_occurrences']==0 and surfaces[-1]['setnonce_substring_occurrences']>0)
         historical=[s for s in base['sources'] if 'tag' in s]
         check('three-named-historical-official-headers',len(historical)==3 and all(s['facts']['incnonce_token_occurrences']==1 and not s['facts']['incnonce_named_documentation'] and s['facts']['nonce_macro_12_bytes'] for s in historical))
-        check('official-published-refs-are-one-current-root',base['official_public_refs']['exit_code']==0 and {line[0] for line in base['official_public_refs']['refs']}=={APPLE} and base['official_current_commit']['sha']==APPLE and base['official_current_commit']['parents']==[])
+        # Canonical local commit metadata avoids unavailable HTTP metadata assumptions.
+        argv=['git','-C',str(mainroot/'worktrees/krn-034-20261105/artifacts/crypto-chacha/apple-primary.git'),'cat-file','-p',APPLE]
+        commit_result=subprocess.run(argv,env=env,capture_output=True,timeout=10)
+        report['commands'].append({'argv':argv,'exit_code':commit_result.returncode,'stdout_sha256':sha(commit_result.stdout),'stderr_sha256':sha(commit_result.stderr)})
+        commit_blob=hashlib.sha1(b'commit '+str(len(commit_result.stdout)).encode()+b'\0'+commit_result.stdout).hexdigest()
+        check('actual-canonical-current-commit',commit_result.returncode==0 and commit_blob==APPLE)
+        parents=re.findall(rb'^parent ([0-9a-f]{40})$',commit_result.stdout,re.M)
+        report['current_commit_metadata']={'revision':APPLE,'canonical_commit_hash':commit_blob,'parent_ids':[p.decode() for p in parents],'metadata_sha256':sha(commit_result.stdout)}
+        check('official-published-refs-are-one-current-root',base['official_public_refs']['exit_code']==0 and {line[0] for line in base['official_public_refs']['refs']}=={APPLE} and report['current_commit_metadata']['revision']==APPLE and report['current_commit_metadata']['parent_ids']==[])
         manifest={'schema_version':1,'task':'KRN-037','method':'ccchacha20poly1305_incnonce',
                   'selected_profile':{'revision':XNU,'header_path':HEADER,'header_sha256':EXPECTED_SELECTED},
                   'nonce_bytes':12,'mutable_nonce_parameter_declared':True,'int_result_declared':True,
