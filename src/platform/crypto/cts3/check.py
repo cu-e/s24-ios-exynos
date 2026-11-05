@@ -221,13 +221,30 @@ def finish_native(command,report,out,objdir,xts,des,git):
  layout=ObjectData(objdir/'arm-adapter.o').value('_s24_cts3_layout','<6Q');fixture=ObjectData(objdir/'arm-fixture.o').value('_s24_cts3_fixture_layout','<4Q')
  report['target_layout']=dict(zip(['cbc_descriptor_bytes','cbc_opaque_bytes','cbc_alignment','iv_opaque_bytes','iv_alignment','selected_max_block_bytes'],layout));report['fixture_target_layout']=dict(zip(['aes_state_bytes','alignment','genuine_mbed_aes_bytes','cbc_descriptor_bytes'],fixture))
  if layout!=(40,16,16,16,16,16)or fixture!=(304,16,288,40):raise ValueError('actual target ABI/layout differs')
- native_paths=[objdir/('arm-'+n+'.o')for n in ['adapter','fixture','aes','suite','typed','guest']]+[xts/'arm-adapter.o',xts/'arm-memory.o',des/'arm-adapter.o',des/'arm-des.o'];report['native_symbols']={};definitions={}
+ native_paths=[objdir/('arm-'+n+'.o')for n in ['adapter','fixture','aes','suite','typed']]+[xts/'arm-adapter.o',xts/'arm-memory.o',des/'arm-adapter.o',des/'arm-des.o'];report['native_symbols']={};definitions={}
  for p in native_paths:
   obj=ObjectData(p);imports=sorted(x['name']for x in obj.symbols if not x['kind']&0x0e and x['kind']&1);names=sorted(obj.named)
   report['native_symbols'][str(p)]={'imports':imports,'definitions':names}
   for name in names:
    if name.startswith('_mbedtls_aes_')or name=='_mbedtls_platform_zeroize':definitions.setdefault(name,[]).append(str(p))
   if p==objdir/'arm-adapter.o'and set(imports)!={'___memcpy_chk','_memcpy','_mbedtls_platform_zeroize'}:raise ValueError('production is no longer generic/memory-only imports')
+ # ObjectData is intentionally a data-backed relocation reader; the guest's
+ # legitimate64KiB zerofill stack has no file payload. Keep that shared reader
+ # strict/read-only and use the real qualified cctools symbol reader here.
+ nm=ld.parent/'aarch64-apple-darwin-nm';tool_report=ld.parent.parent.parent/'report.json';tr=json.loads(tool_report.read_text())
+ if tr['outcome']!='pass'or tr['source_pins']['xnu-cctools']!='904de2a71d4da6a9b30d2efaf912a10ddc7d9ddb'or digest(nm)!=tr['prefix_files_sha256']['bin/aarch64-apple-darwin-nm']:raise ValueError('qualified actual BSS-capable symbol reader changed')
+ command([nm,'-g',objdir/'arm-guest.o'],'guest-native-symbols')
+ imports=[];names=[]
+ for line in(out/'guest-native-symbols.log').read_text().splitlines():
+  fields=line.split()
+  if not fields:continue
+  if len(fields)==2 and fields[0]=='U':imports.append(fields[1])
+  elif len(fields)==3 and re.fullmatch('[0-9a-fA-F]+',fields[0])and fields[1]in ['T','S','B','D','R']:names.append(fields[2])
+  else:raise ValueError('unexpected actual nm global symbol record '+line)
+ report['native_symbols'][str(objdir/'arm-guest.o')]={'imports':sorted(imports),'definitions':sorted(names),'reader':'actual qualified cctools nm for zerofill/BSS object, shared data reader unchanged'}
+ report['tools']['nm']={'path':str(nm),'sha256':digest(nm),'source_commit':tr['source_pins']['xnu-cctools'],'build_report':str(tool_report),'build_report_sha256':digest(tool_report)}
+ for name in names:
+  if name.startswith('_mbedtls_aes_')or name=='_mbedtls_platform_zeroize':definitions.setdefault(name,[]).append(str(objdir/'arm-guest.o'))
  if '___memcpy_chk'not in ObjectData(xts/'arm-memory.o').named:raise ValueError('accepted real trapping helper definition missing')
  if any(len(v)!=1 for v in definitions.values())or len(definitions.get('_mbedtls_platform_zeroize',[]))!=1:raise ValueError('duplicate/missing global AES/zeroizer implementation')
  if definitions.get('_mbedtls_aes_crypt_cbc')!=[str(objdir/'arm-aes.o')]:raise ValueError('canonical CBC function not supplied by one real AES object')
