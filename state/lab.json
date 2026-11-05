@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T12:18:20+00:00",
+  "updated_at": "2026-11-05T13:09:51+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -443,8 +443,8 @@
     {
       "id": "DRV-001",
       "title": "Prepare an STM SPI touch driver and host adapter",
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "codex-team-touch-20261105-aj",
       "scope": "host",
       "evidence_kind": "host-test",
       "depends_on": [
@@ -469,7 +469,14 @@
         "Use project-owned protocol fixtures.",
         "Preserve licenses and provenance for reused code.",
         "Do not read MMIO on the daily Android system."
-      ]
+      ],
+      "priority": 94,
+      "priority_reason": "Independent bounded STM parser and transport boundary enable display/input integration without device operations",
+      "updated_at": "2026-11-05T13:09:27+00:00",
+      "started_at": "2026-11-05T13:09:27+00:00",
+      "last_heartbeat": "2026-11-05T13:09:27+00:00",
+      "branch": "team/drv-001-20261105",
+      "worktree": "worktrees/drv-001-20261105"
     },
     {
       "id": "DRV-002",
@@ -1056,9 +1063,9 @@
     {
       "id": "USB-001",
       "title": "Implement host-buildable native USB and block-transport adapters",
-      "status": "pending",
-      "owner": null,
-      "priority": 70,
+      "status": "in_progress",
+      "owner": "codex-team-usb-20261105-ai",
+      "priority": 95,
       "scope": "host",
       "evidence_kind": "host-test",
       "depends_on": [
@@ -1080,7 +1087,13 @@
         "Inspect the task dependencies and pinned inputs",
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
-      ]
+      ],
+      "priority_reason": "Independent host USB/block path supports native logs and root transport while kernel work continues",
+      "updated_at": "2026-11-05T13:08:57+00:00",
+      "started_at": "2026-11-05T13:08:57+00:00",
+      "last_heartbeat": "2026-11-05T13:08:57+00:00",
+      "branch": "team/usb-001-20261105",
+      "worktree": "worktrees/usb-001-20261105"
     },
     {
       "id": "USB-002",
@@ -1857,9 +1870,9 @@
     {
       "id": "ESIM-001",
       "title": "Specify eUICC logical channels and LPA integration",
-      "status": "pending",
-      "owner": null,
-      "priority": 70,
+      "status": "in_progress",
+      "owner": "codex-team-esim-20261105-ak",
+      "priority": 93,
       "scope": "host",
       "evidence_kind": "host-test",
       "depends_on": [
@@ -1881,7 +1894,13 @@
         "Inspect the task dependencies and pinned inputs",
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
-      ]
+      ],
+      "priority_reason": "Independent eUICC channel/session implementation supports SIM/eSIM roadmap without profile changes on the phone",
+      "updated_at": "2026-11-05T13:09:51+00:00",
+      "started_at": "2026-11-05T13:09:51+00:00",
+      "last_heartbeat": "2026-11-05T13:09:51+00:00",
+      "branch": "team/esim-001-20261105",
+      "worktree": "worktrees/esim-001-20261105"
     },
     {
       "id": "ESIM-002",
@@ -3889,8 +3908,8 @@
     {
       "id": "KRN-022",
       "title": "Qualify genuine pthread kext source, header and provider integration",
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
       "priority": 99,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -3918,7 +3937,13 @@
         "Read actual current SGAP001 replacement graph and preserved KLINK pthread failures,then derive the genuine kext header/build context from pinned sources",
         "Register fresh compile,ABI,provider and negative-control experiments using isolated source/header/build copies and no global install",
         "Hand off verified components or exact remaining source/header/provider requirements to existing integration owners and assess all acceptance criteria with make check"
-      ]
+      ],
+      "started_at": "2026-11-05T12:21:39+00:00",
+      "last_heartbeat": "2026-11-05T12:56:32+00:00",
+      "updated_at": "2026-11-05T12:56:32+00:00",
+      "progress_note": "PTHP005 executes genuine native install rules:1794 installed entries,36 native empty exclusions,76 unavailable generated inputs explicit;PTHP007 builds all3 current ARM64 TUs and a real archive with39 definitions,61 external imports,zero unresolved after genuine3 VM aliases and zero overlaps",
+      "next_step": "Measure both actual callback-table layouts and signatures against the genuine kernel producer,real allocator records,negative header/type/metadata controls and actual alias linkage before acceptance",
+      "handoff": "docs/procedures/xnu-kernel-pthread-profile.md"
     }
   ],
   "experiments": [
@@ -7177,6 +7202,126 @@
       "evidence_sha256": "030d9c9f0b765bdd8c7bc5d39be97a8975be78c664a5a635cc38c057ae630e33",
       "outcome": "pass",
       "recorded_at": "2026-11-05T12:18:01+00:00"
+    },
+    {
+      "id": "PTHP-001",
+      "task": "KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Actual source recursion and INSTALL_KF lists define the genuine public/private kernel installed-header profile,whose native unifdef removes internal-only bodies;the three old missing VM imports are real selected aliases to existing current providers,not missing implementation stubs",
+      "procedure": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T12:26:15+00:00",
+      "evidence": "artifacts/xnu-kernel-pthread-profile/inventory-session1/evidence.json",
+      "evidence_sha256": "0d2a8be04a26c202cea94746a84e3c6b0fada822d41f0eafc9905f30f85fee41",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T12:31:31+00:00"
+    },
+    {
+      "id": "PTHP-002",
+      "task": "KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Actual native kernel header install recipes produce a coherent source-backed private/public profile using genuine unifdef/decomment/replacecontents and witnessed generated MIG/syscall/version inputs;missing generated inputs remain explicit and no raw internal header or empty SDK file fills a gap",
+      "procedure": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T12:31:39+00:00",
+      "evidence": "artifacts/xnu-kernel-pthread-profile/headers-session1/evidence.json",
+      "evidence_sha256": "893bd33b1c7388c581383dd2e246550f3960222ccaf1f73f27e1c9216fe19707",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T12:34:11+00:00"
+    },
+    {
+      "id": "PTHP-003",
+      "task": "KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The actual syscall generator namespace includes bsd/sys;correct source/provenance mapping supplies real generated headers to unchanged native install rules and keeps unavailable DriverKit products and literal malformed recursion entries explicit",
+      "procedure": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T12:34:52+00:00",
+      "evidence": "artifacts/xnu-kernel-pthread-profile/headers-session2/evidence.json",
+      "evidence_sha256": "8d4b1ad67f33cf97225a3446ac52c64b3d8fefa5e68c4c9727d5e736c1a33496",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T12:36:24+00:00"
+    },
+    {
+      "id": "PTHP-004",
+      "task": "KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Native GNU make target names preserve their literal double slash while canonical paths remain filesystem witnesses;copying the genuine _LOG_HOST helper completes cosmetic native logging without changing header rules or flags",
+      "procedure": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T12:36:38+00:00",
+      "evidence": "artifacts/xnu-kernel-pthread-profile/headers-session3/evidence.json",
+      "evidence_sha256": "ada861d7268c8dc578d223813e31d824cb9053aa4ecf06dc0dd442507a719ec2",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T12:38:53+00:00"
+    },
+    {
+      "id": "PTHP-005",
+      "task": "KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Already qualified generated headers are marked old under both native relative and absolute make prerequisite spellings;native installation uses their actual bytes without accidentally rerunning unrelated BSD master generation",
+      "procedure": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T12:39:04+00:00",
+      "evidence": "artifacts/xnu-kernel-pthread-profile/headers-session4/evidence.json",
+      "evidence_sha256": "fd48f28051f6080e87d84b469ccce5f0cd94562e353ad8c92818b530dd1646a5",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T12:46:03+00:00"
+    },
+    {
+      "id": "PTHP-006",
+      "task": "KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "All three pinned typed pthread TUs compile with current real metadata builtins,genuine kext definitions and actual native installed headers without raw-internal fallback;their real archive imports close against current kernel providers and genuine VM aliases",
+      "procedure": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T12:48:16+00:00",
+      "evidence": "artifacts/xnu-kernel-pthread-profile/compile-session1/evidence.json",
+      "evidence_sha256": "7ab8393c035f444ffe5eeec78233cc1367b7dd8e49f2e2fc4c86bf921e2d4371",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T12:50:04+00:00"
+    },
+    {
+      "id": "PTHP-007",
+      "task": "KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The separate public Availability contribution is the first missing include;three exact unchanged Apple XNU public headers verified against pinned git blobs supplement the real installed kernel profile without raw kernel internals,fake declarations or relaxed compiler errors",
+      "procedure": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T12:50:12+00:00",
+      "evidence": "artifacts/xnu-kernel-pthread-profile/compile-session2/evidence.json",
+      "evidence_sha256": "d17ec8373eace6799e40b36963cdde13a2fce74a053f7c074de14b62bccbcff5",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T12:51:59+00:00"
+    },
+    {
+      "id": "PTHP-008",
+      "task": "KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Actual current kext/kernel producer TUs agree on both complete callback-table field layouts and declarations,independent Clang19 agrees on target data layout,real allocator records use genuine metadata,three native aliases bind to genuine VM code,and wrong-header/function/metadata/alias controls fail or differ without any runtime/native claim",
+      "procedure": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T12:56:46+00:00",
+      "evidence": "artifacts/xnu-kernel-pthread-profile/controls-session1/evidence.json",
+      "evidence_sha256": "96898571273a76ba5d514d398d7e7d192beca8d342610b0b69d46af864fb62f6",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:02:02+00:00"
     }
   ],
   "events": [
@@ -14359,6 +14504,210 @@
           "next_step": "KRN-022: derive and qualify genuine pthread kext source/header/provider context;KRN-008 retains full integration and KRN-004 retains Apple ABI qualification",
           "last_heartbeat": "2026-11-05T12:18:10+00:00",
           "handoff": "docs/procedures/xnu-kernel-symbol-gaps.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T12:21:39+00:00",
+      "action": "task.claim:KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "tasks": [
+        {
+          "id": "KRN-022",
+          "status": "in_progress",
+          "owner": "codex-kernel-pthread-profile-20261105-ag",
+          "priority": 99,
+          "last_heartbeat": "2026-11-05T12:21:39+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T12:26:15+00:00",
+      "action": "experiment.plan:PTHP-001",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T12:31:31+00:00",
+      "action": "experiment.record:PTHP-001",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T12:31:39+00:00",
+      "action": "experiment.plan:PTHP-002",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T12:34:11+00:00",
+      "action": "experiment.record:PTHP-002",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T12:34:52+00:00",
+      "action": "experiment.plan:PTHP-003",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T12:36:24+00:00",
+      "action": "experiment.record:PTHP-003",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T12:36:38+00:00",
+      "action": "experiment.plan:PTHP-004",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T12:38:53+00:00",
+      "action": "experiment.record:PTHP-004",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T12:39:04+00:00",
+      "action": "experiment.plan:PTHP-005",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T12:46:03+00:00",
+      "action": "experiment.record:PTHP-005",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T12:48:16+00:00",
+      "action": "experiment.plan:PTHP-006",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T12:50:04+00:00",
+      "action": "experiment.record:PTHP-006",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T12:50:12+00:00",
+      "action": "experiment.plan:PTHP-007",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T12:51:59+00:00",
+      "action": "experiment.record:PTHP-007",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T12:56:32+00:00",
+      "action": "task.update:KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "tasks": [
+        {
+          "id": "KRN-022",
+          "status": "in_progress",
+          "owner": "codex-kernel-pthread-profile-20261105-ag",
+          "priority": 99,
+          "progress_note": "PTHP005 executes genuine native install rules:1794 installed entries,36 native empty exclusions,76 unavailable generated inputs explicit;PTHP007 builds all3 current ARM64 TUs and a real archive with39 definitions,61 external imports,zero unresolved after genuine3 VM aliases and zero overlaps",
+          "next_step": "Measure both actual callback-table layouts and signatures against the genuine kernel producer,real allocator records,negative header/type/metadata controls and actual alias linkage before acceptance",
+          "last_heartbeat": "2026-11-05T12:56:32+00:00",
+          "handoff": "docs/procedures/xnu-kernel-pthread-profile.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T12:56:46+00:00",
+      "action": "experiment.plan:PTHP-008",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T13:02:02+00:00",
+      "action": "experiment.record:PTHP-008",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T13:08:11+00:00",
+      "action": "task.prioritize:USB-001",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "USB-001",
+          "status": "pending",
+          "owner": null,
+          "priority": 95,
+          "priority_reason": "Independent host USB/block path supports native logs and root transport while kernel work continues"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:08:19+00:00",
+      "action": "task.prioritize:DRV-001",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "DRV-001",
+          "status": "pending",
+          "owner": null,
+          "priority": 94,
+          "priority_reason": "Independent bounded STM parser and transport boundary enable display/input integration without device operations"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:08:28+00:00",
+      "action": "task.prioritize:ESIM-001",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "ESIM-001",
+          "status": "pending",
+          "owner": null,
+          "priority": 93,
+          "priority_reason": "Independent eUICC channel/session implementation supports SIM/eSIM roadmap without profile changes on the phone"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:08:57+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-usb-20261105-ai",
+      "tasks": [
+        {
+          "id": "USB-001",
+          "status": "in_progress",
+          "owner": "codex-team-usb-20261105-ai",
+          "priority": 95,
+          "priority_reason": "Independent host USB/block path supports native logs and root transport while kernel work continues",
+          "last_heartbeat": "2026-11-05T13:08:57+00:00",
+          "branch": "team/usb-001-20261105",
+          "worktree": "worktrees/usb-001-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:09:27+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-touch-20261105-aj",
+      "tasks": [
+        {
+          "id": "DRV-001",
+          "status": "in_progress",
+          "owner": "codex-team-touch-20261105-aj",
+          "priority": 94,
+          "priority_reason": "Independent bounded STM parser and transport boundary enable display/input integration without device operations",
+          "last_heartbeat": "2026-11-05T13:09:27+00:00",
+          "branch": "team/drv-001-20261105",
+          "worktree": "worktrees/drv-001-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:09:51+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-esim-20261105-ak",
+      "tasks": [
+        {
+          "id": "ESIM-001",
+          "status": "in_progress",
+          "owner": "codex-team-esim-20261105-ak",
+          "priority": 93,
+          "priority_reason": "Independent eUICC channel/session implementation supports SIM/eSIM roadmap without profile changes on the phone",
+          "last_heartbeat": "2026-11-05T13:09:51+00:00",
+          "branch": "team/esim-001-20261105",
+          "worktree": "worktrees/esim-001-20261105"
         }
       ]
     }

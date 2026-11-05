@@ -1,23 +1,23 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T12:18:48+00:00",
-  "ledger_updated_at": "2026-11-05T12:18:20+00:00",
-  "registry_sha256": "943ec7789b488b608e3c7c81d90adbf7d0ff44442d23de481f582e32d8a75276",
+  "generated_at": "2026-11-05T13:09:54+00:00",
+  "ledger_updated_at": "2026-11-05T13:09:51+00:00",
+  "registry_sha256": "6dc77106fcf926937ed8941ebdf1ad8be0eadede3ba056868ab700bdae7b230f",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
-      "KRN-022",
       "VM-002",
-      "USB-001",
       "SEN-001",
-      "ESIM-001",
       "MISC-001",
-      "DRV-001",
       "VM-001"
     ],
     "in_progress": [
       "KRN-008",
-      "KRN-004"
+      "KRN-022",
+      "USB-001",
+      "KRN-004",
+      "DRV-001",
+      "ESIM-001"
     ],
     "blocked": [
       "KRN-003",
@@ -548,8 +548,8 @@
     {
       "id": "KRN-022",
       "title": "Qualify genuine pthread kext source, header and provider integration",
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
       "priority": 99,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -578,9 +578,16 @@
         "Register fresh compile,ABI,provider and negative-control experiments using isolated source/header/build copies and no global install",
         "Hand off verified components or exact remaining source/header/provider requirements to existing integration owners and assess all acceptance criteria with make check"
       ],
-      "column": "ready",
+      "started_at": "2026-11-05T12:21:39+00:00",
+      "last_heartbeat": "2026-11-05T12:56:32+00:00",
+      "updated_at": "2026-11-05T12:56:32+00:00",
+      "progress_note": "PTHP005 executes genuine native install rules:1794 installed entries,36 native empty exclusions,76 unavailable generated inputs explicit;PTHP007 builds all3 current ARM64 TUs and a real archive with39 definitions,61 external imports,zero unresolved after genuine3 VM aliases and zero overlaps",
+      "next_step": "Measure both actual callback-table layouts and signatures against the genuine kernel producer,real allocator records,negative header/type/metadata controls and actual alias linkage before acceptance",
+      "handoff": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "column": "in_progress",
       "reasons": [],
-      "card_path": "planning/tasks/KRN-022.md"
+      "card_path": "planning/tasks/KRN-022.md",
+      "report_health": "recent"
     },
     {
       "id": "KRN-007",
@@ -959,6 +966,45 @@
       "card_path": "planning/tasks/KRN-005.md"
     },
     {
+      "id": "USB-001",
+      "title": "Implement host-buildable native USB and block-transport adapters",
+      "status": "in_progress",
+      "owner": "codex-team-usb-20261105-ai",
+      "priority": 95,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-002",
+        "BLD-001"
+      ],
+      "paths": [
+        "src/platform/usb",
+        "docs/procedures/usb-001"
+      ],
+      "acceptance": [
+        "Specify DWC3/PHY, DMA and return-channel requirements from exact board inputs",
+        "Bounded read-only block protocol rejects invalid sizes and disconnects"
+      ],
+      "sources": [
+        "s24-bsp-reference"
+      ],
+      "steps": [
+        "Inspect the task dependencies and pinned inputs",
+        "Implement or measure only this task boundary",
+        "Record real results, failure modes and next-step handoff"
+      ],
+      "priority_reason": "Independent host USB/block path supports native logs and root transport while kernel work continues",
+      "updated_at": "2026-11-05T13:08:57+00:00",
+      "started_at": "2026-11-05T13:08:57+00:00",
+      "last_heartbeat": "2026-11-05T13:08:57+00:00",
+      "branch": "team/usb-001-20261105",
+      "worktree": "worktrees/usb-001-20261105",
+      "column": "in_progress",
+      "reasons": [],
+      "card_path": "planning/tasks/USB-001.md",
+      "report_health": "recent"
+    },
+    {
       "id": "RES-008",
       "title": "Validate actual XNU sysroot, SDK and donor build-tool requirements",
       "status": "done",
@@ -1226,6 +1272,87 @@
       "reasons": [],
       "card_path": "planning/tasks/KRN-004.md",
       "report_health": "stale"
+    },
+    {
+      "id": "DRV-001",
+      "title": "Prepare an STM SPI touch driver and host adapter",
+      "status": "in_progress",
+      "owner": "codex-team-touch-20261105-aj",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-002"
+      ],
+      "paths": [
+        "src/platform/input/stm",
+        "docs/procedures/drv-001",
+        "fixtures/public/stm-touch",
+        "tests/test_stm_touch.py"
+      ],
+      "acceptance": [
+        "The protocol is separated from the MMIO layer.",
+        "The parser is tested with truncated/invalid events and coordinate ranges.",
+        "Device power, IRQ and sensor behavior remain labeled unverified."
+      ],
+      "sources": [
+        "s24-port",
+        "s24-linux"
+      ],
+      "steps": [
+        "Use project-owned protocol fixtures.",
+        "Preserve licenses and provenance for reused code.",
+        "Do not read MMIO on the daily Android system."
+      ],
+      "priority": 94,
+      "priority_reason": "Independent bounded STM parser and transport boundary enable display/input integration without device operations",
+      "updated_at": "2026-11-05T13:09:27+00:00",
+      "started_at": "2026-11-05T13:09:27+00:00",
+      "last_heartbeat": "2026-11-05T13:09:27+00:00",
+      "branch": "team/drv-001-20261105",
+      "worktree": "worktrees/drv-001-20261105",
+      "column": "in_progress",
+      "reasons": [],
+      "card_path": "planning/tasks/DRV-001.md",
+      "report_health": "recent"
+    },
+    {
+      "id": "ESIM-001",
+      "title": "Specify eUICC logical channels and LPA integration",
+      "status": "in_progress",
+      "owner": "codex-team-esim-20261105-ak",
+      "priority": 93,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "CELL-001"
+      ],
+      "paths": [
+        "src/platform/esim",
+        "docs/procedures/esim-001"
+      ],
+      "acceptance": [
+        "Separate active-profile use, APDU access and profile provisioning",
+        "Pin lpac and donor code before reuse; test error/session cleanup"
+      ],
+      "sources": [
+        "lpac",
+        "qcom-baseband"
+      ],
+      "steps": [
+        "Inspect the task dependencies and pinned inputs",
+        "Implement or measure only this task boundary",
+        "Record real results, failure modes and next-step handoff"
+      ],
+      "priority_reason": "Independent eUICC channel/session implementation supports SIM/eSIM roadmap without profile changes on the phone",
+      "updated_at": "2026-11-05T13:09:51+00:00",
+      "started_at": "2026-11-05T13:09:51+00:00",
+      "last_heartbeat": "2026-11-05T13:09:51+00:00",
+      "branch": "team/esim-001-20261105",
+      "worktree": "worktrees/esim-001-20261105",
+      "column": "in_progress",
+      "reasons": [],
+      "card_path": "planning/tasks/ESIM-001.md",
+      "report_health": "recent"
     },
     {
       "id": "PLN-001",
@@ -2125,38 +2252,6 @@
       "card_path": "planning/tasks/UI-001.md"
     },
     {
-      "id": "USB-001",
-      "title": "Implement host-buildable native USB and block-transport adapters",
-      "status": "pending",
-      "owner": null,
-      "priority": 70,
-      "scope": "host",
-      "evidence_kind": "host-test",
-      "depends_on": [
-        "RES-002",
-        "BLD-001"
-      ],
-      "paths": [
-        "src/platform/usb",
-        "docs/procedures/usb-001"
-      ],
-      "acceptance": [
-        "Specify DWC3/PHY, DMA and return-channel requirements from exact board inputs",
-        "Bounded read-only block protocol rejects invalid sizes and disconnects"
-      ],
-      "sources": [
-        "s24-bsp-reference"
-      ],
-      "steps": [
-        "Inspect the task dependencies and pinned inputs",
-        "Implement or measure only this task boundary",
-        "Record real results, failure modes and next-step handoff"
-      ],
-      "column": "ready",
-      "reasons": [],
-      "card_path": "planning/tasks/USB-001.md"
-    },
-    {
       "id": "GPU-006",
       "title": "Specify the Xclipse Darwin memory and submission interface",
       "status": "done",
@@ -2620,38 +2715,6 @@
         "Dependencies: KRN-001, CELL-009"
       ],
       "card_path": "planning/tasks/CELL-004.md"
-    },
-    {
-      "id": "ESIM-001",
-      "title": "Specify eUICC logical channels and LPA integration",
-      "status": "pending",
-      "owner": null,
-      "priority": 70,
-      "scope": "host",
-      "evidence_kind": "host-test",
-      "depends_on": [
-        "CELL-001"
-      ],
-      "paths": [
-        "src/platform/esim",
-        "docs/procedures/esim-001"
-      ],
-      "acceptance": [
-        "Separate active-profile use, APDU access and profile provisioning",
-        "Pin lpac and donor code before reuse; test error/session cleanup"
-      ],
-      "sources": [
-        "lpac",
-        "qcom-baseband"
-      ],
-      "steps": [
-        "Inspect the task dependencies and pinned inputs",
-        "Implement or measure only this task boundary",
-        "Record real results, failure modes and next-step handoff"
-      ],
-      "column": "ready",
-      "reasons": [],
-      "card_path": "planning/tasks/ESIM-001.md"
     },
     {
       "id": "MISC-001",
@@ -3407,41 +3470,6 @@
       "card_path": "planning/tasks/GPU-005.md"
     },
     {
-      "id": "DRV-001",
-      "title": "Prepare an STM SPI touch driver and host adapter",
-      "status": "pending",
-      "owner": null,
-      "scope": "host",
-      "evidence_kind": "host-test",
-      "depends_on": [
-        "RES-002"
-      ],
-      "paths": [
-        "src/platform/input/stm",
-        "docs/procedures/drv-001",
-        "fixtures/public/stm-touch",
-        "tests/test_stm_touch.py"
-      ],
-      "acceptance": [
-        "The protocol is separated from the MMIO layer.",
-        "The parser is tested with truncated/invalid events and coordinate ranges.",
-        "Device power, IRQ and sensor behavior remain labeled unverified."
-      ],
-      "sources": [
-        "s24-port",
-        "s24-linux"
-      ],
-      "steps": [
-        "Use project-owned protocol fixtures.",
-        "Preserve licenses and provenance for reused code.",
-        "Do not read MMIO on the daily Android system."
-      ],
-      "column": "ready",
-      "reasons": [],
-      "priority": 50,
-      "card_path": "planning/tasks/DRV-001.md"
-    },
-    {
       "id": "DRV-002",
       "title": "Validate the read-only UFS/MCQ contract on the host",
       "status": "pending",
@@ -3475,7 +3503,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Paths reserved by: KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008"
+        "Paths reserved by: DRV-001, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-022"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-002.md"
@@ -3559,7 +3587,7 @@
       "column": "waiting",
       "reasons": [
         "Dependencies: NAT-001",
-        "Paths reserved by: NAT-001, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008"
+        "Paths reserved by: DRV-001, NAT-001, USB-001, ESIM-001, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-022"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-002.md"
@@ -3603,7 +3631,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-002, NAT-004, KRN-001",
-        "Paths reserved by: NAT-001, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008"
+        "Paths reserved by: DRV-001, NAT-001, USB-001, ESIM-001, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-022"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -4470,6 +4498,32 @@
         "worktree": null
       }
     ],
+    "codex-kernel-pthread-profile-20261105-ag": [
+      {
+        "id": "KRN-022",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-05T12:56:32+00:00",
+        "report_health": "recent",
+        "progress_note": "PTHP005 executes genuine native install rules:1794 installed entries,36 native empty exclusions,76 unavailable generated inputs explicit;PTHP007 builds all3 current ARM64 TUs and a real archive with39 definitions,61 external imports,zero unresolved after genuine3 VM aliases and zero overlaps",
+        "next_step": "Measure both actual callback-table layouts and signatures against the genuine kernel producer,real allocator records,negative header/type/metadata controls and actual alias linkage before acceptance",
+        "handoff": "docs/procedures/xnu-kernel-pthread-profile.md",
+        "branch": null,
+        "worktree": null
+      }
+    ],
+    "codex-team-usb-20261105-ai": [
+      {
+        "id": "USB-001",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-05T13:08:57+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": "team/usb-001-20261105",
+        "worktree": "worktrees/usb-001-20261105"
+      }
+    ],
     "codex-e1s-dependencies-20261105-k": [
       {
         "id": "KRN-003",
@@ -4494,6 +4548,32 @@
         "handoff": "docs/procedures/xnu-iig-abi.md",
         "branch": "main",
         "worktree": null
+      }
+    ],
+    "codex-team-touch-20261105-aj": [
+      {
+        "id": "DRV-001",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-05T13:09:27+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": "team/drv-001-20261105",
+        "worktree": "worktrees/drv-001-20261105"
+      }
+    ],
+    "codex-team-esim-20261105-ak": [
+      {
+        "id": "ESIM-001",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-05T13:09:51+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": "team/esim-001-20261105",
+        "worktree": "worktrees/esim-001-20261105"
       }
     ],
     "codex-implementation-20261105": [
@@ -4560,174 +4640,184 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-05T11:59:52+00:00",
-      "action": "experiment.plan:KLINK-012",
-      "owner": "codex-kernel-link-inputs-20261105-ae"
+      "at": "2026-11-05T12:34:11+00:00",
+      "action": "experiment.record:PTHP-002",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
     },
     {
-      "at": "2026-11-05T12:00:41+00:00",
-      "action": "experiment.record:KLINK-012",
-      "owner": "codex-kernel-link-inputs-20261105-ae"
+      "at": "2026-11-05T12:34:52+00:00",
+      "action": "experiment.plan:PTHP-003",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
     },
     {
-      "at": "2026-11-05T12:00:59+00:00",
-      "action": "task.done:KRN-020",
-      "owner": "codex-kernel-link-inputs-20261105-ae",
-      "tasks": [
-        {
-          "id": "KRN-020",
-          "status": "done",
-          "owner": "codex-kernel-link-inputs-20261105-ae",
-          "priority": 99,
-          "progress_note": "Real981-member archive passes exact ordinal hashes;13 linker boundary pointers resolve;three source gaps measured;two full982-object links fail at real missing libraries;pthread/header failures retained",
-          "next_step": "Run final acceptance over real archive,all982 target representations,provider closure,negative controls and repository checks",
-          "last_heartbeat": "2026-11-05T11:59:26+00:00",
-          "handoff": "docs/procedures/xnu-kernel-link-inputs.md"
-        }
-      ]
+      "at": "2026-11-05T12:36:24+00:00",
+      "action": "experiment.record:PTHP-003",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
     },
     {
-      "at": "2026-11-05T12:02:18+00:00",
-      "action": "task.claim:KRN-021",
-      "owner": "codex-kernel-symbol-gaps-20261105-af",
-      "tasks": [
-        {
-          "id": "KRN-021",
-          "status": "in_progress",
-          "owner": "codex-kernel-symbol-gaps-20261105-af",
-          "priority": 99,
-          "last_heartbeat": "2026-11-05T12:02:18+00:00"
-        }
-      ]
+      "at": "2026-11-05T12:36:38+00:00",
+      "action": "experiment.plan:PTHP-004",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
     },
     {
-      "at": "2026-11-05T12:04:38+00:00",
-      "action": "experiment.plan:SGAP-001",
-      "owner": "codex-kernel-symbol-gaps-20261105-af"
+      "at": "2026-11-05T12:38:53+00:00",
+      "action": "experiment.record:PTHP-004",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
     },
     {
-      "at": "2026-11-05T12:07:32+00:00",
-      "action": "experiment.record:SGAP-001",
-      "owner": "codex-kernel-symbol-gaps-20261105-af"
+      "at": "2026-11-05T12:39:04+00:00",
+      "action": "experiment.plan:PTHP-005",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
     },
     {
-      "at": "2026-11-05T12:07:39+00:00",
-      "action": "experiment.plan:SGAP-002",
-      "owner": "codex-kernel-symbol-gaps-20261105-af"
+      "at": "2026-11-05T12:46:03+00:00",
+      "action": "experiment.record:PTHP-005",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
     },
     {
-      "at": "2026-11-05T12:09:20+00:00",
-      "action": "experiment.record:SGAP-002",
-      "owner": "codex-kernel-symbol-gaps-20261105-af"
+      "at": "2026-11-05T12:48:16+00:00",
+      "action": "experiment.plan:PTHP-006",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
     },
     {
-      "at": "2026-11-05T12:09:27+00:00",
-      "action": "experiment.plan:SGAP-003",
-      "owner": "codex-kernel-symbol-gaps-20261105-af"
+      "at": "2026-11-05T12:50:04+00:00",
+      "action": "experiment.record:PTHP-006",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
     },
     {
-      "at": "2026-11-05T12:11:37+00:00",
-      "action": "experiment.record:SGAP-003",
-      "owner": "codex-kernel-symbol-gaps-20261105-af"
+      "at": "2026-11-05T12:50:12+00:00",
+      "action": "experiment.plan:PTHP-007",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
     },
     {
-      "at": "2026-11-05T12:11:45+00:00",
-      "action": "experiment.plan:SGAP-004",
-      "owner": "codex-kernel-symbol-gaps-20261105-af"
+      "at": "2026-11-05T12:51:59+00:00",
+      "action": "experiment.record:PTHP-007",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
     },
     {
-      "at": "2026-11-05T12:13:14+00:00",
-      "action": "experiment.record:SGAP-004",
-      "owner": "codex-kernel-symbol-gaps-20261105-af"
-    },
-    {
-      "at": "2026-11-05T12:14:42+00:00",
-      "action": "task.update:KRN-021",
-      "owner": "codex-kernel-symbol-gaps-20261105-af",
-      "tasks": [
-        {
-          "id": "KRN-021",
-          "status": "in_progress",
-          "owner": "codex-kernel-symbol-gaps-20261105-af",
-          "priority": 99,
-          "progress_note": "All four genuine target objects compile;982-object audit resolves exactly three source gaps,22 to19;20 source/configuration/mutation controls and seven real stage2-storage controls pass;original sources/objects/dependencies retained",
-          "next_step": "Run final acceptance and132 repository tests,then hand coherent replacements to existing integration owners and queue genuine pthread profile work",
-          "last_heartbeat": "2026-11-05T12:14:42+00:00",
-          "handoff": "docs/procedures/xnu-kernel-symbol-gaps.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T12:15:10+00:00",
-      "action": "task.add:KRN-022",
-      "owner": "codex-kernel-symbol-gaps-20261105-af",
+      "at": "2026-11-05T12:56:32+00:00",
+      "action": "task.update:KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
       "tasks": [
         {
           "id": "KRN-022",
+          "status": "in_progress",
+          "owner": "codex-kernel-pthread-profile-20261105-ag",
+          "priority": 99,
+          "progress_note": "PTHP005 executes genuine native install rules:1794 installed entries,36 native empty exclusions,76 unavailable generated inputs explicit;PTHP007 builds all3 current ARM64 TUs and a real archive with39 definitions,61 external imports,zero unresolved after genuine3 VM aliases and zero overlaps",
+          "next_step": "Measure both actual callback-table layouts and signatures against the genuine kernel producer,real allocator records,negative header/type/metadata controls and actual alias linkage before acceptance",
+          "last_heartbeat": "2026-11-05T12:56:32+00:00",
+          "handoff": "docs/procedures/xnu-kernel-pthread-profile.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T12:56:46+00:00",
+      "action": "experiment.plan:PTHP-008",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T13:02:02+00:00",
+      "action": "experiment.record:PTHP-008",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T13:08:11+00:00",
+      "action": "task.prioritize:USB-001",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "USB-001",
           "status": "pending",
           "owner": null,
-          "priority": 99
+          "priority": 95,
+          "priority_reason": "Independent host USB/block path supports native logs and root transport while kernel work continues"
         }
       ]
     },
     {
-      "at": "2026-11-05T12:15:17+00:00",
-      "action": "experiment.plan:SGAP-005",
-      "owner": "codex-kernel-symbol-gaps-20261105-af"
-    },
-    {
-      "at": "2026-11-05T12:16:38+00:00",
-      "action": "experiment.record:SGAP-005",
-      "owner": "codex-kernel-symbol-gaps-20261105-af"
-    },
-    {
-      "at": "2026-11-05T12:16:46+00:00",
-      "action": "experiment.plan:SGAP-006",
-      "owner": "codex-kernel-symbol-gaps-20261105-af"
-    },
-    {
-      "at": "2026-11-05T12:18:01+00:00",
-      "action": "experiment.record:SGAP-006",
-      "owner": "codex-kernel-symbol-gaps-20261105-af"
-    },
-    {
-      "at": "2026-11-05T12:18:10+00:00",
-      "action": "task.update:KRN-021",
-      "owner": "codex-kernel-symbol-gaps-20261105-af",
+      "at": "2026-11-05T13:08:19+00:00",
+      "action": "task.prioritize:DRV-001",
+      "owner": "codex-team-coordinator-20261105-ah",
       "tasks": [
         {
-          "id": "KRN-021",
+          "id": "DRV-001",
+          "status": "pending",
+          "owner": null,
+          "priority": 94,
+          "priority_reason": "Independent bounded STM parser and transport boundary enable display/input integration without device operations"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:08:28+00:00",
+      "action": "task.prioritize:ESIM-001",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "ESIM-001",
+          "status": "pending",
+          "owner": null,
+          "priority": 93,
+          "priority_reason": "Independent eUICC channel/session implementation supports SIM/eSIM roadmap without profile changes on the phone"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:08:57+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-usb-20261105-ai",
+      "tasks": [
+        {
+          "id": "USB-001",
           "status": "in_progress",
-          "owner": "codex-kernel-symbol-gaps-20261105-af",
-          "priority": 99,
-          "progress_note": "SGAP006 final acceptance passes24 checks and132 repository tests;all982 coherent source/objects,3156 dependencies and exact four full commands reverified;three real source gaps resolved,19 real linker/library names retained;all original prefixes and frozen owners preserved",
-          "next_step": "KRN-022: derive and qualify genuine pthread kext source/header/provider context;KRN-008 retains full integration and KRN-004 retains Apple ABI qualification",
-          "last_heartbeat": "2026-11-05T12:18:10+00:00",
-          "handoff": "docs/procedures/xnu-kernel-symbol-gaps.md"
+          "owner": "codex-team-usb-20261105-ai",
+          "priority": 95,
+          "priority_reason": "Independent host USB/block path supports native logs and root transport while kernel work continues",
+          "last_heartbeat": "2026-11-05T13:08:57+00:00",
+          "branch": "team/usb-001-20261105",
+          "worktree": "worktrees/usb-001-20261105"
         }
       ]
     },
     {
-      "at": "2026-11-05T12:18:20+00:00",
-      "action": "task.done:KRN-021",
-      "owner": "codex-kernel-symbol-gaps-20261105-af",
+      "at": "2026-11-05T13:09:27+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-touch-20261105-aj",
       "tasks": [
         {
-          "id": "KRN-021",
-          "status": "done",
-          "owner": "codex-kernel-symbol-gaps-20261105-af",
-          "priority": 99,
-          "progress_note": "SGAP006 final acceptance passes24 checks and132 repository tests;all982 coherent source/objects,3156 dependencies and exact four full commands reverified;three real source gaps resolved,19 real linker/library names retained;all original prefixes and frozen owners preserved",
-          "next_step": "KRN-022: derive and qualify genuine pthread kext source/header/provider context;KRN-008 retains full integration and KRN-004 retains Apple ABI qualification",
-          "last_heartbeat": "2026-11-05T12:18:10+00:00",
-          "handoff": "docs/procedures/xnu-kernel-symbol-gaps.md"
+          "id": "DRV-001",
+          "status": "in_progress",
+          "owner": "codex-team-touch-20261105-aj",
+          "priority": 94,
+          "priority_reason": "Independent bounded STM parser and transport boundary enable display/input integration without device operations",
+          "last_heartbeat": "2026-11-05T13:09:27+00:00",
+          "branch": "team/drv-001-20261105",
+          "worktree": "worktrees/drv-001-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:09:51+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-esim-20261105-ak",
+      "tasks": [
+        {
+          "id": "ESIM-001",
+          "status": "in_progress",
+          "owner": "codex-team-esim-20261105-ak",
+          "priority": 93,
+          "priority_reason": "Independent eUICC channel/session implementation supports SIM/eSIM roadmap without profile changes on the phone",
+          "last_heartbeat": "2026-11-05T13:09:51+00:00",
+          "branch": "team/esim-001-20261105",
+          "worktree": "worktrees/esim-001-20261105"
         }
       ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "449e3a0f358fd1b7f644178045b64836fee3b3977a51f8ce0136ee62d30c625e",
-    "BOARD.md": "8794e3d400b8b1c3f39d3046d31f2dd766dad45b34041d7fd35260916adc51c9",
+    "STATUS.md": "a414db34ef40e235c80ba77fe5cd34b09943cb5f02281cc9eccc974c49ecfc79",
+    "BOARD.md": "0c985cf4438ab464bb847f1d81eeda88bd01e9dbabee6b965fbb58c8b1d6fbea",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-008.md": "d390a17b7ba0326785326c84ac481fc17aa9afe2ab77e20bb1cef98e0016307d",
     "planning/tasks/KRN-010.md": "4f479284d71242353a2a95508bac0b5304468c6ee44704b7561bc32cee8e1832",
@@ -4737,7 +4827,7 @@
     "planning/tasks/KRN-019.md": "8ff18e3db41236be78fa750e4ab2c2b6c6f400d93dd35e0f35748e2db46b6914",
     "planning/tasks/KRN-020.md": "909c9b336b2366469ce13bca06dbb865ee24458d91c249afc976641d42c061d4",
     "planning/tasks/KRN-021.md": "0d8db5e1a7009caa7d9dc0e4a9d10ee9602c2c5d07fee219df6b96e5a47be1f1",
-    "planning/tasks/KRN-022.md": "334803719904b687a0cdb84e576cc2b38c647152bda25ca5fd3f17ce5b0ba3e4",
+    "planning/tasks/KRN-022.md": "415b91b31bd70c8864a9c7827fd144ada6bbca5ab51445e086534caa1e9f12ff",
     "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-011.md": "9b8014abd8d019af80fad695e0d0df9de9523d36a222553327384f7f00e8a901",
     "planning/tasks/KRN-017.md": "86a29485c4c3ed3a62f7ecf64f5e2bb303bb0bd7ac5fd661482bf024004f407d",
@@ -4746,11 +4836,14 @@
     "planning/tasks/KRN-014.md": "373bcf06587ce0b77bbacdfa023baa6c9b888953717dafa33267ff49a60ea753",
     "planning/tasks/KRN-015.md": "28783b6b5313987331209c84d30f10ddeab6ee7f41bf6bf1d963790545460926",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
+    "planning/tasks/USB-001.md": "2a453873a9b365896125372034f00c2b8d94cb1d4b19ff411bd501f83b06e476",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
     "planning/tasks/KRN-003.md": "7d37e5fece06694371991cb3127ab5121d975ec8a99179d63ec1f71a90c303ff",
     "planning/tasks/RES-009.md": "29506be617bfdcf7676f1f8e24f86b956ac88ba16ee9ae53c3c3e8570711bab8",
     "planning/tasks/KRN-004.md": "70b41a1c9b0f3ea37898dfad96a8363af34840c59272d3ab769b11c241992fa0",
+    "planning/tasks/DRV-001.md": "315f23bf5e57bb91ec5bdf67128044b7e6a7ed4f3fb71eaef13229adea7b78a5",
+    "planning/tasks/ESIM-001.md": "ca9cd4b8b248245c9388ac571c7d40216a05f5efb9cfe98add92358fa2daaebf",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
     "planning/tasks/INT-001.md": "9d68fa75fae4c21f31f5ea4734c3f592ed0b41c6ed897d7b045a892c63549760",
@@ -4769,7 +4862,6 @@
     "planning/tasks/UI-006.md": "3f0b011218a7184215c921772df69609f1b52f14c0c5b058d4e513c9506c5bfb",
     "planning/tasks/VM-002.md": "d3562a56e6974bb5a02fc494ec91bd6c96cfb749e0adc1384caa13950d413785",
     "planning/tasks/UI-001.md": "c625d98b72bb9f1d80a6d5bb3d2a74922ae72d9ab758fb7d12bdf71a7f474320",
-    "planning/tasks/USB-001.md": "aeb1f6cdd25c31a8ae88b49778bfe5fb25ef173807996a58bb8af652a62bb07e",
     "planning/tasks/GPU-006.md": "c4420e384a9ce1eaccb816f017b6212f8b8601974b7de2218916f3115d40464f",
     "planning/tasks/GPU-007.md": "6a2532661ad2838c05dbd0ccb16545e5849ce2ad209d00c3ba69d84197372508",
     "planning/tasks/GPU-009.md": "aa54b72a7a488c031763ae199c237ade1e352378c30d9df2b4e72eb6cacae591",
@@ -4782,7 +4874,6 @@
     "planning/tasks/CELL-001.md": "1daa2c0f314edeeda07b368ca4d7cfa93de97865d45186208754b781f40a715f",
     "planning/tasks/CELL-002.md": "c2bb9100905400e0956657ba95d37ac92efe7749f1fe3bf362e01ff66719db07",
     "planning/tasks/CELL-004.md": "405eb4534873c8285637644c1f4a913afd663fb4e8dbc628d2eea10440fafc51",
-    "planning/tasks/ESIM-001.md": "35d2eb01fcc3c31f09383f73868dc8b03b0c619d14d3b255f4ea38f229e2569e",
     "planning/tasks/MISC-001.md": "d2d92669c56ccc428feedd6af2f3c5bad4f0117107f1518c73999fb68d5c0270",
     "planning/tasks/NET-004.md": "8bd5a17e9165df26cb213f576c2614428ff7e343f1f272f45e1bf5d5906dbeb4",
     "planning/tasks/NET-005.md": "14907c958852b82d97046f0aeefe666073dd6309b0a26f3a119f1a7b4c0acc9f",
@@ -4802,11 +4893,10 @@
     "planning/tasks/GPU-003.md": "665b0d3da71db36dc08200cbd3165a04d9a7df34554e46f50a169e644eb9d273",
     "planning/tasks/GPU-004.md": "4f7b914361a5ff47439410c701bd907e3a3020383d4b33c91ce59b5fbdab2579",
     "planning/tasks/GPU-005.md": "4d83a325d8c9601f76a8a72d7a31f2b7d47d8f450ee9c989a18c58eae4614346",
-    "planning/tasks/DRV-001.md": "0e15c9a93f74cbd15da5e1507551c8599a25ac14bf857b1fc3cf62a672459ade",
-    "planning/tasks/DRV-002.md": "953568fefbe672455732c12028afe82a7d6a41c50a957fd1dd3df9bb32bb5aad",
+    "planning/tasks/DRV-002.md": "d23dad7264847c143c8d228b4b8e9f8f679828f578a1b5ba87b615552bc54737",
     "planning/tasks/NAT-001.md": "555b180dd2cfda5c6a7e4623041660bfd01b1c074d7fd82a9be75e83b4af7bcf",
-    "planning/tasks/NAT-002.md": "a375622284a50d9e325389c8f5063baeae2b78553c4d15d0e375e25869504097",
-    "planning/tasks/NAT-003.md": "603b31969a914acbc9a57955fbef4dff0078ce4320baa7b29cd5b78665ce1e02",
+    "planning/tasks/NAT-002.md": "806f77e8c34cf349daa55f98f270f310a0d7697839310020b6eaafd798fa2e2a",
+    "planning/tasks/NAT-003.md": "b66b749a43bb3680e24af6c46e53a89698632d7589e1cdb27a46caf258b92736",
     "planning/tasks/DRV-003.md": "8f6e3fbe9e05391ad4614894f6675ec628b3abb105f8f2d84009cf446dc2e62a",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",

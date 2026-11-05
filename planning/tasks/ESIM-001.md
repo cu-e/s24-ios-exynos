@@ -6,15 +6,20 @@
 
 | Field | Value |
 |---|---|
-| State / column | pending / ready |
-| Owner | unassigned |
-| Priority | 70 (higher first; default 50) |
+| State / column | in_progress / in_progress |
+| Owner | codex-team-esim-20261105-ak |
+| Priority | 93 (higher first; default 50) |
 | Scope / evidence | host / host-test |
 | Dependencies | CELL-001 |
+| started_at | 2026-11-05T13:09:51+00:00 |
+| last_heartbeat | 2026-11-05T13:09:51+00:00 |
+| report_health | recent |
+| branch | team/esim-001-20261105 |
+| worktree | worktrees/esim-001-20261105 |
 
 ## Readiness
 
-ready
+in_progress
 
 ## Reserved paths
 
@@ -36,5 +41,5 @@ ready
 
 ```sh
 python3 tools/lab.py task show ESIM-001
-python3 tools/lab.py task claim ESIM-001 --owner agent-your-session
+python3 tools/lab.py task update ESIM-001 --owner codex-team-esim-20261105-ak --note 'Observed result' --next-step 'Next concrete check'
 ```
