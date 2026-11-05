@@ -85,3 +85,10 @@ path. Retain that failed proof. Use genuine cc_clear for IV/sbuf and route the
 six post-IV-copy validation failures through common cleanup; pre-IV exits remain
 unchanged. Inspect fresh unobserved production object calls before accepting
 nonelision. Runtime observers prove ownership/values only, never optimizer behavior.
+
+Before another guest lease, independent REV022 must audit all architecture/status/
+ownership fixture expectations. The source-derived expected alignment/scratch/direct
+paths use genuine selected macros, never forced ARM32 definitions. Retain raw input
+alignment observations, exact callback/destination-allocation stop counters and a
+unique source marker for the original ignored-status negative. Rebuild only affected
+instrumented ESP fixture TUs; preserve every earlier partial/failing guest attempt.

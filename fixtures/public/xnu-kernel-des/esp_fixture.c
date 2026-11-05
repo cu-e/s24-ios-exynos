@@ -9,10 +9,11 @@ extern __attribute__((noreturn)) void kdes_fixture_fail(unsigned);
 #define POOL 24
 _Static_assert(MLEN>=44&&MHLEN>=44,"bounded genuine packet capacity");
 const unsigned long long kdes_esp_record_layout[]={sizeof(struct mbuf),_Alignof(struct mbuf),sizeof(struct secasvar),_Alignof(struct secasvar),MLEN,MHLEN,__builtin_offsetof(struct mbuf,m_len),__builtin_offsetof(struct mbuf,m_data),__builtin_offsetof(struct secasvar,sched)};
+const unsigned long long kdes_esp_alignment_policy[]={IPSEC_IS_P2ALIGNED((void *)(uintptr_t)1),IPSEC_GET_P2UNALIGNED_OFS((void *)(uintptr_t)1),sizeof(u_int32_t),IPSEC_IS_P2ALIGNED((void *)(uintptr_t)4)};
 static struct mbuf fixture_pool[POOL];
 static unsigned used[POOL],freed[POOL],original[POOL],count,allocations,fail_alloc;
 static unsigned scratch_live,fail_scratch,stirs,clear_calls,block_calls,fail_block;
-static unsigned saw_split,saw_head_alias,saw_tail_alias,saw_distinct_tail,observed_iv,observed_scratch;
+static unsigned saw_split,saw_raw_unaligned,saw_head_alias,saw_tail_alias,saw_distinct_tail,observed_iv,observed_scratch;
 _Alignas(16) static unsigned char scratch[16];
 static struct secasvar *active_sav;
 static int fixture_triple;
@@ -83,7 +84,7 @@ int assfail(const char *s,const char *file,int line)
 /* Called from the owned instrumented copy immediately before a real block call. */
 void kdes_before_block(struct secasvar *sav,struct mbuf *m,struct mbuf *scut,struct mbuf *d0,struct mbuf *d,unsigned char *sp,unsigned char *sbuf)
 {
- FASSERT(sav==active_sav);block_calls++;saw_split|=sp==sbuf;saw_head_alias|=m==scut;saw_tail_alias|=d0==d;saw_distinct_tail|=d0!=d;
+ FASSERT(sav==active_sav);block_calls++;saw_split|=sp==sbuf;saw_raw_unaligned|=((uintptr_t)sp&3)!=0;saw_head_alias|=m==scut;saw_tail_alias|=d0==d;saw_distinct_tail|=d0!=d;
  FASSERT(original[index_of(m)]&&!original[index_of(d0)]&&!original[index_of(d)]);
  for(unsigned i=0;i<count;++i)if(original[i]&&!freed[i])for(unsigned j=0;j<count;++j)if(!original[j]&&!freed[j])FASSERT(&fixture_pool[i]!=&fixture_pool[j]);
  if(block_calls==fail_block)mbedtls_platform_zeroize(sav->sched,fixture_triple?sizeof(des3_ecb_key_schedule):sizeof(des_ecb_key_schedule));
@@ -91,7 +92,7 @@ void kdes_before_block(struct secasvar *sav,struct mbuf *m,struct mbuf *scut,str
 static void reset_fixture(void)
 {
  memset(fixture_pool,0,sizeof(fixture_pool));memset(used,0,sizeof(used));memset(freed,0,sizeof(freed));memset(original,0,sizeof(original));
- count=allocations=scratch_live=stirs=clear_calls=block_calls=saw_split=saw_head_alias=saw_tail_alias=saw_distinct_tail=observed_iv=observed_scratch=0;
+ count=allocations=scratch_live=stirs=clear_calls=block_calls=saw_split=saw_raw_unaligned=saw_head_alias=saw_tail_alias=saw_distinct_tail=observed_iv=observed_scratch=0;
 }
 /* Genuine algorithm records selecting the actual static block functions; unused
  * network startup/maturity/schedule services are not simulated by this fixture. */
@@ -109,10 +110,26 @@ int kdes_esp_case(int triple,int decrypt,int fragmented,unsigned allocation_fail
  struct mbuf *head=NULL,*tail=NULL;unsigned at=0;const unsigned lengths[4]={8,12,4,16};unsigned nodes=fragmented==1?4:1;
  for(unsigned i=0;i<nodes;++i){unsigned n=fragmented==1?lengths[i]:40;struct mbuf *m=node_alloc(i==0,n+(fragmented==2?4:0),1);if(fragmented==2)m->m_data++;m->m_len=(int)n;memcpy(m->m_data,packet+at,n);at+=n;if(tail)tail->m_next=m;else head=m;tail=m;}
  FASSERT(at==40);head->m_pkthdr.len=validation==1?15:validation==2?39:40;
+ /* Capture policy and alignment while the source packet is still owned/live.
+  * The selected ARM64 header permits direct unaligned access; ARM32-only copy
+  * branches are not forced. Fragmentation still requires scratch on either. */
+ unsigned expected_split=(unsigned)(fragmented==1),expected_direct_unaligned=0;
+ if(fragmented==2){
+  FASSERT((((uintptr_t)head->m_data+16)&3)==1);
+  expected_split=(unsigned)!IPSEC_IS_P2ALIGNED(head->m_data+16);
+  expected_direct_unaligned=!expected_split;
+ }else if(fragmented==0){FASSERT((((uintptr_t)head->m_data+16)&3)==0);}
  const struct esp_algorithm *algo=triple?&fixture_tdes:&fixture_des;
  int result=decrypt?esp_cbc_decrypt(head,0,&sav,algo,8):esp_cbc_encrypt(head,0,24,&sav,algo,8);
  int error=allocation_failure||scratch_failure||algorithm_failure||validation;
- if(error){FASSERT(result==(validation||algorithm_failure?EINVAL:ENOBUFS));for(unsigned i=0;i<count;++i)FASSERT(freed[i]==1);FASSERT(!stirs);}
+ if(error){
+  FASSERT(result==(validation||algorithm_failure?EINVAL:ENOBUFS)); /* KDES_ORIGINAL_STATUS_ASSERT */
+  for(unsigned i=0;i<count;++i)FASSERT(freed[i]==1);
+  FASSERT(!stirs);
+  if(algorithm_failure){FASSERT(block_calls==algorithm_failure&&allocations==algorithm_failure);}
+  else if(allocation_failure){FASSERT(allocations==allocation_failure&&block_calls==allocation_failure-1);}
+  else {FASSERT(!allocations&&!block_calls);}
+ }
  else {
   FASSERT(result==0);m_copydata(head,0,40,out);FASSERT(!memcmp(out,packet,16)&&!memcmp(out+16,expected,24));
   FASSERT(stirs==(unsigned)!decrypt);if(!decrypt)for(unsigned i=0;i<8;++i)FASSERT((unsigned char)saved_iv[i]==(unsigned char)(iv[i]^(0x51+i)));
@@ -123,6 +140,12 @@ int kdes_esp_case(int triple,int decrypt,int fragmented,unsigned allocation_fail
  FASSERT(observed_iv==1&&clear_calls==(scratch_failure||validation?1U:2U));
  FASSERT(observed_scratch==(scratch_failure||validation?0U:2U));
 #endif
- if(!error){FASSERT(block_calls==3);FASSERT(saw_head_alias==(unsigned)(fragmented!=1));FASSERT(saw_split==(unsigned)(fragmented!=0));FASSERT(saw_tail_alias&&saw_distinct_tail);}
+ if(!error){
+  FASSERT(block_calls==3);
+  FASSERT(saw_head_alias==(unsigned)(fragmented!=1));
+  FASSERT(saw_split==expected_split);
+  FASSERT(saw_raw_unaligned==expected_direct_unaligned);
+  FASSERT(saw_tail_alias&&saw_distinct_tail);
+ }
  mbedtls_platform_zeroize(&single,sizeof(single));mbedtls_platform_zeroize(&three,sizeof(three));return 1;
 }

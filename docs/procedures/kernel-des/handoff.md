@@ -95,3 +95,23 @@ strict rebuild in native-controls4 measures frozen812c9d... helper and proves
 identical native text/layout/callback metadata; the final988 graph binds that
 new source/object. Superseded predecessor source hashes are historical, not current
 closure. REV022 separately preserved a predecessor sweep failure at this boundary.
+
+Caller-guest3 passed vector/contracts and packet data/free/scrub checks but failed
+an architecture-dependent coverage expectation on unaligned packet case3.
+The genuine ARM64 ipsec.h branch makes IPSEC_IS_P2ALIGNED constant1; only ARM32
+uses alignment-copy checks. Preserve that exact failed trace; no whole-positive
+or remaining-control acceptance follows. Lease released with zero survivors.
+
+The corrected fixture captures expected scratch/direct access before handing off
+packet ownership, derives it from the genuine macro, separately verifies raw
+unalignment and observes callback pointer alignment. Fragmentation always uses
+scratch; selected ARM64 unaligned contiguous input stays direct. All postconditions
+have distinct source lines. The original-status negative uses a unique assertion
+marker. Error counters require exact callback/allocation stop positions. No32-bit
+macro or native production flag is forced. Intermediate candidate4/5 compile
+receipts are preserved; the combined corrected source is being independently
+reviewed by REV022 before another guest grant. The final targeted rebuild compiles
+only the two affected instrumented ESP fixture TUs, reusing guest/fortify/backend/
+native objects. It records actual IS_P2ALIGNED(ptr1), GET_UNALIGNED_OFS(ptr1),
+sizeof(u_int32_t), IS_P2ALIGNED(ptr4) policy constants; expected ARM64 values are
+1,0,4,1, to be accepted only after actual object decoding.
