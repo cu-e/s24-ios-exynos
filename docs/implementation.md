@@ -116,6 +116,8 @@ ESIM-001 specifies eUICC access and APDU models. ESIM-002 first tests an already
 
 ESIM-004 additionally qualifies the selected iOS frontend/profile before ESIM-003 can pass. The first iPhone X reference is nano-SIM hardware; Apple's eSIM requirements start with XS/XR. This raises an unverified frontend/ABI compatibility question, not proof that adaptation is impossible. Inspect actual locally supplied components and record the adaptation/profile decision; do not silently replace the approved first OS. Android's ordinary-app APIs and lpac linkage do not establish system-LPA privileges or an XNU eUICC transport.
 
+The [selected frontend investigation](procedures/esim-profile/README.md) adds pinned Intel ARI/libARI extraction as an alternative to assuming the Qualcomm donor's interface. Determine the actual iPhone image's modem-facing libraries/plugins before selecting ARI or QMI; neither replaces Samsung vendor command recovery. Current ARIstoteles documentation/tables span later OS versions and do not qualify16.5. Its real offline parser required corrections for sequence bits, nonempty TLVs, length encoding, complete-packet bounds and mutable-byte ownership; seven test groups pass after small attributed patches. No actual Apple image was supplied or inspected, so the selected frontend decision remains open. Public carrier-app API entitlements do not establish a system LPA or private ABI.
+
 Use lpac only after pin/license review and a working logical-channel transport. Existing production profiles must not be automatically downloaded, deleted, switched or reset. Android's eUICC features and system APIs do not grant an ordinary app equivalent privileges.
 
 ## Coordination and final qualification

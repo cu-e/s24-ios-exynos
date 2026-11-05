@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T03:35:41+00:00",
+  "updated_at": "2026-11-05T03:44:36+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -2198,7 +2198,8 @@
       "paths": [
         "tools/research/esim-profile/",
         "docs/procedures/esim-profile/",
-        "fixtures/public/esim-profile/"
+        "fixtures/public/esim-profile/",
+        "patches/cellular/ari"
       ],
       "acceptance": [
         "Inventory actual locally supplied OS components, version and digests without committing Apple files or silently switching the approved first OS",
@@ -2208,17 +2209,26 @@
       "sources": [
         "qcom-baseband",
         "lpac",
-        "apple-esim-docs"
+        "apple-esim-docs",
+        "aristoteles"
       ],
       "steps": [
         "Accept explicit local inputs and verify provenance",
         "Inspect frontend capabilities and ABI boundaries without executing or downloading Apple binaries",
         "Publish the evidence required before native eSIM lifecycle qualification"
       ],
-      "status": "pending",
-      "owner": null,
+      "status": "blocked",
+      "owner": "codex-esim-frontend-20261105-l",
       "scope": "host",
-      "evidence_kind": "host-test"
+      "evidence_kind": "host-test",
+      "started_at": "2026-11-05T03:37:28+00:00",
+      "last_heartbeat": "2026-11-05T03:44:36+00:00",
+      "updated_at": "2026-11-05T03:44:36+00:00",
+      "branch": "main",
+      "progress_note": "New pinned primary ARI method and real seven-group donor regression pass retained alongside both original failures. Actual selected-image components are unsupplied, so frontend/ABI selection remains unresolved and no native capability is advanced. Released finished shared catalog/plan reservations; retained narrow checker/patch/report paths.",
+      "next_step": "Supply explicit selected16.5 image/build/product provenance and matching CommCenter/baseband/cache/entitlement inputs; inspect exact ABI before adapter/profile choice. Continue independent ESIM-001 host preparation meanwhile.",
+      "handoff": "docs/procedures/esim-profile/handoff.md",
+      "blocked_reason": "No explicitly supplied selected iOS16.5 image/build/product manifest or matching CommCenter/baseband/plugin/cache/entitlement inputs; public/later-OS documentation and offline parser tests cannot qualify actual frontend/private ABI or select an adaptation profile."
     },
     {
       "id": "CELL-009",
@@ -3729,6 +3739,51 @@
       "evidence_sha256": "546de26ce39383fe69610df5635c86adfefcbdb60dcf014d49a266468ede6cc7",
       "outcome": "pass",
       "recorded_at": "2026-11-05T03:34:05+00:00"
+    },
+    {
+      "id": "ESIMARI-001",
+      "task": "ESIM-004",
+      "owner": "codex-esim-frontend-20261105-l",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Pinned unchanged offline libari preserves an independently specified nonempty packet and rejects incomplete wire extents; actual failures are retained rather than inferred from empty smoke tests",
+      "procedure": "docs/procedures/esim-profile/README.md",
+      "timeout_seconds": 60,
+      "created_at": "2026-11-05T03:41:02+00:00",
+      "evidence": "state/evidence/ESIMARI-001.json",
+      "evidence_sha256": "201e68f91c274cf039c5c7df6d599688fa0a88fe531ae9d094260436bc8e9939",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T03:41:52+00:00"
+    },
+    {
+      "id": "ESIMARI-002",
+      "task": "ESIM-004",
+      "owner": "codex-esim-frontend-20261105-l",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Privately patched libari preserves independent nonempty TLVs/sequence and length boundaries while rejecting malformed complete-packet extents; no selected-image or native compatibility inferred",
+      "procedure": "docs/procedures/esim-profile/README.md",
+      "timeout_seconds": 60,
+      "created_at": "2026-11-05T03:41:09+00:00",
+      "evidence": "state/evidence/ESIMARI-002.json",
+      "evidence_sha256": "537fc4e791749fd81a3978450acccd69bde15738c70fe5236d34fd6af4d2171e",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T03:41:52+00:00"
+    },
+    {
+      "id": "ESIMARI-003",
+      "task": "ESIM-004",
+      "owner": "codex-esim-frontend-20261105-l",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Ordered small patches preserve actual pack-to-parse bytes/bytearray/memoryview ownership and pass seven offline test groups without using an Apple image or a live interface",
+      "procedure": "docs/procedures/esim-profile/README.md",
+      "timeout_seconds": 60,
+      "created_at": "2026-11-05T03:41:53+00:00",
+      "evidence": "state/evidence/ESIMARI-003.json",
+      "evidence_sha256": "8cd1624b495c83c418749c4c6f88a2c24abdc33d192f0bf172381cd01c18e577",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T03:42:26+00:00"
     }
   ],
   "events": [
@@ -7219,6 +7274,168 @@
           "last_heartbeat": "2026-11-05T03:35:41+00:00",
           "branch": "main",
           "handoff": "research/notes/KRN-003-dependencies.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:37:28+00:00",
+      "action": "task.claim:ESIM-004",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "in_progress",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T03:37:28+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:38:10+00:00",
+      "action": "task.refine:ESIM-004:primary-ARI-source-and-handoff",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "in_progress",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T03:37:28+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:39:02+00:00",
+      "action": "task.refine:ESIM-004:offline-ARI-regression-patch",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "in_progress",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T03:37:28+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:41:02+00:00",
+      "action": "experiment.plan:ESIMARI-001",
+      "owner": "codex-esim-frontend-20261105-l"
+    },
+    {
+      "at": "2026-11-05T03:41:09+00:00",
+      "action": "experiment.plan:ESIMARI-002",
+      "owner": "codex-esim-frontend-20261105-l"
+    },
+    {
+      "at": "2026-11-05T03:41:52+00:00",
+      "action": "experiment.record:ESIMARI-001",
+      "owner": "codex-esim-frontend-20261105-l"
+    },
+    {
+      "at": "2026-11-05T03:41:52+00:00",
+      "action": "experiment.record:ESIMARI-002",
+      "owner": "codex-esim-frontend-20261105-l"
+    },
+    {
+      "at": "2026-11-05T03:41:53+00:00",
+      "action": "experiment.plan:ESIMARI-003",
+      "owner": "codex-esim-frontend-20261105-l"
+    },
+    {
+      "at": "2026-11-05T03:42:26+00:00",
+      "action": "experiment.record:ESIMARI-003",
+      "owner": "codex-esim-frontend-20261105-l"
+    },
+    {
+      "at": "2026-11-05T03:42:26+00:00",
+      "action": "task.refine:ESIM-004:selected-frontend-plan-update",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "in_progress",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T03:37:28+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:42:26+00:00",
+      "action": "task.update:ESIM-004",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "in_progress",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "progress_note": "Pinned Intel ARI extraction reference; reproduced and corrected real offline donor parser defects in isolated copies. Seven groups pass after two patches; selected iOS16.5 image/frontend/ABI still unqualified because no actual local components were supplied.",
+          "next_step": "Inventory explicitly supplied selected iOS image/build/identity, matching CommCenter/baseband libraries and entitlements before choosing Intel ARI or Qualcomm QMI frontend; preserve Samsung command-schema gate",
+          "last_heartbeat": "2026-11-05T03:42:26+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:44:35+00:00",
+      "action": "task.update:ESIM-004",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "in_progress",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "progress_note": "New pinned primary ARI method and real seven-group donor regression pass retained alongside both original failures. Actual selected-image components are unsupplied, so frontend/ABI selection remains unresolved and no native capability is advanced.",
+          "next_step": "Supply explicit selected16.5 image/build/product provenance and matching CommCenter/baseband/cache/entitlement inputs; inspect exact ABI before adapter/profile choice. Continue independent ESIM-001 host preparation meanwhile.",
+          "last_heartbeat": "2026-11-05T03:44:35+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/esim-profile/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:44:35+00:00",
+      "action": "task.refine:ESIM-004:release-finished-source-catalog-and-plan",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "in_progress",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "progress_note": "New pinned primary ARI method and real seven-group donor regression pass retained alongside both original failures. Actual selected-image components are unsupplied, so frontend/ABI selection remains unresolved and no native capability is advanced. Released finished shared catalog/plan reservations; retained narrow checker/patch/report paths.",
+          "next_step": "Supply explicit selected16.5 image/build/product provenance and matching CommCenter/baseband/cache/entitlement inputs; inspect exact ABI before adapter/profile choice. Continue independent ESIM-001 host preparation meanwhile.",
+          "last_heartbeat": "2026-11-05T03:44:35+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/esim-profile/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:44:36+00:00",
+      "action": "task.block:ESIM-004",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "blocked",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "progress_note": "New pinned primary ARI method and real seven-group donor regression pass retained alongside both original failures. Actual selected-image components are unsupplied, so frontend/ABI selection remains unresolved and no native capability is advanced. Released finished shared catalog/plan reservations; retained narrow checker/patch/report paths.",
+          "next_step": "Supply explicit selected16.5 image/build/product provenance and matching CommCenter/baseband/cache/entitlement inputs; inspect exact ABI before adapter/profile choice. Continue independent ESIM-001 host preparation meanwhile.",
+          "blocked_reason": "No explicitly supplied selected iOS16.5 image/build/product manifest or matching CommCenter/baseband/plugin/cache/entitlement inputs; public/later-OS documentation and offline parser tests cannot qualify actual frontend/private ABI or select an adaptation profile.",
+          "last_heartbeat": "2026-11-05T03:44:36+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/esim-profile/handoff.md"
         }
       ]
     }

@@ -1,12 +1,11 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T03:35:41+00:00",
-  "ledger_updated_at": "2026-11-05T03:35:41+00:00",
-  "registry_sha256": "65bb11b2916f11a6a7ad75e8115a32e8aca062e85636787abf53b75bc45e6d01",
+  "generated_at": "2026-11-05T03:44:36+00:00",
+  "ledger_updated_at": "2026-11-05T03:44:36+00:00",
+  "registry_sha256": "4827f30f9a0f17cb7cb0f20fd24152d70863ecfa9863b7b42d41c1f2a4e6e709",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
-      "ESIM-004",
       "CELL-009",
       "VM-002",
       "USB-001",
@@ -20,6 +19,7 @@
     "blocked": [
       "KRN-003",
       "KRN-001",
+      "ESIM-004",
       "NAT-001"
     ],
     "waiting": [
@@ -633,7 +633,8 @@
       "paths": [
         "tools/research/esim-profile/",
         "docs/procedures/esim-profile/",
-        "fixtures/public/esim-profile/"
+        "fixtures/public/esim-profile/",
+        "patches/cellular/ari"
       ],
       "acceptance": [
         "Inventory actual locally supplied OS components, version and digests without committing Apple files or silently switching the approved first OS",
@@ -643,20 +644,32 @@
       "sources": [
         "qcom-baseband",
         "lpac",
-        "apple-esim-docs"
+        "apple-esim-docs",
+        "aristoteles"
       ],
       "steps": [
         "Accept explicit local inputs and verify provenance",
         "Inspect frontend capabilities and ABI boundaries without executing or downloading Apple binaries",
         "Publish the evidence required before native eSIM lifecycle qualification"
       ],
-      "status": "pending",
-      "owner": null,
+      "status": "blocked",
+      "owner": "codex-esim-frontend-20261105-l",
       "scope": "host",
       "evidence_kind": "host-test",
-      "column": "ready",
-      "reasons": [],
-      "card_path": "planning/tasks/ESIM-004.md"
+      "started_at": "2026-11-05T03:37:28+00:00",
+      "last_heartbeat": "2026-11-05T03:44:36+00:00",
+      "updated_at": "2026-11-05T03:44:36+00:00",
+      "branch": "main",
+      "progress_note": "New pinned primary ARI method and real seven-group donor regression pass retained alongside both original failures. Actual selected-image components are unsupplied, so frontend/ABI selection remains unresolved and no native capability is advanced. Released finished shared catalog/plan reservations; retained narrow checker/patch/report paths.",
+      "next_step": "Supply explicit selected16.5 image/build/product provenance and matching CommCenter/baseband/cache/entitlement inputs; inspect exact ABI before adapter/profile choice. Continue independent ESIM-001 host preparation meanwhile.",
+      "handoff": "docs/procedures/esim-profile/handoff.md",
+      "blocked_reason": "No explicitly supplied selected iOS16.5 image/build/product manifest or matching CommCenter/baseband/plugin/cache/entitlement inputs; public/later-OS documentation and offline parser tests cannot qualify actual frontend/private ABI or select an adaptation profile.",
+      "column": "blocked",
+      "reasons": [
+        "No explicitly supplied selected iOS16.5 image/build/product manifest or matching CommCenter/baseband/plugin/cache/entitlement inputs; public/later-OS documentation and offline parser tests cannot qualify actual frontend/private ABI or select an adaptation profile."
+      ],
+      "card_path": "planning/tasks/ESIM-004.md",
+      "report_health": "recent"
     },
     {
       "id": "CELL-009",
@@ -2436,7 +2449,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Paths reserved by: KRN-001, KRN-003"
+        "Paths reserved by: KRN-001, ESIM-004, KRN-003"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-002.md"
@@ -2520,7 +2533,7 @@
       "column": "waiting",
       "reasons": [
         "Dependencies: NAT-001",
-        "Paths reserved by: NAT-001, KRN-001, KRN-003"
+        "Paths reserved by: NAT-001, KRN-001, ESIM-004, KRN-003"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-002.md"
@@ -2564,7 +2577,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-002, NAT-004, KRN-001",
-        "Paths reserved by: NAT-001, KRN-001, KRN-003"
+        "Paths reserved by: NAT-001, KRN-001, ESIM-004, KRN-003"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -3454,148 +3467,22 @@
         "branch": "main",
         "worktree": null
       }
+    ],
+    "codex-esim-frontend-20261105-l": [
+      {
+        "id": "ESIM-004",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-05T03:44:36+00:00",
+        "report_health": "recent",
+        "progress_note": "New pinned primary ARI method and real seven-group donor regression pass retained alongside both original failures. Actual selected-image components are unsupplied, so frontend/ABI selection remains unresolved and no native capability is advanced. Released finished shared catalog/plan reservations; retained narrow checker/patch/report paths.",
+        "next_step": "Supply explicit selected16.5 image/build/product provenance and matching CommCenter/baseband/cache/entitlement inputs; inspect exact ABI before adapter/profile choice. Continue independent ESIM-001 host preparation meanwhile.",
+        "handoff": "docs/procedures/esim-profile/handoff.md",
+        "branch": "main",
+        "worktree": null
+      }
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-05T03:07:15+00:00",
-      "action": "experiment.record:MACHOTOOLS-004",
-      "owner": "codex-xnu-host-tools-20261105-j"
-    },
-    {
-      "at": "2026-11-05T03:08:53+00:00",
-      "action": "task.update:KRN-002",
-      "owner": "codex-xnu-host-tools-20261105-j",
-      "tasks": [
-        {
-          "id": "KRN-002",
-          "status": "in_progress",
-          "owner": "codex-xnu-host-tools-20261105-j",
-          "priority": 95,
-          "progress_note": "Pinned generators and real ld64/TAPI/host runtime now build and pass actual generation, atomic/runtime, static Mach-O, archive/export and owned text-stub fixtures;119 host tests pass, qualified prefixes/hash manifest published",
-          "next_step": "KRN-003 consumes exact host inputs for explicit SDK/DriverKit and real E1S dependency archives; KRN-001 retains full kernel/export acceptance",
-          "last_heartbeat": "2026-11-05T03:08:53+00:00",
-          "branch": "main",
-          "handoff": "research/notes/KRN-002-host-tools.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T03:08:54+00:00",
-      "action": "task.done:KRN-002",
-      "owner": "codex-xnu-host-tools-20261105-j",
-      "tasks": [
-        {
-          "id": "KRN-002",
-          "status": "done",
-          "owner": "codex-xnu-host-tools-20261105-j",
-          "priority": 95,
-          "progress_note": "Pinned generators and real ld64/TAPI/host runtime now build and pass actual generation, atomic/runtime, static Mach-O, archive/export and owned text-stub fixtures;119 host tests pass, qualified prefixes/hash manifest published",
-          "next_step": "KRN-003 consumes exact host inputs for explicit SDK/DriverKit and real E1S dependency archives; KRN-001 retains full kernel/export acceptance",
-          "last_heartbeat": "2026-11-05T03:08:53+00:00",
-          "branch": "main",
-          "handoff": "research/notes/KRN-002-host-tools.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T03:11:01+00:00",
-      "action": "task.claim:KRN-003",
-      "owner": "codex-e1s-dependencies-20261105-k",
-      "tasks": [
-        {
-          "id": "KRN-003",
-          "status": "in_progress",
-          "owner": "codex-e1s-dependencies-20261105-k",
-          "priority": 95,
-          "last_heartbeat": "2026-11-05T03:11:01+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T03:11:02+00:00",
-      "action": "task.refine:KRN-003-pin-real-kernel-dependency-sources",
-      "owner": "codex-e1s-dependencies-20261105-k",
-      "tasks": [
-        {
-          "id": "KRN-003",
-          "status": "in_progress",
-          "owner": "codex-e1s-dependencies-20261105-k",
-          "priority": 95,
-          "last_heartbeat": "2026-11-05T03:11:01+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T03:12:24+00:00",
-      "action": "task.refine:KRN-003-exact-availability-firehose-pthread-pins",
-      "owner": "codex-e1s-dependencies-20261105-k",
-      "tasks": [
-        {
-          "id": "KRN-003",
-          "status": "in_progress",
-          "owner": "codex-e1s-dependencies-20261105-k",
-          "priority": 95,
-          "last_heartbeat": "2026-11-05T03:11:01+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T03:14:39+00:00",
-      "action": "task.update:KRN-003",
-      "owner": "codex-e1s-dependencies-20261105-k",
-      "tasks": [
-        {
-          "id": "KRN-003",
-          "status": "in_progress",
-          "owner": "codex-e1s-dependencies-20261105-k",
-          "priority": 95,
-          "progress_note": "Exact kernel firehose/pthread/availability source pins fetched; traced full exporthdrs DriverKit generator requirement and donor minimal TargetConditionals stand-in. No actual dependency archives or SDK ABI qualified yet",
-          "next_step": "Register bounded real compiler/include audit with explicit E1S profile; measure genuine source/generator gaps before deciding SDK dependencies",
-          "last_heartbeat": "2026-11-05T03:14:39+00:00",
-          "branch": "main",
-          "handoff": "research/notes/KRN-003-dependencies.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T03:14:40+00:00",
-      "action": "experiment.plan:E1SDEPS-001",
-      "owner": "codex-e1s-dependencies-20261105-k"
-    },
-    {
-      "at": "2026-11-05T03:20:49+00:00",
-      "action": "experiment.record:E1SDEPS-001",
-      "owner": "codex-e1s-dependencies-20261105-k"
-    },
-    {
-      "at": "2026-11-05T03:20:49+00:00",
-      "action": "experiment.plan:E1SDEPS-002",
-      "owner": "codex-e1s-dependencies-20261105-k"
-    },
-    {
-      "at": "2026-11-05T03:24:00+00:00",
-      "action": "experiment.record:E1SDEPS-002",
-      "owner": "codex-e1s-dependencies-20261105-k"
-    },
-    {
-      "at": "2026-11-05T03:24:01+00:00",
-      "action": "experiment.plan:E1SDEPS-003",
-      "owner": "codex-e1s-dependencies-20261105-k"
-    },
-    {
-      "at": "2026-11-05T03:28:16+00:00",
-      "action": "experiment.record:E1SDEPS-003",
-      "owner": "codex-e1s-dependencies-20261105-k"
-    },
-    {
-      "at": "2026-11-05T03:30:52+00:00",
-      "action": "experiment.plan:E1SDEPS-004",
-      "owner": "codex-e1s-dependencies-20261105-k"
-    },
     {
       "at": "2026-11-05T03:33:14+00:00",
       "action": "experiment.record:E1SDEPS-004",
@@ -3665,11 +3552,173 @@
           "handoff": "research/notes/KRN-003-dependencies.md"
         }
       ]
+    },
+    {
+      "at": "2026-11-05T03:37:28+00:00",
+      "action": "task.claim:ESIM-004",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "in_progress",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T03:37:28+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:38:10+00:00",
+      "action": "task.refine:ESIM-004:primary-ARI-source-and-handoff",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "in_progress",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T03:37:28+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:39:02+00:00",
+      "action": "task.refine:ESIM-004:offline-ARI-regression-patch",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "in_progress",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T03:37:28+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:41:02+00:00",
+      "action": "experiment.plan:ESIMARI-001",
+      "owner": "codex-esim-frontend-20261105-l"
+    },
+    {
+      "at": "2026-11-05T03:41:09+00:00",
+      "action": "experiment.plan:ESIMARI-002",
+      "owner": "codex-esim-frontend-20261105-l"
+    },
+    {
+      "at": "2026-11-05T03:41:52+00:00",
+      "action": "experiment.record:ESIMARI-001",
+      "owner": "codex-esim-frontend-20261105-l"
+    },
+    {
+      "at": "2026-11-05T03:41:52+00:00",
+      "action": "experiment.record:ESIMARI-002",
+      "owner": "codex-esim-frontend-20261105-l"
+    },
+    {
+      "at": "2026-11-05T03:41:53+00:00",
+      "action": "experiment.plan:ESIMARI-003",
+      "owner": "codex-esim-frontend-20261105-l"
+    },
+    {
+      "at": "2026-11-05T03:42:26+00:00",
+      "action": "experiment.record:ESIMARI-003",
+      "owner": "codex-esim-frontend-20261105-l"
+    },
+    {
+      "at": "2026-11-05T03:42:26+00:00",
+      "action": "task.refine:ESIM-004:selected-frontend-plan-update",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "in_progress",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T03:37:28+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:42:26+00:00",
+      "action": "task.update:ESIM-004",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "in_progress",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "progress_note": "Pinned Intel ARI extraction reference; reproduced and corrected real offline donor parser defects in isolated copies. Seven groups pass after two patches; selected iOS16.5 image/frontend/ABI still unqualified because no actual local components were supplied.",
+          "next_step": "Inventory explicitly supplied selected iOS image/build/identity, matching CommCenter/baseband libraries and entitlements before choosing Intel ARI or Qualcomm QMI frontend; preserve Samsung command-schema gate",
+          "last_heartbeat": "2026-11-05T03:42:26+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:44:35+00:00",
+      "action": "task.update:ESIM-004",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "in_progress",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "progress_note": "New pinned primary ARI method and real seven-group donor regression pass retained alongside both original failures. Actual selected-image components are unsupplied, so frontend/ABI selection remains unresolved and no native capability is advanced.",
+          "next_step": "Supply explicit selected16.5 image/build/product provenance and matching CommCenter/baseband/cache/entitlement inputs; inspect exact ABI before adapter/profile choice. Continue independent ESIM-001 host preparation meanwhile.",
+          "last_heartbeat": "2026-11-05T03:44:35+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/esim-profile/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:44:35+00:00",
+      "action": "task.refine:ESIM-004:release-finished-source-catalog-and-plan",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "in_progress",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "progress_note": "New pinned primary ARI method and real seven-group donor regression pass retained alongside both original failures. Actual selected-image components are unsupplied, so frontend/ABI selection remains unresolved and no native capability is advanced. Released finished shared catalog/plan reservations; retained narrow checker/patch/report paths.",
+          "next_step": "Supply explicit selected16.5 image/build/product provenance and matching CommCenter/baseband/cache/entitlement inputs; inspect exact ABI before adapter/profile choice. Continue independent ESIM-001 host preparation meanwhile.",
+          "last_heartbeat": "2026-11-05T03:44:35+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/esim-profile/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:44:36+00:00",
+      "action": "task.block:ESIM-004",
+      "owner": "codex-esim-frontend-20261105-l",
+      "tasks": [
+        {
+          "id": "ESIM-004",
+          "status": "blocked",
+          "owner": "codex-esim-frontend-20261105-l",
+          "priority": 80,
+          "progress_note": "New pinned primary ARI method and real seven-group donor regression pass retained alongside both original failures. Actual selected-image components are unsupplied, so frontend/ABI selection remains unresolved and no native capability is advanced. Released finished shared catalog/plan reservations; retained narrow checker/patch/report paths.",
+          "next_step": "Supply explicit selected16.5 image/build/product provenance and matching CommCenter/baseband/cache/entitlement inputs; inspect exact ABI before adapter/profile choice. Continue independent ESIM-001 host preparation meanwhile.",
+          "blocked_reason": "No explicitly supplied selected iOS16.5 image/build/product manifest or matching CommCenter/baseband/plugin/cache/entitlement inputs; public/later-OS documentation and offline parser tests cannot qualify actual frontend/private ABI or select an adaptation profile.",
+          "last_heartbeat": "2026-11-05T03:44:36+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/esim-profile/handoff.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "9efdc0ffc74a1ef1e82ce5541d8bd0e3203c59e9300f8a6bf54bfa99d4524f64",
-    "BOARD.md": "e89c2835533c10211109221ba4f8e0416e9ab7b3e162ff0aa39ed07a21955194",
+    "STATUS.md": "0c7b7287623ae821c3e909f73f5090618724d5b15e16c89a9a00609aabffc913",
+    "BOARD.md": "e23507e0b507721956a4852a0b596934103eb6af7d0036b1f5f66fd726ab640d",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
     "planning/tasks/KRN-003.md": "395c361595c2e4804794416f910961e636c7aae780901fde7a93c58bd0f48224",
@@ -3680,7 +3729,7 @@
     "planning/tasks/LAB-001.md": "3bf5f0b07bfe3944559f6520646498c1e907611d0f34201115ad0e39e3240e8c",
     "planning/tasks/TST-002.md": "d78a91ef43894923e022402e9c91dd075e4a7bc4697e33fb7b99263486c544aa",
     "planning/tasks/RES-003.md": "0818cb4fa8ca49d7acad01a7d80cc67041f504e381b68cfc74e8cfa6d369ce50",
-    "planning/tasks/ESIM-004.md": "e4415ff12ece854323f178e57751d6977b25f93dec41ee135288f7e1b5480931",
+    "planning/tasks/ESIM-004.md": "d4e167bcd15f65786d3d6be7664d4b1282e4cff54a520ebe1e4e9cdd4a4847f2",
     "planning/tasks/CELL-009.md": "66ea4f72cf2188c549d905d23ebd40d47f4665721a52a8f939b58e066357ecd9",
     "planning/tasks/RES-004.md": "08bac80e27799418f00000fe2e775a3d800660263c225e58147765b25d905e9a",
     "planning/tasks/GPU-011.md": "80d1aa7ea8b4a3374af3e3373d65fdb0f18f581cfd9297d29b4e707dfb732580",
@@ -3724,10 +3773,10 @@
     "planning/tasks/GPU-004.md": "4f7b914361a5ff47439410c701bd907e3a3020383d4b33c91ce59b5fbdab2579",
     "planning/tasks/GPU-005.md": "4d83a325d8c9601f76a8a72d7a31f2b7d47d8f450ee9c989a18c58eae4614346",
     "planning/tasks/DRV-001.md": "0e15c9a93f74cbd15da5e1507551c8599a25ac14bf857b1fc3cf62a672459ade",
-    "planning/tasks/DRV-002.md": "fdd480910d11c3afcb6a3070a90a26ebd6a3a43f7685c6da919308df3a4133ff",
+    "planning/tasks/DRV-002.md": "5ba374dd1cf23c5c79fddfe83be09760a3a4e5495ca902b26edd2a6680b9e4e9",
     "planning/tasks/NAT-001.md": "555b180dd2cfda5c6a7e4623041660bfd01b1c074d7fd82a9be75e83b4af7bcf",
-    "planning/tasks/NAT-002.md": "b4c1a3c4746c0cb3cfe274355b7dc3414822b69e3615fc5499a0fd10f04b5cbf",
-    "planning/tasks/NAT-003.md": "26b11d66c82bb3c9a3c5630636f078e56a08868c2f4254c415d87153d11d742a",
+    "planning/tasks/NAT-002.md": "33c1be603460037ac0a16f43404b4f3cb9a62618a21fc2795438cf9af1f47534",
+    "planning/tasks/NAT-003.md": "e0308c917e79d8226108bbb94639705ae0a0401d63d05b624139506717e38d02",
     "planning/tasks/DRV-003.md": "8f6e3fbe9e05391ad4614894f6675ec628b3abb105f8f2d84009cf446dc2e62a",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",

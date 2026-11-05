@@ -1,0 +1,61 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "recorded_at": "2026-11-05T03:41:52+00:00",
+  "summary": "First private framing patch passes independent packet and malformed-extent checks but actual pack-to-parse boundary cases fail on bytearray payload ownership/type handling; retain this failure.",
+  "commit": "dae825518115ef64ef2944a483f2dd251cdbdbb9",
+  "provenance": [
+    {
+      "id": "aristoteles",
+      "origin": "https://github.com/seemoo-lab/aristoteles",
+      "revision": "25cb9bb5c35993ed0c74248b96f0065d5479f447",
+      "clean": true,
+      "review_file_sha256": {
+        "README.md": "5e49a83e7e7813c7ab3c8748b3f877bdb58ee86a2794e3de97b51edbb11c2f4d",
+        "LICENSE": "6ac6766cdd90d4ac2cd323ca4478d3d82d71e8d2b6a4faaeeee4666d3400d446",
+        "DEVELOPING.md": "03850b7e16c6ed3c97446cd9c64aec39ee76cbc398f3641ab9ef36236b92b27a",
+        "CHANGELOG.md": "ba8a810d4d1718eabc83f54d05322b31ded20827233bb0ca8fcb790b3c54780d",
+        "ari.lua": "2f16464dd7cea53c912f120aab2ed6f61bcab137f0d6aafcef80d2212eed3962",
+        "tools/libari/LICENSE": "6ac6766cdd90d4ac2cd323ca4478d3d82d71e8d2b6a4faaeeee4666d3400d446",
+        "tools/libari/README.md": "75ed80fd07de6a9112ab808be9094441e9525f541518095c08f5a34a19ce2a6c",
+        "tools/libari/libari/packet.py": "197fa7dee18bb049fac1cac26d2dfa38fe57bb9fb84f0edba83a4cea396f1c2d",
+        "tools/libari/libari/tlv.py": "c74f82556942d14f3d970dc059c80f6d58994f176790c77ac84668df2fca17b7",
+        "tools/libari/tests/test_libari.py": "8f231e9f0f1815be515727f9c170d1d445e48d1e7ddb6b05505fa58f7bf10ec1",
+        "tools/ghidra_scripts/ari-structure-extractor.py": "0a00b445968e07756e586e3689e786e13a24172e7a27af36b9d3b627ddb5754c",
+        "tools/ghidra_scripts/ari-asstring-extractor.py": "a327514926a1b609b70092c2755460de4c652ad8bbf8e37c5bdaa285ddfcf36c",
+        "tools/libari/libari/__init__.py": "f3861423ef2803a1a46ab599eb09dac9ded9efdc5ce63555f4adf2e6513dc9d5"
+      },
+      "submodules_fetched": false,
+      "local_device_verified": false
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/research/esim-profile/check_ari.py",
+        "--run",
+        "ari-patched-session1",
+        "--apply-patch"
+      ],
+      "exit_code": 1
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/esim-profile/ari-patched-session1.json",
+    "artifacts/esim-profile/ari-patched-session1/builder.py",
+    "artifacts/esim-profile/ari-patched-session1/tests.txt",
+    "patches/cellular/ari/0001-libari-offline-framing-corrections.patch"
+  ],
+  "sha256": {
+    "fixtures/public/esim-profile/ari-patched-session1.json": "b90413677e6a0f072f0a2e033c88f45ccdbef4b84166917fea0279071e859ea0",
+    "artifacts/esim-profile/ari-patched-session1/builder.py": "ec4692391d688a63514cd198ed687ff915f32aebc102a09d56fd867b12efab2b",
+    "artifacts/esim-profile/ari-patched-session1/tests.txt": "b92c5c1c93e711ea7402eb26d73cd277810bd2378a9c526ab21e08be43658605",
+    "patches/cellular/ari/0001-libari-offline-framing-corrections.patch": "c42aa6c08960867e13ed94a5e1027eb79a2fa34f6ac5f706ba6a7b3db1b565a9"
+  },
+  "limitations": [
+    "Owned offline cases only; no Apple binary extraction, actual selected iOS16.5 ABI or native transport",
+    "No phone, live hook, network, subscription or replay operation"
+  ]
+}

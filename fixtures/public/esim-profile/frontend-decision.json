@@ -1,0 +1,49 @@
+{
+  "kind": "source-review",
+  "origin": "mixed",
+  "recorded_at": "2026-11-05T03:44:10+00:00",
+  "selected_os": "iOS16.5",
+  "selected_reference": "iPhone X",
+  "actual_local_apple_components_supplied": [],
+  "frontend_compatibility": "unqualified",
+  "concrete_decision": "Retain the approved first OS/profile. Do not select an ARI/QMI adapter or switch to a later eSIM-capable identity before inspecting actual selected-image components. Continue independent transport/library host preparation.",
+  "primary_findings": [
+    {
+      "url": "https://support.apple.com/en-us/109317",
+      "finding": "Public eSIM requirements start with XS/XR; this flags a hardware/profile gap, not software impossibility."
+    },
+    {
+      "url": "https://developer.apple.com/documentation/coretelephony/ctcellularplanprovisioning",
+      "finding": "Public provisioning entry point is carrier-app restricted and uses a fine-grained CommCenter entitlement; it is not selected private/system frontend ABI evidence."
+    },
+    {
+      "url": "https://github.com/seemoo-lab/aristoteles/tree/25cb9bb5c35993ed0c74248b96f0065d5479f447",
+      "finding": "Intel ARI protocol/structure-extraction methodology is available, with later-OS documentation inconsistency; selected16.5 tables were not recovered."
+    },
+    {
+      "url": "https://unixnu.com/drivers/qcom-baseband",
+      "finding": "Author still labels profile provisioning unverified; an incomplete Settings page and host models do not establish provisioning."
+    },
+    {
+      "url": "https://developer.apple.com/documentation/security/preparing-your-app-to-work-with-pointer-authentication",
+      "finding": "XS/XR/A12-capable references support arm64e; switching image identity additionally requires actual architecture/PAC/loader ABI checks."
+    }
+  ],
+  "offline_evidence": [
+    "state/evidence/ESIMARI-001.json",
+    "state/evidence/ESIMARI-002.json",
+    "state/evidence/ESIMARI-003.json"
+  ],
+  "required_external_inputs": [
+    "Explicit selected iOS16.5 image/build/product manifest and acquisition provenance",
+    "Matching CommCenter, relevant baseband libraries/plugins, shared-cache and entitlement inputs with source/extraction hashes",
+    "Selected-image frontend/service/private ABI and actual Samsung command schemas before adapter selection"
+  ],
+  "hardware_or_profile_operations": false,
+  "native_capabilities_advanced": false,
+  "limits": [
+    "No selected-image component presence/absence claim from documentation or missing standalone paths",
+    "No current Apple SDK, later OS table or Qualcomm model substituted for actual selected16.5 inputs",
+    "No Apple binary, private trace, identifier or activation code published"
+  ]
+}

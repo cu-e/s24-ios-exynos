@@ -1,0 +1,60 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T03:45:57+00:00",
+  "commit": "dae825518115ef64ef2944a483f2dd251cdbdbb9",
+  "summary": "Default124 host tests and registry/board/capability checks pass; separate seven-group actual patched donor check passed. All three immutable experiment digest sets verified. Other task records, prior experiments, authorization/facts and native capability status are unchanged. Selected-image acceptance remains incomplete.",
+  "commands": [
+    {
+      "argv": [
+        "make",
+        "check"
+      ],
+      "exit_code": 0,
+      "tests": 124,
+      "log": "artifacts/esim-profile/ari-patched-session2/make-check.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/research/esim-profile/check_ari.py",
+        "--run",
+        "ari-patched-session2",
+        "--apply-patch"
+      ],
+      "exit_code": 0,
+      "tests": 7
+    }
+  ],
+  "artifacts": [
+    "artifacts/esim-profile/ari-patched-session2/make-check.log",
+    "tools/research/esim-profile/check_ari.py",
+    "patches/cellular/ari/0001-libari-offline-framing-corrections.patch",
+    "patches/cellular/ari/0002-libari-owned-byte-payload.patch",
+    "patches/cellular/ari/LICENSE.upstream",
+    "fixtures/public/esim-profile/ari-patched-session2.json",
+    "fixtures/public/esim-profile/frontend-decision.json",
+    "fixtures/public/esim-profile/apple-public-api-review.json",
+    "fixtures/public/esim-profile/research-coverage.json"
+  ],
+  "sha256": {
+    "artifacts/esim-profile/ari-patched-session2/make-check.log": "54a2c7c0a7cb9c8e856e42baed1189e6b32f704ae90c8a294fd3b8c868ef3961",
+    "tools/research/esim-profile/check_ari.py": "55de3cfc329ed8267021278a1ac642652b099ed648e412e0e8ad20f4b3d22a6a",
+    "patches/cellular/ari/0001-libari-offline-framing-corrections.patch": "c42aa6c08960867e13ed94a5e1027eb79a2fa34f6ac5f706ba6a7b3db1b565a9",
+    "patches/cellular/ari/0002-libari-owned-byte-payload.patch": "448570553f3bb06b8a3f62867c9e7c1837eb8380077d8f4eda8728818c1a0586",
+    "patches/cellular/ari/LICENSE.upstream": "6ac6766cdd90d4ac2cd323ca4478d3d82d71e8d2b6a4faaeeee4666d3400d446",
+    "fixtures/public/esim-profile/ari-patched-session2.json": "93425a8d7c463013ec645623f4fa2d606bd6bc99aacc62366e55e5aebeeb1ac2",
+    "fixtures/public/esim-profile/frontend-decision.json": "82df3048cf0d7d0d889c1965749752401032250d6483117746a8a63f19d1cd9d",
+    "fixtures/public/esim-profile/apple-public-api-review.json": "dc06216b99bf7529bb88c34935be3d637919bce2264c462957370916bb6f0d73",
+    "fixtures/public/esim-profile/research-coverage.json": "c4d13e0260b82447634d884c4a124ddb25e63938ef5a6e45520bb2ac48ecbb5a"
+  },
+  "selected_image_supplied": false,
+  "ios16_5_frontend_qualified": false,
+  "device_executed": false,
+  "verification_correction": "Initial ad hoc comparison incorrectly required the complete experiments array to stay unchanged despite three newly registered experiments. Corrected to require every previous experiment unchanged and exactly the three planned additions; no test rerun or source change was needed.",
+  "limitations": [
+    "Offline source/parser results only; actual frontend ABI, Samsung command schemas and native transport remain unknown",
+    "No phone/root/modem/subscription/profile or firmware operation performed"
+  ]
+}

@@ -1,0 +1,65 @@
+diff --git a/tools/libari/libari/packet.py b/tools/libari/libari/packet.py
+--- a/tools/libari/libari/packet.py
++++ b/tools/libari/libari/packet.py
+@@ -22,6 +22,8 @@
+     @classmethod
+     def fromBytes(cls, data):
+         dataLen = len(data)
++        if dataLen < 12 or data[:4] != bytes.fromhex(cls.MAGIC_BYTES):
++            raise ValueError("Expected a complete ARI packet header and magic")
+         packet = cls()
+ 
+         # Extract group id
+@@ -32,7 +34,7 @@
+         if dataLen >= 10:
+             seq_num = data[5] >> 1
+             seq_num += (data[6] & 0b0000_0001) << 7
+-            seq_num += (data[7] & 0b0000_0111) << 8
++            seq_num += (data[8] & 0b0000_0111) << 8
+ 
+             packet.seq = seq_num
+ 
+@@ -58,15 +60,19 @@
+             length += data[7] << 7
+ 
+             packet.length = length
++            if length != dataLen - 12:
++                raise ValueError("ARI declared payload length differs from packet extent")
+ 
+         # Extract tlv data
+         dataTlvLen = dataLen - 12
+         currentByteIndex = 12
+ 
+         # Check if there is atleast one valid TLV
+-        if dataTlvLen >= 4:
++        if dataTlvLen:
+ 
+             while currentByteIndex < dataLen:
++                if dataLen - currentByteIndex < 4:
++                    raise ValueError("Truncated ARI TLV header")
+                 # Extract tlv id
+                 tlvId = data[currentByteIndex] >> 1
+                 tlvId += ((data[currentByteIndex + 1] & 0b0001_1111) << 7)
+@@ -80,7 +86,9 @@
+ 
+                 # Extract tlv data
+                 tlvDataStartIndex = currentByteIndex + 4
+-                tlvData = data[tlvDataStartIndex:tlvLen]
++                if tlvLen > dataLen - tlvDataStartIndex:
++                    raise ValueError("Truncated ARI TLV payload")
++                tlvData = data[tlvDataStartIndex:tlvDataStartIndex + tlvLen]
+ 
+                 tlv = TLV(id=tlvId, version=tlvVersion, data=tlvData)
+ 
+diff --git a/tools/libari/libari/tlv.py b/tools/libari/libari/tlv.py
+--- a/tools/libari/libari/tlv.py
++++ b/tools/libari/libari/tlv.py
+@@ -48,7 +48,7 @@
+         length_num_part_3 = length & 0b11_1111_1100_0000
+ 
+         data[2] = (length_num_part_2 << 2) + (data[2] & 0b0000_0011)
+-        data[3] = length_num_part_3
++        data[3] = length_num_part_3 >> 6
+ 
+         # Add data
+         currentByteIndex = 4

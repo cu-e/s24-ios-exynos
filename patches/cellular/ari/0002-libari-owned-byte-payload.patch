@@ -1,0 +1,14 @@
+diff --git a/tools/libari/libari/tlv.py b/tools/libari/libari/tlv.py
+--- a/tools/libari/libari/tlv.py
++++ b/tools/libari/libari/tlv.py
+@@ -16,8 +16,8 @@
+ 
+         if isinstance(data, str):
+             self._data = bytes(data, "utf-8")
+-        elif isinstance(data, bytes):
+-            self._data = data
++        elif isinstance(data, (bytes, bytearray, memoryview)):
++            self._data = bytes(data)
+         else:
+             self._data = bytes([data])
+ 
