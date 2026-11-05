@@ -86,11 +86,12 @@ def guest_main(a,m):
     if int(mapped[4],16)!=((proof['tt0_va']-delta)&((1<<64)-1)) or int(mapped[5],16)!=((proof['tt1_va']-delta)&((1<<64)-1)):raise ValueError('Actual TTBR roots differ '+case)
    if case=='positive':
     ok=bool(mapped and passed) and result['outcome']=='pass' and 'KXTS CALLER FAIL' not in console and 'XTS SYNTHETIC PSCI_SYSTEM_OFF' in console
-    if ok:r['vectors']=int(passed[1],16);r['checks']=int(passed[2],16);r['genuine_selected_caller_executed']=True
+    if ok:
+     r['vectors']=int(passed[1],16);r['checks']=int(passed[2],16);ok=r['vectors']==1220 and r['checks']==7350;r['genuine_selected_caller_executed']=bool(ok)
    elif case=='wrong-cookie':ok=not passed and not mapped and 'XTS SYNTHETIC REJECT command-cookie' in console and result['outcome']=='pass'
    elif case=='bad-mapping':ok=not passed and not mapped and 'KXTS MAPPING START' in console and result['outcome']=='timeout'
    elif case in ['corrupt-vector','original-caller']:ok=not passed and bool(mapped) and 'KXTS CALLER FAIL' in console and result['outcome']=='pass' and 'XTS SYNTHETIC PSCI_SYSTEM_OFF' in console
-   elif case=='factory-mismatch':ok=not passed and bool(mapped) and 'KXTS FACTORY PASS vectors=0x0' in console and 'KXTS FACTORY MISMATCH REJECTED' in console and result['outcome']=='pass'
+   elif case=='factory-mismatch':ok=not passed and bool(mapped) and 'KXTS FACTORY PASS vectors=0x0 checks=0xb line=0x0' in console and 'KXTS FACTORY MISMATCH REJECTED' in console and result['outcome']=='pass'
    elif case=='panic':ok=not passed and bool(mapped) and 'KXTS SYNTHETIC PANIC' in console and result['outcome']=='pass'
    else:ok=not passed and not mapped and 'KXTS SPIN CONTROL' in console and result['outcome']=='timeout'
    r['guest_cases'].append({'case':case,'accepted':bool(ok),'image':str(image.relative_to(m)),'image_sha256':sha(image),'payload_sha256':sha(payload),'console_sha256':sha(out/(case+'.log')),'mapping_proof':proof,'vectors':0 if case=='factory-mismatch' else r.get('vectors') if case=='positive' else None})

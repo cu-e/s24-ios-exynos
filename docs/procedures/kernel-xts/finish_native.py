@@ -66,6 +66,7 @@ def main():
     path=Path(name);check('absolute-dependency-path',path.is_absolute());r['component_dependency_hashes'][str(path.relative_to(m)) if path.is_relative_to(m) else str(path)]=sha(path)
   for key in ['components','guest_images','guest_image_ready','helper_layout','private_layout','original_graph','table_observation','startup_call_relocations','public_mode_objects','component_symbols','import_provider_map','qualified_link_runtime','remaining_exports','native_compiler','publication_controls']:
    r[key]=old[key]
+  check('actual-host-publication105-and-mismatch5', 'KXTS PUBLICATION PASS checks=105 failure_line=0' in (oldpath.parent/'host-run-publication.log').read_text() and 'KXTS PUBLICATION PASS checks=5 failure_line=0' in (oldpath.parent/'host-run-mismatch.log').read_text())
   r['retained_original_commands']=old['commands'];r['retained_passing_checks']=[x for x in old['checks'] if x['passed']]
   for label,row in r['guest_images'].items():
    path=m/row['path'];check('retained-linked-image-'+label,sha(path)==row['sha256'])
