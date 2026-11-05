@@ -111,13 +111,16 @@ def audit(main, pins, output):
                 'osfmk/bearssl_aes_ct64_enc.o', 'osfmk/bearssl_aes_ct64_dec.o', 'libkern/register_crypto.o',
                 'osfmk/prng_random.o', 'osfmk/entropy.o'}
     require(required <= {r['id'] for r in selected}, 'Genuine guest crypto object membership')
-    scanned, demands = [], {f: [] for f in fields}
+    scanned, demands, registration_text = [], {f: [] for f in fields}, []
     for path in sorted(source_root.rglob('*')):
         if path.suffix not in ('.c', '.h', '.cpp') or not path.is_file():
             continue
         text = clean(path.read_text(errors='strict'))
         name = str(path.relative_to(source_root))
         scanned.append({'source': name, 'sha256': sha(path), 'selected_objects': by_source.get(str(path), [])})
+        for match in re.finditer(r'\b(register_crypto_functions|register_and_init_prng)\s*\(', text):
+            registration_text.append({'function_token': match[1], 'source': name,
+                'line': text[:match.start()].count('\n') + 1, 'selected_objects': by_source.get(str(path), [])})
         for match in re.finditer(r'\bg_crypto_funcs\s*->\s*(\w+)', text):
             field = match[1]
             require(field in demands, 'Unknown registration consumer field: ' + field)
@@ -180,6 +183,7 @@ def audit(main, pins, output):
             'callbacks': callbacks, 'scanned_source_files': scanned,
             'scan_semantics': 'Comment-stripped direct g_crypto_funcs->field text; no preprocessor, call graph or runtime reachability proof. Selected object witnesses are source-recipe membership, never emitted symbols. Header/unselected references remain separately visible.',
             'startup_witnesses': startup_witnesses, 'separate_native_component_inputs': separate,
+            'registration_and_prng_direct_text_witnesses': registration_text,
             'reported_separate_task_states_not_reexecution': task_states,
             'negative_controls': controls, 'boundaries': {'compiler_executed': False, 'linked_image': False,
             'guest_executed': False, 'native_E1S_objects_reused': False, 'provider_registered': False,
