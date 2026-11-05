@@ -113,3 +113,36 @@ must separately validate owned output, genuine tool/source/profile bindings and
 root execution authorization; that function alone is not a provider plan ABI,
 PID1/executable validator, QEMU launcher or authority to execute. No provider
 rows are invented inside this direct-object manifest.
+
+## REV025 ownership/output correction
+
+The original frozen3ffde8d/78a62c and1120-check capsule remain unchanged. REV025
+correctly identified two additional prospective admission gaps: absolute() kept
+parent components during lexical containment checks, and a generic task owner
+could request another task's shard. No production execution occurred.
+
+The corrected admission rejects any `..` path component, symlink ancestry,
+noncanonical ledger worktree or output alias before creating output. The
+registered worktree must exist under canonical MAIN/worktrees, and the new
+output must be a strict canonical child of that worktree's artifacts directory.
+Existing outputs are never overwritten. Task, owner and planned experiment
+identity still bind to MAIN. For both plan and execute, the task must reserve
+both literal fixtures/public/avf-object-shards/SHARD and
+ docs/procedures/avf-object-shards/SHARD paths. Other shard reservations or generic
+tooling/reviewer paths confer no execution authority. VM009 has one explicit
+source-only plan exception under its exact three tooling paths; it can never
+execute a shard compile. Ownership bindings are emitted in the report.
+
+VMOBJBOUND-001 focused controls passed36 checks, with current-image
+VmHWM28889088 bytes. They retrieved the original exact37a0... tool through a
+read-only local Git command and reproduced both old admissions only in a small
+synthetic ledger beneath owned temporary artifacts. Corrected requests reject
+before mkdir; all ten real reservation names map correctly, missing either
+reservation rejects, the VM009 exception remains plan-only, and parent/prefix/
+symlink/worktree/experiment cases reject. No shared path, compiler or guest was
+used. AST comparison proves every original graph/hash/recipe/dependency/MachO/
+resource/resume algorithm unchanged, aside from the replacement owned_out guard,
+two new guard helpers and the added ownership report field. The earlier1120
+results remain baseline evidence for that unchanged code, not a relabeled run
+of the corrected entrypoint. See qualified-runner.json for separate exact source,
+baseline and focused-report hashes. Independent acceptance is still required.

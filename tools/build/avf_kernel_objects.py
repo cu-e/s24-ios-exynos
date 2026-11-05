@@ -481,21 +481,67 @@ def approval(args):
     return data
 
 
+def task_shards(task, mode, requested):
+    """Literal reservations authorize a shard; tooling scope never grants execution."""
+    if requested not in SHARDS or mode not in ['plan', 'execute']:
+        raise ValueError('Unknown shard or execution mode')
+    paths = set(task.get('paths', []))
+    allowed = {name for name in SHARDS if {
+        'fixtures/public/avf-object-shards/'+name,
+        'docs/procedures/avf-object-shards/'+name,
+    }.issubset(paths)}
+    tooling = task['id'] == 'VM-009' and paths == {
+        'tools/build/avf_kernel_objects.py',
+        'fixtures/public/avf-kernel-objects',
+        'docs/procedures/avf-kernel-objects',
+    }
+    if task['id'] == 'VM-009':
+        if mode != 'plan' or not tooling:
+            raise ValueError('VM009 tooling scope authorizes source-only plans, never shard compilation')
+        return {'authorized_shards': [], 'source_only_tooling_exception': True}
+    if requested not in allowed:
+        raise ValueError('Requested shard is not reserved by both literal task fixture/procedure paths')
+    return {'authorized_shards': sorted(allowed), 'source_only_tooling_exception': False}
+
+
+def canonical_output_path(value):
+    path = Path(value)
+    if '..' in path.parts:
+        raise ValueError('Parent traversal is forbidden in owned output/worktree paths')
+    absolute = path.absolute()
+    for ancestor in [absolute, *absolute.parents]:
+        if ancestor.is_symlink():
+            raise ValueError('Output/worktree ancestry contains a symlink')
+    resolved = absolute.resolve(strict=False)
+    if resolved != absolute:
+        raise ValueError('Owned output/worktree path is not canonical')
+    return resolved
+
+
 def owned_out(args):
     ledger = load(args.main/'state/lab.json')
     tasks = [t for t in ledger['tasks'] if t['id'] == args.task and t.get('owner') == args.owner and t['status'] == 'in_progress']
     experiments = [e for e in ledger['experiments'] if e['id'] == args.experiment and e['task'] == args.task and e['owner'] == args.owner and e['status'] == 'planned']
     if len(tasks) != 1 or len(experiments) != 1 or not tasks[0].get('worktree'):
         raise ValueError('Original active owner and pre-registered MAIN experiment required')
-    workspace = args.main/tasks[0]['worktree']; allowed = workspace/'artifacts'
-    out = args.out.absolute()
-    if not out.is_relative_to(allowed.absolute()) or out == allowed.absolute():
-        raise ValueError('New output must be inside original owner worktree artifacts')
-    for parent in [out, *out.parents]:
-        if parent.is_symlink():
-            raise ValueError('Output ancestry contains a symlink')
+    task = tasks[0]
+    authorization = task_shards(task, args.mode, args.shard)
+    relative = PurePosixPath(task['worktree'])
+    if relative.is_absolute() or '..' in relative.parts or len(relative.parts) < 2 or relative.parts[0] != 'worktrees' or str(relative) != task['worktree']:
+        raise ValueError('Ledger worktree must be a canonical relative child of MAIN/worktrees')
+    workspace = canonical_output_path(args.main/task['worktree'])
+    worktrees = canonical_output_path(args.main/'worktrees')
+    if not workspace.is_dir() or not workspace.is_relative_to(worktrees) or workspace == worktrees:
+        raise ValueError('Original owner worktree is missing or outside MAIN/worktrees')
+    allowed = canonical_output_path(workspace/'artifacts')
+    out = canonical_output_path(args.out)
+    if not out.is_relative_to(allowed) or out == allowed:
+        raise ValueError('New output must be a canonical child of original owner worktree artifacts')
     if out.exists():
         raise ValueError('Existing output directory is never reused or overwritten')
+    args.ownership_binding = dict(authorization, task=task['id'], owner=task['owner'], mode=args.mode,
+                                  requested_shard=args.shard, worktree=str(workspace), artifact_root=str(allowed),
+                                  output=str(out), literal_task_paths=list(task['paths']))
     out.mkdir(parents=True)
     return out
 
@@ -517,7 +563,7 @@ def main():
     args = parser.parse_args(); args.main = args.main.resolve()
     out = owned_out(args)
     shutil.copyfile(__file__, out/'executor.py')
-    report = {'kind': 'host-test', 'origin': 'local-host', 'outcome': 'fail', 'recorded_at': stamp(), 'argv': [sys.executable, *sys.argv], 'summary': 'Guest object executor did not complete selected validation', 'executor_sha256': sha(__file__), 'commands': [], 'objects': [], 'compiler_started': False, 'full_kernel_build_or_link': False, 'guest_executed': False, 'device_executed': False, 'sdk_qualified': False, 'private_apple_abi_qualified': False}
+    report = {'kind': 'host-test', 'origin': 'local-host', 'outcome': 'fail', 'recorded_at': stamp(), 'argv': [sys.executable, *sys.argv], 'summary': 'Guest object executor did not complete selected validation', 'executor_sha256': sha(__file__), 'ownership_binding': args.ownership_binding, 'commands': [], 'objects': [], 'compiler_started': False, 'full_kernel_build_or_link': False, 'guest_executed': False, 'device_executed': False, 'sdk_qualified': False, 'private_apple_abi_qualified': False}
     try:
         if args.mode == 'execute':
             report['execution_approval'] = approval(args)

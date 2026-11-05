@@ -48,3 +48,18 @@ process boundary after review; their genuine producer/approval/ABI validators
 remain their responsibility, and no fake graph entries are added.
 
 Historical VM008 measurement/verifier stays physically frozen at worktrees/vm-008-20261105/tools/build/avf_kernel_headers.py, commit1d8ebf6bd087431ba0959a5e65296dbd59e15d26, streaming SHA256d56648d24048b97e2c519faf30cb349291b5aea8b85a640af06b71015e28b8c9. Producer and REV023ct confirmed this original entrypoint and descriptorSHA058451939894bd48ccc2ad1fe8b8d85c515f2176d21c8025daa034be8e98abe7. The executor invokes no producer helper; it binds the exact descriptor/index and actual published bytes directly. The prospective helper under vm-008-admission-20261106 is separate and intentionally cannot validate this old descriptor. No historical measurement is relabeled: its original single4GiB admission/25ms monitor remains original; VM009 future execution independently uses three stable samples. The added provenance note changes no tested executor/fixture source.
+
+REV025 correction: the original source/capsule are preserved. Two old prospective
+admissions were confirmed in owned temporary synthetic ledgers: lexical parent
+traversal could mkdir outside the fixture owner's artifacts, and generic/cross-
+shard tasks lacked literal reservation enforcement. The correction now rejects
+parent/symlink/noncanonical aliases, confines canonical output to the registered
+existing MAIN/worktrees owner, requires both exact shard fixture+procedure paths
+for plan/execute, and permits VM009 only source-only plans, never compilation.
+All checks precede mkdir and the emitted ownership binding records their facts.
+Focused VMOBJBOUND-001 passed36 checks/VmHWM28889088 bytes, including old-source
+reproduction, all ten authorized mappings and unchanged-algorithm AST proof.
+Capsule: worktrees/vm-009-20261106/artifacts/avf-kernel-objects/boundaries-session1/evidence.json.
+No compiler/QEMU/common checks, new task claim, rebase, source-graph change or
+original evidence mutation occurred. New corrected freeze must be independently
+reviewed before actual shard execution.
