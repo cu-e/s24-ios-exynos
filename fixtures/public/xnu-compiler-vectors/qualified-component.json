@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "kind": "host-test",
+  "origin": "local-host",
+  "recorded_at": "2026-11-05T08:40:16+00:00",
+  "task": "KRN-011",
+  "status": "bounded-fixed-arithmetic-vector-component",
+  "full_kernel_qualified": false,
+  "apple_private_abi_qualified": false,
+  "native_device_qualified": false,
+  "device_executed": false,
+  "compiler": {
+    "path": "artifacts/xnu-compiler-vectors/source-build-session1/clang",
+    "sha256": "3b11f867131e9a22a3671101ffb09dcecaf2b6831e5fd2c384b95075f29008a3",
+    "source_evidence": "VCOMP-002",
+    "qualified_evidence": "VCOMP-007"
+  },
+  "source_revision": "fa9443738c1a18accef4244732ec6d6ee97a8133",
+  "atomic_parent_evidence": "ATCOMP-004",
+  "vector_patch": {
+    "path": "patches/compiler-vectors/0001-fixed-arithmetic-vector-layout.patch",
+    "sha256": "d4cfcf2440c49665992716a5bd17865746b5302278e31514a8609028ea538270"
+  },
+  "helper_sha256": "ea289c7ea107295de3937a4dd550b4a4882f5e915f3a4e1ccc1895e64ea9a8bf",
+  "compiled_consumers": [
+    {
+      "source": "artifacts/xnu-compiler-vectors/source-build-session1/consumer-source/src/clang/lib/Sema/SemaExpr.cpp",
+      "source_sha256": "7613baa23486027c16634bb273004b3d51785e04c991b704178a42bd8892a09a",
+      "retained_parent": "artifacts/xnu-compiler-atomics/atomic-arrays-session1/consumer-source/src/clang/lib/Sema/SemaExpr.cpp",
+      "retained_parent_sha256": "7613baa23486027c16634bb273004b3d51785e04c991b704178a42bd8892a09a",
+      "object_sha256": "c834716bf791eff787e4920937dc088eba74744f150cddd5b678cfea41e4bd5d"
+    },
+    {
+      "source": "artifacts/xnu-compiler-vectors/source-build-session1/consumer-source/src/clang/lib/Sema/SemaExprCXX.cpp",
+      "source_sha256": "c15e26fee217b3f8d4a5940eedea0c663bae8e8a6fdae044261f78f7dc219fbd",
+      "retained_parent": "artifacts/xnu-compiler-atomics/atomic-arrays-session1/consumer-source/src/clang/lib/Sema/SemaExprCXX.cpp",
+      "retained_parent_sha256": "c15e26fee217b3f8d4a5940eedea0c663bae8e8a6fdae044261f78f7dc219fbd",
+      "object_sha256": "3df1ecd7e913e60c9a5b1cce13b4329b1641808933261bb9cbaa6c1f6b8b99af"
+    },
+    {
+      "source": "artifacts/xnu-compiler-vectors/source-build-session1/consumer-source/src/clang/lib/AST/ExprConstant.cpp",
+      "source_sha256": "2cb3bf884e7196e082ea70ed9f88654eb63a8132171b11fde850b3ae95f83ead",
+      "retained_parent": "artifacts/xnu-compiler-atomics/atomic-arrays-session1/consumer-source/src/clang/lib/AST/ExprConstant.cpp",
+      "retained_parent_sha256": "2cb3bf884e7196e082ea70ed9f88654eb63a8132171b11fde850b3ae95f83ead",
+      "object_sha256": "2a398673473afbb2dffb5087299f6bebdb1844378a48fa6f615bbeecc4a5d117"
+    }
+  ],
+  "archives": {
+    "artifacts/xnu-compiler-vectors/source-build-session1/libclangAST.a": "c7b96a9ebb8d1743dfb8f898113957c69e1cfbd58c34d3bd49dfd7978ddfa05c",
+    "artifacts/xnu-compiler-vectors/source-build-session1/libclangParse.a": "01cabf4113e5d8f5130c11e58f5a66ae7e2f96da048068690753f6bb81e3d683",
+    "artifacts/xnu-compiler-vectors/source-build-session1/libclangSema.a": "846ffaded64418f0ee8be1f522b05837cc21cc6973126e708b6e54739e2b46cd"
+  },
+  "retained_parser_mangler_checks": [
+    {
+      "name": "retained-ParseExpr.cpp.o",
+      "pass_check": true,
+      "original": "artifacts/xnu-compiler-atomics/atomic-arrays-session1/ParseExpr.cpp.o",
+      "sha256": "8b346c3b4a27023c878d7c26bc32e11560642a655cbd5c97277e33ced924b015"
+    },
+    {
+      "name": "retained-ItaniumMangle.cpp.o",
+      "pass_check": true,
+      "original": "artifacts/xnu-compiler-hardening/ast-patch-session1/ItaniumMangle.cpp.o",
+      "sha256": "d2edb88506c82a4c265677c7f31fca0642c2014b68737a5cae26ae974ecb2dd7"
+    }
+  ],
+  "target": "plain arm64-apple-ios16.5",
+  "vector_rule": {
+    "kinds": [
+      "GenericVector",
+      "NeonVector"
+    ],
+    "lanes": "unannotated real builtin arithmetic",
+    "payload_bits": "actual target element size times actual lane count",
+    "extra_storage": "padding",
+    "pointer_inference": false
+  },
+  "regression_evidence": [
+    "VCOMP-003",
+    "VCOMP-005",
+    "VCOMP-006",
+    "VCOMP-007"
+  ],
+  "full_profile_evidence": "VCOMP-004",
+  "object_dependency_audit": "VCOMP-008",
+  "coverage": {
+    "selected_components": 978,
+    "attempted": 962,
+    "actual_arm64": 954,
+    "actual_component_arm64": 953,
+    "known_direct_objects": 982,
+    "known_direct_unresolved": 28,
+    "component_unresolved": 25,
+    "additional_objects": 1,
+    "prior_successes": 953,
+    "prior_object_regressions": [],
+    "failure_categories": {
+      "other_compile_error": 2,
+      "missing_header": 4,
+      "unsupported_metadata": 2
+    },
+    "missing_headers": {
+      "arm_neon.h": 1,
+      "os/firehose_buffer_private.h": 3
+    },
+    "unique_dependency_files": 3086,
+    "defined_symbol_types": {
+      "T": 17085,
+      "s": 32791,
+      "t": 11917,
+      "b": 2847,
+      "S": 5073,
+      "D": 811,
+      "d": 718
+    }
+  },
+  "archive_member_count_established": false,
+  "limits": [
+    "No matching Apple compiler/private ABI oracle",
+    "Boolean/predicate, polynomial, SVE/RVV, sizeless and vector/lane usage annotations remain unsupported",
+    "PAC/arm64e, reference/member-pointer, virtual-base, VLA and aggregate-annotation limits retained",
+    "Max1MiB storage,131072 elements and128 recursion depth retained",
+    "Only actual same source AST schema PCH qualification; foreign/wrong-target/truncated inputs rejected",
+    "Full kernel/link/archive/IIG/native/userland/GPU/Wi-Fi/cellular qualification remains incomplete"
+  ]
+}

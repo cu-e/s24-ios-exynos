@@ -1,0 +1,57 @@
+--- a/src/clang/include/clang/AST/XnuTypeMetadata.h
++++ b/src/clang/include/clang/AST/XnuTypeMetadata.h
+@@ -45,7 +45,7 @@
+   }
+ 
+   bool walkImpl(QualType T, uint64_t Offset, unsigned Override) {
+-    if (T->isDependentType() || T->isVariablyModifiedType() ||
++    if (T->isSizelessType() || T->isDependentType() || T->isVariablyModifiedType() ||
+         T->isFunctionType() || T->isVoidType()) return false;
+     if (T->isIncompleteArrayType()) return true; // A flexible tail has no storage.
+     if (T->isIncompleteType()) return false;
+@@ -66,6 +66,35 @@
+       if (StorageBits < ValueBits || Offset > TotalBits ||
+           StorageBits > TotalBits - Offset) return false;
+       return walk(Value, Offset, Override);
++    }
++    if (const auto *VT = dyn_cast<VectorType>(T.getTypePtr())) {
++      // Ordinary fixed arithmetic vectors contain contiguous lane values;
++      // target storage can include tail padding (e.g. three 64-bit lanes).
++      // Predicate/polynomial/target-specific forms and vector-level usage
++      // annotations need separate semantics, so do not infer them here.
++      if (Override || VT->isExtVectorBoolType() ||
++          (VT->getVectorKind() != VectorType::GenericVector &&
++           VT->getVectorKind() != VectorType::NeonVector)) return false;
++      QualType Element = VT->getElementType();
++      for (unsigned I = 0; ; ++I) {
++        if (I == 128) return false;
++        if (const auto *TT = dyn_cast<TypedefType>(Element.getTypePtr()))
++          if (semantics(TT->getDecl())) return false;
++        QualType Next = Element.getSingleStepDesugaredType(C);
++        if (Next == Element) break;
++        Element = Next;
++      }
++      if (!Element->isBuiltinType() || !Element->isRealType() ||
++          Element->isBooleanType() || Element->isSizelessType()) return false;
++      uint64_t Count = VT->getNumElements();
++      uint64_t LaneBits = C.getTypeSize(Element);
++      uint64_t StorageBits = C.getTypeSize(T);
++      if (!Count || Count > 131072 || !LaneBits || Count > TotalBits / LaneBits)
++        return false;
++      uint64_t PayloadBits = Count * LaneBits;
++      if (PayloadBits > StorageBits || Offset > TotalBits ||
++          StorageBits > TotalBits - Offset) return false;
++      return mark(Offset, PayloadBits, 2);
+     }
+     if (Override && !T->isArrayType()) {
+       if (!T->isScalarType()) return false; // Scalar semantics, including array elements.
+@@ -120,7 +149,8 @@
+     const auto &Triple = C.getTargetInfo().getTriple();
+     // Selected plain arm64 target only. PAC/arm64e is not inferred from it.
+     if (Triple.getArch() != llvm::Triple::aarch64 || !Triple.isOSDarwin() ||
+-        Triple.isArm64e() || C.getCharWidth() != 8 || T->isIncompleteType() ||
++        Triple.isArm64e() || C.getCharWidth() != 8 || T->isSizelessType() ||
++        T->isIncompleteType() ||
+         T->isDependentType() || T->isVariablyModifiedType() ||
+         T->isFunctionType() || T->isReferenceType()) return false;
+     TotalBits = C.getTypeSize(T);
