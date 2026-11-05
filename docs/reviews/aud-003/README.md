@@ -1,5 +1,7 @@
 # Independent AUD-003 review, 2026-11-05
 
+Current disposition: the initial P2 below is resolved by exact `08ec46d`/`fff8f26` followups. See [the bounded closure report](followup.md). The original finding text and counterexample remain below as history.
+
 **One P2 API-contract documentation finding; no P0/P1 finding.** The source-backed period/frame/pointer admission and ordinary Stop/fault/fence lifecycle checks passed. Initialization needs an explicit fresh/fully-retired-storage precondition: current public documentation does not say that reinitialization discards the very local lease/generation protection otherwise promised. This is not a firmware replay exploit or native audio result.
 
 Task REV-013; reviewer `codex-team-review-audio-20261105-bo`.

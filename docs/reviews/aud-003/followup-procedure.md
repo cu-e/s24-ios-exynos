@@ -1,0 +1,5 @@
+# AUD-003 initializer contract followup procedure
+
+2026-11-05; same REV-013/owner codex-team-review-audio-20261105-bo.
+
+Review exact08ec46d92ae3e4b95ecf9d56d2ac180b53183208 plusfff8f269d5dd6f38472b0fa6e77e1f33a2eb32a4 against originalcbec42f/7854ddf. Preserve original98ee3cf report and counterexample evidence. Confirm core C bytes unchanged, public contract explicitly excludes live reset/copy and binds reconstruction to full retirement/drain plus external never-reused epoch authority; inspect actual legal-regression source. Verify followup capsule expected SHA256 and all59 indexed artifact/source hashes without shared mutation. Run only one tiny independent legal Stop/retire/CLOSED/fence/release, reconstruct epoch41→42, stale old lease rejection/no-mutation and complete teardown under host ASan/UBSan; no broad matrix, target build or hardware. One compiler job<=256MiB, finite commands, source Git guards. Save closure evidence and append a separate report; keep the historical P2 intact and task in progress for coordinator acceptance.
