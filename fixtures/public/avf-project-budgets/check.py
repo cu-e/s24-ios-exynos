@@ -114,6 +114,84 @@ def main():
         budget.state_path.unlink()
         changed = dict(approval, resource_queue_path='artifacts/other-queue.json')
         rejects('alternate resource queue cannot split global broker', lambda: e.project_approval(ns, changed))
+        # Regression for REV035: every old session remains charged after a
+        # later command starts, including an orphan whose cwd is outside MAIN.
+        supervise = e.supervisor(args.main.resolve())
+        budget = fresh(); budget.reserve(); orphan_file = fake/'old-orphan.pid'
+        leader = subprocess.Popen([sys.executable, '-c', "import pathlib,subprocess,sys;p=subprocess.Popen(['sleep','10'],cwd='/tmp');pathlib.Path(sys.argv[1]).write_text(str(p.pid))", orphan_file], cwd=fake, start_new_session=True)
+        second = None
+        try:
+            leader.wait(timeout=2); orphan_pid = int(orphan_file.read_text())
+            orphan_start = e.process_table()[orphan_pid]['start_ticks']
+            check('old orphan observed in first session', any(p['pid'] == orphan_pid for p in budget.sample(leader.pid)['project_processes']))
+            second = subprocess.Popen(['sleep', '10'], cwd='/tmp', start_new_session=True)
+            later = budget.sample(second.pid); budget.sample()
+            check('old outside-cwd orphan remains in union after new session', any(p['pid'] == orphan_pid and p['start_ticks'] == orphan_start for p in later['project_processes']))
+            supervise.terminate(second)
+            rejects('release refuses old orphan after latest session ended', lambda: budget.release())
+        finally:
+            supervise.terminate(leader)
+            if second is not None:supervise.terminate(second)
+        budget.release()
+        for field in ['queue_path', 'allocation_path', 'state_path', 'lock_path', 'temporary']:
+            budget = fresh(); budget.reserve()
+            path = budget.state_path.with_suffix('.tmp') if field == 'temporary' else getattr(budget, field)
+            saved = path.with_name(path.name+'.regression-original')
+            if path.exists():path.rename(saved)
+            else:saved.write_text('unchanged')
+            path.symlink_to(saved.name)
+            try:
+                rejects('live '+field+' symlink rejected', lambda: budget.sample())
+            finally:
+                path.unlink()
+                if field == 'temporary':saved.unlink()
+                else:saved.rename(path)
+            budget.release()
+        # A competing holder may never suspend child deadline supervision.
+        budget = fresh(); budget.reserve(); ready = out/'lock-held'
+        holder = subprocess.Popen([sys.executable, '-c', "import fcntl,pathlib,sys,time;f=open(sys.argv[1],'a+');fcntl.flock(f,fcntl.LOCK_EX);pathlib.Path(sys.argv[2]).write_text('ready');time.sleep(2)", budget.lock_path, ready], cwd='/tmp')
+        until = time.monotonic()+2
+        while not ready.exists() and time.monotonic() < until:time.sleep(.005)
+        check('real competing broker lock acquired', ready.exists())
+        blocked_started = time.monotonic()
+        rejects('bounded lock acquisition without a child', lambda: budget.sample(lock_timeout=.05))
+        check('lock contention returns within finite bound', time.monotonic()-blocked_started < .5)
+        holder.terminate(); holder.wait(timeout=2); budget.release()
+        # Arrange the holder inside the real child's first supervisor sample,
+        # after admission, to measure actual owned-child deadline cleanup.
+        budget = fresh(); budget.reserve(); held_after_spawn = out/'lock-held-after-spawn'
+        class ContendingSupervisor:
+            def __init__(self):self.holder=None
+            def sample(self, session=None):
+                if session is not None and self.holder is None:
+                    self.holder = subprocess.Popen([sys.executable, '-c', "import fcntl,pathlib,sys,time;f=open(sys.argv[1],'a+');fcntl.flock(f,fcntl.LOCK_EX);pathlib.Path(sys.argv[2]).write_text('ready');time.sleep(2)", budget.lock_path, held_after_spawn], cwd='/tmp')
+                    until = time.monotonic()+2
+                    while not held_after_spawn.exists() and time.monotonic() < until:time.sleep(.005)
+                return supervise.sample(session)
+            def terminate(self, proc):return supervise.terminate(proc)
+        contending = ContendingSupervisor(); lock_sandbox = out/'lock-sandbox'; lock_sandbox.mkdir()
+        try:
+            lock_result = e.run_child([sys.executable, '-c', 'import time;time.sleep(10)'], ROOT, lock_sandbox, 'contended-deadline', contending, timeout=.15, admit=False, budget=budget)
+            commands.append(lock_result)
+            check('lock contention stops owned child within bounded deadline grace', lock_result['stop_reason'] == 'project-admission' and lock_result['elapsed_seconds'] < 1.3 and not lock_result['after']['owned_processes'])
+        finally:
+            if contending.holder is not None:contending.holder.terminate();contending.holder.wait(timeout=2)
+        budget.release()
+        # A vanished external inventory root is unknown, never evidence of zero
+        # descendants. Root must reconcile it, even if an orphan moved to /tmp.
+        outside_file = fake/'external-orphan.pid'; exit_file = fake/'external-exit'
+        outside_root = subprocess.Popen([sys.executable, '-c', "import pathlib,subprocess,sys,time;p=subprocess.Popen(['sleep','10'],cwd='/tmp');pathlib.Path(sys.argv[1]).write_text(str(p.pid));\nwhile not pathlib.Path(sys.argv[2]).exists():time.sleep(.01)", outside_file, exit_file], cwd='/tmp', start_new_session=True)
+        until = time.monotonic()+2
+        while (not outside_file.exists() or not outside_file.read_text()) and time.monotonic() < until:time.sleep(.005)
+        outside_identity = e.process_identity(outside_root.pid); orphan_pid = int(outside_file.read_text())
+        external_grant = copy.deepcopy(grant); external_grant['existing_work'] = [dict(outside_identity, max_owned_rss_bytes=64*1024**2, compiler_jobs=0, label='synthetic-external-root')]
+        try:
+            for suffix in ['.reservations.json', '.tmp']:(fake/'artifacts/allocation.json').with_suffix(suffix).unlink(missing_ok=True)
+            install(external_grant); budget = e.project_approval(ns, approval); budget.reserve()
+            check('declared external root descendant initially accounted', any(p['pid'] == orphan_pid for p in budget.sample()['project_processes']))
+            exit_file.write_text('exit'); outside_root.wait(timeout=2)
+            rejects('vanished external root cannot silently drop live orphan', lambda: budget.sample())
+        finally:supervise.terminate(outside_root)
         # A separate process, outside an executor reservation, is discovered by
         # its real project cwd; its child changes cwd and remains accounted.
         helper_pid_file = fake/'helper.pid'
@@ -165,6 +243,22 @@ def main():
             stdout, stderr = worker.communicate(timeout=5); returns.append(worker.returncode)
             commands.append({'kind': 'synthetic-admission-race', 'pid': worker.pid, 'exit_code': worker.returncode, 'stdout': stdout.decode(), 'stderr': stderr.decode()})
         check('two real concurrent controllers admit exactly one slot', sorted(returns) == [0, 7])
+        # REV035 hash/parse race: replace the real path exactly after the
+        # genuine snapshot checksum is computed, before JSON parsing returns.
+        approved_bytes = b'{"source_plan_identity":"approved-original"}'
+        loader_plan = fake/'artifacts/loader-plan.json'; loader_plan.write_bytes(approved_bytes)
+        replacement = loader_plan.with_suffix('.replacement'); replacement.write_text('{"source_plan_identity":"unapproved-replacement"}')
+        expected = e.hashlib.sha256(approved_bytes).hexdigest(); original_sha256 = e.hashlib.sha256
+        def replace_after_hash(raw=b''):
+            digest = original_sha256(raw)
+            if raw == approved_bytes and replacement.exists():os.replace(replacement, loader_plan)
+            return digest
+        try:
+            e.hashlib.sha256 = replace_after_hash
+            parsed = e.load_project(loader_plan, expected)
+        finally:e.hashlib.sha256 = original_sha256
+        check('prospective checksum and parse consume same approved snapshot during real rename', parsed['source_plan_identity'] == 'approved-original' and json.loads(loader_plan.read_text())['source_plan_identity'] == 'unapproved-replacement')
+        rejects('changed prospective plan body rejects original checksum', lambda: e.load_project(loader_plan, expected))
         class LowMemory:
             def sample(self):return {'MemAvailable_bytes': 3*e.GIB}
         admitted = e.stable_memory(LowMemory(), seconds=0)

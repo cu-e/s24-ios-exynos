@@ -408,6 +408,19 @@ RESOURCE_QUEUE = 'artifacts/team-coordination/20261106-team/resource-queue.json'
 EXECUTOR_RSS = 512*1024**2
 
 
+def load_project(path, expected=None, maximum=64*1024**2):
+    # Prospective trusted JSON is hashed and parsed from the same byte snapshot.
+    path = canonical_output_path(path)
+    descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    with os.fdopen(descriptor, 'rb') as stream:
+        if os.fstat(stream.fileno()).st_mode & 0o170000 != 0o100000:
+            raise ValueError('Project JSON input must be a regular file')
+        raw = stream.read(maximum+1)
+    if len(raw) > maximum or (expected is not None and hashlib.sha256(raw).hexdigest() != expected):
+        raise ValueError('Oversized or changed prospective JSON input')
+    return json.loads(raw)
+
+
 def strict_fields(value, fields, label):
     if type(value) is not dict or set(value) != set(fields):
         raise ValueError('Wrong '+label+' schema')
@@ -467,7 +480,7 @@ class ProjectBudget:
     def __init__(self, args, data, executor_sha256):
         self.args = args; self.data = data
         self.allocation_path = canonical_output_path(args.main/data['root_lease_path'])
-        self.allocation = load(self.allocation_path, data['root_lease_sha256'])
+        self.allocation = load_project(self.allocation_path, data['root_lease_sha256'])
         grant = self.allocation
         strict_fields(grant, ['schema', 'id', 'policy_sha256', 'expires_at', 'max_compiler_jobs_total',
                              'max_total_project_rss_bytes', 'slots', 'existing_work', 'light_rss_budget_bytes', 'six_job_measurement'], 'project allocation')
@@ -518,13 +531,13 @@ class ProjectBudget:
         self.slot = selected[0]; self.rss_limit = self.slot['max_owned_rss_bytes']
         if str(canonical_output_path(args.main/self.slot['actual_output'])) != str(args.out.resolve()):
             raise ValueError('Root slot binds one exact canonical output')
-        self.source_plan = load(args.main/self.slot['source_plan'], self.slot['source_plan_sha256'])
+        self.source_plan = load_project(args.main/self.slot['source_plan'], self.slot['source_plan_sha256'])
         if self.source_plan.get('resource_profile') != PROJECT_PROFILE:
             raise ValueError('Prospective allocation requires a new project-budget plan')
         if jobs == 8:
             proof = grant['six_job_measurement']
             strict_fields(proof, ['path', 'sha256'], 'six job measurement binding')
-            measured = load(args.main/proof['path'], proof['sha256'])
+            measured = load_project(args.main/proof['path'], proof['sha256'])
             if measured.get('schema') != 'project-six-job-measurement-v1' or measured.get('outcome') != 'pass' or type(measured.get('max_compiler_jobs_observed')) is not int or measured['max_compiler_jobs_observed'] != 6 or type(measured.get('elapsed_seconds')) not in [int, float] or measured['elapsed_seconds'] <= 0 or type(measured.get('peak_project_rss_bytes')) is not int or not 0 < measured['peak_project_rss_bytes'] <= 6*GIB or measured.get('stable_memory_floor_bytes') != 4*GIB or not measured.get('samples'):
                 raise ValueError('Eight jobs require a bound actual measured six job trial')
             for sample in measured['samples']:
@@ -535,32 +548,45 @@ class ProjectBudget:
         self.queue_path = canonical_output_path(args.main/data['resource_queue_path'])
         self.state_path = self.allocation_path.with_suffix('.reservations.json')
         self.lock_path = self.allocation_path.with_suffix('.budget.lock')
-        self.identity = process_identity(os.getpid()); self.registered = False
+        self.identity = process_identity(os.getpid()); self.registered = False; self.observed_sessions = {}
         self.check_live()
 
     def check_live(self):
+        for path in [self.allocation_path, self.queue_path, self.state_path, self.lock_path, self.state_path.with_suffix('.tmp')]:
+            canonical_output_path(path)
         if sha(self.allocation_path) != self.data['root_lease_sha256']:
             raise ValueError('Root allocation changed')
         expiry = datetime.datetime.fromisoformat(self.allocation['expires_at'])
         if expiry.tzinfo is None or expiry <= datetime.datetime.now(datetime.timezone.utc):
             raise ValueError('Root allocation expired')
-        queue = load(self.queue_path)
+        queue = load_project(self.queue_path)
         heavy = queue.get('heavy')
         if type(heavy) is not dict or heavy.get('id') != self.allocation['id'] or heavy.get('allocation_path') != self.data['root_lease_path'] or heavy.get('allocation_sha256') != self.data['root_lease_sha256'] or heavy.get('slots') != self.allocation['slots']:
             raise ValueError('Root resource queue does not hold this exact allocation')
 
-    def transaction(self, operation):
+    def transaction(self, operation, lock_timeout=.5):
         # Never unlink this inode, including after release; independent of lab/integration locks.
         canonical_output_path(self.state_path); canonical_output_path(self.lock_path)
         descriptor = os.open(self.lock_path, os.O_RDWR | os.O_CREAT | os.O_APPEND | os.O_NOFOLLOW, 0o600)
         with os.fdopen(descriptor, 'a+') as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX)
+            deadline = time.monotonic()+lock_timeout
+            while True:
+                try:
+                    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except BlockingIOError:
+                    if time.monotonic() >= deadline:
+                        raise ValueError('Project budget lock acquisition timed out')
+                    time.sleep(min(.005, max(0, deadline-time.monotonic())))
             self.check_live()
-            state = load(self.state_path) if self.state_path.exists() else {'allocation_sha256': self.data['root_lease_sha256'], 'entries': {}}
-            strict_fields(state, ['allocation_sha256', 'entries'], 'reservation state')
-            if state['allocation_sha256'] != self.data['root_lease_sha256'] or type(state['entries']) is not dict:
+            if (os.fstat(lock.fileno()).st_dev, os.fstat(lock.fileno()).st_ino) != (self.lock_path.stat().st_dev, self.lock_path.stat().st_ino):
+                raise ValueError('Stable project budget lock inode changed')
+            state = load_project(self.state_path) if self.state_path.exists() else {'allocation_sha256': self.data['root_lease_sha256'], 'entries': {}, 'light_owned': {}}
+            strict_fields(state, ['allocation_sha256', 'entries', 'light_owned'], 'reservation state')
+            if state['allocation_sha256'] != self.data['root_lease_sha256'] or type(state['entries']) is not dict or type(state['light_owned']) is not dict:
                 raise ValueError('Reservation state belongs to a different allocation')
             result = operation(state)
+            self.check_live()
             temporary = self.state_path.with_suffix('.tmp')
             with temporary.open('x') as stream:
                 json.dump(state, stream, sort_keys=True); stream.flush(); os.fsync(stream.fileno())
@@ -570,6 +596,8 @@ class ProjectBudget:
     def snapshot(self, state):
         table = process_table(); observed = {}; details = []; executor_pids = set(); allowed_compiler_pids = set(); violations = []
         for work in self.allocation['existing_work']:
+            if work['pid'] not in table or table[work['pid']]['state'] == 'Z':
+                raise ValueError('Declared existing project root disappeared; root reconciliation required')
             rows = owned_processes(work, [], table)
             rss = sum(p['rss_bytes'] for p in rows)
             details.append({'label': work['label'], 'rss_bytes': rss, 'processes': rows})
@@ -580,19 +608,25 @@ class ProjectBudget:
             observed.update((p['pid'], p) for p in rows)
         slots = {s['task']: s for s in self.allocation['slots']}
         for task, entry in state['entries'].items():
-            strict_fields(entry, ['identity', 'session', 'status'], 'executor reservation')
+            strict_fields(entry, ['identity', 'sessions', 'owned', 'status'], 'executor reservation')
             if task not in slots or entry['status'] not in ['active', 'complete']:
                 raise ValueError('Unallocated executor reservation')
             strict_fields(entry['identity'], ['pid', 'start_ticks'], 'reservation identity')
             strict_int(entry['identity']['pid'], 1, 2**31-1, 'reservation PID')
             strict_int(entry['identity']['start_ticks'], 1, 2**64-1, 'reservation start identity')
-            if entry['session'] is not None:
-                strict_int(entry['session'], 1, 2**31-1, 'reservation session')
+            if type(entry['sessions']) is not dict or type(entry['owned']) is not dict:
+                raise ValueError('Invalid retained session/process identities')
+            for sid, start in entry['sessions'].items():
+                strict_int(int(sid), 1, 2**31-1, 'reservation session')
+                if start is not None:
+                    strict_int(start, 1, 2**64-1, 'session start identity')
+                    if int(sid) in table and table[int(sid)]['start_ticks'] != start:
+                        raise ValueError('Owned session leader PID was reused')
             if entry['status'] == 'complete':
                 continue
             if entry['identity']['pid'] not in table:
                 raise ValueError('Stale executor reservation; root must reconcile survivors')
-            rows = owned_processes(entry['identity'], [entry['session']] if entry['session'] else [], table)
+            rows = self.retained_processes(entry, table)
             rss = sum(p['rss_bytes'] for p in rows)
             details.append({'task': task, 'rss_bytes': rss, 'processes': rows})
             if rss > slots[task]['max_owned_rss_bytes']:
@@ -608,7 +642,20 @@ class ProjectBudget:
             if expanded == discovered:
                 break
             discovered = expanded
+        for pid, start in state['light_owned'].items():
+            strict_int(int(pid), 1, 2**31-1, 'retained light PID')
+            strict_int(start, 1, 2**64-1, 'retained light start identity')
+            if int(pid) in table and table[int(pid)]['start_ticks'] == start and table[int(pid)]['state'] != 'Z':
+                discovered.add(int(pid))
+        while True:
+            expanded = discovered | {p for p, row in table.items() if row['ppid'] in discovered}
+            if expanded == discovered:
+                break
+            discovered = expanded
         observed.update((p, table[p]) for p in discovered if table[p]['state'] != 'Z')
+        for pid, row in observed.items():
+            if pid not in executor_pids:
+                state['light_owned'][str(pid)] = row['start_ticks']
         if any(p not in allowed_compiler_pids and row['executable'] and re.fullmatch(r'(?:clang(?:\+\+)?(?:-\d+)?|(?:\w+-)?gcc(?:-\d+)?|g\+\+|cc1(?:plus)?|cc|c\+\+)', row['executable']) for p, row in observed.items()):
             violations.append('unregistered-project-compiler')
         light_rss = sum(row['rss_bytes'] for p, row in observed.items() if p not in executor_pids)
@@ -618,24 +665,50 @@ class ProjectBudget:
         memory = {line.split(':')[0]+'_bytes': int(line.split()[1])*1024 for line in Path('/proc/meminfo').read_text().splitlines() if line.startswith(('MemAvailable:', 'SwapTotal:', 'SwapFree:', 'SwapCached:'))}
         return {'recorded_at': stamp(), 'project_rss_bytes': sum(p['rss_bytes'] for p in observed.values()), 'violations': violations, 'light_rss_bytes': light_rss, 'project_processes': list(observed.values()), 'project_swap_bytes': sum(p['swap_bytes'] for p in observed.values()), 'workloads': details, **memory, **vm}
 
+    def retained_processes(self, entry, table):
+        rows = {p['pid']: p for p in owned_processes(entry['identity'], [int(s) for s in entry['sessions']], table)}
+        for pid, start in entry['owned'].items():
+            strict_int(int(pid), 1, 2**31-1, 'retained process PID')
+            strict_int(start, 1, 2**64-1, 'retained process start identity')
+            current = table.get(int(pid))
+            if current and current['start_ticks'] == start and current['state'] != 'Z':
+                rows[int(pid)] = current
+        # A previously observed child remains ours after reparenting, chdir,
+        # setsid, or its original session leader's exit. PID reuse is excluded.
+        while True:
+            descendants = {p: row for p, row in table.items() if row['ppid'] in rows and row['state'] != 'Z'}
+            if set(descendants).issubset(rows):
+                break
+            rows.update(descendants)
+        for pid, row in rows.items():
+            if pid != entry['identity']['pid']:
+                entry['owned'][str(pid)] = row['start_ticks']
+        return list(rows.values())
+
     def reserve(self):
         def operation(state):
             if self.args.task in state['entries']:
                 raise ValueError('Duplicate executor/finished allocation requires a new root plan')
             if self.snapshot(state)['violations']:
                 raise ValueError('Project allocation currently exceeds reserved budget')
-            state['entries'][self.args.task] = {'identity': self.identity, 'session': None, 'status': 'active'}
+            state['entries'][self.args.task] = {'identity': self.identity, 'sessions': {}, 'owned': {}, 'status': 'active'}
         self.transaction(operation); self.registered = True
 
-    def sample(self, session=None):
+    def sample(self, session=None, *, lock_timeout=.5):
+        if session is not None:
+            strict_int(session, 1, 2**31-1, 'owned child session')
+            table = process_table()
+            self.observed_sessions.setdefault(str(session), table[session]['start_ticks'] if session in table else None)
         def operation(state):
             entry = state['entries'][self.args.task]
             if entry['identity'] != self.identity or entry['status'] != 'active':
                 raise ValueError('Executor does not own active reservation')
-            if session is not None:
-                entry['session'] = session
+            for key, start in self.observed_sessions.items():
+                if key in entry['sessions'] and entry['sessions'][key] is not None and start is not None and entry['sessions'][key] != start:
+                    raise ValueError('Owned session leader identity changed')
+                entry['sessions'].setdefault(key, start)
             return self.snapshot(state)
-        return self.transaction(operation)
+        return self.transaction(operation, lock_timeout=lock_timeout)
 
     def release(self):
         if not self.registered:
@@ -644,10 +717,12 @@ class ProjectBudget:
             entry = state['entries'][self.args.task]
             if entry['identity'] != self.identity:
                 raise ValueError('Cannot release another executor')
-            session = entry['session']
-            if session and any(p['state'] != 'Z' and p['session'] == session for p in process_table().values()):
-                raise ValueError('Cannot release while owned session survives')
-            entry['session'] = None; entry['status'] = 'complete'
+            for key, start in self.observed_sessions.items():
+                entry['sessions'].setdefault(key, start)
+            rows = self.retained_processes(entry, process_table())
+            if any(p['pid'] != self.identity['pid'] for p in rows):
+                raise ValueError('Cannot release while any retained owned process/session survives')
+            entry['status'] = 'complete'
         self.transaction(operation); self.registered = False
 
 
@@ -716,7 +791,7 @@ def run_child(argv, cwd, out, label, supervise, timeout=120, admit=True, budget=
                 controller = int(Path('/proc/self/statm').read_text().split()[1])*resource.getpagesize()
                 if budget:
                     try:
-                        sample['project_budget'] = budget.sample(proc.pid)
+                        sample['project_budget'] = budget.sample(proc.pid, lock_timeout=max(.001, min(.5, timeout-(time.monotonic()-started))))
                     except Exception as error:
                         record['project_budget_error'] = repr(error)
                         record['stop_reason'] = 'project-admission'
@@ -773,7 +848,7 @@ def reusable(item, row, inputs, cache):
 def approval(args):
     if not args.approval or not args.approval_sha256:
         raise ValueError('Explicit independently reviewed runner/root lease descriptor required')
-    data = load(args.approval, args.approval_sha256)
+    data = load_project(args.approval, args.approval_sha256) if getattr(args, 'resource_profile', 'legacy') == PROJECT_PROFILE else load(args.approval, args.approval_sha256)
     if getattr(args, 'resource_profile', 'legacy') == PROJECT_PROFILE:
         args.project_budget = project_approval(args, data)
         return data

@@ -13,6 +13,9 @@ must contain the immutable allocation's `id`, `allocation_path`,
 that queue entry invalidates admission. A copied allocation path or alternate
 queue cannot create another broker. The adjacent `.budget.lock` is a stable
 flock inode; `.reservations.json` is runtime accounting, not a task registry.
+Lock acquisition is nonblocking with a finite 0.5 second maximum wait; command
+monitoring further bounds it by the remaining command deadline. A contended
+monitor stops only its owned child and retains an unreleased reservation.
 Never unlink the lock, recycle completed slots, or silently reclaim stale owners.
 Root must reconcile a failed controller and its remaining processes explicitly.
 
@@ -24,7 +27,10 @@ auxiliary project work, including declared QEMU. All reservations fit the global
 worktrees, follows their descendants even outside that cwd, and adds exact
 PID/start-time identities declared for work rooted elsewhere. Root must declare
 such external work before granting; cwd discovery is not an ownership oracle.
-Process RSS is summed once by PID, including controllers. Unknown project
+All observed session IDs and process PID/start identities remain retained across
+commands until release verifies that every known owned process is gone. This
+includes reparented children outside the project cwd and children that change
+session after observation. Process RSS is summed once by PID, including controllers. Unknown project
 compilers outside registered slots or declared compiler work cause deferral.
 No unrelated process is signalled. RSS limits are sampled stop limits, not kernel
 memory cgroups; short peaks between samples are not proven absent.
@@ -34,6 +40,10 @@ second apart with at least 4 GiB MemAvailable and acceptable project allocation.
 Commands retain the 120 second default, Landlock, owned session cleanup, namespace,
 output ownership and genuine source/recipe checks. Monitoring stops only the
 caller's owned child on its RSS cap, aggregate cap, memory floor or lost grant.
+Prospective trusted JSON uses `load_project(path, expected_sha256)`: one bounded
+regular-file snapshot supplies both checksum and JSON parse. Live allocation,
+queue, state, lock and temporary paths are checked for symlinks and canonical
+ancestry on every transaction. The legacy loader remains unchanged.
 Evidence records elapsed time, sampled peak project RSS, individual process
 VmSwap, and host pswpin/pswpout counters and deltas. Host swap activity is not
 attributed causally to this project.
@@ -53,6 +63,7 @@ the caller's new plan, and call:
 budget = policy.project_approval(args, approval, executor_path=__file__)
 budget.reserve()
 try:
+    # Use load_project for prospective hash-bound JSON inputs.
     # Validate budget.source_plan using the caller's own exact plan contract.
     result = policy.run_child(argv, cwd, out, label, supervisor, budget=budget)
 finally:
