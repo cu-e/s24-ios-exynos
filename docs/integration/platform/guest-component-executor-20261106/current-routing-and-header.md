@@ -6,11 +6,14 @@ actual atomic VM-036 owner is `codex-guest-next-executor-20261106-dz`, agent
 assignment in planning prose was superseded before implementation. No claim or
 component experiment is transferred or completed by this integrator.
 
-The shared executor chooses the physically frozen accepted process boundary
+The shared executor's initial source baseline is the physically frozen boundary
 `worktrees/vm-035-20261106/tools/build/avf_kernel_objects.py`, SHA256
 `5c7b9c549e2740f3fad2a80c060e558dff3c9aa15e98bb2d9a56b33684e687d8`.
-Original cx/cy prepare new metadata-only plan paths naming that boundary and dz,
-preserving the old four-command plans and all source/TU/filelist bytes. The old
+The later VM-037 budget API adds `run_child(...budget=ProjectBudget)`; the final
+executable process/version pin awaits its independent acceptance and root's
+selection. A source receipt naming 5c does not silently upgrade to that API.
+Original cx/cy use new metadata-only paths for the final chosen boundary and dz,
+preserving old four-command plans and all source/TU/filelist bytes. The old
 Firehose physical132 and pthread MAIN5c choices cannot silently override one
 another. New plans also distinguish the next-boundary six-compiler/6 GiB global
 ceiling from each serial 256 MiB unit. Existing jobs retain their old limits.
@@ -57,3 +60,14 @@ No compiler, archiver, loader, guest or source/namespace mutation occurred.
 The source matrix was not repeated. This unlocks the narrow new namespace
 qualification and its explicit consumer admission, followed by a separately
 planned retry only after actual wave failures and resource admission.
+
+Original VM-020 delivered source facts at
+`c68cf193713769f92a4558ba82e3fc26be1f0a40`, changing only its 58-line
+`critical-header-handoff.md`, SHA256
+`c6b1e1f2ec806de9417db759c6da5acd572eebe99204d8812914d0e4e708060a`.
+INT-003 accepts that bounded source handoff. Separate actual first-match lookup
+confirms Firehose tracepoint/chunk/types at slot 10 and EXTERNAL_HEADERS
+stdint/stdbool at slot 19 for both failed rows. Old source/four-command plan and
+predicate hashes remain unchanged. This unlocks VM-038's new qualification under
+original worker's new owner `codex-guest-fh-namespace-20261106-ef`; it does not
+qualify a preprocessed closure, compiled type layout or successful retry.
