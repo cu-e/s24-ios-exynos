@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "kind": "source-review",
+  "machine": "SM-S921B / e1s / s5e9945",
+  "reference": {
+    "source_id": "s24-bsp-reference",
+    "revision": "f85e53cfa5497ead5d78821efbac84e51f37a4e1",
+    "source": "arch/arm64/boot/dts/exynos/s5e9945-usb.dtsi"
+  },
+  "comparison": {
+    "source_id": "s24-linux",
+    "revision": "417484173abc2c4fa93e738ea82ad9f2e84911b1",
+    "live_firmware_equivalence_qualified": false
+  },
+  "controller": {
+    "parent_compatible": "samsung,exynos-dwusb",
+    "child_compatible": "synopsys,dwc3",
+    "base": "0x17900000",
+    "bytes": 65536,
+    "SPI_index": 403,
+    "trigger": "level-high",
+    "mode": "otg",
+    "role_switch": true,
+    "source_force_gen1": true,
+    "board_maximum_speed": "super-speed",
+    "parent_clock_names": ["aclk", "sclk", "bus"],
+    "child_clock_name": "ref",
+    "power_domain": "pd_hsi0"
+  },
+  "PHY": {
+    "compatible": "samsung,exynos-usbdrd-phy",
+    "register_regions": [
+      {"base": "0x178a0000", "bytes": 512},
+      {"base": "0x178b0000", "bytes": 512},
+      {"base": "0x178c0000", "bytes": 512},
+      {"base": "0x178d0000", "bytes": 2048},
+      {"base": "0x178e0000", "bytes": 2048},
+      {"base": "0x17900000", "bytes": 65536}
+    ],
+    "sysreg": {"base": "0x17820000", "bytes": 65536},
+    "version": "0x600",
+    "combo_version": "0x801",
+    "ram_mode": true,
+    "pmu_offsets": ["0x61c", "0x620"],
+    "remote_SPI_indices": [401, 399, 405],
+    "clock_names": ["ext_xtal", "aclk"],
+    "board_port_gpio": "gpc7-1",
+    "board_supplies": {
+      "vdd075_usb": "s5_l2_reg",
+      "vdd12_usb": "s4_l4_reg",
+      "vdd18_usb": "l7_reg",
+      "vdd33_usb": "l11_reg"
+    }
+  },
+  "DMA": {
+    "vendor_parent_and_core_requested_address_bits": 36,
+    "core_has_conditional_64bit_capability_path": true,
+    "actual_GHWPARAMS_width_qualified": false,
+    "identity_mapping_assumed": false,
+    "live_IOMMU_topology_qualified": false,
+    "cache_coherency_qualified": false,
+    "requires": [
+      "Explicit CPU/physical/controller-bus or IOVA translation",
+      "Pinned controller-visible buffers and TRB/event-ring allocation",
+      "Measured controller address width and valid mapped extents",
+      "CPU/device ownership transitions with required barriers and cache synchronization",
+      "Endpoint quiescence and verified DMA completion before unmap/free"
+    ]
+  },
+  "USB2_repeater": {
+    "source": "arch/arm64/boot/dts/samsung/e1s/e1s_eur_openx_w01_r17.dts",
+    "compatible": "tusb2e11-repeater",
+    "I2C_controller": "hsi2c_34",
+    "I2C_7bit_address": "0x3e",
+    "GPIO_template_is_in_disabled_preprocessor_branch": true,
+    "reset_power_tuning_and_native_I2C_qualified": false
+  },
+  "return_channel": {
+    "implemented": "Serialized host-testable session close and late-completion rejection",
+    "hardware_requirements": [
+      "Authenticated or otherwise explicitly trusted host read-only image and session owner",
+      "Fresh transport session binding across reset and reconnect",
+      "Bounded receive assembly, monotonic deadlines, transfer cancellation and endpoint stall/reset policy",
+      "Independent log/control capacity so block traffic cannot starve diagnostics",
+      "Separate proven recovery/watchdog path if USB, IRQ, PHY or kernel fails"
+    ],
+    "automatic_return_to_Android_qualified": false
+  },
+  "qualification": {
+    "source_only": true,
+    "native_controller_driver_built": false,
+    "PHY_programmed": false,
+    "USB_enumerated": false,
+    "hardware_DMA_executed": false,
+    "Apple_USB_service_ABI_qualified": false,
+    "native_root_mount_qualified": false
+  }
+}
