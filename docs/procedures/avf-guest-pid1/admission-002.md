@@ -75,3 +75,45 @@ Root authorized only one fresh positive CLI in this follow-up after restoration,
 not repetition of compilation, independent review or the completed negative
 controls. The continuation evidence must distinguish those preserved controls
 from the fresh positive report and retain every runtime boundary.
+
+## Measured continuation and downstream handoff
+
+At `1610ed23e716a8f5c229d6d77677142f96cb7995`, exactly one fresh CLI invocation
+from this follow-up exited 0 with `abi_admission=compiled-only`, forty-one input
+hashes and all runtime qualification flags false. Original physical tool,
+fixture and evidence hashes match before and after the run. Current-image
+preflight `/proc` VmHWM was 21,680,128 bytes. The earlier eleven CLI cases and
+seventeen image mutation controls remain preserved at their original paths,
+including ten expected nonzero results. They are not claimed as repeated in
+this follow-up, nor as kernel or runtime observations.
+
+[`admission-002-evidence.json`](admission-002-evidence.json) SHA256 is
+`29c8b44e66d21f6f01987c51f805f5094f290702da83e38240677d13843ac2d5`.
+Its local continuation run is
+`worktrees/vm-025-admission-20261106/artifacts/avf-guest-pid1/admission-continuation-1610ed2`.
+The artifact-index SHA256 is
+`dddd4776c110836688619b9ea25bdb622e0cc7b920a3a000979b33dae27116fa`.
+The original inconclusive capsule and initial driver failure remain untouched.
+
+VM-024 separately packaged the same exact source-built candidate into the raw
+mockfs image, with 16,512 input bytes and 16,256 zero padding bytes. The preferred
+`package-one/root.ramdisk` SHA256 is
+`b26710980746c0fbc48f4d40f9b43533784617c7332ba54055e44da2d0f12b59`;
+its `package.json` SHA256 is
+`c8140c21b5fb72bfde6bf08d24af7a9b7b945fc914503bb0408c5899b746ef51`.
+Both actual files were rehashed read-only and bound by this continuation evidence.
+Their MAIN-relative root is
+`worktrees/vm-024-20261106/artifacts/avf-guest-mockfs/candidate-fac53e7-1`.
+VM-024's separate `candidate-output-manifest.json` SHA256 is
+`aa8c56bbdbad5190d3e2cb509a3ba62493d4fb56c0376ae4cf4cd219996fb0c7`;
+`candidate-evidence.json` SHA256 is
+`7d123269d82e96f50dc838696389dde3234b1c9d642c22596e8681e722f27d86`,
+under its `docs/procedures/avf-guest-mockfs` directory. Packaging deliberately
+does not imply executable/runtime qualification.
+
+Next: independent review and kernel integrator/root acceptance of this exact
+prospective admission implementation and continuation evidence. Integrators
+alone publish MAIN and run fresh common checks. Original dg owner retains
+VM-025 in progress; actual kernel/PID1/stack/signing/console/syscall/boot/stop
+qualification remains outside this phase. Preserve the registered original
+procedure file until ledger references are deliberately migrated.
