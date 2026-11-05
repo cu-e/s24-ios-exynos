@@ -188,7 +188,12 @@ def namespace(rows, index, digests):
                 if expected != digest:
                     raise ValueError('Unindexed, changed or newly shadowing namespace input: ' + str(path))
                 files[str(path)] = digest
-    missing = [name for name in index if any(Path(name).is_relative_to(root) for root in reduced) and name not in files]
+    root_parts = [root.parts for root in reduced]
+    missing = []
+    for name in index:
+        name_parts = Path(name).parts
+        if any(name_parts[:len(parts)] == parts for parts in root_parts) and name not in files:
+            missing.append(name)
     if missing:
         raise ValueError('Missing qualified namespace input: '+missing[0])
     result = {'roots': [str(p) for p in reduced], 'absent_search_roots': absent, 'files': files}
