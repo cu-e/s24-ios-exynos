@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import re
 import resource
+import signal
 import sys
 import time
 
@@ -185,11 +186,18 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=False)
+    resource.setrlimit(resource.RLIMIT_AS, (256 * 1024 * 1024, 256 * 1024 * 1024))
+    def deadline(signum, frame):
+        raise TimeoutError('Source audit exceeded 60 second deadline')
+    signal.signal(signal.SIGALRM, deadline)
+    signal.alarm(60)
     start = time.monotonic()
     report = {'kind': 'source-review', 'origin': 'local-host', 'outcome': 'fail',
               'recorded_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
               'argv': sys.argv, 'cwd': os.getcwd(), 'tool_sha256': sha(Path(__file__)),
-              'python_sha256': sha(Path(sys.executable).resolve())}
+              'python_sha256': sha(Path(sys.executable).resolve()),
+              'resource_limits': {'address_space_bytes': 256 * 1024 * 1024, 'deadline_seconds': 60},
+              'environment': {k: os.environ.get(k) for k in ('LC_ALL', 'PYTHONUTF8', 'PYTHONNOUSERSITE', 'PYTHONDONTWRITEBYTECODE')}}
     code = 1
     try:
         pins = json.loads((FIXTURE / 'inputs.json').read_text())
@@ -200,6 +208,7 @@ def main():
     except Exception as error:
         report['summary'] = str(error)
         report['error_type'] = type(error).__name__
+    signal.alarm(0)
     report['elapsed_seconds'] = time.monotonic() - start
     report['exit_code'] = code
     report['current_image_memory'] = {line.split(':')[0]: line.split(':', 1)[1].strip()
