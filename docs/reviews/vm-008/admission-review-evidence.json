@@ -1,0 +1,153 @@
+{
+  "kind": "source-review",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T21:03:05.350832+00:00",
+  "task": "REV-023",
+  "owner": "codex-review-integration-20261106-ct",
+  "commit": "6b1af40afbae5128c388b4ce52bd999eb1f7fee6",
+  "reviewed_followup_tip": "5f4cd4ad2c4e52e7eb59cf9f4fe08954a640695b",
+  "summary": "Accept separate prospective three-sample one-second admission guard with exact preserved historical entrypoint/descriptor; four producer controls and four fresh independent controls pass, zero child/build/guest. Original review capsules remain unchanged.",
+  "commands": [
+    {
+      "argv": [
+        "timeout",
+        "30s",
+        "python3",
+        "-s",
+        "docs/reviews/vm-008/verify-admission.py"
+      ],
+      "environment": {
+        "LC_ALL": "C",
+        "PYTHONUTF8": "1",
+        "PYTHONNOUSERSITE": "1"
+      },
+      "exit_code": 0,
+      "elapsed_seconds": 0.047
+    }
+  ],
+  "verification": {
+    "outcome": "pass",
+    "controls": [
+      {
+        "name": "last-sample-low",
+        "pass": true,
+        "admission": {
+          "admitted": false,
+          "minimum_MemAvailable_bytes": 4294967296,
+          "required_samples": 3,
+          "interval_seconds": 1.0,
+          "samples": [
+            {
+              "sampled_at": "0.0",
+              "monotonic_seconds": 0.0,
+              "MemAvailable_bytes": 4294967296
+            },
+            {
+              "sampled_at": "1.0",
+              "monotonic_seconds": 1.0,
+              "MemAvailable_bytes": 4294967296
+            },
+            {
+              "sampled_at": "2.0",
+              "monotonic_seconds": 2.0,
+              "MemAvailable_bytes": 4294967295
+            }
+          ],
+          "rejection": "MemAvailable below 4GiB"
+        }
+      },
+      {
+        "name": "all-floor",
+        "pass": true,
+        "admission": {
+          "admitted": true,
+          "minimum_MemAvailable_bytes": 4294967296,
+          "required_samples": 3,
+          "interval_seconds": 1.0,
+          "samples": [
+            {
+              "sampled_at": "0.0",
+              "monotonic_seconds": 0.0,
+              "MemAvailable_bytes": 4294967296
+            },
+            {
+              "sampled_at": "1.0",
+              "monotonic_seconds": 1.0,
+              "MemAvailable_bytes": 4294967296
+            },
+            {
+              "sampled_at": "2.0",
+              "monotonic_seconds": 2.0,
+              "MemAvailable_bytes": 4294967296
+            }
+          ]
+        }
+      },
+      {
+        "name": "too-close",
+        "pass": true,
+        "admission": {
+          "admitted": false,
+          "minimum_MemAvailable_bytes": 4294967296,
+          "required_samples": 3,
+          "interval_seconds": 1.0,
+          "samples": [
+            {
+              "sampled_at": "0.0",
+              "monotonic_seconds": 0.0,
+              "MemAvailable_bytes": 4294967296
+            },
+            {
+              "sampled_at": "0.25",
+              "monotonic_seconds": 0.25,
+              "MemAvailable_bytes": 4294967296
+            }
+          ],
+          "rejection": "Samples were not separated by at least one second"
+        }
+      },
+      {
+        "name": "new-tool-old-descriptor-rejected",
+        "pass": true,
+        "full_sweep_or_child_started": false
+      }
+    ],
+    "compiler_generator_guest_started": false,
+    "producer_controls": 4,
+    "independent_controls": 4,
+    "actual_producer_sample_spacing_seconds": [
+      1.0001467350521125,
+      1.0002448089653626
+    ],
+    "historical_tool_preserved": true,
+    "prospective_guard_only": true,
+    "elapsed_seconds": 0.047,
+    "current_image_peak_rss_bytes": 33849344,
+    "current_rss_bytes": 33849344,
+    "raw_rusage_maxrss_bytes": 33357824
+  },
+  "binding_count": 14,
+  "source_bindings": {
+    "producer_descriptor_sha256": "a9d40d614ca28bf6719cbde9b9dadcf6f0c92726330ef694768eae05677ae6a0",
+    "producer_evidence_sha256": "50bfe91c3dc06f9151ba7a6d35d571c42a8c4c9db0e1f6fc115c77a017ac5355",
+    "prospective_tool_sha256": "b874e60a29ae99e0ee926f7c6fa90c09914ca1bbe5d1a06f6096a9483011a09c",
+    "historical_tool_sha256": "d56648d24048b97e2c519faf30cb349291b5aea8b85a640af06b71015e28b8c9"
+  },
+  "artifacts": [
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verify-admission.py",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/admission-verification.json",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/admission-handoff.md",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/evidence.json",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/tools-evidence.json"
+  ],
+  "sha256": {
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verify-admission.py": "0c041169ed263f23ccee36040403a30c09a5b9dd622ee648bb33e5110e8510b6",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/admission-verification.json": "0d917f563ea10a9a46836dbfd10ff9f0017fa7b1ea01e6797b0591a59bb5ff81",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/admission-handoff.md": "b0f92852a5c221f69319f2fecbedb60b78bfa2ac77557653eb8fb5d7cea2ef0d",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/evidence.json": "792543f32c17bcb502e30f5d5158cdb6b41eb4de4c9ba9690e3ca4456b657d1a",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/tools-evidence.json": "3ad8b7b61f369a945a9fc1b2df59613393a788d763ac0361aa12926a04a52f31"
+  },
+  "handoff": "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/admission-handoff.md",
+  "next_step": "Root accept source/evidence review; integrator publish exact source/review commits and run fresh MAIN common checks under integration lock before authorizing original ct owner completion."
+}
