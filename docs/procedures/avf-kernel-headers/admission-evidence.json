@@ -1,0 +1,252 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T21:01:28.849325+00:00",
+  "task": "VM-008",
+  "experiment": "AVFADMIT-001",
+  "owner": "codex-team-avf-kernel-headers-20261105-cd",
+  "commit": "3d5333f34e02b6ac7df4e07beb4c028345839fd5",
+  "summary": "Prospective admission-only helper: three consecutive >=4GiB samples one second apart before every Headers.run Popen. First-low,middle-dip,too-close timing and all-good mocked call-site controls PASS; actual read-only /proc sequence PASS, no actual child command/compiler/header/TU/IIG/QEMU/device run. Original VM-008 qualification/tool/descriptor/evidence unchanged.",
+  "commands": [
+    {
+      "argv": [
+        "timeout",
+        "--kill-after=2s",
+        "30s",
+        "/usr/bin/python3",
+        "fixtures/public/avf-kernel-headers/admission_probe.py",
+        "--main",
+        "/home/egor/dev/pet/s24-ios-exynos",
+        "--out",
+        "artifacts/avf-kernel-headers/admission-3d5333f",
+        "--implementation-commit",
+        "3d5333f34e02b6ac7df4e07beb4c028345839fd5"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-008-admission-20261106",
+      "environment_overrides": {
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "exit_code": 0,
+      "timeout_seconds": 30,
+      "report": "worktrees/vm-008-admission-20261106/artifacts/avf-kernel-headers/admission-3d5333f/report.json",
+      "report_sha256": "625ad1baaa520f1cfdabb309b274ca8b0a8d2c32d85079ddcb57c26219372bc5"
+    }
+  ],
+  "actual_controls": [
+    {
+      "name": "first-low",
+      "pass": true,
+      "admission": {
+        "admitted": false,
+        "minimum_MemAvailable_bytes": 4294967296,
+        "required_samples": 3,
+        "interval_seconds": 1.0,
+        "samples": [
+          {
+            "sampled_at": "mock+0.0",
+            "monotonic_seconds": 0.0,
+            "MemAvailable_bytes": 4294967295
+          }
+        ],
+        "rejection": "MemAvailable below 4GiB"
+      },
+      "mock_Popen_reached": false,
+      "actual_child_started": false,
+      "injected_sleeps": []
+    },
+    {
+      "name": "middle-dip",
+      "pass": true,
+      "admission": {
+        "admitted": false,
+        "minimum_MemAvailable_bytes": 4294967296,
+        "required_samples": 3,
+        "interval_seconds": 1.0,
+        "samples": [
+          {
+            "sampled_at": "mock+0.0",
+            "monotonic_seconds": 0.0,
+            "MemAvailable_bytes": 4294967296
+          },
+          {
+            "sampled_at": "mock+1.0",
+            "monotonic_seconds": 1.0,
+            "MemAvailable_bytes": 4294967295
+          }
+        ],
+        "rejection": "MemAvailable below 4GiB"
+      },
+      "mock_Popen_reached": false,
+      "actual_child_started": false,
+      "injected_sleeps": [
+        1.0
+      ]
+    },
+    {
+      "name": "too-close-monotonic",
+      "pass": true,
+      "admission": {
+        "admitted": false,
+        "minimum_MemAvailable_bytes": 4294967296,
+        "required_samples": 3,
+        "interval_seconds": 1.0,
+        "samples": [
+          {
+            "sampled_at": "mock+0.0",
+            "monotonic_seconds": 0.0,
+            "MemAvailable_bytes": 4294967296
+          },
+          {
+            "sampled_at": "mock+0.5",
+            "monotonic_seconds": 0.5,
+            "MemAvailable_bytes": 4294967296
+          }
+        ],
+        "rejection": "Samples were not separated by at least one second"
+      },
+      "mock_Popen_reached": false,
+      "actual_child_started": false,
+      "injected_sleeps": [
+        1.0
+      ]
+    },
+    {
+      "name": "all-good-boundary",
+      "pass": true,
+      "admission": {
+        "admitted": true,
+        "minimum_MemAvailable_bytes": 4294967296,
+        "required_samples": 3,
+        "interval_seconds": 1.0,
+        "samples": [
+          {
+            "sampled_at": "mock+0.0",
+            "monotonic_seconds": 0.0,
+            "MemAvailable_bytes": 4294967296
+          },
+          {
+            "sampled_at": "mock+1.0",
+            "monotonic_seconds": 1.0,
+            "MemAvailable_bytes": 4362076160
+          },
+          {
+            "sampled_at": "mock+2.0",
+            "monotonic_seconds": 2.0,
+            "MemAvailable_bytes": 4294967296
+          }
+        ]
+      },
+      "mock_Popen_reached": true,
+      "actual_child_started": false,
+      "injected_sleeps": [
+        1.0,
+        1.0
+      ]
+    }
+  ],
+  "actual_readonly_probe": {
+    "pass": true,
+    "admission": {
+      "admitted": true,
+      "minimum_MemAvailable_bytes": 4294967296,
+      "required_samples": 3,
+      "interval_seconds": 1.0,
+      "samples": [
+        {
+          "sampled_at": "2026-11-05T21:00:00.903371+00:00",
+          "monotonic_seconds": 366911.179450252,
+          "MemAvailable_bytes": 18417090560
+        },
+        {
+          "sampled_at": "2026-11-05T21:00:01.903501+00:00",
+          "monotonic_seconds": 366912.179596987,
+          "MemAvailable_bytes": 18302439424
+        },
+        {
+          "sampled_at": "2026-11-05T21:00:02.903740+00:00",
+          "monotonic_seconds": 366913.179841796,
+          "MemAvailable_bytes": 18185007104
+        }
+      ]
+    },
+    "children_before": "",
+    "children_after": "",
+    "meaning": "Actual admission result only; no command launch even if admitted"
+  },
+  "controller_usage": {
+    "current_image_peak_rss_bytes": 37773312,
+    "current_rss_bytes": 37773312,
+    "raw_rusage_maxrss_bytes": 37347328
+  },
+  "resource_policy": {
+    "snapshot": "worktrees/vm-008-admission-20261106/artifacts/avf-kernel-headers/admission-3d5333f/resource-policy.json",
+    "sha256": "9e81067de67f5b845b894da10b94f9bacb816155f04af5b9185db76d258ec3cc",
+    "source": "/home/egor/dev/pet/s24-ios-exynos/artifacts/team-coordination/20261106-team/resource-queue.json",
+    "source_observed_sha256": "817a5e33cb62139de0625e60ca293f01a630ba013b61fde40fbc000030adf9c4",
+    "minimum_MemAvailable_bytes": 4294967296,
+    "required_stable_samples": 3,
+    "interval_seconds": 1
+  },
+  "historical_compatibility": {
+    "use_frozen_entrypoint": true,
+    "argv_template": [
+      "/usr/bin/python3",
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-008-20261105/tools/build/avf_kernel_headers.py",
+      "--mode",
+      "verify",
+      "--main",
+      "/home/egor/dev/pet/s24-ios-exynos",
+      "--qualification",
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-008-20261105/fixtures/public/avf-kernel-headers/qualified-component.json",
+      "--out",
+      "/home/egor/dev/pet/s24-ios-exynos/artifacts/avf-kernel-headers/NEW_FRESH_VERIFICATION_NAME"
+    ],
+    "new_guard_tool_rejects_old_descriptor_self_hash": true,
+    "historical_runs_relabelled": false,
+    "historical_capsules_modified": false
+  },
+  "historical_fingerprints_unchanged": {
+    "worktrees/vm-008-20261105/tools/build/avf_kernel_headers.py": "d56648d24048b97e2c519faf30cb349291b5aea8b85a640af06b71015e28b8c9",
+    "worktrees/vm-008-20261105/fixtures/public/avf-kernel-headers/qualified-component.json": "058451939894bd48ccc2ad1fe8b8d85c515f2176d21c8025daa034be8e98abe7",
+    "worktrees/vm-008-20261105/docs/procedures/avf-kernel-headers/evidence.json": "6209dde21ba80535e3cc15139dc6165b5e120674920b9382257dddab3fa9fbf1"
+  },
+  "admission_descriptor": {
+    "path": "worktrees/vm-008-admission-20261106/fixtures/public/avf-kernel-headers/admission-qualified.json",
+    "sha256": "a9d40d614ca28bf6719cbde9b9dadcf6f0c92726330ef694768eae05677ae6a0"
+  },
+  "artifacts": [
+    "worktrees/vm-008-admission-20261106/artifacts/avf-kernel-headers/admission-3d5333f/report.json",
+    "worktrees/vm-008-admission-20261106/artifacts/avf-kernel-headers/admission-3d5333f/resource-policy.json",
+    "worktrees/vm-008-admission-20261106/artifacts/avf-kernel-headers/admission-3d5333f/prospective.patch",
+    "worktrees/vm-008-admission-20261106/fixtures/public/avf-kernel-headers/admission-qualified.json",
+    "worktrees/vm-008-admission-20261106/tools/build/avf_kernel_headers.py",
+    "worktrees/vm-008-admission-20261106/fixtures/public/avf-kernel-headers/admission_probe.py",
+    "worktrees/vm-008-admission-20261106/docs/procedures/avf-kernel-headers/admission-followup.md",
+    "worktrees/vm-008-admission-20261106/artifacts/avf-kernel-headers/admission-3d5333f/mock-all-good-boundary.samples.jsonl",
+    "worktrees/vm-008-admission-20261106/artifacts/avf-kernel-headers/admission-3d5333f/mock-all-good-boundary.stderr.txt",
+    "worktrees/vm-008-admission-20261106/artifacts/avf-kernel-headers/admission-3d5333f/mock-all-good-boundary.stdout.txt"
+  ],
+  "sha256": {
+    "worktrees/vm-008-admission-20261106/artifacts/avf-kernel-headers/admission-3d5333f/report.json": "625ad1baaa520f1cfdabb309b274ca8b0a8d2c32d85079ddcb57c26219372bc5",
+    "worktrees/vm-008-admission-20261106/artifacts/avf-kernel-headers/admission-3d5333f/resource-policy.json": "9e81067de67f5b845b894da10b94f9bacb816155f04af5b9185db76d258ec3cc",
+    "worktrees/vm-008-admission-20261106/artifacts/avf-kernel-headers/admission-3d5333f/prospective.patch": "f3d5ac2b0996bccf4761d6bfcdc8f166c55077e972cae46d45fc6feb44b5f32b",
+    "worktrees/vm-008-admission-20261106/fixtures/public/avf-kernel-headers/admission-qualified.json": "a9d40d614ca28bf6719cbde9b9dadcf6f0c92726330ef694768eae05677ae6a0",
+    "worktrees/vm-008-admission-20261106/tools/build/avf_kernel_headers.py": "b874e60a29ae99e0ee926f7c6fa90c09914ca1bbe5d1a06f6096a9483011a09c",
+    "worktrees/vm-008-admission-20261106/fixtures/public/avf-kernel-headers/admission_probe.py": "dfd3e6da3d5f18edf77d97c1eb1cfec0686bad8ac9243aa8f87e2291d001cbea",
+    "worktrees/vm-008-admission-20261106/docs/procedures/avf-kernel-headers/admission-followup.md": "25ed10ebeb3a5457707c51cd8435ae28b7fc89eda831c0cc86f44412d20232f9",
+    "worktrees/vm-008-admission-20261106/artifacts/avf-kernel-headers/admission-3d5333f/mock-all-good-boundary.samples.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "worktrees/vm-008-admission-20261106/artifacts/avf-kernel-headers/admission-3d5333f/mock-all-good-boundary.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "worktrees/vm-008-admission-20261106/artifacts/avf-kernel-headers/admission-3d5333f/mock-all-good-boundary.stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "boundaries": {
+    "prospective_guard_only": true,
+    "historical_three_sample_admission_claim": false,
+    "historical_capsules_changed": false,
+    "new_header_TU_IIG_matrix_or_compiler_run": false,
+    "actual_Header_run_subprocess_started": false,
+    "SDK_privateABI_kernel_link_guest_device_qualified": false,
+    "heavy_or_qemu_lease_granted": false
+  },
+  "next_step": "Reviewer ct checks separate guard/control capsule; root decides prospective helper integration after original candidate acceptance. VM-008 stays in_progress pending root acceptance."
+}
