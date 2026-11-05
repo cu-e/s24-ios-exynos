@@ -1,0 +1,508 @@
+#!/usr/bin/env python3
+"""Prepare genuine AVF guest archive/link rules without producing target code."""
+from __future__ import annotations
+import argparse
+from collections import Counter
+from datetime import datetime, timezone
+import hashlib
+import json
+import os
+from pathlib import Path
+import plistlib
+import re
+import resource
+import shutil
+import shlex
+import signal
+import subprocess
+import sys
+import time
+
+HEADERS_SHA = '058451939894bd48ccc2ad1fe8b8d85c515f2176d21c8025daa034be8e98abe7'
+GRAPH_SHA = 'afc5cd206965de7e36a0aa17c4eb86a1f305689f386ccb22c55bd983567dd1dd'
+LINK_TOOLS_SHA = '00f56086d206e6c470f9c5622d8be4832f24cdccbb044689fa8894c3d3a8d1dd'
+HOST_INPUTS_SHA = '10f7c68ba08d2c72226d4f6b37d0f09e8755c8bca9e8dae9af0c7e3f08da3cf8'
+LIMIT = 256 * 1024 * 1024
+
+
+def sha(path):
+    h = hashlib.sha256()
+    with Path(path).open('rb') as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b''):
+            h.update(block)
+    return h.hexdigest()
+
+
+def dump(path, value):
+    Path(path).write_text(json.dumps(value, indent=2) + '\n')
+
+
+def proc_status(pid='self'):
+    result = {}
+    try:
+        for line in Path(f'/proc/{pid}/status').read_text().splitlines():
+            if line.startswith(('VmRSS:', 'VmHWM:')):
+                key, value, _ = line.split()
+                result[key[:-1] + '_bytes'] = int(value) * 1024
+    except FileNotFoundError:
+        pass
+    return result
+
+
+def require_profile(values):
+    expected = {'CURRENT_ARCH_CONFIG': 'ARM64', 'CURRENT_KERNEL_CONFIG': 'DEVELOPMENT',
+                'CURRENT_MACHINE_CONFIG': 'BCM2837', 'USE_LTO': '0'}
+    if any(values.get(k) != v for k, v in expected.items()):
+        raise ValueError('Exact ARM64/DEVELOPMENT/BCM2837 non-LTO profile required')
+    if '-exported_symbols_list' in values.get('LDFLAGS_KERNEL_ONLY', ''):
+        raise ValueError('RELEASE exports cannot be imposed on DEVELOPMENT')
+    if '-undefined' in values.get('LDFLAGS_KERNEL', ''):
+        raise ValueError('Unresolved symbols may not be suppressed')
+
+
+def require_order(objects, expected):
+    if objects != expected or len(objects) != len(set(objects)):
+        raise ValueError('Exact genuine guest object order required')
+
+
+def session_rss(session):
+    total = 0
+    for entry in Path('/proc').iterdir():
+        if entry.name.isdigit():
+            try:
+                fields = (entry / 'stat').read_text().rsplit(')', 1)[1].split()
+                if int(fields[3]) == session:
+                    total += proc_status(entry.name).get('VmRSS_bytes', 0)
+            except (FileNotFoundError, ProcessLookupError):
+                pass
+    return total
+
+
+class Preparation:
+    def __init__(self, args):
+        self.args = args
+        self.main = args.main.resolve()
+        self.vm = args.vm008.resolve()
+        self.h = self.vm / 'artifacts/avf-kernel-headers'
+        self.kernel = self.h / 'prepare-2/source/xnu'
+        self.out = args.out.absolute()
+        owned = Path(__file__).resolve().parents[2] / 'artifacts/avf-guest-link-inputs'
+        if self.out != self.out.resolve() or not self.out.is_relative_to(owned):
+            raise ValueError('Fresh canonical owned output outside immutable VM008 required')
+        self.out.mkdir(parents=True, exist_ok=False)
+        shutil.copyfile(__file__, self.out / 'builder.py')
+        self.report = dict(kind='host-test', origin='local-host', outcome='inconclusive',
+                           recorded_at=datetime.now(timezone.utc).isoformat(),
+                           argv=sys.argv, builder_sha256=sha(__file__), commands=[], checks=[],
+                           source_only=True, compiler_executed=False, generator_executed=False,
+                           linker_executed=False, guest_executed=False, native_objects_reused=False,
+                           full_kernel_qualified=False, private_apple_abi_qualified=False,
+                           initial_process=proc_status(),
+                           initial_raw_ru_maxrss_bytes=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024,
+                           input_bindings={})
+        ledger = json.load((self.main / 'state/lab.json').open())
+        experiment = args.experiment or ('AVFLINKTEXT-001' if args.mode == 'metadata' else 'AVFLINKPREP-001')
+        plan = next((e for e in ledger['experiments'] if e['id'] == experiment), None)
+        if not plan or plan['status'] != 'planned' or plan['task'] != 'VM-022' or plan['owner'] != 'codex-guest-exec-20261106-cu':
+            raise ValueError('An active original-owner VM022 experiment plan is required')
+        self.report['experiment'] = experiment
+
+    def bind(self, path, expected=None):
+        path = Path(path)
+        actual = sha(path)
+        if expected is not None and actual != expected:
+            raise ValueError('Input hash mismatch: ' + str(path))
+        self.report['input_bindings'][str(path)] = actual
+        return actual
+
+    def inputs(self):
+        descriptor = self.vm / 'fixtures/public/avf-kernel-headers/qualified-component.json'
+        self.bind(descriptor, HEADERS_SHA)
+        desc = json.load(descriptor.open())
+        index = self.main / desc['artifact_index']
+        self.bind(index, desc['artifact_index_sha256'])
+        self.index = json.load(index.open())['files']
+        self.bind(self.h / 'handoff-1/next-full-object-manifest.json', GRAPH_SHA)
+        self.graph = json.load((self.h / 'handoff-1/next-full-object-manifest.json').open())
+        if len(self.graph) != 1080 or len({r['id'] for r in self.graph}) != 1080:
+            raise ValueError('Exact genuine 1080-row graph required')
+        self.prepared = json.load((self.h / 'prepare-2/prepared-component.json').open())
+        self.bind_index(self.h / 'prepare-2/prepared-component.json')
+        self.parent = json.load((self.h / 'handoff-1/report.json').open())
+        self.bind_index(self.h / 'handoff-1/report.json')
+        self.base = next(c['argv'] for c in self.parent['commands']
+                         if any('query-objects-osfmk.mk' in a for a in c['argv']))
+        self.compiler = Path(next(a.split('=', 1)[1] for a in self.base if a.startswith('CC=')))
+        self.bind_index(self.compiler)
+        self.shim = Path(next(a.split('=', 1)[1] for a in self.base if a.startswith('MakeInc_cmd=')))
+        self.bind_index(self.shim)
+        tool_descriptor = self.main / 'fixtures/public/xnu-kernel-link-inputs/qualified-component.json'
+        self.bind(tool_descriptor, LINK_TOOLS_SHA)
+        self.tools = json.load(tool_descriptor.open())['tools']
+        for name in ['linker', 'libtool', 'setsegname']:
+            self.bind(self.main / self.tools[name], self.tools[name + '_sha256'])
+        host_descriptor = self.main / 'fixtures/public/xnu-host-tools/qualified-inputs.json'
+        self.bind(host_descriptor, HOST_INPUTS_SHA)
+        host_inputs = json.load(host_descriptor.open())
+        for relative, expected in host_inputs['dependency_files_sha256'].items():
+            self.bind(self.main / host_inputs['dependency_prefix'] / relative, expected)
+        # Freeze genuine rules, producer sources and every export/plist data input.
+        for p in sorted((self.kernel / 'makedefs').glob('MakeInc.*')):
+            self.bind_index(p)
+        self.bind_index(self.kernel / 'Makefile')
+        for p in sorted((self.kernel / 'config').rglob('*')):
+            if p.is_file():
+                self.bind_index(p)
+        for name in ['nonlto.c', 'lastkerneldataconst.c', 'lastkernelconstructor.c']:
+            self.bind_index(self.kernel / 'libsa' / name)
+        self.bind_index(self.kernel / 'SETUP/setsegname/setsegname.c')
+        self.bind(self.kernel / 'SETUP/setsegname/setsegname.c',
+                  'e02a92537a4a14de6c8719cb87ac272d5fb1b4b5f5c9dd4a63d385b9a89e420d')
+        self.bind(self.main / 'artifacts/xnu-kernel-direct-tail/build-session3/host-compat.h',
+                  'aa377a67bdb81f56135f73cd42123861768ebccad9cab7f7196e4c236b8bca28')
+        self.component_defines = {}
+        for component, row in self.prepared['configurations'].items():
+            self.bind(Path(row['root']) / 'Makefile', row['makefile_sha256'])
+            definitions = re.findall(r'^export CONFIG_DEFINES = (.*)$',
+                                     (Path(row['root']) / 'Makefile').read_text(), re.M)
+            if len(definitions) != 1:
+                raise ValueError('One genuine guest CONFIG_DEFINES declaration required')
+            self.component_defines[component] = definitions[0]
+        self.report['tools'] = self.tools
+        self.report['configuration_context'] = dict(
+            component_CONFIG_DEFINES=self.component_defines,
+            kernel_and_config_CONFIG_DEFINES='',
+            reason='Each doconf Makefile declares its own export; genuine top-level/config Makefiles declare no CONFIG_DEFINES. The isolated environment prevents unrelated inherited Make variables.')
+        self.report['guest_graph'] = dict(path=str(self.h / 'handoff-1/next-full-object-manifest.json'),
+                                          sha256=GRAPH_SHA, objects=1080)
+
+    def bind_index(self, path):
+        path = Path(path)
+        key = str(path.relative_to(self.main)) if path.is_relative_to(self.main) else str(path)
+        if key not in self.index:
+            raise ValueError('Source missing immutable VM008 index binding: ' + str(path))
+        return self.bind(path, self.index[key])
+
+    def query(self, label, includes, keys, component='osfmk', extra='', overrides=None, prelude=''):
+        cwd = self.out / 'queries' / label
+        cwd.mkdir(parents=True)
+        query = cwd / 'query.mk'
+        query.write_text(''.join('include ' + str(p) + '\n' for p in includes) + prelude +
+                         ''.join('$(info AVFLINK|' + k + '|$(' + k + '))\n' for k in keys) + extra +
+                         '\n.PHONY: avflink_query\navflink_query: ;\n')
+        source = self.kernel if component == 'kernel' else self.kernel / component
+        replace = {'TARGET': str(cwd), 'OBJROOT': str(self.out), 'OBJPATH': str(self.out / 'stage'),
+                   'SOURCE': str(source) + '/', 'RELATIVE_SOURCE_PATH': '.' if component == 'kernel' else './' + component,
+                   'DSTROOT': str(self.out / 'installtree'),
+                   'CONFIG_DEFINES': self.component_defines.get(component, '')}
+        replace.update(overrides or {})
+        argv = self.base.copy()
+        argv[argv.index('-f') + 1] = str(query)
+        argv = [next((k + '=' + v for k, v in replace.items() if a.startswith(k + '=')), a) for a in argv]
+        argv[-1] = 'avflink_query' if '=' not in argv[-1] else argv[-1]
+        if argv[-1] != 'avflink_query':
+            argv.append('avflink_query')
+        env = {'PATH': '/usr/bin:/bin'}
+        env.update(LC_ALL='C', PYTHONUTF8='1', PYTHONNOUSERSITE='1', GIT_NO_LAZY_FETCH='1',
+                   GIT_OPTIONAL_LOCKS='0', HAKIOS_VERSION_SUFFIX='-vm022', GIT_CEILING_DIRECTORIES=str(self.out))
+        start = time.monotonic()
+        with (cwd / 'stdout.txt').open('w') as stdout, (cwd / 'stderr.txt').open('w') as stderr:
+            process = subprocess.Popen(argv, cwd=cwd, env=env, stdout=stdout, stderr=stderr, start_new_session=True)
+            peak = 0
+            try:
+                while process.poll() is None:
+                    peak = max(peak, session_rss(process.pid))
+                    if peak + proc_status().get('VmRSS_bytes', 0) > LIMIT or time.monotonic() - start > 20:
+                        raise RuntimeError('Bounded source query exceeded RSS/deadline')
+                    time.sleep(.025)
+            except BaseException:
+                os.killpg(process.pid, signal.SIGKILL)
+                process.wait()
+                raise
+        record = dict(argv=argv, cwd=str(cwd), exit_code=process.returncode,
+                      elapsed_seconds=time.monotonic()-start, peak_query_session_rss_bytes=peak,
+                      stdout=str(cwd / 'stdout.txt'), stdout_sha256=sha(cwd / 'stdout.txt'),
+                      stderr=str(cwd / 'stderr.txt'), stderr_sha256=sha(cwd / 'stderr.txt'),
+                      query_sha256=sha(query))
+        self.report['commands'].append(record)
+        if process.returncode:
+            raise ValueError('Genuine source query failed: ' + label)
+        text = (cwd / 'stdout.txt').read_text()
+        values = {r[1]: r[2] for line in text.splitlines() if line.startswith('AVFLINK|') and len(r := line.split('|', 2)) == 3}
+        if set(values) != set(keys):
+            raise ValueError('Incomplete genuine query variables: ' + label)
+        for p in values.get('MAKEFILE_LIST', '').split():
+            if Path(p) != query:
+                self.bind_index(Path(p))
+        return values
+
+    def admit(self):
+        samples = []
+        for _ in range(3):
+            available = int(next(line.split()[1] for line in Path('/proc/meminfo').read_text().splitlines()
+                                 if line.startswith('MemAvailable:'))) * 1024
+            samples.append(available)
+            time.sleep(1)
+        self.report['MemAvailable_admission_bytes'] = samples
+        if min(samples) < 4 * 1024 ** 3:
+            raise RuntimeError('Three stable MemAvailable >=4GiB samples required')
+
+    def prepare(self):
+        self.inputs()
+        self.bind('/usr/bin/make')
+        self.admit()
+        components = {}
+        common = ['CURRENT_ARCH_CONFIG', 'CURRENT_KERNEL_CONFIG', 'CURRENT_MACHINE_CONFIG', 'USE_LTO', 'MAKEFILE_LIST']
+        for component, cfg in self.prepared['configurations'].items():
+            keys = common + ['OBJS', 'LIBOBJS', 'HIB_FILES', 'KLD_FILES', 'LAST_FILES']
+            values = self.query(component, [Path(cfg['root']) / 'Makefile'], keys, component)
+            require_profile(values)
+            objects = values['OBJS'].split()
+            expected = [r['target'] for r in self.graph if r['component'] == component]
+            require_order(objects, expected)
+            components[component] = dict(variables=values, linked_ids=[component + '/' + n for n in objects],
+                                         filelist_template=['@GUEST_OBJECT_ROOT@/' + component + '/DEVELOPMENT/' + n for n in objects],
+                                         library_only_unbuilt=[n for n in values['LIBOBJS'].split() if n not in objects])
+            text = (Path(cfg['root']) / 'Makefile').read_text()
+            begin = text.index('$(COMPONENT).filelist:')
+            end = text.index('$(COMPONENT).libfilelist:', begin)
+            components[component]['genuine_filelist_rule'] = text[begin:end]
+        topkeys = common + ['COMPONENT_LIST', 'BUILD_STATIC_LINK', 'BUILD_XNU_LIBRARY', 'LDFLAGS_KERNEL',
+                           'LDFLAGS_KERNEL_ONLY', 'LD_KERNEL_LIBS', 'LD_KERNEL_ARCHIVES', 'LDFILES_KERNEL_ONLY',
+                           'EXTRA_KC_LINKARGS', 'KERNEL_FILE_NAME', 'ARM64_LINK_ADDR', 'ARM64_PLKSEG_ADDR',
+                           'C_RULE_1A', 'CFLAGS_NOLTO_FLAG', 'LAST_FILES', 'LD']
+        top = self.query('kernel', [self.shim, self.kernel / 'makedefs/MakeInc.def', self.kernel / 'makedefs/MakeInc.rule', self.kernel / 'makedefs/MakeInc.kernel'], topkeys, 'kernel')
+        require_profile(top)
+        tail_prelude = ''
+        tail_keys = []
+        for target, source in [('nonlto.o', 'libsa/nonlto.c'), ('version.o', '@FRESH_VERSION_C@'),
+                               ('lastkerneldataconst.o', 'libsa/lastkerneldataconst.c'),
+                               ('lastkernelconstructor.o', 'libsa/lastkernelconstructor.c')]:
+            key = 'TAIL_' + target
+            tail_keys.append(key)
+            source_path = source if source.startswith('@') else str(self.kernel / source)
+            tail_prelude += '$(eval @ := ' + target + ')\n$(eval < := ' + source_path + ')\n'
+            flags = ' $(CFLAGS_NOLTO_FLAG)' if target in ['nonlto.o', 'lastkernelconstructor.o'] else ''
+            tail_prelude += key + ' := $(C_RULE_1A) $<' + flags + '\n'
+        tails = self.query('tails', [self.shim, self.kernel / 'makedefs/MakeInc.def',
+                           self.kernel / 'makedefs/MakeInc.rule', self.kernel / 'makedefs/MakeInc.kernel'],
+                           tail_keys, 'kernel', prelude=tail_prelude)
+        if set(top['COMPONENT_LIST'].split()) != set(components):
+            raise ValueError('Genuine eight-component order required')
+        configkeys = common + ['EXPORTS_FILES', 'SYMBOL_COMPONENT_LIST', 'SYMBOL_SET_PLIST_COMPONENT_LIST',
+                               'Kasan_EXPORTS', 'Kcov_EXPORTS', 'EXPORT_SOURCE_ARCH_CONFIG_LC', 'KEXT_PLIST_LIST']
+        config = self.query('config', [self.kernel / 'config/Makefile'], configkeys, 'config')
+        require_profile(config)
+        controls = []
+        release = self.query('negative-release', [self.shim, self.kernel / 'makedefs/MakeInc.def',
+                            self.kernel / 'makedefs/MakeInc.rule', self.kernel / 'makedefs/MakeInc.kernel'],
+                            topkeys, 'kernel', overrides={'CURRENT_KERNEL_CONFIG': 'RELEASE', 'CURRENT_KERNEL_CONFIG_LC': 'release'})
+        try:
+            require_profile(release)
+        except ValueError as error:
+            controls.append(dict(name='actual RELEASE source selection rejected', error=str(error)))
+        else:
+            raise ValueError('Wrong-profile negative control accepted')
+        try:
+            self.bind(self.main / self.tools['linker'], '0' * 64)
+        except ValueError as error:
+            controls.append(dict(name='changed tool binding rejected', error=str(error)))
+        else:
+            raise ValueError('Changed-tool negative control accepted')
+        selected = components['osfmk']['linked_ids']
+        try:
+            require_order(list(reversed(selected)), selected)
+        except ValueError as error:
+            controls.append(dict(name='same object set with incorrect order rejected', error=str(error)))
+        else:
+            raise ValueError('Wrong-order negative control accepted')
+        self.report['negative_controls'] = controls
+        order = top['COMPONENT_LIST'].split()
+        flat = [identifier for c in order for identifier in components[c]['linked_ids']]
+        if len(flat) != 1080 or Counter(flat) != Counter(r['id'] for r in self.graph):
+            raise ValueError('Complete guest ordered link filelist required')
+        rules = {str(p.relative_to(self.kernel)): p.read_text() for p in [self.kernel / 'makedefs/MakeInc.kernel', self.kernel / 'config/Makefile']}
+        dump(self.out / 'genuine-rules.json', rules)
+        archive_recipe = next(line.strip() for line in rules['makedefs/MakeInc.kernel'].splitlines()
+                              if '$(LIBTOOL) -ca -filelist link.filelist version.o' in line)
+        link_recipe = next(line.strip() for line in rules['makedefs/MakeInc.kernel'].splitlines()
+                           if '$(LD) $(LDFLAGS_KERNEL)' in line and '-filelist link.filelist version.o' in line)
+        target_root = str(self.out / 'queries/kernel')
+        source_context = next(a.split('=', 1)[1] for a in self.base if a.startswith('SDKROOT='))
+        def placeholder(value):
+            return value.replace(target_root, '@GUEST_LINK_ROOT@').replace(source_context, '@GUEST_PROVIDER_CONTEXT@')
+        link_argv = shlex.split(top['LD']) + ['--ld-path=' + str(self.main / self.tools['linker'])]
+        link_argv += shlex.split(placeholder(top['LDFLAGS_KERNEL'])) + shlex.split(placeholder(top['LDFLAGS_KERNEL_ONLY']))
+        link_argv += ['-filelist', '@GUEST_LINK_ROOT@/link.filelist', '@GUEST_LINK_ROOT@/version.o',
+                      '@GUEST_LINK_ROOT@/lastkerneldataconst.o', '@GUEST_LINK_ROOT@/lastkernelconstructor.o',
+                      '@GUEST_LINK_ROOT@/nonlto.o', '-o', '@GUEST_LINK_ROOT@/' + top['KERNEL_FILE_NAME'] + '.unstripped']
+        link_argv += shlex.split(placeholder(top['LD_KERNEL_LIBS'])) + shlex.split(placeholder(top['LD_KERNEL_ARCHIVES']))
+        contract = dict(schema_version=1, task='VM-022', profile='ARM64/DEVELOPMENT/BCM2837',
+                        graph_sha256=GRAPH_SHA, component_order=order, components=components, ordered_link_ids=flat,
+                        top_level_variables=top, symbolset_variables=config, tools=self.tools,
+                        archive_recipe=archive_recipe, link_recipe=link_recipe,
+                        link_driver=top['LD'], linker_selection_requires_qualification=True,
+                        next_owned_link_argv_template=link_argv,
+                        next_owned_archive_argv_template=[str(self.main/self.tools['libtool']), '-ca', '-filelist',
+                            '@GUEST_LINK_ROOT@/link.filelist', '@GUEST_LINK_ROOT@/version.o',
+                            '@GUEST_LINK_ROOT@/lastkerneldataconst.o', '@GUEST_LINK_ROOT@/lastkernelconstructor.o',
+                            '-o', '@GUEST_LINK_ROOT@/' + top['KERNEL_FILE_NAME'] + '.link/' + top['KERNEL_FILE_NAME'] + '.a'],
+                        placeholder_contract={'@GUEST_LINK_ROOT@':'fresh coherent accepted staging directory',
+                            '@GUEST_PROVIDER_CONTEXT@':'fresh guest source-built provider library context; no SDK identity implied'},
+                        tail_compile_recipe_templates=tails,
+                        tail_compile_cwd_template='@GUEST_LINK_ROOT@',
+                        archive_member_count_if_complete=1083, direct_link_extra_objects=['version.o', 'lastkerneldataconst.o', 'lastkernelconstructor.o', 'nonlto.o'],
+                        unresolved_symbols_must_fail=True, target_production_executed=False,
+                        execution_requires=['accepted VM008 namespace', 'accepted fresh component objects and providers', 'registered experiment', 'root resource lease'],
+                        unmeasured=['all1080 guest objects', 'fresh guest tail/version/nonlto products', 'firehose pthread cc_kext providers', 'private IIG ABI', 'all required definitions and exports', 'archive member bytes', 'linker compatibility with final graph', 'final image entry/layout', 'guest console and stopping'])
+        dump(self.out / 'prepared-link-inputs.json', contract)
+        for path, expected in self.report['input_bindings'].copy().items():
+            self.bind(path, expected)
+        self.report['checks'] += ['all1080 exact ordered object IDs', 'eight genuine component filelist queries', 'DEVELOPMENT export selection retained', 'source-built tool hashes', 'symbolset and alias rules retained']
+        self.report['prepared_contract'] = dict(path=str(self.out / 'prepared-link-inputs.json'), sha256=sha(self.out / 'prepared-link-inputs.json'))
+        self.report['outcome'] = 'pass'
+
+    def source_command(self, argv, label):
+        allowed = {'generate_linker_exports.sh', 'generate_linker_aliases.sh',
+                   'generate_symbolset_plist.sh', 'generate_combined_symbolsets_plist.sh', 'newvers.pl'}
+        argv = [str(a) for a in argv]
+        if argv[0] not in ['sh', 'perl'] or Path(argv[1]).parent != self.kernel / 'config' or Path(argv[1]).name not in allowed:
+            raise ValueError('Only exact genuine source-text producers are permitted')
+        output = Path(argv[2])
+        if not output.is_relative_to(self.out):
+            raise ValueError('Text producer output must be owned')
+        log = self.out / 'text-commands' / label
+        log.mkdir(parents=True)
+        env = dict(PATH='/usr/bin:/bin', LC_ALL='C', PYTHONUTF8='1', PYTHONNOUSERSITE='1',
+                   SRCROOT=str(self.kernel), OBJROOT=str(self.out), TARGET=str(self.out / 'stage'),
+                   CURRENT_KERNEL_CONFIG_LC='development', HAKIOS_VERSION_SUFFIX='-vm022',
+                   GIT_NO_LAZY_FETCH='1', GIT_OPTIONAL_LOCKS='0', GIT_CEILING_DIRECTORIES=str(self.out))
+        start = time.monotonic()
+        with (log / 'stdout.txt').open('w') as stdout, (log / 'stderr.txt').open('w') as stderr:
+            child = subprocess.Popen(argv, cwd=self.out, env=env, stdout=stdout, stderr=stderr, start_new_session=True)
+            peak = 0
+            try:
+                while child.poll() is None:
+                    peak = max(peak, session_rss(child.pid))
+                    if peak + proc_status().get('VmRSS_bytes', 0) > LIMIT or time.monotonic() - start > 20:
+                        raise RuntimeError('Source-text production exceeded owned RSS/deadline')
+                    time.sleep(.025)
+            except BaseException:
+                os.killpg(child.pid, signal.SIGKILL)
+                child.wait()
+                raise
+        self.report['commands'].append(dict(argv=argv, cwd=str(self.out), environment=env,
+            exit_code=child.returncode, elapsed_seconds=time.monotonic()-start,
+            peak_session_rss_bytes=peak, stdout=str(log/'stdout.txt'), stdout_sha256=sha(log/'stdout.txt'),
+            stderr=str(log/'stderr.txt'), stderr_sha256=sha(log/'stderr.txt')))
+        if child.returncode:
+            raise ValueError('Genuine source-text producer failed: ' + label)
+        self.report['generator_executed'] = True
+
+    def metadata(self):
+        self.inputs()
+        self.bind('/usr/bin/make')
+        self.admit()
+        if self.args.prepared is None:
+            raise ValueError('Passing owned source-query preparation required')
+        prior_path = self.args.prepared.resolve()
+        if not prior_path.is_relative_to(Path(__file__).resolve().parents[2] / 'artifacts/avf-guest-link-inputs'):
+            raise ValueError('Prior preparation must belong to this worktree')
+        prior = json.load((prior_path / 'evidence.json').open())
+        if prior.get('outcome') != 'pass' or not prior.get('source_only'):
+            raise ValueError('Passing source-only preparation required')
+        contract_path = prior_path / 'prepared-link-inputs.json'
+        self.bind(contract_path, prior['prepared_contract']['sha256'])
+        self.bind(prior_path / 'evidence.json')
+        contract = json.load(contract_path.open())
+        require_profile(contract['top_level_variables'])
+        names = contract['symbolset_variables']['SYMBOL_SET_PLIST_COMPONENT_LIST'].split()
+        keys = ['CURRENT_ARCH_CONFIG', 'CURRENT_KERNEL_CONFIG', 'CURRENT_MACHINE_CONFIG', 'USE_LTO',
+                'MAKEFILE_LIST', 'EXPORTS_FILES', 'SYMBOL_COMPONENT_LIST', 'SYMBOL_SET_PLIST_COMPONENT_LIST',
+                'Kasan_EXPORTS', 'Kcov_EXPORTS'] + [name + '_EXPORTS' for name in names]
+        values = self.query('metadata-config', [self.kernel / 'config/Makefile'], keys, 'config')
+        require_profile(values)
+        stage = self.out / 'stage'
+        stage.mkdir()
+        exports = [self.kernel / 'config' / name for name in values['EXPORTS_FILES'].split()]
+        exports += [Path(name) for key in ['Kasan_EXPORTS', 'Kcov_EXPORTS'] for name in values[key].split()]
+        for path in exports:
+            self.bind_index(path)
+        for output, script in [('all-kpi.exp', 'generate_linker_exports.sh'), ('all-alias.exp', 'generate_linker_aliases.sh')]:
+            self.source_command(['sh', self.kernel/'config'/script, stage/output, *exports], output)
+        generated = []
+        for name in names:
+            original = self.kernel / 'config/System.kext/PlugIns' / (name + '.kext') / 'Info.plist'
+            self.bind_index(original)
+            info = stage / (name + '-Info.plist')
+            shutil.copyfile(original, info)
+            self.source_command(['perl', self.kernel/'config/newvers.pl', info], 'newvers-'+name)
+            output = stage / (name + '.symbolset.plist')
+            selected = [Path(n) for n in values[name + '_EXPORTS'].split()]
+            for path in selected:
+                self.bind_index(path)
+            self.source_command(['sh', self.kernel/'config/generate_symbolset_plist.sh', output, info, *selected], 'symbolset-'+name)
+            plistlib.loads(output.read_bytes())
+            generated.append(output)
+        xml = stage / 'symbolsets.xml.plist'
+        self.source_command(['sh', self.kernel/'config/generate_combined_symbolsets_plist.sh', xml, *generated], 'combined-symbolsets')
+        value = plistlib.loads(xml.read_bytes())
+        binary = stage / 'symbolsets.plist'
+        binary.write_bytes(plistlib.dumps(value, fmt=plistlib.FMT_BINARY, sort_keys=False))
+        if plistlib.loads(binary.read_bytes()) != value or len(value['SymbolsSets']) != 9 or value['WeakRefFallbackSymbol'] != {'SymbolName': '_gOSKextUnresolved'}:
+            raise ValueError('Exact nine symbolsets and genuine fallback required')
+        version = stage / 'version.c'
+        shutil.copyfile(self.kernel / 'config/version.c', version)
+        self.source_command(['perl', self.kernel/'config/newvers.pl', version], 'newvers-version-source')
+        if '###KERNEL_VERSION' in version.read_text():
+            raise ValueError('Unresolved genuine version template marker')
+        metadata = dict(schema_version=1, task='VM-022', prior_contract=str(contract_path),
+            prior_contract_sha256=sha(contract_path), source_query=values, symbolsets=names,
+            outputs={str(p):sha(p) for p in sorted(stage.iterdir()) if p.is_file()},
+            export_lines=len((stage/'all-kpi.exp').read_text().splitlines()),
+            alias_lines=len((stage/'all-alias.exp').read_text().splitlines()),
+            symbol_entries=sum(len(item['Symbols']) for item in value['SymbolsSets']),
+            binary_converter='Python stdlib plistlib with semantic roundtrip; native plutil oracle unqualified',
+            object_or_archive_or_image_produced=False, unresolved_symbols_not_assessed=True)
+        dump(self.out / 'prepared-text-inputs.json', metadata)
+        for path, expected in self.report['input_bindings'].copy().items():
+            self.bind(path, expected)
+        self.report['prepared_text_inputs'] = dict(path=str(self.out/'prepared-text-inputs.json'), sha256=sha(self.out/'prepared-text-inputs.json'))
+        self.report['outcome'] = 'pass'
+
+    def finish(self):
+        self.report['final_process'] = proc_status()
+        self.report['final_raw_ru_maxrss_bytes'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
+        self.report['rss_gate_counter'] = '/proc/self/status VmHWM for this executable image; raw getrusage may retain pre-exec history'
+        if self.report['final_process'].get('VmHWM_bytes', 0) > LIMIT:
+            self.report['outcome'] = 'inconclusive'
+            self.report['resource_error'] = 'Current executable image exceeded256MiB'
+        dump(self.out / 'evidence.json', self.report)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--main', type=Path, required=True)
+    parser.add_argument('--vm008', type=Path, required=True)
+    parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--mode', choices=['prepare', 'metadata'], default='prepare')
+    parser.add_argument('--prepared', type=Path)
+    parser.add_argument('--experiment')
+    args = parser.parse_args()
+    run = Preparation(args)
+    try:
+        if args.mode == 'metadata':
+            run.metadata()
+        else:
+            run.prepare()
+    except Exception as error:
+        run.report['error'] = repr(error)
+        run.report['outcome'] = 'inconclusive'
+    finally:
+        run.finish()
+    print(json.dumps(dict(outcome=run.report['outcome'], evidence=str(run.out / 'evidence.json'), error=run.report.get('error'))))
+    return 0 if run.report['outcome'] == 'pass' else 2
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
