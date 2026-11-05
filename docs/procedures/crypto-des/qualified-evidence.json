@@ -1,0 +1,630 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T18:09:20.900139+00:00",
+  "summary": "Genuine typed DES/TDES ECB/CBC/helper component: primary NIST and independent OpenSSL, sanitized host and typed ARM; actual CPU only if guest_cases present; no provider/general roundkey/privateApple/native/FIPS/sidechannel claim",
+  "commit": "6aa53a7df5cec5d4e11884751d79a1d2641dd316",
+  "experiment": "DES004",
+  "source_pins": {
+    "xnu": "c54f35ca767986246321eb901baf8f5ff7923f6a",
+    "mbedtls": "068ff080b369adfac81509f9b57b2afabaf82dc5"
+  },
+  "host_vectors": 2936,
+  "host_checks": 167606,
+  "arm_checks": 167606,
+  "target_layout": {
+    "des_bytes": 144,
+    "tdes_bytes": 400,
+    "alignment": 16,
+    "mbed_des_bytes": 128,
+    "mbed_tdes_bytes": 384,
+    "ecb_descriptor_bytes": 48,
+    "cbc_descriptor_bytes": 40
+  },
+  "selected_storage": [
+    256,
+    768,
+    8,
+    8
+  ],
+  "profile_rejections": [
+    {
+      "macro": "MBEDTLS_DES_ALT",
+      "rejected": true
+    },
+    {
+      "macro": "MBEDTLS_DES_SETKEY_ALT",
+      "rejected": true
+    },
+    {
+      "macro": "MBEDTLS_DES_CRYPT_ECB_ALT",
+      "rejected": true
+    },
+    {
+      "macro": "MBEDTLS_DES3_CRYPT_ECB_ALT",
+      "rejected": true
+    },
+    {
+      "macro": "MBEDTLS_HAVE_ASM",
+      "rejected": true
+    }
+  ],
+  "sanitizer_controls": [
+    {
+      "name": "asan-heap",
+      "detected": true
+    },
+    {
+      "name": "ubsan-overflow",
+      "detected": true
+    }
+  ],
+  "guest_cases": [
+    {
+      "name": "positive",
+      "accepted": true,
+      "payload_sha256": "eb387555268cdb29945266f1d6650e0da4abe7928f07890be915bdc871868762",
+      "console_sha256": "45161a165af6d9a882f1330adc233f2dde5c7fb6d15b1ee5ae53fe0158ede945"
+    },
+    {
+      "name": "wrong-cookie",
+      "accepted": true,
+      "payload_sha256": "f5c50d72471854a6cb1b3679ff97748fa2a49f20683bddaeefdd82b4f9a2b009",
+      "console_sha256": "d7f5adfa6e80035d7653de595520ddefc1637f3581cddb93b769e5fe0856fee4"
+    },
+    {
+      "name": "corrupt-vector",
+      "accepted": true,
+      "payload_sha256": "c8fed5a97335216cd299463444e75bdb55bf4e9e4f54b3ff98b31aec19a332ae",
+      "console_sha256": "b03248ec2e86c0cfd0c2b92635c2010142be47349845befaaf14804c79eac77f"
+    },
+    {
+      "name": "spin-timeout",
+      "accepted": true,
+      "payload_sha256": "d6e1f1cbec2a8c0f22acefc557c30ece77ff0870cd4af24eca67fd91213a9a0c",
+      "console_sha256": "a6b0bf637bd022c602d3faafe26127bd7fc1a799263c4c298e35c15a069015db"
+    }
+  ],
+  "corpus": {
+    "primary_count": 1000,
+    "derived_count": 1900,
+    "oracle_extra_count": 36,
+    "archive_sha256": {
+      "KAT_TDES.zip": "19d8841f84ae3415350b069a4768bd416c05a0533ee43e905ab099adb8ccb374",
+      "tdesmmt.zip": "04db93728ebf994330b0ba4555d397f8f03c29fd8547d9d586219fabe00e8c78"
+    },
+    "files": {
+      "KAT_TDES.zip/KAT_TDES/TCBCIinvperm.rsp": "08ee279b76c15f18c3be0144be2594e3967ccdc71b3468af0a98c04bdb3e3dc3",
+      "KAT_TDES.zip/KAT_TDES/TCBCIpermop.rsp": "27e0c4a291d63a89167645c4c8214829bc78aa0a560527247a7194bbbe8a5f57",
+      "KAT_TDES.zip/KAT_TDES/TCBCIsubtab.rsp": "28d3141a7639edd545f3bbe39deba114a2ddfcf4cd2c9c1fc0bde67b3261b1c9",
+      "KAT_TDES.zip/KAT_TDES/TCBCIvarkey.rsp": "5924fe62286fdf78ad4426a36cacff9e8a671921d77ff43c225b4b218d1b4282",
+      "KAT_TDES.zip/KAT_TDES/TCBCIvartext.rsp": "69e176ceed3c420dad87d393c5038502a4d1cda75ff2ebc0e825eee1bced5cd5",
+      "KAT_TDES.zip/KAT_TDES/TCBCinvperm.rsp": "ff3b3f84784e1e4f11d23a9a9497d9bf95bd60b474259c28b979543556f80fbd",
+      "KAT_TDES.zip/KAT_TDES/TCBCpermop.rsp": "268dcf9d3859652fc46e298d80084b67ff3ce6fd8260581448aacbcc89cabe97",
+      "KAT_TDES.zip/KAT_TDES/TCBCsubtab.rsp": "e7dd340a295ae483a8e55a540edac1f110d1b4e20f5acaeba13006b1ce2850b3",
+      "KAT_TDES.zip/KAT_TDES/TCBCvarkey.rsp": "da503c266444539d95a7d5f9a495906baacb08ccc66275038b9546e98af90980",
+      "KAT_TDES.zip/KAT_TDES/TCBCvartext.rsp": "eaa1346c88a035f26c96b5500c659957b6245c11b7fa1c0e823b2e221cf242b7",
+      "KAT_TDES.zip/KAT_TDES/TCFB1invperm.rsp": "6ffdd7a858a50bfa182491e6e1114ad14afcb9f629732cbb3d64be9afa5603d1",
+      "KAT_TDES.zip/KAT_TDES/TCFB1permop.rsp": "7e9b5913ed43c5b660c42e2d8012d7217fe0e6889871e31fb91cfffe10cccf73",
+      "KAT_TDES.zip/KAT_TDES/TCFB1subtab.rsp": "41b33fa512f55c361203249d6adc3c045e2ce22c45c0fd9fc43ecb79cc964840",
+      "KAT_TDES.zip/KAT_TDES/TCFB1varkey.rsp": "dd29c2d4f1cdc8b5f36311c5277ceb427ca5ca066991860f0e11cfa424e2d42f",
+      "KAT_TDES.zip/KAT_TDES/TCFB1vartext.rsp": "c13eb23676ed027deb2616451d7ef6284c520d44a5eeb6f119cd477e72d0cab3",
+      "KAT_TDES.zip/KAT_TDES/TCFB64invperm.rsp": "05531bd7c326d478a7ded8078e7c6b7cf49be0fe18da6bdf87607d579672f577",
+      "KAT_TDES.zip/KAT_TDES/TCFB64permop.rsp": "e99c0e299e448fc12b8df6449d63814f5f56813c79532aba8f46e2d50afa56ef",
+      "KAT_TDES.zip/KAT_TDES/TCFB64subtab.rsp": "44f2e158ad77e76dabb225200676e00a4e7bff20d211baad5d8d50672f124500",
+      "KAT_TDES.zip/KAT_TDES/TCFB64varkey.rsp": "c21c5abe004f51b786c120250eacb5c168042ccb50b3d3d01342d4cc5cdc06c6",
+      "KAT_TDES.zip/KAT_TDES/TCFB64vartext.rsp": "0c246ba8a277704eec3d3779368bf4d2cccb07752c66f861208958c970a58633",
+      "KAT_TDES.zip/KAT_TDES/TCFB8invperm.rsp": "cb50616836a38492bab208bf5a80a98af9ee9c4710cf7b3f60fe92d1cc797186",
+      "KAT_TDES.zip/KAT_TDES/TCFB8permop.rsp": "52e9c31e04e5920bb9497fbfadbc2bbbb09bd78afbd69ff9da61a0935780e188",
+      "KAT_TDES.zip/KAT_TDES/TCFB8subtab.rsp": "3f3f60b78620e7a661a4968d7562179b4aeb12e1604435491370524574570782",
+      "KAT_TDES.zip/KAT_TDES/TCFB8varkey.rsp": "3949c069bd5757195491c1d1d21a593385b317868b9e46cfa2b60fb372de2e59",
+      "KAT_TDES.zip/KAT_TDES/TCFB8vartext.rsp": "e2acc395f0ab29282a8b379269649209b74c5eeef05aea6759823627d672d093",
+      "KAT_TDES.zip/KAT_TDES/TCFBP1invperm.rsp": "30bd4d787dc624289c63f4cd84dc69cfddf0896826bcd61dc16852159e106661",
+      "KAT_TDES.zip/KAT_TDES/TCFBP1permop.rsp": "136f4d86af36a1b391b51a28dcebab960ff4b8a202a09665af5126fbdb32f4c2",
+      "KAT_TDES.zip/KAT_TDES/TCFBP1subtab.rsp": "36d7e14849707dd08ddbc769eceee40085e0d8261bd93c130f44b742de2d5826",
+      "KAT_TDES.zip/KAT_TDES/TCFBP1varkey.rsp": "1742921d76b6e5a2e9890b60c5d371becd4fad612629ce9894bc48a8f2fa6db9",
+      "KAT_TDES.zip/KAT_TDES/TCFBP1vartext.rsp": "0a7cfdcb056d4b4f5fef172724c7fedd64960dbbe23ea4c8f37c747f7d7cb60d",
+      "KAT_TDES.zip/KAT_TDES/TCFBP64invperm.rsp": "b8796ea31fdcfecb5175622204cb8590d5bfb6b329747af27001638ecc5503b0",
+      "KAT_TDES.zip/KAT_TDES/TCFBP64permop.rsp": "7d041bbc7e8fe9099d158db5b0b5127b2b9bc389d700be20bcf4d3d2134035dd",
+      "KAT_TDES.zip/KAT_TDES/TCFBP64subtab.rsp": "758a2ca2e0bcf7b9844dc5e4773e6cf71c224b3d879026d779b55a6699b5427e",
+      "KAT_TDES.zip/KAT_TDES/TCFBP64varkey.rsp": "e7c807fc64f1d66484b3282b49d8ab86ea420531cbaefd0542853143844d7566",
+      "KAT_TDES.zip/KAT_TDES/TCFBP64vartext.rsp": "42ce40531660d79485439f2fbeeb404487547ac02987ed26f19c40113de22f27",
+      "KAT_TDES.zip/KAT_TDES/TCFBP8invperm.rsp": "5ae5e37e5f6b8eecd412b412df3f51f991678054bd8922c90a03d702c07c8574",
+      "KAT_TDES.zip/KAT_TDES/TCFBP8permop.rsp": "671fc6798e05f1d2265ad14a72e6501ee7ef24c13e40f40c281ff4167443cf4c",
+      "KAT_TDES.zip/KAT_TDES/TCFBP8subtab.rsp": "974c094a462ac0681df1e9f0fe5ecc0837d1baa3c3ba9ab14333bff7a4ea49dd",
+      "KAT_TDES.zip/KAT_TDES/TCFBP8varkey.rsp": "869202058911efbdc2890948d809e2f5ba73c393706add91ff4d31093799fb1c",
+      "KAT_TDES.zip/KAT_TDES/TCFBP8vartext.rsp": "622c6b4857fa7af97cea4207bc47802c18a1d173d6c9fc3b15179db446fe2857",
+      "KAT_TDES.zip/KAT_TDES/TECBinvperm.rsp": "e75875a423e590ba5a81c81ee847d06633f54e13640e7a1ea6b484db3cd55aed",
+      "KAT_TDES.zip/KAT_TDES/TECBpermop.rsp": "b0f695ad165b5855801122e178750bc5acd3e8413a5d82b27fc00b5b20339494",
+      "KAT_TDES.zip/KAT_TDES/TECBsubtab.rsp": "3944fdf7e426214e58f0b53836752647e6e839b54f057b4eaa8b1267cf1e8b10",
+      "KAT_TDES.zip/KAT_TDES/TECBvarkey.rsp": "c4be8b474093b9a90c33d8f9dd63c99635b61b769a332b58f14f29a309edeb9c",
+      "KAT_TDES.zip/KAT_TDES/TECBvartext.rsp": "f2f3bf4b729fe132b0f9010f5b61c1dffad20723a659bfe4f82169cc40325909",
+      "KAT_TDES.zip/KAT_TDES/TOFBIinvperm.rsp": "e4961a9d8aff460c7e5c37055a2bba607676d1bae29d03c13acb6b491878dd7d",
+      "KAT_TDES.zip/KAT_TDES/TOFBIpermop.rsp": "8829429c41037dc4b4f0bc93d8e5ab59b996671e67bde2954774a7ba1d7f9aed",
+      "KAT_TDES.zip/KAT_TDES/TOFBIsubtab.rsp": "d06c1774d33b37b889218a38e235d4981fad12763bad5d6dd5d00014865656e0",
+      "KAT_TDES.zip/KAT_TDES/TOFBIvarkey.rsp": "75ac465558f5409c2374ddeed53dfab8f5156538e5b3f5547b2add8b5df57305",
+      "KAT_TDES.zip/KAT_TDES/TOFBIvartext.rsp": "5f35b32b95f1d677d2421b20d85b9b7551f57132a61887037c602632f0296b01",
+      "KAT_TDES.zip/KAT_TDES/TOFBinvperm.rsp": "8e106c908aae9ceb2dc37cfd1029cb3e363795ee425771a46ec6629a08481629",
+      "KAT_TDES.zip/KAT_TDES/TOFBpermop.rsp": "f64c024f0bf0acc202a0ad77ff2614f65f26264ff9379ffdd5ba8c166e7a6b0b",
+      "KAT_TDES.zip/KAT_TDES/TOFBsubtab.rsp": "b157d8732eba58e285713e2f7f2ff291abc4b7c7c53fee53cd435d47482ce6c6",
+      "KAT_TDES.zip/KAT_TDES/TOFBvarkey.rsp": "1e6728ccd47d96a1a688d73223d42a008dc66ac2107e4b962ba2e6139d80d809",
+      "KAT_TDES.zip/KAT_TDES/TOFBvartext.rsp": "924ae4f6a4333beb73007d18611e10b7219001fca2bbf250f2f22fd3e29cbc18",
+      "tdesmmt.zip/TCBCIMMT2.rsp": "d9d0325964eafa7e01623de6487f95a661d7ed5220f6c974935f0d40dd4c7740",
+      "tdesmmt.zip/TCBCIMMT3.rsp": "db18a93ae4caff5b6b3cf4f47aee18903675fb262652f6e12498d56b1dc5290c",
+      "tdesmmt.zip/TCBCMMT2.rsp": "4d4969210c1d61550a908818b4f61d01f8b6048a40afa9ae09a788a96965d36c",
+      "tdesmmt.zip/TCBCMMT3.rsp": "0ea39ced9720b3855c8d517e1b0a9493b9b515eaa426d6580f592024685590c6",
+      "tdesmmt.zip/TCFB1MMT2.rsp": "c59a67d0ce5748fbe1d9a59530bef449ffe5ab0d94c3bf317ce710dc6460a785",
+      "tdesmmt.zip/TCFB1MMT3.rsp": "947f9c9c90fbe13a1bfaf5c3b1577a548d135f60f4ccf139f55e570db50cbaff",
+      "tdesmmt.zip/TCFB64MMT2.rsp": "a16375bea2af702b1151ab85b487079b4ab0d6c26d4117e4f2df3d572551ceeb",
+      "tdesmmt.zip/TCFB64MMT3.rsp": "ca64da5348208ce259fd55e711436c55f1604e8c569527121dbfe7c2adc1fb87",
+      "tdesmmt.zip/TCFB8MMT2.rsp": "a7d904343b597e19d23068432c5dd9a45c56149f694db49c4eaa956df5e3b30d",
+      "tdesmmt.zip/TCFB8MMT3.rsp": "5375f8984526cd459e47102585776e166d153b570ce456910dbad016c541744c",
+      "tdesmmt.zip/TCFBP1MMT2.rsp": "aba89200856b8ad9f176520007d944abc69769fe3c56bc6205974cdeab3d6825",
+      "tdesmmt.zip/TCFBP1MMT3.rsp": "ee919def7b942bc127f56918988b94cdf853a68b7f04cf95c9d99594a76cfd17",
+      "tdesmmt.zip/TCFBP64MMT2.rsp": "83503c551fa5c63e3ad926b12c3a02379c5d9f1f2257316e5d30c3f121002749",
+      "tdesmmt.zip/TCFBP64MMT3.rsp": "3180c0b6f08f8b3ffef076e7ad34250c491e873033cf5b33541371582b1aeb49",
+      "tdesmmt.zip/TCFBP8MMT2.rsp": "dfa1dbbcddf99549601f0ae792f3d32d3a6d986579cc6c15d716c0a902ec62ff",
+      "tdesmmt.zip/TCFBP8MMT3.rsp": "3f077caf8ca09ff23505e9af73f73d4514ae2242670e04b8fa3a51ac75da632c",
+      "tdesmmt.zip/TECBMMT2.rsp": "51b732ac7374fb5bfb540f6fd92ae687476c7f3f6255874491e5f0ad687999e8",
+      "tdesmmt.zip/TECBMMT3.rsp": "b2473145da9b63100444143f6cb74bbef51f04b85831831393cca2e07aeeeb29",
+      "tdesmmt.zip/TOFBIMMT2.rsp": "9f651c81513df6b88f96d44ea5ca975049dab60681d099485947d8b1ab6fe174",
+      "tdesmmt.zip/TOFBIMMT3.rsp": "c38b3b9940fc756a148df957cb736f553b41c42031153a5f498e2e4aab5cc4d3",
+      "tdesmmt.zip/TOFBMMT2.rsp": "4554f5fb8a3bb314c9083df0a425dda06084573431f7d181c3d5d28d128436d2",
+      "tdesmmt.zip/TOFBMMT3.rsp": "668d95dd74bf1cc36fc83bb32d173f2d2ad717016a0297a9d0253b3f36cc3eb5"
+    },
+    "excluded": [
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCBCIinvperm.rsp",
+        "reason": "interleaved CBCI, not ordinary CBC"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCBCIpermop.rsp",
+        "reason": "interleaved CBCI, not ordinary CBC"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCBCIsubtab.rsp",
+        "reason": "interleaved CBCI, not ordinary CBC"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCBCIvarkey.rsp",
+        "reason": "interleaved CBCI, not ordinary CBC"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCBCIvartext.rsp",
+        "reason": "interleaved CBCI, not ordinary CBC"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFB1invperm.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFB1permop.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFB1subtab.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFB1varkey.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFB1vartext.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFB64invperm.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFB64permop.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFB64subtab.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFB64varkey.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFB64vartext.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFB8invperm.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFB8permop.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFB8subtab.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFB8varkey.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFB8vartext.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFBP1invperm.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFBP1permop.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFBP1subtab.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFBP1varkey.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFBP1vartext.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFBP64invperm.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFBP64permop.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFBP64subtab.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFBP64varkey.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFBP64vartext.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFBP8invperm.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFBP8permop.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFBP8subtab.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFBP8varkey.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TCFBP8vartext.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TOFBIinvperm.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TOFBIpermop.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TOFBIsubtab.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TOFBIvarkey.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TOFBIvartext.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TOFBinvperm.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TOFBpermop.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TOFBsubtab.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TOFBvarkey.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "KAT_TDES.zip/KAT_TDES/TOFBvartext.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TCBCIMMT2.rsp",
+        "reason": "interleaved CBCI, not ordinary CBC"
+      },
+      {
+        "file": "tdesmmt.zip/TCBCIMMT3.rsp",
+        "reason": "interleaved CBCI, not ordinary CBC"
+      },
+      {
+        "file": "tdesmmt.zip/TCFB1MMT2.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TCFB1MMT3.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TCFB64MMT2.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TCFB64MMT3.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TCFB8MMT2.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TCFB8MMT3.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TCFBP1MMT2.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TCFBP1MMT3.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TCFBP64MMT2.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TCFBP64MMT3.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TCFBP8MMT2.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TCFBP8MMT3.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TOFBIMMT2.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TOFBIMMT3.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TOFBMMT2.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      },
+      {
+        "file": "tdesmmt.zip/TOFBMMT3.rsp",
+        "reason": "CFB/OFB mode is outside ECB/CBC callback scope"
+      }
+    ],
+    "parser": {
+      "path": "/home/egor/dev/pet/s24-ios-exynos/tools/research/crypto-candidates/verify.py",
+      "sha256": "2da599a7488642d9f711b64c6ef0d9923a5964b4e3c17bd0f97fe8eb73215a78"
+    },
+    "oracle": {
+      "path": "/usr/lib64/libcrypto.so.3.5.9",
+      "sha256": "104ea7f8490d18e9a2e3f877a7579c112adcc3a990a878902dd7b611d94f596e",
+      "version": "OpenSSL 3.5.9 29 Sep 2026",
+      "interface": "EVP ECB/CBC no padding; default and legacy providers; public 8-byte DES helper pointers only",
+      "binary_source_rebuild_verified": false
+    }
+  },
+  "shared_runtime": {
+    "path": "/home/egor/dev/pet/s24-ios-exynos/fixtures/public/avf-handoff/runtime.h",
+    "sha256": "0d85cbf3acec7858458bcb086ff23a5ab8a61eefb5ce47d4d75fbf01cf728087",
+    "unchanged_against_accepted_XTS": true
+  },
+  "zeroizer_dependency": {
+    "accepted_report": "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/evidence.json",
+    "sha256": "c5064a512ba295d1cd447af1e73ac6fc4f9c0ffeaf5b78f09ca0f80fc1f6216c",
+    "objects": {
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/host-adapter.o": "9cab942f6bc120c18e33dcef17aa742f2796e484f9e08654292d1e10cf330ced",
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/host-aes.o": "7450c21d18b98f4039e04d5f635498eeac462aab89fcff6a2844eb4ecbe0022e",
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/arm-adapter.o": "a9acb5e645d728305eaad4487390065fcfef14edde18047133211c0d5dc84cfb",
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/arm-aes.o": "c64214355291093affc4f1b58f04bd4112f342875d7a2e3609163914c6adea8f",
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/arm-memory.o": "4e24c780227c702dd6201f285ce28d4290c75b1ff8d68ba2aa4c1ce818d0b91d"
+    }
+  },
+  "prior_host_planning_deviation": "DES001 plan rejected for prose procedure instead of existing file; host-arm1..4 not preregistered; retained honestly. Fresh runs require an actual planned MAIN experiment before any child execution.",
+  "planning_record": {
+    "id": "DES004",
+    "task": "KRN-032",
+    "owner": "codex-team-crypto-des-20261105-bs",
+    "kind": "host-test",
+    "status": "planned",
+    "hypothesis": "Committed6aa53a7 source-qualified DES modes pass the genuine primary/oracle, expanded sanitized host and actual typed ARMCPU suite under bounded stable-memory admission, preserving exact errors, ownership and finite stop controls.",
+    "procedure": "worktrees/krn-032-20261105/docs/procedures/crypto-des/README.md",
+    "timeout_seconds": 600,
+    "created_at": "2026-11-05T18:07:51+00:00"
+  },
+  "planning_snapshot_sha256": "8e93c9a9914f0d181f2165b3b4854dfbb835c765ddd9be4a585ec3955de4f0e2",
+  "resource_wait_seconds": 68.02966248901794,
+  "raw_evidence": {
+    "path": "worktrees/krn-032-20261105/artifacts/crypto-des/cpu-final3/evidence.json",
+    "sha256": "077f56b1469d961ec5d5f5af695e85e0037ca698fd60a984b62efcae7006447d"
+  },
+  "canonical_vendor": {
+    "archive": "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105/artifacts/crypto-xts/inputs/mbedtls.tar.gz",
+    "archive_sha256": "ca6bd316bbec49ef20088f39b8755fcaec0b7e45781506de55b17cd191ae6937",
+    "commit": "068ff080b369adfac81509f9b57b2afabaf82dc5",
+    "upstream_url": "https://github.com/Mbed-TLS/mbedtls/archive/068ff080b369adfac81509f9b57b2afabaf82dc5.tar.gz",
+    "source_transport": "read-only independently qualified complete XTS cached archive; no new network acquisition",
+    "files": {
+      "LICENSE": {
+        "canonical_member": "mbedtls-068ff080b369adfac81509f9b57b2afabaf82dc5/LICENSE",
+        "canonical_sha256": "9b405ef4c89342f5eae1dd828882f931747f71001cfba7d114801039b52ad09b",
+        "canonical_bytes": 29852,
+        "actual_sha256": "9b405ef4c89342f5eae1dd828882f931747f71001cfba7d114801039b52ad09b",
+        "actual_bytes": 29852,
+        "patched": false
+      },
+      "include/mbedtls/build_info.h": {
+        "canonical_member": "mbedtls-068ff080b369adfac81509f9b57b2afabaf82dc5/include/mbedtls/build_info.h",
+        "canonical_sha256": "4bb715278f3199298220b930514ace4f461ed0e9ff27b656d6e2616a1ca3287f",
+        "canonical_bytes": 6163,
+        "actual_sha256": "4bb715278f3199298220b930514ace4f461ed0e9ff27b656d6e2616a1ca3287f",
+        "actual_bytes": 6163,
+        "patched": false
+      },
+      "include/mbedtls/check_config.h": {
+        "canonical_member": "mbedtls-068ff080b369adfac81509f9b57b2afabaf82dc5/include/mbedtls/check_config.h",
+        "canonical_sha256": "66696df9cc3f7cbbe84786046937242b18140963b94c34347404f7827c428efa",
+        "canonical_bytes": 48196,
+        "actual_sha256": "66696df9cc3f7cbbe84786046937242b18140963b94c34347404f7827c428efa",
+        "actual_bytes": 48196,
+        "patched": false
+      },
+      "include/mbedtls/config_adjust_legacy_crypto.h": {
+        "canonical_member": "mbedtls-068ff080b369adfac81509f9b57b2afabaf82dc5/include/mbedtls/config_adjust_legacy_crypto.h",
+        "canonical_sha256": "f404960e2878c21c22a5d67caba6cd1d29f382b3d913a56ce856931dd15b2886",
+        "canonical_bytes": 21274,
+        "actual_sha256": "f404960e2878c21c22a5d67caba6cd1d29f382b3d913a56ce856931dd15b2886",
+        "actual_bytes": 21274,
+        "patched": false
+      },
+      "include/mbedtls/config_adjust_ssl.h": {
+        "canonical_member": "mbedtls-068ff080b369adfac81509f9b57b2afabaf82dc5/include/mbedtls/config_adjust_ssl.h",
+        "canonical_sha256": "2d37a7552566e9fbd8a5a8b3e6cf6d4e21125a5e48a7e24ca30f3c683d141871",
+        "canonical_bytes": 3417,
+        "actual_sha256": "2d37a7552566e9fbd8a5a8b3e6cf6d4e21125a5e48a7e24ca30f3c683d141871",
+        "actual_bytes": 3417,
+        "patched": false
+      },
+      "include/mbedtls/config_adjust_x509.h": {
+        "canonical_member": "mbedtls-068ff080b369adfac81509f9b57b2afabaf82dc5/include/mbedtls/config_adjust_x509.h",
+        "canonical_sha256": "92909d91c59340f13eb2b447cf44e0075a0ee742a18f22fb7843f6a18c5af5dc",
+        "canonical_bytes": 1517,
+        "actual_sha256": "92909d91c59340f13eb2b447cf44e0075a0ee742a18f22fb7843f6a18c5af5dc",
+        "actual_bytes": 1517,
+        "patched": false
+      },
+      "include/mbedtls/des.h": {
+        "canonical_member": "mbedtls-068ff080b369adfac81509f9b57b2afabaf82dc5/include/mbedtls/des.h",
+        "canonical_sha256": "05ddc8143ac3c6287946c73556c7a0ee50ecaa74132cf9d7895d9b894a115310",
+        "canonical_bytes": 12844,
+        "actual_sha256": "05ddc8143ac3c6287946c73556c7a0ee50ecaa74132cf9d7895d9b894a115310",
+        "actual_bytes": 12844,
+        "patched": false
+      },
+      "include/mbedtls/error.h": {
+        "canonical_member": "mbedtls-068ff080b369adfac81509f9b57b2afabaf82dc5/include/mbedtls/error.h",
+        "canonical_sha256": "ddcb14c1bf9d6fd2f2f1d2eb62117ce9bf05a0f9430c6931d7555b23f9ed3ddb",
+        "canonical_bytes": 6543,
+        "actual_sha256": "ddcb14c1bf9d6fd2f2f1d2eb62117ce9bf05a0f9430c6931d7555b23f9ed3ddb",
+        "actual_bytes": 6543,
+        "patched": false
+      },
+      "include/mbedtls/platform.h": {
+        "canonical_member": "mbedtls-068ff080b369adfac81509f9b57b2afabaf82dc5/include/mbedtls/platform.h",
+        "canonical_sha256": "e6e1edc99d90698acf751d5d837c9b59898d7277deb993bcbf7473172b7a3523",
+        "canonical_bytes": 18554,
+        "actual_sha256": "e6e1edc99d90698acf751d5d837c9b59898d7277deb993bcbf7473172b7a3523",
+        "actual_bytes": 18554,
+        "patched": false
+      },
+      "include/mbedtls/platform_util.h": {
+        "canonical_member": "mbedtls-068ff080b369adfac81509f9b57b2afabaf82dc5/include/mbedtls/platform_util.h",
+        "canonical_sha256": "1237d849e96bc15b479e8086160e4568c1de86563bb51c60eead45b99ad1b4ac",
+        "canonical_bytes": 10759,
+        "actual_sha256": "1237d849e96bc15b479e8086160e4568c1de86563bb51c60eead45b99ad1b4ac",
+        "actual_bytes": 10759,
+        "patched": false
+      },
+      "include/mbedtls/private_access.h": {
+        "canonical_member": "mbedtls-068ff080b369adfac81509f9b57b2afabaf82dc5/include/mbedtls/private_access.h",
+        "canonical_sha256": "c897213b3e534e8d5db83629177f9c01d90461ed6fea57906836262dba87056d",
+        "canonical_bytes": 435,
+        "actual_sha256": "c897213b3e534e8d5db83629177f9c01d90461ed6fea57906836262dba87056d",
+        "actual_bytes": 435,
+        "patched": false
+      },
+      "library/alignment.h": {
+        "canonical_member": "mbedtls-068ff080b369adfac81509f9b57b2afabaf82dc5/library/alignment.h",
+        "canonical_sha256": "e97b8844abfadc4cc2fecce5b040d58cd53f549c42712205a267e00e372efd3d",
+        "canonical_bytes": 27429,
+        "actual_sha256": "e97b8844abfadc4cc2fecce5b040d58cd53f549c42712205a267e00e372efd3d",
+        "actual_bytes": 27429,
+        "patched": false
+      },
+      "library/common.h": {
+        "canonical_member": "mbedtls-068ff080b369adfac81509f9b57b2afabaf82dc5/library/common.h",
+        "canonical_sha256": "adfd493f8ecb11f87f7e75f270a97cbd05d1902345ef32db51d39c076e4f8fde",
+        "canonical_bytes": 18702,
+        "actual_sha256": "a567c2f940035ecc19204f17cd37f0c23374e7ab8d15c73ffba94946e43ab412",
+        "actual_bytes": 18816,
+        "patched": true
+      },
+      "library/ctr.h": {
+        "canonical_member": "mbedtls-068ff080b369adfac81509f9b57b2afabaf82dc5/library/ctr.h",
+        "canonical_sha256": "63331eb36d8ea69b4b4dcd2ec059582bcabf51a8ea891db26d37ab033967789f",
+        "canonical_bytes": 947,
+        "actual_sha256": "63331eb36d8ea69b4b4dcd2ec059582bcabf51a8ea891db26d37ab033967789f",
+        "actual_bytes": 947,
+        "patched": false
+      },
+      "library/des.c": {
+        "canonical_member": "mbedtls-068ff080b369adfac81509f9b57b2afabaf82dc5/library/des.c",
+        "canonical_sha256": "b3d91e02055fc05f0d28f820e8731445eeeb73a6708bbafc3c988bf631a243b0",
+        "canonical_bytes": 32154,
+        "actual_sha256": "b3d91e02055fc05f0d28f820e8731445eeeb73a6708bbafc3c988bf631a243b0",
+        "actual_bytes": 32154,
+        "patched": false
+      }
+    },
+    "patches": {
+      "library/common.h": {
+        "upstream_sha256": "adfd493f8ecb11f87f7e75f270a97cbd05d1902345ef32db51d39c076e4f8fde",
+        "postimage_sha256": "a567c2f940035ecc19204f17cd37f0c23374e7ab8d15c73ffba94946e43ab412",
+        "patch_sha256": "3194224e2e4fd3d39db9057aeb54e244924e77bfc6cc92ef72a3b1b608e83874",
+        "algorithm_bodies_changed": false
+      }
+    },
+    "assert_call_count_des_translation_unit": 0,
+    "outcome": "pass"
+  },
+  "owned_dirty_at_start": "",
+  "commands_count": 33,
+  "max_total_owned_rss_bytes": 110022656,
+  "all_owned_sessions_quiescent": true,
+  "artifacts": [
+    "worktrees/krn-032-20261105/artifacts/crypto-des/cpu-final3/evidence.json",
+    "worktrees/krn-032-20261105/artifacts/crypto-des/cpu-final3/host-tests.log",
+    "worktrees/krn-032-20261105/artifacts/crypto-des/cpu-final3/positive.log",
+    "worktrees/krn-032-20261105/artifacts/crypto-des/cpu-final3/wrong-cookie.log",
+    "worktrees/krn-032-20261105/artifacts/crypto-des/cpu-final3/corrupt-vector.log",
+    "worktrees/krn-032-20261105/artifacts/crypto-des/cpu-final3/spin-timeout.log",
+    "worktrees/krn-032-20261105/artifacts/crypto-des/cpu-final3/asan-heap.log",
+    "worktrees/krn-032-20261105/artifacts/crypto-des/cpu-final3/ubsan-overflow.log",
+    "worktrees/krn-032-20261105/artifacts/crypto-des/cpu-final3/preflight.json"
+  ]
+}
