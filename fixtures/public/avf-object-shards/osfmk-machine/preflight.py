@@ -214,7 +214,7 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     args = parser.parse_args()
     wt = Path(__file__).resolve().parents[4]
-    output = args.out.absolute()
+    output = args.out.resolve()
     if not output.is_relative_to(wt / 'artifacts') or output.exists():
         parser.error('Output must be a new owned worktree artifacts directory')
     output.mkdir(parents=True)
