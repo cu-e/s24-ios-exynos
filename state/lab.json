@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T13:09:51+00:00",
+  "updated_at": "2026-11-05T14:04:16+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -443,7 +443,7 @@
     {
       "id": "DRV-001",
       "title": "Prepare an STM SPI touch driver and host adapter",
-      "status": "in_progress",
+      "status": "done",
       "owner": "codex-team-touch-20261105-aj",
       "scope": "host",
       "evidence_kind": "host-test",
@@ -472,11 +472,17 @@
       ],
       "priority": 94,
       "priority_reason": "Independent bounded STM parser and transport boundary enable display/input integration without device operations",
-      "updated_at": "2026-11-05T13:09:27+00:00",
+      "updated_at": "2026-11-05T13:56:31+00:00",
       "started_at": "2026-11-05T13:09:27+00:00",
-      "last_heartbeat": "2026-11-05T13:09:27+00:00",
+      "last_heartbeat": "2026-11-05T13:55:54+00:00",
       "branch": "team/drv-001-20261105",
-      "worktree": "worktrees/drv-001-20261105"
+      "worktree": "worktrees/drv-001-20261105",
+      "progress_note": "Coordinator accepted all3 host acceptance criteria after independent exact-source and sanitizer review. Implementation integrated as70f92bd; review2031fb9; primary make check passed146tests at f18eba26816d8fa1ce93d4ebb60496a1607ee4ed. Common evidence artifacts/team-coordination/20261105-ah/integration-002/evidence.json. Hardware and Apple HID remain unqualified.",
+      "next_step": "Close accepted host task; physical SPI/IRQ/power and native HID require separate authorized tasks.",
+      "handoff": "worktrees/drv-001-20261105/docs/procedures/drv-001/handoff.md",
+      "evidence": "worktrees/drv-001-20261105/artifacts/stm-host/commit-session1/evidence.json",
+      "evidence_sha256": "f2dc1fed5fe6a9d22de69100cdd0173c32c97ff2bdbcfc6f7a3f04dce6006ada",
+      "finished_at": "2026-11-05T13:56:31+00:00"
     },
     {
       "id": "DRV-002",
@@ -897,8 +903,8 @@
     {
       "id": "VM-002",
       "title": "Build a pinned minimal XNU guest and host launch harness",
-      "status": "pending",
-      "owner": null,
+      "status": "blocked",
+      "owner": "codex-team-vm-20261105-am",
       "priority": 70,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -922,12 +928,16 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "started_at": "2026-11-05T11:12:01+00:00",
-      "updated_at": "2026-11-05T11:12:50+00:00",
-      "progress_note": "Automatic claim corrected before work;no VM files,experiments or processes touched. Current priority is new genuine IOKit IIG integration task KRN-019.",
-      "next_step": "Release this untouched VM claim;future VM work follows original acceptance and scope.",
-      "handoff": "artifacts/planning/VM-002-release.md",
-      "released_at": "2026-11-05T11:12:50+00:00"
+      "started_at": "2026-11-05T13:27:37+00:00",
+      "updated_at": "2026-11-05T13:41:52+00:00",
+      "progress_note": "Pinned donor verified;genuinely built5-source AVF shim and owned static arm64 PID1;12 real host controls pass. VMHOST001 inconclusive and VMHOST002 shim-only pass recorded. No XNU guest launched or runtime PID1 observed. Scoped commits f71ede2 and current evidence commit are ready for coordinator review.",
+      "next_step": "Supply provenance-qualified complete QEMU/AVF XNU kernel and generic ARM64 QEMU virt/TCG executable;then coordinator leases one bounded guest and reviews actual Darwin/PID1 console and termination. Main make check deferred to coordinator integration.",
+      "handoff": "worktrees/vm-002-20261105/docs/procedures/vm-002/README.md",
+      "released_at": "2026-11-05T11:12:50+00:00",
+      "last_heartbeat": "2026-11-05T13:41:52+00:00",
+      "branch": "team/vm-002-20261105",
+      "worktree": "worktrees/vm-002-20261105",
+      "blocked_reason": "No complete linked provenance-qualified XNU guest kernel for QEMU/AVF board+mockfs+PSCI exit is supplied;E1S object closure is not a guest image. No generic ARM64 QEMU virt/TCG executable is available;installed Android frontend rejects required -machine help (exit1) and -accel help (exit2). Shim/PID1 source builds and host controls do not satisfy actual XNU execution acceptance."
     },
     {
       "id": "VM-003",
@@ -1063,7 +1073,7 @@
     {
       "id": "USB-001",
       "title": "Implement host-buildable native USB and block-transport adapters",
-      "status": "in_progress",
+      "status": "done",
       "owner": "codex-team-usb-20261105-ai",
       "priority": 95,
       "scope": "host",
@@ -1089,11 +1099,17 @@
         "Record real results, failure modes and next-step handoff"
       ],
       "priority_reason": "Independent host USB/block path supports native logs and root transport while kernel work continues",
-      "updated_at": "2026-11-05T13:08:57+00:00",
+      "updated_at": "2026-11-05T13:56:21+00:00",
       "started_at": "2026-11-05T13:08:57+00:00",
-      "last_heartbeat": "2026-11-05T13:08:57+00:00",
+      "last_heartbeat": "2026-11-05T13:55:44+00:00",
       "branch": "team/usb-001-20261105",
-      "worktree": "worktrees/usb-001-20261105"
+      "worktree": "worktrees/usb-001-20261105",
+      "progress_note": "Coordinator accepted host/source scope after independent REV-001 correction and main integration commits631c661+13ea0a2. Shared make check passed146tests at f18eba26816d8fa1ce93d4ebb60496a1607ee4ed;main evidence artifacts/team-coordination/20261105-ah/integration-002/evidence.json SHA256 2d65d06911ce5475dca7bada6382f4dec0732aea6b6f4e7441babb6b32192f81. Native USB/PHY/DMA/Apple ABI/root mount/Android return remain unqualified.",
+      "next_step": "Host/source task accepted;native stages require ordered kernel/platform dependencies and separately authorized hardware qualification.",
+      "handoff": "worktrees/usb-001-20261105/docs/procedures/usb-001/README.md",
+      "evidence": "worktrees/usb-001-20261105/artifacts/usb-readonly/host-session6/evidence.json",
+      "evidence_sha256": "b17b36d35435a4c0d72eb6341140cf4300d650406ae9d9ff8e23c9ec29ff708f",
+      "finished_at": "2026-11-05T13:56:21+00:00"
     },
     {
       "id": "USB-002",
@@ -1632,9 +1648,9 @@
     {
       "id": "SEN-001",
       "title": "Specify sensor-hub and GNSS transport adapters",
-      "status": "pending",
-      "owner": null,
-      "priority": 70,
+      "status": "done",
+      "owner": "codex-team-sensors-20261105-al",
+      "priority": 92,
       "scope": "host",
       "evidence_kind": "host-test",
       "depends_on": [
@@ -1655,7 +1671,19 @@
         "Inspect the task dependencies and pinned inputs",
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
-      ]
+      ],
+      "priority_reason": "Next independent host executor for pinned sensor-hub/GNSS interfaces after USB,touch,eSIM;queue if session capacity is full",
+      "updated_at": "2026-11-05T14:02:22+00:00",
+      "started_at": "2026-11-05T13:25:56+00:00",
+      "last_heartbeat": "2026-11-05T13:34:23+00:00",
+      "branch": "team/sen-001-20261105",
+      "worktree": "worktrees/sen-001-20261105",
+      "progress_note": "Ready for review: commits f6b2072 and 82c8e94; source-qualified SHUB/GNSS C boundaries pass host ASan/UBSan, ARM64 compile, genuine SHUB declaration oracle, all65524 GNSS length comparisons and seven original HAL identity controls. First support-header failure retained. Native/Apple ABI and exact BYH3 firmware remain unqualified.",
+      "next_step": "Coordinator inspect main-relative passing evidence, cherry-pick both commits and run common main make check; keep in_progress until acceptance review.",
+      "handoff": "worktrees/sen-001-20261105/docs/procedures/sen-001/handoff.md",
+      "evidence": "worktrees/sen-001-20261105/artifacts/sen-001/20261105-host-002/evidence.json",
+      "evidence_sha256": "b7a56c30a205e805269ff850a13521bb59824d25b01090188e1c0d75bd5c1227",
+      "finished_at": "2026-11-05T14:02:22+00:00"
     },
     {
       "id": "SEN-002",
@@ -1870,7 +1898,7 @@
     {
       "id": "ESIM-001",
       "title": "Specify eUICC logical channels and LPA integration",
-      "status": "in_progress",
+      "status": "done",
       "owner": "codex-team-esim-20261105-ak",
       "priority": 93,
       "scope": "host",
@@ -1896,11 +1924,17 @@
         "Record real results, failure modes and next-step handoff"
       ],
       "priority_reason": "Independent eUICC channel/session implementation supports SIM/eSIM roadmap without profile changes on the phone",
-      "updated_at": "2026-11-05T13:09:51+00:00",
+      "updated_at": "2026-11-05T13:56:39+00:00",
       "started_at": "2026-11-05T13:09:51+00:00",
-      "last_heartbeat": "2026-11-05T13:09:51+00:00",
+      "last_heartbeat": "2026-11-05T13:56:03+00:00",
       "branch": "team/esim-001-20261105",
-      "worktree": "worktrees/esim-001-20261105"
+      "worktree": "worktrees/esim-001-20261105",
+      "progress_note": "Coordinator accepted host acceptance after independent exact review b005e7b and integration 6c18ad3+07f873e; common make check PASS 146 tests at f18eba26816d8fa1ce93d4ebb60496a1607ee4ed, evidence artifacts/team-coordination/20261105-ah/integration-002/evidence.json. ESIMHOST-005 passing capsule retained; physical transport, provisioning and selected iOS16.5 frontend remain unqualified.",
+      "next_step": "Host task accepted; exact Samsung physical eUICC transport and selected iOS16.5 frontend qualification remain separate authorized tasks",
+      "handoff": "worktrees/esim-001-20261105/docs/procedures/esim-001/handoff.md",
+      "evidence": "worktrees/esim-001-20261105/artifacts/esim-001/session5/evidence.json",
+      "evidence_sha256": "80c28f663d0059731e9a032640a0268420e96e9423c49392b7baec02015e075e",
+      "finished_at": "2026-11-05T13:56:39+00:00"
     },
     {
       "id": "ESIM-002",
@@ -1960,8 +1994,8 @@
     {
       "id": "MISC-001",
       "title": "Specify haptics, NFC, biometrics, video and external display gaps",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-team-misc-20261105-an",
       "priority": 70,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -1983,7 +2017,18 @@
         "Inspect the task dependencies and pinned inputs",
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
-      ]
+      ],
+      "started_at": "2026-11-05T13:28:27+00:00",
+      "last_heartbeat": "2026-11-05T14:03:31+00:00",
+      "updated_at": "2026-11-05T14:03:44+00:00",
+      "branch": "team/misc-001-20261105",
+      "worktree": "worktrees/misc-001-20261105",
+      "progress_note": "Coordinator accepted specification criteria after independent REV005 review d0e3e0ef: no bounded P0/P1/P2 findings. Main implementation 6a3e127 and review 3b5b4f9 integrated; common make check passed 146 tests at 3b5b4f987bc73b7cb1e7f056d1efa0252fa5c70c. Integration evidence: artifacts/team-coordination/20261105-ah/integration-003/evidence.json. All native hardware gates remain open; no Apple service or security compatibility asserted.",
+      "next_step": "Complete accepted MISC-001 with original passing source-audit evidence; future native work requires separate tasks and acceptance.",
+      "handoff": "worktrees/misc-001-20261105/docs/procedures/misc-001/HANDOFF.md",
+      "evidence": "worktrees/misc-001-20261105/artifacts/misc-001/2026-11-05-source-audit/evidence.json",
+      "evidence_sha256": "458a5ab066a99c8b5cc3588347c49974e8ba293e196d1f24b434c868736b8abb",
+      "finished_at": "2026-11-05T14:03:44+00:00"
     },
     {
       "id": "QUAL-001",
@@ -3939,11 +3984,359 @@
         "Hand off verified components or exact remaining source/header/provider requirements to existing integration owners and assess all acceptance criteria with make check"
       ],
       "started_at": "2026-11-05T12:21:39+00:00",
-      "last_heartbeat": "2026-11-05T12:56:32+00:00",
-      "updated_at": "2026-11-05T12:56:32+00:00",
-      "progress_note": "PTHP005 executes genuine native install rules:1794 installed entries,36 native empty exclusions,76 unavailable generated inputs explicit;PTHP007 builds all3 current ARM64 TUs and a real archive with39 definitions,61 external imports,zero unresolved after genuine3 VM aliases and zero overlaps",
-      "next_step": "Measure both actual callback-table layouts and signatures against the genuine kernel producer,real allocator records,negative header/type/metadata controls and actual alias linkage before acceptance",
-      "handoff": "docs/procedures/xnu-kernel-pthread-profile.md"
+      "last_heartbeat": "2026-11-05T13:12:43+00:00",
+      "updated_at": "2026-11-05T13:12:43+00:00",
+      "progress_note": "Pthread component and15 actual source/ABI/metadata/VM-alias controls pass;checkpoint committed;coordinator now uses isolated worktree while three independent host executors own USB001,DRV001,ESIM001",
+      "next_step": "Finish exact native MIG-header context comparison and wrong-alias negative control,then final acceptance and integration",
+      "handoff": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "branch": "team/krn-022-coordinator-20261105",
+      "worktree": "worktrees/krn-022-coordinator-20261105"
+    },
+    {
+      "id": "REV-001",
+      "title": "Independently review USB-001 host implementation before integration",
+      "status": "done",
+      "owner": "codex-team-review-usb-20261105-ao",
+      "priority": 99,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002",
+        "BLD-001"
+      ],
+      "paths": [
+        "docs/reviews/usb-001"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Review exact implementation commit e1785878045751213cb1e8e49e42a364333ed496 and its actual tests/evidence without modifying the implementation;verify ownership/licensing,source pins and host-versus-native claims",
+        "Inspect correctness and security boundaries,integer and extent checks,lifecycle/error/Stop/disconnect behavior;independently reproduce at least one meaningful claimed check or counterexample where practical",
+        "Publish actionable findings with severity,file/line,reproduction and scope,or a bounded no-finding conclusion;do not use sanitizer/test success as proof of hardware or private Apple compatibility"
+      ],
+      "steps": [
+        "Read task USB-001 and exact committed implementation plus existing evidence",
+        "Perform independent source review and bounded verification within the reviewer worktree",
+        "Commit only the review report and record real source-review evidence/handoff;send blockers/findings to coordinator before acceptance"
+      ],
+      "started_at": "2026-11-05T13:36:19+00:00",
+      "last_heartbeat": "2026-11-05T13:47:45+00:00",
+      "updated_at": "2026-11-05T14:01:29+00:00",
+      "branch": "team/rev-usb-20261105",
+      "worktree": "worktrees/rev-usb-20261105",
+      "progress_note": "Ready for coordinator acceptance: initial review e5a857f and followup eb37732 resolve P2 USBREV-F01 in exact USB fix f3d705d. USBREV-002 independently passes2 exact source sets and34 omission/property/source/conditional negatives;107 session6 hashes match;C unchanged. No unresolved P0/P1/P2 in bounded host/source review;native USB/Apple/kernel claims remain unqualified.",
+      "next_step": "Coordinator accepts independent report and integrates only owned review commits; retain in_progress until acceptance, then owner may complete REV-001 with evidence.",
+      "handoff": "worktrees/rev-usb-20261105/docs/reviews/usb-001/handoff.md",
+      "evidence": "worktrees/rev-usb-20261105/docs/reviews/usb-001/followup-evidence.json",
+      "evidence_sha256": "8ae84fa15e0cb583ef39e3541c3690a6a672e24ff165191705f4183e42fc20ad",
+      "finished_at": "2026-11-05T14:01:29+00:00"
+    },
+    {
+      "id": "REV-002",
+      "title": "Independently review DRV-001 host implementation before integration",
+      "status": "done",
+      "owner": "codex-team-review-touch-20261105-ap",
+      "priority": 98,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002"
+      ],
+      "paths": [
+        "docs/reviews/drv-001"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Review exact implementation commit deb2f861160e6407f95de7f18e41b87603e651e9 and its actual tests/evidence without modifying the implementation;verify ownership/licensing,source pins and host-versus-native claims",
+        "Inspect correctness and security boundaries,integer and extent checks,lifecycle/error/Stop/disconnect behavior;independently reproduce at least one meaningful claimed check or counterexample where practical",
+        "Publish actionable findings with severity,file/line,reproduction and scope,or a bounded no-finding conclusion;do not use sanitizer/test success as proof of hardware or private Apple compatibility"
+      ],
+      "steps": [
+        "Read task DRV-001 and exact committed implementation plus existing evidence",
+        "Perform independent source review and bounded verification within the reviewer worktree",
+        "Commit only the review report and record real source-review evidence/handoff;send blockers/findings to coordinator before acceptance"
+      ],
+      "started_at": "2026-11-05T13:36:47+00:00",
+      "last_heartbeat": "2026-11-05T13:44:09+00:00",
+      "updated_at": "2026-11-05T13:56:12+00:00",
+      "branch": "team/rev-stm-20261105",
+      "worktree": "worktrees/rev-stm-20261105",
+      "progress_note": "Review-only commit afad83224c6b23dd6ce336520abd98c30e17682e ready: no actionable P0/P1/P2 within exact deb2f861 host contract. REVSTM-001 pass; actual capsule hashes/source pins audited; independent compiled Samsung declaration oracle12288 records plus lifecycle/reentry/status ASan+UBSan and exact14 candidate tests no skips. No native/Apple HID/device qualification.",
+      "next_step": "Coordinator review report/evidence and cherry-pick review-only commit alongside common integration checks; retain in_progress until explicit acceptance",
+      "handoff": "worktrees/rev-stm-20261105/docs/reviews/drv-001/handoff.md",
+      "evidence": "worktrees/rev-stm-20261105/artifacts/rev-stm/20261105-session2/evidence.json",
+      "evidence_sha256": "878935f035fb6872f9b7f2ff379bee7f1a72034652c1a053a2b9b43af97ae23c",
+      "finished_at": "2026-11-05T13:56:12+00:00"
+    },
+    {
+      "id": "REV-003",
+      "title": "Independently review ESIM-001 host implementation before integration",
+      "status": "done",
+      "owner": "codex-team-review-esim-20261105-aq",
+      "priority": 97,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "CELL-001"
+      ],
+      "paths": [
+        "docs/reviews/esim-001"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Review exact implementation commit 9daf884467c1fe0b816a53dafe86675587570605 and its actual tests/evidence without modifying the implementation;verify ownership/licensing,source pins and host-versus-native claims",
+        "Inspect correctness and security boundaries,integer and extent checks,lifecycle/error/Stop/disconnect behavior;independently reproduce at least one meaningful claimed check or counterexample where practical",
+        "Publish actionable findings with severity,file/line,reproduction and scope,or a bounded no-finding conclusion;do not use sanitizer/test success as proof of hardware or private Apple compatibility"
+      ],
+      "steps": [
+        "Read task ESIM-001 and exact committed implementation plus existing evidence",
+        "Perform independent source review and bounded verification within the reviewer worktree",
+        "Commit only the review report and record real source-review evidence/handoff;send blockers/findings to coordinator before acceptance"
+      ],
+      "started_at": "2026-11-05T13:37:41+00:00",
+      "last_heartbeat": "2026-11-05T13:44:58+00:00",
+      "updated_at": "2026-11-05T13:57:28+00:00",
+      "branch": "team/rev-esim-20261105",
+      "worktree": "worktrees/rev-esim-20261105",
+      "progress_note": "Independent review commit b005e7b: bounded no P0/P1/P2 findings at exact ESIM tip9daf884. ESIMREV-001 pass: original11 ASan/UBSan groups,independent263165 APDU cases/324 lifecycle-CLA sessions,actual negative controls and ARM64 ELF/MachO layout;all66 original artifact hashes and source pins verified;no device or implementation writes.",
+      "next_step": "Coordinator inspect review/evidence and integrate implementation plus review as appropriate;run primary make check and decide acceptance before task completion.",
+      "handoff": "worktrees/rev-esim-20261105/docs/reviews/esim-001/handoff.md",
+      "evidence": "worktrees/rev-esim-20261105/artifacts/rev-esim-001/review1/evidence.json",
+      "evidence_sha256": "8cfbb69a9d982b2afa5aa2c7d923840b700702545008abde0ad6cf1910610df4",
+      "finished_at": "2026-11-05T13:57:28+00:00"
+    },
+    {
+      "id": "REV-004",
+      "title": "Independently review SEN-001 source and host parser boundaries",
+      "status": "done",
+      "owner": "codex-team-review-sensors-20261105-ar",
+      "priority": 96,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002"
+      ],
+      "paths": [
+        "docs/reviews/sen-001"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Review exact sensor implementation commits f6b2072 and 82c8e94 with pinned SHUB and GNSS sources, all evidence hashes and original HAL identity provenance.",
+        "Independently test meaningful packet extent, timestamp, atomic output and unavailable-service cases; resolve the genuine GNSS struct versus offset helper discrepancy without editing implementation.",
+        "Publish actionable severity and reproduction or bounded no-finding report; native firmware, exact BYH3 and Apple ABI remain unqualified."
+      ],
+      "steps": [
+        "Atomically claim through the primary lab.py registry and inspect dependencies and reserved paths.",
+        "Work in a unique worktree; preserve phone restrictions and resource limits.",
+        "Record dated evidence and handoff, commit only owned paths, request coordinator integration review."
+      ],
+      "started_at": "2026-11-05T13:51:26+00:00",
+      "last_heartbeat": "2026-11-05T13:58:46+00:00",
+      "updated_at": "2026-11-05T14:03:02+00:00",
+      "branch": "team/rev-sensors-20261105",
+      "worktree": "worktrees/rev-sensors-20261105",
+      "progress_note": "Review-only commit d78299c4fa44cf386d44ac30a848375960912179 ready: no actionable P0/P1/P2 for exact f6b2072 plus82c8e94 host boundary. REVSEN-001 pass; source/capsule/HAL hashes checked, compiled actual GNSS writer resolves struct discrepancy, independent extent/atomic-output/timestamp/unavailable cases pass ASan+UBSan. No device/native/Apple ABI qualification.",
+      "next_step": "Coordinator inspect report/evidence, cherry-pick review-only commit and assess acceptance with common integration checks; retain in_progress until explicit acceptance",
+      "handoff": "worktrees/rev-sensors-20261105/docs/reviews/sen-001/handoff.md",
+      "evidence": "worktrees/rev-sensors-20261105/artifacts/rev-sensors/20261105-session1/evidence.json",
+      "evidence_sha256": "e9ee2ef79c90d221df424e2d1954d2e39dcd0eaac3854ce6a5af34f6e2cdb3b4",
+      "finished_at": "2026-11-05T14:03:02+00:00"
+    },
+    {
+      "id": "REV-005",
+      "title": "Independently review MISC-001 peripheral source specifications",
+      "status": "in_progress",
+      "owner": "codex-team-review-misc-20261105-as",
+      "priority": 95,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002"
+      ],
+      "paths": [
+        "docs/reviews/misc-001"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Review exact bf54dcdc4a92111f20b7a05b6ba435b2674d8251 source specifications and verify pinned source and evidence hashes.",
+        "Independently verify key NFC, biometric, haptic, codec and external display claims and run meaningful provenance rejection controls.",
+        "Publish actionable findings or bounded no-finding report; preserve unavailable firmware, secure-world and private Apple interfaces."
+      ],
+      "steps": [
+        "Atomically claim through the primary lab.py registry and inspect dependencies and reserved paths.",
+        "Work in a unique worktree; preserve phone restrictions and resource limits.",
+        "Record dated evidence and handoff, commit only owned paths, request coordinator integration review."
+      ],
+      "started_at": "2026-11-05T13:51:49+00:00",
+      "last_heartbeat": "2026-11-05T13:58:23+00:00",
+      "updated_at": "2026-11-05T13:58:23+00:00",
+      "branch": "team/rev-misc-20261105",
+      "worktree": "worktrees/rev-misc-20261105",
+      "progress_note": "Independent review-only commit d0e3e0e ready: bounded no P0/P1/P2 findings at exact misc tipbf54dcd. MISCREV-001 pass:66commands,22 raw source blobs/81anchors,16same/6different,all10 original evidence hashes and precommit-source binding;7 original plus12 reviewer provenance rejection controls;actual NFC/biometric/haptic/MFC/DP context verified,no native claim or implementation/reference/device writes.",
+      "next_step": "Coordinator inspect review commit/evidence, integrate review documentation and decide acceptance;leave REV-005 in_progress until explicitly accepted.",
+      "handoff": "worktrees/rev-misc-20261105/docs/reviews/misc-001/handoff.md"
+    },
+    {
+      "id": "KRN-023",
+      "title": "Qualify genuine corecrypto provider requirements for selected XNU link",
+      "status": "in_progress",
+      "owner": "codex-team-corecrypto-20261105-at",
+      "priority": 94,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "KRN-020",
+        "KRN-021"
+      ],
+      "paths": [
+        "tools/research/corecrypto",
+        "docs/procedures/corecrypto-provider",
+        "fixtures/public/corecrypto-provider",
+        "patches/corecrypto-provider"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Trace actual selected XNU crypto registration table, required cc_kext entry and known missing callbacks against full pinned primary sources and current link evidence.",
+        "Identify locally available or publicly licensed provider source with exact revision and provenance; distinguish missing private ABI or unavailable inputs from build failures.",
+        "Produce a repeatable input and ABI audit with actual negative controls and precise next integration gates; no fake archive, zero stubs, silent fallback or runtime/FIPS compatibility claims."
+      ],
+      "steps": [
+        "Atomically claim through the primary lab.py registry and inspect dependencies and reserved paths.",
+        "Work in a unique worktree; preserve phone restrictions and resource limits.",
+        "Record dated evidence and handoff, commit only owned paths, request coordinator integration review."
+      ],
+      "started_at": "2026-11-05T13:52:28+00:00",
+      "last_heartbeat": "2026-11-05T13:52:28+00:00",
+      "updated_at": "2026-11-05T13:52:28+00:00",
+      "branch": "team/krn-023-20261105",
+      "worktree": "worktrees/krn-023-20261105"
+    },
+    {
+      "id": "VM-004",
+      "title": "Prepare a locally built generic ARM64 QEMU virt and TCG host runner",
+      "status": "in_progress",
+      "owner": "codex-team-qemu-host-20261105-au",
+      "priority": 93,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-001",
+        "BLD-001"
+      ],
+      "paths": [
+        "tools/build/qemu_host.py",
+        "docs/procedures/qemu-host",
+        "fixtures/public/qemu-host"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Pin genuine primary QEMU source and dependencies; build generic aarch64-softmmu locally without global installs or modifications to shared references.",
+        "Actually demonstrate virt machine and TCG accelerator availability and bounded child-process termination; record commands, source and binary hashes and failures.",
+        "Document exact interface for later qualified XNU guest while retaining VM-002 blocked until actual guest execution; do not substitute a shim or Linux run for XNU proof."
+      ],
+      "steps": [
+        "Atomically claim through the primary lab.py registry and inspect dependencies and reserved paths.",
+        "Work in a unique worktree; preserve phone restrictions and resource limits.",
+        "Record dated evidence and handoff, commit only owned paths, request coordinator integration review."
+      ],
+      "started_at": "2026-11-05T13:53:55+00:00",
+      "last_heartbeat": "2026-11-05T13:53:55+00:00",
+      "updated_at": "2026-11-05T13:53:55+00:00",
+      "branch": "team/vm-004-20261105",
+      "worktree": "worktrees/vm-004-20261105"
+    },
+    {
+      "id": "REV-006",
+      "title": "Independently review genuine KRN-022 pthread component qualification",
+      "status": "in_progress",
+      "owner": "codex-team-review-pthread-20261105-av",
+      "priority": 99,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "KRN-021"
+      ],
+      "paths": [
+        "docs/reviews/krn-022"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Review exact implementation16a7497, pinned source inputs and all five passing pthread capsules, final PTHP012 acceptance and actual source-qualified archive without modifying implementation.",
+        "Independently verify meaningful callback ABI, allocator metadata, native installed-header/MIG context and real-provider alias/import claims using actual bytes or a counterexample; assess LTO, namespace remaps, unavailable header and Apple-private limits.",
+        "Publish actionable severity/reproduction or bounded no-finding verdict and repeatable reviewer evidence; no full SDK, private Apple ABI, crypto, full-link or runtime qualification inferred."
+      ],
+      "steps": [
+        "Atomically claim-next through primary registry and inspect dependencies/reservations.",
+        "Use separate reviewer worktree, read-only source and actual qualification artifacts, bounded small tests only.",
+        "Commit review docs only and record real evidence/handoff; retain in_progress for coordinator acceptance."
+      ],
+      "started_at": "2026-11-05T13:59:46+00:00",
+      "last_heartbeat": "2026-11-05T13:59:46+00:00",
+      "updated_at": "2026-11-05T13:59:46+00:00",
+      "branch": "team/rev-pthread-20261105",
+      "worktree": "worktrees/rev-pthread-20261105"
+    },
+    {
+      "id": "DRV-004",
+      "title": "Prepare source-qualified E1S UFS and MCQ read-only descriptor boundaries",
+      "status": "in_progress",
+      "owner": "codex-team-ufs-host-20261105-aw",
+      "priority": 80,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-002",
+        "BLD-001"
+      ],
+      "paths": [
+        "src/platform/storage/ufs",
+        "docs/procedures/ufs-host"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Trace exact pinned E1S UFS/MCQ donor and Samsung source, descriptor and completion layouts, read-only operations and DMA/lifecycle constraints; explicitly distinguish source facts and unavailable BYH3/native inputs.",
+        "Implement only a bounded host-buildable descriptor/completion admission boundary useful to future DRV-002; validate integer, extent, direction/write rejection and stale/error completion behavior against independently extracted genuine declarations, with actual host sanitizer and ARM64 compile evidence.",
+        "Record exact commands, hashes, negative controls and handoff to DRV-002 without editing its reserved src/xnu, patches/e1s, tests or fixtures paths; no MMIO, write/erase/format command, reset or phone operation."
+      ],
+      "steps": [
+        "Atomically claim through main lab.py and inspect DRV-002 plus own card; retain original dependencies and blocked reservations.",
+        "Use own narrow worktree and read-only main pinned references; derive only source-qualified host contracts, not hardware emulation.",
+        "Test meaningful actual source layout cases and adverse inputs, commit owned files and record evidence/handoff for coordinator review."
+      ],
+      "started_at": "2026-11-05T14:02:36+00:00",
+      "last_heartbeat": "2026-11-05T14:02:36+00:00",
+      "updated_at": "2026-11-05T14:02:36+00:00",
+      "branch": "team/drv-004-20261105",
+      "worktree": "worktrees/drv-004-20261105"
+    },
+    {
+      "id": "KRN-024",
+      "title": "Measure coherent selected kernel link with genuine pthread and firehose providers",
+      "status": "pending",
+      "owner": null,
+      "priority": 99,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "KRN-022",
+        "KRN-020",
+        "KRN-021"
+      ],
+      "paths": [
+        "tools/build/xnu_kernel_provider_link.py",
+        "docs/procedures/kernel-provider-link",
+        "fixtures/public/kernel-provider-link"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Revalidate exact982-object SGAP graph, genuine native KRN020 link recipe/filelists/aliases and matched firehose plus KRN022 current source-qualified pthread archive; preserve original prefixes and ownership.",
+        "Execute bounded genuine selected linking with those exact providers and required native libraries, inspecting actual diagnostics/output and remaining provider requirements; distinguish absent cc_kext or other inputs from full-image success. No omitted required library, fake archive or stub may manufacture success.",
+        "Publish coherent actual input/output/command hashes, real source-backed provider inventories and precise next blockers. Host experiment may pass only its stated measurement checks; full kernel, Apple ABI, runtime and hardware remain false unless independently established."
+      ],
+      "steps": [
+        "Wait for genuine KRN022 acceptance,then atomically claim-next through main registry and create separate worktree.",
+        "Derive actual native link command and current coherent source/object/header witnesses; do not invent kernel layout or symbols.",
+        "Run one bounded link stage within resource budget,record real evidence/handoff and scoped commit for coordinator review."
+      ]
     }
   ],
   "experiments": [
@@ -7322,6 +7715,500 @@
       "evidence_sha256": "96898571273a76ba5d514d398d7e7d192beca8d342610b0b69d46af864fb62f6",
       "outcome": "pass",
       "recorded_at": "2026-11-05T13:02:02+00:00"
+    },
+    {
+      "id": "STMHOST-001",
+      "task": "DRV-001",
+      "owner": "codex-team-touch-20261105-aj",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "An owned freestanding STM16 parser and acknowledged host adapter implement the pinned corrected coordinate layout,fail closed on damaged contact streams,and preserve releases until delivery;host and ARM compile checks do not claim SPI/IRQ/power or native HID execution",
+      "procedure": "worktrees/drv-001-20261105/docs/procedures/drv-001/README.md",
+      "timeout_seconds": 600,
+      "created_at": "2026-11-05T13:13:18+00:00",
+      "evidence": "worktrees/drv-001-20261105/artifacts/stm-host/initial-session1/evidence.json",
+      "evidence_sha256": "d253223211db0def1291f92d9b9db4951fbf11ddc70edf23c58b860780da7473",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T13:18:07+00:00"
+    },
+    {
+      "id": "ESIMHOST-001",
+      "task": "ESIM-001",
+      "owner": "codex-team-esim-20261105-ak",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Owned bounded APDU parser and injected session layer preserve channel ownership,card status versus transport errors,cancellation and cleanup uncertainty under actual host sanitizer tests and ARM64 compilation;no physical transport or provisioning claim follows",
+      "procedure": "worktrees/esim-001-20261105/docs/procedures/esim-001/README.md",
+      "timeout_seconds": 600,
+      "created_at": "2026-11-05T13:13:25+00:00",
+      "evidence": "worktrees/esim-001-20261105/artifacts/esim-001/session1/evidence.json",
+      "evidence_sha256": "7ef599ce542e93ba54d5d61433de1a8a92fc02065783f87be53d9ad1743595c4",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T13:18:38+00:00"
+    },
+    {
+      "id": "USBHOST-001",
+      "task": "USB-001",
+      "owner": "codex-team-usb-20261105-ai",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "An allocation-free owned read-only block framing/client/server adapter rejects malformed,oversized,overflow,write,replay and disconnected work before backend use;bounded host sanitizer and ARM object checks and exact source-pin USB/PHY/DMA evidence qualify host preparation only",
+      "procedure": "worktrees/usb-001-20261105/docs/procedures/usb-001/README.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T13:13:30+00:00",
+      "evidence": "worktrees/usb-001-20261105/artifacts/usb-readonly/host-session1/failure-record.json",
+      "evidence_sha256": "5224eb54ca9a685f5de65daae1c2210d4bfa3b3c571805281ee8854788c8b810",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T13:21:26+00:00"
+    },
+    {
+      "id": "PTHP-009",
+      "task": "KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The native three-name alias subset binds genuine VM implementations at identical real code addresses;redirecting vm_fault to another real function keeps a public symbol but is detected as a wrong provider,without runtime or full-kernel claims",
+      "procedure": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T13:14:41+00:00",
+      "evidence": "artifacts/xnu-kernel-pthread-profile/aliases-session1/evidence.json",
+      "evidence_sha256": "a6af1626e8744b1a603869754f7fa65e7aec5d5ee84530235e65d5af00a62f68",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:15:56+00:00"
+    },
+    {
+      "id": "PTHP-010",
+      "task": "KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The four generated Mach headers actually used by pthread are freshly regenerated from exact native installed-header MIG recipes and flags,current real compiler and native unifdef;their installed bytes match the qualified profile despite its earlier reuse of kernel-context generated witnesses",
+      "procedure": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T13:17:29+00:00",
+      "evidence": "artifacts/xnu-kernel-pthread-profile/native-mig-session1/evidence.json",
+      "evidence_sha256": "6415d6a736d69d25f733cb54918f757a5911295cfcdbb61e858421b10abb1f5a",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T13:19:07+00:00"
+    },
+    {
+      "id": "STMHOST-002",
+      "task": "DRV-001",
+      "owner": "codex-team-touch-20261105-aj",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Corrected handwritten wet-type fixture and bytes conversion permit all real STM parser/adapter tests,corrected-donor equivalence,sanitizer guard bounds and ARM64 target compilation while preserving all initial failures",
+      "procedure": "worktrees/drv-001-20261105/docs/procedures/drv-001/README.md",
+      "timeout_seconds": 600,
+      "created_at": "2026-11-05T13:18:23+00:00",
+      "evidence": "worktrees/drv-001-20261105/artifacts/stm-host/qualified-session1/evidence.json",
+      "evidence_sha256": "b8736f91e1fe1cc54a3a8090d0811f683cf214b52ea8d76fdf76c415e216ba07",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T13:23:03+00:00"
+    },
+    {
+      "id": "PTHP-011",
+      "task": "KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Native recursive relative source paths retain their leading dot so MakeInc.def selects osfmk rather than mach as component;the corrected genuine MIG include context regenerates the four used Mach headers for exact installed-byte comparison",
+      "procedure": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T13:19:15+00:00",
+      "evidence": "artifacts/xnu-kernel-pthread-profile/native-mig-session2/evidence.json",
+      "evidence_sha256": "1fd4f0cc09a8a15c0c84a7d743bf69f9de0c1ffdc74e2cee1ba7e6d18e773773",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:21:19+00:00"
+    },
+    {
+      "id": "USBHOST-002",
+      "task": "USB-001",
+      "owner": "codex-team-usb-20261105-ai",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Correcting the response-opcode mutation to change the high byte actually changes reply0x8001 to request1;all actual boundary/lifecycle/read-only file/sanitizer/ARM checks remain unchanged and independent Python wire serialization agrees",
+      "procedure": "worktrees/usb-001-20261105/docs/procedures/usb-001/README.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T13:19:28+00:00",
+      "evidence": "worktrees/usb-001-20261105/artifacts/usb-readonly/host-session2/evidence.json",
+      "evidence_sha256": "1d515a98b5546d0c6d6ba315cbe8261fcef6c5e0894e369e7d5eb9f5fc0c23fa",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:21:35+00:00"
+    },
+    {
+      "id": "ESIMHOST-002",
+      "task": "ESIM-001",
+      "owner": "codex-team-esim-20261105-ak",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Strict host GCC and available NDK Clang ASan/UBSan execute the ten real parser/session/cancellation/error scenario groups;native ARM64 ELF/Mach-O objects agree on interface layout;the absent GCC sanitizer libraries remain an explicit separate failed experiment",
+      "procedure": "worktrees/esim-001-20261105/docs/procedures/esim-001/README.md",
+      "timeout_seconds": 600,
+      "created_at": "2026-11-05T13:19:34+00:00",
+      "evidence": "worktrees/esim-001-20261105/artifacts/esim-001/session2/evidence.json",
+      "evidence_sha256": "57b97b7e830bc63ff0411ff6d79a6238ac50675d2d53b3699b781aac54d22412",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T13:20:08+00:00"
+    },
+    {
+      "id": "USBHOST-003",
+      "task": "USB-001",
+      "owner": "codex-team-usb-20261105-ai",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Additional full reconnect-after-late-response,near-UINT64_MAX byte range and full64-bit DMA-boundary cases preserve bounded read-only semantics;all sanitizer,source,independent wire and ARM checks pass with complete failure metadata",
+      "procedure": "worktrees/usb-001-20261105/docs/procedures/usb-001/README.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T13:21:43+00:00",
+      "evidence": "worktrees/usb-001-20261105/artifacts/usb-readonly/host-session3/evidence.json",
+      "evidence_sha256": "18a7054a26b02ea94d69a5b2dff5a1f35f92667209084b9b62abf70905ecc68b",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:23:13+00:00"
+    },
+    {
+      "id": "USBHOST-004",
+      "task": "USB-001",
+      "owner": "codex-team-usb-20261105-ai",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Both pinned BSP revisions independently retain exact DWC3/PHY/DMA facts and the retail hsi2c34 TUSB2E11 repeater;source differences stay explicit while the unchanged read-only adapter retains all sanitizer,boundary,file and4 target object checks",
+      "procedure": "worktrees/usb-001-20261105/docs/procedures/usb-001/README.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T13:23:21+00:00",
+      "evidence": "worktrees/usb-001-20261105/artifacts/usb-readonly/host-session4/evidence.json",
+      "evidence_sha256": "59a2406eb2e82505568e8f92079e50d43f3b0a7a2b280aaa3749b7aa9cc4cebd",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:25:46+00:00"
+    },
+    {
+      "id": "ESIMHOST-003",
+      "task": "ESIM-001",
+      "owner": "codex-team-esim-20261105-ak",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Actual GCC strict and Clang runtime-free UBSan trap builds execute eleven session/parser/guard-page scenario groups;an intentional signed-overflow binary contains UBSan IR instrumentation and terminates by SIGILL;ARM64 data layouts agree while unavailable ASan runtimes remain explicit",
+      "procedure": "worktrees/esim-001-20261105/docs/procedures/esim-001/README.md",
+      "timeout_seconds": 600,
+      "created_at": "2026-11-05T13:23:28+00:00",
+      "evidence": "worktrees/esim-001-20261105/artifacts/esim-001/session3/evidence.json",
+      "evidence_sha256": "e1ac040b1bee419fc3642e0c074b9ae64237751bdea48fd52bfb549e43616dae",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T13:23:45+00:00"
+    },
+    {
+      "id": "USBHOST-005",
+      "task": "USB-001",
+      "owner": "codex-team-usb-20261105-ai",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Verified NDK27 host sanitizer runtime must reject deliberate heap overflow and signed integer overflow while the final owned transport, source comparisons and four target objects still pass",
+      "procedure": "worktrees/usb-001-20261105/docs/procedures/usb-001/README.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T13:26:06+00:00",
+      "evidence": "worktrees/usb-001-20261105/artifacts/usb-readonly/host-session5/evidence.json",
+      "evidence_sha256": "60681756f2c475ff9cee17fb80a1637aed8c1ac737116df4fa47d9071372dd0b",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:27:24+00:00"
+    },
+    {
+      "id": "ESIMHOST-004",
+      "task": "ESIM-001",
+      "owner": "codex-team-esim-20261105-ak",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Existing NDK27 native Linux ASan+UBSan executes all eleven synthetic-peer scenarios and diagnoses intentional heap overflow;trap UBSan catches deliberate signed overflow;freestanding GCC/Clang intrinsic atomics remove Android header dependency and actual ARM64 layouts agree",
+      "procedure": "worktrees/esim-001-20261105/docs/procedures/esim-001/README.md",
+      "timeout_seconds": 600,
+      "created_at": "2026-11-05T13:26:16+00:00",
+      "evidence": "worktrees/esim-001-20261105/artifacts/esim-001/session4/evidence.json",
+      "evidence_sha256": "fd5025d4a3618bd3f16c8401810f5a3fe403769db5d6eeaa0de81950d61a2274",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T13:27:04+00:00"
+    },
+    {
+      "id": "STMHOST-003",
+      "task": "DRV-001",
+      "owner": "codex-team-touch-20261105-aj",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The actual owned STM parser and acknowledged adapter pass corrected-donor, malformed-frame, guard-page and ASan/UBSan runtime controls using the existing NDK27 host runtime, and produce two ARM64 Mach-O objects without hardware I/O.",
+      "procedure": "worktrees/drv-001-20261105/docs/procedures/drv-001/README.md",
+      "timeout_seconds": 240,
+      "created_at": "2026-11-05T13:26:26+00:00",
+      "evidence": "worktrees/drv-001-20261105/artifacts/stm-host/qualified-session2/evidence.json",
+      "evidence_sha256": "39ad8ce14dbcbcee76985ed32d58b262df24b3f45453026763971e7dc562f023",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:28:15+00:00"
+    },
+    {
+      "id": "STMHOST-004",
+      "task": "DRV-001",
+      "owner": "codex-team-touch-20261105-aj",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Final exact source bytes retain both nested host compiler commands, compiler hash, actual corrected donor extracts, passing 14 real parser tests and sanitizer controls, and two ARM64 objects.",
+      "procedure": "worktrees/drv-001-20261105/docs/procedures/drv-001/README.md",
+      "timeout_seconds": 240,
+      "created_at": "2026-11-05T13:27:51+00:00",
+      "evidence": "worktrees/drv-001-20261105/artifacts/stm-host/commit-session1/evidence.json",
+      "evidence_sha256": "f2dc1fed5fe6a9d22de69100cdd0173c32c97ff2bdbcfc6f7a3f04dce6006ada",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:29:40+00:00"
+    },
+    {
+      "id": "ESIMHOST-005",
+      "task": "ESIM-001",
+      "owner": "codex-team-esim-20261105-ak",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "After explicit int32 channel-range correction actual strict GCC, UBSan trap, native ASan+UBSan, deliberate sanitizer failures, and ARM64 ELF/MachO module/layout controls all execute successfully with physical transport claims false",
+      "procedure": "worktrees/esim-001-20261105/docs/procedures/esim-001/README.md",
+      "timeout_seconds": 600,
+      "created_at": "2026-11-05T13:27:58+00:00",
+      "evidence": "worktrees/esim-001-20261105/artifacts/esim-001/session5/evidence.json",
+      "evidence_sha256": "80c28f663d0059731e9a032640a0268420e96e9423c49392b7baec02015e075e",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:28:33+00:00"
+    },
+    {
+      "id": "SENHOST-001",
+      "task": "SEN-001",
+      "owner": "codex-team-sensors-20261105-al",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Pinned E1S SHUB and GNSS header contracts admit bounded host decoders with explicit unavailable-service and boot-time timestamp behavior",
+      "procedure": "worktrees/sen-001-20261105/docs/procedures/sen-001/README.md",
+      "timeout_seconds": 120,
+      "created_at": "2026-11-05T13:29:24+00:00",
+      "evidence": "worktrees/sen-001-20261105/artifacts/sen-001/20261105-host-001/evidence.json",
+      "evidence_sha256": "bc4a313df7cbeb82a65f389a0d80d9c8ec752a4c8d5e50bbe4d8beed9832b5c5",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T13:32:16+00:00"
+    },
+    {
+      "id": "MISCHOST-001",
+      "task": "MISC-001",
+      "owner": "codex-team-misc-20261105-an",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Pinned E1S BSP identifies concrete board/driver boundaries and unresolved proprietary inputs for five miscellaneous peripherals; host source assertions can verify mappings without hardware claims.",
+      "procedure": "worktrees/misc-001-20261105/docs/procedures/misc-001/README.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T13:29:34+00:00",
+      "evidence": "worktrees/misc-001-20261105/artifacts/misc-001/2026-11-05-source-audit/evidence.json",
+      "evidence_sha256": "458a5ab066a99c8b5cc3588347c49974e8ba293e196d1f24b434c868736b8abb",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:39:48+00:00"
+    },
+    {
+      "id": "VMHOST-001",
+      "task": "VM-002",
+      "owner": "codex-team-vm-20261105-am",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Pinned source review and bounded existing-tool compilation can qualify guest prerequisites and an owned raw-syscall PID1 executable; actual XNU guest execution remains unproven until a complete compatible kernel and emulator are supplied.",
+      "procedure": "worktrees/vm-002-20261105/docs/procedures/vm-002/experiment.md",
+      "timeout_seconds": 180,
+      "created_at": "2026-11-05T13:30:08+00:00",
+      "evidence": "worktrees/vm-002-20261105/docs/procedures/vm-002/evidence.json",
+      "evidence_sha256": "a890c79171a3003d086c0a30e5056b99ff8052e34091b2634627480c9ce8a62f",
+      "outcome": "inconclusive",
+      "recorded_at": "2026-11-05T13:40:59+00:00"
+    },
+    {
+      "id": "SENHOST-002",
+      "task": "SEN-001",
+      "owner": "codex-team-sensors-20261105-al",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Corrected isolated support-header guard allows genuine SHUB declaration oracle; preserved parser sanitizer controls and captured identity verification pass",
+      "procedure": "worktrees/sen-001-20261105/docs/procedures/sen-001/README.md",
+      "timeout_seconds": 120,
+      "created_at": "2026-11-05T13:32:30+00:00",
+      "evidence": "worktrees/sen-001-20261105/artifacts/sen-001/20261105-host-002/evidence.json",
+      "evidence_sha256": "b7a56c30a205e805269ff850a13521bb59824d25b01090188e1c0d75bd5c1227",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:34:09+00:00"
+    },
+    {
+      "id": "VMHOST-002",
+      "task": "VM-002",
+      "owner": "codex-team-vm-20261105-am",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Five small pinned AVF shim sources can compile and link with installed LLVM and reviewed placeholder identity; no Apple data acquisition or guest execution is required to resolve this prerequisite.",
+      "procedure": "worktrees/vm-002-20261105/docs/procedures/vm-002/shim-experiment.md",
+      "timeout_seconds": 180,
+      "created_at": "2026-11-05T13:35:46+00:00",
+      "evidence": "worktrees/vm-002-20261105/docs/procedures/vm-002/evidence-shim.json",
+      "evidence_sha256": "56a6c5761aa9c92590ffa0fa171dbd3112ed19319187f4718bd95c54a9a55fc9",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:41:08+00:00"
+    },
+    {
+      "id": "REVSTM-001",
+      "task": "REV-002",
+      "owner": "codex-team-review-touch-20261105-ap",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "Exact deb2f861 STM boundary preserves bounded decode and acknowledged lifecycle under independently chosen records and callback outcomes; source donor and evidence claims match pinned bytes",
+      "procedure": "worktrees/rev-stm-20261105/docs/reviews/drv-001/procedure.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-05T13:37:35+00:00",
+      "evidence": "worktrees/rev-stm-20261105/artifacts/rev-stm/20261105-session2/evidence.json",
+      "evidence_sha256": "878935f035fb6872f9b7f2ff379bee7f1a72034652c1a053a2b9b43af97ae23c",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:43:47+00:00"
+    },
+    {
+      "id": "USBREV-001",
+      "task": "REV-001",
+      "owner": "codex-team-review-usb-20261105-ao",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "Exact USB-001 commit implements the documented serialized host protocol and DMA arithmetic without an independently reproducible correctness defect; saved evidence supports bounded host/source claims only.",
+      "procedure": "worktrees/rev-usb-20261105/docs/reviews/usb-001/procedure.md",
+      "timeout_seconds": 600,
+      "created_at": "2026-11-05T13:38:16+00:00",
+      "evidence": "worktrees/rev-usb-20261105/docs/reviews/usb-001/evidence.json",
+      "evidence_sha256": "70d883acac83dc1777bfe84cb7f8ae41f108fd19e87e9e9fda100517db9df297",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:43:15+00:00"
+    },
+    {
+      "id": "ESIMREV-001",
+      "task": "REV-003",
+      "owner": "codex-team-review-esim-20261105-aq",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "Exact ESIM-001 tip has bounded APDU framing and at-most-once ownership cleanup under documented callback contract; independently reproduce synthetic scenarios and inspect actual source pins, artifact hashes and ARM layout.",
+      "procedure": "worktrees/rev-esim-20261105/docs/reviews/esim-001/README.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-05T13:38:33+00:00",
+      "evidence": "worktrees/rev-esim-20261105/artifacts/rev-esim-001/review1/evidence.json",
+      "evidence_sha256": "8cfbb69a9d982b2afa5aa2c7d923840b700702545008abde0ad6cf1910610df4",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:44:30+00:00"
+    },
+    {
+      "id": "USBHOST-006",
+      "task": "USB-001",
+      "owner": "codex-team-usb-20261105-ai",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Both enabled retail hsi2c_34 repeater source nodes match the complete machine-readable profile at both pinned revisions, omission of either profile or source node is detected, and existing bounded USB host checks still pass",
+      "procedure": "worktrees/usb-001-20261105/docs/procedures/usb-001/README.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T13:42:15+00:00",
+      "evidence": "worktrees/usb-001-20261105/artifacts/usb-readonly/host-session6/evidence.json",
+      "evidence_sha256": "b17b36d35435a4c0d72eb6341140cf4300d650406ae9d9ff8e23c9ec29ff708f",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:43:37+00:00"
+    },
+    {
+      "id": "USBREV-002",
+      "task": "REV-001",
+      "owner": "codex-team-review-usb-20261105-ao",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "Fix f3d705d resolves USBREV-F01 with complete two-node source profile, preserved hardware disclaimers and genuine omission/mismatch rejection; prior independent C verification remains applicable because C is unchanged.",
+      "procedure": "worktrees/rev-usb-20261105/docs/reviews/usb-001/followup-procedure.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T13:45:13+00:00",
+      "evidence": "worktrees/rev-usb-20261105/docs/reviews/usb-001/followup-evidence.json",
+      "evidence_sha256": "8ae84fa15e0cb583ef39e3541c3690a6a672e24ff165191705f4183e42fc20ad",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:47:27+00:00"
+    },
+    {
+      "id": "REVSEN-001",
+      "task": "REV-004",
+      "owner": "codex-team-review-sensors-20261105-ar",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "Exact sensor host parser matches pinned SHUB and GNSS writer boundaries, preserves outputs on invalid/unavailable packets and handles sample clock extremes without assigning native compatibility",
+      "procedure": "worktrees/rev-sensors-20261105/docs/reviews/sen-001/procedure.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-05T13:52:17+00:00",
+      "evidence": "worktrees/rev-sensors-20261105/artifacts/rev-sensors/20261105-session1/evidence.json",
+      "evidence_sha256": "e9ee2ef79c90d221df424e2d1954d2e39dcd0eaac3854ce6a5af34f6e2cdb3b4",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:58:03+00:00"
+    },
+    {
+      "id": "MISCREV-001",
+      "task": "REV-005",
+      "owner": "codex-team-review-misc-20261105-as",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "MISC-001 accurately distinguishes pinned peripheral source facts from unavailable runtime/security/Apple qualification and rejects meaningful provenance mutations.",
+      "procedure": "worktrees/rev-misc-20261105/docs/reviews/misc-001/README.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-05T13:52:35+00:00",
+      "evidence": "worktrees/rev-misc-20261105/artifacts/rev-misc-001/review1/evidence.json",
+      "evidence_sha256": "1269b94d03533a49dc25eb9769ea6841dab82ae648971584cb8d386fdef5a870",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:57:39+00:00"
+    },
+    {
+      "id": "CCPROV-001",
+      "task": "KRN-023",
+      "owner": "codex-team-corecrypto-20261105-at",
+      "kind": "source-review",
+      "status": "planned",
+      "hypothesis": "A pinned source/object/link audit can establish the real selected crypto registration ABI and missing provider requirements without treating minicrypto, public evaluation-only corecrypto or algorithm selftests as a complete compatible provider.",
+      "procedure": "worktrees/krn-023-20261105/docs/procedures/corecrypto-provider/README.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-05T13:54:24+00:00"
+    },
+    {
+      "id": "PTHP-012",
+      "task": "KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "All four bounded pthread component acceptance criteria are supported by coherent actual source, object, metadata, provider, native MIG and common repository witnesses.",
+      "procedure": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "timeout_seconds": 240,
+      "created_at": "2026-11-05T13:55:10+00:00",
+      "evidence": "artifacts/xnu-kernel-pthread-profile/acceptance-session1/evidence.json",
+      "evidence_sha256": "7e3aefe6d7f38e3a8c08275c1b0c333a463b500367b0c7353d716b1f8a79fa62",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T13:58:13+00:00"
+    },
+    {
+      "id": "QEMUHOST-001",
+      "task": "VM-004",
+      "owner": "codex-team-qemu-host-20261105-au",
+      "kind": "host-test",
+      "status": "planned",
+      "hypothesis": "Pinned primary QEMU10.2.0 can build generic aarch64-softmmu virt/TCG with available host dependencies and local bundled source dependencies under monitored2job lease; actual help and bounded stopped-machine lifecycle qualify the host tool without any guest OS.",
+      "procedure": "worktrees/vm-004-20261105/docs/procedures/qemu-host/experiment.md",
+      "timeout_seconds": 3600,
+      "created_at": "2026-11-05T13:55:36+00:00"
+    },
+    {
+      "id": "PTHPREV-001",
+      "task": "REV-006",
+      "owner": "codex-team-review-pthread-20261105-av",
+      "kind": "source-review",
+      "status": "planned",
+      "hypothesis": "Genuine pthread component capsules bind actual installed headers, compiler metadata, callback layout and provider aliases to the measured BUILD_LTO=0 archive without claiming full SDK, Apple ABI or runtime qualification.",
+      "procedure": "worktrees/rev-pthread-20261105/docs/reviews/krn-022/README.md",
+      "timeout_seconds": 1200,
+      "created_at": "2026-11-05T14:00:54+00:00"
+    },
+    {
+      "id": "UFSHOST-001",
+      "task": "DRV-004",
+      "owner": "codex-team-ufs-host-20261105-aw",
+      "kind": "host-test",
+      "status": "planned",
+      "hypothesis": "Exact pinned E1S and Samsung declarations can qualify a bounded read-only host descriptor/completion admission boundary, independently check layout and reject writes, overflow, stale/error completion and unsafe DMA reuse without hardware I/O.",
+      "procedure": "worktrees/drv-004-20261105/docs/procedures/ufs-host/README.md",
+      "timeout_seconds": 240,
+      "created_at": "2026-11-05T14:03:37+00:00"
     }
   ],
   "events": [
@@ -14708,6 +15595,1211 @@
           "last_heartbeat": "2026-11-05T13:09:51+00:00",
           "branch": "team/esim-001-20261105",
           "worktree": "worktrees/esim-001-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:12:43+00:00",
+      "action": "task.update:KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "tasks": [
+        {
+          "id": "KRN-022",
+          "status": "in_progress",
+          "owner": "codex-kernel-pthread-profile-20261105-ag",
+          "priority": 99,
+          "progress_note": "Pthread component and15 actual source/ABI/metadata/VM-alias controls pass;checkpoint committed;coordinator now uses isolated worktree while three independent host executors own USB001,DRV001,ESIM001",
+          "next_step": "Finish exact native MIG-header context comparison and wrong-alias negative control,then final acceptance and integration",
+          "last_heartbeat": "2026-11-05T13:12:43+00:00",
+          "branch": "team/krn-022-coordinator-20261105",
+          "worktree": "worktrees/krn-022-coordinator-20261105",
+          "handoff": "docs/procedures/xnu-kernel-pthread-profile.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:13:18+00:00",
+      "action": "experiment.plan:STMHOST-001",
+      "owner": "codex-team-touch-20261105-aj"
+    },
+    {
+      "at": "2026-11-05T13:13:25+00:00",
+      "action": "experiment.plan:ESIMHOST-001",
+      "owner": "codex-team-esim-20261105-ak"
+    },
+    {
+      "at": "2026-11-05T13:13:30+00:00",
+      "action": "experiment.plan:USBHOST-001",
+      "owner": "codex-team-usb-20261105-ai"
+    },
+    {
+      "at": "2026-11-05T13:13:52+00:00",
+      "action": "task.prioritize:SEN-001",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "SEN-001",
+          "status": "pending",
+          "owner": null,
+          "priority": 92,
+          "priority_reason": "Next independent host executor for pinned sensor-hub/GNSS interfaces after USB,touch,eSIM;queue if session capacity is full"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:14:41+00:00",
+      "action": "experiment.plan:PTHP-009",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T13:15:56+00:00",
+      "action": "experiment.record:PTHP-009",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T13:17:29+00:00",
+      "action": "experiment.plan:PTHP-010",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T13:18:07+00:00",
+      "action": "experiment.record:STMHOST-001",
+      "owner": "codex-team-touch-20261105-aj"
+    },
+    {
+      "at": "2026-11-05T13:18:23+00:00",
+      "action": "experiment.plan:STMHOST-002",
+      "owner": "codex-team-touch-20261105-aj"
+    },
+    {
+      "at": "2026-11-05T13:18:38+00:00",
+      "action": "experiment.record:ESIMHOST-001",
+      "owner": "codex-team-esim-20261105-ak"
+    },
+    {
+      "at": "2026-11-05T13:19:07+00:00",
+      "action": "experiment.record:PTHP-010",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T13:19:15+00:00",
+      "action": "experiment.plan:PTHP-011",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T13:19:28+00:00",
+      "action": "experiment.plan:USBHOST-002",
+      "owner": "codex-team-usb-20261105-ai"
+    },
+    {
+      "at": "2026-11-05T13:19:34+00:00",
+      "action": "experiment.plan:ESIMHOST-002",
+      "owner": "codex-team-esim-20261105-ak"
+    },
+    {
+      "at": "2026-11-05T13:20:08+00:00",
+      "action": "experiment.record:ESIMHOST-002",
+      "owner": "codex-team-esim-20261105-ak"
+    },
+    {
+      "at": "2026-11-05T13:21:19+00:00",
+      "action": "experiment.record:PTHP-011",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T13:21:26+00:00",
+      "action": "experiment.record:USBHOST-001",
+      "owner": "codex-team-usb-20261105-ai"
+    },
+    {
+      "at": "2026-11-05T13:21:35+00:00",
+      "action": "experiment.record:USBHOST-002",
+      "owner": "codex-team-usb-20261105-ai"
+    },
+    {
+      "at": "2026-11-05T13:21:43+00:00",
+      "action": "experiment.plan:USBHOST-003",
+      "owner": "codex-team-usb-20261105-ai"
+    },
+    {
+      "at": "2026-11-05T13:23:03+00:00",
+      "action": "experiment.record:STMHOST-002",
+      "owner": "codex-team-touch-20261105-aj"
+    },
+    {
+      "at": "2026-11-05T13:23:13+00:00",
+      "action": "experiment.record:USBHOST-003",
+      "owner": "codex-team-usb-20261105-ai"
+    },
+    {
+      "at": "2026-11-05T13:23:21+00:00",
+      "action": "experiment.plan:USBHOST-004",
+      "owner": "codex-team-usb-20261105-ai"
+    },
+    {
+      "at": "2026-11-05T13:23:28+00:00",
+      "action": "experiment.plan:ESIMHOST-003",
+      "owner": "codex-team-esim-20261105-ak"
+    },
+    {
+      "at": "2026-11-05T13:23:45+00:00",
+      "action": "experiment.record:ESIMHOST-003",
+      "owner": "codex-team-esim-20261105-ak"
+    },
+    {
+      "at": "2026-11-05T13:25:46+00:00",
+      "action": "experiment.record:USBHOST-004",
+      "owner": "codex-team-usb-20261105-ai"
+    },
+    {
+      "at": "2026-11-05T13:25:56+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-sensors-20261105-al",
+      "tasks": [
+        {
+          "id": "SEN-001",
+          "status": "in_progress",
+          "owner": "codex-team-sensors-20261105-al",
+          "priority": 92,
+          "priority_reason": "Next independent host executor for pinned sensor-hub/GNSS interfaces after USB,touch,eSIM;queue if session capacity is full",
+          "last_heartbeat": "2026-11-05T13:25:56+00:00",
+          "branch": "team/sen-001-20261105",
+          "worktree": "worktrees/sen-001-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:26:06+00:00",
+      "action": "experiment.plan:USBHOST-005",
+      "owner": "codex-team-usb-20261105-ai"
+    },
+    {
+      "at": "2026-11-05T13:26:16+00:00",
+      "action": "experiment.plan:ESIMHOST-004",
+      "owner": "codex-team-esim-20261105-ak"
+    },
+    {
+      "at": "2026-11-05T13:26:26+00:00",
+      "action": "experiment.plan:STMHOST-003",
+      "owner": "codex-team-touch-20261105-aj"
+    },
+    {
+      "at": "2026-11-05T13:27:04+00:00",
+      "action": "experiment.record:ESIMHOST-004",
+      "owner": "codex-team-esim-20261105-ak"
+    },
+    {
+      "at": "2026-11-05T13:27:24+00:00",
+      "action": "experiment.record:USBHOST-005",
+      "owner": "codex-team-usb-20261105-ai"
+    },
+    {
+      "at": "2026-11-05T13:27:37+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-vm-20261105-am",
+      "tasks": [
+        {
+          "id": "VM-002",
+          "status": "in_progress",
+          "owner": "codex-team-vm-20261105-am",
+          "priority": 70,
+          "progress_note": "Automatic claim corrected before work;no VM files,experiments or processes touched. Current priority is new genuine IOKit IIG integration task KRN-019.",
+          "next_step": "Release this untouched VM claim;future VM work follows original acceptance and scope.",
+          "last_heartbeat": "2026-11-05T13:27:37+00:00",
+          "branch": "team/vm-002-20261105",
+          "worktree": "worktrees/vm-002-20261105",
+          "handoff": "artifacts/planning/VM-002-release.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:27:44+00:00",
+      "action": "task.update:USB-001",
+      "owner": "codex-team-usb-20261105-ai",
+      "tasks": [
+        {
+          "id": "USB-001",
+          "status": "in_progress",
+          "owner": "codex-team-usb-20261105-ai",
+          "priority": 95,
+          "priority_reason": "Independent host USB/block path supports native logs and root transport while kernel work continues",
+          "progress_note": "Ready for coordinator review: owned commit e178587, source-qualified exact E1S USB profile and bounded read-only client/server/DMA arithmetic. USBHOST-005 passed20 runner checks,63482 assertions,20000 mutations,actual readonly file,ASan/UBSan negative controls and4 target objects;native hardware remains unqualified.",
+          "next_step": "Coordinator reviews/cherry-picks e178587 and records main make check before completion;no device operations authorized by this evidence.",
+          "last_heartbeat": "2026-11-05T13:27:44+00:00",
+          "branch": "team/usb-001-20261105",
+          "worktree": "worktrees/usb-001-20261105",
+          "handoff": "worktrees/usb-001-20261105/docs/procedures/usb-001/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:27:51+00:00",
+      "action": "experiment.plan:STMHOST-004",
+      "owner": "codex-team-touch-20261105-aj"
+    },
+    {
+      "at": "2026-11-05T13:27:58+00:00",
+      "action": "experiment.plan:ESIMHOST-005",
+      "owner": "codex-team-esim-20261105-ak"
+    },
+    {
+      "at": "2026-11-05T13:28:15+00:00",
+      "action": "experiment.record:STMHOST-003",
+      "owner": "codex-team-touch-20261105-aj"
+    },
+    {
+      "at": "2026-11-05T13:28:27+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-misc-20261105-an",
+      "tasks": [
+        {
+          "id": "MISC-001",
+          "status": "in_progress",
+          "owner": "codex-team-misc-20261105-an",
+          "priority": 70,
+          "last_heartbeat": "2026-11-05T13:28:27+00:00",
+          "branch": "team/misc-001-20261105",
+          "worktree": "worktrees/misc-001-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:28:33+00:00",
+      "action": "experiment.record:ESIMHOST-005",
+      "owner": "codex-team-esim-20261105-ak"
+    },
+    {
+      "at": "2026-11-05T13:29:13+00:00",
+      "action": "task.update:ESIM-001",
+      "owner": "codex-team-esim-20261105-ak",
+      "tasks": [
+        {
+          "id": "ESIM-001",
+          "status": "in_progress",
+          "owner": "codex-team-esim-20261105-ak",
+          "priority": 93,
+          "priority_reason": "Independent eUICC channel/session implementation supports SIM/eSIM roadmap without profile changes on the phone",
+          "progress_note": "Ready for coordinator review: commits bc2b6ec and 9daf884; ESIMHOST-005 pass, eleven synthetic-peer scenario groups in GCC, UBSan trap, native ASan+UBSan, both deliberate sanitizer controls executed, actual ARM64 ELF/MachO layout agrees; no physical eUICC or selected iOS16.5 frontend qualification",
+          "next_step": "Coordinator review and integrate owned commits, inspect session5 evidence and handoff, run main make check before deciding completion; retain physical transport/provisioning gates",
+          "last_heartbeat": "2026-11-05T13:29:13+00:00",
+          "branch": "team/esim-001-20261105",
+          "worktree": "worktrees/esim-001-20261105",
+          "handoff": "worktrees/esim-001-20261105/docs/procedures/esim-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:29:24+00:00",
+      "action": "experiment.plan:SENHOST-001",
+      "owner": "codex-team-sensors-20261105-al"
+    },
+    {
+      "at": "2026-11-05T13:29:34+00:00",
+      "action": "experiment.plan:MISCHOST-001",
+      "owner": "codex-team-misc-20261105-an"
+    },
+    {
+      "at": "2026-11-05T13:29:40+00:00",
+      "action": "experiment.record:STMHOST-004",
+      "owner": "codex-team-touch-20261105-aj"
+    },
+    {
+      "at": "2026-11-05T13:29:56+00:00",
+      "action": "task.update:DRV-001",
+      "owner": "codex-team-touch-20261105-aj",
+      "tasks": [
+        {
+          "id": "DRV-001",
+          "status": "in_progress",
+          "owner": "codex-team-touch-20261105-aj",
+          "priority": 94,
+          "priority_reason": "Independent bounded STM parser and transport boundary enable display/input integration without device operations",
+          "progress_note": "Owned commit deb2f861160e6407f95de7f18e41b87603e651e9 ready for coordinator review/integration. STMHOST-004 commit-bound pass links actual14 no-skip C tests,1024 donor comparisons,100000 ASan/UBSan records and2ARM64 objects; negative sanitizer controls detect real faults. No device operations; all3 host acceptance criteria assessed pass pending review.",
+          "next_step": "Coordinator cherry-pick, review shared interface and run primary make check; retain in_progress until integration accepted.",
+          "last_heartbeat": "2026-11-05T13:29:56+00:00",
+          "branch": "team/drv-001-20261105",
+          "worktree": "worktrees/drv-001-20261105",
+          "handoff": "worktrees/drv-001-20261105/docs/procedures/drv-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:30:08+00:00",
+      "action": "experiment.plan:VMHOST-001",
+      "owner": "codex-team-vm-20261105-am"
+    },
+    {
+      "at": "2026-11-05T13:32:16+00:00",
+      "action": "experiment.record:SENHOST-001",
+      "owner": "codex-team-sensors-20261105-al"
+    },
+    {
+      "at": "2026-11-05T13:32:30+00:00",
+      "action": "experiment.plan:SENHOST-002",
+      "owner": "codex-team-sensors-20261105-al"
+    },
+    {
+      "at": "2026-11-05T13:33:54+00:00",
+      "action": "task.add:REV-001",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "REV-001",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:34:03+00:00",
+      "action": "task.add:REV-002",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "REV-002",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:34:09+00:00",
+      "action": "experiment.record:SENHOST-002",
+      "owner": "codex-team-sensors-20261105-al"
+    },
+    {
+      "at": "2026-11-05T13:34:15+00:00",
+      "action": "task.add:REV-003",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "REV-003",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:34:23+00:00",
+      "action": "task.update:SEN-001",
+      "owner": "codex-team-sensors-20261105-al",
+      "tasks": [
+        {
+          "id": "SEN-001",
+          "status": "in_progress",
+          "owner": "codex-team-sensors-20261105-al",
+          "priority": 92,
+          "priority_reason": "Next independent host executor for pinned sensor-hub/GNSS interfaces after USB,touch,eSIM;queue if session capacity is full",
+          "progress_note": "Ready for review: commits f6b2072 and 82c8e94; source-qualified SHUB/GNSS C boundaries pass host ASan/UBSan, ARM64 compile, genuine SHUB declaration oracle, all65524 GNSS length comparisons and seven original HAL identity controls. First support-header failure retained. Native/Apple ABI and exact BYH3 firmware remain unqualified.",
+          "next_step": "Coordinator inspect main-relative passing evidence, cherry-pick both commits and run common main make check; keep in_progress until acceptance review.",
+          "last_heartbeat": "2026-11-05T13:34:23+00:00",
+          "branch": "team/sen-001-20261105",
+          "worktree": "worktrees/sen-001-20261105",
+          "handoff": "worktrees/sen-001-20261105/docs/procedures/sen-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:35:46+00:00",
+      "action": "experiment.plan:VMHOST-002",
+      "owner": "codex-team-vm-20261105-am"
+    },
+    {
+      "at": "2026-11-05T13:36:19+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-review-usb-20261105-ao",
+      "tasks": [
+        {
+          "id": "REV-001",
+          "status": "in_progress",
+          "owner": "codex-team-review-usb-20261105-ao",
+          "priority": 99,
+          "last_heartbeat": "2026-11-05T13:36:19+00:00",
+          "branch": "team/rev-usb-20261105",
+          "worktree": "worktrees/rev-usb-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:36:47+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-review-touch-20261105-ap",
+      "tasks": [
+        {
+          "id": "REV-002",
+          "status": "in_progress",
+          "owner": "codex-team-review-touch-20261105-ap",
+          "priority": 98,
+          "last_heartbeat": "2026-11-05T13:36:47+00:00",
+          "branch": "team/rev-stm-20261105",
+          "worktree": "worktrees/rev-stm-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:37:35+00:00",
+      "action": "experiment.plan:REVSTM-001",
+      "owner": "codex-team-review-touch-20261105-ap"
+    },
+    {
+      "at": "2026-11-05T13:37:41+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-review-esim-20261105-aq",
+      "tasks": [
+        {
+          "id": "REV-003",
+          "status": "in_progress",
+          "owner": "codex-team-review-esim-20261105-aq",
+          "priority": 97,
+          "last_heartbeat": "2026-11-05T13:37:41+00:00",
+          "branch": "team/rev-esim-20261105",
+          "worktree": "worktrees/rev-esim-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:38:16+00:00",
+      "action": "experiment.plan:USBREV-001",
+      "owner": "codex-team-review-usb-20261105-ao"
+    },
+    {
+      "at": "2026-11-05T13:38:33+00:00",
+      "action": "experiment.plan:ESIMREV-001",
+      "owner": "codex-team-review-esim-20261105-aq"
+    },
+    {
+      "at": "2026-11-05T13:39:48+00:00",
+      "action": "experiment.record:MISCHOST-001",
+      "owner": "codex-team-misc-20261105-an"
+    },
+    {
+      "at": "2026-11-05T13:40:09+00:00",
+      "action": "task.update:MISC-001",
+      "owner": "codex-team-misc-20261105-an",
+      "tasks": [
+        {
+          "id": "MISC-001",
+          "status": "in_progress",
+          "owner": "codex-team-misc-20261105-an",
+          "priority": 70,
+          "progress_note": "Ready for coordinator review: commit bf54dcdc4a92111f20b7a05b6ba435b2674d8251 supplies five source-backed peripheral specifications and independent native gates;22 real source blobs,81 anchors and7 negative provenance controls pass. No native/Apple compatibility claims;all hardware gates open.",
+          "next_step": "Coordinator review and integrate owned commit,run global make check,then decide MISC-001 completion;retain in_progress until reviewed.",
+          "last_heartbeat": "2026-11-05T13:40:09+00:00",
+          "branch": "team/misc-001-20261105",
+          "worktree": "worktrees/misc-001-20261105",
+          "handoff": "worktrees/misc-001-20261105/docs/procedures/misc-001/HANDOFF.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:40:59+00:00",
+      "action": "experiment.record:VMHOST-001",
+      "owner": "codex-team-vm-20261105-am"
+    },
+    {
+      "at": "2026-11-05T13:41:08+00:00",
+      "action": "experiment.record:VMHOST-002",
+      "owner": "codex-team-vm-20261105-am"
+    },
+    {
+      "at": "2026-11-05T13:41:44+00:00",
+      "action": "task.update:VM-002",
+      "owner": "codex-team-vm-20261105-am",
+      "tasks": [
+        {
+          "id": "VM-002",
+          "status": "in_progress",
+          "owner": "codex-team-vm-20261105-am",
+          "priority": 70,
+          "progress_note": "Pinned donor verified;genuinely built5-source AVF shim and owned static arm64 PID1;12 real host controls pass. VMHOST001 inconclusive and VMHOST002 shim-only pass recorded. No XNU guest launched or runtime PID1 observed. Scoped commits f71ede2 and current evidence commit are ready for coordinator review.",
+          "next_step": "Supply provenance-qualified complete QEMU/AVF XNU kernel and generic ARM64 QEMU virt/TCG executable;then coordinator leases one bounded guest and reviews actual Darwin/PID1 console and termination. Main make check deferred to coordinator integration.",
+          "last_heartbeat": "2026-11-05T13:41:44+00:00",
+          "branch": "team/vm-002-20261105",
+          "worktree": "worktrees/vm-002-20261105",
+          "handoff": "worktrees/vm-002-20261105/docs/procedures/vm-002/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:41:52+00:00",
+      "action": "task.block:VM-002",
+      "owner": "codex-team-vm-20261105-am",
+      "tasks": [
+        {
+          "id": "VM-002",
+          "status": "blocked",
+          "owner": "codex-team-vm-20261105-am",
+          "priority": 70,
+          "progress_note": "Pinned donor verified;genuinely built5-source AVF shim and owned static arm64 PID1;12 real host controls pass. VMHOST001 inconclusive and VMHOST002 shim-only pass recorded. No XNU guest launched or runtime PID1 observed. Scoped commits f71ede2 and current evidence commit are ready for coordinator review.",
+          "next_step": "Supply provenance-qualified complete QEMU/AVF XNU kernel and generic ARM64 QEMU virt/TCG executable;then coordinator leases one bounded guest and reviews actual Darwin/PID1 console and termination. Main make check deferred to coordinator integration.",
+          "blocked_reason": "No complete linked provenance-qualified XNU guest kernel for QEMU/AVF board+mockfs+PSCI exit is supplied;E1S object closure is not a guest image. No generic ARM64 QEMU virt/TCG executable is available;installed Android frontend rejects required -machine help (exit1) and -accel help (exit2). Shim/PID1 source builds and host controls do not satisfy actual XNU execution acceptance.",
+          "last_heartbeat": "2026-11-05T13:41:52+00:00",
+          "branch": "team/vm-002-20261105",
+          "worktree": "worktrees/vm-002-20261105",
+          "handoff": "worktrees/vm-002-20261105/docs/procedures/vm-002/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:42:15+00:00",
+      "action": "experiment.plan:USBHOST-006",
+      "owner": "codex-team-usb-20261105-ai"
+    },
+    {
+      "at": "2026-11-05T13:43:15+00:00",
+      "action": "experiment.record:USBREV-001",
+      "owner": "codex-team-review-usb-20261105-ao"
+    },
+    {
+      "at": "2026-11-05T13:43:29+00:00",
+      "action": "task.update:REV-001",
+      "owner": "codex-team-review-usb-20261105-ao",
+      "tasks": [
+        {
+          "id": "REV-001",
+          "status": "in_progress",
+          "owner": "codex-team-review-usb-20261105-ao",
+          "priority": 99,
+          "progress_note": "Initial independent review committed e5a857f: one P2 USBREV-F01 omitted PTN3222 source alternative; no P0/P1 protocol defect reproduced. USBREV-001 replays63482 ASan/UBSan assertions and both fault controls;63865 independent DMA cases agree;107 original hashes verified. Coordinator notified and requests owner correction.",
+          "next_step": "Read original owner followup commit and independently verify both repeater source entries plus strengthened omission negative; retain in_progress pending coordinator acceptance.",
+          "last_heartbeat": "2026-11-05T13:43:29+00:00",
+          "branch": "team/rev-usb-20261105",
+          "worktree": "worktrees/rev-usb-20261105",
+          "handoff": "worktrees/rev-usb-20261105/docs/reviews/usb-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:43:37+00:00",
+      "action": "experiment.record:USBHOST-006",
+      "owner": "codex-team-usb-20261105-ai"
+    },
+    {
+      "at": "2026-11-05T13:43:47+00:00",
+      "action": "experiment.record:REVSTM-001",
+      "owner": "codex-team-review-touch-20261105-ap"
+    },
+    {
+      "at": "2026-11-05T13:44:03+00:00",
+      "action": "task.update:USB-001",
+      "owner": "codex-team-usb-20261105-ai",
+      "tasks": [
+        {
+          "id": "USB-001",
+          "status": "in_progress",
+          "owner": "codex-team-usb-20261105-ai",
+          "priority": 95,
+          "priority_reason": "Independent host USB/block path supports native logs and root transport while kernel work continues",
+          "progress_note": "REV-001 P2 addressed in followup f3d705d: both declared enabled hsi2c_34 repeater candidates represented, fitted/BYH3 selection unqualified. USBHOST-006 passed28 checks including8 meaningful profile/source negative controls;C protocol unchanged and63482 fixture assertions pass.",
+          "next_step": "Coordinator reviews and integrates f3d705d after e178587;record shared main checks before task completion.",
+          "last_heartbeat": "2026-11-05T13:44:03+00:00",
+          "branch": "team/usb-001-20261105",
+          "worktree": "worktrees/usb-001-20261105",
+          "handoff": "worktrees/usb-001-20261105/docs/procedures/usb-001/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:44:09+00:00",
+      "action": "task.update:REV-002",
+      "owner": "codex-team-review-touch-20261105-ap",
+      "tasks": [
+        {
+          "id": "REV-002",
+          "status": "in_progress",
+          "owner": "codex-team-review-touch-20261105-ap",
+          "priority": 98,
+          "progress_note": "Review-only commit afad83224c6b23dd6ce336520abd98c30e17682e ready: no actionable P0/P1/P2 within exact deb2f861 host contract. REVSTM-001 pass; actual capsule hashes/source pins audited; independent compiled Samsung declaration oracle12288 records plus lifecycle/reentry/status ASan+UBSan and exact14 candidate tests no skips. No native/Apple HID/device qualification.",
+          "next_step": "Coordinator review report/evidence and cherry-pick review-only commit alongside common integration checks; retain in_progress until explicit acceptance",
+          "last_heartbeat": "2026-11-05T13:44:09+00:00",
+          "branch": "team/rev-stm-20261105",
+          "worktree": "worktrees/rev-stm-20261105",
+          "handoff": "worktrees/rev-stm-20261105/docs/reviews/drv-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:44:30+00:00",
+      "action": "experiment.record:ESIMREV-001",
+      "owner": "codex-team-review-esim-20261105-aq"
+    },
+    {
+      "at": "2026-11-05T13:44:58+00:00",
+      "action": "task.update:REV-003",
+      "owner": "codex-team-review-esim-20261105-aq",
+      "tasks": [
+        {
+          "id": "REV-003",
+          "status": "in_progress",
+          "owner": "codex-team-review-esim-20261105-aq",
+          "priority": 97,
+          "progress_note": "Independent review commit b005e7b: bounded no P0/P1/P2 findings at exact ESIM tip9daf884. ESIMREV-001 pass: original11 ASan/UBSan groups,independent263165 APDU cases/324 lifecycle-CLA sessions,actual negative controls and ARM64 ELF/MachO layout;all66 original artifact hashes and source pins verified;no device or implementation writes.",
+          "next_step": "Coordinator inspect review/evidence and integrate implementation plus review as appropriate;run primary make check and decide acceptance before task completion.",
+          "last_heartbeat": "2026-11-05T13:44:58+00:00",
+          "branch": "team/rev-esim-20261105",
+          "worktree": "worktrees/rev-esim-20261105",
+          "handoff": "worktrees/rev-esim-20261105/docs/reviews/esim-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:45:13+00:00",
+      "action": "experiment.plan:USBREV-002",
+      "owner": "codex-team-review-usb-20261105-ao"
+    },
+    {
+      "at": "2026-11-05T13:47:27+00:00",
+      "action": "experiment.record:USBREV-002",
+      "owner": "codex-team-review-usb-20261105-ao"
+    },
+    {
+      "at": "2026-11-05T13:47:45+00:00",
+      "action": "task.update:REV-001",
+      "owner": "codex-team-review-usb-20261105-ao",
+      "tasks": [
+        {
+          "id": "REV-001",
+          "status": "in_progress",
+          "owner": "codex-team-review-usb-20261105-ao",
+          "priority": 99,
+          "progress_note": "Ready for coordinator acceptance: initial review e5a857f and followup eb37732 resolve P2 USBREV-F01 in exact USB fix f3d705d. USBREV-002 independently passes2 exact source sets and34 omission/property/source/conditional negatives;107 session6 hashes match;C unchanged. No unresolved P0/P1/P2 in bounded host/source review;native USB/Apple/kernel claims remain unqualified.",
+          "next_step": "Coordinator accepts independent report and integrates only owned review commits; retain in_progress until acceptance, then owner may complete REV-001 with evidence.",
+          "last_heartbeat": "2026-11-05T13:47:45+00:00",
+          "branch": "team/rev-usb-20261105",
+          "worktree": "worktrees/rev-usb-20261105",
+          "handoff": "worktrees/rev-usb-20261105/docs/reviews/usb-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:50:41+00:00",
+      "action": "task.add:REV-004",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "REV-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:50:58+00:00",
+      "action": "task.add:REV-005",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "REV-005",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:51:17+00:00",
+      "action": "task.add:KRN-023",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "KRN-023",
+          "status": "pending",
+          "owner": null,
+          "priority": 94
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:51:26+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-review-sensors-20261105-ar",
+      "tasks": [
+        {
+          "id": "REV-004",
+          "status": "in_progress",
+          "owner": "codex-team-review-sensors-20261105-ar",
+          "priority": 96,
+          "last_heartbeat": "2026-11-05T13:51:26+00:00",
+          "branch": "team/rev-sensors-20261105",
+          "worktree": "worktrees/rev-sensors-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:51:34+00:00",
+      "action": "task.add:VM-004",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "VM-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 93
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:51:49+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-review-misc-20261105-as",
+      "tasks": [
+        {
+          "id": "REV-005",
+          "status": "in_progress",
+          "owner": "codex-team-review-misc-20261105-as",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T13:51:49+00:00",
+          "branch": "team/rev-misc-20261105",
+          "worktree": "worktrees/rev-misc-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:52:17+00:00",
+      "action": "experiment.plan:REVSEN-001",
+      "owner": "codex-team-review-sensors-20261105-ar"
+    },
+    {
+      "at": "2026-11-05T13:52:28+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-corecrypto-20261105-at",
+      "tasks": [
+        {
+          "id": "KRN-023",
+          "status": "in_progress",
+          "owner": "codex-team-corecrypto-20261105-at",
+          "priority": 94,
+          "last_heartbeat": "2026-11-05T13:52:28+00:00",
+          "branch": "team/krn-023-20261105",
+          "worktree": "worktrees/krn-023-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:52:35+00:00",
+      "action": "experiment.plan:MISCREV-001",
+      "owner": "codex-team-review-misc-20261105-as"
+    },
+    {
+      "at": "2026-11-05T13:53:55+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-qemu-host-20261105-au",
+      "tasks": [
+        {
+          "id": "VM-004",
+          "status": "in_progress",
+          "owner": "codex-team-qemu-host-20261105-au",
+          "priority": 93,
+          "last_heartbeat": "2026-11-05T13:53:55+00:00",
+          "branch": "team/vm-004-20261105",
+          "worktree": "worktrees/vm-004-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:54:24+00:00",
+      "action": "experiment.plan:CCPROV-001",
+      "owner": "codex-team-corecrypto-20261105-at"
+    },
+    {
+      "at": "2026-11-05T13:55:10+00:00",
+      "action": "experiment.plan:PTHP-012",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T13:55:36+00:00",
+      "action": "experiment.plan:QEMUHOST-001",
+      "owner": "codex-team-qemu-host-20261105-au"
+    },
+    {
+      "at": "2026-11-05T13:55:44+00:00",
+      "action": "task.update:USB-001",
+      "owner": "codex-team-usb-20261105-ai",
+      "tasks": [
+        {
+          "id": "USB-001",
+          "status": "in_progress",
+          "owner": "codex-team-usb-20261105-ai",
+          "priority": 95,
+          "priority_reason": "Independent host USB/block path supports native logs and root transport while kernel work continues",
+          "progress_note": "Coordinator accepted host/source scope after independent REV-001 correction and main integration commits631c661+13ea0a2. Shared make check passed146tests at f18eba26816d8fa1ce93d4ebb60496a1607ee4ed;main evidence artifacts/team-coordination/20261105-ah/integration-002/evidence.json SHA256 2d65d06911ce5475dca7bada6382f4dec0732aea6b6f4e7441babb6b32192f81. Native USB/PHY/DMA/Apple ABI/root mount/Android return remain unqualified.",
+          "next_step": "Host/source task accepted;native stages require ordered kernel/platform dependencies and separately authorized hardware qualification.",
+          "last_heartbeat": "2026-11-05T13:55:44+00:00",
+          "branch": "team/usb-001-20261105",
+          "worktree": "worktrees/usb-001-20261105",
+          "handoff": "worktrees/usb-001-20261105/docs/procedures/usb-001/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:55:54+00:00",
+      "action": "task.update:DRV-001",
+      "owner": "codex-team-touch-20261105-aj",
+      "tasks": [
+        {
+          "id": "DRV-001",
+          "status": "in_progress",
+          "owner": "codex-team-touch-20261105-aj",
+          "priority": 94,
+          "priority_reason": "Independent bounded STM parser and transport boundary enable display/input integration without device operations",
+          "progress_note": "Coordinator accepted all3 host acceptance criteria after independent exact-source and sanitizer review. Implementation integrated as70f92bd; review2031fb9; primary make check passed146tests at f18eba26816d8fa1ce93d4ebb60496a1607ee4ed. Common evidence artifacts/team-coordination/20261105-ah/integration-002/evidence.json. Hardware and Apple HID remain unqualified.",
+          "next_step": "Close accepted host task; physical SPI/IRQ/power and native HID require separate authorized tasks.",
+          "last_heartbeat": "2026-11-05T13:55:54+00:00",
+          "branch": "team/drv-001-20261105",
+          "worktree": "worktrees/drv-001-20261105",
+          "handoff": "worktrees/drv-001-20261105/docs/procedures/drv-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:56:03+00:00",
+      "action": "task.update:ESIM-001",
+      "owner": "codex-team-esim-20261105-ak",
+      "tasks": [
+        {
+          "id": "ESIM-001",
+          "status": "in_progress",
+          "owner": "codex-team-esim-20261105-ak",
+          "priority": 93,
+          "priority_reason": "Independent eUICC channel/session implementation supports SIM/eSIM roadmap without profile changes on the phone",
+          "progress_note": "Coordinator accepted host acceptance after independent exact review b005e7b and integration 6c18ad3+07f873e; common make check PASS 146 tests at f18eba26816d8fa1ce93d4ebb60496a1607ee4ed, evidence artifacts/team-coordination/20261105-ah/integration-002/evidence.json. ESIMHOST-005 passing capsule retained; physical transport, provisioning and selected iOS16.5 frontend remain unqualified.",
+          "next_step": "Host task accepted; exact Samsung physical eUICC transport and selected iOS16.5 frontend qualification remain separate authorized tasks",
+          "last_heartbeat": "2026-11-05T13:56:03+00:00",
+          "branch": "team/esim-001-20261105",
+          "worktree": "worktrees/esim-001-20261105",
+          "handoff": "worktrees/esim-001-20261105/docs/procedures/esim-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:56:12+00:00",
+      "action": "task.done:REV-002",
+      "owner": "codex-team-review-touch-20261105-ap",
+      "tasks": [
+        {
+          "id": "REV-002",
+          "status": "done",
+          "owner": "codex-team-review-touch-20261105-ap",
+          "priority": 98,
+          "progress_note": "Review-only commit afad83224c6b23dd6ce336520abd98c30e17682e ready: no actionable P0/P1/P2 within exact deb2f861 host contract. REVSTM-001 pass; actual capsule hashes/source pins audited; independent compiled Samsung declaration oracle12288 records plus lifecycle/reentry/status ASan+UBSan and exact14 candidate tests no skips. No native/Apple HID/device qualification.",
+          "next_step": "Coordinator review report/evidence and cherry-pick review-only commit alongside common integration checks; retain in_progress until explicit acceptance",
+          "last_heartbeat": "2026-11-05T13:44:09+00:00",
+          "branch": "team/rev-stm-20261105",
+          "worktree": "worktrees/rev-stm-20261105",
+          "handoff": "worktrees/rev-stm-20261105/docs/reviews/drv-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:56:21+00:00",
+      "action": "task.done:USB-001",
+      "owner": "codex-team-usb-20261105-ai",
+      "tasks": [
+        {
+          "id": "USB-001",
+          "status": "done",
+          "owner": "codex-team-usb-20261105-ai",
+          "priority": 95,
+          "priority_reason": "Independent host USB/block path supports native logs and root transport while kernel work continues",
+          "progress_note": "Coordinator accepted host/source scope after independent REV-001 correction and main integration commits631c661+13ea0a2. Shared make check passed146tests at f18eba26816d8fa1ce93d4ebb60496a1607ee4ed;main evidence artifacts/team-coordination/20261105-ah/integration-002/evidence.json SHA256 2d65d06911ce5475dca7bada6382f4dec0732aea6b6f4e7441babb6b32192f81. Native USB/PHY/DMA/Apple ABI/root mount/Android return remain unqualified.",
+          "next_step": "Host/source task accepted;native stages require ordered kernel/platform dependencies and separately authorized hardware qualification.",
+          "last_heartbeat": "2026-11-05T13:55:44+00:00",
+          "branch": "team/usb-001-20261105",
+          "worktree": "worktrees/usb-001-20261105",
+          "handoff": "worktrees/usb-001-20261105/docs/procedures/usb-001/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:56:31+00:00",
+      "action": "task.done:DRV-001",
+      "owner": "codex-team-touch-20261105-aj",
+      "tasks": [
+        {
+          "id": "DRV-001",
+          "status": "done",
+          "owner": "codex-team-touch-20261105-aj",
+          "priority": 94,
+          "priority_reason": "Independent bounded STM parser and transport boundary enable display/input integration without device operations",
+          "progress_note": "Coordinator accepted all3 host acceptance criteria after independent exact-source and sanitizer review. Implementation integrated as70f92bd; review2031fb9; primary make check passed146tests at f18eba26816d8fa1ce93d4ebb60496a1607ee4ed. Common evidence artifacts/team-coordination/20261105-ah/integration-002/evidence.json. Hardware and Apple HID remain unqualified.",
+          "next_step": "Close accepted host task; physical SPI/IRQ/power and native HID require separate authorized tasks.",
+          "last_heartbeat": "2026-11-05T13:55:54+00:00",
+          "branch": "team/drv-001-20261105",
+          "worktree": "worktrees/drv-001-20261105",
+          "handoff": "worktrees/drv-001-20261105/docs/procedures/drv-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:56:39+00:00",
+      "action": "task.done:ESIM-001",
+      "owner": "codex-team-esim-20261105-ak",
+      "tasks": [
+        {
+          "id": "ESIM-001",
+          "status": "done",
+          "owner": "codex-team-esim-20261105-ak",
+          "priority": 93,
+          "priority_reason": "Independent eUICC channel/session implementation supports SIM/eSIM roadmap without profile changes on the phone",
+          "progress_note": "Coordinator accepted host acceptance after independent exact review b005e7b and integration 6c18ad3+07f873e; common make check PASS 146 tests at f18eba26816d8fa1ce93d4ebb60496a1607ee4ed, evidence artifacts/team-coordination/20261105-ah/integration-002/evidence.json. ESIMHOST-005 passing capsule retained; physical transport, provisioning and selected iOS16.5 frontend remain unqualified.",
+          "next_step": "Host task accepted; exact Samsung physical eUICC transport and selected iOS16.5 frontend qualification remain separate authorized tasks",
+          "last_heartbeat": "2026-11-05T13:56:03+00:00",
+          "branch": "team/esim-001-20261105",
+          "worktree": "worktrees/esim-001-20261105",
+          "handoff": "worktrees/esim-001-20261105/docs/procedures/esim-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:57:28+00:00",
+      "action": "task.done:REV-003",
+      "owner": "codex-team-review-esim-20261105-aq",
+      "tasks": [
+        {
+          "id": "REV-003",
+          "status": "done",
+          "owner": "codex-team-review-esim-20261105-aq",
+          "priority": 97,
+          "progress_note": "Independent review commit b005e7b: bounded no P0/P1/P2 findings at exact ESIM tip9daf884. ESIMREV-001 pass: original11 ASan/UBSan groups,independent263165 APDU cases/324 lifecycle-CLA sessions,actual negative controls and ARM64 ELF/MachO layout;all66 original artifact hashes and source pins verified;no device or implementation writes.",
+          "next_step": "Coordinator inspect review/evidence and integrate implementation plus review as appropriate;run primary make check and decide acceptance before task completion.",
+          "last_heartbeat": "2026-11-05T13:44:58+00:00",
+          "branch": "team/rev-esim-20261105",
+          "worktree": "worktrees/rev-esim-20261105",
+          "handoff": "worktrees/rev-esim-20261105/docs/reviews/esim-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:57:39+00:00",
+      "action": "experiment.record:MISCREV-001",
+      "owner": "codex-team-review-misc-20261105-as"
+    },
+    {
+      "at": "2026-11-05T13:58:03+00:00",
+      "action": "experiment.record:REVSEN-001",
+      "owner": "codex-team-review-sensors-20261105-ar"
+    },
+    {
+      "at": "2026-11-05T13:58:13+00:00",
+      "action": "experiment.record:PTHP-012",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T13:58:23+00:00",
+      "action": "task.update:REV-005",
+      "owner": "codex-team-review-misc-20261105-as",
+      "tasks": [
+        {
+          "id": "REV-005",
+          "status": "in_progress",
+          "owner": "codex-team-review-misc-20261105-as",
+          "priority": 95,
+          "progress_note": "Independent review-only commit d0e3e0e ready: bounded no P0/P1/P2 findings at exact misc tipbf54dcd. MISCREV-001 pass:66commands,22 raw source blobs/81anchors,16same/6different,all10 original evidence hashes and precommit-source binding;7 original plus12 reviewer provenance rejection controls;actual NFC/biometric/haptic/MFC/DP context verified,no native claim or implementation/reference/device writes.",
+          "next_step": "Coordinator inspect review commit/evidence, integrate review documentation and decide acceptance;leave REV-005 in_progress until explicitly accepted.",
+          "last_heartbeat": "2026-11-05T13:58:23+00:00",
+          "branch": "team/rev-misc-20261105",
+          "worktree": "worktrees/rev-misc-20261105",
+          "handoff": "worktrees/rev-misc-20261105/docs/reviews/misc-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:58:46+00:00",
+      "action": "task.update:REV-004",
+      "owner": "codex-team-review-sensors-20261105-ar",
+      "tasks": [
+        {
+          "id": "REV-004",
+          "status": "in_progress",
+          "owner": "codex-team-review-sensors-20261105-ar",
+          "priority": 96,
+          "progress_note": "Review-only commit d78299c4fa44cf386d44ac30a848375960912179 ready: no actionable P0/P1/P2 for exact f6b2072 plus82c8e94 host boundary. REVSEN-001 pass; source/capsule/HAL hashes checked, compiled actual GNSS writer resolves struct discrepancy, independent extent/atomic-output/timestamp/unavailable cases pass ASan+UBSan. No device/native/Apple ABI qualification.",
+          "next_step": "Coordinator inspect report/evidence, cherry-pick review-only commit and assess acceptance with common integration checks; retain in_progress until explicit acceptance",
+          "last_heartbeat": "2026-11-05T13:58:46+00:00",
+          "branch": "team/rev-sensors-20261105",
+          "worktree": "worktrees/rev-sensors-20261105",
+          "handoff": "worktrees/rev-sensors-20261105/docs/reviews/sen-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:59:11+00:00",
+      "action": "task.add:REV-006",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "REV-006",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:59:46+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-review-pthread-20261105-av",
+      "tasks": [
+        {
+          "id": "REV-006",
+          "status": "in_progress",
+          "owner": "codex-team-review-pthread-20261105-av",
+          "priority": 99,
+          "last_heartbeat": "2026-11-05T13:59:46+00:00",
+          "branch": "team/rev-pthread-20261105",
+          "worktree": "worktrees/rev-pthread-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:00:54+00:00",
+      "action": "experiment.plan:PTHPREV-001",
+      "owner": "codex-team-review-pthread-20261105-av"
+    },
+    {
+      "at": "2026-11-05T14:01:29+00:00",
+      "action": "task.done:REV-001",
+      "owner": "codex-team-review-usb-20261105-ao",
+      "tasks": [
+        {
+          "id": "REV-001",
+          "status": "done",
+          "owner": "codex-team-review-usb-20261105-ao",
+          "priority": 99,
+          "progress_note": "Ready for coordinator acceptance: initial review e5a857f and followup eb37732 resolve P2 USBREV-F01 in exact USB fix f3d705d. USBREV-002 independently passes2 exact source sets and34 omission/property/source/conditional negatives;107 session6 hashes match;C unchanged. No unresolved P0/P1/P2 in bounded host/source review;native USB/Apple/kernel claims remain unqualified.",
+          "next_step": "Coordinator accepts independent report and integrates only owned review commits; retain in_progress until acceptance, then owner may complete REV-001 with evidence.",
+          "last_heartbeat": "2026-11-05T13:47:45+00:00",
+          "branch": "team/rev-usb-20261105",
+          "worktree": "worktrees/rev-usb-20261105",
+          "handoff": "worktrees/rev-usb-20261105/docs/reviews/usb-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:01:39+00:00",
+      "action": "task.add:DRV-004",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "DRV-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:02:22+00:00",
+      "action": "task.done:SEN-001",
+      "owner": "codex-team-sensors-20261105-al",
+      "tasks": [
+        {
+          "id": "SEN-001",
+          "status": "done",
+          "owner": "codex-team-sensors-20261105-al",
+          "priority": 92,
+          "priority_reason": "Next independent host executor for pinned sensor-hub/GNSS interfaces after USB,touch,eSIM;queue if session capacity is full",
+          "progress_note": "Ready for review: commits f6b2072 and 82c8e94; source-qualified SHUB/GNSS C boundaries pass host ASan/UBSan, ARM64 compile, genuine SHUB declaration oracle, all65524 GNSS length comparisons and seven original HAL identity controls. First support-header failure retained. Native/Apple ABI and exact BYH3 firmware remain unqualified.",
+          "next_step": "Coordinator inspect main-relative passing evidence, cherry-pick both commits and run common main make check; keep in_progress until acceptance review.",
+          "last_heartbeat": "2026-11-05T13:34:23+00:00",
+          "branch": "team/sen-001-20261105",
+          "worktree": "worktrees/sen-001-20261105",
+          "handoff": "worktrees/sen-001-20261105/docs/procedures/sen-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:02:36+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-ufs-host-20261105-aw",
+      "tasks": [
+        {
+          "id": "DRV-004",
+          "status": "in_progress",
+          "owner": "codex-team-ufs-host-20261105-aw",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T14:02:36+00:00",
+          "branch": "team/drv-004-20261105",
+          "worktree": "worktrees/drv-004-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:03:02+00:00",
+      "action": "task.done:REV-004",
+      "owner": "codex-team-review-sensors-20261105-ar",
+      "tasks": [
+        {
+          "id": "REV-004",
+          "status": "done",
+          "owner": "codex-team-review-sensors-20261105-ar",
+          "priority": 96,
+          "progress_note": "Review-only commit d78299c4fa44cf386d44ac30a848375960912179 ready: no actionable P0/P1/P2 for exact f6b2072 plus82c8e94 host boundary. REVSEN-001 pass; source/capsule/HAL hashes checked, compiled actual GNSS writer resolves struct discrepancy, independent extent/atomic-output/timestamp/unavailable cases pass ASan+UBSan. No device/native/Apple ABI qualification.",
+          "next_step": "Coordinator inspect report/evidence, cherry-pick review-only commit and assess acceptance with common integration checks; retain in_progress until explicit acceptance",
+          "last_heartbeat": "2026-11-05T13:58:46+00:00",
+          "branch": "team/rev-sensors-20261105",
+          "worktree": "worktrees/rev-sensors-20261105",
+          "handoff": "worktrees/rev-sensors-20261105/docs/reviews/sen-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:03:31+00:00",
+      "action": "task.update:MISC-001",
+      "owner": "codex-team-misc-20261105-an",
+      "tasks": [
+        {
+          "id": "MISC-001",
+          "status": "in_progress",
+          "owner": "codex-team-misc-20261105-an",
+          "priority": 70,
+          "progress_note": "Coordinator accepted specification criteria after independent REV005 review d0e3e0ef: no bounded P0/P1/P2 findings. Main implementation 6a3e127 and review 3b5b4f9 integrated; common make check passed 146 tests at 3b5b4f987bc73b7cb1e7f056d1efa0252fa5c70c. Integration evidence: artifacts/team-coordination/20261105-ah/integration-003/evidence.json. All native hardware gates remain open; no Apple service or security compatibility asserted.",
+          "next_step": "Complete accepted MISC-001 with original passing source-audit evidence; future native work requires separate tasks and acceptance.",
+          "last_heartbeat": "2026-11-05T14:03:31+00:00",
+          "branch": "team/misc-001-20261105",
+          "worktree": "worktrees/misc-001-20261105",
+          "handoff": "worktrees/misc-001-20261105/docs/procedures/misc-001/HANDOFF.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:03:37+00:00",
+      "action": "experiment.plan:UFSHOST-001",
+      "owner": "codex-team-ufs-host-20261105-aw"
+    },
+    {
+      "at": "2026-11-05T14:03:44+00:00",
+      "action": "task.done:MISC-001",
+      "owner": "codex-team-misc-20261105-an",
+      "tasks": [
+        {
+          "id": "MISC-001",
+          "status": "done",
+          "owner": "codex-team-misc-20261105-an",
+          "priority": 70,
+          "progress_note": "Coordinator accepted specification criteria after independent REV005 review d0e3e0ef: no bounded P0/P1/P2 findings. Main implementation 6a3e127 and review 3b5b4f9 integrated; common make check passed 146 tests at 3b5b4f987bc73b7cb1e7f056d1efa0252fa5c70c. Integration evidence: artifacts/team-coordination/20261105-ah/integration-003/evidence.json. All native hardware gates remain open; no Apple service or security compatibility asserted.",
+          "next_step": "Complete accepted MISC-001 with original passing source-audit evidence; future native work requires separate tasks and acceptance.",
+          "last_heartbeat": "2026-11-05T14:03:31+00:00",
+          "branch": "team/misc-001-20261105",
+          "worktree": "worktrees/misc-001-20261105",
+          "handoff": "worktrees/misc-001-20261105/docs/procedures/misc-001/HANDOFF.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:04:16+00:00",
+      "action": "task.add:KRN-024",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "KRN-024",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
         }
       ]
     }

@@ -14,7 +14,7 @@
 
 ## Readiness
 
-Scope not authorized: native; Dependencies: ESIM-001, CELL-003
+Scope not authorized: native; Dependencies: CELL-003
 
 ## Reserved paths
 

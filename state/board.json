@@ -1,23 +1,22 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T13:09:54+00:00",
-  "ledger_updated_at": "2026-11-05T13:09:51+00:00",
-  "registry_sha256": "6dc77106fcf926937ed8941ebdf1ad8be0eadede3ba056868ab700bdae7b230f",
+  "generated_at": "2026-11-05T14:04:20+00:00",
+  "ledger_updated_at": "2026-11-05T14:04:16+00:00",
+  "registry_sha256": "8b0d7c48131cb05d15a6ca779d0f88dd21c49f05f7282e00264cc5773394c477",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
-      "VM-002",
-      "SEN-001",
-      "MISC-001",
       "VM-001"
     ],
     "in_progress": [
       "KRN-008",
       "KRN-022",
-      "USB-001",
+      "REV-006",
       "KRN-004",
-      "DRV-001",
-      "ESIM-001"
+      "REV-005",
+      "KRN-023",
+      "VM-004",
+      "DRV-004"
     ],
     "blocked": [
       "KRN-003",
@@ -25,9 +24,11 @@
       "CELL-010",
       "ESIM-004",
       "CELL-009",
+      "VM-002",
       "NAT-001"
     ],
     "waiting": [
+      "KRN-024",
       "GPU-007",
       "GPU-009",
       "AUD-001",
@@ -80,17 +81,25 @@
       "KRN-019",
       "KRN-020",
       "KRN-021",
+      "REV-001",
       "KRN-007",
       "KRN-011",
       "KRN-017",
       "KRN-018",
+      "REV-002",
       "KRN-006",
       "KRN-014",
       "KRN-015",
+      "REV-003",
       "KRN-005",
+      "REV-004",
+      "USB-001",
       "RES-008",
       "KRN-002",
       "RES-009",
+      "DRV-001",
+      "ESIM-001",
+      "SEN-001",
       "PLN-001",
       "SRC-001",
       "INT-001",
@@ -108,6 +117,7 @@
       "NET-001",
       "BT-001",
       "CELL-001",
+      "MISC-001",
       "FND-001",
       "RES-001",
       "DEV-001",
@@ -579,15 +589,128 @@
         "Hand off verified components or exact remaining source/header/provider requirements to existing integration owners and assess all acceptance criteria with make check"
       ],
       "started_at": "2026-11-05T12:21:39+00:00",
-      "last_heartbeat": "2026-11-05T12:56:32+00:00",
-      "updated_at": "2026-11-05T12:56:32+00:00",
-      "progress_note": "PTHP005 executes genuine native install rules:1794 installed entries,36 native empty exclusions,76 unavailable generated inputs explicit;PTHP007 builds all3 current ARM64 TUs and a real archive with39 definitions,61 external imports,zero unresolved after genuine3 VM aliases and zero overlaps",
-      "next_step": "Measure both actual callback-table layouts and signatures against the genuine kernel producer,real allocator records,negative header/type/metadata controls and actual alias linkage before acceptance",
+      "last_heartbeat": "2026-11-05T13:12:43+00:00",
+      "updated_at": "2026-11-05T13:12:43+00:00",
+      "progress_note": "Pthread component and15 actual source/ABI/metadata/VM-alias controls pass;checkpoint committed;coordinator now uses isolated worktree while three independent host executors own USB001,DRV001,ESIM001",
+      "next_step": "Finish exact native MIG-header context comparison and wrong-alias negative control,then final acceptance and integration",
       "handoff": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "branch": "team/krn-022-coordinator-20261105",
+      "worktree": "worktrees/krn-022-coordinator-20261105",
       "column": "in_progress",
       "reasons": [],
       "card_path": "planning/tasks/KRN-022.md",
+      "report_health": "stale"
+    },
+    {
+      "id": "REV-001",
+      "title": "Independently review USB-001 host implementation before integration",
+      "status": "done",
+      "owner": "codex-team-review-usb-20261105-ao",
+      "priority": 99,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002",
+        "BLD-001"
+      ],
+      "paths": [
+        "docs/reviews/usb-001"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Review exact implementation commit e1785878045751213cb1e8e49e42a364333ed496 and its actual tests/evidence without modifying the implementation;verify ownership/licensing,source pins and host-versus-native claims",
+        "Inspect correctness and security boundaries,integer and extent checks,lifecycle/error/Stop/disconnect behavior;independently reproduce at least one meaningful claimed check or counterexample where practical",
+        "Publish actionable findings with severity,file/line,reproduction and scope,or a bounded no-finding conclusion;do not use sanitizer/test success as proof of hardware or private Apple compatibility"
+      ],
+      "steps": [
+        "Read task USB-001 and exact committed implementation plus existing evidence",
+        "Perform independent source review and bounded verification within the reviewer worktree",
+        "Commit only the review report and record real source-review evidence/handoff;send blockers/findings to coordinator before acceptance"
+      ],
+      "started_at": "2026-11-05T13:36:19+00:00",
+      "last_heartbeat": "2026-11-05T13:47:45+00:00",
+      "updated_at": "2026-11-05T14:01:29+00:00",
+      "branch": "team/rev-usb-20261105",
+      "worktree": "worktrees/rev-usb-20261105",
+      "progress_note": "Ready for coordinator acceptance: initial review e5a857f and followup eb37732 resolve P2 USBREV-F01 in exact USB fix f3d705d. USBREV-002 independently passes2 exact source sets and34 omission/property/source/conditional negatives;107 session6 hashes match;C unchanged. No unresolved P0/P1/P2 in bounded host/source review;native USB/Apple/kernel claims remain unqualified.",
+      "next_step": "Coordinator accepts independent report and integrates only owned review commits; retain in_progress until acceptance, then owner may complete REV-001 with evidence.",
+      "handoff": "worktrees/rev-usb-20261105/docs/reviews/usb-001/handoff.md",
+      "evidence": "worktrees/rev-usb-20261105/docs/reviews/usb-001/followup-evidence.json",
+      "evidence_sha256": "8ae84fa15e0cb583ef39e3541c3690a6a672e24ff165191705f4183e42fc20ad",
+      "finished_at": "2026-11-05T14:01:29+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/REV-001.md"
+    },
+    {
+      "id": "REV-006",
+      "title": "Independently review genuine KRN-022 pthread component qualification",
+      "status": "in_progress",
+      "owner": "codex-team-review-pthread-20261105-av",
+      "priority": 99,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "KRN-021"
+      ],
+      "paths": [
+        "docs/reviews/krn-022"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Review exact implementation16a7497, pinned source inputs and all five passing pthread capsules, final PTHP012 acceptance and actual source-qualified archive without modifying implementation.",
+        "Independently verify meaningful callback ABI, allocator metadata, native installed-header/MIG context and real-provider alias/import claims using actual bytes or a counterexample; assess LTO, namespace remaps, unavailable header and Apple-private limits.",
+        "Publish actionable severity/reproduction or bounded no-finding verdict and repeatable reviewer evidence; no full SDK, private Apple ABI, crypto, full-link or runtime qualification inferred."
+      ],
+      "steps": [
+        "Atomically claim-next through primary registry and inspect dependencies/reservations.",
+        "Use separate reviewer worktree, read-only source and actual qualification artifacts, bounded small tests only.",
+        "Commit review docs only and record real evidence/handoff; retain in_progress for coordinator acceptance."
+      ],
+      "started_at": "2026-11-05T13:59:46+00:00",
+      "last_heartbeat": "2026-11-05T13:59:46+00:00",
+      "updated_at": "2026-11-05T13:59:46+00:00",
+      "branch": "team/rev-pthread-20261105",
+      "worktree": "worktrees/rev-pthread-20261105",
+      "column": "in_progress",
+      "reasons": [],
+      "card_path": "planning/tasks/REV-006.md",
       "report_health": "recent"
+    },
+    {
+      "id": "KRN-024",
+      "title": "Measure coherent selected kernel link with genuine pthread and firehose providers",
+      "status": "pending",
+      "owner": null,
+      "priority": 99,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "KRN-022",
+        "KRN-020",
+        "KRN-021"
+      ],
+      "paths": [
+        "tools/build/xnu_kernel_provider_link.py",
+        "docs/procedures/kernel-provider-link",
+        "fixtures/public/kernel-provider-link"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Revalidate exact982-object SGAP graph, genuine native KRN020 link recipe/filelists/aliases and matched firehose plus KRN022 current source-qualified pthread archive; preserve original prefixes and ownership.",
+        "Execute bounded genuine selected linking with those exact providers and required native libraries, inspecting actual diagnostics/output and remaining provider requirements; distinguish absent cc_kext or other inputs from full-image success. No omitted required library, fake archive or stub may manufacture success.",
+        "Publish coherent actual input/output/command hashes, real source-backed provider inventories and precise next blockers. Host experiment may pass only its stated measurement checks; full kernel, Apple ABI, runtime and hardware remain false unless independently established."
+      ],
+      "steps": [
+        "Wait for genuine KRN022 acceptance,then atomically claim-next through main registry and create separate worktree.",
+        "Derive actual native link command and current coherent source/object/header witnesses; do not invent kernel layout or symbols.",
+        "Run one bounded link stage within resource budget,record real evidence/handoff and scoped commit for coordinator review."
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: KRN-022"
+      ],
+      "card_path": "planning/tasks/KRN-024.md"
     },
     {
       "id": "KRN-007",
@@ -776,6 +899,46 @@
       "card_path": "planning/tasks/KRN-018.md"
     },
     {
+      "id": "REV-002",
+      "title": "Independently review DRV-001 host implementation before integration",
+      "status": "done",
+      "owner": "codex-team-review-touch-20261105-ap",
+      "priority": 98,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002"
+      ],
+      "paths": [
+        "docs/reviews/drv-001"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Review exact implementation commit deb2f861160e6407f95de7f18e41b87603e651e9 and its actual tests/evidence without modifying the implementation;verify ownership/licensing,source pins and host-versus-native claims",
+        "Inspect correctness and security boundaries,integer and extent checks,lifecycle/error/Stop/disconnect behavior;independently reproduce at least one meaningful claimed check or counterexample where practical",
+        "Publish actionable findings with severity,file/line,reproduction and scope,or a bounded no-finding conclusion;do not use sanitizer/test success as proof of hardware or private Apple compatibility"
+      ],
+      "steps": [
+        "Read task DRV-001 and exact committed implementation plus existing evidence",
+        "Perform independent source review and bounded verification within the reviewer worktree",
+        "Commit only the review report and record real source-review evidence/handoff;send blockers/findings to coordinator before acceptance"
+      ],
+      "started_at": "2026-11-05T13:36:47+00:00",
+      "last_heartbeat": "2026-11-05T13:44:09+00:00",
+      "updated_at": "2026-11-05T13:56:12+00:00",
+      "branch": "team/rev-stm-20261105",
+      "worktree": "worktrees/rev-stm-20261105",
+      "progress_note": "Review-only commit afad83224c6b23dd6ce336520abd98c30e17682e ready: no actionable P0/P1/P2 within exact deb2f861 host contract. REVSTM-001 pass; actual capsule hashes/source pins audited; independent compiled Samsung declaration oracle12288 records plus lifecycle/reentry/status ASan+UBSan and exact14 candidate tests no skips. No native/Apple HID/device qualification.",
+      "next_step": "Coordinator review report/evidence and cherry-pick review-only commit alongside common integration checks; retain in_progress until explicit acceptance",
+      "handoff": "worktrees/rev-stm-20261105/docs/reviews/drv-001/handoff.md",
+      "evidence": "worktrees/rev-stm-20261105/artifacts/rev-stm/20261105-session2/evidence.json",
+      "evidence_sha256": "878935f035fb6872f9b7f2ff379bee7f1a72034652c1a053a2b9b43af97ae23c",
+      "finished_at": "2026-11-05T13:56:12+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/REV-002.md"
+    },
+    {
       "id": "KRN-006",
       "title": "Harden experimental XNU compiler AST and whole-kernel expression coverage",
       "priority": 97,
@@ -915,6 +1078,46 @@
       "card_path": "planning/tasks/KRN-015.md"
     },
     {
+      "id": "REV-003",
+      "title": "Independently review ESIM-001 host implementation before integration",
+      "status": "done",
+      "owner": "codex-team-review-esim-20261105-aq",
+      "priority": 97,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "CELL-001"
+      ],
+      "paths": [
+        "docs/reviews/esim-001"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Review exact implementation commit 9daf884467c1fe0b816a53dafe86675587570605 and its actual tests/evidence without modifying the implementation;verify ownership/licensing,source pins and host-versus-native claims",
+        "Inspect correctness and security boundaries,integer and extent checks,lifecycle/error/Stop/disconnect behavior;independently reproduce at least one meaningful claimed check or counterexample where practical",
+        "Publish actionable findings with severity,file/line,reproduction and scope,or a bounded no-finding conclusion;do not use sanitizer/test success as proof of hardware or private Apple compatibility"
+      ],
+      "steps": [
+        "Read task ESIM-001 and exact committed implementation plus existing evidence",
+        "Perform independent source review and bounded verification within the reviewer worktree",
+        "Commit only the review report and record real source-review evidence/handoff;send blockers/findings to coordinator before acceptance"
+      ],
+      "started_at": "2026-11-05T13:37:41+00:00",
+      "last_heartbeat": "2026-11-05T13:44:58+00:00",
+      "updated_at": "2026-11-05T13:57:28+00:00",
+      "branch": "team/rev-esim-20261105",
+      "worktree": "worktrees/rev-esim-20261105",
+      "progress_note": "Independent review commit b005e7b: bounded no P0/P1/P2 findings at exact ESIM tip9daf884. ESIMREV-001 pass: original11 ASan/UBSan groups,independent263165 APDU cases/324 lifecycle-CLA sessions,actual negative controls and ARM64 ELF/MachO layout;all66 original artifact hashes and source pins verified;no device or implementation writes.",
+      "next_step": "Coordinator inspect review/evidence and integrate implementation plus review as appropriate;run primary make check and decide acceptance before task completion.",
+      "handoff": "worktrees/rev-esim-20261105/docs/reviews/esim-001/handoff.md",
+      "evidence": "worktrees/rev-esim-20261105/artifacts/rev-esim-001/review1/evidence.json",
+      "evidence_sha256": "8cfbb69a9d982b2afa5aa2c7d923840b700702545008abde0ad6cf1910610df4",
+      "finished_at": "2026-11-05T13:57:28+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/REV-003.md"
+    },
+    {
       "id": "KRN-005",
       "title": "Qualify real selected XNU allocator type compiler metadata",
       "priority": 96,
@@ -966,9 +1169,49 @@
       "card_path": "planning/tasks/KRN-005.md"
     },
     {
+      "id": "REV-004",
+      "title": "Independently review SEN-001 source and host parser boundaries",
+      "status": "done",
+      "owner": "codex-team-review-sensors-20261105-ar",
+      "priority": 96,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002"
+      ],
+      "paths": [
+        "docs/reviews/sen-001"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Review exact sensor implementation commits f6b2072 and 82c8e94 with pinned SHUB and GNSS sources, all evidence hashes and original HAL identity provenance.",
+        "Independently test meaningful packet extent, timestamp, atomic output and unavailable-service cases; resolve the genuine GNSS struct versus offset helper discrepancy without editing implementation.",
+        "Publish actionable severity and reproduction or bounded no-finding report; native firmware, exact BYH3 and Apple ABI remain unqualified."
+      ],
+      "steps": [
+        "Atomically claim through the primary lab.py registry and inspect dependencies and reserved paths.",
+        "Work in a unique worktree; preserve phone restrictions and resource limits.",
+        "Record dated evidence and handoff, commit only owned paths, request coordinator integration review."
+      ],
+      "started_at": "2026-11-05T13:51:26+00:00",
+      "last_heartbeat": "2026-11-05T13:58:46+00:00",
+      "updated_at": "2026-11-05T14:03:02+00:00",
+      "branch": "team/rev-sensors-20261105",
+      "worktree": "worktrees/rev-sensors-20261105",
+      "progress_note": "Review-only commit d78299c4fa44cf386d44ac30a848375960912179 ready: no actionable P0/P1/P2 for exact f6b2072 plus82c8e94 host boundary. REVSEN-001 pass; source/capsule/HAL hashes checked, compiled actual GNSS writer resolves struct discrepancy, independent extent/atomic-output/timestamp/unavailable cases pass ASan+UBSan. No device/native/Apple ABI qualification.",
+      "next_step": "Coordinator inspect report/evidence, cherry-pick review-only commit and assess acceptance with common integration checks; retain in_progress until explicit acceptance",
+      "handoff": "worktrees/rev-sensors-20261105/docs/reviews/sen-001/handoff.md",
+      "evidence": "worktrees/rev-sensors-20261105/artifacts/rev-sensors/20261105-session1/evidence.json",
+      "evidence_sha256": "e9ee2ef79c90d221df424e2d1954d2e39dcd0eaac3854ce6a5af34f6e2cdb3b4",
+      "finished_at": "2026-11-05T14:03:02+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/REV-004.md"
+    },
+    {
       "id": "USB-001",
       "title": "Implement host-buildable native USB and block-transport adapters",
-      "status": "in_progress",
+      "status": "done",
       "owner": "codex-team-usb-20261105-ai",
       "priority": 95,
       "scope": "host",
@@ -994,15 +1237,20 @@
         "Record real results, failure modes and next-step handoff"
       ],
       "priority_reason": "Independent host USB/block path supports native logs and root transport while kernel work continues",
-      "updated_at": "2026-11-05T13:08:57+00:00",
+      "updated_at": "2026-11-05T13:56:21+00:00",
       "started_at": "2026-11-05T13:08:57+00:00",
-      "last_heartbeat": "2026-11-05T13:08:57+00:00",
+      "last_heartbeat": "2026-11-05T13:55:44+00:00",
       "branch": "team/usb-001-20261105",
       "worktree": "worktrees/usb-001-20261105",
-      "column": "in_progress",
+      "progress_note": "Coordinator accepted host/source scope after independent REV-001 correction and main integration commits631c661+13ea0a2. Shared make check passed146tests at f18eba26816d8fa1ce93d4ebb60496a1607ee4ed;main evidence artifacts/team-coordination/20261105-ah/integration-002/evidence.json SHA256 2d65d06911ce5475dca7bada6382f4dec0732aea6b6f4e7441babb6b32192f81. Native USB/PHY/DMA/Apple ABI/root mount/Android return remain unqualified.",
+      "next_step": "Host/source task accepted;native stages require ordered kernel/platform dependencies and separately authorized hardware qualification.",
+      "handoff": "worktrees/usb-001-20261105/docs/procedures/usb-001/README.md",
+      "evidence": "worktrees/usb-001-20261105/artifacts/usb-readonly/host-session6/evidence.json",
+      "evidence_sha256": "b17b36d35435a4c0d72eb6341140cf4300d650406ae9d9ff8e23c9ec29ff708f",
+      "finished_at": "2026-11-05T13:56:21+00:00",
+      "column": "done",
       "reasons": [],
-      "card_path": "planning/tasks/USB-001.md",
-      "report_health": "recent"
+      "card_path": "planning/tasks/USB-001.md"
     },
     {
       "id": "RES-008",
@@ -1274,9 +1522,47 @@
       "report_health": "stale"
     },
     {
+      "id": "REV-005",
+      "title": "Independently review MISC-001 peripheral source specifications",
+      "status": "in_progress",
+      "owner": "codex-team-review-misc-20261105-as",
+      "priority": 95,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002"
+      ],
+      "paths": [
+        "docs/reviews/misc-001"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Review exact bf54dcdc4a92111f20b7a05b6ba435b2674d8251 source specifications and verify pinned source and evidence hashes.",
+        "Independently verify key NFC, biometric, haptic, codec and external display claims and run meaningful provenance rejection controls.",
+        "Publish actionable findings or bounded no-finding report; preserve unavailable firmware, secure-world and private Apple interfaces."
+      ],
+      "steps": [
+        "Atomically claim through the primary lab.py registry and inspect dependencies and reserved paths.",
+        "Work in a unique worktree; preserve phone restrictions and resource limits.",
+        "Record dated evidence and handoff, commit only owned paths, request coordinator integration review."
+      ],
+      "started_at": "2026-11-05T13:51:49+00:00",
+      "last_heartbeat": "2026-11-05T13:58:23+00:00",
+      "updated_at": "2026-11-05T13:58:23+00:00",
+      "branch": "team/rev-misc-20261105",
+      "worktree": "worktrees/rev-misc-20261105",
+      "progress_note": "Independent review-only commit d0e3e0e ready: bounded no P0/P1/P2 findings at exact misc tipbf54dcd. MISCREV-001 pass:66commands,22 raw source blobs/81anchors,16same/6different,all10 original evidence hashes and precommit-source binding;7 original plus12 reviewer provenance rejection controls;actual NFC/biometric/haptic/MFC/DP context verified,no native claim or implementation/reference/device writes.",
+      "next_step": "Coordinator inspect review commit/evidence, integrate review documentation and decide acceptance;leave REV-005 in_progress until explicitly accepted.",
+      "handoff": "worktrees/rev-misc-20261105/docs/reviews/misc-001/handoff.md",
+      "column": "in_progress",
+      "reasons": [],
+      "card_path": "planning/tasks/REV-005.md",
+      "report_health": "recent"
+    },
+    {
       "id": "DRV-001",
       "title": "Prepare an STM SPI touch driver and host adapter",
-      "status": "in_progress",
+      "status": "done",
       "owner": "codex-team-touch-20261105-aj",
       "scope": "host",
       "evidence_kind": "host-test",
@@ -1305,20 +1591,64 @@
       ],
       "priority": 94,
       "priority_reason": "Independent bounded STM parser and transport boundary enable display/input integration without device operations",
-      "updated_at": "2026-11-05T13:09:27+00:00",
+      "updated_at": "2026-11-05T13:56:31+00:00",
       "started_at": "2026-11-05T13:09:27+00:00",
-      "last_heartbeat": "2026-11-05T13:09:27+00:00",
+      "last_heartbeat": "2026-11-05T13:55:54+00:00",
       "branch": "team/drv-001-20261105",
       "worktree": "worktrees/drv-001-20261105",
+      "progress_note": "Coordinator accepted all3 host acceptance criteria after independent exact-source and sanitizer review. Implementation integrated as70f92bd; review2031fb9; primary make check passed146tests at f18eba26816d8fa1ce93d4ebb60496a1607ee4ed. Common evidence artifacts/team-coordination/20261105-ah/integration-002/evidence.json. Hardware and Apple HID remain unqualified.",
+      "next_step": "Close accepted host task; physical SPI/IRQ/power and native HID require separate authorized tasks.",
+      "handoff": "worktrees/drv-001-20261105/docs/procedures/drv-001/handoff.md",
+      "evidence": "worktrees/drv-001-20261105/artifacts/stm-host/commit-session1/evidence.json",
+      "evidence_sha256": "f2dc1fed5fe6a9d22de69100cdd0173c32c97ff2bdbcfc6f7a3f04dce6006ada",
+      "finished_at": "2026-11-05T13:56:31+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/DRV-001.md"
+    },
+    {
+      "id": "KRN-023",
+      "title": "Qualify genuine corecrypto provider requirements for selected XNU link",
+      "status": "in_progress",
+      "owner": "codex-team-corecrypto-20261105-at",
+      "priority": 94,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "KRN-020",
+        "KRN-021"
+      ],
+      "paths": [
+        "tools/research/corecrypto",
+        "docs/procedures/corecrypto-provider",
+        "fixtures/public/corecrypto-provider",
+        "patches/corecrypto-provider"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Trace actual selected XNU crypto registration table, required cc_kext entry and known missing callbacks against full pinned primary sources and current link evidence.",
+        "Identify locally available or publicly licensed provider source with exact revision and provenance; distinguish missing private ABI or unavailable inputs from build failures.",
+        "Produce a repeatable input and ABI audit with actual negative controls and precise next integration gates; no fake archive, zero stubs, silent fallback or runtime/FIPS compatibility claims."
+      ],
+      "steps": [
+        "Atomically claim through the primary lab.py registry and inspect dependencies and reserved paths.",
+        "Work in a unique worktree; preserve phone restrictions and resource limits.",
+        "Record dated evidence and handoff, commit only owned paths, request coordinator integration review."
+      ],
+      "started_at": "2026-11-05T13:52:28+00:00",
+      "last_heartbeat": "2026-11-05T13:52:28+00:00",
+      "updated_at": "2026-11-05T13:52:28+00:00",
+      "branch": "team/krn-023-20261105",
+      "worktree": "worktrees/krn-023-20261105",
       "column": "in_progress",
       "reasons": [],
-      "card_path": "planning/tasks/DRV-001.md",
+      "card_path": "planning/tasks/KRN-023.md",
       "report_health": "recent"
     },
     {
       "id": "ESIM-001",
       "title": "Specify eUICC logical channels and LPA integration",
-      "status": "in_progress",
+      "status": "done",
       "owner": "codex-team-esim-20261105-ak",
       "priority": 93,
       "scope": "host",
@@ -1344,15 +1674,101 @@
         "Record real results, failure modes and next-step handoff"
       ],
       "priority_reason": "Independent eUICC channel/session implementation supports SIM/eSIM roadmap without profile changes on the phone",
-      "updated_at": "2026-11-05T13:09:51+00:00",
+      "updated_at": "2026-11-05T13:56:39+00:00",
       "started_at": "2026-11-05T13:09:51+00:00",
-      "last_heartbeat": "2026-11-05T13:09:51+00:00",
+      "last_heartbeat": "2026-11-05T13:56:03+00:00",
       "branch": "team/esim-001-20261105",
       "worktree": "worktrees/esim-001-20261105",
+      "progress_note": "Coordinator accepted host acceptance after independent exact review b005e7b and integration 6c18ad3+07f873e; common make check PASS 146 tests at f18eba26816d8fa1ce93d4ebb60496a1607ee4ed, evidence artifacts/team-coordination/20261105-ah/integration-002/evidence.json. ESIMHOST-005 passing capsule retained; physical transport, provisioning and selected iOS16.5 frontend remain unqualified.",
+      "next_step": "Host task accepted; exact Samsung physical eUICC transport and selected iOS16.5 frontend qualification remain separate authorized tasks",
+      "handoff": "worktrees/esim-001-20261105/docs/procedures/esim-001/handoff.md",
+      "evidence": "worktrees/esim-001-20261105/artifacts/esim-001/session5/evidence.json",
+      "evidence_sha256": "80c28f663d0059731e9a032640a0268420e96e9423c49392b7baec02015e075e",
+      "finished_at": "2026-11-05T13:56:39+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/ESIM-001.md"
+    },
+    {
+      "id": "VM-004",
+      "title": "Prepare a locally built generic ARM64 QEMU virt and TCG host runner",
+      "status": "in_progress",
+      "owner": "codex-team-qemu-host-20261105-au",
+      "priority": 93,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-001",
+        "BLD-001"
+      ],
+      "paths": [
+        "tools/build/qemu_host.py",
+        "docs/procedures/qemu-host",
+        "fixtures/public/qemu-host"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Pin genuine primary QEMU source and dependencies; build generic aarch64-softmmu locally without global installs or modifications to shared references.",
+        "Actually demonstrate virt machine and TCG accelerator availability and bounded child-process termination; record commands, source and binary hashes and failures.",
+        "Document exact interface for later qualified XNU guest while retaining VM-002 blocked until actual guest execution; do not substitute a shim or Linux run for XNU proof."
+      ],
+      "steps": [
+        "Atomically claim through the primary lab.py registry and inspect dependencies and reserved paths.",
+        "Work in a unique worktree; preserve phone restrictions and resource limits.",
+        "Record dated evidence and handoff, commit only owned paths, request coordinator integration review."
+      ],
+      "started_at": "2026-11-05T13:53:55+00:00",
+      "last_heartbeat": "2026-11-05T13:53:55+00:00",
+      "updated_at": "2026-11-05T13:53:55+00:00",
+      "branch": "team/vm-004-20261105",
+      "worktree": "worktrees/vm-004-20261105",
       "column": "in_progress",
       "reasons": [],
-      "card_path": "planning/tasks/ESIM-001.md",
+      "card_path": "planning/tasks/VM-004.md",
       "report_health": "recent"
+    },
+    {
+      "id": "SEN-001",
+      "title": "Specify sensor-hub and GNSS transport adapters",
+      "status": "done",
+      "owner": "codex-team-sensors-20261105-al",
+      "priority": 92,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-002"
+      ],
+      "paths": [
+        "src/platform/sensors",
+        "docs/procedures/sen-001"
+      ],
+      "acceptance": [
+        "Pinned hub/GNSS interfaces and exact sensor identities",
+        "Timestamp, packet truncation and unavailable-service cases tested"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "steps": [
+        "Inspect the task dependencies and pinned inputs",
+        "Implement or measure only this task boundary",
+        "Record real results, failure modes and next-step handoff"
+      ],
+      "priority_reason": "Next independent host executor for pinned sensor-hub/GNSS interfaces after USB,touch,eSIM;queue if session capacity is full",
+      "updated_at": "2026-11-05T14:02:22+00:00",
+      "started_at": "2026-11-05T13:25:56+00:00",
+      "last_heartbeat": "2026-11-05T13:34:23+00:00",
+      "branch": "team/sen-001-20261105",
+      "worktree": "worktrees/sen-001-20261105",
+      "progress_note": "Ready for review: commits f6b2072 and 82c8e94; source-qualified SHUB/GNSS C boundaries pass host ASan/UBSan, ARM64 compile, genuine SHUB declaration oracle, all65524 GNSS length comparisons and seven original HAL identity controls. First support-header failure retained. Native/Apple ABI and exact BYH3 firmware remain unqualified.",
+      "next_step": "Coordinator inspect main-relative passing evidence, cherry-pick both commits and run common main make check; keep in_progress until acceptance review.",
+      "handoff": "worktrees/sen-001-20261105/docs/procedures/sen-001/handoff.md",
+      "evidence": "worktrees/sen-001-20261105/artifacts/sen-001/20261105-host-002/evidence.json",
+      "evidence_sha256": "b7a56c30a205e805269ff850a13521bb59824d25b01090188e1c0d75bd5c1227",
+      "finished_at": "2026-11-05T14:02:22+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/SEN-001.md"
     },
     {
       "id": "PLN-001",
@@ -2169,10 +2585,47 @@
       "card_path": "planning/tasks/UI-006.md"
     },
     {
+      "id": "DRV-004",
+      "title": "Prepare source-qualified E1S UFS and MCQ read-only descriptor boundaries",
+      "status": "in_progress",
+      "owner": "codex-team-ufs-host-20261105-aw",
+      "priority": 80,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-002",
+        "BLD-001"
+      ],
+      "paths": [
+        "src/platform/storage/ufs",
+        "docs/procedures/ufs-host"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Trace exact pinned E1S UFS/MCQ donor and Samsung source, descriptor and completion layouts, read-only operations and DMA/lifecycle constraints; explicitly distinguish source facts and unavailable BYH3/native inputs.",
+        "Implement only a bounded host-buildable descriptor/completion admission boundary useful to future DRV-002; validate integer, extent, direction/write rejection and stale/error completion behavior against independently extracted genuine declarations, with actual host sanitizer and ARM64 compile evidence.",
+        "Record exact commands, hashes, negative controls and handoff to DRV-002 without editing its reserved src/xnu, patches/e1s, tests or fixtures paths; no MMIO, write/erase/format command, reset or phone operation."
+      ],
+      "steps": [
+        "Atomically claim through main lab.py and inspect DRV-002 plus own card; retain original dependencies and blocked reservations.",
+        "Use own narrow worktree and read-only main pinned references; derive only source-qualified host contracts, not hardware emulation.",
+        "Test meaningful actual source layout cases and adverse inputs, commit owned files and record evidence/handoff for coordinator review."
+      ],
+      "started_at": "2026-11-05T14:02:36+00:00",
+      "last_heartbeat": "2026-11-05T14:02:36+00:00",
+      "updated_at": "2026-11-05T14:02:36+00:00",
+      "branch": "team/drv-004-20261105",
+      "worktree": "worktrees/drv-004-20261105",
+      "column": "in_progress",
+      "reasons": [],
+      "card_path": "planning/tasks/DRV-004.md",
+      "report_health": "recent"
+    },
+    {
       "id": "VM-002",
       "title": "Build a pinned minimal XNU guest and host launch harness",
-      "status": "pending",
-      "owner": null,
+      "status": "blocked",
+      "owner": "codex-team-vm-20261105-am",
       "priority": 70,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -2196,15 +2649,22 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "started_at": "2026-11-05T11:12:01+00:00",
-      "updated_at": "2026-11-05T11:12:50+00:00",
-      "progress_note": "Automatic claim corrected before work;no VM files,experiments or processes touched. Current priority is new genuine IOKit IIG integration task KRN-019.",
-      "next_step": "Release this untouched VM claim;future VM work follows original acceptance and scope.",
-      "handoff": "artifacts/planning/VM-002-release.md",
+      "started_at": "2026-11-05T13:27:37+00:00",
+      "updated_at": "2026-11-05T13:41:52+00:00",
+      "progress_note": "Pinned donor verified;genuinely built5-source AVF shim and owned static arm64 PID1;12 real host controls pass. VMHOST001 inconclusive and VMHOST002 shim-only pass recorded. No XNU guest launched or runtime PID1 observed. Scoped commits f71ede2 and current evidence commit are ready for coordinator review.",
+      "next_step": "Supply provenance-qualified complete QEMU/AVF XNU kernel and generic ARM64 QEMU virt/TCG executable;then coordinator leases one bounded guest and reviews actual Darwin/PID1 console and termination. Main make check deferred to coordinator integration.",
+      "handoff": "worktrees/vm-002-20261105/docs/procedures/vm-002/README.md",
       "released_at": "2026-11-05T11:12:50+00:00",
-      "column": "ready",
-      "reasons": [],
-      "card_path": "planning/tasks/VM-002.md"
+      "last_heartbeat": "2026-11-05T13:41:52+00:00",
+      "branch": "team/vm-002-20261105",
+      "worktree": "worktrees/vm-002-20261105",
+      "blocked_reason": "No complete linked provenance-qualified XNU guest kernel for QEMU/AVF board+mockfs+PSCI exit is supplied;E1S object closure is not a guest image. No generic ARM64 QEMU virt/TCG executable is available;installed Android frontend rejects required -machine help (exit1) and -accel help (exit2). Shim/PID1 source builds and host controls do not satisfy actual XNU execution acceptance.",
+      "column": "blocked",
+      "reasons": [
+        "No complete linked provenance-qualified XNU guest kernel for QEMU/AVF board+mockfs+PSCI exit is supplied;E1S object closure is not a guest image. No generic ARM64 QEMU virt/TCG executable is available;installed Android frontend rejects required -machine help (exit1) and -accel help (exit2). Shim/PID1 source builds and host controls do not satisfy actual XNU execution acceptance."
+      ],
+      "card_path": "planning/tasks/VM-002.md",
+      "report_health": "recent"
     },
     {
       "id": "UI-001",
@@ -2571,37 +3031,6 @@
       "card_path": "planning/tasks/PWR-001.md"
     },
     {
-      "id": "SEN-001",
-      "title": "Specify sensor-hub and GNSS transport adapters",
-      "status": "pending",
-      "owner": null,
-      "priority": 70,
-      "scope": "host",
-      "evidence_kind": "host-test",
-      "depends_on": [
-        "RES-002"
-      ],
-      "paths": [
-        "src/platform/sensors",
-        "docs/procedures/sen-001"
-      ],
-      "acceptance": [
-        "Pinned hub/GNSS interfaces and exact sensor identities",
-        "Timestamp, packet truncation and unavailable-service cases tested"
-      ],
-      "sources": [
-        "s24-linux"
-      ],
-      "steps": [
-        "Inspect the task dependencies and pinned inputs",
-        "Implement or measure only this task boundary",
-        "Record real results, failure modes and next-step handoff"
-      ],
-      "column": "ready",
-      "reasons": [],
-      "card_path": "planning/tasks/SEN-001.md"
-    },
-    {
       "id": "CELL-001",
       "title": "Specify Samsung CPIF control and packet transports",
       "status": "done",
@@ -2719,8 +3148,8 @@
     {
       "id": "MISC-001",
       "title": "Specify haptics, NFC, biometrics, video and external display gaps",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-team-misc-20261105-an",
       "priority": 70,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -2743,7 +3172,18 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "ready",
+      "started_at": "2026-11-05T13:28:27+00:00",
+      "last_heartbeat": "2026-11-05T14:03:31+00:00",
+      "updated_at": "2026-11-05T14:03:44+00:00",
+      "branch": "team/misc-001-20261105",
+      "worktree": "worktrees/misc-001-20261105",
+      "progress_note": "Coordinator accepted specification criteria after independent REV005 review d0e3e0ef: no bounded P0/P1/P2 findings. Main implementation 6a3e127 and review 3b5b4f9 integrated; common make check passed 146 tests at 3b5b4f987bc73b7cb1e7f056d1efa0252fa5c70c. Integration evidence: artifacts/team-coordination/20261105-ah/integration-003/evidence.json. All native hardware gates remain open; no Apple service or security compatibility asserted.",
+      "next_step": "Complete accepted MISC-001 with original passing source-audit evidence; future native work requires separate tasks and acceptance.",
+      "handoff": "worktrees/misc-001-20261105/docs/procedures/misc-001/HANDOFF.md",
+      "evidence": "worktrees/misc-001-20261105/artifacts/misc-001/2026-11-05-source-audit/evidence.json",
+      "evidence_sha256": "458a5ab066a99c8b5cc3588347c49974e8ba293e196d1f24b434c868736b8abb",
+      "finished_at": "2026-11-05T14:03:44+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/MISC-001.md"
     },
@@ -2975,7 +3415,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Dependencies: DRV-001, KRN-001"
+        "Dependencies: KRN-001"
       ],
       "card_path": "planning/tasks/UI-004.md"
     },
@@ -3503,7 +3943,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Paths reserved by: DRV-001, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-022"
+        "Paths reserved by: KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-022, KRN-023, VM-004"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-002.md"
@@ -3587,7 +4027,7 @@
       "column": "waiting",
       "reasons": [
         "Dependencies: NAT-001",
-        "Paths reserved by: DRV-001, NAT-001, USB-001, ESIM-001, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-022"
+        "Paths reserved by: NAT-001, VM-002, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-022, KRN-023, VM-004, DRV-004"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-002.md"
@@ -3631,7 +4071,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-002, NAT-004, KRN-001",
-        "Paths reserved by: DRV-001, NAT-001, USB-001, ESIM-001, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-022"
+        "Paths reserved by: NAT-001, VM-002, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-022, KRN-023, VM-004, DRV-004"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -3669,7 +4109,7 @@
       "column": "gated",
       "reasons": [
         "Scope not authorized: native",
-        "Dependencies: NAT-003, DRV-001, DRV-002",
+        "Dependencies: NAT-003, DRV-002",
         "Paths reserved by: KRN-003"
       ],
       "priority": 50,
@@ -3928,7 +4368,7 @@
       "column": "gated",
       "reasons": [
         "Scope not authorized: native",
-        "Dependencies: DRV-003, USB-001"
+        "Dependencies: DRV-003"
       ],
       "card_path": "planning/tasks/USB-002.md"
     },
@@ -4231,7 +4671,7 @@
       "column": "gated",
       "reasons": [
         "Scope not authorized: native",
-        "Dependencies: SEN-001, DRV-003"
+        "Dependencies: DRV-003"
       ],
       "card_path": "planning/tasks/SEN-002.md"
     },
@@ -4363,7 +4803,7 @@
       "column": "gated",
       "reasons": [
         "Scope not authorized: native",
-        "Dependencies: ESIM-001, CELL-003"
+        "Dependencies: CELL-003"
       ],
       "card_path": "planning/tasks/ESIM-002.md"
     },
@@ -4502,26 +4942,26 @@
       {
         "id": "KRN-022",
         "status": "in_progress",
-        "last_heartbeat": "2026-11-05T12:56:32+00:00",
-        "report_health": "recent",
-        "progress_note": "PTHP005 executes genuine native install rules:1794 installed entries,36 native empty exclusions,76 unavailable generated inputs explicit;PTHP007 builds all3 current ARM64 TUs and a real archive with39 definitions,61 external imports,zero unresolved after genuine3 VM aliases and zero overlaps",
-        "next_step": "Measure both actual callback-table layouts and signatures against the genuine kernel producer,real allocator records,negative header/type/metadata controls and actual alias linkage before acceptance",
+        "last_heartbeat": "2026-11-05T13:12:43+00:00",
+        "report_health": "stale",
+        "progress_note": "Pthread component and15 actual source/ABI/metadata/VM-alias controls pass;checkpoint committed;coordinator now uses isolated worktree while three independent host executors own USB001,DRV001,ESIM001",
+        "next_step": "Finish exact native MIG-header context comparison and wrong-alias negative control,then final acceptance and integration",
         "handoff": "docs/procedures/xnu-kernel-pthread-profile.md",
-        "branch": null,
-        "worktree": null
+        "branch": "team/krn-022-coordinator-20261105",
+        "worktree": "worktrees/krn-022-coordinator-20261105"
       }
     ],
-    "codex-team-usb-20261105-ai": [
+    "codex-team-review-pthread-20261105-av": [
       {
-        "id": "USB-001",
+        "id": "REV-006",
         "status": "in_progress",
-        "last_heartbeat": "2026-11-05T13:08:57+00:00",
+        "last_heartbeat": "2026-11-05T13:59:46+00:00",
         "report_health": "recent",
         "progress_note": null,
         "next_step": null,
         "handoff": null,
-        "branch": "team/usb-001-20261105",
-        "worktree": "worktrees/usb-001-20261105"
+        "branch": "team/rev-pthread-20261105",
+        "worktree": "worktrees/rev-pthread-20261105"
       }
     ],
     "codex-e1s-dependencies-20261105-k": [
@@ -4550,30 +4990,43 @@
         "worktree": null
       }
     ],
-    "codex-team-touch-20261105-aj": [
+    "codex-team-review-misc-20261105-as": [
       {
-        "id": "DRV-001",
+        "id": "REV-005",
         "status": "in_progress",
-        "last_heartbeat": "2026-11-05T13:09:27+00:00",
+        "last_heartbeat": "2026-11-05T13:58:23+00:00",
         "report_health": "recent",
-        "progress_note": null,
-        "next_step": null,
-        "handoff": null,
-        "branch": "team/drv-001-20261105",
-        "worktree": "worktrees/drv-001-20261105"
+        "progress_note": "Independent review-only commit d0e3e0e ready: bounded no P0/P1/P2 findings at exact misc tipbf54dcd. MISCREV-001 pass:66commands,22 raw source blobs/81anchors,16same/6different,all10 original evidence hashes and precommit-source binding;7 original plus12 reviewer provenance rejection controls;actual NFC/biometric/haptic/MFC/DP context verified,no native claim or implementation/reference/device writes.",
+        "next_step": "Coordinator inspect review commit/evidence, integrate review documentation and decide acceptance;leave REV-005 in_progress until explicitly accepted.",
+        "handoff": "worktrees/rev-misc-20261105/docs/reviews/misc-001/handoff.md",
+        "branch": "team/rev-misc-20261105",
+        "worktree": "worktrees/rev-misc-20261105"
       }
     ],
-    "codex-team-esim-20261105-ak": [
+    "codex-team-corecrypto-20261105-at": [
       {
-        "id": "ESIM-001",
+        "id": "KRN-023",
         "status": "in_progress",
-        "last_heartbeat": "2026-11-05T13:09:51+00:00",
+        "last_heartbeat": "2026-11-05T13:52:28+00:00",
         "report_health": "recent",
         "progress_note": null,
         "next_step": null,
         "handoff": null,
-        "branch": "team/esim-001-20261105",
-        "worktree": "worktrees/esim-001-20261105"
+        "branch": "team/krn-023-20261105",
+        "worktree": "worktrees/krn-023-20261105"
+      }
+    ],
+    "codex-team-qemu-host-20261105-au": [
+      {
+        "id": "VM-004",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-05T13:53:55+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": "team/vm-004-20261105",
+        "worktree": "worktrees/vm-004-20261105"
       }
     ],
     "codex-implementation-20261105": [
@@ -4636,188 +5089,328 @@
         "branch": "main",
         "worktree": null
       }
+    ],
+    "codex-team-ufs-host-20261105-aw": [
+      {
+        "id": "DRV-004",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-05T14:02:36+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": "team/drv-004-20261105",
+        "worktree": "worktrees/drv-004-20261105"
+      }
+    ],
+    "codex-team-vm-20261105-am": [
+      {
+        "id": "VM-002",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-05T13:41:52+00:00",
+        "report_health": "recent",
+        "progress_note": "Pinned donor verified;genuinely built5-source AVF shim and owned static arm64 PID1;12 real host controls pass. VMHOST001 inconclusive and VMHOST002 shim-only pass recorded. No XNU guest launched or runtime PID1 observed. Scoped commits f71ede2 and current evidence commit are ready for coordinator review.",
+        "next_step": "Supply provenance-qualified complete QEMU/AVF XNU kernel and generic ARM64 QEMU virt/TCG executable;then coordinator leases one bounded guest and reviews actual Darwin/PID1 console and termination. Main make check deferred to coordinator integration.",
+        "handoff": "worktrees/vm-002-20261105/docs/procedures/vm-002/README.md",
+        "branch": "team/vm-002-20261105",
+        "worktree": "worktrees/vm-002-20261105"
+      }
     ]
   },
   "recent_events": [
     {
-      "at": "2026-11-05T12:34:11+00:00",
-      "action": "experiment.record:PTHP-002",
-      "owner": "codex-kernel-pthread-profile-20261105-ag"
-    },
-    {
-      "at": "2026-11-05T12:34:52+00:00",
-      "action": "experiment.plan:PTHP-003",
-      "owner": "codex-kernel-pthread-profile-20261105-ag"
-    },
-    {
-      "at": "2026-11-05T12:36:24+00:00",
-      "action": "experiment.record:PTHP-003",
-      "owner": "codex-kernel-pthread-profile-20261105-ag"
-    },
-    {
-      "at": "2026-11-05T12:36:38+00:00",
-      "action": "experiment.plan:PTHP-004",
-      "owner": "codex-kernel-pthread-profile-20261105-ag"
-    },
-    {
-      "at": "2026-11-05T12:38:53+00:00",
-      "action": "experiment.record:PTHP-004",
-      "owner": "codex-kernel-pthread-profile-20261105-ag"
-    },
-    {
-      "at": "2026-11-05T12:39:04+00:00",
-      "action": "experiment.plan:PTHP-005",
-      "owner": "codex-kernel-pthread-profile-20261105-ag"
-    },
-    {
-      "at": "2026-11-05T12:46:03+00:00",
-      "action": "experiment.record:PTHP-005",
-      "owner": "codex-kernel-pthread-profile-20261105-ag"
-    },
-    {
-      "at": "2026-11-05T12:48:16+00:00",
-      "action": "experiment.plan:PTHP-006",
-      "owner": "codex-kernel-pthread-profile-20261105-ag"
-    },
-    {
-      "at": "2026-11-05T12:50:04+00:00",
-      "action": "experiment.record:PTHP-006",
-      "owner": "codex-kernel-pthread-profile-20261105-ag"
-    },
-    {
-      "at": "2026-11-05T12:50:12+00:00",
-      "action": "experiment.plan:PTHP-007",
-      "owner": "codex-kernel-pthread-profile-20261105-ag"
-    },
-    {
-      "at": "2026-11-05T12:51:59+00:00",
-      "action": "experiment.record:PTHP-007",
-      "owner": "codex-kernel-pthread-profile-20261105-ag"
-    },
-    {
-      "at": "2026-11-05T12:56:32+00:00",
-      "action": "task.update:KRN-022",
-      "owner": "codex-kernel-pthread-profile-20261105-ag",
-      "tasks": [
-        {
-          "id": "KRN-022",
-          "status": "in_progress",
-          "owner": "codex-kernel-pthread-profile-20261105-ag",
-          "priority": 99,
-          "progress_note": "PTHP005 executes genuine native install rules:1794 installed entries,36 native empty exclusions,76 unavailable generated inputs explicit;PTHP007 builds all3 current ARM64 TUs and a real archive with39 definitions,61 external imports,zero unresolved after genuine3 VM aliases and zero overlaps",
-          "next_step": "Measure both actual callback-table layouts and signatures against the genuine kernel producer,real allocator records,negative header/type/metadata controls and actual alias linkage before acceptance",
-          "last_heartbeat": "2026-11-05T12:56:32+00:00",
-          "handoff": "docs/procedures/xnu-kernel-pthread-profile.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T12:56:46+00:00",
-      "action": "experiment.plan:PTHP-008",
-      "owner": "codex-kernel-pthread-profile-20261105-ag"
-    },
-    {
-      "at": "2026-11-05T13:02:02+00:00",
-      "action": "experiment.record:PTHP-008",
-      "owner": "codex-kernel-pthread-profile-20261105-ag"
-    },
-    {
-      "at": "2026-11-05T13:08:11+00:00",
-      "action": "task.prioritize:USB-001",
-      "owner": "codex-team-coordinator-20261105-ah",
-      "tasks": [
-        {
-          "id": "USB-001",
-          "status": "pending",
-          "owner": null,
-          "priority": 95,
-          "priority_reason": "Independent host USB/block path supports native logs and root transport while kernel work continues"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T13:08:19+00:00",
-      "action": "task.prioritize:DRV-001",
-      "owner": "codex-team-coordinator-20261105-ah",
-      "tasks": [
-        {
-          "id": "DRV-001",
-          "status": "pending",
-          "owner": null,
-          "priority": 94,
-          "priority_reason": "Independent bounded STM parser and transport boundary enable display/input integration without device operations"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T13:08:28+00:00",
-      "action": "task.prioritize:ESIM-001",
-      "owner": "codex-team-coordinator-20261105-ah",
-      "tasks": [
-        {
-          "id": "ESIM-001",
-          "status": "pending",
-          "owner": null,
-          "priority": 93,
-          "priority_reason": "Independent eUICC channel/session implementation supports SIM/eSIM roadmap without profile changes on the phone"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T13:08:57+00:00",
-      "action": "task.claim-next",
-      "owner": "codex-team-usb-20261105-ai",
-      "tasks": [
-        {
-          "id": "USB-001",
-          "status": "in_progress",
-          "owner": "codex-team-usb-20261105-ai",
-          "priority": 95,
-          "priority_reason": "Independent host USB/block path supports native logs and root transport while kernel work continues",
-          "last_heartbeat": "2026-11-05T13:08:57+00:00",
-          "branch": "team/usb-001-20261105",
-          "worktree": "worktrees/usb-001-20261105"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T13:09:27+00:00",
-      "action": "task.claim-next",
+      "at": "2026-11-05T13:56:31+00:00",
+      "action": "task.done:DRV-001",
       "owner": "codex-team-touch-20261105-aj",
       "tasks": [
         {
           "id": "DRV-001",
-          "status": "in_progress",
+          "status": "done",
           "owner": "codex-team-touch-20261105-aj",
           "priority": 94,
           "priority_reason": "Independent bounded STM parser and transport boundary enable display/input integration without device operations",
-          "last_heartbeat": "2026-11-05T13:09:27+00:00",
+          "progress_note": "Coordinator accepted all3 host acceptance criteria after independent exact-source and sanitizer review. Implementation integrated as70f92bd; review2031fb9; primary make check passed146tests at f18eba26816d8fa1ce93d4ebb60496a1607ee4ed. Common evidence artifacts/team-coordination/20261105-ah/integration-002/evidence.json. Hardware and Apple HID remain unqualified.",
+          "next_step": "Close accepted host task; physical SPI/IRQ/power and native HID require separate authorized tasks.",
+          "last_heartbeat": "2026-11-05T13:55:54+00:00",
           "branch": "team/drv-001-20261105",
-          "worktree": "worktrees/drv-001-20261105"
+          "worktree": "worktrees/drv-001-20261105",
+          "handoff": "worktrees/drv-001-20261105/docs/procedures/drv-001/handoff.md"
         }
       ]
     },
     {
-      "at": "2026-11-05T13:09:51+00:00",
-      "action": "task.claim-next",
+      "at": "2026-11-05T13:56:39+00:00",
+      "action": "task.done:ESIM-001",
       "owner": "codex-team-esim-20261105-ak",
       "tasks": [
         {
           "id": "ESIM-001",
-          "status": "in_progress",
+          "status": "done",
           "owner": "codex-team-esim-20261105-ak",
           "priority": 93,
           "priority_reason": "Independent eUICC channel/session implementation supports SIM/eSIM roadmap without profile changes on the phone",
-          "last_heartbeat": "2026-11-05T13:09:51+00:00",
+          "progress_note": "Coordinator accepted host acceptance after independent exact review b005e7b and integration 6c18ad3+07f873e; common make check PASS 146 tests at f18eba26816d8fa1ce93d4ebb60496a1607ee4ed, evidence artifacts/team-coordination/20261105-ah/integration-002/evidence.json. ESIMHOST-005 passing capsule retained; physical transport, provisioning and selected iOS16.5 frontend remain unqualified.",
+          "next_step": "Host task accepted; exact Samsung physical eUICC transport and selected iOS16.5 frontend qualification remain separate authorized tasks",
+          "last_heartbeat": "2026-11-05T13:56:03+00:00",
           "branch": "team/esim-001-20261105",
-          "worktree": "worktrees/esim-001-20261105"
+          "worktree": "worktrees/esim-001-20261105",
+          "handoff": "worktrees/esim-001-20261105/docs/procedures/esim-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:57:28+00:00",
+      "action": "task.done:REV-003",
+      "owner": "codex-team-review-esim-20261105-aq",
+      "tasks": [
+        {
+          "id": "REV-003",
+          "status": "done",
+          "owner": "codex-team-review-esim-20261105-aq",
+          "priority": 97,
+          "progress_note": "Independent review commit b005e7b: bounded no P0/P1/P2 findings at exact ESIM tip9daf884. ESIMREV-001 pass: original11 ASan/UBSan groups,independent263165 APDU cases/324 lifecycle-CLA sessions,actual negative controls and ARM64 ELF/MachO layout;all66 original artifact hashes and source pins verified;no device or implementation writes.",
+          "next_step": "Coordinator inspect review/evidence and integrate implementation plus review as appropriate;run primary make check and decide acceptance before task completion.",
+          "last_heartbeat": "2026-11-05T13:44:58+00:00",
+          "branch": "team/rev-esim-20261105",
+          "worktree": "worktrees/rev-esim-20261105",
+          "handoff": "worktrees/rev-esim-20261105/docs/reviews/esim-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:57:39+00:00",
+      "action": "experiment.record:MISCREV-001",
+      "owner": "codex-team-review-misc-20261105-as"
+    },
+    {
+      "at": "2026-11-05T13:58:03+00:00",
+      "action": "experiment.record:REVSEN-001",
+      "owner": "codex-team-review-sensors-20261105-ar"
+    },
+    {
+      "at": "2026-11-05T13:58:13+00:00",
+      "action": "experiment.record:PTHP-012",
+      "owner": "codex-kernel-pthread-profile-20261105-ag"
+    },
+    {
+      "at": "2026-11-05T13:58:23+00:00",
+      "action": "task.update:REV-005",
+      "owner": "codex-team-review-misc-20261105-as",
+      "tasks": [
+        {
+          "id": "REV-005",
+          "status": "in_progress",
+          "owner": "codex-team-review-misc-20261105-as",
+          "priority": 95,
+          "progress_note": "Independent review-only commit d0e3e0e ready: bounded no P0/P1/P2 findings at exact misc tipbf54dcd. MISCREV-001 pass:66commands,22 raw source blobs/81anchors,16same/6different,all10 original evidence hashes and precommit-source binding;7 original plus12 reviewer provenance rejection controls;actual NFC/biometric/haptic/MFC/DP context verified,no native claim or implementation/reference/device writes.",
+          "next_step": "Coordinator inspect review commit/evidence, integrate review documentation and decide acceptance;leave REV-005 in_progress until explicitly accepted.",
+          "last_heartbeat": "2026-11-05T13:58:23+00:00",
+          "branch": "team/rev-misc-20261105",
+          "worktree": "worktrees/rev-misc-20261105",
+          "handoff": "worktrees/rev-misc-20261105/docs/reviews/misc-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:58:46+00:00",
+      "action": "task.update:REV-004",
+      "owner": "codex-team-review-sensors-20261105-ar",
+      "tasks": [
+        {
+          "id": "REV-004",
+          "status": "in_progress",
+          "owner": "codex-team-review-sensors-20261105-ar",
+          "priority": 96,
+          "progress_note": "Review-only commit d78299c4fa44cf386d44ac30a848375960912179 ready: no actionable P0/P1/P2 for exact f6b2072 plus82c8e94 host boundary. REVSEN-001 pass; source/capsule/HAL hashes checked, compiled actual GNSS writer resolves struct discrepancy, independent extent/atomic-output/timestamp/unavailable cases pass ASan+UBSan. No device/native/Apple ABI qualification.",
+          "next_step": "Coordinator inspect report/evidence, cherry-pick review-only commit and assess acceptance with common integration checks; retain in_progress until explicit acceptance",
+          "last_heartbeat": "2026-11-05T13:58:46+00:00",
+          "branch": "team/rev-sensors-20261105",
+          "worktree": "worktrees/rev-sensors-20261105",
+          "handoff": "worktrees/rev-sensors-20261105/docs/reviews/sen-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:59:11+00:00",
+      "action": "task.add:REV-006",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "REV-006",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T13:59:46+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-review-pthread-20261105-av",
+      "tasks": [
+        {
+          "id": "REV-006",
+          "status": "in_progress",
+          "owner": "codex-team-review-pthread-20261105-av",
+          "priority": 99,
+          "last_heartbeat": "2026-11-05T13:59:46+00:00",
+          "branch": "team/rev-pthread-20261105",
+          "worktree": "worktrees/rev-pthread-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:00:54+00:00",
+      "action": "experiment.plan:PTHPREV-001",
+      "owner": "codex-team-review-pthread-20261105-av"
+    },
+    {
+      "at": "2026-11-05T14:01:29+00:00",
+      "action": "task.done:REV-001",
+      "owner": "codex-team-review-usb-20261105-ao",
+      "tasks": [
+        {
+          "id": "REV-001",
+          "status": "done",
+          "owner": "codex-team-review-usb-20261105-ao",
+          "priority": 99,
+          "progress_note": "Ready for coordinator acceptance: initial review e5a857f and followup eb37732 resolve P2 USBREV-F01 in exact USB fix f3d705d. USBREV-002 independently passes2 exact source sets and34 omission/property/source/conditional negatives;107 session6 hashes match;C unchanged. No unresolved P0/P1/P2 in bounded host/source review;native USB/Apple/kernel claims remain unqualified.",
+          "next_step": "Coordinator accepts independent report and integrates only owned review commits; retain in_progress until acceptance, then owner may complete REV-001 with evidence.",
+          "last_heartbeat": "2026-11-05T13:47:45+00:00",
+          "branch": "team/rev-usb-20261105",
+          "worktree": "worktrees/rev-usb-20261105",
+          "handoff": "worktrees/rev-usb-20261105/docs/reviews/usb-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:01:39+00:00",
+      "action": "task.add:DRV-004",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "DRV-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:02:22+00:00",
+      "action": "task.done:SEN-001",
+      "owner": "codex-team-sensors-20261105-al",
+      "tasks": [
+        {
+          "id": "SEN-001",
+          "status": "done",
+          "owner": "codex-team-sensors-20261105-al",
+          "priority": 92,
+          "priority_reason": "Next independent host executor for pinned sensor-hub/GNSS interfaces after USB,touch,eSIM;queue if session capacity is full",
+          "progress_note": "Ready for review: commits f6b2072 and 82c8e94; source-qualified SHUB/GNSS C boundaries pass host ASan/UBSan, ARM64 compile, genuine SHUB declaration oracle, all65524 GNSS length comparisons and seven original HAL identity controls. First support-header failure retained. Native/Apple ABI and exact BYH3 firmware remain unqualified.",
+          "next_step": "Coordinator inspect main-relative passing evidence, cherry-pick both commits and run common main make check; keep in_progress until acceptance review.",
+          "last_heartbeat": "2026-11-05T13:34:23+00:00",
+          "branch": "team/sen-001-20261105",
+          "worktree": "worktrees/sen-001-20261105",
+          "handoff": "worktrees/sen-001-20261105/docs/procedures/sen-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:02:36+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-ufs-host-20261105-aw",
+      "tasks": [
+        {
+          "id": "DRV-004",
+          "status": "in_progress",
+          "owner": "codex-team-ufs-host-20261105-aw",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T14:02:36+00:00",
+          "branch": "team/drv-004-20261105",
+          "worktree": "worktrees/drv-004-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:03:02+00:00",
+      "action": "task.done:REV-004",
+      "owner": "codex-team-review-sensors-20261105-ar",
+      "tasks": [
+        {
+          "id": "REV-004",
+          "status": "done",
+          "owner": "codex-team-review-sensors-20261105-ar",
+          "priority": 96,
+          "progress_note": "Review-only commit d78299c4fa44cf386d44ac30a848375960912179 ready: no actionable P0/P1/P2 for exact f6b2072 plus82c8e94 host boundary. REVSEN-001 pass; source/capsule/HAL hashes checked, compiled actual GNSS writer resolves struct discrepancy, independent extent/atomic-output/timestamp/unavailable cases pass ASan+UBSan. No device/native/Apple ABI qualification.",
+          "next_step": "Coordinator inspect report/evidence, cherry-pick review-only commit and assess acceptance with common integration checks; retain in_progress until explicit acceptance",
+          "last_heartbeat": "2026-11-05T13:58:46+00:00",
+          "branch": "team/rev-sensors-20261105",
+          "worktree": "worktrees/rev-sensors-20261105",
+          "handoff": "worktrees/rev-sensors-20261105/docs/reviews/sen-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:03:31+00:00",
+      "action": "task.update:MISC-001",
+      "owner": "codex-team-misc-20261105-an",
+      "tasks": [
+        {
+          "id": "MISC-001",
+          "status": "in_progress",
+          "owner": "codex-team-misc-20261105-an",
+          "priority": 70,
+          "progress_note": "Coordinator accepted specification criteria after independent REV005 review d0e3e0ef: no bounded P0/P1/P2 findings. Main implementation 6a3e127 and review 3b5b4f9 integrated; common make check passed 146 tests at 3b5b4f987bc73b7cb1e7f056d1efa0252fa5c70c. Integration evidence: artifacts/team-coordination/20261105-ah/integration-003/evidence.json. All native hardware gates remain open; no Apple service or security compatibility asserted.",
+          "next_step": "Complete accepted MISC-001 with original passing source-audit evidence; future native work requires separate tasks and acceptance.",
+          "last_heartbeat": "2026-11-05T14:03:31+00:00",
+          "branch": "team/misc-001-20261105",
+          "worktree": "worktrees/misc-001-20261105",
+          "handoff": "worktrees/misc-001-20261105/docs/procedures/misc-001/HANDOFF.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:03:37+00:00",
+      "action": "experiment.plan:UFSHOST-001",
+      "owner": "codex-team-ufs-host-20261105-aw"
+    },
+    {
+      "at": "2026-11-05T14:03:44+00:00",
+      "action": "task.done:MISC-001",
+      "owner": "codex-team-misc-20261105-an",
+      "tasks": [
+        {
+          "id": "MISC-001",
+          "status": "done",
+          "owner": "codex-team-misc-20261105-an",
+          "priority": 70,
+          "progress_note": "Coordinator accepted specification criteria after independent REV005 review d0e3e0ef: no bounded P0/P1/P2 findings. Main implementation 6a3e127 and review 3b5b4f9 integrated; common make check passed 146 tests at 3b5b4f987bc73b7cb1e7f056d1efa0252fa5c70c. Integration evidence: artifacts/team-coordination/20261105-ah/integration-003/evidence.json. All native hardware gates remain open; no Apple service or security compatibility asserted.",
+          "next_step": "Complete accepted MISC-001 with original passing source-audit evidence; future native work requires separate tasks and acceptance.",
+          "last_heartbeat": "2026-11-05T14:03:31+00:00",
+          "branch": "team/misc-001-20261105",
+          "worktree": "worktrees/misc-001-20261105",
+          "handoff": "worktrees/misc-001-20261105/docs/procedures/misc-001/HANDOFF.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:04:16+00:00",
+      "action": "task.add:KRN-024",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "KRN-024",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
         }
       ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "a414db34ef40e235c80ba77fe5cd34b09943cb5f02281cc9eccc974c49ecfc79",
-    "BOARD.md": "0c985cf4438ab464bb847f1d81eeda88bd01e9dbabee6b965fbb58c8b1d6fbea",
+    "STATUS.md": "51c2b649b35641f73b7740496e81cdead75f4d258b23d7c50c207afc6d51884a",
+    "BOARD.md": "ded3558f3917d804a2643036ed10e465364f37db9189fa7f91785fc82ae81254",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-008.md": "d390a17b7ba0326785326c84ac481fc17aa9afe2ab77e20bb1cef98e0016307d",
     "planning/tasks/KRN-010.md": "4f479284d71242353a2a95508bac0b5304468c6ee44704b7561bc32cee8e1832",
@@ -4827,23 +5420,33 @@
     "planning/tasks/KRN-019.md": "8ff18e3db41236be78fa750e4ab2c2b6c6f400d93dd35e0f35748e2db46b6914",
     "planning/tasks/KRN-020.md": "909c9b336b2366469ce13bca06dbb865ee24458d91c249afc976641d42c061d4",
     "planning/tasks/KRN-021.md": "0d8db5e1a7009caa7d9dc0e4a9d10ee9602c2c5d07fee219df6b96e5a47be1f1",
-    "planning/tasks/KRN-022.md": "415b91b31bd70c8864a9c7827fd144ada6bbca5ab51445e086534caa1e9f12ff",
+    "planning/tasks/KRN-022.md": "cc9fb45d74bfe45e81fc13d12e4daaa23f7619878ac541e12d2f8706f0c107da",
+    "planning/tasks/REV-001.md": "d8a58625a359fe6de7cc680bef57d2bc89bdaa2c0ad5ceec5bc8337ad88d69f8",
+    "planning/tasks/REV-006.md": "05b0cc8ab47618f1a238da1bc271f08dd28320479d12e7bce1d1759ab079395a",
+    "planning/tasks/KRN-024.md": "aae1866c93598ee6dd36b842376e558c1196fa401031eb79b1bf9f0e3bef16ea",
     "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-011.md": "9b8014abd8d019af80fad695e0d0df9de9523d36a222553327384f7f00e8a901",
     "planning/tasks/KRN-017.md": "86a29485c4c3ed3a62f7ecf64f5e2bb303bb0bd7ac5fd661482bf024004f407d",
     "planning/tasks/KRN-018.md": "30d65ab589f173b4f02563009e3700bc43f264a360c30d74714dd866684d9877",
+    "planning/tasks/REV-002.md": "751c810a5bba87c11c5362c9b8696d3b721937b7c581b93cf1655a9e3d68cf5b",
     "planning/tasks/KRN-006.md": "17787b37e62d7cb230c248532450af8108a583aca6b6e955cee29637f8e981a1",
     "planning/tasks/KRN-014.md": "373bcf06587ce0b77bbacdfa023baa6c9b888953717dafa33267ff49a60ea753",
     "planning/tasks/KRN-015.md": "28783b6b5313987331209c84d30f10ddeab6ee7f41bf6bf1d963790545460926",
+    "planning/tasks/REV-003.md": "47e2ab744a4b49b97ac1a3db1b3aee9a73f10e891e7f733c7f4ec7573c0f5157",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
-    "planning/tasks/USB-001.md": "2a453873a9b365896125372034f00c2b8d94cb1d4b19ff411bd501f83b06e476",
+    "planning/tasks/REV-004.md": "8c7b273845208b121b2d6d1f05038b627689d3f97b766a765a91cdf23082bdb1",
+    "planning/tasks/USB-001.md": "19299959cb09f2aa3b00ffa299face5e25f485c75dfcc2e5f1879b39d435471a",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
     "planning/tasks/KRN-003.md": "7d37e5fece06694371991cb3127ab5121d975ec8a99179d63ec1f71a90c303ff",
     "planning/tasks/RES-009.md": "29506be617bfdcf7676f1f8e24f86b956ac88ba16ee9ae53c3c3e8570711bab8",
     "planning/tasks/KRN-004.md": "70b41a1c9b0f3ea37898dfad96a8363af34840c59272d3ab769b11c241992fa0",
-    "planning/tasks/DRV-001.md": "315f23bf5e57bb91ec5bdf67128044b7e6a7ed4f3fb71eaef13229adea7b78a5",
-    "planning/tasks/ESIM-001.md": "ca9cd4b8b248245c9388ac571c7d40216a05f5efb9cfe98add92358fa2daaebf",
+    "planning/tasks/REV-005.md": "787093a1a397cde143d7c01a73c927e39e63c2cf8872a3105b0d51612a3fe2b8",
+    "planning/tasks/DRV-001.md": "eaac786b5ca6d0640d7a9bea43bf42424662189e0f9f44baaa6b6ad049f10f17",
+    "planning/tasks/KRN-023.md": "c4313eb07cf313e04e1e4984f266a312a1a28fbc979351e2d73d39f652bf7313",
+    "planning/tasks/ESIM-001.md": "4ff5511bf1b91ec562d46b9fa0fdbc4dc3ffd12af187060e75777f8fcde71bb6",
+    "planning/tasks/VM-004.md": "41ae13c3bd52a73818284f8f482623c167e8e7715fee4d3478b4fdc7198ec8fe",
+    "planning/tasks/SEN-001.md": "3c54f6f748160ba9c5b4c4f27f41576ddb90a5c2f73f0243805e189091695d2d",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
     "planning/tasks/INT-001.md": "9d68fa75fae4c21f31f5ea4734c3f592ed0b41c6ed897d7b045a892c63549760",
@@ -4860,7 +5463,8 @@
     "planning/tasks/RES-006.md": "fded3b24adc468781d4354b2a7680ddd8266abe8e2dd808b90926f5c2f436ccd",
     "planning/tasks/RES-007.md": "5a800737008f7de03e4cf7254db0be8c36c33e524ad56b27c1ecefe6dbafc82b",
     "planning/tasks/UI-006.md": "3f0b011218a7184215c921772df69609f1b52f14c0c5b058d4e513c9506c5bfb",
-    "planning/tasks/VM-002.md": "d3562a56e6974bb5a02fc494ec91bd6c96cfb749e0adc1384caa13950d413785",
+    "planning/tasks/DRV-004.md": "c30497bf66182ff707e5e37134f7097640ad120a7070ecc3d8c1b454d708a06a",
+    "planning/tasks/VM-002.md": "ebc0c5bc5bb8b272e3334d434d3d8c8c602f3c67ba2898e9208a7c6f6405f991",
     "planning/tasks/UI-001.md": "c625d98b72bb9f1d80a6d5bb3d2a74922ae72d9ab758fb7d12bdf71a7f474320",
     "planning/tasks/GPU-006.md": "c4420e384a9ce1eaccb816f017b6212f8b8601974b7de2218916f3115d40464f",
     "planning/tasks/GPU-007.md": "6a2532661ad2838c05dbd0ccb16545e5849ce2ad209d00c3ba69d84197372508",
@@ -4870,17 +5474,16 @@
     "planning/tasks/AUD-001.md": "ad24878acc1e855423ab6d5f45b1a0cb7289bce59ed8c2621bb837679baa96f2",
     "planning/tasks/CAM-001.md": "22314f5add985fc2ca3de9f94e21c03f71a8289248b7b8a6e640e4cd434a2f84",
     "planning/tasks/PWR-001.md": "4845edf6b466d79887e056b3760de4f17c9da9b4527d0af7371e649ccf3b2320",
-    "planning/tasks/SEN-001.md": "6f26f36aea8de216e49cfd9ceaf9b0388785a2a759b493ed0cfae0bd01144212",
     "planning/tasks/CELL-001.md": "1daa2c0f314edeeda07b368ca4d7cfa93de97865d45186208754b781f40a715f",
     "planning/tasks/CELL-002.md": "c2bb9100905400e0956657ba95d37ac92efe7749f1fe3bf362e01ff66719db07",
     "planning/tasks/CELL-004.md": "405eb4534873c8285637644c1f4a913afd663fb4e8dbc628d2eea10440fafc51",
-    "planning/tasks/MISC-001.md": "d2d92669c56ccc428feedd6af2f3c5bad4f0117107f1518c73999fb68d5c0270",
+    "planning/tasks/MISC-001.md": "2601cafe28e232e2d18902292762755f980b3942341aa2bfb61e1c05abea1581",
     "planning/tasks/NET-004.md": "8bd5a17e9165df26cb213f576c2614428ff7e343f1f272f45e1bf5d5906dbeb4",
     "planning/tasks/NET-005.md": "14907c958852b82d97046f0aeefe666073dd6309b0a26f3a119f1a7b4c0acc9f",
     "planning/tasks/BT-003.md": "875fae9ca53d4b1c01f04ac369dcf004479e5d8a77b3c13617ee74c788dad6bc",
     "planning/tasks/BT-004.md": "38b9ed3159c61b1d8d77e676045b37931edab22f57f43d6cd90ec339d04cd431",
     "planning/tasks/UI-003.md": "cdd6c5ef5d563473531a5635079591d0c13fa8309ddf4234743325fb13690c64",
-    "planning/tasks/UI-004.md": "a5363156aa64fa4c018c340ef93aed61f17bdb784bd59c3d83739be423714f6e",
+    "planning/tasks/UI-004.md": "46e25626887cafc4213c82caf4b3ad797d66bfad5e740579a46220b0fb02d6ae",
     "planning/tasks/UI-005.md": "893df8898fdf7ee6e20f600417d9461b52488f4560f7b34659b08cde9edba4b5",
     "planning/tasks/FND-001.md": "ee81357df48cbcec414e6dc2f58f1325d8936e16bbbe8022d8b771c316d6b0f8",
     "planning/tasks/RES-001.md": "956b0cf0fe59602b13d98565c02c1486438c7f0451c2800e8d5c1a77e8e1d9fe",
@@ -4893,18 +5496,18 @@
     "planning/tasks/GPU-003.md": "665b0d3da71db36dc08200cbd3165a04d9a7df34554e46f50a169e644eb9d273",
     "planning/tasks/GPU-004.md": "4f7b914361a5ff47439410c701bd907e3a3020383d4b33c91ce59b5fbdab2579",
     "planning/tasks/GPU-005.md": "4d83a325d8c9601f76a8a72d7a31f2b7d47d8f450ee9c989a18c58eae4614346",
-    "planning/tasks/DRV-002.md": "d23dad7264847c143c8d228b4b8e9f8f679828f578a1b5ba87b615552bc54737",
+    "planning/tasks/DRV-002.md": "ce5d76e960b8ee5f0aff279ba883e90227be4cd9d744afb507087ce9c0b291d5",
     "planning/tasks/NAT-001.md": "555b180dd2cfda5c6a7e4623041660bfd01b1c074d7fd82a9be75e83b4af7bcf",
-    "planning/tasks/NAT-002.md": "806f77e8c34cf349daa55f98f270f310a0d7697839310020b6eaafd798fa2e2a",
-    "planning/tasks/NAT-003.md": "b66b749a43bb3680e24af6c46e53a89698632d7589e1cdb27a46caf258b92736",
-    "planning/tasks/DRV-003.md": "8f6e3fbe9e05391ad4614894f6675ec628b3abb105f8f2d84009cf446dc2e62a",
+    "planning/tasks/NAT-002.md": "32d322f0939862df634ca9a7105ec62c5c8a57e8e55c80597a5b56de657d89b6",
+    "planning/tasks/NAT-003.md": "6ed9b4237a743cd315592a2245397943b239e555e4f9899ef4e3573da539f3ff",
+    "planning/tasks/DRV-003.md": "417e899379f7cc440d539f4b14d3474e26d1b46edac8ead78867dd90f392acac",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "1bdf1cd15a3f5b52db67c8865eede9f5039648dafb2a7c5c3f3e63143846ab29",
     "planning/tasks/VM-003.md": "50d42060d8983e4466e45c806e7f4310bfeb901594a729ffa7678b6cd9327439",
     "planning/tasks/NAT-004.md": "92ee8663bb250f96bdbd463a941d9b1c595eab5ac2055c8a0d9649f37161c232",
     "planning/tasks/UI-002.md": "5669ba2f32f4ec7d2645872861f8386ed6c8c5de8e89b251743f940b593caac4",
-    "planning/tasks/USB-002.md": "9f1e7d8d4951abdd4453efd531ee26d37d31e754957605894eafb6534a2ab46e",
+    "planning/tasks/USB-002.md": "7f7a1becaf541ada578adc6a25c0ea651489f967d5ff844f0be8b3568e303462",
     "planning/tasks/GPU-008.md": "8b10873253b9ad1f4cab2298e05f5359e7b9917aa4c7525bf7fb954ad06b74fb",
     "planning/tasks/GPU-010.md": "4749d305f26f3c16f7a9e7180a76696bbccdbe43ad5c29c46229e1bf68b27d8c",
     "planning/tasks/NET-002.md": "d29066526b3034e404542cde26c8b2f5feff13eaf064ce1d81a92e1551351a46",
@@ -4913,11 +5516,11 @@
     "planning/tasks/AUD-002.md": "eb5952fd0ebc9f3b02765eff1ca88a7598d9396be68c8678a08e0ed67fe1cead",
     "planning/tasks/CAM-002.md": "c103b76f2d577d2fbf0281ff75fb44a227eed2225665ea79158333b0566e6551",
     "planning/tasks/PWR-002.md": "f80a6af04cbe0ff88f07c6af1a1a04f89693584003fea461c05ed3d5119129c3",
-    "planning/tasks/SEN-002.md": "503858bb2efe18c0ff8860e390f69354e526853cddef725f46f976b21aa361a8",
+    "planning/tasks/SEN-002.md": "d5fb456503ff7cdef26c03b846c8da969efa1299efda131c78435ff5f4efba43",
     "planning/tasks/CELL-003.md": "21beaf041f7a0f24cdaead83b121ce0c18937e7e684a3d3e952f7ce212663e19",
     "planning/tasks/CELL-005.md": "f4d56657b1532f99561638e25a1b544d1f344725befb8d77c61ef05514d87c79",
     "planning/tasks/CELL-006.md": "6b306fabb59cc3ccd33b0263d2024ad0e0c0c69dfb961c8970f21ee47880f367",
-    "planning/tasks/ESIM-002.md": "f155be473727b4387c7179e85e3b59013b1d88469b6b0864662cf2ab153d9cea",
+    "planning/tasks/ESIM-002.md": "6c399676159f65f4b4bb57a7753974158e33bb9786602f3568fc0158110547d7",
     "planning/tasks/ESIM-003.md": "f8771c136a5fa36d900bdca732abec23c437850a53a146c61c8cb5437553f8e7",
     "planning/tasks/QUAL-001.md": "7bf40b2c3c32e8161f29dc9134f7fc30271e33315a9d2c8877dc04cccc0bd8fe",
     "planning/tasks/BT-005.md": "35bc4d704b20131d6176800ff9f9822b0f78173243d37fa576d6a53d48986576"
