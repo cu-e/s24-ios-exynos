@@ -102,3 +102,65 @@ retain all other frozen arguments and use the accepted shared runner directly.
 Preserve the first real compiler, missing-root, dependency and resource outcomes.
 No compiler, main publication, common check, linker, QEMU or phone operation is
 authorized by this source plan.
+
+## Actual authorized thirteen-object result
+
+Root subsequently granted explicit lease `guest-platform-objects-20261106-6`
+and approval SHA256
+`ef698b6a965ad80d3e548618678d64b5ebfb75ded2af25b88b3c2a04b42bdbd3`.
+The exact shared runner ran through root's tested same-process launcher, SHA256
+`d9d9d1145fa1456de67983661bdb3b2a0418a61a4205bd82513d52cf0c38793e`.
+The launcher retained a 600 second whole-pipeline alarm and the unchanged runner
+retained each compiler's 120 second deadline, three stable 4 GiB admission
+samples, one compiler job and 256 MiB controller plus child budget. No whole
+engine subprocess wrapper or altered recipe was used.
+
+The actual `execute-001` command exited 0. All thirteen compiler commands exited
+0 and produced thirteen fresh validated ARM64 MH_OBJECT files. Actual compiler
+depfiles bind 455 unique source/header dependencies across the selected objects.
+`pexpert/device_tree.o` additionally emitted a genuine 128 byte
+`__DATA_CONST,__kalloc_type` section. Its first real compile took 0.139 seconds,
+produced a 41,464 byte object and bound 176 actual dependencies. Its object SHA256
+is `026d841f4dfc9b528112516c145e3c7706588b2ccbfdd245f85aa1e74e6aad93`;
+its depfile SHA256 is
+`44cc4d69d92a3581ff64d2421da9a1d4bb5b5e82349fb01208f4c18866976867`.
+All thirteen object/depfile/sidecar hashes and source/recipe input identities are
+retained in `build-001-result.json` and the original runtime sidecars.
+
+The final full-namespace check passed unchanged with namespace SHA256
+`a2410326ba3560948edb9923b8dd8382d0557060ceaaf031735feef1bfbaa70a`
+and input-bindings SHA256
+`60f7b4774bcec32ff83093629d5f1fa00ade24ecddbd4c64a2d6e96c8d75221e`.
+The four genuine absent search roots remain bound as absences. Peak measured
+controller plus compiler RSS was 186,384,384 bytes, and current executable-image
+VmHWM was 111,071,232 bytes. The inherited raw ru_maxrss counter was
+1,847,656,448 bytes and was not used as current memory. Every command's final
+owned-process list is empty; all thirteen compiler session leader PIDs were
+absent after the engine exited. Root was notified immediately to release the
+heavy lease before further light reporting work.
+
+The original artifacts are in this worktree's
+`artifacts/avf-object-shards/platform-support/execute-001`:
+
+- `evidence.json`: SHA256
+  `cacbf88ca57491cac477e186da8293a1e99c813fb3ec4758609890685eda6f80`.
+- `execution-plan.json`: SHA256
+  `8aa39a9ceb25b2d3255838113df73cc0c03b0b7c015abc9fef5a1fc624b6bec9`.
+- `input-bindings.json`: the unchanged SHA256 recorded above.
+- Thirteen object sidecars, original compiler stdout/stderr, memory samples,
+  object files and actual depfiles are retained without changes.
+
+Sibling `execute-001-launch.json` records the exact actual launcher argv and
+authorization hashes; `execute-001-completion.json` records exit 0 and survivor
+proof. The source plan's proposed output tokens changed only to the approved
+fresh execution directory, so the actual execution-plan hash differs from the
+source-plan hash while its input identities and namespace remain unchanged.
+
+`VM018BUILD-001` is recorded PASS from the real runtime evidence, rather than
+from its earlier source plan. MAIN's heavy lease is released with zero survivors.
+The task remains in progress for independent
+review and integrator acceptance. No complete object closure, provider set,
+link, kernel image, guest console, PID1 runtime, stop, AVF host or native S24
+result is established. No source edits, main publication, common checks, linker,
+QEMU or phone operation occurred. Only the original owner closes after the
+required acceptance and fresh MAIN common checks by the integrator.
