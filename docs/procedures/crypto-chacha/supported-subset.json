@@ -4,7 +4,7 @@
   "origin": "local-host",
   "outcome": "inconclusive",
   "supported_host_arm": "pass",
-  "supported_cpu": "pending-fresh-exclusive-lease-after-address-fix",
+  "supported_cpu": "pass",
   "complete_table_qualified": false,
   "incnonce_supported": false,
   "host_vectors": 59,
@@ -25,20 +25,52 @@
   "evidence_sha256": "4a0e0b9134d6aa5bfee0eee58f79582daea12fb3db7aa392105e0008b2e5cc69",
   "limitations": [
     "Applicable selected incnonce byte encoding/range/order/overflow/mutation/lifecycle/success contract unavailable; all-ten acceptance incomplete",
-    "CPU execution pending exclusive coordinator lease and stable4GiB resource admission",
     "No provider registration, private context-field ABI, XNU execution, native device or FIPS/side-channel qualification",
     "Streamed plaintext is unauthenticated until verify success; caller quarantines/discards it",
     "Pointer numeric extent checks do not prove accessible mappings/capacity; caller owns serialization/lifetime",
     "Owned-state counter injections qualify arithmetic guards, not256GiB operation or nonce exhaustion",
     "Installed independent OpenSSL binary/hash pinned; primary-source distro rebuild not proven",
-    "Initial corpus acquisition preceded corrected plan; actual timing and failed first plan retained"
+    "Initial corpus acquisition preceded corrected plan; actual timing and failed first plan retained",
+    "Actual native const table relocation proof is separate from genuine runtime-filled CPU table; no kernel provider registration or field-inspecting private ABI qualification"
   ],
-  "recorded_at": "2026-11-05T18:41:06.104144+00:00",
+  "recorded_at": "2026-11-05T18:43:35.206807+00:00",
   "binding_requalification": {
     "outcome": "pass",
     "evidence": "worktrees/krn-034-20261105/artifacts/crypto-chacha/bindings-session3/evidence.json",
     "sha256": "178bab95be70dadeca5e852b6169971163bcd1bacfe424441a7c939b01546f59",
     "scope": "Only native/runtime bindings+guest recompiled. Core/primitives/profile/corpus/suite exact proven bytes reused. Both actual linked initializers prove ten direct callback addresses+offsets; surviving GOT not assumed safe; mutated STR field rejects."
   },
-  "prior_cpu_failure": "cpu-failure-envelope1 preserves genuine static-callback highVA instruction abort; process exit0 was shutdown, not vector pass"
+  "prior_cpu_failure": "cpu-failure-envelope1 preserves genuine static-callback highVA instruction abort; process exit0 was shutdown, not vector pass",
+  "arm_checks": 123999,
+  "implementation_commit": "7f45596efa2ad27a3b64c771d7602aae10bc6bda",
+  "guest_cases": [
+    {
+      "name": "positive",
+      "accepted": true,
+      "payload_sha256": "f79198623ab368e47d892d84ca3adf8fd5bafa09cbd086ffb9f3bd837b44bde1",
+      "console_sha256": "76b0963362ae909a51c077bea21b3710c883643807fa2bc3e7d8914db98404fa"
+    },
+    {
+      "name": "wrong-cookie",
+      "accepted": true,
+      "payload_sha256": "77ba528fda6f103a573c65dce8e26bfeb230e7de5d011e3bfad589cfbfb897e7",
+      "console_sha256": "9829aff94cb2057dcca34d68dd5a652d389e156a44e418b17b00bd410ce3e5f7"
+    },
+    {
+      "name": "corrupt-vector",
+      "accepted": true,
+      "payload_sha256": "ce478e000a720a41b0342265fceabde83aa5b40ed152fd5eca603756b06c60cb",
+      "console_sha256": "00bbddf1a18b8965a2954d4c95bd2492461ff4976e032aa580750959a7a8e772"
+    },
+    {
+      "name": "spin-timeout",
+      "accepted": true,
+      "payload_sha256": "45a7e2cb7fa2cb9122d4f030928b8528124a251be1909ee0f2bb3624a4d7b66a",
+      "console_sha256": "8117d5a0b3c752c1454b64a38608e5239bb0ddedda04ea1ddd62fa0339c7a40f"
+    }
+  ],
+  "cpu_evidence": {
+    "path": "worktrees/krn-034-20261105/artifacts/crypto-chacha/cpu-session2/evidence.json",
+    "sha256": "0c359393c60d64e75b1446647c347e7d6df07438a10d407f2d6989e4a623f038"
+  }
 }
