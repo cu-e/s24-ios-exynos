@@ -29,7 +29,7 @@ The genuine builtins CMake source expressions and Darwin exclusion/architecture
 functions select the sources. The cc_kext branch intentionally excludes without
 MIN_VERSION: kexts cannot depend on libSystem's builtin providers. All six genuine
 Darwin profiling sources are included. Actual native atomic, assembler LSE and
-unwind-header probes pass, selecting287 objects including155 outline atomics.
+unwind-header probes pass, selecting287 objects including125 outline atomics.
 The runtime uses `-mkernel`, `KERNEL_USE` and original Darwin visibility/optimization
 flags. The target is explicitly plain ARM64/iOS16.5; upstream's generic iOS6.0
 minimum is recorded as context, not the selected deployment target. ARM64e/PAC
@@ -153,3 +153,9 @@ blob rejection;010/012 exact declaration gaps;014 original UBSan finding.
 Passing source/header steps are004/006/009/011/013; corrected runtime is015.
 The coordinator owns independent review, integration and common `make check`.
 Keep KRN-025 in progress until that acceptance.
+
+CCKEXT-016 proves actual positive driver/helper linking and missing/corrupt/
+incomplete controls, then retains a fixture prerequisite failure: the selected
+compiler has only an AArch64 backend. The foreign-x86 negative uses the existing
+multi-target NDK Clang with its actual tool hash; positive/platform probes retain
+the selected original compiler. No compiler rebuild or native-runtime change.

@@ -735,7 +735,7 @@ class Runner:
         self.driver_link('incomplete',roots['incomplete'],probe,True)
         for name,target in [('foreign','x86_64-apple-macos13'),('platform','arm64-apple-macos13')]:
             obj=self.out/(name+'-genuine-udivti3.o')
-            self.run([COMPILER,'-target',target,'-mkernel','-O3','-nostdinc','-isystem',parent/'resource/include','-c',self.source/'lib/builtins/udivti3.c','-o',obj],name+'-actual-genuine-source-build')
+            self.run([NDK/'clang' if name=='foreign' else COMPILER,'-target',target,'-mkernel','-O3','-nostdinc','-isystem',parent/'resource/include','-c',self.source/'lib/builtins/udivti3.c','-o',obj],name+'-actual-genuine-source-build')
             self.run([self.libtool,'-static','-o',runtime(roots[name]),obj],name+'-actual-genuine-source-archive')
             self.run([NDK/'llvm-readobj','--file-headers',obj],name+'-independent-profile-inspection')
             try: object_symbols(obj.read_bytes())
