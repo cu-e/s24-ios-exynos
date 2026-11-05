@@ -1,0 +1,272 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T20:56:30.249051+00:00",
+  "task": "REV-024",
+  "experiment": "REVGATE-001",
+  "owner": "codex-review-guest-headers-20261106-cs",
+  "commit": "8042e6529e34d470620940e9263ede76e9331b18",
+  "review_base_commit": "aac27cfbc0d71b34eda33ddf366c72427507ae0b",
+  "summary": "Independent bounded integration gate review passes:54 producer bindings,4 exact committed files,13 source-bound producer reports,fresh11-test suite and4 independent fixture probes. No actionable finding; actual MAIN publication/project common check and real admission remain pending.",
+  "prospective_plan": {
+    "id": "REVGATE-001",
+    "task": "REV-024",
+    "owner": "codex-review-guest-headers-20261106-cs",
+    "kind": "host-test",
+    "status": "planned",
+    "hypothesis": "Frozen integration gate preserves exact-source and live-ledger boundaries and holds one lock through publication/check; bounded independent temporary Git/flock and tiny owned child controls expose stale or lock/cleanup failures without primary publication.",
+    "procedure": "worktrees/rev-vm008-20261106/docs/reviews/int-002/procedure.md",
+    "timeout_seconds": 90,
+    "created_at": "2026-11-05T20:51:03+00:00"
+  },
+  "producer_capsule": {
+    "path": "worktrees/int-kernel-20261106/artifacts/integration-gate/light-4/evidence.json",
+    "sha256": "2807bf0826091372c20b5ff1c8a35d7ee02fb4575f9114c6f3a32fff5f10273c"
+  },
+  "commands": [
+    {
+      "argv": [
+        "prlimit",
+        "--as=268435456",
+        "python3",
+        "-s",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm008-20261106/docs/reviews/int-002/audit.py",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/audit.json"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm008-20261106",
+      "started_at": "2026-11-05T20:51:24.081698+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.219
+    },
+    {
+      "argv": [
+        "prlimit",
+        "--as=268435456",
+        "python3",
+        "-s",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/int-kernel-20261106/docs/integration/kernel/test_gate.py",
+        "-v"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm008-20261106",
+      "started_at": "2026-11-05T20:51:24.300615+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 5.768
+    },
+    {
+      "argv": [
+        "prlimit",
+        "--as=2147483648",
+        "--data=268435456",
+        "python3",
+        "-s",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm008-20261106/docs/reviews/int-002/probe.py"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm008-20261106",
+      "started_at": "2026-11-05T20:51:30.068166+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 2.967
+    },
+    {
+      "argv": [
+        "prlimit",
+        "--as=2147483648",
+        "--data=268435456",
+        "python3",
+        "-s",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm008-20261106/docs/reviews/int-002/probe.py"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm008-20261106",
+      "started_at": "2026-11-05T20:51:56.993563+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 1.416,
+      "sampled_controller_current_image_hwm_bytes": 23904256
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "recorded_at": "2026-11-05T20:56:30.248857+00:00",
+      "argv": [
+        "python3",
+        "-s",
+        "tools/lab.py",
+        "--root",
+        "/home/egor/dev/pet/s24-ios-exynos",
+        "experiment",
+        "record",
+        "REVGATE-001",
+        "--owner",
+        "codex-review-guest-headers-20261106-cs",
+        "--evidence",
+        "worktrees/rev-vm008-20261106/docs/reviews/int-002/evidence.json"
+      ],
+      "exit_code": 2,
+      "output": "lab: Evidence must reference at least one existing artifact",
+      "cause": "Original review evidence has artifacts_sha256 map but CLI additionally requires an artifacts list. Original passing review evidence is immutable."
+    }
+  ],
+  "python": "3.14.8 (main, Oct  1 2026, 00:00:00) [GCC 15.3.1 20260722 (Red Hat 15.3.1-1)]",
+  "tools_sha256": {
+    "/usr/bin/python3.14": "e5c6e9f7342cc22734b05ea3c34dd4a1543c7079b086f21b400595bc3583fd0c",
+    "/usr/bin/git": "300ab75cd7f1f6ccdef3f85e1425675647f62fdb25867438c1b5033a1713955f",
+    "/usr/bin/prlimit": "a3d1b9a04a850115f088326bc481e145eb98278713b50a4c4cdf05fe94d891a9"
+  },
+  "artifacts_sha256": {
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/procedure.md": "88a736b1e77a43df2c6c256b530c8f8a9a216e0bcbad55038350a2cb317d4dc1",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/probe.py": "54f0c7fda7c862bc6dad4bcabeee9426e1b624888cc1197c7ae0a80523e11e82",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/audit.py": "c0855b94bc2fe4f5391c7bedb6484b336ff7d11aaa13dbd3e66c56d3ae032d90",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/handoff.md": "b3b33f3a4f0833333383777b6204d033217b7c1280f4fa9f0e9a7e11c40145a0",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/command-0.stdout.txt": "94bc28928c280bb01d8beeec1c579150caa150cabfd417dfd3d3430cf8179e08",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/command-0.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/audit.json": "bcffff5be915838c0dd31dc5e7955d9d13be2d4be125eb4fc16a8f7108821eff",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/command-1.stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/command-1.stderr.txt": "9eb3cc22ea7e39bb68e9b94c9634508a83754ca7be661f76d0a870a225daa100",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/command-2.stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/command-2.stderr.txt": "3e561e39fe501009cd723856898a8b96b46a348ebd685d1e2fe492e46fad5185",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/commands.json": "1e399e5ab39b9bdaeecf77f3236e0f0a8abeaca9e219e8364c1d776f8a739405",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/stderr.txt": "21e37357edc371d2cd58b8adc24c340f5390ea6e68854b97be498c01c9d305d9",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/command.json": "6a24997a92d7951c8e797a18a02303125e71ed75a3138e0be4c9c6b336a3d5b3",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/controller-samples.json": "259333cc90b0290b0c8cab22f6c5ebf6ef5a9e984f42fb69fac8e43e3e6bf565",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/cases/review-actual-common.json": "17c05d242a4d5174344c1a734acd76d6100c11b5632cbe25385f6d2d8cf63446",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/cases/test_review_ignored_symlink_parent_is_rejected-1.json": "34d5aeafb370e8f7858613c6d61707574acf0f66f31c2405e4323d03b8a56619",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/cases/test_review_stale_candidate_keeps_dirty_ledger-1.json": "50aab824e1cef8ab49a68c551f1545656e8bc874a3d520b2d18cdcae479aa18b",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/cases/review-actual-common-artifacts/make-check.samples.jsonl": "692ed886de687856580545b9cc26913b32b4d5b72f52d9054a8434365b047db7",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/cases/review-actual-common-artifacts/make-check.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/cases/review-actual-common-artifacts/fixture-make.py": "1ee0a964fdc577501e2dabb246814d7e1466304855e5667e2b994f6531622df9",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_audit_preserves_unrelated_dirty_registry_and_frozen_head-1.json": "b6c1125b88bc38071dceaf693cada10e6a8ba1a52c8d97be6672cf5639209c14",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_candidate_cannot_replace_held_integration_lock-1.json": "4d3daf4f7ba593fc379c2f9e987045e0652462d9df3cdd7b9880e3ab2b5ccdef",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_changed_capsule_and_wrong_approval_cannot_publish-1.json": "324154d2c6130b175c5bf7cd477828d78e087f37158238301a82e3fd04d1c3f5",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_changed_capsule_and_wrong_approval_cannot_publish-2.json": "60ec4f68902300cd14ec5268adb7dc181e52196198160bf294c841e236153a4a",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_competing_process_waits_for_single_stable_lock_inode-1.json": "ec7b042da6b79eb2a44ffe7c66b0e5b843a4bb6b34fd04aca1e75f7f26329155",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_dirty_source_and_staged_index_are_rejected_without_changes-1.json": "1d4e50d15f456960dd99b258a38216dc2b71fbce8c38c1a2efc3a5f1f51c4733",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_dirty_source_and_staged_index_are_rejected_without_changes-2.json": "c5bc89a22ec0cbac542a39a97aef092938fac2e330193ba89ac53dacdada2f94",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_failed_light_check_retains_published_head_without_rollback-1.json": "97c17fee18e66a7d63e45ff784f62f7e77f1d8951616ffbfde6e4e1034864b17",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_head_is_rechecked_after_waiting_for_lock-1.json": "e85c6fac0165daecc6e392fa2194b6b6c06d738349403e79c3c8917c38440848",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_new_candidate_file_cannot_overwrite_ignored_main_data-1.json": "cf04c42f458451d3343afd8d7eceb1488f6313bc9bfa17b8e0472685191c955f",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_real_fixture_fast_forward_holds_lock_through_light_check-1.json": "2f2a53bda9079e818beeb1167759e378c4dc72863bd8077e2c36330abc631a67",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_registry_candidate_is_rejected_even_when_main_is_clean-1.json": "239a380b6184cd38ee36e9c3479abca388e574614976a4130d52fc851b7b3252",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_unrelated_source_label_is_rejected-1.json": "c6ae68bda8d4bc480a10b75f828498f849edd6a925fc8f3a0be27250391a9eec",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/review-actual-common.json": "a97bb6a671c0270f9e2ad875b539149c0100943cc691462e2527a1770977f6ae",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_review_ignored_symlink_parent_is_rejected-1.json": "9cbb08cbfa22ed526005403eaa6ce6016eafb3b234dd26fe6c5d4112dc3d2327",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_review_stale_candidate_keeps_dirty_ledger-1.json": "e075cf41ea0cc253cb3d552d2704e0bd95033b4ce89f01c03d4709eb8a6c6d83"
+  },
+  "findings": [],
+  "reviewer_compiler_executed": false,
+  "reviewer_guest_executed": false,
+  "main_publication_executed": false,
+  "project_common_check_executed": false,
+  "tiny_fixture_actual_common_check": {
+    "report": {
+      "supervisor_sha256": "faaa9b707a8bb48b1ee502a2c58c9b876eb7859ad5b0ff6541bae27c20ed9f99",
+      "common_check": {
+        "argv": [
+          "make",
+          "check"
+        ],
+        "address_space_limit_bytes": 2147483648,
+        "aggregate_rss_stop_bytes": 2147483648,
+        "max_jobs": 2,
+        "peak_owned_tree_rss_bytes": 21528576,
+        "owned_session": 2287415,
+        "exit_code": 7,
+        "after": {
+          "recorded_at": "2026-11-05T20:51:57.599712+00:00",
+          "MemAvailable_bytes": 7492444160,
+          "SwapCached_bytes": 8912896,
+          "SwapTotal_bytes": 30064762880,
+          "SwapFree_bytes": 450560,
+          "pressure": {
+            "some": {
+              "avg10": 0.1,
+              "avg60": 2.37,
+              "avg300": 16.41,
+              "total": 1300842959.0
+            },
+            "full": {
+              "avg10": 0.09,
+              "avg60": 2.02,
+              "avg300": 13.72,
+              "total": 1036393736.0
+            }
+          },
+          "owned_tree_rss_bytes": 0,
+          "owned_processes": []
+        }
+      }
+    },
+    "admission_substituted": true,
+    "project_common_check": false,
+    "fixture_child_pid": 2287416,
+    "fixture_lock_held": true
+  },
+  "limits": {
+    "source_audit_and_producer_tests_as_bytes": 268435456,
+    "independent_fixture_as_bytes": 2147483648,
+    "independent_fixture_data_bytes": 268435456,
+    "actual_controller_current_image_hwm_bytes": 23904256
+  },
+  "limitations": [
+    "Independent fixtures use disposable repositories; no primary Git publication.",
+    "Actual common_check and existing supervisor exercised with tiny failing fixture make, admission deliberately substituted.",
+    "Real stable memory admission,2GiB RSS exhaustion/deadline stress and project workload remain unmeasured.",
+    "Sampled aggregate RSS stop is not a hard cgroup cap.",
+    "No compiler,QEMU,SDK,phone,ADB or shared-reference hydration.",
+    "Original owner waits for integrator fresh MAIN acceptance before task completion."
+  ],
+  "artifacts": [
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/procedure.md",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/probe.py",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/audit.py",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/handoff.md",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/command-0.stdout.txt",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/command-0.stderr.txt",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/audit.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/command-1.stdout.txt",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/command-1.stderr.txt",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/command-2.stdout.txt",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/command-2.stderr.txt",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/commands.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/stdout.txt",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/stderr.txt",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/command.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/controller-samples.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/cases/review-actual-common.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/cases/test_review_ignored_symlink_parent_is_rejected-1.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/cases/test_review_stale_candidate_keeps_dirty_ledger-1.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/cases/review-actual-common-artifacts/make-check.samples.jsonl",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/cases/review-actual-common-artifacts/make-check.log",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-2/cases/review-actual-common-artifacts/fixture-make.py",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_audit_preserves_unrelated_dirty_registry_and_frozen_head-1.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_candidate_cannot_replace_held_integration_lock-1.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_changed_capsule_and_wrong_approval_cannot_publish-1.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_changed_capsule_and_wrong_approval_cannot_publish-2.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_competing_process_waits_for_single_stable_lock_inode-1.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_dirty_source_and_staged_index_are_rejected_without_changes-1.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_dirty_source_and_staged_index_are_rejected_without_changes-2.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_failed_light_check_retains_published_head_without_rollback-1.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_head_is_rechecked_after_waiting_for_lock-1.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_new_candidate_file_cannot_overwrite_ignored_main_data-1.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_real_fixture_fast_forward_holds_lock_through_light_check-1.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_registry_candidate_is_rejected_even_when_main_is_clean-1.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_unrelated_source_label_is_rejected-1.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/review-actual-common.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_review_ignored_symlink_parent_is_rejected-1.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/run-1/cases/test_review_stale_candidate_keeps_dirty_ledger-1.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/evidence.json",
+    "worktrees/rev-vm008-20261106/docs/reviews/int-002/registration-failure.json"
+  ],
+  "review_evidence": {
+    "path": "worktrees/rev-vm008-20261106/docs/reviews/int-002/evidence.json",
+    "sha256": "a70c1d5a8380855780fad278107f2840c7ce8d41519d330b82eab154e669cc60"
+  },
+  "ledger_wrapper_only": true
+}
