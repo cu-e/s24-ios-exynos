@@ -206,6 +206,14 @@ def main():
               'environment': {k: os.environ.get(k) for k in ('LC_ALL', 'PYTHONUTF8', 'PYTHONNOUSERSITE', 'PYTHONDONTWRITEBYTECODE')}}
     code = 1
     try:
+        report['admission_samples'] = []
+        for index in range(3):
+            mem = dict(line.split(':', 1) for line in Path('/proc/meminfo').read_text().splitlines())
+            available = int(mem['MemAvailable'].split()[0]) * 1024
+            report['admission_samples'].append({'monotonic': time.monotonic(), 'mem_available_bytes': available})
+            require(available >= 4 * 1024 ** 3, 'Resource admission requires 4 GiB available memory')
+            if index < 2:
+                time.sleep(1)
         pins = json.loads((FIXTURE / 'inputs.json').read_text())
         result = audit(args.main.resolve(), pins, args.out)
         route_path = args.out / 'route.json'
