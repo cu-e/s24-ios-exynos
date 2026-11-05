@@ -5,6 +5,7 @@ import argparse
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import resource
@@ -103,6 +104,11 @@ def main():
                   commands=[], checks=[], source_inputs={}, device_executed=False,
                   provider_built=False, full_crypto_qualified=False, full_kernel_qualified=False,
                   apple_private_abi_qualified=False, FIPS_qualified=False, native_device_qualified=False)
+    command_env = {**os.environ, 'GIT_NO_LAZY_FETCH': '1', 'GIT_OPTIONAL_LOCKS': '0'}
+    report['subprocess_environment'] = {key: command_env[key] for key in ['GIT_NO_LAZY_FETCH', 'GIT_OPTIONAL_LOCKS']}
+    report['reference_hydration_limits'] = ('Earlier acquisition/source reads and CCPROV-001/002/003 lacked the lazy-fetch guard; '
+                                            'incidental promisor-object hydration cannot be excluded. No intentional shared checkout/fetch '
+                                            'was issued. This run disables Git lazy fetch and optional locks for every subprocess.')
 
     def rel(path):
         return str(path.relative_to(root))
@@ -115,7 +121,7 @@ def main():
 
     def run(argv, label, cwd=WORKTREE, expected=0):
         argv = list(map(str, argv))
-        result = subprocess.run(argv, cwd=cwd, capture_output=True, timeout=45)
+        result = subprocess.run(argv, cwd=cwd, capture_output=True, timeout=45, env=command_env)
         stdout, stderr = out / (label + '.stdout.txt'), out / (label + '.stderr.txt')
         stdout.write_bytes(result.stdout)
         stderr.write_bytes(result.stderr)
@@ -142,6 +148,10 @@ def main():
 
     try:
         report['commit'] = run(['git', 'rev-parse', 'HEAD'], 'worktree-commit').decode().strip()
+        run(['git', '-C', root / 'references/apple-xnu', 'show', '0000000000000000000000000000000000000001:missing-review-control'],
+            'reject-missing-shared-object-without-lazy-fetch', expected=128)
+        check('missing-shared-object-rejected-with-lazy-fetch-disabled',
+              'fatal:' in (out / 'reject-missing-shared-object-without-lazy-fetch.stderr.txt').read_text())
         snapshot = out / 'auditor.py'
         shutil.copyfile(__file__, snapshot)
         manifest_path = bind(WORKTREE / 'fixtures/public/corecrypto-provider/inputs.json')
