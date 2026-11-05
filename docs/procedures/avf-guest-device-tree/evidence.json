@@ -1,0 +1,183 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "inconclusive",
+  "task": "VM-027",
+  "owner": "codex-guest-exec-20261106-di",
+  "recorded_at": "2026-11-05T21:01:37.390844+00:00",
+  "summary": "Source preparation PASS: bounded parser/preflight,33 actual controls and22 exact source bindings pass; public CLI accepts owned model and rejects actual historical QEMU input FDT. No raw serialized Apple DT artifact found; actual shim-data acceptance remains unmeasured. No compiler or guest.",
+  "implementation_commit": "b4a01245383434066b9c631083c140780948e91c",
+  "test_context": "Controls ran before commit on exactly the implementation/controls/pins bytes recorded here; source freeze b4a0124 contains those unchanged bytes. Worktree HEAD during controls was aac27cfbc0d71b34eda33ddf366c72427507ae0b.",
+  "commands": [
+    {
+      "argv": [
+        "timeout",
+        "30s",
+        "python3",
+        "-s",
+        "fixtures/public/avf-guest-device-tree/controls.py",
+        "--main",
+        "/home/egor/dev/pet/s24-ios-exynos",
+        "--out",
+        "artifacts/avf-guest-device-tree/controls-1"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.01274782
+    },
+    {
+      "argv": [
+        "timeout",
+        "30s",
+        "prlimit",
+        "--as=268435456",
+        "python3",
+        "-s",
+        "tools/build/avf_guest_device_tree.py",
+        "artifacts/avf-guest-device-tree/controls-1/owned-example.adt",
+        "--require-ramdisk",
+        "--require-pci",
+        "--out",
+        "artifacts/avf-guest-device-tree/controls-1/cli-example.json"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.05235688
+    },
+    {
+      "argv": [
+        "timeout",
+        "30s",
+        "prlimit",
+        "--as=268435456",
+        "python3",
+        "-s",
+        "tools/build/avf_guest_device_tree.py",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/qemu.dtb",
+        "--out",
+        "artifacts/avf-guest-device-tree/controls-1/cli-input-fdt-rejected.json"
+      ],
+      "exit_code": 2,
+      "elapsed_seconds": 0.089047003,
+      "expected_rejection": true
+    }
+  ],
+  "environment": {
+    "LC_ALL": "C",
+    "PYTHONUTF8": "1",
+    "PYTHONNOUSERSITE": "1",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "python_version": "3.14.8 (main, Oct  1 2026, 00:00:00) [GCC 15.3.1 20260722 (Red Hat 15.3.1-1)]",
+    "working_directory": "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-027-20261106"
+  },
+  "tools": [
+    {
+      "path": "/usr/bin/python3.14",
+      "sha256": "e5c6e9f7342cc22734b05ea3c34dd4a1543c7079b086f21b400595bc3583fd0c",
+      "size": 11544
+    },
+    {
+      "path": "/usr/bin/timeout",
+      "sha256": "16d49e9d0a0560c6f1dcc0049e9bea427d2a18e61efc7866d29e31ea2734dcd1",
+      "size": 41176
+    },
+    {
+      "path": "/usr/bin/prlimit",
+      "sha256": "a3d1b9a04a850115f088326bc481e145eb98278713b50a4c4cdf05fe94d891a9",
+      "size": 28648
+    }
+  ],
+  "artifacts": [
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/controls-1/cli-example.json",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/controls-1/cli-example.log",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/controls-1/cli-input-fdt-rejected.json",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/controls-1/cli-input-fdt-rejected.log",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/controls-1/owned-example.adt",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/controls-1/report.json",
+    "worktrees/vm-027-20261106/tools/build/avf_guest_device_tree.py",
+    "worktrees/vm-027-20261106/fixtures/public/avf-guest-device-tree/controls.py",
+    "worktrees/vm-027-20261106/fixtures/public/avf-guest-device-tree/source-pins.json",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/qemu.dtb",
+    "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/positive.log"
+  ],
+  "artifact_bindings": [
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/controls-1/cli-example.json",
+      "sha256": "2ced2d9d4423ed1c4bb0568bd9c33293322005e55b26f89ff91b20f9fa33bd1f",
+      "size": 1639
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/controls-1/cli-example.log",
+      "sha256": "2ced2d9d4423ed1c4bb0568bd9c33293322005e55b26f89ff91b20f9fa33bd1f",
+      "size": 1639
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/controls-1/cli-input-fdt-rejected.json",
+      "sha256": "37798c21525eb319ed584bbb787449a04266df66ef9e04e338805b105b1ddab2",
+      "size": 278
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/controls-1/cli-input-fdt-rejected.log",
+      "sha256": "37798c21525eb319ed584bbb787449a04266df66ef9e04e338805b105b1ddab2",
+      "size": 278
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/controls-1/owned-example.adt",
+      "sha256": "2c05ee388f0dc5806797646b745218e91988c83b54b16ea089df8b3d2d5c911d",
+      "size": 2344
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/controls-1/report.json",
+      "sha256": "18c7433d32c21efc3b21bcc80b41141d3d87c56da823a4b385bb32560a6abc98",
+      "size": 8529
+    },
+    {
+      "path": "worktrees/vm-027-20261106/tools/build/avf_guest_device_tree.py",
+      "sha256": "84685695772d3eeb9e2d77fae6672ad75620d9edeb1b5cc7a69def2795074bcf",
+      "size": 12142
+    },
+    {
+      "path": "worktrees/vm-027-20261106/fixtures/public/avf-guest-device-tree/controls.py",
+      "sha256": "d8780cc21e6337a6ffb98ee956ce4add69b6ed4637b9c34f97bc772e202324cb",
+      "size": 10760
+    },
+    {
+      "path": "worktrees/vm-027-20261106/fixtures/public/avf-guest-device-tree/source-pins.json",
+      "sha256": "a45329f839dc2291032d0ff791b6c897dc9e1d814b82be46268728d512fe7de0",
+      "size": 8577
+    },
+    {
+      "path": "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/qemu.dtb",
+      "sha256": "5746c9c0398905f9c5152240e02fd7b72c378a71dde1e74d4bff49fafb7d3c1d",
+      "size": 1048576
+    },
+    {
+      "path": "worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/positive.log",
+      "sha256": "e861383dcb4ae1f27df0111758ccc0aa8855937398e680bad30498c663d951ba",
+      "size": 1005
+    }
+  ],
+  "measurements": {
+    "source_controls_outcome": "pass",
+    "control_count": 33,
+    "source_bindings": 22,
+    "current_image_VmHWM_bytes": 20774912,
+    "address_space_cap_bytes": 268435456,
+    "compiler_jobs": 0,
+    "qemu_processes": 0
+  },
+  "preserved_attempts": [
+    {
+      "kind": "expected-negative",
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/controls-1/cli-input-fdt-rejected.json",
+      "exit_code": 2,
+      "reason": "A QEMU FDT input is not an emitted serialized Apple tree."
+    }
+  ],
+  "limitations": [
+    "Only authored source-contract examples passed this parser; they are not runtime data.",
+    "Historical VM005 positive console shows an actual Apple tree at0x4300c000 length0x30fc;0x48200000 is its QEMU input FDT. Neither console assertions nor the input FDT are a raw emitted tree capture.",
+    "Selected console contract is not exhaustive XNU/IOKit property closure or hardware compatibility.",
+    "Unknown identity,NVRAM,camera,product and other properties are parsed but not functionally qualified.",
+    "No source compiler,full kernel,link,guest,XNU,PID1,iOS,physical phone or MMIO operation was executed.",
+    "Task remains in_progress;actual capture,independent review,integrator acceptance and fresh MAIN common checks remain open."
+  ]
+}
