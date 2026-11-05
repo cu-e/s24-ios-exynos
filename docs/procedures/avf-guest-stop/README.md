@@ -129,6 +129,11 @@ current-image HWM was 40,292 KiB. Actual CLI source preflight passed, synthetic
 artifact assessment passed, and a changed console digest was rejected with
 exit 2. The preceding 38-case run remains as `controls-1`; it predates added
 malformed-record and preflight binding controls and is not the final freeze.
+Registered experiment VMSTOP-001 then exercised four actual negative Python
+CLI invocations. Timeout with exit zero was `host-cleanup`, host-origin QMP was
+`inconclusive`, and malformed QMP/unreviewed preflight failed; all exited 2.
+Each invocation completed in less than 0.12 seconds with current-image VmHWM
+at most 19,624 KiB under its inherited 256 MiB address-space cap.
 See [evidence.json](evidence.json) and [experiment.md](experiment.md) for exact
 commands, retained negative outputs and acceptance limits.
 
