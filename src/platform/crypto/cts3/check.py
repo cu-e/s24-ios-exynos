@@ -56,11 +56,11 @@ def inputs(report):
  return xts,des,vendor,dr
 
 def main():
- ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--run',required=True);ap.add_argument('--experiment',required=True);ap.add_argument('--guest',action='store_true');ap.add_argument('--resume',type=Path,help='Reuse immutable same-commit host/ARM capsule; no compiler/oracle replay');a=ap.parse_args()
+ ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--run',required=True);ap.add_argument('--experiment',required=True);ap.add_argument('--guest',action='store_true');ap.add_argument('--resume',type=Path,help='Reuse immutable same-commit host/ARM capsule; no compiler/oracle replay');ap.add_argument('--audit-resume',type=Path,help='Narrow continuation of preserved known fortification-audit failure, without host replay');a=ap.parse_args()
  if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]*',a.run):raise ValueError('fresh simple run name required')
  out=ROOT/'artifacts/crypto-cts3'/a.run;out.mkdir(parents=True,exist_ok=False)
  report={'task':'KRN-036','experiment':a.experiment,'kind':'host-test','origin':'local-host','outcome':'fail','recorded_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'summary':'Attempted genuine generic CBC-CS3 qualification; no pass inferred from authored code or a resource stop','argv':sys.argv,'commands':[],'source_reads':[],'source_pins':{'xnu':XNU,'mbedtls':MBED},'native_device':False,'xnu_executed':False,'provider_registered':False,'arm_cpu_executed':False,'test_CBC16_is_production':False}
- supervisor=None;extra_artifacts=[]
+ supervisor=None;extra_artifacts=[];extra_hashes={}
  def command(argv,name,seconds=30,expected=0,budget=256):
   r=supervisor.run(argv,out,name,seconds,budget);report['commands'].append(r)
   if expected is not None and (r['exit_code']!=expected or r['outcome']!='pass'):raise ValueError(name+' '+r['outcome']+' exit '+str(r['exit_code']))
@@ -84,6 +84,7 @@ def main():
   for name in ['EXTERNAL_HEADERS/corecrypto/ccpad.h','EXTERNAL_HEADERS/corecrypto/ccmode_impl.h','EXTERNAL_HEADERS/corecrypto/ccmode.h','libkern/libkern/crypto/register_crypto.h','bsd/nfs/gss/ccrypto.c','bsd/nfs/gss/gss_krb5_mech.c']:
    raw=git(MAIN/'references/apple-xnu',XNU+':'+name)
    if raw!=(MAIN/'references/apple-xnu'/name).read_bytes():raise ValueError('actual selected declaration/caller changed')
+  if a.resume and a.audit_resume:raise ValueError('choose one immutable phase input')
   if a.resume:
    if not a.guest:raise ValueError('resume is a guest-only phase')
    resume=a.resume.resolve()
@@ -94,12 +95,34 @@ def main():
    if current!=host['owned_source_hashes']:raise ValueError('owned implementation changed since host/typedARM qualification')
    for name,sha in host['artifact_hashes'].items():
     if digest(MAIN/name)!=sha:raise ValueError('host phase artifact changed '+name)
-   report['host_phase']={'path':str(resume.relative_to(MAIN)),'sha256':digest(resume),'commit':host['commit']};extra_artifacts=[str(resume.relative_to(MAIN)),*host['artifacts']]
-   for key in ['host_checks','host_vectors','cbc_fixture_vectors','corpus','target_layout','fixture_target_layout','profile_rejections','sanitizer_controls','native_symbols','tools','dependency_hashes','selected_header_checks','images','typed_negative_rejected','stack_usage_artifacts','single_AES_and_zeroizer_definitions']:report[key]=host[key]
-   image_dir=resume.parent;corpus=json.loads((image_dir/'regenerated/vectors.json').read_text())
+   report['host_phase']={'path':str(resume.relative_to(MAIN)),'sha256':digest(resume),'commit':host['commit']};extra_hashes=dict(host['artifact_hashes']);extra_hashes[str(resume.relative_to(MAIN))]=digest(resume);extra_artifacts=[str(resume.relative_to(MAIN)),*host['artifacts']]
+   for key in ['host_checks','host_vectors','cbc_fixture_vectors','corpus','target_layout','fixture_target_layout','profile_rejections','sanitizer_controls','native_symbols','tools','dependency_hashes','selected_header_checks','images','typed_negative_rejected','stack_usage_artifacts','single_AES_and_zeroizer_definitions','fortified_memory_boundary','adapter_compile_argv','corpus_path']:report[key]=host[key]
+   image_dir=resume.parent;corpus=json.loads(Path(host['corpus_path']).read_text())
+  elif a.audit_resume:
+   preserved=a.audit_resume.resolve()
+   if not preserved.is_relative_to(ROOT/'artifacts/crypto-cts3')or digest(preserved)!='26edb172fd4f023b0b0659f23cdf02d466befe579a5321051b6bc326947442f3':raise ValueError('only exact preserved real audit-failure capsule is admitted')
+   host=json.loads(preserved.read_text())
+   if host['outcome']!='fail'or host['error']!="ValueError('production is no longer generic/memory-only imports')"or host['owned_dirty_at_start']or host['host_checks']!=28794or host['host_vectors']!=381or host['cbc_fixture_vectors']!=18:raise ValueError('preserved actual host/typed proof differs')
+   if not all(x['rejected']for x in host['profile_rejections'])or not all(x['detected']for x in host['sanitizer_controls'])or not host['typed_negative_rejected']:raise ValueError('existing real negative proof incomplete')
+   current={str(p.relative_to(ROOT)):digest(p)for p in sorted(HERE.rglob('*'))if p.is_file()and'__pycache__'not in str(p)}
+   allowed={'src/platform/crypto/cts3/check.py','src/platform/crypto/cts3/production.json'}
+   if set(current)!=set(host['owned_source_hashes'])or any(sha!=current[name]for name,sha in host['owned_source_hashes'].items()if name not in allowed):raise ValueError('compiled production/fixture/oracle/suite/source set changed; host proof cannot be reused')
+   if digest(ROOT/'docs/procedures/crypto-cts3/source-pins.json')!=host['primary_source_pins']['sha256']:raise ValueError('primary pins changed after actual host proof')
+   old_manifest=json.loads(git(ROOT,host['commit']+':src/platform/crypto/cts3/production.json'));new_manifest=json.loads((HERE/'production.json').read_text())
+   if {k:v for k,v in new_manifest.items()if k!='selected_native_external_boundary'}!=old_manifest:raise ValueError('production manifest changed beyond explicit external-memory boundary')
+   for name,sha in host['artifact_hashes'].items():
+    if digest(MAIN/name)!=sha:raise ValueError('preserved host/typed artifact changed '+name)
+   for name,sha in host['dependency_hashes'].items():
+    if digest(name)!=sha:raise ValueError('actual consumed compilation input changed '+name)
+   extra_hashes=dict(host['artifact_hashes']);extra_hashes[str(preserved.relative_to(MAIN))]=digest(preserved)
+   report['audit_continuation']={'preserved_path':str(preserved.relative_to(MAIN)),'sha256':digest(preserved),'original_failure':host['error'],'compiled_source_commit':host['commit'],'qualification_commit':report['commit'],'changed_uncompiled_metadata_only':sorted(allowed),'unchanged_compiled_and_oracle_sources':{k:v for k,v in current.items()if k not in allowed},'host_algorithm_replayed':False,'object_recompiled':False}
+   for key in ['host_checks','host_vectors','cbc_fixture_vectors','corpus','tools','dependency_hashes','selected_header_checks','profile_rejections','sanitizer_controls','typed_negative_rejected']:report[key]=host[key]
+   report['adapter_compile_argv']=next(x['argv']for x in host['commands']if str(preserved.parent/'arm-adapter.o')in x['argv']and'-c'in x['argv'])
+   report['corpus_path']=str(preserved.parent/'regenerated/vectors.json');corpus=json.loads(Path(report['corpus_path']).read_text());image_dir=out
+   finish_native(command,report,out,preserved.parent,xts,des,git)
   else:
    image_dir=out;native(command,report,out,vendor,xts,des,git)
-   corpus=json.loads((out/'regenerated/vectors.json').read_text())
+   report['corpus_path']=str(out/'regenerated/vectors.json');corpus=json.loads(Path(report['corpus_path']).read_text())
   if a.guest:
    guest(command,out,image_dir,corpus,report,avf,git)
    report['arm_cpu_executed']=True
@@ -110,7 +133,7 @@ def main():
  finally:
   report['resource_wait_seconds']=supervisor.RESOURCE_WAIT_USED if supervisor else 0
   report['owned_source_hashes']={str(p.relative_to(ROOT)):digest(p) for p in sorted(HERE.rglob('*')) if p.is_file() and '__pycache__'not in str(p)}
-  report['artifact_hashes']={str(p.relative_to(MAIN)):digest(p) for p in sorted(out.rglob('*')) if p.is_file()};report['artifacts']=list(report['artifact_hashes'])+extra_artifacts
+  report['artifact_hashes']=extra_hashes|{str(p.relative_to(MAIN)):digest(p) for p in sorted(out.rglob('*')) if p.is_file()};report['artifacts']=list(report['artifact_hashes'])
   report['finished_at']=datetime.datetime.now(datetime.timezone.utc).isoformat();(out/'evidence.json').write_text(json.dumps(report,indent=2)+'\n')
  print(json.dumps({k:report.get(k) for k in ['outcome','error','commit','host_vectors','cbc_fixture_vectors','host_checks','arm_checks','target_layout','fixture_target_layout','guest_cases']},indent=2));return 0 if report['outcome']=='pass' else 1
 
@@ -173,23 +196,44 @@ def native(command,report,out,vendor,xts,des,git):
    report['selected_header_checks'][rel]=sha
   if p.is_relative_to(cr/'src/clang/lib/Headers'):
    if hashlib.sha256(git(cr,'fa9443738c1a18accef4244732ec6d6ee97a8133:'+str(p.relative_to(cr)))).hexdigest()!=sha:raise ValueError('genuine compiler resource header mismatch')
+ report['adapter_compile_argv']=next(x['argv']for x in report['commands']if str(out/'arm-adapter.o')in x['argv']and'-c'in x['argv'])
+ finish_native(command,report,out,out,xts,des,git)
+
+def finish_native(command,report,out,objdir,xts,des,git):
+ ld=Path(report['tools']['ld']['path'])
+ # Exact selected string header explains the observed fortified external import.
+ string_path=next(Path(x)for x in report['dependency_hashes']if x.endswith('/EXPORT_HDRS/osfmk/string.h'))
+ raw=git(MAIN/'references/apple-xnu',XNU+':osfmk/libsa/string.h')
+ if string_path.read_bytes()!=raw or digest(string_path)!='53948931a721b9fa29a0cd0a1dc4f09d1e3332bc6377f9cf8441760bcb20e38d':raise ValueError('actual fortified string header differs from exact genuine blob')
+ if b'#define memcpy(dst, src, n)             __builtin___memcpy_chk(dst, src, n, __xnu_bos_default(dst))'not in raw:raise ValueError('genuine builtin mapping not present')
+ pp=list(report['adapter_compile_argv'])
+ for option in ['-o','-MF']:
+  index=pp.index(option);del pp[index:index+2]
+ pp=[x for x in pp if x not in ['-c','-MD','-MMD','-MP','-fstack-usage']]+['-E','-dM']
+ command(pp,'native-memory-preprocessor')
+ macros=(out/'native-memory-preprocessor.log').read_text();mapping=next(x for x in macros.splitlines()if x.startswith('#define memcpy('))
+ if '__builtin___memcpy_chk'not in mapping:raise ValueError('actual selected preprocessing did not enable checked memcpy')
+ memory=MAIN/'src/platform/crypto/xts/memory.c';xr=json.loads((xts/'evidence.json').read_text())
+ if digest(memory)!=xr['owned_source_hashes']['src/platform/crypto/xts/memory.c']or'if(n>capacity)__builtin_trap();return memcpy(dst,src,n);'not in memory.read_text():raise ValueError('accepted memory source/real trapping check changed')
+ report['fortified_memory_boundary']={'canonical_header':{'path':str(string_path),'sha256':digest(string_path),'git_blob':XNU+':osfmk/libsa/string.h'},'actual_preprocessor_mapping':mapping,'actual_macho_import':'___memcpy_chk','C_symbol':'__memcpy_chk','accepted_fixture_provider':{'object':str(xts/'arm-memory.o'),'sha256':digest(xts/'arm-memory.o'),'source':str(memory),'source_sha256':digest(memory),'bounds_overflow_traps':True},'native_kernel_provider_qualified':False,'scope':'synthetic fixture provider only; production native provider closure is a separate gate'}
  sys.path.insert(0,str(MAIN/'tools/build'));from xnu_kernel_syscalls import ObjectData
- layout=ObjectData(out/'arm-adapter.o').value('_s24_cts3_layout','<6Q');fixture=ObjectData(out/'arm-fixture.o').value('_s24_cts3_fixture_layout','<4Q')
+ layout=ObjectData(objdir/'arm-adapter.o').value('_s24_cts3_layout','<6Q');fixture=ObjectData(objdir/'arm-fixture.o').value('_s24_cts3_fixture_layout','<4Q')
  report['target_layout']=dict(zip(['cbc_descriptor_bytes','cbc_opaque_bytes','cbc_alignment','iv_opaque_bytes','iv_alignment','selected_max_block_bytes'],layout));report['fixture_target_layout']=dict(zip(['aes_state_bytes','alignment','genuine_mbed_aes_bytes','cbc_descriptor_bytes'],fixture))
  if layout!=(40,16,16,16,16,16)or fixture!=(304,16,288,40):raise ValueError('actual target ABI/layout differs')
- native_paths=[out/('arm-'+n+'.o')for n in ['adapter','fixture','aes','suite','typed','guest']]+[xts/'arm-adapter.o',xts/'arm-memory.o',des/'arm-adapter.o',des/'arm-des.o'];report['native_symbols']={};definitions={}
+ native_paths=[objdir/('arm-'+n+'.o')for n in ['adapter','fixture','aes','suite','typed','guest']]+[xts/'arm-adapter.o',xts/'arm-memory.o',des/'arm-adapter.o',des/'arm-des.o'];report['native_symbols']={};definitions={}
  for p in native_paths:
   obj=ObjectData(p);imports=sorted(x['name']for x in obj.symbols if not x['kind']&0x0e and x['kind']&1);names=sorted(obj.named)
   report['native_symbols'][str(p)]={'imports':imports,'definitions':names}
   for name in names:
    if name.startswith('_mbedtls_aes_')or name=='_mbedtls_platform_zeroize':definitions.setdefault(name,[]).append(str(p))
-  if p==out/'arm-adapter.o'and not set(imports)<={'_bzero','_memset','_memcpy','_mbedtls_platform_zeroize'}:raise ValueError('production is no longer generic/memory-only imports')
+  if p==objdir/'arm-adapter.o'and set(imports)!={'___memcpy_chk','_memcpy','_mbedtls_platform_zeroize'}:raise ValueError('production is no longer generic/memory-only imports')
+ if '___memcpy_chk'not in ObjectData(xts/'arm-memory.o').named:raise ValueError('accepted real trapping helper definition missing')
  if any(len(v)!=1 for v in definitions.values())or len(definitions.get('_mbedtls_platform_zeroize',[]))!=1:raise ValueError('duplicate/missing global AES/zeroizer implementation')
- if definitions.get('_mbedtls_aes_crypt_cbc')!=[str(out/'arm-aes.o')]:raise ValueError('canonical CBC function not supplied by one real AES object')
+ if definitions.get('_mbedtls_aes_crypt_cbc')!=[str(objdir/'arm-aes.o')]:raise ValueError('canonical CBC function not supplied by one real AES object')
  report['single_AES_and_zeroizer_definitions']=definitions
- for mode,last in [('normal','guest'),('spin','spin')]:command([ld,'-arch','arm64','-static','-e','_xts_entry','-iphoneos_version_min','16.5','-pagezero_size','0','-seg1addr','0xfffffff007000000','-no_uuid',*[out/('arm-'+n+'.o')for n in ['adapter','fixture','aes','suite','typed',last]],xts/'arm-adapter.o',xts/'arm-memory.o',des/'arm-adapter.o',des/'arm-des.o','-o',out/(mode+'.macho')],mode+'-link')
+ for mode,last in [('normal','guest'),('spin','spin')]:command([ld,'-arch','arm64','-static','-e','_xts_entry','-iphoneos_version_min','16.5','-pagezero_size','0','-seg1addr','0xfffffff007000000','-no_uuid',*[objdir/('arm-'+n+'.o')for n in ['adapter','fixture','aes','suite','typed',last]],xts/'arm-adapter.o',xts/'arm-memory.o',des/'arm-adapter.o',des/'arm-des.o','-o',out/(mode+'.macho')],mode+'-link')
  avf=load_module('qualified_avf_for_cts3',MAIN/'tools/verify/avf_handoff.py');report['images']={mode:avf.macho(out/(mode+'.macho'))for mode in ['normal','spin']}
- report['stack_usage_artifacts']={str(p.relative_to(MAIN)):digest(p)for p in sorted(out.glob('*.su'))}
+ report['stack_usage_artifacts']={str(p.relative_to(MAIN)):digest(p)for p in sorted(objdir.glob('*.su'))}
 
 def guest(command,out,image_dir,corpus,report,avf,git):
  vm2=MAIN/'worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105';vm4=MAIN/'worktrees/vm-004-20261105/artifacts/qemu-host';qemu=vm4/'build-6/build/qemu-system-aarch64';shim=vm2/'Image'
