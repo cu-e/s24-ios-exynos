@@ -45,6 +45,8 @@ high-water mark and 180-second deadline. No process is launched or terminated.
 Five negative controls reject duplicate allocation, foreign object substitution,
 changed source binding, an escaped object output and disabled allocator metadata.
 They mutate owned in-memory copies and leave all shared source bytes untouched.
+An additional actual CLI invocation supplies an output path containing `..`;
+canonical ownership admission rejects it with exit 2 before creating that path.
 Actual compiler success, object hashes/metadata and active dependency closure
 remain required before shard build acceptance.
 
