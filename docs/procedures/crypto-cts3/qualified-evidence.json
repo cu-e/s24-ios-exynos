@@ -1,0 +1,406 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T19:39:54.592920+00:00",
+  "summary": "Genuine generic CBC-CS3 selected callbacks: primary RFC3962, published NIST CBC fixture and explicitly derived/oracle cases, bounded sanitized host/typedARM and actual ARMCPU controls; strict>block/local error boundary, single zeroizer/AES object, no provider/privateABI/native/FIPS/fullcrypto claim",
+  "task": "KRN-036",
+  "experiment": "CTS3005",
+  "commit": "80ee7fde7b7a67310a8eecdb1a015aa6aa8081ad",
+  "arm_cpu_executed": true,
+  "host_checks": 28794,
+  "arm_checks": 28794,
+  "host_vectors": 381,
+  "cbc_fixture_vectors": 18,
+  "target_layout": {
+    "cbc_descriptor_bytes": 40,
+    "cbc_opaque_bytes": 16,
+    "cbc_alignment": 16,
+    "iv_opaque_bytes": 16,
+    "iv_alignment": 16,
+    "selected_max_block_bytes": 16
+  },
+  "fixture_target_layout": {
+    "aes_state_bytes": 304,
+    "alignment": 16,
+    "genuine_mbed_aes_bytes": 288,
+    "cbc_descriptor_bytes": 40
+  },
+  "profile_rejections": [
+    {
+      "macro": "MBEDTLS_AES_ALT",
+      "rejected": true
+    },
+    {
+      "macro": "MBEDTLS_AESNI_C",
+      "rejected": true
+    },
+    {
+      "macro": "MBEDTLS_AESCE_C",
+      "rejected": true
+    },
+    {
+      "macro": "MBEDTLS_HAVE_ASM",
+      "rejected": true
+    },
+    {
+      "macro": "MBEDTLS_PADLOCK_C",
+      "rejected": true
+    },
+    {
+      "macro": "MBEDTLS_SELF_TEST",
+      "rejected": true
+    }
+  ],
+  "sanitizer_controls": [
+    {
+      "name": "asan-heap",
+      "detected": true
+    },
+    {
+      "name": "ubsan-overflow",
+      "detected": true
+    }
+  ],
+  "typed_negative_rejected": true,
+  "corpus": {
+    "primary": {
+      "url": "https://www.rfc-editor.org/rfc/rfc3962.txt",
+      "sha256": "1a6bf9edff650f92e8c5f85a450335c168545169bfdd51977393d15a6932f1f0",
+      "count": 6,
+      "lengths": [
+        17,
+        31,
+        32,
+        47,
+        48,
+        64
+      ]
+    },
+    "derived_extra_count": 375,
+    "nist_published_cbc_count": 3,
+    "nist_derived_cs3_count": 3,
+    "nist_text_sha256": "e9393d4b55e0fb327205ce7876913b8413e2c4df25e168671accdb019f6fc65c",
+    "parser_negative_reordered_offsets": true,
+    "oracle": {
+      "library": "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm2/oracle.so",
+      "sha256": "72d1b64067783710a30b1970e5b06df1268841299bf3584ad42be8019c1105c4",
+      "version": "OpenSSL 3.5.9 29 Sep 2026",
+      "libcrypto_path": "/usr/lib64/libcrypto.so.3.5.9",
+      "libcrypto_sha256": "104ea7f8490d18e9a2e3f877a7579c112adcc3a990a878902dd7b611d94f596e",
+      "binary_source_rebuild_verified": false,
+      "actual_mapped_libcrypto": [
+        "/usr/lib64/libcrypto.so.3.5.9"
+      ],
+      "provider_module_hashes": {
+        "/usr/lib64/ossl-modules/legacy.so": "b966d50f6ff2a2d24fdeb7de3cb74921cc24f66cd71daf7493a9fbf24f48dee7"
+      },
+      "AES": "actual EVP-CBC-CTS/CS3 AND independent whole-CBC permutation, genuine public C headers/opaque contexts",
+      "DES_TDES": "whole independent OpenSSL CBC plus normative permutation; not a native OpenSSL DES-CS3 mode or published CTS vector"
+    }
+  },
+  "fortified_memory_boundary": {
+    "canonical_header": {
+      "path": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-kernel-objects/compile-session2/EXPORT_HDRS/osfmk/string.h",
+      "sha256": "53948931a721b9fa29a0cd0a1dc4f09d1e3332bc6377f9cf8441760bcb20e38d",
+      "git_blob": "c54f35ca767986246321eb901baf8f5ff7923f6a:osfmk/libsa/string.h"
+    },
+    "actual_preprocessor_mapping": "#define memcpy(dst,src,n) __builtin___memcpy_chk(dst, src, n, __xnu_bos_default(dst))",
+    "actual_macho_import": "___memcpy_chk",
+    "C_symbol": "__memcpy_chk",
+    "accepted_fixture_provider": {
+      "object": "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/arm-memory.o",
+      "sha256": "4e24c780227c702dd6201f285ce28d4290c75b1ff8d68ba2aa4c1ce818d0b91d",
+      "source": "/home/egor/dev/pet/s24-ios-exynos/src/platform/crypto/xts/memory.c",
+      "source_sha256": "21c4aa5045952b84532754e51a4c2bfb7958752c90fb6c11d5a6a4e4189608f8",
+      "bounds_overflow_traps": true
+    },
+    "native_kernel_provider_qualified": false,
+    "scope": "synthetic fixture provider only; production native provider closure is a separate gate"
+  },
+  "single_AES_and_zeroizer_definitions": {
+    "_mbedtls_aes_crypt_cbc": [
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm2/arm-aes.o"
+    ],
+    "_mbedtls_aes_crypt_ecb": [
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm2/arm-aes.o"
+    ],
+    "_mbedtls_aes_free": [
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm2/arm-aes.o"
+    ],
+    "_mbedtls_aes_init": [
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm2/arm-aes.o"
+    ],
+    "_mbedtls_aes_setkey_dec": [
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm2/arm-aes.o"
+    ],
+    "_mbedtls_aes_setkey_enc": [
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm2/arm-aes.o"
+    ],
+    "_mbedtls_platform_zeroize": [
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/arm-adapter.o"
+    ]
+  },
+  "shared_runtime": {
+    "path": "/home/egor/dev/pet/s24-ios-exynos/fixtures/public/avf-handoff/runtime.h",
+    "sha256": "0d85cbf3acec7858458bcb086ff23a5ab8a61eefb5ce47d4d75fbf01cf728087",
+    "unchanged": true
+  },
+  "canonical_AES_inputs": {
+    "archive": "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105/artifacts/crypto-xts/inputs/mbedtls.tar.gz",
+    "sha256": "ca6bd316bbec49ef20088f39b8755fcaec0b7e45781506de55b17cd191ae6937",
+    "commit": "068ff080b369adfac81509f9b57b2afabaf82dc5",
+    "files": {
+      "include/mbedtls/aes.h": {
+        "canonical_sha256": "ce71f35d91cf1609bddff21d613863c1177bccc97327f7994c39965ebf044b56",
+        "actual_sha256": "ce71f35d91cf1609bddff21d613863c1177bccc97327f7994c39965ebf044b56",
+        "bytes": 28025,
+        "patched": false
+      },
+      "include/mbedtls/private_access.h": {
+        "canonical_sha256": "c897213b3e534e8d5db83629177f9c01d90461ed6fea57906836262dba87056d",
+        "actual_sha256": "c897213b3e534e8d5db83629177f9c01d90461ed6fea57906836262dba87056d",
+        "bytes": 435,
+        "patched": false
+      },
+      "include/mbedtls/build_info.h": {
+        "canonical_sha256": "4bb715278f3199298220b930514ace4f461ed0e9ff27b656d6e2616a1ca3287f",
+        "actual_sha256": "4bb715278f3199298220b930514ace4f461ed0e9ff27b656d6e2616a1ca3287f",
+        "bytes": 6163,
+        "patched": false
+      },
+      "include/mbedtls/config_adjust_legacy_crypto.h": {
+        "canonical_sha256": "f404960e2878c21c22a5d67caba6cd1d29f382b3d913a56ce856931dd15b2886",
+        "actual_sha256": "f404960e2878c21c22a5d67caba6cd1d29f382b3d913a56ce856931dd15b2886",
+        "bytes": 21274,
+        "patched": false
+      },
+      "include/mbedtls/config_adjust_x509.h": {
+        "canonical_sha256": "92909d91c59340f13eb2b447cf44e0075a0ee742a18f22fb7843f6a18c5af5dc",
+        "actual_sha256": "92909d91c59340f13eb2b447cf44e0075a0ee742a18f22fb7843f6a18c5af5dc",
+        "bytes": 1517,
+        "patched": false
+      },
+      "include/mbedtls/config_adjust_ssl.h": {
+        "canonical_sha256": "2d37a7552566e9fbd8a5a8b3e6cf6d4e21125a5e48a7e24ca30f3c683d141871",
+        "actual_sha256": "2d37a7552566e9fbd8a5a8b3e6cf6d4e21125a5e48a7e24ca30f3c683d141871",
+        "bytes": 3417,
+        "patched": false
+      },
+      "include/mbedtls/check_config.h": {
+        "canonical_sha256": "66696df9cc3f7cbbe84786046937242b18140963b94c34347404f7827c428efa",
+        "actual_sha256": "66696df9cc3f7cbbe84786046937242b18140963b94c34347404f7827c428efa",
+        "bytes": 48196,
+        "patched": false
+      },
+      "include/mbedtls/platform_util.h": {
+        "canonical_sha256": "1237d849e96bc15b479e8086160e4568c1de86563bb51c60eead45b99ad1b4ac",
+        "actual_sha256": "1237d849e96bc15b479e8086160e4568c1de86563bb51c60eead45b99ad1b4ac",
+        "bytes": 10759,
+        "patched": false
+      },
+      "library/aes.c": {
+        "canonical_sha256": "f30e6b7139527b41c32f68cc5430ceafa213e7fdf7a39bf4981f6a20cd0e77a1",
+        "actual_sha256": "f30e6b7139527b41c32f68cc5430ceafa213e7fdf7a39bf4981f6a20cd0e77a1",
+        "bytes": 78798,
+        "patched": false
+      },
+      "library/common.h": {
+        "canonical_sha256": "adfd493f8ecb11f87f7e75f270a97cbd05d1902345ef32db51d39c076e4f8fde",
+        "actual_sha256": "3f7b4261ac2b7b429d0e7729aedeb4c26ad6a5e29d8878ad0437e68bbf4b2381",
+        "bytes": 18818,
+        "patched": true
+      },
+      "library/alignment.h": {
+        "canonical_sha256": "e97b8844abfadc4cc2fecce5b040d58cd53f549c42712205a267e00e372efd3d",
+        "actual_sha256": "e97b8844abfadc4cc2fecce5b040d58cd53f549c42712205a267e00e372efd3d",
+        "bytes": 27429,
+        "patched": false
+      },
+      "include/mbedtls/platform.h": {
+        "canonical_sha256": "e6e1edc99d90698acf751d5d837c9b59898d7277deb993bcbf7473172b7a3523",
+        "actual_sha256": "e6e1edc99d90698acf751d5d837c9b59898d7277deb993bcbf7473172b7a3523",
+        "bytes": 18554,
+        "patched": false
+      },
+      "include/mbedtls/error.h": {
+        "canonical_sha256": "ddcb14c1bf9d6fd2f2f1d2eb62117ce9bf05a0f9430c6931d7555b23f9ed3ddb",
+        "actual_sha256": "ddcb14c1bf9d6fd2f2f1d2eb62117ce9bf05a0f9430c6931d7555b23f9ed3ddb",
+        "bytes": 6543,
+        "patched": false
+      },
+      "library/ctr.h": {
+        "canonical_sha256": "63331eb36d8ea69b4b4dcd2ec059582bcabf51a8ea891db26d37ab033967789f",
+        "actual_sha256": "63331eb36d8ea69b4b4dcd2ec059582bcabf51a8ea891db26d37ab033967789f",
+        "bytes": 947,
+        "patched": false
+      },
+      "LICENSE": {
+        "canonical_sha256": "9b405ef4c89342f5eae1dd828882f931747f71001cfba7d114801039b52ad09b",
+        "actual_sha256": "9b405ef4c89342f5eae1dd828882f931747f71001cfba7d114801039b52ad09b",
+        "bytes": 29852,
+        "patched": false
+      }
+    },
+    "license_choice": "Apache-2.0",
+    "shared_vendor_read_only": true
+  },
+  "accepted_dependencies": {
+    "reports": {
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/evidence.json": "c5064a512ba295d1cd447af1e73ac6fc4f9c0ffeaf5b78f09ca0f80fc1f6216c",
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-032-20261105/artifacts/crypto-des/cpu-final3/evidence.json": "077f56b1469d961ec5d5f5af695e85e0037ca698fd60a984b62efcae7006447d"
+    },
+    "objects": {
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/host-adapter.o": "9cab942f6bc120c18e33dcef17aa742f2796e484f9e08654292d1e10cf330ced",
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/arm-adapter.o": "a9acb5e645d728305eaad4487390065fcfef14edde18047133211c0d5dc84cfb",
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/arm-memory.o": "4e24c780227c702dd6201f285ce28d4290c75b1ff8d68ba2aa4c1ce818d0b91d",
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-032-20261105/artifacts/crypto-des/cpu-final3/host-adapter.o": "6bd2f5c8877750f57c243bcd324c5dead5d349a169c5df8047537e6be9c6335c",
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-032-20261105/artifacts/crypto-des/cpu-final3/host-des.o": "f4ac79d717942ae8cdcca3d99db4df2239cd9766a639e6deb3cbfea3893ff065",
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-032-20261105/artifacts/crypto-des/cpu-final3/arm-adapter.o": "83ba219693efb3712044bf90382c811d8f6b1dc1ee571f60cfcce5f25c796a96",
+      "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-032-20261105/artifacts/crypto-des/cpu-final3/arm-des.o": "d4ee195f0cde0a0719b3811b8cda2ca9b539bd98109f47c7209c13d545bdc6e2"
+    }
+  },
+  "audit_continuation": {
+    "preserved_path": "worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm2/evidence.json",
+    "sha256": "26edb172fd4f023b0b0659f23cdf02d466befe579a5321051b6bc326947442f3",
+    "original_failure": "ValueError('production is no longer generic/memory-only imports')",
+    "compiled_source_commit": "89ff8f2a6f616c5a3662f8e91cb54396318eb405",
+    "qualification_commit": "80ee7fde7b7a67310a8eecdb1a015aa6aa8081ad",
+    "changed_qualification_script_and_manifest_only": [
+      "src/platform/crypto/cts3/check.py",
+      "src/platform/crypto/cts3/production.json"
+    ],
+    "unchanged_compiled_and_oracle_sources": {
+      "src/platform/crypto/cts3/cts3.c": "b845a947778ef340008fa1f7350867aa458a634067d73684613258ae77fa8704",
+      "src/platform/crypto/cts3/cts3.h": "48a04dad0c722d61613b8faba634114b6fd84d38fc47b8825a407330e8108422",
+      "src/platform/crypto/cts3/fixture_aes.c": "57423f7be62ebdee4d188934ce1a6ea5276d1badd8cfb212b14dd828a7378b55",
+      "src/platform/crypto/cts3/fixture_aes.h": "0faede71cdabbcb1f4d74d5b4d453b9f53971fda3e556d3b9eed6f88a4c41676",
+      "src/platform/crypto/cts3/guest.c": "c7ec2fb779979ff6f550718029b02b5fc60e34462bacfeccb501f81bd3d600f9",
+      "src/platform/crypto/cts3/oracle.c": "52d1a2c93716237770c939489121961aabea1aab8619358b8a483f6ce194980f",
+      "src/platform/crypto/cts3/s24_cts3_aes_profile.h": "796a344f5f4514117cc86f4d46fbcf56673a9e29607eafd06c54640f0ec8f6c9",
+      "src/platform/crypto/cts3/sanitizer_control.c": "7d19297648bddbe9901edd2c69366e1fc7fd73435814dc221ba3054288346e75",
+      "src/platform/crypto/cts3/suite.c": "5a0192de07b1ed792212552068167efce881a6aae884936616208c419d00a9aa",
+      "src/platform/crypto/cts3/typed.c": "238060ce7dbd431c981d043305955ba388b78be67b8ab694298d436365bb8b6a",
+      "src/platform/crypto/cts3/typed_negative.c": "dfec8b4012b7f195d7a045adeea4c570ced7b6e323c35812e8a9a73e27373ff3",
+      "src/platform/crypto/cts3/vectors.py": "f49b639e05654f7a47daba6e84637df3c4c4a23e7b05c935eb1fdb46601da81d"
+    },
+    "host_algorithm_replayed": false,
+    "object_recompiled": false
+  },
+  "host_phase": {
+    "path": "worktrees/krn-036-20261105/artifacts/crypto-cts3/audit-link2/evidence.json",
+    "sha256": "ecdcf6e9139490252e165ce2e90d527662af933845e3907b9b0fd8d23f214a19",
+    "commit": "80ee7fde7b7a67310a8eecdb1a015aa6aa8081ad"
+  },
+  "planning_record": {
+    "id": "CTS3005",
+    "task": "KRN-036",
+    "owner": "codex-team-crypto-cts3-20261105-cb",
+    "kind": "host-test",
+    "status": "planned",
+    "hypothesis": "Immutable linked genericCBC-CS3 component and real CBC fixtures execute381CS3+18CBC records and28794checks on actual ARMCPU, with wrong-cookie/ciphertext-corruption/spin termination controls and exact same-source/object/dependency/image hash chain, without host algorithm or build replay.",
+    "procedure": "worktrees/krn-036-20261105/docs/procedures/crypto-cts3/README.md",
+    "timeout_seconds": 300,
+    "created_at": "2026-11-05T19:39:03+00:00"
+  },
+  "planning_snapshot_sha256": "b73292e554b3ca50029d014a097c72ffedfc9f256255478a92bb6491aa01dcb9",
+  "raw_evidence": {
+    "path": "worktrees/krn-036-20261105/artifacts/crypto-cts3/cpu-final1/evidence.json",
+    "sha256": "a95b5c69a14519bc2cfc2da8dea025a684bda3a82647b27e66d93d90109afc57"
+  },
+  "actual_guest_elapsed_seconds": 12.248586,
+  "guest_command_count": 4,
+  "guest_peak_owned_rss_bytes": 64753664,
+  "guest_resource_admission_seconds": 8.01068415993359,
+  "all_owned_guest_sessions_quiescent": true,
+  "guest_cases": [
+    {
+      "name": "positive",
+      "accepted": true,
+      "payload_sha256": "3adbe8bf08ef6d6810a64dab60e7e94ab7d68c801036e0e82857638d6b2ce5ca",
+      "console_sha256": "9dd80b0a98bdbd7bb77035e9ae3b2c0cbe182fea8cddf43dd9ea318601a89cce"
+    },
+    {
+      "name": "wrong-cookie",
+      "accepted": true,
+      "payload_sha256": "4b076de30ca8bc5db1fd72716356ef77f862a828c28961e34c3e81e3ca84f81e",
+      "console_sha256": "23f253a48d33be494a5dfcfb435d518ec90c73188d6748b4a0471d8e20663a1c"
+    },
+    {
+      "name": "corrupt-vector",
+      "accepted": true,
+      "payload_sha256": "91eadfa38ea23b6cca8e5045710804c98e7044ea97c3abf83dcc3b3abf201233",
+      "console_sha256": "5598a3c791ca10d62207228278c8a294b0421c818897e4c01686f17257d984a2"
+    },
+    {
+      "name": "spin-timeout",
+      "accepted": true,
+      "payload_sha256": "d8621f7f4fd46b16378721ef7a2ab7eaee94f91ae1fa1ce27a241b566d970902",
+      "console_sha256": "bf4c2679bd33c62d3eb9d6d73a07b5e4599a7985c3448f8b3b3bddec1eff8996"
+    }
+  ],
+  "native_kernel_provider_qualified": false,
+  "provider_registered": false,
+  "private_Apple_ABI_qualified": false,
+  "FIPS_qualified": false,
+  "side_channel_qualified": false,
+  "native_device_executed": false,
+  "stage_capsules": [
+    {
+      "experiment": "CTS3001",
+      "path": "worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm1/evidence.json",
+      "sha256": "cbe9309cffef12c09cd2bfbe4463ad1d274ad22553f7acd1c6a8eae47ab348e5",
+      "outcome": "inconclusive",
+      "error": "ResourceDeferred('host-version: resource-deferred admission deadline, MemAvailable=616172KiB; no child spawned')",
+      "commit": "09111a944045ffad348e790c9f7377f6628ca0b5"
+    },
+    {
+      "experiment": "CTS3002",
+      "path": "worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm2/evidence.json",
+      "sha256": "26edb172fd4f023b0b0659f23cdf02d466befe579a5321051b6bc326947442f3",
+      "outcome": "fail",
+      "error": "ValueError('production is no longer generic/memory-only imports')",
+      "commit": "89ff8f2a6f616c5a3662f8e91cb54396318eb405"
+    },
+    {
+      "experiment": "CTS3003",
+      "path": "worktrees/krn-036-20261105/artifacts/crypto-cts3/audit-link1/evidence.json",
+      "sha256": "fa32a1b080a3fd596ce4a73f2d0599af01435a5397a632a9386a44c2d1743e44",
+      "outcome": "fail",
+      "error": "ValueError('Invalid data/relocation extent')",
+      "commit": "55ea7b7d0e49d87c72c2c6953934ecc33cc8c200"
+    },
+    {
+      "experiment": "CTS3004",
+      "path": "worktrees/krn-036-20261105/artifacts/crypto-cts3/audit-link2/evidence.json",
+      "sha256": "ecdcf6e9139490252e165ce2e90d527662af933845e3907b9b0fd8d23f214a19",
+      "outcome": "pass",
+      "error": null,
+      "commit": "80ee7fde7b7a67310a8eecdb1a015aa6aa8081ad"
+    },
+    {
+      "experiment": "CTS3005",
+      "path": "worktrees/krn-036-20261105/artifacts/crypto-cts3/cpu-final1/evidence.json",
+      "sha256": "a95b5c69a14519bc2cfc2da8dea025a684bda3a82647b27e66d93d90109afc57",
+      "outcome": "pass",
+      "error": null,
+      "commit": "80ee7fde7b7a67310a8eecdb1a015aa6aa8081ad"
+    }
+  ],
+  "artifacts": [
+    "worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm1/evidence.json",
+    "worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm2/evidence.json",
+    "worktrees/krn-036-20261105/artifacts/crypto-cts3/audit-link1/evidence.json",
+    "worktrees/krn-036-20261105/artifacts/crypto-cts3/audit-link2/evidence.json",
+    "worktrees/krn-036-20261105/artifacts/crypto-cts3/cpu-final1/evidence.json",
+    "worktrees/krn-036-20261105/artifacts/crypto-cts3/cpu-final1/positive.log",
+    "worktrees/krn-036-20261105/artifacts/crypto-cts3/cpu-final1/wrong-cookie.log",
+    "worktrees/krn-036-20261105/artifacts/crypto-cts3/cpu-final1/corrupt-vector.log",
+    "worktrees/krn-036-20261105/artifacts/crypto-cts3/cpu-final1/spin-timeout.log",
+    "worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm2/host-tests.log",
+    "worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm2/vectors-replay.log",
+    "worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm2/asan-heap.log",
+    "worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm2/ubsan-overflow.log",
+    "worktrees/krn-036-20261105/artifacts/crypto-cts3/host-arm2/typed-return-negative.log"
+  ]
+}
