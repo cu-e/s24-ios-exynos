@@ -12,4 +12,13 @@ The GNSS struct declaration conflicts with offset macros and actual writer. The 
 
 Experiment SENHOST-001: original parser ASan/UBSan execution and AArch64 compile passed; genuine SHUB oracle failed because the owned synthetic linux/kernel.h lacked an include guard. Failure capsule `worktrees/sen-001-20261105/artifacts/sen-001/20261105-host-001/evidence.json` preserves commands/exits/logs. No upstream source was changed. Fixed the support guard for SENHOST-002.
 
-Expected final capsule: `worktrees/sen-001-20261105/artifacts/sen-001/20261105-host-002/evidence.json`. Actual outcome is recorded there after execution. The final revision and all owned input hashes are recorded in it. The coordinator should inspect that outcome, cherry-pick owned commit(s), and run main `make check`; the checker stays local to this task boundary. Native sensor/clock/firmware/Apple-service work requires new scoped prerequisites, as listed in README. No phone/ADB/root/MMIO/flash/reboot/provisioning operation was issued.
+Passing final capsule: `worktrees/sen-001-20261105/artifacts/sen-001/20261105-host-002/evidence.json`. SENHOST-002 passed at tested commit `f6b2072` (all owned input hashes recorded): host parser ASan/UBSan executable exit0, freestanding AArch64 compile exit0, genuine SHUB declaration compile/run exit0, genuine GNSS helper differential compile/run exit0, and seven existing HAL capture identity checks. The worker did not run common main make check; the coordinator owns integration verification. The coordinator should inspect that outcome, cherry-pick owned commit(s), and run main `make check`; the checker stays local to this task boundary. Native sensor/clock/firmware/Apple-service work requires new scoped prerequisites, as listed in README. No phone/ADB/root/MMIO/flash/reboot/provisioning operation was issued.
+
+Acceptance assessment:
+
+| Criterion | Result | Evidence and limits |
+| --- | --- | --- |
+| Pinned hub/GNSS interfaces and exact sensor identities | Met for source-qualified host specification | Full upstream SHA,18 exact source snapshots and hashes; genuine prefix/constants oracle; actual E1S GNSS include path; seven exact existing HAL names/handles/types and inventory hash. BYH3 wire compatibility and GNSS silicon identity remain unqualified. |
+| Timestamp, packet truncation and unavailable-service cases tested | Met for host adapter | Every SHUB/GNSS prefix (including GNSS padding), incomplete count and oversized lengths; atomic output publication; capacity; raw future/zero/max and backward batch times; distinct service-down/clock-unavailable controls. GNSS65524 valid length comparisons use genuine source helpers. |
+
+Ready for review; leave SEN-001 in progress until the coordinator cherry-picks and validates common main checks. Integrate implementation commit `f6b2072` plus the documentation-result follow-up. No native capability is advanced.
