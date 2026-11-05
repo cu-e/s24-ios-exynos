@@ -44,3 +44,14 @@ full crypto, encrypted-volume/FIPS/side-channel/native-device support. The
 selected kernel wrapper ignores the xts pointer return. Future integration must
 qualify or fix caller error semantics, key/sector policy and provider ownership
 under a separate scoped claim. No physical device action occurred.
+
+Final clean replay: XTS-003, implementation7b7607b1f907d2e51dbb55766de9cdee772c0842
+(after396517f55102a2ded50245b053684dfffb6c2ec8). Report:
+worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/evidence.json,
+SHA256 c5064a512ba295d1cd447af1e73ac6fc4f9c0ffeaf5b78f09ca0f80fc1f6216c.
+Qualified capsule: docs/procedures/crypto-xts/qualified-evidence.json.
+Passed40708 host/40703 ARM checks; all1220 records,2 detector controls,
+4 profile rejects,4 guest controls. Sampled owned peak106192896 bytes;
+cumulative child ru_maxrss84952KiB. Every owned session cleaned up. The
+memmove followup uses numeric rather than unrelated-object pointer ordering.
+Implementation and evidence capsule are ready for coordinator/independent review.

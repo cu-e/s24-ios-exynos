@@ -1,0 +1,216 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T16:51:30.381342+00:00",
+  "summary": "Genuine typed full-block XTS descriptors:1200 NIST records+20 independent OpenSSL records, real sanitized host and unchanged AVF/QEMU ARM CPU execution; no provider/XNU/native/private ABI/FIPS/side-channel qualification",
+  "commit": "7b7607b1f907d2e51dbb55766de9cdee772c0842",
+  "host_checks": 40708,
+  "arm_checks": 40703,
+  "host_vectors": 1220,
+  "target_layout": {
+    "key_bytes": 608,
+    "key_alignment": 16,
+    "tweak_bytes": 48,
+    "tweak_alignment": 16,
+    "mbedtls_aes_bytes": 288,
+    "ccmode_xts_bytes": 80
+  },
+  "vectors": {
+    "nist_count": 1200,
+    "oracle_extra_count": 20,
+    "archive_sha256": "67bb04b018182f65530596786e7783f817d2e56509bf3b1f066609b8e3e29c36",
+    "oracle": {
+      "path": "/usr/lib64/libcrypto.so.3.5.9",
+      "sha256": "104ea7f8490d18e9a2e3f877a7579c112adcc3a990a878902dd7b611d94f596e",
+      "version": "OpenSSL 3.5.9 29 Sep 2026",
+      "interface": "EVP AES-XTS, one whole-unit EncryptUpdate"
+    },
+    "excluded_records": 2800
+  },
+  "guest_cases": [
+    {
+      "name": "positive",
+      "accepted": true,
+      "payload_sha256": "5581a9bc67a2d756a418e10aa0eb74dfe6af343849942355ae84f1669056c5fc",
+      "console_sha256": "b596ae255d58869e426b8a0bbf41de00c3a249f88aab42e8e5d52990b5d2116e"
+    },
+    {
+      "name": "wrong-cookie",
+      "accepted": true,
+      "payload_sha256": "3f9b625523a08443ff77b69b44d5cc909f6c255113692fb5316135d1f794e3f8",
+      "console_sha256": "e661c24cb12e6e313f98037a6d0e7c17ab961fb3c1dc7b1587e68ebc14d33859"
+    },
+    {
+      "name": "corrupt-vector",
+      "accepted": true,
+      "payload_sha256": "69a5787cc390cb30afe19959dfb93864ec0e3d34d33ba0fbf53df9127adad222",
+      "console_sha256": "47f404425bab3d57d5c122c20f3b5e604e9167abbcea655bef51d8f7e31443ba"
+    },
+    {
+      "name": "spin-timeout",
+      "accepted": true,
+      "payload_sha256": "b22dec0625f994a47bd7fdde46514d527debbc6ab4a3fbef75fc6b5808d3b0aa",
+      "console_sha256": "7328e8f0ee66c182c2ca5a2290ef53b844960f3dd9fe1a1272227d19ab2e7cad"
+    }
+  ],
+  "sanitizer_controls": [
+    {
+      "name": "asan-heap",
+      "detected": true
+    },
+    {
+      "name": "ubsan-overflow",
+      "detected": true
+    }
+  ],
+  "profile_rejections": [
+    {
+      "macro": "MBEDTLS_AES_ALT",
+      "rejected": true
+    },
+    {
+      "macro": "MBEDTLS_AESNI_C",
+      "rejected": true
+    },
+    {
+      "macro": "MBEDTLS_AESCE_C",
+      "rejected": true
+    },
+    {
+      "macro": "MBEDTLS_HAVE_ASM",
+      "rejected": true
+    }
+  ],
+  "tools": {
+    "host": {
+      "path": "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/bin/clang-18",
+      "sha256": "0e14b158c3e11fc5da5e585d01e8a586aa14b6e57f544f9db737745b18201a79",
+      "resource_dir": "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18",
+      "runtime_hashes": {
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.asan-preinit.a": "d35825b08d51e2277621555875ceaa276ed7a0f8bfa3c0417f8bf511c788348a",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.asan.a": "d438c6cd7ab45d32c43c123ecedb7efe14a7edc5eded1a10ca35eea80d9d33ba",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.asan.a.syms": "06ff706a30ce2579ad863db702cf6f3c07b0e853ed77c78ce9a86b2ba14e7163",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.asan.so": "47279b9afc8a41b05b7e7d81f119a7e869e84c23c153cb30ca71761034e42503",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.asan_cxx.a": "f760bc9ccd82fc880911fa5e7f7c59da8c38d19ee5f5a7476c09c1705559d3ad",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.asan_cxx.a.syms": "6eac435ad2d94c93a4e3deb0ffb5e62e37ca5eb7b5f32d96ffc812abe54918d7",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.asan_static.a": "48ab3ceb91636f8c144e072cc6511b6ec3b35d1cb6a8ec65760af106114f562b",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.gwp_asan.a": "b049ddc09359956018f58b34a8090fe4c0918e036d2ac710dacfcf96c22c0440",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan-preinit.a": "fa77b78482785eeb89eb74175d230b174e91d56aa722a2291db43c219bc497c3",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan.a": "f85e96314a773f65fd2ea1a7bcd4056cb21b67c1a7bc00a743e139a5e1915ec0",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan.a.syms": "517544dbbf108f28862b0644a9ce6b0a6fac33bbaf199793f1bc5de685ab2eb4",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan.so": "72a7bf8af79cf4c987fc414ded0b508c8f7e82eff93774eeb44efee2db622a7a",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan_aliases.a": "54abe7f080223423a4d304a2fb4728d05fff03dd5291301b9b5070baaf2612da",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan_aliases.a.syms": "517544dbbf108f28862b0644a9ce6b0a6fac33bbaf199793f1bc5de685ab2eb4",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan_aliases.so": "9b96b67122363bb6b5a6492600a0aec39c4cbe3b39237537705e2efa7a4e9795",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan_aliases_cxx.a": "9fd2766811e4fa2ee9d97e47ed29453bf77451b3272057204b85858ae656ac1a",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan_aliases_cxx.a.syms": "7634cbe8cc66a5e07b8cda2e21275aab735b36d591f369c05a855818e38654f7",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan_cxx.a": "9fd2766811e4fa2ee9d97e47ed29453bf77451b3272057204b85858ae656ac1a",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan_cxx.a.syms": "7634cbe8cc66a5e07b8cda2e21275aab735b36d591f369c05a855818e38654f7",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_minimal.a": "5ea45754403d45ed462646b8d0b02e0e843f48819b4e1db3d0744c3162c1b17e",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_minimal.a.syms": "e75012de432dd345c24acb6eecad877944bd1944fec55c9b44218ef610424fd0",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_minimal.so": "aea5914e10a34ec2a32a6d2a74623050a761aca0f2e2268390120fc42668d683",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone.a": "6792e5bc42a6df303960f58c2ad9404504c611f155e2ea80f5cb3c5f45a75ea0",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone.a.syms": "7e1451c7af1386f34d27acf1eea732fdc3c293f9f501c01af29c5a7b964b3d80",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone.so": "17477ea0cc2dd729d7f5b05f858d5114b7480b9b74ab671e3371f50f95bea358",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone_cxx.a": "a2f91eb70d0a1a41d1c2b66b08b7e7080ed68e9b876b9978a4caf82a3bcfbe83",
+        "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone_cxx.a.syms": "e75012de432dd345c24acb6eecad877944bd1944fec55c9b44218ef610424fd0"
+      }
+    },
+    "arm": {
+      "path": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-vectors/source-build-session1/clang",
+      "sha256": "3b11f867131e9a22a3671101ffb09dcecaf2b6831e5fd2c384b95075f29008a3",
+      "recipe_report": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-kernel-declarations/controls-session1/report.json",
+      "recipe_report_sha256": "c602127379dc86584584e04a78622520611d9bed33bc58e3911772c36b6607c6",
+      "target": "arm64-apple-ios16.5, general registers only, no outline atomics"
+    },
+    "ld": {
+      "path": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-ld",
+      "sha256": "f3cab070fef2c3fb39687e31bab86193f34ab95215fc4dbc8783f2a4f741563e"
+    }
+  },
+  "report": "worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/evidence.json",
+  "report_sha256": "c5064a512ba295d1cd447af1e73ac6fc4f9c0ffeaf5b78f09ca0f80fc1f6216c",
+  "owned_source_hashes": {
+    "src/platform/crypto/xts/check.py": "b39a7a300a030b5dd38c6a923ddaf541a4f6c1afabae0255756a6f0b17b51550",
+    "src/platform/crypto/xts/fetch_vectors.py": "1ff78086f17477f3d89d10bcf107297823130b320b030c523c3592d6d7a8d8f8",
+    "src/platform/crypto/xts/guest.c": "ad409fa915a32899ef4dd069d171e9f3416a76ef024bf9110e76fe6b66a9e97a",
+    "src/platform/crypto/xts/memory.c": "21c4aa5045952b84532754e51a4c2bfb7958752c90fb6c11d5a6a4e4189608f8",
+    "src/platform/crypto/xts/s24_xts_profile.h": "b71c3ee5c233998f7cc6e6ea016fa9ab79aeadccd0544e45ed323add2c0a3381",
+    "src/platform/crypto/xts/sanitizer_control.c": "7d19297648bddbe9901edd2c69366e1fc7fd73435814dc221ba3054288346e75",
+    "src/platform/crypto/xts/suite.c": "7109091f7034c2ebb372b1704acee63ff6e9d5cc67a7c770e84365c53e176005",
+    "src/platform/crypto/xts/testdata/vectors.h": "f88b69d9e2b4521d3e4de044cfdc61262bdafd379d497a9e4ad457245fa08ffa",
+    "src/platform/crypto/xts/testdata/vectors.json": "c9e26018344d891e8d12291391bc6a8804249164fb3c62aab95b2cffc65a3e90",
+    "src/platform/crypto/xts/vectors.py": "8ebf492f60d8621f37f94ceef7654d04af26d7a6a46caa6f16238fc307560026",
+    "src/platform/crypto/xts/vendor/LICENSE": "9b405ef4c89342f5eae1dd828882f931747f71001cfba7d114801039b52ad09b",
+    "src/platform/crypto/xts/vendor/NOTICE.md": "d2a06ab7224eae98096100b319705e18d3b7322af4d87b6962b9eb28967d73b9",
+    "src/platform/crypto/xts/vendor/common-freestanding.patch": "9ec28c6c6b02bcaac7db336794fd8389e20648afe5b6686a4c96639a5963ef9f",
+    "src/platform/crypto/xts/vendor/include/mbedtls/aes.h": "ce71f35d91cf1609bddff21d613863c1177bccc97327f7994c39965ebf044b56",
+    "src/platform/crypto/xts/vendor/include/mbedtls/build_info.h": "4bb715278f3199298220b930514ace4f461ed0e9ff27b656d6e2616a1ca3287f",
+    "src/platform/crypto/xts/vendor/include/mbedtls/check_config.h": "66696df9cc3f7cbbe84786046937242b18140963b94c34347404f7827c428efa",
+    "src/platform/crypto/xts/vendor/include/mbedtls/config_adjust_legacy_crypto.h": "f404960e2878c21c22a5d67caba6cd1d29f382b3d913a56ce856931dd15b2886",
+    "src/platform/crypto/xts/vendor/include/mbedtls/config_adjust_ssl.h": "2d37a7552566e9fbd8a5a8b3e6cf6d4e21125a5e48a7e24ca30f3c683d141871",
+    "src/platform/crypto/xts/vendor/include/mbedtls/config_adjust_x509.h": "92909d91c59340f13eb2b447cf44e0075a0ee742a18f22fb7843f6a18c5af5dc",
+    "src/platform/crypto/xts/vendor/include/mbedtls/error.h": "ddcb14c1bf9d6fd2f2f1d2eb62117ce9bf05a0f9430c6931d7555b23f9ed3ddb",
+    "src/platform/crypto/xts/vendor/include/mbedtls/platform.h": "e6e1edc99d90698acf751d5d837c9b59898d7277deb993bcbf7473172b7a3523",
+    "src/platform/crypto/xts/vendor/include/mbedtls/platform_util.h": "1237d849e96bc15b479e8086160e4568c1de86563bb51c60eead45b99ad1b4ac",
+    "src/platform/crypto/xts/vendor/include/mbedtls/private_access.h": "c897213b3e534e8d5db83629177f9c01d90461ed6fea57906836262dba87056d",
+    "src/platform/crypto/xts/vendor/library/aes.c": "f30e6b7139527b41c32f68cc5430ceafa213e7fdf7a39bf4981f6a20cd0e77a1",
+    "src/platform/crypto/xts/vendor/library/alignment.h": "e97b8844abfadc4cc2fecce5b040d58cd53f549c42712205a267e00e372efd3d",
+    "src/platform/crypto/xts/vendor/library/common.h": "3f7b4261ac2b7b429d0e7729aedeb4c26ad6a5e29d8878ad0437e68bbf4b2381",
+    "src/platform/crypto/xts/vendor/library/ctr.h": "63331eb36d8ea69b4b4dcd2ec059582bcabf51a8ea891db26d37ab033967789f",
+    "src/platform/crypto/xts/vendor/provenance.json": "dbc2dfe0d7b559a68cd22e9a4cd896548e6616056fd8304bf7070b9b95359fa7",
+    "src/platform/crypto/xts/xts.c": "dbc022eb3ebbb61530de552adb406999b20d768981758c8a0d69c188906b3a84",
+    "src/platform/crypto/xts/xts.h": "40560b1d889cf5a0593c761e5017c083891659a9fe03285106779a9ac4d3ac05",
+    "fixtures/public/avf-handoff/runtime.h": "0d85cbf3acec7858458bcb086ff23a5ab8a61eefb5ce47d4d75fbf01cf728087"
+  },
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "src/platform/crypto/xts/check.py",
+        "--run",
+        "final-commit2",
+        "--nist-archive",
+        "artifacts/crypto-xts/inputs/XTSTestVectors.zip"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "make",
+        "check"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-029-20261105",
+      "exit_code": 2,
+      "limitation": "Inherited ignored private device inventory absent in isolated WT; coordinator main common check required"
+    }
+  ],
+  "artifacts": [
+    "worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/evidence.json",
+    "worktrees/krn-029-20261105/artifacts/crypto-xts/inputs/XTSTestVectors.zip"
+  ],
+  "sha256": {
+    "worktrees/krn-029-20261105/artifacts/crypto-xts/final-commit2/evidence.json": "c5064a512ba295d1cd447af1e73ac6fc4f9c0ffeaf5b78f09ca0f80fc1f6216c",
+    "worktrees/krn-029-20261105/artifacts/crypto-xts/inputs/XTSTestVectors.zip": "67bb04b018182f65530596786e7783f817d2e56509bf3b1f066609b8e3e29c36"
+  },
+  "command_count": 32,
+  "resource_summary": {
+    "sampled_peak_total_owned_RSS_bytes": 106192896,
+    "cumulative_children_ru_maxrss_KiB": 84952,
+    "compiler_jobs_at_once": 1,
+    "guest_jobs_at_once": 1,
+    "guest_RAM_MiB": 256,
+    "no_live_owned_children_after_each_run": true
+  },
+  "limitations": [
+    "Actual algorithm runs in sanitized host and owned ARM synthetic fixture, no XNU or provider execution",
+    "Genuine selected kernel wrapper ignores xts pointer errors; no caller integration/error-propagation qualification",
+    "No fullcrypto/private Apple ABI/encrypted volume/FIPS/side-channel/native S24 claim",
+    "Maximum2^20-block cumulative test host-only; ARM executes same suite excluding five checks",
+    "Pointer checks prove numeric extent, not accessible mapping/capacity; caller owns lifetime/serialization",
+    "OpenSSL binary pinned independently, distro rebuild from primary source not proven",
+    "Global make check requires coordinator main checkout inventory; isolated WT missing ignored private input"
+  ]
+}
