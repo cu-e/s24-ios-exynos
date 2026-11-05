@@ -1,0 +1,24 @@
+--- a/libkern/crypto/corecrypto_aesxts.c
++++ b/libkern/crypto/corecrypto_aesxts.c
+@@ -88,7 +88,9 @@
+ 		return rc;
+ 	}
+ 
+-	xtsenc->xts(xts->enc, tweak, ptlen / 16, pt, ct);
++	if (xtsenc->xts(xts->enc, tweak, ptlen / 16, pt, ct) == NULL) {
++		return CCERR_PARAMETER;
++	}
+ 	return 0;
+ }
+ 
+@@ -110,7 +112,9 @@
+ 		return rc;
+ 	}
+ 
+-	xtsdec->xts(xts->dec, tweak, ptlen / 16, ct, pt);
++	if (xtsdec->xts(xts->dec, tweak, ptlen / 16, ct, pt) == NULL) {
++		return CCERR_PARAMETER;
++	}
+ 	return 0;
+ }
+ 

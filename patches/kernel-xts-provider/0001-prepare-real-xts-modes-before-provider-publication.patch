@@ -1,0 +1,47 @@
+--- a/osfmk/minicrypto/mc_provider.c
++++ b/osfmk/minicrypto/mc_provider.c
+@@ -12,7 +12,7 @@
+  *
+  *   - AES in ECB, CBC and CTR modes (mc_aes.c; the TCP stack needs it at boot)
+  *
+- * NOT provided (function pointers left NULL; using them will fault): AES-XTS,
++ * NOT provided (function pointers left NULL; using them will fault):
+  * AES-GCM, DES/3DES, ChaCha20-Poly1305, RSA. Encrypted volumes, IPsec and
+  * signature checks need those; the boot path to a ramdisk shell does not.
+  */
+@@ -34,6 +34,7 @@
+ #include <string.h>
+ 
+ #include "minicrypto.h"
++#include "kernel_provider.h"
+ 
+ #ifndef MIN
+ #define MIN(a, b) ((a) < (b) ? (a) : (b))
+@@ -419,6 +420,8 @@
+ 	.ccaes_cbc_encrypt = &mc_aes_cbc_encrypt,
+ 	.ccaes_cbc_decrypt = &mc_aes_cbc_decrypt,
+ 	.ccaes_ctr_crypt = &mc_aes_ctr_crypt,
++	.ccaes_xts_encrypt = &s24_kernel_xts_encrypt,
++	.ccaes_xts_decrypt = &s24_kernel_xts_decrypt,
+ 
+ 	.ccrng_fn = mc_ccrng,
+ 
+@@ -458,12 +461,17 @@
+ 		panic("minicrypto: %s self-test failed", failed);
+ 	}
+ 
++	if (s24_kernel_xts_prepare() != 0 ||
++	    s24_kernel_xts_encrypt_mode() != mc_funcs.ccaes_xts_encrypt ||
++	    s24_kernel_xts_decrypt_mode() != mc_funcs.ccaes_xts_decrypt) {
++		panic("minicrypto: XTS preparation failed");
++	}
+ 	mc_funcs.ccsha256_di = ccsha256_di();
+ 	if (register_crypto_functions(&mc_funcs) != 0) {
+ 		return; /* a real provider got there first */
+ 	}
+ 	/* The PRNG context is ours; the kernel only hands the pointer back to us. */
+ 	register_and_init_prng((struct cckprng_ctx *)(void *)&mc_prng, &mc_prng_funcs);
+-	printf("minicrypto: registered (md5, sha1, sha2, hmac, aes-ecb/cbc/ctr, hmac-drbg prng); no xts/gcm, no RSA\n");
++	printf("minicrypto: registered (md5, sha1, sha2, hmac, aes-ecb/cbc/ctr/xts, hmac-drbg prng); no gcm, no RSA\n");
+ }
+ STARTUP(EARLY_BOOT, STARTUP_RANK_FIRST, minicrypto_init);
