@@ -257,6 +257,7 @@ def macho(path, entry):
                 pc = struct.unpack('<Q', read(offset + 16 + 32 * 8, 8))[0]
             offset += size
         require(offset == 32 + cmd_bytes and segments and pc is not None, 'Missing Mach-O segments/thread entry')
+        require(pc % 4 == 0, 'ARM64 thread entry must be four-byte aligned')
         require(any(s['va'] <= pc < s['va'] + s['filesize'] and s['initprot'] & 4 for s in segments), 'Entry is not in file-backed executable bytes')
         metadata = [s for s in sections if s['name'] in ('__kalloc_type', '__kalloc_var')]
         require(any(s['name'] == '__kalloc_type' and s['size'] for s in metadata), 'Required kalloc type section absent')
