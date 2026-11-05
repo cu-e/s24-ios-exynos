@@ -39,9 +39,20 @@ source-admission result. A subsequent bounded inventory read succeeded.
 
 No compiler, linker, QEMU, physical phone operation, old E1S object reuse,
 shared source write, artificial include directory or MAIN publication occurred.
-The next step is the registered finite source-only positive inspection and
-changed-manifest/selector/existing-output rejection controls, preserving each
-actual exit and output hash. Then provide exact source-stage commits/evidence
-to root and the kernel integrator. Actual compilation additionally waits for
+The final source-only attempt3 passed: all104 input bindings, changed-manifest,
+changed-selector and existing-output exact-reason rejection controls. Positive
+admission exited0 in2.544s with current-image VmHWM71032KiB. All three memory
+samples exceeded4GiB. Source report SHA256 is
+`7804e01a0d8e5cb55c245340b7cda7bac049f717acc6f460a9e03e898892284a`.
+The report records three genuine missing search roots,1143 lexical include
+observations and597 shadowed occurrences (all identical bytes). The21 unresolved
+lexical observations are in conditionals/comments; no active missing dependency
+is established. `source-observations.json` records context and limitations.
+No profile weakening, search-root creation or argument removal occurred.
+
+`evidence.json` binds tested implementation `f4f9507`, source/tool/outputs, exact
+commands/exits/time, resource samples and both retained failures. The remaining
+step is independent review and root/kernel-integrator source-stage acceptance.
+Actual compilation additionally waits for
 VM008 and independently accepted VM009 plus explicit root resource admission
 and heavy lease. Keep VM-013 in progress until acceptance is real.
