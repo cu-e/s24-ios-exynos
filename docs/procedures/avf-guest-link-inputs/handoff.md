@@ -80,3 +80,12 @@ ADB, firmware, native device, main publication or common checks were performed.
 controller-commands.json retains the exact controller interpreter/-s/environment
 wrapper. The immutable phase reports store Python sys.argv. Nested producer
 commands and their output hashes are recorded in each corresponding phase report.
+
+The resumed final-plan phase now verifies194 actual objects from the receipted
+VM018/015/013 raw capsules and retains886 missing accepted outputs. See
+final-link-plan.md, final-plan-evidence.json and the final-plan.json fixture for
+exact1080 producer mappings, unknown future owner roots, the actual287-member
+VM023 runtime/resource route and the finite genuine Mach-O/XNUP/shim command
+chain. No production command was executed. The helper extension is frozen in
+d66758627d54144a414ae9a2366538ce7482dbe5; final machine plan SHA256 is
+a14c985397c125f99ae94007454021bd6b17a5ad10166c1441fb6b9eead4567c.
