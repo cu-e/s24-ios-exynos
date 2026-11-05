@@ -76,3 +76,7 @@ is e8846761b8150f25a49024b174f5484eb3d86369 plus f10dda9 in its own worktree;
 its actual archive remains unqualified. No E1S object/archive was consumed, no
 compiler/preprocessor/archive/linker/section processor or QEMU ran, and no phone,
 ADB, firmware, native device, main publication or common checks were performed.
+
+controller-commands.json retains the exact controller interpreter/-s/environment
+wrapper. The immutable phase reports store Python sys.argv. Nested producer
+commands and their output hashes are recorded in each corresponding phase report.
