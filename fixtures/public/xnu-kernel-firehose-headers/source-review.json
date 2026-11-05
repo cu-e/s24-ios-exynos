@@ -1,0 +1,27 @@
+{
+  "kind": "source-review",
+  "origin": "primary-upstream-and-limited-search",
+  "checked_on": "2026-11-05",
+  "source_revision": "a641558f447659d90ad002ef0ee6f0212273fbfc",
+  "primary_sources": [
+    "https://github.com/apple-oss-distributions/libdispatch/blob/a641558f447659d90ad002ef0ee6f0212273fbfc/xcodeconfig/libfirehose_kernel.xcconfig",
+    "https://github.com/apple-oss-distributions/libdispatch/blob/a641558f447659d90ad002ef0ee6f0212273fbfc/libdispatch.xcodeproj/project.pbxproj",
+    "https://github.com/apple-oss-distributions/libdispatch/blob/a641558f447659d90ad002ef0ee6f0212273fbfc/os/firehose_buffer_private.h"
+  ],
+  "findings": [
+    "The kernel target exports a single private os/firehose_buffer_private.h through genuine unifdef flags with KERNEL=1 and OS_FIREHOSE_SPI=1",
+    "The userspace libfirehose target instead undefines KERNEL; it is not the selected export profile",
+    "The old E1SDEPS-003 archive uses a minimal compatibility Clang19 profile with XNU_KERNEL_PRIVATE=0; current full source compiler/profile qualification is separate"
+  ],
+  "reddit": {
+    "tool": "reddit MCP search_reddit",
+    "query": "firehose",
+    "subreddit": "hackios",
+    "limit": 10,
+    "result_count": 0,
+    "limitation": "A bounded query returned no results; this does not establish complete Reddit coverage or absence of implementations"
+  },
+  "upstream_installers_executed": false,
+  "device_executed": false,
+  "private_apple_abi_oracle_available": false
+}
