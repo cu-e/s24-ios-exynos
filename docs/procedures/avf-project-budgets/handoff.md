@@ -5,9 +5,11 @@ independent review, accepted common checks, and original-owner closure.
 
 Source base is accepted MAIN `12a43eef4a00da24bed6604655854ef533d2bbb2`.
 Ordered implementation commits are `308d868bc6e9dc1cfa4749f69590403503b5e0b9`
-and `b712f8e` (one-line disappearing-process sampling correction).
+`b712f8e` (disappearing-process sampling correction), and `39f68b5`
+(retain child-session identity until verified release). Documentation commit is
+`42d0ead`.
 Frozen helper SHA256 is
-`48ff45164566810a69cb2bfa07e0684a7adce2e2a4d0262071df2e437f1fbd16`.
+`42f84aff5febfe4800cb0f84f4052bc98ac539766f8d4ecd7739a63d2fb7dd0d`.
 Only the reserved engine, fixture directory and procedure directory changed.
 The primary checkout's physical executor and all historical experiments remained
 unchanged by this owner. The original user attachment was read in full.

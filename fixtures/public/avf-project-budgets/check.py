@@ -147,6 +147,14 @@ def main():
         commands.append(result)
         check('actual sampled RSS stop defers and cleans only owned session', result['outcome'] == 'resource-deferred' and result['stop_reason'] == 'rss-budget' and not result['after']['owned_processes'])
         budget.release()
+        budget = fresh(); budget.reserve()
+        survivor = subprocess.Popen(['sleep', '10'], cwd=fake, start_new_session=True)
+        try:
+            budget.sample(survivor.pid); budget.sample()
+            rejects('release retains and refuses a live last child session', lambda: budget.release())
+        finally:
+            supervise.terminate(survivor)
+        budget.release()
         # Race two independent real controllers for one root-issued slot.
         fresh()
         worker_code = "import importlib.util,json,pathlib,sys,time,types;s=importlib.util.spec_from_file_location('e',sys.argv[1]);e=importlib.util.module_from_spec(s);s.loader.exec_module(e);a=json.loads(sys.argv[2]);a['main']=pathlib.Path(a['main']);a['out']=pathlib.Path(a['out']);b=e.project_approval(types.SimpleNamespace(**a),json.loads(sys.argv[3]));\ntry:b.reserve()\nexcept ValueError:sys.exit(7)\ntime.sleep(.2);b.release()"
