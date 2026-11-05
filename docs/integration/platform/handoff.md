@@ -9,6 +9,12 @@ original-owner, registry, generated-view or shared input edits.
 
 ## Current handoff: 2026-11-05 22:30 UTC
 
+Routing correction after that snapshot: actual VM-036 owner is dz/misc_worker,
+not the initially intended dy. The exact new physical process boundary and real
+Firehose missing-header lookup facts are in
+`guest-component-executor-20261106/current-routing-and-header.md`. Original
+source-plan records remain unchanged; metadata refreshes use new paths.
+
 KRN-036/REV-021 published at exact `36c7dce7c18a2cefbf5ae41032915b2a8a5a8006`.
 The continuously locked whole common check passed all 170 tests, exit 0,
 19.398 seconds, peak owned RSS 383209472 bytes, with no surviving owned processes.
