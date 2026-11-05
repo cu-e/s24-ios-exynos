@@ -1,11 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T03:56:51+00:00",
-  "ledger_updated_at": "2026-11-05T03:56:51+00:00",
-  "registry_sha256": "70a83dee9776d09103340a65871950393ce2a18b4c9af98cafb4d4c260b1e37b",
+  "generated_at": "2026-11-05T04:18:48+00:00",
+  "ledger_updated_at": "2026-11-05T04:18:48+00:00",
+  "registry_sha256": "f632396e997afaa783426d1fa36532a896022433594e8fddd56bdeb95aa97fcb",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
+      "KRN-004",
       "VM-002",
       "USB-001",
       "SEN-001",
@@ -70,6 +71,7 @@
     "done": [
       "RES-008",
       "KRN-002",
+      "RES-009",
       "PLN-001",
       "SRC-001",
       "INT-001",
@@ -265,7 +267,101 @@
         "Actual pthread compilation lacks genuine TargetConditionals.h; complete SDK/export ABI and matching DriverKit generated-header inputs have no explicitly supplied/provenanced local paths. Firehose and wrapper component passes do not satisfy full dependency acceptance."
       ],
       "card_path": "planning/tasks/KRN-003.md",
-      "report_health": "recent"
+      "report_health": "stale"
+    },
+    {
+      "id": "RES-009",
+      "title": "Qualify open-source header and IIG alternatives for E1S kernel inputs",
+      "status": "done",
+      "owner": "codex-open-inputs-20261105-n",
+      "priority": 95,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-008",
+        "KRN-002"
+      ],
+      "paths": [
+        "tools/research/open-kernel-inputs",
+        "docs/procedures/open-kernel-inputs",
+        "fixtures/public/open-kernel-inputs",
+        "patches/open-kernel-inputs",
+        "research/sources.json",
+        "docs/implementation.md"
+      ],
+      "sources": [
+        "apple-xnu",
+        "hakios-e1s-tools",
+        "xnu-availability",
+        "puredarwin-build-inputs",
+        "puredarwin-iig",
+        "apple-carbon-headers",
+        "xnu-kernel-pthread"
+      ],
+      "acceptance": [
+        "Pin primary open-source header/SDK/IIG implementations and review actual per-file licenses and version/architecture assumptions before reuse",
+        "Test relevant real compiler/generator behavior on actual selected E1S source/IDL or independently specified fixtures; preserve failures and distinguish old/new profiles",
+        "Publish exact reusable artifacts or precise remaining gaps without inventing SDK headers, treating Linux/platform stubs as iOS, replacing the approved runtime or changing reserved KRN-001/KRN-003 implementation",
+        "No phone, global installer, Apple SDK/binary/archive acquisition or native capability claim"
+      ],
+      "steps": [
+        "Inspect current PureDarwin open-source SDK/IIG provenance and Apple public header candidates",
+        "Build/measure reviewed applicable components in private artifacts with explicit compiler and finite budgets",
+        "Record real compatibility limits and update the implementation input strategy without bypassing selected-kernel acceptance"
+      ],
+      "started_at": "2026-11-05T04:01:23+00:00",
+      "last_heartbeat": "2026-11-05T04:18:47+00:00",
+      "updated_at": "2026-11-05T04:18:48+00:00",
+      "branch": "main",
+      "progress_note": "Research acceptance passed: genuine E1S pthread archive/three exact arm64 archive members/four defined exports,19 real MIG headers and six target controls;132 default tests and139 prefix hashes verified. IIG non-Apple IDs/conditional flag failure remain unqualified. All failed evidence and original owners preserved.",
+      "next_step": "Claim KRN-004 for exact selected8796 DriverKit header/RPC ABI qualification using these source/component artifacts; full SDK/export/kernel/native acceptance remains separate",
+      "handoff": "docs/procedures/open-kernel-inputs/handoff.md",
+      "evidence": "state/evidence/RES-009.json",
+      "evidence_sha256": "4fc283bb5ad7e4aa7dc094730d9ca87978df26c5afdc97d1ca4753d39c7abba6",
+      "finished_at": "2026-11-05T04:18:48+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/RES-009.md"
+    },
+    {
+      "id": "KRN-004",
+      "title": "Recover and qualify selected XNU8796 DriverKit header and RPC ABI inputs",
+      "status": "pending",
+      "owner": null,
+      "priority": 95,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-009",
+        "KRN-002"
+      ],
+      "paths": [
+        "tools/build/xnu_iig_abi.py",
+        "docs/procedures/xnu-iig-abi.md",
+        "fixtures/public/xnu-iig-abi",
+        "patches/iig-abi",
+        "research/sources.json"
+      ],
+      "sources": [
+        "apple-xnu",
+        "hakios-e1s-tools",
+        "puredarwin-iig",
+        "puredarwin-build-inputs"
+      ],
+      "acceptance": [
+        "Locate and pin applicable public-source or explicitly supplied selected8796 generated-header/RPC ABI oracles, recording exact origin/version/license/hashes; missing inputs cannot become a compatibility pass",
+        "Test actual header/implementation generation, conditional compiler flags, message IDs, structures and dispatch/marshalling against independent selected-version evidence before positive use; self-consistent FNV protocols do not prove Apple compatibility",
+        "Publish actual ARM64 compile/ABI evidence for any qualified inputs or precise unresolved requirements, keeping rejected and unsupported paths explicit",
+        "No Apple SDK/binary/archive acquisition, successful unsupported RPC stub, native claim or mutation of original KRN-001/KRN-003 reserved implementation/owners"
+      ],
+      "steps": [
+        "Use RES-009 component artifacts and exact IIG failures as starting evidence",
+        "Trace selected original interfaces and available generated-source references before selecting a real generator/adaptation strategy",
+        "Build/verify applicable candidate interfaces in new private artifacts and hand off exact reusable inputs or missing selected oracle"
+      ],
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/KRN-004.md"
     },
     {
       "id": "PLN-001",
@@ -718,7 +814,7 @@
         "No explicitly supplied selected iOS16.5 image/build/product manifest or matching CommCenter/baseband/plugin/cache/entitlement inputs; public/later-OS documentation and offline parser tests cannot qualify actual frontend/private ABI or select an adaptation profile."
       ],
       "card_path": "planning/tasks/ESIM-004.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "CELL-009",
@@ -3496,7 +3592,7 @@
         "id": "KRN-003",
         "status": "blocked",
         "last_heartbeat": "2026-11-05T03:35:41+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "Built genuine E1S and BCM firehose archives and measured nine ABI fields; explicit C/C++ wrapper fixtures pass. Pthread fails at genuine TargetConditionals.h; complete SDK/DriverKit/export ABI remains unavailable. Retained all failed outcomes. Released finished shared source catalog reservation; retained narrow dependency implementation paths.",
         "next_step": "Supply provenanced local SDK and matching DriverKit headers, then compile and inspect all actual E1S dependency archives; independent host tasks may proceed meanwhile",
         "handoff": "research/notes/KRN-003-dependencies.md",
@@ -3557,7 +3653,7 @@
         "id": "ESIM-004",
         "status": "blocked",
         "last_heartbeat": "2026-11-05T03:44:36+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "New pinned primary ARI method and real seven-group donor regression pass retained alongside both original failures. Actual selected-image components are unsupplied, so frontend/ABI selection remains unresolved and no native capability is advanced. Released finished shared catalog/plan reservations; retained narrow checker/patch/report paths.",
         "next_step": "Supply explicit selected16.5 image/build/product provenance and matching CommCenter/baseband/cache/entitlement inputs; inspect exact ABI before adapter/profile choice. Continue independent ESIM-001 host preparation meanwhile.",
         "handoff": "docs/procedures/esim-profile/handoff.md",
@@ -3567,195 +3663,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-05T03:42:26+00:00",
-      "action": "task.update:ESIM-004",
-      "owner": "codex-esim-frontend-20261105-l",
-      "tasks": [
-        {
-          "id": "ESIM-004",
-          "status": "in_progress",
-          "owner": "codex-esim-frontend-20261105-l",
-          "priority": 80,
-          "progress_note": "Pinned Intel ARI extraction reference; reproduced and corrected real offline donor parser defects in isolated copies. Seven groups pass after two patches; selected iOS16.5 image/frontend/ABI still unqualified because no actual local components were supplied.",
-          "next_step": "Inventory explicitly supplied selected iOS image/build/identity, matching CommCenter/baseband libraries and entitlements before choosing Intel ARI or Qualcomm QMI frontend; preserve Samsung command-schema gate",
-          "last_heartbeat": "2026-11-05T03:42:26+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T03:44:35+00:00",
-      "action": "task.update:ESIM-004",
-      "owner": "codex-esim-frontend-20261105-l",
-      "tasks": [
-        {
-          "id": "ESIM-004",
-          "status": "in_progress",
-          "owner": "codex-esim-frontend-20261105-l",
-          "priority": 80,
-          "progress_note": "New pinned primary ARI method and real seven-group donor regression pass retained alongside both original failures. Actual selected-image components are unsupplied, so frontend/ABI selection remains unresolved and no native capability is advanced.",
-          "next_step": "Supply explicit selected16.5 image/build/product provenance and matching CommCenter/baseband/cache/entitlement inputs; inspect exact ABI before adapter/profile choice. Continue independent ESIM-001 host preparation meanwhile.",
-          "last_heartbeat": "2026-11-05T03:44:35+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/esim-profile/handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T03:44:35+00:00",
-      "action": "task.refine:ESIM-004:release-finished-source-catalog-and-plan",
-      "owner": "codex-esim-frontend-20261105-l",
-      "tasks": [
-        {
-          "id": "ESIM-004",
-          "status": "in_progress",
-          "owner": "codex-esim-frontend-20261105-l",
-          "priority": 80,
-          "progress_note": "New pinned primary ARI method and real seven-group donor regression pass retained alongside both original failures. Actual selected-image components are unsupplied, so frontend/ABI selection remains unresolved and no native capability is advanced. Released finished shared catalog/plan reservations; retained narrow checker/patch/report paths.",
-          "next_step": "Supply explicit selected16.5 image/build/product provenance and matching CommCenter/baseband/cache/entitlement inputs; inspect exact ABI before adapter/profile choice. Continue independent ESIM-001 host preparation meanwhile.",
-          "last_heartbeat": "2026-11-05T03:44:35+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/esim-profile/handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T03:44:36+00:00",
-      "action": "task.block:ESIM-004",
-      "owner": "codex-esim-frontend-20261105-l",
-      "tasks": [
-        {
-          "id": "ESIM-004",
-          "status": "blocked",
-          "owner": "codex-esim-frontend-20261105-l",
-          "priority": 80,
-          "progress_note": "New pinned primary ARI method and real seven-group donor regression pass retained alongside both original failures. Actual selected-image components are unsupplied, so frontend/ABI selection remains unresolved and no native capability is advanced. Released finished shared catalog/plan reservations; retained narrow checker/patch/report paths.",
-          "next_step": "Supply explicit selected16.5 image/build/product provenance and matching CommCenter/baseband/cache/entitlement inputs; inspect exact ABI before adapter/profile choice. Continue independent ESIM-001 host preparation meanwhile.",
-          "blocked_reason": "No explicitly supplied selected iOS16.5 image/build/product manifest or matching CommCenter/baseband/plugin/cache/entitlement inputs; public/later-OS documentation and offline parser tests cannot qualify actual frontend/private ABI or select an adaptation profile.",
-          "last_heartbeat": "2026-11-05T03:44:36+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/esim-profile/handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T03:48:28+00:00",
-      "action": "task.add:CELL-010",
-      "owner": "codex-ril-inputs-20261105-m",
-      "tasks": [
-        {
-          "id": "CELL-010",
-          "status": "pending",
-          "owner": null,
-          "priority": 85
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T03:48:29+00:00",
-      "action": "task.claim:CELL-010",
-      "owner": "codex-ril-inputs-20261105-m",
-      "tasks": [
-        {
-          "id": "CELL-010",
-          "status": "in_progress",
-          "owner": "codex-ril-inputs-20261105-m",
-          "priority": 85,
-          "last_heartbeat": "2026-11-05T03:48:29+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T03:50:59+00:00",
-      "action": "experiment.plan:RILINPUT-001",
-      "owner": "codex-ril-inputs-20261105-m"
-    },
-    {
-      "at": "2026-11-05T03:51:41+00:00",
-      "action": "experiment.plan:RILINPUT-002",
-      "owner": "codex-ril-inputs-20261105-m"
-    },
-    {
-      "at": "2026-11-05T03:52:50+00:00",
-      "action": "experiment.record:RILINPUT-001",
-      "owner": "codex-ril-inputs-20261105-m"
-    },
-    {
-      "at": "2026-11-05T03:52:51+00:00",
-      "action": "experiment.record:RILINPUT-002",
-      "owner": "codex-ril-inputs-20261105-m"
-    },
-    {
-      "at": "2026-11-05T03:52:51+00:00",
-      "action": "experiment.plan:RILINPUT-003",
-      "owner": "codex-ril-inputs-20261105-m"
-    },
-    {
-      "at": "2026-11-05T03:54:40+00:00",
-      "action": "experiment.record:RILINPUT-003",
-      "owner": "codex-ril-inputs-20261105-m"
-    },
-    {
-      "at": "2026-11-05T03:54:41+00:00",
-      "action": "task.refine:CELL-010:actual-sync-byte-verification-without-root",
-      "owner": "codex-ril-inputs-20261105-m",
-      "tasks": [
-        {
-          "id": "CELL-010",
-          "status": "in_progress",
-          "owner": "codex-ril-inputs-20261105-m",
-          "priority": 85,
-          "progress_note": "Actual target/BYH3/uid2000 reverified. Shell checksum denied for two regular vendor libraries; no root requested. Next test ordinary existing-permission ADB sync reads twice; preserve unavailable remote checksum and require actual complete byte agreement.",
-          "last_heartbeat": "2026-11-05T03:48:29+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T03:54:41+00:00",
-      "action": "experiment.plan:RILINPUT-004",
-      "owner": "codex-ril-inputs-20261105-m"
-    },
-    {
-      "at": "2026-11-05T03:56:48+00:00",
-      "action": "experiment.record:RILINPUT-004",
-      "owner": "codex-ril-inputs-20261105-m"
-    },
-    {
-      "at": "2026-11-05T03:56:48+00:00",
-      "action": "task.claim:CELL-009",
-      "owner": "codex-ril-inputs-20261105-m",
-      "tasks": [
-        {
-          "id": "CELL-009",
-          "status": "in_progress",
-          "owner": "codex-ril-inputs-20261105-m",
-          "priority": 80,
-          "last_heartbeat": "2026-11-05T03:56:48+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T03:56:49+00:00",
-      "action": "task.update:CELL-010",
-      "owner": "codex-ril-inputs-20261105-m",
-      "tasks": [
-        {
-          "id": "CELL-010",
-          "status": "in_progress",
-          "owner": "codex-ril-inputs-20261105-m",
-          "priority": 85,
-          "progress_note": "Eight host guard groups pass. Exact live BYH3/uid2000 context reverified; two regular vendor RIL files exist, but ordinary shell checksum and normal ADB sync pulls are denied. No binary bytes acquired or privileges changed.",
-          "next_step": "Use an explicitly supplied matching local RIL/vendor image for offline analysis, or a separately user-authorized future acquisition task; do not retry current access boundary",
-          "last_heartbeat": "2026-11-05T03:56:49+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/ril-capture/handoff.md"
-        }
-      ]
-    },
     {
       "at": "2026-11-05T03:56:50+00:00",
       "action": "task.block:CELL-010",
@@ -3811,14 +3718,196 @@
           "handoff": "docs/procedures/ril/handoff.md"
         }
       ]
+    },
+    {
+      "at": "2026-11-05T04:01:22+00:00",
+      "action": "task.add:RES-009",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:01:23+00:00",
+      "action": "task.claim:RES-009",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "in_progress",
+          "owner": "codex-open-inputs-20261105-n",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T04:01:23+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:01:24+00:00",
+      "action": "task.refine:RES-009:pin-primary-open-input-sources",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "in_progress",
+          "owner": "codex-open-inputs-20261105-n",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T04:01:23+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:06:22+00:00",
+      "action": "experiment.plan:OPENINPUT-001",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:07:57+00:00",
+      "action": "experiment.record:OPENINPUT-001",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:07:58+00:00",
+      "action": "experiment.plan:OPENINPUT-002",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:10:58+00:00",
+      "action": "experiment.record:OPENINPUT-002",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:10:58+00:00",
+      "action": "task.refine:RES-009:real-pthread-and-MIG-source-inputs",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "in_progress",
+          "owner": "codex-open-inputs-20261105-n",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T04:01:23+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:10:59+00:00",
+      "action": "experiment.plan:OPENINPUT-003",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:12:37+00:00",
+      "action": "experiment.record:OPENINPUT-003",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:12:37+00:00",
+      "action": "experiment.plan:OPENINPUT-004",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:14:18+00:00",
+      "action": "experiment.record:OPENINPUT-004",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:14:18+00:00",
+      "action": "task.refine:RES-009:publish-open-component-build-route",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "in_progress",
+          "owner": "codex-open-inputs-20261105-n",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T04:01:23+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:15:56+00:00",
+      "action": "task.add:KRN-004",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "KRN-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:15:56+00:00",
+      "action": "task.update:RES-009",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "in_progress",
+          "owner": "codex-open-inputs-20261105-n",
+          "priority": 95,
+          "progress_note": "Built genuine E1S pthread archive with three arm64 objects/four exact defined exports,19 real MIG client headers and six target-profile controls from full licensed source inputs. Preserved three failures. Actual open IIG remains non-Apple ABI and ignores conditional flags; new KRN-004 gates selected interface qualification.",
+          "next_step": "Validate the complete research handoff and132 default checks, then complete RES-009 research only; continue KRN-004 exact DriverKit header/RPC qualification without advancing original full-kernel/native gates",
+          "last_heartbeat": "2026-11-05T04:15:56+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/open-kernel-inputs/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:18:47+00:00",
+      "action": "task.update:RES-009",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "in_progress",
+          "owner": "codex-open-inputs-20261105-n",
+          "priority": 95,
+          "progress_note": "Research acceptance passed: genuine E1S pthread archive/three exact arm64 archive members/four defined exports,19 real MIG headers and six target controls;132 default tests and139 prefix hashes verified. IIG non-Apple IDs/conditional flag failure remain unqualified. All failed evidence and original owners preserved.",
+          "next_step": "Claim KRN-004 for exact selected8796 DriverKit header/RPC ABI qualification using these source/component artifacts; full SDK/export/kernel/native acceptance remains separate",
+          "last_heartbeat": "2026-11-05T04:18:47+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/open-kernel-inputs/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:18:48+00:00",
+      "action": "task.done:RES-009",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "done",
+          "owner": "codex-open-inputs-20261105-n",
+          "priority": 95,
+          "progress_note": "Research acceptance passed: genuine E1S pthread archive/three exact arm64 archive members/four defined exports,19 real MIG headers and six target controls;132 default tests and139 prefix hashes verified. IIG non-Apple IDs/conditional flag failure remain unqualified. All failed evidence and original owners preserved.",
+          "next_step": "Claim KRN-004 for exact selected8796 DriverKit header/RPC ABI qualification using these source/component artifacts; full SDK/export/kernel/native acceptance remains separate",
+          "last_heartbeat": "2026-11-05T04:18:47+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/open-kernel-inputs/handoff.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "9cb549f11696bd14af86865d35d36781dc7044401c7216a1473dd00fc44a905f",
-    "BOARD.md": "e5ff4ce7456b2f33119e34e6cc5f8006534b036a219e158019fd171217fe3bb0",
+    "STATUS.md": "4b1637e59a99b6be9066d68547a351e352f542ee362ff00546bba1b411e89734",
+    "BOARD.md": "076863b2e0dd33785eb8430322c53b181d90bae5c5d62defbf2581a8e2c68848",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
-    "planning/tasks/KRN-003.md": "395c361595c2e4804794416f910961e636c7aae780901fde7a93c58bd0f48224",
+    "planning/tasks/KRN-003.md": "7d37e5fece06694371991cb3127ab5121d975ec8a99179d63ec1f71a90c303ff",
+    "planning/tasks/RES-009.md": "29506be617bfdcf7676f1f8e24f86b956ac88ba16ee9ae53c3c3e8570711bab8",
+    "planning/tasks/KRN-004.md": "c5b7a809cbe1b6ccf6bcf21fd550d7c7d983c13c9f368533af5533f77d1c88e9",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
     "planning/tasks/INT-001.md": "9d68fa75fae4c21f31f5ea4734c3f592ed0b41c6ed897d7b045a892c63549760",
@@ -3827,7 +3916,7 @@
     "planning/tasks/LAB-001.md": "3bf5f0b07bfe3944559f6520646498c1e907611d0f34201115ad0e39e3240e8c",
     "planning/tasks/TST-002.md": "d78a91ef43894923e022402e9c91dd075e4a7bc4697e33fb7b99263486c544aa",
     "planning/tasks/RES-003.md": "0818cb4fa8ca49d7acad01a7d80cc67041f504e381b68cfc74e8cfa6d369ce50",
-    "planning/tasks/ESIM-004.md": "d4e167bcd15f65786d3d6be7664d4b1282e4cff54a520ebe1e4e9cdd4a4847f2",
+    "planning/tasks/ESIM-004.md": "5e29d4b6130fec198ec2bea4c33a4848b706db553f56cf57ce00bc3284e7e147",
     "planning/tasks/CELL-009.md": "739dbc970796ca6d8217b1a2af7e2e77de53e044762a60b3da279a07e4bc3121",
     "planning/tasks/RES-004.md": "08bac80e27799418f00000fe2e775a3d800660263c225e58147765b25d905e9a",
     "planning/tasks/GPU-011.md": "80d1aa7ea8b4a3374af3e3373d65fdb0f18f581cfd9297d29b4e707dfb732580",

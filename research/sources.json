@@ -808,7 +808,8 @@
         "kern/kern_support.c",
         "kern/kern_synch.c",
         "kern/kern_internal.h",
-        "include/pthread/pthread_impl.h"
+        "include/pthread/pthread_impl.h",
+        "kern/kern_trace.h"
       ],
       "checkout_policy": "Named pinned open-source text first, then source-only expansion for isolated dependency compilation; no upstream setup/SDK installer"
     },
@@ -836,6 +837,63 @@
         "tools/libari/libari/__init__.py"
       ],
       "checkout_policy": "Named pinned source/document text only; no binary samples/capture corpus, submodules, iPhone hooks, injection/replay or upstream installers"
+    },
+    {
+      "id": "puredarwin-build-inputs",
+      "url": "https://github.com/PureDarwin/PureDarwin",
+      "revision": "6982ddbfca1047c86680ec7c66da152789746efd",
+      "relevance": "Current source-assembled SDK and header-origin method; XNU12377/macOS/ARM targets are not selected E1S8796/iOS16.5 compatibility",
+      "license_notes": "Full TargetConditionals.h retains Apple APSL2.0 notice (2000-2014); PureDarwin project BSD2-Clause and individual Apple/component notices remain separate. No general grant for SDK/Apple binary inputs.",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "README.md",
+        "PUREDARWIN_LICENSE.txt",
+        "APPLE_LICENSE.txt",
+        "APPLE_DRIVER_LICENSE.txt",
+        "flake.lock",
+        "nix/pkgs/toolchain/apple-sdk-pinned.nix",
+        "src/Libraries/AvailabilityVersions/include/TargetConditionals.h",
+        "src/Libraries/AvailabilityVersions/README.md",
+        "cmake/iig.cmake",
+        "tools/iig-selfhost/CMakeLists.txt"
+      ],
+      "checkout_policy": "Only named pinned source/build/license text; no SDK/firmware/binary samples, submodules, Nix activation/global store setup or upstream execution"
+    },
+    {
+      "id": "puredarwin-iig",
+      "url": "https://github.com/PureDarwin/iig-tools",
+      "revision": "28010c688caab7eb5400b9c98faa5b1e538e0108",
+      "relevance": "Pinned real open-source IIG compiler candidate from PureDarwin flake lock; actual generation/ABI requires qualification",
+      "license_notes": "BSD-3-Clause in LICENSE, copyright2026 Vali0004; preserve source/binary notices. Kernel-side subset with explicitly non-Apple FNV RPC IDs, not an Apple ABI license or compatibility claim.",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "LICENSE",
+        "CMakeLists.txt",
+        "default.nix",
+        "flake.nix",
+        "include/ast.h",
+        "src/main.cpp",
+        "src/parse.cpp",
+        "src/codegen.cpp"
+      ],
+      "checkout_policy": "Only named pinned source/build/license text; no SDK/firmware/binary samples, submodules, Nix activation/global store setup or upstream execution"
+    },
+    {
+      "id": "apple-carbon-headers",
+      "url": "https://github.com/apple-oss-distributions/CarbonHeaders",
+      "revision": "214a9ae7ab3c0c78ddb50328ca226e6313c4c782",
+      "relevance": "Official older public target-condition header candidate; age/ARM64/iOS profile must be measured before use",
+      "license_notes": "TargetConditionals.h carries Apple APSL2.0 notice, copyright2000-2008. It is a configurable source template, not a supplied SDK; retain notices with generated/private copies.",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "TargetConditionals.h",
+        "Makefile",
+        "notes.txt"
+      ],
+      "checkout_policy": "Only named pinned source/build/license text; no SDK/firmware/binary samples, submodules, Nix activation/global store setup or upstream execution"
     }
   ]
 }

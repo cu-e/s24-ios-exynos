@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T03:56:51+00:00",
+  "updated_at": "2026-11-05T04:18:48+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -3036,6 +3036,94 @@
       "next_step": "Use an explicitly supplied matching local RIL/vendor image for offline analysis, or a separately user-authorized future acquisition task; do not retry current access boundary",
       "handoff": "docs/procedures/ril-capture/handoff.md",
       "blocked_reason": "Existing exact-BYH3 vendor RIL files deny current uid2000 shell checksums and ordinary authorized ADB sync pulls; actual file bytes/hash cannot be acquired within approved current read-only access. No supplied local matching copy exists in this task."
+    },
+    {
+      "id": "RES-009",
+      "title": "Qualify open-source header and IIG alternatives for E1S kernel inputs",
+      "status": "done",
+      "owner": "codex-open-inputs-20261105-n",
+      "priority": 95,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-008",
+        "KRN-002"
+      ],
+      "paths": [
+        "tools/research/open-kernel-inputs",
+        "docs/procedures/open-kernel-inputs",
+        "fixtures/public/open-kernel-inputs",
+        "patches/open-kernel-inputs",
+        "research/sources.json",
+        "docs/implementation.md"
+      ],
+      "sources": [
+        "apple-xnu",
+        "hakios-e1s-tools",
+        "xnu-availability",
+        "puredarwin-build-inputs",
+        "puredarwin-iig",
+        "apple-carbon-headers",
+        "xnu-kernel-pthread"
+      ],
+      "acceptance": [
+        "Pin primary open-source header/SDK/IIG implementations and review actual per-file licenses and version/architecture assumptions before reuse",
+        "Test relevant real compiler/generator behavior on actual selected E1S source/IDL or independently specified fixtures; preserve failures and distinguish old/new profiles",
+        "Publish exact reusable artifacts or precise remaining gaps without inventing SDK headers, treating Linux/platform stubs as iOS, replacing the approved runtime or changing reserved KRN-001/KRN-003 implementation",
+        "No phone, global installer, Apple SDK/binary/archive acquisition or native capability claim"
+      ],
+      "steps": [
+        "Inspect current PureDarwin open-source SDK/IIG provenance and Apple public header candidates",
+        "Build/measure reviewed applicable components in private artifacts with explicit compiler and finite budgets",
+        "Record real compatibility limits and update the implementation input strategy without bypassing selected-kernel acceptance"
+      ],
+      "started_at": "2026-11-05T04:01:23+00:00",
+      "last_heartbeat": "2026-11-05T04:18:47+00:00",
+      "updated_at": "2026-11-05T04:18:48+00:00",
+      "branch": "main",
+      "progress_note": "Research acceptance passed: genuine E1S pthread archive/three exact arm64 archive members/four defined exports,19 real MIG headers and six target controls;132 default tests and139 prefix hashes verified. IIG non-Apple IDs/conditional flag failure remain unqualified. All failed evidence and original owners preserved.",
+      "next_step": "Claim KRN-004 for exact selected8796 DriverKit header/RPC ABI qualification using these source/component artifacts; full SDK/export/kernel/native acceptance remains separate",
+      "handoff": "docs/procedures/open-kernel-inputs/handoff.md",
+      "evidence": "state/evidence/RES-009.json",
+      "evidence_sha256": "4fc283bb5ad7e4aa7dc094730d9ca87978df26c5afdc97d1ca4753d39c7abba6",
+      "finished_at": "2026-11-05T04:18:48+00:00"
+    },
+    {
+      "id": "KRN-004",
+      "title": "Recover and qualify selected XNU8796 DriverKit header and RPC ABI inputs",
+      "status": "pending",
+      "owner": null,
+      "priority": 95,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-009",
+        "KRN-002"
+      ],
+      "paths": [
+        "tools/build/xnu_iig_abi.py",
+        "docs/procedures/xnu-iig-abi.md",
+        "fixtures/public/xnu-iig-abi",
+        "patches/iig-abi",
+        "research/sources.json"
+      ],
+      "sources": [
+        "apple-xnu",
+        "hakios-e1s-tools",
+        "puredarwin-iig",
+        "puredarwin-build-inputs"
+      ],
+      "acceptance": [
+        "Locate and pin applicable public-source or explicitly supplied selected8796 generated-header/RPC ABI oracles, recording exact origin/version/license/hashes; missing inputs cannot become a compatibility pass",
+        "Test actual header/implementation generation, conditional compiler flags, message IDs, structures and dispatch/marshalling against independent selected-version evidence before positive use; self-consistent FNV protocols do not prove Apple compatibility",
+        "Publish actual ARM64 compile/ABI evidence for any qualified inputs or precise unresolved requirements, keeping rejected and unsupported paths explicit",
+        "No Apple SDK/binary/archive acquisition, successful unsupported RPC stub, native claim or mutation of original KRN-001/KRN-003 reserved implementation/owners"
+      ],
+      "steps": [
+        "Use RES-009 component artifacts and exact IIG failures as starting evidence",
+        "Trace selected original interfaces and available generated-source references before selecting a real generator/adaptation strategy",
+        "Build/verify applicable candidate interfaces in new private artifacts and hand off exact reusable inputs or missing selected oracle"
+      ]
     }
   ],
   "experiments": [
@@ -3894,6 +3982,66 @@
       "evidence_sha256": "b02ecbb7a3e40f5923bf3dedcae4faf40cbeb7e7375cc5cc6ee024b6557f4890",
       "outcome": "inconclusive",
       "recorded_at": "2026-11-05T03:56:48+00:00"
+    },
+    {
+      "id": "OPENINPUT-001",
+      "task": "RES-009",
+      "owner": "codex-open-inputs-20261105-n",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Pinned public target-condition candidates may correctly identify actual iOS16.5 targets and real open IIG may process selected E1S definitions; target/flag/ABI gaps must be measured rather than assumed from source availability",
+      "procedure": "docs/procedures/open-kernel-inputs/README.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:06:22+00:00",
+      "evidence": "state/evidence/OPENINPUT-001.json",
+      "evidence_sha256": "c70523b70cb61414adb507320265c2f88111b962fd2fb0d9518c5b0afee1d55c",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T04:07:57+00:00"
+    },
+    {
+      "id": "OPENINPUT-002",
+      "task": "RES-009",
+      "owner": "codex-open-inputs-20261105-n",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "A small intrinsic-based correction to the full licensed open header selects native iOS/arm64 simulator correctly without altering macOS/macabi/DriverKit controls, allowing genuine selected E1S pthread component compilation if no further inputs are missing; old Carbon configuration and IIG ABI limits remain explicit",
+      "procedure": "docs/procedures/open-kernel-inputs/README.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:07:58+00:00",
+      "evidence": "state/evidence/OPENINPUT-002.json",
+      "evidence_sha256": "67b7d08bd3b705fbae41ad1905b9819f90cd8478a2b8bbbd5047cb4416989f7c",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T04:10:58+00:00"
+    },
+    {
+      "id": "OPENINPUT-003",
+      "task": "RES-009",
+      "owner": "codex-open-inputs-20261105-n",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Correct full source target conditions, a width-checked actual VM address cast and real source-derived MIG client headers may compile the selected genuine E1S pthread archive without a fabricated SDK; all remaining compiler/ABI failures remain explicit",
+      "procedure": "docs/procedures/open-kernel-inputs/README.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:10:59+00:00",
+      "evidence": "state/evidence/OPENINPUT-003.json",
+      "evidence_sha256": "4a4cac294320784ffdd49bdfddb58e6f15fbffddc99703516c11985f1c0c29c9",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T04:12:37+00:00"
+    },
+    {
+      "id": "OPENINPUT-004",
+      "task": "RES-009",
+      "owner": "codex-open-inputs-20261105-n",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Real generated Mach headers and explicit width-checked source interface conversions can compile all three genuine selected E1S pthread objects/archive without an Apple SDK or fabricated API; unsupported IIG Apple ABI remains separate",
+      "procedure": "docs/procedures/open-kernel-inputs/README.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:12:37+00:00",
+      "evidence": "state/evidence/OPENINPUT-004.json",
+      "evidence_sha256": "44c24722bf1dcc1ff4c79ba427f02c07ed0c24ec6f6a01ff44b421a115c7338f",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T04:14:18+00:00"
     }
   ],
   "events": [
@@ -7719,6 +7867,186 @@
           "last_heartbeat": "2026-11-05T03:56:51+00:00",
           "branch": "main",
           "handoff": "docs/procedures/ril/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:01:22+00:00",
+      "action": "task.add:RES-009",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:01:23+00:00",
+      "action": "task.claim:RES-009",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "in_progress",
+          "owner": "codex-open-inputs-20261105-n",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T04:01:23+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:01:24+00:00",
+      "action": "task.refine:RES-009:pin-primary-open-input-sources",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "in_progress",
+          "owner": "codex-open-inputs-20261105-n",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T04:01:23+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:06:22+00:00",
+      "action": "experiment.plan:OPENINPUT-001",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:07:57+00:00",
+      "action": "experiment.record:OPENINPUT-001",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:07:58+00:00",
+      "action": "experiment.plan:OPENINPUT-002",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:10:58+00:00",
+      "action": "experiment.record:OPENINPUT-002",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:10:58+00:00",
+      "action": "task.refine:RES-009:real-pthread-and-MIG-source-inputs",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "in_progress",
+          "owner": "codex-open-inputs-20261105-n",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T04:01:23+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:10:59+00:00",
+      "action": "experiment.plan:OPENINPUT-003",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:12:37+00:00",
+      "action": "experiment.record:OPENINPUT-003",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:12:37+00:00",
+      "action": "experiment.plan:OPENINPUT-004",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:14:18+00:00",
+      "action": "experiment.record:OPENINPUT-004",
+      "owner": "codex-open-inputs-20261105-n"
+    },
+    {
+      "at": "2026-11-05T04:14:18+00:00",
+      "action": "task.refine:RES-009:publish-open-component-build-route",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "in_progress",
+          "owner": "codex-open-inputs-20261105-n",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T04:01:23+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:15:56+00:00",
+      "action": "task.add:KRN-004",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "KRN-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:15:56+00:00",
+      "action": "task.update:RES-009",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "in_progress",
+          "owner": "codex-open-inputs-20261105-n",
+          "priority": 95,
+          "progress_note": "Built genuine E1S pthread archive with three arm64 objects/four exact defined exports,19 real MIG client headers and six target-profile controls from full licensed source inputs. Preserved three failures. Actual open IIG remains non-Apple ABI and ignores conditional flags; new KRN-004 gates selected interface qualification.",
+          "next_step": "Validate the complete research handoff and132 default checks, then complete RES-009 research only; continue KRN-004 exact DriverKit header/RPC qualification without advancing original full-kernel/native gates",
+          "last_heartbeat": "2026-11-05T04:15:56+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/open-kernel-inputs/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:18:47+00:00",
+      "action": "task.update:RES-009",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "in_progress",
+          "owner": "codex-open-inputs-20261105-n",
+          "priority": 95,
+          "progress_note": "Research acceptance passed: genuine E1S pthread archive/three exact arm64 archive members/four defined exports,19 real MIG headers and six target controls;132 default tests and139 prefix hashes verified. IIG non-Apple IDs/conditional flag failure remain unqualified. All failed evidence and original owners preserved.",
+          "next_step": "Claim KRN-004 for exact selected8796 DriverKit header/RPC ABI qualification using these source/component artifacts; full SDK/export/kernel/native acceptance remains separate",
+          "last_heartbeat": "2026-11-05T04:18:47+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/open-kernel-inputs/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:18:48+00:00",
+      "action": "task.done:RES-009",
+      "owner": "codex-open-inputs-20261105-n",
+      "tasks": [
+        {
+          "id": "RES-009",
+          "status": "done",
+          "owner": "codex-open-inputs-20261105-n",
+          "priority": 95,
+          "progress_note": "Research acceptance passed: genuine E1S pthread archive/three exact arm64 archive members/four defined exports,19 real MIG headers and six target controls;132 default tests and139 prefix hashes verified. IIG non-Apple IDs/conditional flag failure remain unqualified. All failed evidence and original owners preserved.",
+          "next_step": "Claim KRN-004 for exact selected8796 DriverKit header/RPC ABI qualification using these source/component artifacts; full SDK/export/kernel/native acceptance remains separate",
+          "last_heartbeat": "2026-11-05T04:18:47+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/open-kernel-inputs/handoff.md"
         }
       ]
     }

@@ -13,7 +13,7 @@
 | Dependencies | RES-003 |
 | started_at | 2026-11-05T03:37:28+00:00 |
 | last_heartbeat | 2026-11-05T03:44:36+00:00 |
-| report_health | recent |
+| report_health | stale |
 | progress_note | New pinned primary ARI method and real seven-group donor regression pass retained alongside both original failures. Actual selected-image components are unsupplied, so frontend/ABI selection remains unresolved and no native capability is advanced. Released finished shared catalog/plan reservations; retained narrow checker/patch/report paths. |
 | next_step | Supply explicit selected16.5 image/build/product provenance and matching CommCenter/baseband/cache/entitlement inputs; inspect exact ABI before adapter/profile choice. Continue independent ESIM-001 host preparation meanwhile. |
 | branch | main |

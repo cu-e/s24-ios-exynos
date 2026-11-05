@@ -1,0 +1,36 @@
+diff --git a/src/Libraries/AvailabilityVersions/include/TargetConditionals.h b/src/Libraries/AvailabilityVersions/include/TargetConditionals.h
+--- a/src/Libraries/AvailabilityVersions/include/TargetConditionals.h
++++ b/src/Libraries/AvailabilityVersions/include/TargetConditionals.h
+@@ -174,6 +174,32 @@
+         #define TARGET_OS_DRIVERKIT         0
+         #define DYNAMIC_TARGETS_ENABLED     1
+     #endif 
++
++    /* Open-source port: honor the compiler's real native iOS target and
++     * arm64 simulator target, rather than falling back to the macOS profile.
++     * Existing macabi and x86 simulator branches above remain authoritative.
++     */
++    #if !defined(DYNAMIC_TARGETS_ENABLED) && __is_target_vendor(apple) && __is_target_os(ios)
++        #define TARGET_OS_OSX               0
++        #define TARGET_OS_IPHONE            1
++        #define TARGET_OS_IOS               1
++        #define TARGET_OS_WATCH             0
++        #define TARGET_OS_TV                0
++        #if __is_target_environment(simulator)
++            #define TARGET_OS_SIMULATOR     1
++            #define TARGET_OS_EMBEDDED      0
++        #else
++            #define TARGET_OS_SIMULATOR     0
++            #define TARGET_OS_EMBEDDED      1
++        #endif
++        #define TARGET_OS_RTKIT             0
++        #define TARGET_OS_MACCATALYST       0
++        #ifndef TARGET_OS_UIKITFORMAC
++            #define TARGET_OS_UIKITFORMAC   0
++        #endif
++        #define TARGET_OS_DRIVERKIT         0
++        #define DYNAMIC_TARGETS_ENABLED     1
++    #endif
+ 
+     /* -target=x86_64-apple-driverkit19.0 */
+     /* -target=arm64-apple-driverkit19.0 */
