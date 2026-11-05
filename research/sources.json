@@ -856,7 +856,13 @@
         "src/Libraries/AvailabilityVersions/include/TargetConditionals.h",
         "src/Libraries/AvailabilityVersions/README.md",
         "cmake/iig.cmake",
-        "tools/iig-selfhost/CMakeLists.txt"
+        "tools/iig-selfhost/CMakeLists.txt",
+        "src/Kernel/xnu/iokit/DriverKit/IOService.h",
+        "src/Kernel/xnu/iokit/DriverKit/OSObject.h",
+        "src/Kernel/xnu/iokit/DriverKit/IOService.iig",
+        "src/Kernel/xnu/iokit/DriverKit/OSObject.iig",
+        "src/Kernel/xnu/iokit/DriverKit/IOService.iig.cpp",
+        "src/Kernel/xnu/iokit/DriverKit/OSObject.iig.cpp"
       ],
       "checkout_policy": "Only named pinned source/build/license text; no SDK/firmware/binary samples, submodules, Nix activation/global store setup or upstream execution"
     },
@@ -894,6 +900,55 @@
         "notes.txt"
       ],
       "checkout_policy": "Only named pinned source/build/license text; no SDK/firmware/binary samples, submodules, Nix activation/global store setup or upstream execution"
+    },
+    {
+      "id": "nyktis-iig",
+      "url": "https://github.com/Nyktis/iig-port",
+      "revision": "ea6d147d668ca15d490da638012243fcd705f30d",
+      "relevance": "Additional portable IIG implementation; inspect real algorithm/ABI/profile and separate source tests from excluded archive/Apple oracle provenance",
+      "license_notes": "MIT copyright 2026 iig-port contributors; retain LICENSE and NOTICE including MIT 2012 Zilong Tan fasthash attribution. Excluded test archive and Apple generated oracle provenance remain outside reuse.",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "README",
+        "NOTICE",
+        "LICENSE",
+        "iig.cpp",
+        "tests/README",
+        "tests/run.sh"
+      ],
+      "checkout_policy": "Only named pinned source/document text; exclude test archive, binaries, SDK/firmware samples, bootstrap/install scripts and automatic upstream execution"
+    },
+    {
+      "id": "allen-xnu-toolchain",
+      "url": "https://github.com/Allenwdk/xnu-linux-toolchain",
+      "revision": "909990e4ec2c6cda30c20cdb23219946918c7fd6",
+      "relevance": "Independent Linux build method and IIG RPC limits; source/license review only before any potential execution or reuse",
+      "license_notes": "No root reusable code license established in the named review; documentation review only, no execution or copied implementation. SDK/private headers and unsupported RPC stub claims do not grant or establish compatibility.",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "README.md",
+        "docs/LINUX-BUILD.md",
+        "toolchain/iig"
+      ],
+      "checkout_policy": "Only named pinned source/document text; exclude test archive, binaries, SDK/firmware samples, bootstrap/install scripts and automatic upstream execution"
+    },
+    {
+      "id": "xnu-libc-headers",
+      "url": "https://github.com/apple-oss-distributions/Libc",
+      "revision": "dbde50970329ace8793fca2b63d708d280c33d88",
+      "relevance": "Source-only Libc1507.100.9 header-generation review lead; supplies no build input. The actual required symbol-aliasing generator was found in selected XNU, not this checkout.",
+      "license_notes": "Preserve APPLE_LICENSE and component/file notices; source-only header generation does not grant SDK/binary/archive acquisition",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "APPLE_LICENSE",
+        "xcodescripts/headers.sh",
+        "xcodescripts/generate_features.pl",
+        "include/sys/cdefs.h"
+      ],
+      "checkout_policy": "Only pinned named source/header generation inputs; no SDK/Apple binary/archive, global installer or upstream build execution"
     }
   ]
 }

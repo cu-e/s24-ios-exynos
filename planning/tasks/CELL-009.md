@@ -13,7 +13,7 @@
 | Dependencies | RES-003, CELL-001 |
 | started_at | 2026-11-05T03:56:48+00:00 |
 | last_heartbeat | 2026-11-05T03:56:51+00:00 |
-| report_health | recent |
+| report_health | stale |
 | progress_note | CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass. |
 | next_step | Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay |
 | branch | main |

@@ -1,0 +1,14 @@
+--- a/iig.cpp
++++ b/iig.cpp
+@@ -1385,8 +1385,9 @@
+ 		}
+ 		if (arg == "-target") {
+ 			if (i + 1 >= opt.clang_args.size() ||
+-			    opt.clang_args[i + 1].rfind("unknown-", 0) != 0) {
+-				std::fprintf(stderr, "error: -target is only permitted with an unknown arch\n");
++			    (opt.clang_args[i + 1].rfind("unknown-", 0) != 0 &&
++			     opt.clang_args[i + 1] != "arm64-apple-ios16.5")) {
++				std::fprintf(stderr, "error: -target requires unknown arch or the explicit selected arm64-apple-ios16.5 profile\n");
+ 				return 1;
+ 			}
+ 			++i;

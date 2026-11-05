@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T04:18:48+00:00",
-  "ledger_updated_at": "2026-11-05T04:18:48+00:00",
-  "registry_sha256": "f632396e997afaa783426d1fa36532a896022433594e8fddd56bdeb95aa97fcb",
+  "generated_at": "2026-11-05T04:55:04+00:00",
+  "ledger_updated_at": "2026-11-05T04:55:03+00:00",
+  "registry_sha256": "04f1abd8d51345f1f43de96a6f94c9ebe22cbb366f0d28a10c7dd47402a57a78",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
-      "KRN-004",
+      "KRN-005",
       "VM-002",
       "USB-001",
       "SEN-001",
@@ -15,7 +15,9 @@
       "DRV-001",
       "VM-001"
     ],
-    "in_progress": [],
+    "in_progress": [
+      "KRN-004"
+    ],
     "blocked": [
       "KRN-003",
       "KRN-001",
@@ -103,6 +105,45 @@
     ]
   },
   "tasks": [
+    {
+      "id": "KRN-005",
+      "title": "Qualify real selected XNU allocator type compiler metadata",
+      "priority": 96,
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-009",
+        "KRN-002"
+      ],
+      "paths": [
+        "tools/build/xnu_compiler_types.py",
+        "patches/compiler-types",
+        "fixtures/public/xnu-compiler-types",
+        "docs/procedures/xnu-compiler-types.md",
+        "research/sources.json"
+      ],
+      "acceptance": [
+        "Measure actual installed compiler support for selected __builtin_xnu_type_signature/type_summary/types_compatible and xnu_usage_semantics with real selected headers and exact compiler hashes",
+        "Pin/review a usable public compiler-source implementation or explicitly supplied local compiler path, retaining licenses and no global installer or Apple binary/SDK/archive acquisition",
+        "Qualify actual type-sensitive metadata for data/pointer/mixed/padded/array/union/annotated controls and negative misuse; constant signature or blanket summary macros cannot pass",
+        "Compile actual selected allocator/metaclass call sites into arm64 Mach-O and inspect metadata/sections before claiming a usable compiler component; preserve precise unsupported cases and no full-kernel/native pass"
+      ],
+      "sources": [
+        "apple-xnu",
+        "hakios-e1s-tools",
+        "nyktis-iig"
+      ],
+      "steps": [
+        "Start from IIGABI-013 actual sixteen failed generated compiles and selected OSData/kalloc declarations",
+        "Measure capability with real tool commands; distinguish genuine type semantics from existing donor constant fallback",
+        "Implement and isolate a real source-backed compiler route or publish the exact external compiler API gap with immutable failed evidence"
+      ],
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/KRN-005.md"
+    },
     {
       "id": "RES-008",
       "title": "Validate actual XNU sysroot, SDK and donor build-tool requirements",
@@ -326,8 +367,8 @@
     {
       "id": "KRN-004",
       "title": "Recover and qualify selected XNU8796 DriverKit header and RPC ABI inputs",
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "codex-iig-abi-20261105-o",
       "priority": 95,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -339,14 +380,15 @@
         "tools/build/xnu_iig_abi.py",
         "docs/procedures/xnu-iig-abi.md",
         "fixtures/public/xnu-iig-abi",
-        "patches/iig-abi",
-        "research/sources.json"
+        "patches/iig-abi"
       ],
       "sources": [
         "apple-xnu",
         "hakios-e1s-tools",
         "puredarwin-iig",
-        "puredarwin-build-inputs"
+        "puredarwin-build-inputs",
+        "nyktis-iig",
+        "allen-xnu-toolchain"
       ],
       "acceptance": [
         "Locate and pin applicable public-source or explicitly supplied selected8796 generated-header/RPC ABI oracles, recording exact origin/version/license/hashes; missing inputs cannot become a compatibility pass",
@@ -359,9 +401,17 @@
         "Trace selected original interfaces and available generated-source references before selecting a real generator/adaptation strategy",
         "Build/verify applicable candidate interfaces in new private artifacts and hand off exact reusable inputs or missing selected oracle"
       ],
-      "column": "ready",
+      "started_at": "2026-11-05T04:20:51+00:00",
+      "last_heartbeat": "2026-11-05T04:53:57+00:00",
+      "updated_at": "2026-11-05T04:55:03+00:00",
+      "branch": "main",
+      "progress_note": "Actual17 AST pairs,14 genuine MIG server headers, experimental arm64 OSObject and invocation layout objects, eight generated cross-version IDs and11 real host decoder controls verified. Four measured malformed-input failures fixed; all13 evidence records preserved. Other16 compiles and exact selected Apple ABI remain unqualified.",
+      "next_step": "Run independent KRN-005 for genuine XNU allocator compiler metadata, then recompile remaining interfaces and qualify selected dispatch/marshalling against exact-version evidence",
+      "handoff": "docs/procedures/xnu-iig-abi.md",
+      "column": "in_progress",
       "reasons": [],
-      "card_path": "planning/tasks/KRN-004.md"
+      "card_path": "planning/tasks/KRN-004.md",
+      "report_health": "recent"
     },
     {
       "id": "PLN-001",
@@ -601,7 +651,7 @@
         "Existing exact-BYH3 vendor RIL files deny current uid2000 shell checksums and ordinary authorized ADB sync pulls; actual file bytes/hash cannot be acquired within approved current read-only access. No supplied local matching copy exists in this task."
       ],
       "card_path": "planning/tasks/CELL-010.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "LAB-001",
@@ -860,7 +910,7 @@
         "No explicitly supplied matching BYH3 RIL bytes/hash or vendor-image artifact; CELL-010 verified current ordinary shell and ADB sync access denial. Static schema extraction cannot run on file metadata or another-device examples."
       ],
       "card_path": "planning/tasks/CELL-009.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "RES-004",
@@ -2605,7 +2655,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Paths reserved by: KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010"
+        "Paths reserved by: KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-002.md"
@@ -2689,7 +2739,7 @@
       "column": "waiting",
       "reasons": [
         "Dependencies: NAT-001",
-        "Paths reserved by: NAT-001, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010"
+        "Paths reserved by: NAT-001, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-002.md"
@@ -2733,7 +2783,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-002, NAT-004, KRN-001",
-        "Paths reserved by: NAT-001, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010"
+        "Paths reserved by: NAT-001, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -3600,6 +3650,19 @@
         "worktree": null
       }
     ],
+    "codex-iig-abi-20261105-o": [
+      {
+        "id": "KRN-004",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-05T04:53:57+00:00",
+        "report_health": "recent",
+        "progress_note": "Actual17 AST pairs,14 genuine MIG server headers, experimental arm64 OSObject and invocation layout objects, eight generated cross-version IDs and11 real host decoder controls verified. Four measured malformed-input failures fixed; all13 evidence records preserved. Other16 compiles and exact selected Apple ABI remain unqualified.",
+        "next_step": "Run independent KRN-005 for genuine XNU allocator compiler metadata, then recompile remaining interfaces and qualify selected dispatch/marshalling against exact-version evidence",
+        "handoff": "docs/procedures/xnu-iig-abi.md",
+        "branch": "main",
+        "worktree": null
+      }
+    ],
     "codex-implementation-20261105": [
       {
         "id": "KRN-001",
@@ -3629,7 +3692,7 @@
         "id": "CELL-010",
         "status": "blocked",
         "last_heartbeat": "2026-11-05T03:56:50+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "Eight host guard groups pass. Exact live BYH3/uid2000 context reverified; two regular vendor RIL files exist, but ordinary shell checksum and normal ADB sync pulls are denied. No binary bytes acquired or privileges changed.",
         "next_step": "Use an explicitly supplied matching local RIL/vendor image for offline analysis, or a separately user-authorized future acquisition task; do not retry current access boundary",
         "handoff": "docs/procedures/ril-capture/handoff.md",
@@ -3640,7 +3703,7 @@
         "id": "CELL-009",
         "status": "blocked",
         "last_heartbeat": "2026-11-05T03:56:51+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.",
         "next_step": "Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay",
         "handoff": "docs/procedures/ril/handoff.md",
@@ -3664,260 +3727,172 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-05T03:56:50+00:00",
-      "action": "task.block:CELL-010",
-      "owner": "codex-ril-inputs-20261105-m",
-      "tasks": [
-        {
-          "id": "CELL-010",
-          "status": "blocked",
-          "owner": "codex-ril-inputs-20261105-m",
-          "priority": 85,
-          "progress_note": "Eight host guard groups pass. Exact live BYH3/uid2000 context reverified; two regular vendor RIL files exist, but ordinary shell checksum and normal ADB sync pulls are denied. No binary bytes acquired or privileges changed.",
-          "next_step": "Use an explicitly supplied matching local RIL/vendor image for offline analysis, or a separately user-authorized future acquisition task; do not retry current access boundary",
-          "blocked_reason": "Existing exact-BYH3 vendor RIL files deny current uid2000 shell checksums and ordinary authorized ADB sync pulls; actual file bytes/hash cannot be acquired within approved current read-only access. No supplied local matching copy exists in this task.",
-          "last_heartbeat": "2026-11-05T03:56:50+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/ril-capture/handoff.md"
-        }
-      ]
+      "at": "2026-11-05T04:42:08+00:00",
+      "action": "experiment.plan:IIGABI-006",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T03:56:50+00:00",
-      "action": "task.update:CELL-009",
-      "owner": "codex-ril-inputs-20261105-m",
-      "tasks": [
-        {
-          "id": "CELL-009",
-          "status": "in_progress",
-          "owner": "codex-ril-inputs-20261105-m",
-          "priority": 80,
-          "progress_note": "CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.",
-          "next_step": "Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay",
-          "last_heartbeat": "2026-11-05T03:56:50+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/ril/handoff.md"
-        }
-      ]
+      "at": "2026-11-05T04:43:42+00:00",
+      "action": "experiment.record:IIGABI-006",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T03:56:51+00:00",
-      "action": "task.block:CELL-009",
-      "owner": "codex-ril-inputs-20261105-m",
-      "tasks": [
-        {
-          "id": "CELL-009",
-          "status": "blocked",
-          "owner": "codex-ril-inputs-20261105-m",
-          "priority": 80,
-          "progress_note": "CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.",
-          "next_step": "Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay",
-          "blocked_reason": "No explicitly supplied matching BYH3 RIL bytes/hash or vendor-image artifact; CELL-010 verified current ordinary shell and ADB sync access denial. Static schema extraction cannot run on file metadata or another-device examples.",
-          "last_heartbeat": "2026-11-05T03:56:51+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/ril/handoff.md"
-        }
-      ]
+      "at": "2026-11-05T04:43:54+00:00",
+      "action": "experiment.plan:IIGABI-007",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T04:01:22+00:00",
-      "action": "task.add:RES-009",
-      "owner": "codex-open-inputs-20261105-n",
-      "tasks": [
-        {
-          "id": "RES-009",
-          "status": "pending",
-          "owner": null,
-          "priority": 95
-        }
-      ]
+      "at": "2026-11-05T04:45:03+00:00",
+      "action": "experiment.record:IIGABI-007",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T04:01:23+00:00",
-      "action": "task.claim:RES-009",
-      "owner": "codex-open-inputs-20261105-n",
-      "tasks": [
-        {
-          "id": "RES-009",
-          "status": "in_progress",
-          "owner": "codex-open-inputs-20261105-n",
-          "priority": 95,
-          "last_heartbeat": "2026-11-05T04:01:23+00:00",
-          "branch": "main"
-        }
-      ]
+      "at": "2026-11-05T04:45:04+00:00",
+      "action": "experiment.plan:IIGABI-008",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T04:01:24+00:00",
-      "action": "task.refine:RES-009:pin-primary-open-input-sources",
-      "owner": "codex-open-inputs-20261105-n",
-      "tasks": [
-        {
-          "id": "RES-009",
-          "status": "in_progress",
-          "owner": "codex-open-inputs-20261105-n",
-          "priority": 95,
-          "last_heartbeat": "2026-11-05T04:01:23+00:00",
-          "branch": "main"
-        }
-      ]
+      "at": "2026-11-05T04:45:43+00:00",
+      "action": "experiment.record:IIGABI-008",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T04:06:22+00:00",
-      "action": "experiment.plan:OPENINPUT-001",
-      "owner": "codex-open-inputs-20261105-n"
+      "at": "2026-11-05T04:46:07+00:00",
+      "action": "experiment.plan:IIGABI-009",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T04:07:57+00:00",
-      "action": "experiment.record:OPENINPUT-001",
-      "owner": "codex-open-inputs-20261105-n"
+      "at": "2026-11-05T04:47:27+00:00",
+      "action": "experiment.record:IIGABI-009",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T04:07:58+00:00",
-      "action": "experiment.plan:OPENINPUT-002",
-      "owner": "codex-open-inputs-20261105-n"
+      "at": "2026-11-05T04:47:27+00:00",
+      "action": "experiment.plan:IIGABI-010",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T04:10:58+00:00",
-      "action": "experiment.record:OPENINPUT-002",
-      "owner": "codex-open-inputs-20261105-n"
+      "at": "2026-11-05T04:48:26+00:00",
+      "action": "experiment.record:IIGABI-010",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T04:10:58+00:00",
-      "action": "task.refine:RES-009:real-pthread-and-MIG-source-inputs",
-      "owner": "codex-open-inputs-20261105-n",
-      "tasks": [
-        {
-          "id": "RES-009",
-          "status": "in_progress",
-          "owner": "codex-open-inputs-20261105-n",
-          "priority": 95,
-          "last_heartbeat": "2026-11-05T04:01:23+00:00",
-          "branch": "main"
-        }
-      ]
+      "at": "2026-11-05T04:49:17+00:00",
+      "action": "experiment.plan:IIGABI-011",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T04:10:59+00:00",
-      "action": "experiment.plan:OPENINPUT-003",
-      "owner": "codex-open-inputs-20261105-n"
+      "at": "2026-11-05T04:50:24+00:00",
+      "action": "experiment.record:IIGABI-011",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T04:12:37+00:00",
-      "action": "experiment.record:OPENINPUT-003",
-      "owner": "codex-open-inputs-20261105-n"
+      "at": "2026-11-05T04:50:25+00:00",
+      "action": "experiment.plan:IIGABI-012",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T04:12:37+00:00",
-      "action": "experiment.plan:OPENINPUT-004",
-      "owner": "codex-open-inputs-20261105-n"
+      "at": "2026-11-05T04:50:50+00:00",
+      "action": "experiment.record:IIGABI-012",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T04:14:18+00:00",
-      "action": "experiment.record:OPENINPUT-004",
-      "owner": "codex-open-inputs-20261105-n"
+      "at": "2026-11-05T04:50:50+00:00",
+      "action": "experiment.plan:IIGABI-013",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T04:14:18+00:00",
-      "action": "task.refine:RES-009:publish-open-component-build-route",
-      "owner": "codex-open-inputs-20261105-n",
-      "tasks": [
-        {
-          "id": "RES-009",
-          "status": "in_progress",
-          "owner": "codex-open-inputs-20261105-n",
-          "priority": 95,
-          "last_heartbeat": "2026-11-05T04:01:23+00:00",
-          "branch": "main"
-        }
-      ]
+      "at": "2026-11-05T04:51:58+00:00",
+      "action": "experiment.record:IIGABI-013",
+      "owner": "codex-iig-abi-20261105-o"
     },
     {
-      "at": "2026-11-05T04:15:56+00:00",
-      "action": "task.add:KRN-004",
-      "owner": "codex-open-inputs-20261105-n",
+      "at": "2026-11-05T04:53:56+00:00",
+      "action": "task.refine:KRN-004:handoff-independent-compiler-metadata",
+      "owner": "codex-iig-abi-20261105-o",
       "tasks": [
         {
           "id": "KRN-004",
+          "status": "in_progress",
+          "owner": "codex-iig-abi-20261105-o",
+          "priority": 95,
+          "progress_note": "Real libclang IIG built, two conditional controls and eight cross-version public fasthash IDs agree; genuine selected arm64 IORPC24-byte layout confirmed and newer kernelContent rejected. Baseline and target-patch failures retained as IIGABI-001/002.",
+          "next_step": "Resolve compiler resource include closure and compile actual generated selected implementations before any ABI integration claim",
+          "last_heartbeat": "2026-11-05T04:37:49+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-iig-abi.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:53:56+00:00",
+      "action": "task.add:KRN-005",
+      "owner": "codex-iig-abi-20261105-o",
+      "tasks": [
+        {
+          "id": "KRN-005",
           "status": "pending",
           "owner": null,
-          "priority": 95
+          "priority": 96
         }
       ]
     },
     {
-      "at": "2026-11-05T04:15:56+00:00",
-      "action": "task.update:RES-009",
-      "owner": "codex-open-inputs-20261105-n",
+      "at": "2026-11-05T04:53:57+00:00",
+      "action": "task.update:KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
       "tasks": [
         {
-          "id": "RES-009",
+          "id": "KRN-004",
           "status": "in_progress",
-          "owner": "codex-open-inputs-20261105-n",
+          "owner": "codex-iig-abi-20261105-o",
           "priority": 95,
-          "progress_note": "Built genuine E1S pthread archive with three arm64 objects/four exact defined exports,19 real MIG client headers and six target-profile controls from full licensed source inputs. Preserved three failures. Actual open IIG remains non-Apple ABI and ignores conditional flags; new KRN-004 gates selected interface qualification.",
-          "next_step": "Validate the complete research handoff and132 default checks, then complete RES-009 research only; continue KRN-004 exact DriverKit header/RPC qualification without advancing original full-kernel/native gates",
-          "last_heartbeat": "2026-11-05T04:15:56+00:00",
+          "progress_note": "Actual17 AST pairs,14 genuine MIG server headers, experimental arm64 OSObject and invocation layout objects, eight generated cross-version IDs and11 real host decoder controls verified. Four measured malformed-input failures fixed; all13 evidence records preserved. Other16 compiles and exact selected Apple ABI remain unqualified.",
+          "next_step": "Run independent KRN-005 for genuine XNU allocator compiler metadata, then recompile remaining interfaces and qualify selected dispatch/marshalling against exact-version evidence",
+          "last_heartbeat": "2026-11-05T04:53:57+00:00",
           "branch": "main",
-          "handoff": "docs/procedures/open-kernel-inputs/handoff.md"
+          "handoff": "docs/procedures/xnu-iig-abi.md"
         }
       ]
     },
     {
-      "at": "2026-11-05T04:18:47+00:00",
-      "action": "task.update:RES-009",
-      "owner": "codex-open-inputs-20261105-n",
+      "at": "2026-11-05T04:55:03+00:00",
+      "action": "task.refine:KRN-004:final-source-review-notes",
+      "owner": "codex-iig-abi-20261105-o",
       "tasks": [
         {
-          "id": "RES-009",
+          "id": "KRN-004",
           "status": "in_progress",
-          "owner": "codex-open-inputs-20261105-n",
+          "owner": "codex-iig-abi-20261105-o",
           "priority": 95,
-          "progress_note": "Research acceptance passed: genuine E1S pthread archive/three exact arm64 archive members/four defined exports,19 real MIG headers and six target controls;132 default tests and139 prefix hashes verified. IIG non-Apple IDs/conditional flag failure remain unqualified. All failed evidence and original owners preserved.",
-          "next_step": "Claim KRN-004 for exact selected8796 DriverKit header/RPC ABI qualification using these source/component artifacts; full SDK/export/kernel/native acceptance remains separate",
-          "last_heartbeat": "2026-11-05T04:18:47+00:00",
+          "progress_note": "Actual17 AST pairs,14 genuine MIG server headers, experimental arm64 OSObject and invocation layout objects, eight generated cross-version IDs and11 real host decoder controls verified. Four measured malformed-input failures fixed; all13 evidence records preserved. Other16 compiles and exact selected Apple ABI remain unqualified.",
+          "next_step": "Run independent KRN-005 for genuine XNU allocator compiler metadata, then recompile remaining interfaces and qualify selected dispatch/marshalling against exact-version evidence",
+          "last_heartbeat": "2026-11-05T04:53:57+00:00",
           "branch": "main",
-          "handoff": "docs/procedures/open-kernel-inputs/handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T04:18:48+00:00",
-      "action": "task.done:RES-009",
-      "owner": "codex-open-inputs-20261105-n",
-      "tasks": [
-        {
-          "id": "RES-009",
-          "status": "done",
-          "owner": "codex-open-inputs-20261105-n",
-          "priority": 95,
-          "progress_note": "Research acceptance passed: genuine E1S pthread archive/three exact arm64 archive members/four defined exports,19 real MIG headers and six target controls;132 default tests and139 prefix hashes verified. IIG non-Apple IDs/conditional flag failure remain unqualified. All failed evidence and original owners preserved.",
-          "next_step": "Claim KRN-004 for exact selected8796 DriverKit header/RPC ABI qualification using these source/component artifacts; full SDK/export/kernel/native acceptance remains separate",
-          "last_heartbeat": "2026-11-05T04:18:47+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/open-kernel-inputs/handoff.md"
+          "handoff": "docs/procedures/xnu-iig-abi.md"
         }
       ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "4b1637e59a99b6be9066d68547a351e352f542ee362ff00546bba1b411e89734",
-    "BOARD.md": "076863b2e0dd33785eb8430322c53b181d90bae5c5d62defbf2581a8e2c68848",
+    "STATUS.md": "6cf83977d29dd0bb795e20a70fb7326bd9ec0600c810b8d47f2997aef0c60457",
+    "BOARD.md": "4a75185d9186c79b456f2ebff4e456f23bb46ae0a97756ee97593d7aeeb6dbcc",
+    "planning/tasks/KRN-005.md": "0e691081503a05fee496e2bc7df688f12ec6fb0696b1cc334447ffc4496e38c2",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
     "planning/tasks/KRN-003.md": "7d37e5fece06694371991cb3127ab5121d975ec8a99179d63ec1f71a90c303ff",
     "planning/tasks/RES-009.md": "29506be617bfdcf7676f1f8e24f86b956ac88ba16ee9ae53c3c3e8570711bab8",
-    "planning/tasks/KRN-004.md": "c5b7a809cbe1b6ccf6bcf21fd550d7c7d983c13c9f368533af5533f77d1c88e9",
+    "planning/tasks/KRN-004.md": "26874c7fd28e235440c32e04c097458ed85a29787434e7c7e09aff376d450d52",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
     "planning/tasks/INT-001.md": "9d68fa75fae4c21f31f5ea4734c3f592ed0b41c6ed897d7b045a892c63549760",
     "planning/tasks/KRN-001.md": "be7d3f89bd84d7679d09c3a1f0fff5afc6a08359c99a924a32ef23878f827bd3",
-    "planning/tasks/CELL-010.md": "0810bda1adee66d1cd64d5bd895711a6fda6f73f2edf774436a84409485bf65e",
+    "planning/tasks/CELL-010.md": "19e917f0ad825829661a820f7a58d49c1f573d78dbdff618a983f52141e99104",
     "planning/tasks/LAB-001.md": "3bf5f0b07bfe3944559f6520646498c1e907611d0f34201115ad0e39e3240e8c",
     "planning/tasks/TST-002.md": "d78a91ef43894923e022402e9c91dd075e4a7bc4697e33fb7b99263486c544aa",
     "planning/tasks/RES-003.md": "0818cb4fa8ca49d7acad01a7d80cc67041f504e381b68cfc74e8cfa6d369ce50",
     "planning/tasks/ESIM-004.md": "5e29d4b6130fec198ec2bea4c33a4848b706db553f56cf57ce00bc3284e7e147",
-    "planning/tasks/CELL-009.md": "739dbc970796ca6d8217b1a2af7e2e77de53e044762a60b3da279a07e4bc3121",
+    "planning/tasks/CELL-009.md": "9de452dda4b6bbeae122a777b694ab8947cfbe5b69853b37dec30cdacdf190a7",
     "planning/tasks/RES-004.md": "08bac80e27799418f00000fe2e775a3d800660263c225e58147765b25d905e9a",
     "planning/tasks/GPU-011.md": "80d1aa7ea8b4a3374af3e3373d65fdb0f18f581cfd9297d29b4e707dfb732580",
     "planning/tasks/RES-005.md": "8bed1c3def30237963fab381a9b7130571df463daeb0a727c2c367496c02d5b8",
@@ -3960,10 +3935,10 @@
     "planning/tasks/GPU-004.md": "4f7b914361a5ff47439410c701bd907e3a3020383d4b33c91ce59b5fbdab2579",
     "planning/tasks/GPU-005.md": "4d83a325d8c9601f76a8a72d7a31f2b7d47d8f450ee9c989a18c58eae4614346",
     "planning/tasks/DRV-001.md": "0e15c9a93f74cbd15da5e1507551c8599a25ac14bf857b1fc3cf62a672459ade",
-    "planning/tasks/DRV-002.md": "db65b273054f775f8f06ad8d88672c28ba5e2adcca75591df58ed6d1e0bcd211",
+    "planning/tasks/DRV-002.md": "0c74b3d36849d63641ad1b12acdefe02bbaa46e931afd0b007bf0c5178e91c67",
     "planning/tasks/NAT-001.md": "555b180dd2cfda5c6a7e4623041660bfd01b1c074d7fd82a9be75e83b4af7bcf",
-    "planning/tasks/NAT-002.md": "3500552d09b3a6a04e690747aa03b43c8e8161dca13059114b21086bc93a0ef1",
-    "planning/tasks/NAT-003.md": "f291a6ab54ca4b2cd0f30c1d3b081c8c439bc11946cf3408762318b4541b3562",
+    "planning/tasks/NAT-002.md": "88fe214cc9bdccfa53b2a66ba329ee59eb60c01893086e7f63161999e888d4bd",
+    "planning/tasks/NAT-003.md": "bbbb8b4ae0e4cadf56d9b06c2ad6dddbb18b917df9f1dd0645b3361abfb47582",
     "planning/tasks/DRV-003.md": "8f6e3fbe9e05391ad4614894f6675ec628b3abb105f8f2d84009cf446dc2e62a",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",

@@ -1,0 +1,134 @@
+--- a/iig.cpp
++++ b/iig.cpp
+@@ -25,7 +25,7 @@
+ namespace {
+ 
+ const char kIIGVersion[] = "DriverKit-440";
+-const char kIIGBannerVersion[] = "DriverKit-440 portable Jan  9 2026 10:49:41";
++const char kIIGBannerVersion[] = "DriverKit-440 portable selected8796 legacy24 experiment";
+ 
+ struct Options {
+ 	std::string def;
+@@ -3068,16 +3068,14 @@
+ 	out << "    struct\n";
+ 	out << "    {\n";
+ 	out << "#ifdef KERNEL\n";
+-	out << "        const struct " << prefix << "_Msg * message;\n";
++	out << "        const struct " << prefix << "_Msg_With_Content * message;\n";
+ 	out << "#else /* KERNEL */\n";
+ 	out << "        const struct " << prefix << "_Msg_With_Content * message;\n";
+ 	out << "#endif /* KERNEL */\n";
+ 	out << "        struct " << prefix << "_Rpl_With_Content       * reply;\n";
+ 	out << "        uint32_t sendSize;\n";
+ 	out << "        uint32_t replySize;\n";
+-	out << "#ifdef KERNEL\n";
+-	out << "        const struct " << prefix << "_Msg_Content * kernelContent;\n";
+-	out << "#endif /* KERNEL */\n";
++
+ 	out << "    };\n";
+ 	out << "} " << prefix << "_Invocation;\n";
+ }
+@@ -3450,7 +3448,7 @@
+ 	std::set<std::string> typed_targets = typed_action_target_names(methods);
+ 
+ 	out << "#ifdef KERNEL\n";
+-	out << "#define MESSAGE_CONTENT(__field) (messageContent->__field)\n";
++	out << "#define MESSAGE_CONTENT(__field) (message->content.__field)\n";
+ 	out << "#else /* KERNEL */\n";
+ 	out << "#define MESSAGE_CONTENT(__field) (message->content.__field)\n";
+ 	out << "#endif /* KERNEL */\n\n";
+@@ -3464,7 +3462,7 @@
+ 	out << "{\n";
+ 	out << "    kern_return_t ret = kIOReturnUnsupported;\n";
+ 	out << "#ifdef KERNEL\n";
+-	out << "    IORPCMessage * msg = rpc.kernelContent;\n";
++	out << "    IORPCMessage * msg = IORPCMessageFromMach(rpc.message, false);\n";
+ 	out << "#else /* KERNEL */\n";
+ 	out << "    IORPCMessage * msg = IORPCMessageFromMach(rpc.message, false);\n";
+ 	out << "#endif /* KERNEL */\n\n";
+@@ -3507,7 +3505,7 @@
+ 	out << "#endif /* !KERNEL */\n\n";
+ 	out << "    kern_return_t ret = kIOReturnUnsupported;\n";
+ 	out << "#ifdef KERNEL\n";
+-	out << "    IORPCMessage * msg = rpc.kernelContent;\n";
++	out << "    IORPCMessage * msg = IORPCMessageFromMach(rpc.message, false);\n";
+ 	out << "#else /* KERNEL */\n";
+ 	out << "    IORPCMessage * msg = IORPCMessageFromMach(rpc.message, false);\n";
+ 	out << "#endif /* KERNEL */\n\n";
+@@ -3838,7 +3836,7 @@
+ 	if (has_annotation(method.annotations, "reply")) {
+ 		out << "    struct " << prefix << "_Msg_With_Content * msg = (typeof(msg)) rpc.reply;\n";
+ 		out << "#ifdef KERNEL\n";
+-		out << "    rpc.kernelContent = &msg->content.__hdr;\n";
++
+ 		out << "#endif /* KERNEL */\n\n";
+ 	} else {
+ 		out << "    union\n";
+@@ -3887,9 +3885,9 @@
+ 	if (!has_annotation(method.annotations, "reply")) {
+ 		out << "#ifdef KERNEL\n";
+ 		if (include_reply) {
+-			out << "    IORPC rpc = { .message = &buf.msg.mach, .reply = &buf.rpl.rpl.mach, .sendSize = sizeof(buf.msg), .replySize = sizeof(buf.rpl), .kernelContent = &buf.msg.content.__hdr };\n";
++			out << "    IORPC rpc = { .message = &buf.msg.mach, .reply = &buf.rpl.rpl.mach, .sendSize = sizeof(buf.msg), .replySize = sizeof(buf.rpl) };\n";
+ 		} else {
+-			out << "    IORPC rpc = { .message = &buf.msg.mach, .reply = NULL, .sendSize = sizeof(*msg), .replySize = 0, .kernelContent = &buf.msg.content.__hdr };\n";
++			out << "    IORPC rpc = { .message = &buf.msg.mach, .reply = NULL, .sendSize = sizeof(*msg), .replySize = 0 };\n";
+ 		}
+ 		out << "#else /* KERNEL */\n";
+ 		if (include_reply) {
+@@ -3951,7 +3949,7 @@
+ 			out << "            IORPCMessage * message;\n";
+ 			out << "            OSObject     * object;\n\n";
+ 			out << "#ifdef KERNEL\n";
+-			out << "            message = rpc.kernelContent;\n";
++			out << "            message = IORPCMessageFromMach(rpc.reply, false);\n";
+ 			out << "#else /* KERNEL */\n";
+ 			out << "            message = IORPCMessageFromMach(rpc.reply, false);\n";
+ 			out << "#endif /* KERNEL */\n";
+@@ -4094,8 +4092,8 @@
+ 	out << "    " << prefix << "_Invocation rpc = { _rpc };\n";
+ 	out << "    " << prefix << "_Rpl_With_Content * reply = rpc.reply;\n";
+ 	out << "#ifdef KERNEL\n";
+-	out << "    const " << prefix << "_Msg *         message = rpc.message;\n";
+-	out << "    const " << prefix << "_Msg_Content * messageContent = rpc.kernelContent;\n";
++	out << "    const " << prefix << "_Msg_With_Content * message = rpc.message;\n";
++
+ 	out << "#else /* KERNEL */\n";
+ 	out << "    const " << prefix << "_Msg_With_Content * message = rpc.message;\n";
+ 	out << "#endif /* KERNEL */\n";
+@@ -4286,7 +4284,7 @@
+ 	if (method_is_invoke_reply(method)) {
+ 		out << "    IORPCMessage * replyMessage;\n\n";
+ 		out << "#ifdef KERNEL\n";
+-		out << "    replyMessage = rpc.rpc.kernelContent;\n";
++		out << "    replyMessage = IORPCMessageFromMach(rpc.rpc.reply, false);\n";
+ 		out << "#else /* KERNEL */\n";
+ 		out << "    replyMessage = IORPCMessageFromMach(rpc.rpc.reply, false);\n";
+ 		out << "#endif /* KERNEL */\n";
+@@ -4432,7 +4430,7 @@
+     const std::string &action_class)
+ {
+ 	out << "#ifdef KERNEL\n";
+-	out << "#define MESSAGE_CONTENT(__field) (messageContent->__field)\n";
++	out << "#define MESSAGE_CONTENT(__field) (message->content.__field)\n";
+ 	out << "#else /* KERNEL */\n";
+ 	out << "#define MESSAGE_CONTENT(__field) (message->content.__field)\n";
+ 	out << "#endif /* KERNEL */\n\n";
+@@ -4446,7 +4444,7 @@
+ 	out << "{\n";
+ 	out << "    kern_return_t ret = kIOReturnUnsupported;\n";
+ 	out << "#ifdef KERNEL\n";
+-	out << "    IORPCMessage * msg = rpc.kernelContent;\n";
++	out << "    IORPCMessage * msg = IORPCMessageFromMach(rpc.message, false);\n";
+ 	out << "#else /* KERNEL */\n";
+ 	out << "    IORPCMessage * msg = IORPCMessageFromMach(rpc.message, false);\n";
+ 	out << "#endif /* KERNEL */\n\n";
+@@ -4469,7 +4467,7 @@
+ 	out << "#endif /* !KERNEL */\n\n";
+ 	out << "    kern_return_t ret = kIOReturnUnsupported;\n";
+ 	out << "#ifdef KERNEL\n";
+-	out << "    IORPCMessage * msg = rpc.kernelContent;\n";
++	out << "    IORPCMessage * msg = IORPCMessageFromMach(rpc.message, false);\n";
+ 	out << "#else /* KERNEL */\n";
+ 	out << "    IORPCMessage * msg = IORPCMessageFromMach(rpc.message, false);\n";
+ 	out << "#endif /* KERNEL */\n\n";

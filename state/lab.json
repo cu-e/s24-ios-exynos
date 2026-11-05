@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T04:18:48+00:00",
+  "updated_at": "2026-11-05T04:55:03+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -3091,8 +3091,8 @@
     {
       "id": "KRN-004",
       "title": "Recover and qualify selected XNU8796 DriverKit header and RPC ABI inputs",
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "codex-iig-abi-20261105-o",
       "priority": 95,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -3104,14 +3104,15 @@
         "tools/build/xnu_iig_abi.py",
         "docs/procedures/xnu-iig-abi.md",
         "fixtures/public/xnu-iig-abi",
-        "patches/iig-abi",
-        "research/sources.json"
+        "patches/iig-abi"
       ],
       "sources": [
         "apple-xnu",
         "hakios-e1s-tools",
         "puredarwin-iig",
-        "puredarwin-build-inputs"
+        "puredarwin-build-inputs",
+        "nyktis-iig",
+        "allen-xnu-toolchain"
       ],
       "acceptance": [
         "Locate and pin applicable public-source or explicitly supplied selected8796 generated-header/RPC ABI oracles, recording exact origin/version/license/hashes; missing inputs cannot become a compatibility pass",
@@ -3123,6 +3124,49 @@
         "Use RES-009 component artifacts and exact IIG failures as starting evidence",
         "Trace selected original interfaces and available generated-source references before selecting a real generator/adaptation strategy",
         "Build/verify applicable candidate interfaces in new private artifacts and hand off exact reusable inputs or missing selected oracle"
+      ],
+      "started_at": "2026-11-05T04:20:51+00:00",
+      "last_heartbeat": "2026-11-05T04:53:57+00:00",
+      "updated_at": "2026-11-05T04:55:03+00:00",
+      "branch": "main",
+      "progress_note": "Actual17 AST pairs,14 genuine MIG server headers, experimental arm64 OSObject and invocation layout objects, eight generated cross-version IDs and11 real host decoder controls verified. Four measured malformed-input failures fixed; all13 evidence records preserved. Other16 compiles and exact selected Apple ABI remain unqualified.",
+      "next_step": "Run independent KRN-005 for genuine XNU allocator compiler metadata, then recompile remaining interfaces and qualify selected dispatch/marshalling against exact-version evidence",
+      "handoff": "docs/procedures/xnu-iig-abi.md"
+    },
+    {
+      "id": "KRN-005",
+      "title": "Qualify real selected XNU allocator type compiler metadata",
+      "priority": 96,
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "RES-009",
+        "KRN-002"
+      ],
+      "paths": [
+        "tools/build/xnu_compiler_types.py",
+        "patches/compiler-types",
+        "fixtures/public/xnu-compiler-types",
+        "docs/procedures/xnu-compiler-types.md",
+        "research/sources.json"
+      ],
+      "acceptance": [
+        "Measure actual installed compiler support for selected __builtin_xnu_type_signature/type_summary/types_compatible and xnu_usage_semantics with real selected headers and exact compiler hashes",
+        "Pin/review a usable public compiler-source implementation or explicitly supplied local compiler path, retaining licenses and no global installer or Apple binary/SDK/archive acquisition",
+        "Qualify actual type-sensitive metadata for data/pointer/mixed/padded/array/union/annotated controls and negative misuse; constant signature or blanket summary macros cannot pass",
+        "Compile actual selected allocator/metaclass call sites into arm64 Mach-O and inspect metadata/sections before claiming a usable compiler component; preserve precise unsupported cases and no full-kernel/native pass"
+      ],
+      "sources": [
+        "apple-xnu",
+        "hakios-e1s-tools",
+        "nyktis-iig"
+      ],
+      "steps": [
+        "Start from IIGABI-013 actual sixteen failed generated compiles and selected OSData/kalloc declarations",
+        "Measure capability with real tool commands; distinguish genuine type semantics from existing donor constant fallback",
+        "Implement and isolate a real source-backed compiler route or publish the exact external compiler API gap with immutable failed evidence"
       ]
     }
   ],
@@ -4042,6 +4086,201 @@
       "evidence_sha256": "44c24722bf1dcc1ff4c79ba427f02c07ed0c24ec6f6a01ff44b421a115c7338f",
       "outcome": "pass",
       "recorded_at": "2026-11-05T04:14:18+00:00"
+    },
+    {
+      "id": "IIGABI-001",
+      "task": "KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "A real libclang AST IIG candidate may preserve conditionals and public fasthash IDs, while explicit selected ARM64 generation and actual selected IORPC layout expose version incompatibilities",
+      "procedure": "docs/procedures/xnu-iig-abi.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:35:46+00:00",
+      "evidence": "state/evidence/IIGABI-001.json",
+      "evidence_sha256": "4793dc6e528c683379a4ae6c047154677c55e3ec0b3fb362d5eee3dc26f62fee",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T04:36:07+00:00"
+    },
+    {
+      "id": "IIGABI-002",
+      "task": "KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Explicitly allowing only the selected arm64 iOS16.5 target in the real AST generator will expose genuine selected-header generation behavior without changing source or adopting a new RPC ABI",
+      "procedure": "docs/procedures/xnu-iig-abi.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:36:40+00:00",
+      "evidence": "state/evidence/IIGABI-002.json",
+      "evidence_sha256": "45bb4a19d3757895c33ea026a36f1fd1fe6e73bab16ffed9e5086a4d6b9447d6",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T04:37:05+00:00"
+    },
+    {
+      "id": "IIGABI-003",
+      "task": "KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Matching genuine LLVM19 freestanding resource headers resolve the actual selected IDL stdint include_next gap and expose remaining AST or generated RPC compatibility errors",
+      "procedure": "docs/procedures/xnu-iig-abi.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:37:17+00:00",
+      "evidence": "state/evidence/IIGABI-003.json",
+      "evidence_sha256": "35d33bc212b43ddca4de1bd76281bd5821b4d3e60dd703be77bdd8b515e72f46",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T04:39:12+00:00"
+    },
+    {
+      "id": "IIGABI-004",
+      "task": "KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Running the reviewed selected XNU setup-header recipes with the pinned public availability generator resolves the actual cdefs prerequisite and enables genuine AST/interface compile diagnostics without a substitute SDK",
+      "procedure": "docs/procedures/xnu-iig-abi.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:40:03+00:00",
+      "evidence": "state/evidence/IIGABI-004.json",
+      "evidence_sha256": "002862ec1306b4f26c3adef3f5f828bcebbfc1f0d4f9e3a920eab2fcfe384e7f",
+      "outcome": "inconclusive",
+      "recorded_at": "2026-11-05T04:40:56+00:00"
+    },
+    {
+      "id": "IIGABI-005",
+      "task": "KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Restoring the genuine selected osfmk/libsa root header export advances real generated ARM64 compiles and exposes candidate RPC/version diagnostics without fabricated headers",
+      "procedure": "docs/procedures/xnu-iig-abi.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:40:57+00:00",
+      "evidence": "state/evidence/IIGABI-005.json",
+      "evidence_sha256": "9509d4e09a11b1d53f2d78f823078687575a663eef599cf46e1d49a12bb4718e",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T04:42:07+00:00"
+    },
+    {
+      "id": "IIGABI-006",
+      "task": "KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "A source-traced experimental legacy24 emitter can compile real OSObject RPC interfaces against selected public headers without adding a fake kernelContent field, while other exact compile gaps remain explicit",
+      "procedure": "docs/procedures/xnu-iig-abi.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:42:08+00:00",
+      "evidence": "state/evidence/IIGABI-006.json",
+      "evidence_sha256": "404449b9bcb763e5a7384f3cf53877f4d4d2e2684dad2ec28b8eba5d1df377a2",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T04:43:42+00:00"
+    },
+    {
+      "id": "IIGABI-007",
+      "task": "KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Generating all14 source-listed real MIG server headers resolves the next genuine export prerequisite and isolates remaining selected C++/RPC API incompatibilities without compiler type stand-ins",
+      "procedure": "docs/procedures/xnu-iig-abi.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:43:54+00:00",
+      "evidence": "state/evidence/IIGABI-007.json",
+      "evidence_sha256": "ce83881fb86647d6fc8009c910273d6345dc96eaeff9704622f8eb53441f3e64",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T04:45:03+00:00"
+    },
+    {
+      "id": "IIGABI-008",
+      "task": "KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The actual generated legacy24 CopyDispatchQueue_Invoke code can be compiled and exercised on the host with ASan/UBSan; valid and malformed message cases will distinguish real marshalling behavior from generated-file or ARM64 compile-only evidence",
+      "procedure": "docs/procedures/xnu-iig-abi.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:45:04+00:00",
+      "evidence": "state/evidence/IIGABI-008.json",
+      "evidence_sha256": "909fffcfd8efbf5b4538234957b2c44036331f0bf135b66af3b35a8c373e735e",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T04:45:43+00:00"
+    },
+    {
+      "id": "IIGABI-009",
+      "task": "KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Explicit real Linux/x86_64 TargetConditionals fallback values and Blocks syntax support permit the actual generated host marshalling sanitizer probe to run without pretending the host is Apple ARM64",
+      "procedure": "docs/procedures/xnu-iig-abi.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:46:07+00:00",
+      "evidence": "state/evidence/IIGABI-009.json",
+      "evidence_sha256": "298e165884f0c51d84985e862ef1b1f73316b48f19543bb664578ced72c1fabc",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T04:47:27+00:00"
+    },
+    {
+      "id": "IIGABI-010",
+      "task": "KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "A real full-source Linux TargetConditionals branch and explicit installed GNU ASan/UBSan runtime link enable honest host execution of the actual generated legacy RPC decoder, exposing malformed-message failures",
+      "procedure": "docs/procedures/xnu-iig-abi.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:47:27+00:00",
+      "evidence": "state/evidence/IIGABI-010.json",
+      "evidence_sha256": "900bcce0525845ee24c6e7945148dbbbff1e9f4b9ca59d97cd9fde99d82e25a8",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T04:48:26+00:00"
+    },
+    {
+      "id": "IIGABI-011",
+      "task": "KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Actual generated CopyDispatchQueue_Invoke can execute with real host libc and a separate guard-page helper, exposing valid/malformed behavior without claiming unavailable sanitizer or ARM64 runtime support",
+      "procedure": "docs/procedures/xnu-iig-abi.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:49:17+00:00",
+      "evidence": "state/evidence/IIGABI-011.json",
+      "evidence_sha256": "9f0e237e2d1026afd524308c21d8fc2cfc4bace2e3cd0dbb96d279bd089d8b62",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T04:50:24+00:00"
+    },
+    {
+      "id": "IIGABI-012",
+      "task": "KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Checking complete method-specific extents and required pointers before any generated Invoke access fixes four real malformed-input failures, while actual ARM64 union/offset checks and generated IDs provide bounded independent controls",
+      "procedure": "docs/procedures/xnu-iig-abi.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:50:25+00:00",
+      "evidence": "state/evidence/IIGABI-012.json",
+      "evidence_sha256": "30f50d4e18809570affc653a1ccf5ae037ea0c65aa235ee4a437fe83ba59421d",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T04:50:50+00:00"
+    },
+    {
+      "id": "IIGABI-013",
+      "task": "KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "With the harness name collision corrected, actual generated Invoke extent/null guards should pass all11 real host cases including the guard-page boundary, alongside actual ARM64 generated-layout and ID checks",
+      "procedure": "docs/procedures/xnu-iig-abi.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T04:50:50+00:00",
+      "evidence": "state/evidence/IIGABI-013.json",
+      "evidence_sha256": "1a568caf5c1ae17c9ed44a9f342bdb88886d9b4bdb81efa5f4408096b8b7d9fe",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T04:51:58+00:00"
     }
   ],
   "events": [
@@ -8047,6 +8286,287 @@
           "last_heartbeat": "2026-11-05T04:18:47+00:00",
           "branch": "main",
           "handoff": "docs/procedures/open-kernel-inputs/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:20:51+00:00",
+      "action": "task.claim:KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "tasks": [
+        {
+          "id": "KRN-004",
+          "status": "in_progress",
+          "owner": "codex-iig-abi-20261105-o",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T04:20:51+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:23:33+00:00",
+      "action": "task.refine:KRN-004:pin-additional-generator-primary-sources",
+      "owner": "codex-iig-abi-20261105-o",
+      "tasks": [
+        {
+          "id": "KRN-004",
+          "status": "in_progress",
+          "owner": "codex-iig-abi-20261105-o",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T04:20:51+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:35:46+00:00",
+      "action": "experiment.plan:IIGABI-001",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:36:07+00:00",
+      "action": "experiment.record:IIGABI-001",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:36:40+00:00",
+      "action": "experiment.plan:IIGABI-002",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:37:05+00:00",
+      "action": "experiment.record:IIGABI-002",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:37:17+00:00",
+      "action": "experiment.plan:IIGABI-003",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:37:49+00:00",
+      "action": "task.update:KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "tasks": [
+        {
+          "id": "KRN-004",
+          "status": "in_progress",
+          "owner": "codex-iig-abi-20261105-o",
+          "priority": 95,
+          "progress_note": "Real libclang IIG built, two conditional controls and eight cross-version public fasthash IDs agree; genuine selected arm64 IORPC24-byte layout confirmed and newer kernelContent rejected. Baseline and target-patch failures retained as IIGABI-001/002.",
+          "next_step": "Resolve compiler resource include closure and compile actual generated selected implementations before any ABI integration claim",
+          "last_heartbeat": "2026-11-05T04:37:49+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-iig-abi.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:38:59+00:00",
+      "action": "task.refine:KRN-004:pin-public-libc-header-generator",
+      "owner": "codex-iig-abi-20261105-o",
+      "tasks": [
+        {
+          "id": "KRN-004",
+          "status": "in_progress",
+          "owner": "codex-iig-abi-20261105-o",
+          "priority": 95,
+          "progress_note": "Real libclang IIG built, two conditional controls and eight cross-version public fasthash IDs agree; genuine selected arm64 IORPC24-byte layout confirmed and newer kernelContent rejected. Baseline and target-patch failures retained as IIGABI-001/002.",
+          "next_step": "Resolve compiler resource include closure and compile actual generated selected implementations before any ABI integration claim",
+          "last_heartbeat": "2026-11-05T04:37:49+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-iig-abi.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:39:12+00:00",
+      "action": "experiment.record:IIGABI-003",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:39:19+00:00",
+      "action": "task.refine:KRN-004:review-public-libc-header-generation",
+      "owner": "codex-iig-abi-20261105-o",
+      "tasks": [
+        {
+          "id": "KRN-004",
+          "status": "in_progress",
+          "owner": "codex-iig-abi-20261105-o",
+          "priority": 95,
+          "progress_note": "Real libclang IIG built, two conditional controls and eight cross-version public fasthash IDs agree; genuine selected arm64 IORPC24-byte layout confirmed and newer kernelContent rejected. Baseline and target-patch failures retained as IIGABI-001/002.",
+          "next_step": "Resolve compiler resource include closure and compile actual generated selected implementations before any ABI integration claim",
+          "last_heartbeat": "2026-11-05T04:37:49+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-iig-abi.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:40:03+00:00",
+      "action": "experiment.plan:IIGABI-004",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:40:56+00:00",
+      "action": "experiment.record:IIGABI-004",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:40:57+00:00",
+      "action": "experiment.plan:IIGABI-005",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:42:07+00:00",
+      "action": "experiment.record:IIGABI-005",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:42:08+00:00",
+      "action": "experiment.plan:IIGABI-006",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:43:42+00:00",
+      "action": "experiment.record:IIGABI-006",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:43:54+00:00",
+      "action": "experiment.plan:IIGABI-007",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:45:03+00:00",
+      "action": "experiment.record:IIGABI-007",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:45:04+00:00",
+      "action": "experiment.plan:IIGABI-008",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:45:43+00:00",
+      "action": "experiment.record:IIGABI-008",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:46:07+00:00",
+      "action": "experiment.plan:IIGABI-009",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:47:27+00:00",
+      "action": "experiment.record:IIGABI-009",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:47:27+00:00",
+      "action": "experiment.plan:IIGABI-010",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:48:26+00:00",
+      "action": "experiment.record:IIGABI-010",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:49:17+00:00",
+      "action": "experiment.plan:IIGABI-011",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:50:24+00:00",
+      "action": "experiment.record:IIGABI-011",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:50:25+00:00",
+      "action": "experiment.plan:IIGABI-012",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:50:50+00:00",
+      "action": "experiment.record:IIGABI-012",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:50:50+00:00",
+      "action": "experiment.plan:IIGABI-013",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:51:58+00:00",
+      "action": "experiment.record:IIGABI-013",
+      "owner": "codex-iig-abi-20261105-o"
+    },
+    {
+      "at": "2026-11-05T04:53:56+00:00",
+      "action": "task.refine:KRN-004:handoff-independent-compiler-metadata",
+      "owner": "codex-iig-abi-20261105-o",
+      "tasks": [
+        {
+          "id": "KRN-004",
+          "status": "in_progress",
+          "owner": "codex-iig-abi-20261105-o",
+          "priority": 95,
+          "progress_note": "Real libclang IIG built, two conditional controls and eight cross-version public fasthash IDs agree; genuine selected arm64 IORPC24-byte layout confirmed and newer kernelContent rejected. Baseline and target-patch failures retained as IIGABI-001/002.",
+          "next_step": "Resolve compiler resource include closure and compile actual generated selected implementations before any ABI integration claim",
+          "last_heartbeat": "2026-11-05T04:37:49+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-iig-abi.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:53:56+00:00",
+      "action": "task.add:KRN-005",
+      "owner": "codex-iig-abi-20261105-o",
+      "tasks": [
+        {
+          "id": "KRN-005",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:53:57+00:00",
+      "action": "task.update:KRN-004",
+      "owner": "codex-iig-abi-20261105-o",
+      "tasks": [
+        {
+          "id": "KRN-004",
+          "status": "in_progress",
+          "owner": "codex-iig-abi-20261105-o",
+          "priority": 95,
+          "progress_note": "Actual17 AST pairs,14 genuine MIG server headers, experimental arm64 OSObject and invocation layout objects, eight generated cross-version IDs and11 real host decoder controls verified. Four measured malformed-input failures fixed; all13 evidence records preserved. Other16 compiles and exact selected Apple ABI remain unqualified.",
+          "next_step": "Run independent KRN-005 for genuine XNU allocator compiler metadata, then recompile remaining interfaces and qualify selected dispatch/marshalling against exact-version evidence",
+          "last_heartbeat": "2026-11-05T04:53:57+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-iig-abi.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T04:55:03+00:00",
+      "action": "task.refine:KRN-004:final-source-review-notes",
+      "owner": "codex-iig-abi-20261105-o",
+      "tasks": [
+        {
+          "id": "KRN-004",
+          "status": "in_progress",
+          "owner": "codex-iig-abi-20261105-o",
+          "priority": 95,
+          "progress_note": "Actual17 AST pairs,14 genuine MIG server headers, experimental arm64 OSObject and invocation layout objects, eight generated cross-version IDs and11 real host decoder controls verified. Four measured malformed-input failures fixed; all13 evidence records preserved. Other16 compiles and exact selected Apple ABI remain unqualified.",
+          "next_step": "Run independent KRN-005 for genuine XNU allocator compiler metadata, then recompile remaining interfaces and qualify selected dispatch/marshalling against exact-version evidence",
+          "last_heartbeat": "2026-11-05T04:53:57+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-iig-abi.md"
         }
       ]
     }

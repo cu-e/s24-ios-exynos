@@ -13,7 +13,7 @@
 | Dependencies | DEV-001, CELL-001 |
 | started_at | 2026-11-05T03:48:29+00:00 |
 | last_heartbeat | 2026-11-05T03:56:50+00:00 |
-| report_health | recent |
+| report_health | stale |
 | progress_note | Eight host guard groups pass. Exact live BYH3/uid2000 context reverified; two regular vendor RIL files exist, but ordinary shell checksum and normal ADB sync pulls are denied. No binary bytes acquired or privileges changed. |
 | next_step | Use an explicitly supplied matching local RIL/vendor image for offline analysis, or a separately user-authorized future acquisition task; do not retry current access boundary |
 | branch | main |

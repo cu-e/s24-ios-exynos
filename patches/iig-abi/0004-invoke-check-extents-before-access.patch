@@ -1,0 +1,15 @@
+--- a/iig.cpp
++++ b/iig.cpp
+@@ -4090,6 +4090,12 @@
+ 	}
+ 	out << ")\n";
+ 	out << "{\n";
++	out << "    if (!_rpc.message || _rpc.sendSize < sizeof(" << prefix
++	    << "_Msg_With_Content) || !func) return kIOReturnIPCError;\n";
++	if (!method_is_oneway(method)) {
++		out << "    if (!_rpc.reply || _rpc.replySize < sizeof(" << prefix
++		    << "_Rpl_With_Content)) return kIOReturnIPCError;\n";
++	}
+ 	out << "    " << prefix << "_Invocation rpc = { _rpc };\n";
+ 	out << "    " << prefix << "_Rpl_With_Content * reply = rpc.reply;\n";
+ 	out << "#ifdef KERNEL\n";
