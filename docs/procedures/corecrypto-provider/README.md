@@ -148,11 +148,14 @@ CCPROV-001 failed after a real successful layout compile because the auditor
 hashed relative dependency names against its own cwd. Its failed source and
 outputs are retained. CCPROV-002 resolves names against the exact recorded
 compiler cwd and passes41 actual checks, with peak child RSS136460KiB. It
-records99 genuine probe dependencies. CCPROV-003 is the final replay bound to
+records99 genuine probe dependencies. CCPROV-003 replay is bound to
 `e4e11be38ee3d41b233f58b8d4c9234c2af93e28`: all42 checks pass, with peak
-child RSS160224KiB. It hashes all selected C/C++ sources scanned for direct
-demand, verifies the maintained56-slot catalog, and records the measured
-startup-symbol inventory. [qualified-audit.json](../../../fixtures/public/corecrypto-provider/qualified-audit.json)
+child RSS160224KiB. CCPROV-004 is the final replay bound to the subsequent
+Git-read guard commit: all43 checks pass, including29 negative controls,
+with peak child RSS160140KiB. It hashes957 selected C/C++ sources scanned for
+direct demand, verifies the maintained56-slot catalog, records79 demand
+references and99 probe dependencies, and measures the startup-symbol inventory.
+[qualified-audit.json](../../../fixtures/public/corecrypto-provider/qualified-audit.json)
 links the exact existing evidence capsule and its immutable digest.
 
 Controls change all21 actual zero-slot bytes individually and one active
