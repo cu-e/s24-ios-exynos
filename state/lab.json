@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T14:04:16+00:00",
+  "updated_at": "2026-11-05T15:00:48+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -929,15 +929,15 @@
         "Record real results, failure modes and next-step handoff"
       ],
       "started_at": "2026-11-05T13:27:37+00:00",
-      "updated_at": "2026-11-05T13:41:52+00:00",
-      "progress_note": "Pinned donor verified;genuinely built5-source AVF shim and owned static arm64 PID1;12 real host controls pass. VMHOST001 inconclusive and VMHOST002 shim-only pass recorded. No XNU guest launched or runtime PID1 observed. Scoped commits f71ede2 and current evidence commit are ready for coordinator review.",
-      "next_step": "Supply provenance-qualified complete QEMU/AVF XNU kernel and generic ARM64 QEMU virt/TCG executable;then coordinator leases one bounded guest and reviews actual Darwin/PID1 console and termination. Main make check deferred to coordinator integration.",
+      "updated_at": "2026-11-05T14:21:27+00:00",
+      "progress_note": "VM-004 resolved genericQEMU prerequisite with actual QEMU10.2.0 virt/TCG,cortex-a76 and bounded stopped-machine controls. Read-only existing VM002 harness with explicit built binary,old built shim and ownedPID1 returns exit2 with exactly one missing completekernel input;no guest started. Historical VM002 evidence remains inconclusive.",
+      "next_step": "Supply and independently qualify a complete selected QEMU/AVF XNU guest kernel with mockfs and PSCI exit;then obtain one concrete guest resource lease,capture genuine Darwin/PID1 console and measure guest/host stopping. VM004 followup handoff:worktrees/vm-004-20261105/docs/procedures/qemu-host/README.md. Keep VM002 blocked;no Linux substitute or source/object acceptance.",
       "handoff": "worktrees/vm-002-20261105/docs/procedures/vm-002/README.md",
       "released_at": "2026-11-05T11:12:50+00:00",
-      "last_heartbeat": "2026-11-05T13:41:52+00:00",
+      "last_heartbeat": "2026-11-05T14:21:27+00:00",
       "branch": "team/vm-002-20261105",
       "worktree": "worktrees/vm-002-20261105",
-      "blocked_reason": "No complete linked provenance-qualified XNU guest kernel for QEMU/AVF board+mockfs+PSCI exit is supplied;E1S object closure is not a guest image. No generic ARM64 QEMU virt/TCG executable is available;installed Android frontend rejects required -machine help (exit1) and -accel help (exit2). Shim/PID1 source builds and host controls do not satisfy actual XNU execution acceptance."
+      "blocked_reason": "VM-004 now supplies genuinely built generic QEMU10.2.0 ARM64 virt/TCG and measured bounded empty-machine stopping;read-only existing VM002 preflight accepts it and reports only missing kernel. Still need complete linked provenance-qualified XNU guest kernel for selected QEMU/AVF board,mockfs raw-executable ramdisk and intended PSCI exit. Actual Darwin guest/PID1 execution and guest stopping remain unmeasured;E1S object closure is not a guest kernel. VM-002 remains blocked under original am owner."
     },
     {
       "id": "VM-003",
@@ -3953,7 +3953,7 @@
     {
       "id": "KRN-022",
       "title": "Qualify genuine pthread kext source, header and provider integration",
-      "status": "in_progress",
+      "status": "done",
       "owner": "codex-kernel-pthread-profile-20261105-ag",
       "priority": 99,
       "scope": "host",
@@ -3984,13 +3984,16 @@
         "Hand off verified components or exact remaining source/header/provider requirements to existing integration owners and assess all acceptance criteria with make check"
       ],
       "started_at": "2026-11-05T12:21:39+00:00",
-      "last_heartbeat": "2026-11-05T13:12:43+00:00",
-      "updated_at": "2026-11-05T13:12:43+00:00",
-      "progress_note": "Pthread component and15 actual source/ABI/metadata/VM-alias controls pass;checkpoint committed;coordinator now uses isolated worktree while three independent host executors own USB001,DRV001,ESIM001",
-      "next_step": "Finish exact native MIG-header context comparison and wrong-alias negative control,then final acceptance and integration",
+      "last_heartbeat": "2026-11-05T14:05:52+00:00",
+      "updated_at": "2026-11-05T14:13:26+00:00",
+      "progress_note": "PTHP-012 passes21 final checks: five passing capsules revalidated, three actual ARM64 archive members,39 definitions/61 imports with no unresolved or kernel overlap,140 callback fields/284 layout values and four fresh native SDK MIG byte identities. Integrated3c23af0 and main146tests pass; independent REV-006 is active before acceptance. No full SDK, private Apple ABI, crypto, full-link or runtime claim.",
+      "next_step": "Resolve any independent REV-006 finding, then complete bounded component and release ordered KRN-024 genuine provider link measurement.",
       "handoff": "docs/procedures/xnu-kernel-pthread-profile.md",
       "branch": "team/krn-022-coordinator-20261105",
-      "worktree": "worktrees/krn-022-coordinator-20261105"
+      "worktree": "worktrees/krn-022-coordinator-20261105",
+      "evidence": "artifacts/xnu-kernel-pthread-profile/acceptance-session1/evidence.json",
+      "evidence_sha256": "7e3aefe6d7f38e3a8c08275c1b0c333a463b500367b0c7353d716b1f8a79fa62",
+      "finished_at": "2026-11-05T14:13:26+00:00"
     },
     {
       "id": "REV-001",
@@ -4144,7 +4147,7 @@
     {
       "id": "REV-005",
       "title": "Independently review MISC-001 peripheral source specifications",
-      "status": "in_progress",
+      "status": "done",
       "owner": "codex-team-review-misc-20261105-as",
       "priority": 95,
       "scope": "host",
@@ -4168,17 +4171,20 @@
       ],
       "started_at": "2026-11-05T13:51:49+00:00",
       "last_heartbeat": "2026-11-05T13:58:23+00:00",
-      "updated_at": "2026-11-05T13:58:23+00:00",
+      "updated_at": "2026-11-05T14:06:45+00:00",
       "branch": "team/rev-misc-20261105",
       "worktree": "worktrees/rev-misc-20261105",
       "progress_note": "Independent review-only commit d0e3e0e ready: bounded no P0/P1/P2 findings at exact misc tipbf54dcd. MISCREV-001 pass:66commands,22 raw source blobs/81anchors,16same/6different,all10 original evidence hashes and precommit-source binding;7 original plus12 reviewer provenance rejection controls;actual NFC/biometric/haptic/MFC/DP context verified,no native claim or implementation/reference/device writes.",
       "next_step": "Coordinator inspect review commit/evidence, integrate review documentation and decide acceptance;leave REV-005 in_progress until explicitly accepted.",
-      "handoff": "worktrees/rev-misc-20261105/docs/reviews/misc-001/handoff.md"
+      "handoff": "worktrees/rev-misc-20261105/docs/reviews/misc-001/handoff.md",
+      "evidence": "worktrees/rev-misc-20261105/artifacts/rev-misc-001/review1/evidence.json",
+      "evidence_sha256": "1269b94d03533a49dc25eb9769ea6841dab82ae648971584cb8d386fdef5a870",
+      "finished_at": "2026-11-05T14:06:45+00:00"
     },
     {
       "id": "KRN-023",
       "title": "Qualify genuine corecrypto provider requirements for selected XNU link",
-      "status": "in_progress",
+      "status": "done",
       "owner": "codex-team-corecrypto-20261105-at",
       "priority": 94,
       "scope": "host",
@@ -4205,15 +4211,21 @@
         "Record dated evidence and handoff, commit only owned paths, request coordinator integration review."
       ],
       "started_at": "2026-11-05T13:52:28+00:00",
-      "last_heartbeat": "2026-11-05T13:52:28+00:00",
-      "updated_at": "2026-11-05T13:52:28+00:00",
+      "last_heartbeat": "2026-11-05T14:46:30+00:00",
+      "updated_at": "2026-11-05T14:53:36+00:00",
       "branch": "team/krn-023-20261105",
-      "worktree": "worktrees/krn-023-20261105"
+      "worktree": "worktrees/krn-023-20261105",
+      "progress_note": "Material correction ready: followups5e7d3bb+fc7f7da separate Clang cc_kext compiler support from corecrypto identity. Final planned CCPROV-007 bound5e7d3bb passes56checks/33negatives;3pinnedDriver/Darwin/ToolChain blobs match retainedcompiler;actual retained-driver backend omits absent support resource,explicitXlinker control retainsliteral. Removed libcc_kext search-directory/provider inference;56slot/21unsupported crypto audit unchanged and independently gated. PeakRSS160192KiB,noheavybuild or native execution.",
+      "next_step": "Coordinator cherry-picks two correction commits and runs common checks;KRN025 qualifies compiler-runtime independently of crypto implementation/init. Retain in_progress until acceptance.",
+      "handoff": "worktrees/krn-023-20261105/docs/procedures/corecrypto-provider/handoff.md",
+      "evidence": "worktrees/krn-023-20261105/tools/research/corecrypto/local/driver-correction-session3/evidence.json",
+      "evidence_sha256": "ff9c01d10b1fc3022147a56da4af5ce3397f4dc250c4ff750b6753c35a614ef9",
+      "finished_at": "2026-11-05T14:53:36+00:00"
     },
     {
       "id": "VM-004",
       "title": "Prepare a locally built generic ARM64 QEMU virt and TCG host runner",
-      "status": "in_progress",
+      "status": "done",
       "owner": "codex-team-qemu-host-20261105-au",
       "priority": 93,
       "scope": "host",
@@ -4239,15 +4251,21 @@
         "Record dated evidence and handoff, commit only owned paths, request coordinator integration review."
       ],
       "started_at": "2026-11-05T13:53:55+00:00",
-      "last_heartbeat": "2026-11-05T13:53:55+00:00",
-      "updated_at": "2026-11-05T13:53:55+00:00",
+      "last_heartbeat": "2026-11-05T14:26:27+00:00",
+      "updated_at": "2026-11-05T14:40:34+00:00",
       "branch": "team/vm-004-20261105",
-      "worktree": "worktrees/vm-004-20261105"
+      "worktree": "worktrees/vm-004-20261105",
+      "progress_note": "Ready for coordinator review:commits d46e7ac plus evidence followup;genuine pinned QEMU10.2.0 binary SHA bca8564182c786eb00e9f43c3153328f68e2edf50bfabe28236dbaac438acc11. Actual virt/TCG/cortex-a76/serial and bounded stopped-empty-machine PASS. Final2job build94.295s,corrected session-tree RSSpeak938.57MiB,minimumavailable13.47GiB. Independent child-group kill/pause controls PASS;six failures retained. No guest OS/XNU execution. Originalam VM002blocked reason updated:QEMU resolved,completekernel/actualPID1+stop still missing.",
+      "next_step": "Coordinator reviews/cherry-picks implementation and evidence,then runs common checks for VM004 acceptance. No further build needed;exclusive heavy lease released. Keep VM002blocked until provenance-qualified full QEMU/AVF kernel and actual guest execution.",
+      "handoff": "worktrees/vm-004-20261105/docs/procedures/qemu-host/README.md",
+      "evidence": "worktrees/vm-004-20261105/docs/procedures/qemu-host/evidence.json",
+      "evidence_sha256": "98cb717cefb2036bef18acb06e072d744a0144a3dd0fa0e7a8debac209417bb0",
+      "finished_at": "2026-11-05T14:40:34+00:00"
     },
     {
       "id": "REV-006",
       "title": "Independently review genuine KRN-022 pthread component qualification",
-      "status": "in_progress",
+      "status": "done",
       "owner": "codex-team-review-pthread-20261105-av",
       "priority": 99,
       "scope": "host",
@@ -4270,15 +4288,21 @@
         "Commit review docs only and record real evidence/handoff; retain in_progress for coordinator acceptance."
       ],
       "started_at": "2026-11-05T13:59:46+00:00",
-      "last_heartbeat": "2026-11-05T13:59:46+00:00",
-      "updated_at": "2026-11-05T13:59:46+00:00",
+      "last_heartbeat": "2026-11-05T14:12:58+00:00",
+      "updated_at": "2026-11-05T14:14:05+00:00",
       "branch": "team/rev-pthread-20261105",
-      "worktree": "worktrees/rev-pthread-20261105"
+      "worktree": "worktrees/rev-pthread-20261105",
+      "progress_note": "Review-only commit0c0a226 ready:bounded no P0/P1/P2 at exact16a7497. PTHPREV-001 pass:3578 original artifact hashentries,six capsules including21acceptancechecks,actual982object closure39defs/61imports/zerooverlap,140declarations/284values and genuine metadata;fresh real callbackTU/type-rejection/VMalias/nativeSDKMIG/threadunifdef controls,15commands,70864KiB peakRSS,no heavybuild or mainartifact edits.",
+      "next_step": "Coordinator inspect and accept review/evidence before completion;next controlled link preserves BUILD_LTO=0,namespace remaps,nativealiases and all genuine required libraries;full SDK/privateAppleABI/crypto/link/runtime/native remain unqualified.",
+      "handoff": "worktrees/rev-pthread-20261105/docs/reviews/krn-022/handoff.md",
+      "evidence": "worktrees/rev-pthread-20261105/artifacts/rev-krn-022/review1/evidence.json",
+      "evidence_sha256": "503062615d13cc093aabf05393c4b289f0cb0a8e21742b16b770cf1221324785",
+      "finished_at": "2026-11-05T14:14:05+00:00"
     },
     {
       "id": "DRV-004",
       "title": "Prepare source-qualified E1S UFS and MCQ read-only descriptor boundaries",
-      "status": "in_progress",
+      "status": "done",
       "owner": "codex-team-ufs-host-20261105-aw",
       "priority": 80,
       "scope": "host",
@@ -4303,16 +4327,22 @@
         "Test meaningful actual source layout cases and adverse inputs, commit owned files and record evidence/handoff for coordinator review."
       ],
       "started_at": "2026-11-05T14:02:36+00:00",
-      "last_heartbeat": "2026-11-05T14:02:36+00:00",
-      "updated_at": "2026-11-05T14:02:36+00:00",
+      "last_heartbeat": "2026-11-05T14:40:45+00:00",
+      "updated_at": "2026-11-05T14:41:17+00:00",
       "branch": "team/drv-004-20261105",
-      "worktree": "worktrees/drv-004-20261105"
+      "worktree": "worktrees/drv-004-20261105",
+      "progress_note": "Coordinator accepted host criteria after independent REV-007 with no actionable findings. Explicit primary UFSHOST-003 passed22checks at artifacts/ufs-host/coordinator-integration-session1/evidence.json; common make check passed146tests at25236224f5a47c2340b5d2fe4fd6ef3ed6d2380a with artifacts/team-coordination/20261105-ah/integration-004/evidence.json. Native MMIO, DMA coherency/backend drain, hardware clocks, firmware and Apple ABI remain unqualified.",
+      "next_step": "Close accepted host preparation. DRV-002 retains its dependencies and separate native/backend/hardware gates.",
+      "handoff": "worktrees/drv-004-20261105/docs/procedures/ufs-host/handoff.md",
+      "evidence": "artifacts/ufs-host/coordinator-integration-session1/evidence.json",
+      "evidence_sha256": "1117091f656539bb432de6505ccc3817312ad75aa1523d92af9834499410e7d6",
+      "finished_at": "2026-11-05T14:41:17+00:00"
     },
     {
       "id": "KRN-024",
       "title": "Measure coherent selected kernel link with genuine pthread and firehose providers",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-team-kernel-link-20261105-ax",
       "priority": 99,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -4336,7 +4366,275 @@
         "Wait for genuine KRN022 acceptance,then atomically claim-next through main registry and create separate worktree.",
         "Derive actual native link command and current coherent source/object/header witnesses; do not invent kernel layout or symbols.",
         "Run one bounded link stage within resource budget,record real evidence/handoff and scoped commit for coordinator review."
-      ]
+      ],
+      "started_at": "2026-11-05T14:14:32+00:00",
+      "last_heartbeat": "2026-11-05T15:00:25+00:00",
+      "updated_at": "2026-11-05T15:00:41+00:00",
+      "branch": "team/krn-024-20261105",
+      "worktree": "worktrees/krn-024-20261105",
+      "progress_note": "Coordinator accepted bounded measurement after independent REV-008 review 87ccd002 with no P0/P1/P2 findings. Implementation a8c4532 integrated as b52538c; review integrated as b3e9666. Main make check passed 146 tests at 065e32280cea165f22d29d5db6ea934d89e24b6c; evidence artifacts/team-coordination/20261105-ah/integration-005/evidence.json. Actual intact link FAILED, exit 1 missing -lcc_kext, and produced NO kernel image. Compiler-support runtime and 37 genuine ARM export providers remain distinct gates; no full kernel, Apple ABI, crypto, runtime or native qualification.",
+      "next_step": "Complete only accepted KRN-024 measurement. KRN-025 compiler-runtime owner remains active; KRN-026 source-provider owner remains blocked. No ownership takeover or further full relink until genuine new inputs.",
+      "handoff": "worktrees/krn-024-20261105/docs/procedures/kernel-provider-link/README.md",
+      "evidence": "worktrees/krn-024-20261105/artifacts/kernel-provider-link/acceptance-session1/evidence.json",
+      "evidence_sha256": "87040045bd6c6dd75c28a8080ef826e6baaa4a13c304dc99ed01eed685ee19bc",
+      "finished_at": "2026-11-05T15:00:41+00:00"
+    },
+    {
+      "id": "REV-007",
+      "title": "Independently review DRV-004 UFS MCQ read-only host admission",
+      "status": "done",
+      "owner": "codex-team-review-ufs-20261105-ay",
+      "priority": 97,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002",
+        "BLD-001"
+      ],
+      "paths": [
+        "docs/reviews/drv-004"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Review exact1e0b86c8e5a322c60718006b053739d96a641078 implementation, genuine pinned Samsung and E1S descriptor/completion source, final and commit-bound evidence without modifying implementation.",
+        "Independently verify meaningful descriptor, CQE address/SQ and response tag/residual/error/lifetime admission cases against actual source declarations and a separate bounded oracle; challenge1088-byte UCD versus128-byte alignment, stale/error/timeout ownership and write rejection.",
+        "Publish actionable severity/reproduction or bounded no-finding verdict with actual command/source/artifact hashes, evidence and handoff. No DMA/MMIO/hardware or native kernel qualification inferred."
+      ],
+      "steps": [
+        "Atomically claim-next through main registry and create separate reviewer worktree.",
+        "Inspect exact candidate and actual source-cache with no shared reference changes; run bounded independent source/host checks.",
+        "Commit review docs only and retain in_progress pending coordinator integration acceptance."
+      ],
+      "started_at": "2026-11-05T14:17:07+00:00",
+      "last_heartbeat": "2026-11-05T14:27:07+00:00",
+      "updated_at": "2026-11-05T14:45:37+00:00",
+      "branch": "team/rev-ufs-20261105",
+      "worktree": "worktrees/rev-ufs-20261105",
+      "progress_note": "Review-only commit 8d9e53c88eb8e0f7d8a57599514f78884b9b097f ready; no actionable P0/P1/P2 for exact 1e0b86c host contract. REVUFS-002 pass after correcting reviewer backward-time fixture. Genuine declaration/descriptor/error/stale/lease tests and documented stride/epoch-reuse counterexamples pass ASan+UBSan; actual capsule/source hashes match. No hardware/native/DMA qualification.",
+      "next_step": "Coordinator inspect report/evidence, integrate review-only commit and run explicit UFS component runner with read-only source cache plus common checks; retain in_progress until acceptance",
+      "handoff": "worktrees/rev-ufs-20261105/docs/reviews/drv-004/handoff.md",
+      "evidence": "worktrees/rev-ufs-20261105/artifacts/rev-ufs/20261105-session2/evidence.json",
+      "evidence_sha256": "3fbcb3b6431e226f17189481eec26cb028a5bd070cdf15ebdc48d7343fbfc428",
+      "finished_at": "2026-11-05T14:45:37+00:00"
+    },
+    {
+      "id": "KRN-025",
+      "title": "Build and qualify genuine selected cc_kext compiler runtime",
+      "status": "in_progress",
+      "owner": "codex-team-cc-runtime-20261105-az",
+      "priority": 100,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "KRN-021",
+        "KRN-022"
+      ],
+      "paths": [
+        "tools/build/xnu_cc_kext.py",
+        "patches/cc-kext-runtime",
+        "fixtures/public/xnu-cc-kext",
+        "docs/procedures/xnu-cc-kext.md"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Trace exact selected Clang Driver/Darwin source mapping of native -lcc_kext to compiler-rt support archive, full source pin and genuine Darwin cc_kext source/build selection. Keep corecrypto identity separate.",
+        "Build genuine selected ARM64/iOS kernel compiler-runtime archive from applicable pinned primary source and native definitions; inspect all members/exports/imports and exact compiler resource/archive lookup with executed missing/wrong-input controls. No empty archive or stub provider.",
+        "Record reproducible actual commands/source/tool/archive hashes and coherent integration handoff; preserve missing inputs explicitly and full-kernel/runtime/private-Apple limits."
+      ],
+      "steps": [
+        "Atomically claim-next through primary registry, inspect task/dependencies and use a separate worktree.",
+        "Work only within reserved paths and preserve shared source/artifact immutability and phone restrictions.",
+        "Record actual evidence and handoff, commit only owned changes and request coordinator acceptance."
+      ],
+      "started_at": "2026-11-05T14:33:33+00:00",
+      "last_heartbeat": "2026-11-05T14:59:16+00:00",
+      "updated_at": "2026-11-05T14:59:16+00:00",
+      "branch": "team/krn-025-20261105",
+      "worktree": "worktrees/krn-025-20261105",
+      "progress_note": "Genuine LLVM17 source snapshot472files and public Libc132headers verified; full286-source compile survey retained160 failures from159 missing generated XNU alias header and1 public os availability header. Corrected resource include order/native feature extraction for next run. HTTP200 truncated named AvailabilityInternal Git blob rejected; bounded verified Git-object fallback in progress. No runtime archive qualified yet; all hardware/private/fullcrypto gates false.",
+      "next_step": "Finish verified public declaration headers and genuine generated headers, compile all selected runtime sources, then native archive/member/import/export, driver resource/link and wrong-input controls under existing bounded lease",
+      "handoff": "worktrees/krn-025-20261105/docs/procedures/xnu-cc-kext.md"
+    },
+    {
+      "id": "KRN-026",
+      "title": "Resolve selected kernel export-list-only symbol gaps against genuine source",
+      "status": "blocked",
+      "owner": "codex-team-export-gaps-20261105-ba",
+      "priority": 98,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "KRN-020",
+        "KRN-021",
+        "KRN-022"
+      ],
+      "paths": [
+        "tools/build/xnu_kernel_export_gaps.py",
+        "patches/kernel-export-gaps",
+        "fixtures/public/kernel-export-gaps",
+        "docs/procedures/xnu-kernel-export-gaps.md"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Bind actual current SGAP982 graph and KRN024 observed37 export-only names to native export generation recipes, selected feature defines and genuine source/IIG providers.",
+        "Implement only source-backed profile/export or object-production corrections supported by native recipes, in fresh owned outputs; do not drop genuine required exports, invent symbols or disable features to hide unresolved inputs.",
+        "Verify actual corrected provider/export bytes and meaningful wrong-source/config controls, record exact unavailable private inputs where necessary and hand off coherent replacements. No full kernel/runtime/native promotion without evidence."
+      ],
+      "steps": [
+        "Atomically claim-next through primary registry, inspect task/dependencies and use a separate worktree.",
+        "Work only within reserved paths and preserve shared source/artifact immutability and phone restrictions.",
+        "Record actual evidence and handoff, commit only owned changes and request coordinator acceptance."
+      ],
+      "started_at": "2026-11-05T14:34:59+00:00",
+      "last_heartbeat": "2026-11-05T14:54:57+00:00",
+      "updated_at": "2026-11-05T14:54:57+00:00",
+      "branch": "team/krn-026-20261105",
+      "worktree": "worktrees/krn-026-20261105",
+      "progress_note": "Blocked with coordinator approval after independent final capsule and81 artifact hash verification. Integrated diagnosis34e2181+3376c9b and py_compile pass retained.37 genuine selected ARM64 providers/private ABI inputs remain unavailable; all native exports,features and982-object graph unchanged. Original owner and path reservations preserved; no completion or release.",
+      "next_step": "Supply provenance-qualified selected ARM64 implementation and class ABI inputs for17 IOUnifiedAddressTranslator,7 pmap_iommu,11 DART/SART/UAT/NVMe PPL and2 pmap query exports, then resume original ownership for source-backed provider qualification.",
+      "handoff": "docs/procedures/xnu-kernel-export-gaps.md",
+      "blocked_reason": "Exact selected ARM64 provider inputs are unavailable:17 IOUnifiedAddressTranslator implementations with provenance-qualified class layout/vtable/type/dispatch ABI;7 pmap_iommu implementations;11 DART/SART/UAT/NVMe PPL implementations and hardware/ABI dependencies;2 pmap_has_iofilter_protected_write and pmap_cs_configuration ARM64 semantics/implementations. Native selection still requires all37 exports; public pmap sources are already-compiled placeholders. Root independently verified diagnosis and81 artifact hashes; no supported export/profile/object correction exists from supplied inputs."
+    },
+    {
+      "id": "KRN-027",
+      "title": "Correct compiler-runtime versus corecrypto identity in coordinator procedures",
+      "status": "done",
+      "owner": "codex-coordinator-docfix-20261105-bb",
+      "priority": 90,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "KRN-022",
+        "KRN-021"
+      ],
+      "paths": [
+        "docs/procedures/xnu-kernel-pthread-profile.md",
+        "docs/procedures/xnu-kernel-symbol-gaps.md"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Correct previous cc_kext/corecrypto conflation using pinned actual selected Clang driver source; retain crypto missing callbacks as separate facts.",
+        "Preserve historical actual evidence and source limits, add exact provenance and new next integration tasks without changing source/build or generated registry files manually."
+      ],
+      "steps": [
+        "Atomically claim-next through primary registry, inspect task/dependencies and use a separate worktree.",
+        "Work only within reserved paths and preserve shared source/artifact immutability and phone restrictions.",
+        "Record actual evidence and handoff, commit only owned changes and request coordinator acceptance."
+      ],
+      "started_at": "2026-11-05T14:35:45+00:00",
+      "last_heartbeat": "2026-11-05T14:35:45+00:00",
+      "updated_at": "2026-11-05T14:41:23+00:00",
+      "branch": "team/krn-027-20261105",
+      "worktree": "worktrees/krn-027-20261105",
+      "evidence": "worktrees/krn-027-20261105/artifacts/cc-runtime-docfix/session1/evidence.json",
+      "evidence_sha256": "6441460ef90752e1b408868952f57963cfc1ea0b1cd618bb52fcd329ac957fcc",
+      "finished_at": "2026-11-05T14:41:23+00:00"
+    },
+    {
+      "id": "REV-008",
+      "title": "Independently review current genuine kernel provider-link measurement",
+      "status": "done",
+      "owner": "codex-team-review-kernel-link-20261105-bc",
+      "priority": 99,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "KRN-020",
+        "KRN-021",
+        "KRN-022"
+      ],
+      "paths": [
+        "docs/reviews/krn-024"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Review exacta8c45325356ed2842d34a8901fba92136564a397 measurement builder, actual current982-object/3156-dependency graph, native transformations/filelists/981archive, genuine pthread/firehose providers and actual driver/backend commands.",
+        "Independently verify compiler cc_kext mapping and backend omission/restoration, actual missing-library versus37 export-only diagnostic boundaries, exact aliases and coherent input provenance; repeat only bounded necessary controls, no heavy rebuild.",
+        "Publish actionable findings or bounded no-finding review/evidence/handoff, retaining full kernel/crypto/privateABI/runtime/native limitations and distinct compiler-runtime identity."
+      ],
+      "steps": [
+        "Atomically claim through mainregistry and create isolatedreviewworktree.",
+        "Read exact source and genuine capsules/objects without shared source/artifact mutations.",
+        "Commitreviewdocs only, record real commands/hashes and retaininprogress for rootacceptance."
+      ],
+      "started_at": "2026-11-05T14:43:52+00:00",
+      "last_heartbeat": "2026-11-05T14:56:00+00:00",
+      "updated_at": "2026-11-05T15:00:18+00:00",
+      "branch": "team/rev-kernel-link-20261105",
+      "worktree": "worktrees/rev-kernel-link-20261105",
+      "progress_note": "Review-only87ccd00 ready:bounded no P0/P1/P2 at exacta8c4532. KLINKREV-002 pass verifies3366retained artifact entries/45commandhashes,982objects/3156deps,native14HIB+1KLD,978filelist/981archive,FH/PTH realclosure83aliases;fresh driver dry-run confirms reservedcc omission/exactsingle restoration and missing-library/noimage gate,37export-only names distinct;threeactualreadonlyvalidatorrejections,no relink/build. KLINKREV-001 reviewerwhitespacefailure preserved.",
+      "next_step": "Coordinator inspect/accept review/evidence before completion;preserve missing compiler-runtime and37source-qualified export-provider followups,KRN025/026 owners;full kernel/crypto/SDK/privateABI/runtime/native remain unqualified.",
+      "handoff": "worktrees/rev-kernel-link-20261105/docs/reviews/krn-024/handoff.md",
+      "evidence": "worktrees/rev-kernel-link-20261105/artifacts/rev-krn-024/review2/evidence.json",
+      "evidence_sha256": "7159f1558be221bd327dbd58dc6796a12baa3a6be31522bc653082f26cccb141",
+      "finished_at": "2026-11-05T15:00:18+00:00"
+    },
+    {
+      "id": "VM-005",
+      "title": "Execute genuine AVF shim handoff fixture under qualified generic ARM64 QEMU",
+      "status": "in_progress",
+      "owner": "codex-team-avf-handoff-20261105-bd",
+      "priority": 80,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "VM-004",
+        "BLD-001"
+      ],
+      "paths": [
+        "tools/verify/avf_handoff.py",
+        "fixtures/public/avf-handoff",
+        "docs/procedures/avf-handoff"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Bind genuine previously pinned scion AVF shim source and actual built image, qualified QEMU binary, loader input/MachO/bootargs/DTB contract against real source; do not edit blocked VM002 implementation or its original artifacts.",
+        "Build an explicitly owned synthetic ARM64 handoff fixture and execute actual pinned shim plus fixture under qualified generic QEMU, checking real console marker/bootargs/entry and bounded PSCI exit or exact observed source-backed failure. No XNU kernel/PID1/iOS/native execution claim from this fixture.",
+        "Record actual CPU execution evidence, full commands/exits/source/tool/image hashes and independent failure/termination controls with finite timeouts/owned-process cleanup and bounded RAM. If genuine incompatibility prevents handoff retain exact blocker instead of skipping shim, faking output or marking runtime success."
+      ],
+      "steps": [
+        "Atomically claim-next through main registry after higherpriorityreview isclaimed; create distinctworktree.",
+        "Derive exact pinned shim/native build and QEMU virtualboard inputs, preserve sources and validate owned fixture with genuine target objects.",
+        "Run one bounded guestfixture atatime usinghosttoolonly, save evidence/handoff andscopedcommit forrootreview."
+      ],
+      "started_at": "2026-11-05T14:45:27+00:00",
+      "last_heartbeat": "2026-11-05T14:45:27+00:00",
+      "updated_at": "2026-11-05T14:45:27+00:00",
+      "branch": "team/vm-005-20261105",
+      "worktree": "worktrees/vm-005-20261105"
+    },
+    {
+      "id": "KRN-028",
+      "title": "Qualify source-available crypto backend candidates for missing selected callbacks",
+      "status": "in_progress",
+      "owner": "codex-team-crypto-candidates-20261105-be",
+      "priority": 85,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "KRN-023"
+      ],
+      "paths": [
+        "tools/research/crypto-candidates",
+        "fixtures/public/crypto-candidates",
+        "docs/procedures/crypto-candidates"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Bind all21 missing callback requirements to genuine selected XNU declarations, descriptors/context/ownership and actual demand catalog; do not equate compiler-runtime library with crypto provider.",
+        "Identify at least two real primary source backend candidates with full pinned revisions, component notices and supported/missing algorithm/API mappings; assess freestanding kernel portability and exact allocation/entropy/initialization dependencies from actual code, preserving unknown/private inputs.",
+        "Produce a repeatable requirements/provenance verifier and a concrete next bridge-interface plan for actual algorithms without copying restricted implementation, fake SDK types, empty callbacks or crypto/FIPS/native success claims."
+      ],
+      "steps": [
+        "Claim-next via primary registry only after KRN023 reviewed/done and create isolated worktree.",
+        "Research primary source only, keep fetches/task artifacts isolated and source references read-only; pin before reuse.",
+        "Record dated source/candidate/API evidence, real verifier negative controls, scoped commit and handoff for coordinator review."
+      ],
+      "started_at": "2026-11-05T14:54:22+00:00",
+      "last_heartbeat": "2026-11-05T14:54:22+00:00",
+      "updated_at": "2026-11-05T14:54:22+00:00",
+      "branch": "team/krn-028-20261105",
+      "worktree": "worktrees/krn-028-20261105"
     }
   ],
   "experiments": [
@@ -8156,11 +8454,15 @@
       "task": "KRN-023",
       "owner": "codex-team-corecrypto-20261105-at",
       "kind": "source-review",
-      "status": "planned",
+      "status": "recorded",
       "hypothesis": "A pinned source/object/link audit can establish the real selected crypto registration ABI and missing provider requirements without treating minicrypto, public evaluation-only corecrypto or algorithm selftests as a complete compatible provider.",
       "procedure": "worktrees/krn-023-20261105/docs/procedures/corecrypto-provider/README.md",
       "timeout_seconds": 900,
-      "created_at": "2026-11-05T13:54:24+00:00"
+      "created_at": "2026-11-05T13:54:24+00:00",
+      "evidence": "worktrees/krn-023-20261105/tools/research/corecrypto/local/source-abi-session1/evidence.json",
+      "evidence_sha256": "5b82352ad060d02a5bd91eed8ad2f3f55a99db5ab7f12716f84093ce25f64a3f",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T14:08:31+00:00"
     },
     {
       "id": "PTHP-012",
@@ -8182,33 +8484,498 @@
       "task": "VM-004",
       "owner": "codex-team-qemu-host-20261105-au",
       "kind": "host-test",
-      "status": "planned",
+      "status": "recorded",
       "hypothesis": "Pinned primary QEMU10.2.0 can build generic aarch64-softmmu virt/TCG with available host dependencies and local bundled source dependencies under monitored2job lease; actual help and bounded stopped-machine lifecycle qualify the host tool without any guest OS.",
       "procedure": "worktrees/vm-004-20261105/docs/procedures/qemu-host/experiment.md",
       "timeout_seconds": 3600,
-      "created_at": "2026-11-05T13:55:36+00:00"
+      "created_at": "2026-11-05T13:55:36+00:00",
+      "evidence": "worktrees/vm-004-20261105/docs/procedures/qemu-host/evidence.json",
+      "evidence_sha256": "98cb717cefb2036bef18acb06e072d744a0144a3dd0fa0e7a8debac209417bb0",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:26:18+00:00"
     },
     {
       "id": "PTHPREV-001",
       "task": "REV-006",
       "owner": "codex-team-review-pthread-20261105-av",
       "kind": "source-review",
-      "status": "planned",
+      "status": "recorded",
       "hypothesis": "Genuine pthread component capsules bind actual installed headers, compiler metadata, callback layout and provider aliases to the measured BUILD_LTO=0 archive without claiming full SDK, Apple ABI or runtime qualification.",
       "procedure": "worktrees/rev-pthread-20261105/docs/reviews/krn-022/README.md",
       "timeout_seconds": 1200,
-      "created_at": "2026-11-05T14:00:54+00:00"
+      "created_at": "2026-11-05T14:00:54+00:00",
+      "evidence": "worktrees/rev-pthread-20261105/artifacts/rev-krn-022/review1/evidence.json",
+      "evidence_sha256": "503062615d13cc093aabf05393c4b289f0cb0a8e21742b16b770cf1221324785",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:12:29+00:00"
     },
     {
       "id": "UFSHOST-001",
       "task": "DRV-004",
       "owner": "codex-team-ufs-host-20261105-aw",
       "kind": "host-test",
-      "status": "planned",
+      "status": "recorded",
       "hypothesis": "Exact pinned E1S and Samsung declarations can qualify a bounded read-only host descriptor/completion admission boundary, independently check layout and reject writes, overflow, stale/error completion and unsafe DMA reuse without hardware I/O.",
       "procedure": "worktrees/drv-004-20261105/docs/procedures/ufs-host/README.md",
       "timeout_seconds": 240,
-      "created_at": "2026-11-05T14:03:37+00:00"
+      "created_at": "2026-11-05T14:03:37+00:00",
+      "evidence": "worktrees/drv-004-20261105/artifacts/ufs-host/initial-registration/evidence.json",
+      "evidence_sha256": "3efacfc83ed42029027e401d4be39f1420fef461a797ede55990954cc4483c58",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:12:36+00:00"
+    },
+    {
+      "id": "CCPROV-002",
+      "task": "KRN-023",
+      "owner": "codex-team-corecrypto-20261105-at",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "After resolving relative dependency paths against the recorded compile cwd, the exact selected header/type/object/link/source audit executes completely and rejects genuine callback, provenance, signature, library and incomplete-provider mutations without supplying corecrypto.",
+      "procedure": "worktrees/krn-023-20261105/docs/procedures/corecrypto-provider/README.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-05T14:08:12+00:00",
+      "evidence": "worktrees/krn-023-20261105/tools/research/corecrypto/local/source-abi-session2/evidence.json",
+      "evidence_sha256": "308025eaf84024de27d649eb0fe241484b52b3447a08c633e38a79d22320bf39",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:10:41+00:00"
+    },
+    {
+      "id": "UFSHOST-002",
+      "task": "DRV-004",
+      "owner": "codex-team-ufs-host-20261105-aw",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Final host boundary also agrees with the genuine Samsung MCQ tag function on2048 UCD/SQ encodings, succeeds across all32 queue IDs and preserves all genuine donor, guard, sanitizer, lifecycle and ARM64 controls.",
+      "procedure": "worktrees/drv-004-20261105/docs/procedures/ufs-host/README.md",
+      "timeout_seconds": 240,
+      "created_at": "2026-11-05T14:11:56+00:00",
+      "evidence": "worktrees/drv-004-20261105/artifacts/ufs-host/commit-session1/evidence.json",
+      "evidence_sha256": "34011174fe3fe4ac48210d560c3eefcd1c268e09271384e30f5c78c2831f586e",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:16:30+00:00"
+    },
+    {
+      "id": "CCPROV-003",
+      "task": "KRN-023",
+      "owner": "codex-team-corecrypto-20261105-at",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "Commit-bound replay independently reproduces all56 table entries,21 unsupported raw-zero slots, real RSA signature rejection, exact source/demand hashes, required archive/startup inventory and candidate license/coverage limits, with no provider or native qualification.",
+      "procedure": "worktrees/krn-023-20261105/docs/procedures/corecrypto-provider/README.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-05T14:14:13+00:00",
+      "evidence": "worktrees/krn-023-20261105/tools/research/corecrypto/local/source-abi-session3/evidence.json",
+      "evidence_sha256": "700ef65d82e80eff89232cf7d00f29ec6bd7626de1a0f9ce3b58891dcc78e614",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:18:38+00:00"
+    },
+    {
+      "id": "KPROV-001",
+      "task": "KRN-024",
+      "owner": "codex-team-kernel-link-20261105-ax",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Exact current SGAP-001 graph, matched FHDR-006 and accepted PTHP-007 provider archive can be staged by genuine native rules and measured through an unabridged bounded full link; missing required cc_kext remains a truthful failure rather than a kernel pass.",
+      "procedure": "worktrees/krn-024-20261105/docs/procedures/kernel-provider-link/README.md",
+      "timeout_seconds": 120,
+      "created_at": "2026-11-05T14:17:14+00:00",
+      "evidence": "worktrees/krn-024-20261105/artifacts/kernel-provider-link/native-session1/evidence.json",
+      "evidence_sha256": "6cee349019707514f5be73cfe52b770d6252a3e4da52c60977ff003cccd15ab0",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T14:23:18+00:00"
+    },
+    {
+      "id": "CCPROV-004",
+      "task": "KRN-023",
+      "owner": "codex-team-corecrypto-20261105-at",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "Guarded commit-bound audit retains all crypto source/ABI observations and negatives while disabling Git lazy fetch/optional locks on every subprocess; a real missing shared object is rejected without intentional reference mutation.",
+      "procedure": "worktrees/krn-023-20261105/docs/procedures/corecrypto-provider/README.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-05T14:18:45+00:00",
+      "evidence": "worktrees/krn-023-20261105/tools/research/corecrypto/local/source-abi-session4/evidence.json",
+      "evidence_sha256": "019b656366be95785c026ca176451334c590262e0083d392ce905bdc473ba98a",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:20:20+00:00"
+    },
+    {
+      "id": "REVUFS-001",
+      "task": "REV-007",
+      "owner": "codex-team-review-ufs-20261105-ay",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "Exact read-only UFS host admission agrees with genuine source declarations and retains DMA lease on stale/error/timeout paths; wire-only epoch reuse remains an explicit backend limitation",
+      "procedure": "worktrees/rev-ufs-20261105/docs/reviews/drv-004/procedure.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-05T14:18:51+00:00",
+      "evidence": "worktrees/rev-ufs-20261105/artifacts/rev-ufs/20261105-session1-registration/evidence.json",
+      "evidence_sha256": "b960eb4e7d0748f532c8938425bb7d00a3ec1d4b632a4c6e8b240b9e1cde3a23",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T14:23:25+00:00"
+    },
+    {
+      "id": "REVUFS-002",
+      "task": "REV-007",
+      "owner": "codex-team-review-ufs-20261105-ay",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "Corrected independent reviewer monotonic-time fixture passes genuine declaration and DMA lease admission checks, while reproducing documented stride and epoch-reuse limitations",
+      "procedure": "worktrees/rev-ufs-20261105/docs/reviews/drv-004/procedure.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-05T14:23:45+00:00",
+      "evidence": "worktrees/rev-ufs-20261105/artifacts/rev-ufs/20261105-session2/evidence.json",
+      "evidence_sha256": "3fbcb3b6431e226f17189481eec26cb028a5bd070cdf15ebdc48d7343fbfc428",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:26:40+00:00"
+    },
+    {
+      "id": "KPROV-002",
+      "task": "KRN-024",
+      "owner": "codex-team-kernel-link-20261105-ax",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The native -rename_section flags are layout operations and must not be mistaken for relocatable -r by a prefix guard; exact-token checks preserve intact full-link semantics, execute five actual wrong-input rejections and one current provider full-link measurement.",
+      "procedure": "worktrees/krn-024-20261105/docs/procedures/kernel-provider-link/README.md",
+      "timeout_seconds": 120,
+      "created_at": "2026-11-05T14:24:29+00:00",
+      "evidence": "worktrees/krn-024-20261105/artifacts/kernel-provider-link/native-session2/evidence.json",
+      "evidence_sha256": "14954ed1072eba6c8ab1f2fa50d75b62be41dcb931502fcfdc2224e757b1b93f",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:25:38+00:00"
+    },
+    {
+      "id": "KPROV-003",
+      "task": "KRN-024",
+      "owner": "codex-team-kernel-link-20261105-ax",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Pinned Clang reserved cc_kext handling explains the observed backend omission; exact expanded native ld64 argv with only required literal -lcc_kext restored exposes the genuine missing compiler-support library while preserving every current object/provider/export/layout input and native runtime limits.",
+      "procedure": "worktrees/krn-024-20261105/docs/procedures/kernel-provider-link/README.md",
+      "timeout_seconds": 120,
+      "created_at": "2026-11-05T14:29:33+00:00",
+      "evidence": "worktrees/krn-024-20261105/artifacts/kernel-provider-link/native-session3/evidence.json",
+      "evidence_sha256": "101f247f13600e6c2219540cdc79008099ee15af76c6f8a19790cf6ea23c41ea",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:32:37+00:00"
+    },
+    {
+      "id": "UFSHOST-003",
+      "task": "DRV-004",
+      "owner": "codex-team-ufs-host-20261105-aw",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The coordinator can reproduce the accepted source-qualified UFS host admission checks from the integrated primary checkout using its current check.py and the exact verified source cache, before common make check; no hardware qualification is implied.",
+      "procedure": "docs/procedures/ufs-host/README.md",
+      "timeout_seconds": 120,
+      "created_at": "2026-11-05T14:33:59+00:00",
+      "evidence": "artifacts/ufs-host/coordinator-integration-session1/evidence.json",
+      "evidence_sha256": "1117091f656539bb432de6505ccc3817312ad75aa1523d92af9834499410e7d6",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:40:15+00:00"
+    },
+    {
+      "id": "CCPROV-005",
+      "task": "KRN-023",
+      "owner": "codex-team-corecrypto-20261105-at",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "Pinned source and actual selected driver expansion show -lcc_kext is compiler runtime support, rewritten/omitted by Darwin when absent, independent of the genuine56-slot crypto provider audit.",
+      "procedure": "worktrees/krn-023-20261105/docs/procedures/corecrypto-provider/driver-correction.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-05T14:34:24+00:00",
+      "evidence": "worktrees/krn-023-20261105/tools/research/corecrypto/local/driver-correction-session1/evidence.json",
+      "evidence_sha256": "7707a1a21b1fab82a95bba175e42b3d2ed8a86e2f8ef97c3c3535aa9d5dcd585",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:40:00+00:00"
+    },
+    {
+      "id": "CCKEXT-001",
+      "task": "KRN-025",
+      "owner": "codex-team-cc-runtime-20261105-az",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Pinned LLVM17.0.6 genuine Darwin cc_kext source selection builds ARM64 iOS compiler runtime and selected original Clang maps reserved cc_kext to owned explicit resource archive; all member/symbol and missing/wrong input controls distinguish genuine runtime from absent or invalid inputs",
+      "procedure": "worktrees/krn-025-20261105/docs/procedures/xnu-cc-kext.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T14:35:37+00:00",
+      "evidence": "worktrees/krn-025-20261105/artifacts/xnu-cc-kext/source-session1/evidence.json",
+      "evidence_sha256": "87e48cb18f006e7f2bf4d92762d0c0606481e2054ed8924150c8490d396d080c",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T14:37:42+00:00"
+    },
+    {
+      "id": "CCDOC-001",
+      "task": "KRN-027",
+      "owner": "codex-coordinator-docfix-20261105-bb",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "Pinned actual driver source separates cc_kext compiler support archive selection from the independent corecrypto registration/provider gaps; corrected procedures retain original measurements.",
+      "procedure": "docs/procedures/xnu-kernel-pthread-profile.md",
+      "timeout_seconds": 60,
+      "created_at": "2026-11-05T14:35:54+00:00",
+      "evidence": "worktrees/krn-027-20261105/artifacts/cc-runtime-docfix/session1/evidence.json",
+      "evidence_sha256": "6441460ef90752e1b408868952f57963cfc1ea0b1cd618bb52fcd329ac957fcc",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:40:58+00:00"
+    },
+    {
+      "id": "KPROV-004",
+      "task": "KRN-024",
+      "owner": "codex-team-kernel-link-20261105-ax",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Independent retained-byte verification confirms the exact intact backend command, all current source/object/dependency/provider artifacts, missing required compiler-support input, six negative controls and37 source-located export requirements without executing another link or changing source providers.",
+      "procedure": "worktrees/krn-024-20261105/docs/procedures/kernel-provider-link/README.md",
+      "timeout_seconds": 120,
+      "created_at": "2026-11-05T14:36:26+00:00",
+      "evidence": "worktrees/krn-024-20261105/artifacts/kernel-provider-link/acceptance-session1/evidence.json",
+      "evidence_sha256": "87040045bd6c6dd75c28a8080ef826e6baaa4a13c304dc99ed01eed685ee19bc",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:38:12+00:00"
+    },
+    {
+      "id": "CCKEXT-002",
+      "task": "KRN-025",
+      "owner": "codex-team-cc-runtime-20261105-az",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Bounded release-source download and smaller exact Git subtrees verify complete genuine builtin/profile/include/cmake bytes at LLVM17.0.6 revision before native ARM64 runtime compilation",
+      "procedure": "worktrees/krn-025-20261105/docs/procedures/xnu-cc-kext.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T14:38:05+00:00",
+      "evidence": "worktrees/krn-025-20261105/artifacts/xnu-cc-kext/source-session2/evidence.json",
+      "evidence_sha256": "9a0995d6ec194a3d79eb625377e9ab119704ba8faf28812f9c4aefbc9e28412a",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T14:38:54+00:00"
+    },
+    {
+      "id": "EXPGAP-001",
+      "task": "KRN-026",
+      "owner": "codex-team-export-gaps-20261105-ba",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Genuine selected native export selection and full current pmap recipes distinguish missing public providers from omitted object/profile mistakes without dropping required exports",
+      "procedure": "worktrees/krn-026-20261105/docs/procedures/xnu-kernel-export-gaps.md",
+      "timeout_seconds": 180,
+      "created_at": "2026-11-05T14:39:13+00:00",
+      "evidence": "worktrees/krn-026-20261105/artifacts/kernel-export-gaps/audit-session1/evidence.json",
+      "evidence_sha256": "af4175aff45cf5d90473635f2b3da7891524d7700924fe76384c14597031e2e2",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T14:42:01+00:00"
+    },
+    {
+      "id": "CCKEXT-003",
+      "task": "KRN-025",
+      "owner": "codex-team-cc-runtime-20261105-az",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Bounded retry handles transient GitHub disconnects while preserving partial failures; exact release bytes verify against complete selected source-subtree Git blobs before any build",
+      "procedure": "worktrees/krn-025-20261105/docs/procedures/xnu-cc-kext.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T14:39:20+00:00",
+      "evidence": "worktrees/krn-025-20261105/artifacts/xnu-cc-kext/source-session3/evidence.json",
+      "evidence_sha256": "340b064b1fa77176a17c3b8ab817f0f47f2cf4ad687a4f9d992af2988c7cd788",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T14:41:10+00:00"
+    },
+    {
+      "id": "CCPROV-006",
+      "task": "KRN-023",
+      "owner": "codex-team-corecrypto-20261105-at",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "Corrected committed audit preserves all56 crypto slot findings while source+real driver plans distinguish cc_kext compiler-runtime handling from crypto-provider identity, including genuine forwarding and source-policy negatives.",
+      "procedure": "worktrees/krn-023-20261105/docs/procedures/corecrypto-provider/driver-correction.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-05T14:41:31+00:00",
+      "evidence": "worktrees/krn-023-20261105/tools/research/corecrypto/local/driver-correction-session2/evidence.json",
+      "evidence_sha256": "aeac04eb772f0c9d8921355969ddc4dc3945fac382c02a96da47afd02802714d",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:42:40+00:00"
+    },
+    {
+      "id": "CCKEXT-004",
+      "task": "KRN-025",
+      "owner": "codex-team-cc-runtime-20261105-az",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Every recovered selected source file matches pinned primary Git blob, yielding fresh complete genuine builtin/profile/include/cmake snapshot despite explicitly retained incomplete unrelated release-test tail",
+      "procedure": "worktrees/krn-025-20261105/docs/procedures/xnu-cc-kext.md",
+      "timeout_seconds": 600,
+      "created_at": "2026-11-05T14:41:46+00:00",
+      "evidence": "worktrees/krn-025-20261105/artifacts/xnu-cc-kext/source-session4/evidence.json",
+      "evidence_sha256": "5a1cbe366ddd7556add5a906013cc02c11aaa42dade7edeac01230d5ef1a757f",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:44:09+00:00"
+    },
+    {
+      "id": "CCPROV-007",
+      "task": "KRN-023",
+      "owner": "codex-team-corecrypto-20261105-at",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "After waiting for actual plan registration, exact correction commit5e7d3bb passes56 source/target/driver controls and preserves the independent crypto/runtime gates without treating the native cc_kext token as provider identity.",
+      "procedure": "worktrees/krn-023-20261105/docs/procedures/corecrypto-provider/driver-correction.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-05T14:42:51+00:00",
+      "evidence": "worktrees/krn-023-20261105/tools/research/corecrypto/local/driver-correction-session3/evidence.json",
+      "evidence_sha256": "ff9c01d10b1fc3022147a56da4af5ce3397f4dc250c4ff750b6753c35a614ef9",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:45:43+00:00"
+    },
+    {
+      "id": "EXPGAP-002",
+      "task": "KRN-026",
+      "owner": "codex-team-export-gaps-20261105-ba",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Explicitly account for existing donor files.arm64 provenance while preserving identical pmap selection; genuine full placeholder compiles and negative controls distinguish unavailable providers",
+      "procedure": "worktrees/krn-026-20261105/docs/procedures/xnu-kernel-export-gaps.md",
+      "timeout_seconds": 180,
+      "created_at": "2026-11-05T14:42:59+00:00",
+      "evidence": "worktrees/krn-026-20261105/artifacts/kernel-export-gaps/audit-session2/evidence.json",
+      "evidence_sha256": "7aebe127a750d5105ee2c657e807ddcb51f63aa618a0ab0ddf648dd280ae94e2",
+      "outcome": "inconclusive",
+      "recorded_at": "2026-11-05T14:43:32+00:00"
+    },
+    {
+      "id": "KLINKREV-001",
+      "task": "REV-008",
+      "owner": "codex-team-review-kernel-link-20261105-bc",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "Exact KRN-024 measurement preserves current graph/native command/provider identities and correctly separates reserved compiler-runtime omission from source-gated export failures without claiming a kernel image.",
+      "procedure": "worktrees/rev-kernel-link-20261105/docs/reviews/krn-024/README.md",
+      "timeout_seconds": 1200,
+      "created_at": "2026-11-05T14:44:20+00:00",
+      "evidence": "worktrees/rev-kernel-link-20261105/artifacts/rev-krn-024/review1/evidence.json",
+      "evidence_sha256": "5e969d3bbd0640c5046587f357528900bc765a810fe34f63234523b97a92f012",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T14:51:26+00:00"
+    },
+    {
+      "id": "EXPGAP-003",
+      "task": "KRN-026",
+      "owner": "codex-team-export-gaps-20261105-ba",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Pinned unsupported x86 pmap source fails under exact unchanged ARM64 full recipe; final audit preserves all required exports and identifies missing actual provider inputs",
+      "procedure": "worktrees/krn-026-20261105/docs/procedures/xnu-kernel-export-gaps.md",
+      "timeout_seconds": 180,
+      "created_at": "2026-11-05T14:44:43+00:00",
+      "evidence": "worktrees/krn-026-20261105/artifacts/kernel-export-gaps/audit-session3/evidence.json",
+      "evidence_sha256": "093eddc4da9f3f9d0e628f8fb991d853ccb0fb37c7231c6aec5a9adf6caaecae",
+      "outcome": "inconclusive",
+      "recorded_at": "2026-11-05T14:46:56+00:00"
+    },
+    {
+      "id": "CCKEXT-005",
+      "task": "KRN-025",
+      "owner": "codex-team-cc-runtime-20261105-az",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Execute pinned genuine CMake ARM64 builtin selection and per-source outline assembly definitions, all six genuine kernel profile sources and actual selected Clang native kernel compilation; preserve actual missing header/provider failures without substitutes",
+      "procedure": "worktrees/krn-025-20261105/docs/procedures/xnu-cc-kext.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T14:44:55+00:00",
+      "evidence": "worktrees/krn-025-20261105/artifacts/xnu-cc-kext/build-session1/evidence.json",
+      "evidence_sha256": "2d922763404ffcaa44b8bb5feb1425b3c372ef39d6e166394c38d0afe3db0591",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T14:46:37+00:00"
+    },
+    {
+      "id": "CCKEXT-006",
+      "task": "KRN-025",
+      "owner": "codex-team-cc-runtime-20261105-az",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Pinned public Apple Libc1534.100.14 include-source headers verify against exact primary Git blobs and supply genuine source declarations without SDK acquisition, fake FILE/pthread types, function removal or global install",
+      "procedure": "worktrees/krn-025-20261105/docs/procedures/xnu-cc-kext.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T14:47:36+00:00",
+      "evidence": "worktrees/krn-025-20261105/artifacts/xnu-cc-kext/headers-session1/evidence.json",
+      "evidence_sha256": "99383da9d91dd4467186c2862e1182ddb2890902981bec76db9250022cfa262d",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:50:35+00:00"
+    },
+    {
+      "id": "CCKEXT-007",
+      "task": "KRN-025",
+      "owner": "codex-team-cc-runtime-20261105-az",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Full286-source genuine runtime compile survey uses verified public Libc source headers, exact existing public Darwin/pthread/dispatch source roots and explicit nostdinc resource policy; captures every actual compile failure without omitting functions or SDK substitutes",
+      "procedure": "worktrees/krn-025-20261105/docs/procedures/xnu-cc-kext.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T14:51:35+00:00",
+      "evidence": "worktrees/krn-025-20261105/artifacts/xnu-cc-kext/build-session2/evidence.json",
+      "evidence_sha256": "c14af83dde2f1a43e35c0649400550f2ff6d266ae9667f40297bf60242b080bf",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T14:55:03+00:00"
+    },
+    {
+      "id": "KLINKREV-002",
+      "task": "REV-008",
+      "owner": "codex-team-review-kernel-link-20261105-bc",
+      "kind": "source-review",
+      "status": "recorded",
+      "hypothesis": "After correcting reviewer alias whitespace normalization, actual native provider-link inputs/backend omission and truthful failure boundaries independently validate; failed KLINKREV-001 remains preserved.",
+      "procedure": "worktrees/rev-kernel-link-20261105/docs/reviews/krn-024/README.md",
+      "timeout_seconds": 1200,
+      "created_at": "2026-11-05T14:51:49+00:00",
+      "evidence": "worktrees/rev-kernel-link-20261105/artifacts/rev-krn-024/review2/evidence.json",
+      "evidence_sha256": "7159f1558be221bd327dbd58dc6796a12baa3a6be31522bc653082f26cccb141",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T14:55:37+00:00"
+    },
+    {
+      "id": "AVFHOST-001",
+      "task": "VM-005",
+      "owner": "codex-team-avf-handoff-20261105-bd",
+      "kind": "host-test",
+      "status": "planned",
+      "hypothesis": "Actual pinned AVF Image can relocate and hand off bootargs to an owned explicitly synthetic arm64 MachO under qualified QEMU virt/TCG;real guest cookie/DT assertions and PSCI exit or exact source-backed failure distinguish the result from XNU execution.",
+      "procedure": "worktrees/vm-005-20261105/docs/procedures/avf-handoff/experiment.md",
+      "timeout_seconds": 180,
+      "created_at": "2026-11-05T14:52:21+00:00"
+    },
+    {
+      "id": "CCKEXT-008",
+      "task": "KRN-025",
+      "owner": "codex-team-cc-runtime-20261105-az",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Exact existing pinned PureDarwin public AvailabilityVersions and upstream dyld dlfcn header Git blobs complete named source-header inputs; retain Libc1534 native installation script and all licenses without proprietary SDK or type invention",
+      "procedure": "worktrees/krn-025-20261105/docs/procedures/xnu-cc-kext.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T14:55:27+00:00",
+      "evidence": "worktrees/krn-025-20261105/artifacts/xnu-cc-kext/headers-session2/evidence.json",
+      "evidence_sha256": "257c8fff09c6ed679b0f725b1273c8e14181fc6f781f61c98598123a5dc17be1",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T14:58:42+00:00"
+    },
+    {
+      "id": "CRYCAND-001",
+      "task": "KRN-028",
+      "owner": "codex-team-crypto-candidates-20261105-be",
+      "kind": "source-review",
+      "status": "planned",
+      "hypothesis": "Two pinned primary algorithm backends can be mapped honestly to all21 missing selected callbacks, with explicit context/ownership/kernel dependencies and real source/provenance rejection controls, without implying a complete provider or native ABI.",
+      "procedure": "worktrees/krn-028-20261105/docs/procedures/crypto-candidates/README.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T14:56:53+00:00"
+    },
+    {
+      "id": "CCKEXT-009",
+      "task": "KRN-025",
+      "owner": "codex-team-cc-runtime-20261105-az",
+      "kind": "host-test",
+      "status": "planned",
+      "hypothesis": "Bounded Git-object fallback rejects truncated HTTP200 named header bytes and verifies every final staged public AvailabilityVersions/dyld declaration header against immutable pinned Git blob before compiler use",
+      "procedure": "worktrees/krn-025-20261105/docs/procedures/xnu-cc-kext.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T15:00:48+00:00"
     }
   ],
   "events": [
@@ -16802,6 +17569,1054 @@
           "priority": 99
         }
       ]
+    },
+    {
+      "at": "2026-11-05T14:05:52+00:00",
+      "action": "task.update:KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "tasks": [
+        {
+          "id": "KRN-022",
+          "status": "in_progress",
+          "owner": "codex-kernel-pthread-profile-20261105-ag",
+          "priority": 99,
+          "progress_note": "PTHP-012 passes21 final checks: five passing capsules revalidated, three actual ARM64 archive members,39 definitions/61 imports with no unresolved or kernel overlap,140 callback fields/284 layout values and four fresh native SDK MIG byte identities. Integrated3c23af0 and main146tests pass; independent REV-006 is active before acceptance. No full SDK, private Apple ABI, crypto, full-link or runtime claim.",
+          "next_step": "Resolve any independent REV-006 finding, then complete bounded component and release ordered KRN-024 genuine provider link measurement.",
+          "last_heartbeat": "2026-11-05T14:05:52+00:00",
+          "branch": "team/krn-022-coordinator-20261105",
+          "worktree": "worktrees/krn-022-coordinator-20261105",
+          "handoff": "docs/procedures/xnu-kernel-pthread-profile.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:06:45+00:00",
+      "action": "task.done:REV-005",
+      "owner": "codex-team-review-misc-20261105-as",
+      "tasks": [
+        {
+          "id": "REV-005",
+          "status": "done",
+          "owner": "codex-team-review-misc-20261105-as",
+          "priority": 95,
+          "progress_note": "Independent review-only commit d0e3e0e ready: bounded no P0/P1/P2 findings at exact misc tipbf54dcd. MISCREV-001 pass:66commands,22 raw source blobs/81anchors,16same/6different,all10 original evidence hashes and precommit-source binding;7 original plus12 reviewer provenance rejection controls;actual NFC/biometric/haptic/MFC/DP context verified,no native claim or implementation/reference/device writes.",
+          "next_step": "Coordinator inspect review commit/evidence, integrate review documentation and decide acceptance;leave REV-005 in_progress until explicitly accepted.",
+          "last_heartbeat": "2026-11-05T13:58:23+00:00",
+          "branch": "team/rev-misc-20261105",
+          "worktree": "worktrees/rev-misc-20261105",
+          "handoff": "worktrees/rev-misc-20261105/docs/reviews/misc-001/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:08:12+00:00",
+      "action": "experiment.plan:CCPROV-002",
+      "owner": "codex-team-corecrypto-20261105-at"
+    },
+    {
+      "at": "2026-11-05T14:08:31+00:00",
+      "action": "experiment.record:CCPROV-001",
+      "owner": "codex-team-corecrypto-20261105-at"
+    },
+    {
+      "at": "2026-11-05T14:10:41+00:00",
+      "action": "experiment.record:CCPROV-002",
+      "owner": "codex-team-corecrypto-20261105-at"
+    },
+    {
+      "at": "2026-11-05T14:11:56+00:00",
+      "action": "experiment.plan:UFSHOST-002",
+      "owner": "codex-team-ufs-host-20261105-aw"
+    },
+    {
+      "at": "2026-11-05T14:12:29+00:00",
+      "action": "experiment.record:PTHPREV-001",
+      "owner": "codex-team-review-pthread-20261105-av"
+    },
+    {
+      "at": "2026-11-05T14:12:36+00:00",
+      "action": "experiment.record:UFSHOST-001",
+      "owner": "codex-team-ufs-host-20261105-aw"
+    },
+    {
+      "at": "2026-11-05T14:12:58+00:00",
+      "action": "task.update:REV-006",
+      "owner": "codex-team-review-pthread-20261105-av",
+      "tasks": [
+        {
+          "id": "REV-006",
+          "status": "in_progress",
+          "owner": "codex-team-review-pthread-20261105-av",
+          "priority": 99,
+          "progress_note": "Review-only commit0c0a226 ready:bounded no P0/P1/P2 at exact16a7497. PTHPREV-001 pass:3578 original artifact hashentries,six capsules including21acceptancechecks,actual982object closure39defs/61imports/zerooverlap,140declarations/284values and genuine metadata;fresh real callbackTU/type-rejection/VMalias/nativeSDKMIG/threadunifdef controls,15commands,70864KiB peakRSS,no heavybuild or mainartifact edits.",
+          "next_step": "Coordinator inspect and accept review/evidence before completion;next controlled link preserves BUILD_LTO=0,namespace remaps,nativealiases and all genuine required libraries;full SDK/privateAppleABI/crypto/link/runtime/native remain unqualified.",
+          "last_heartbeat": "2026-11-05T14:12:58+00:00",
+          "branch": "team/rev-pthread-20261105",
+          "worktree": "worktrees/rev-pthread-20261105",
+          "handoff": "worktrees/rev-pthread-20261105/docs/reviews/krn-022/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:13:26+00:00",
+      "action": "task.done:KRN-022",
+      "owner": "codex-kernel-pthread-profile-20261105-ag",
+      "tasks": [
+        {
+          "id": "KRN-022",
+          "status": "done",
+          "owner": "codex-kernel-pthread-profile-20261105-ag",
+          "priority": 99,
+          "progress_note": "PTHP-012 passes21 final checks: five passing capsules revalidated, three actual ARM64 archive members,39 definitions/61 imports with no unresolved or kernel overlap,140 callback fields/284 layout values and four fresh native SDK MIG byte identities. Integrated3c23af0 and main146tests pass; independent REV-006 is active before acceptance. No full SDK, private Apple ABI, crypto, full-link or runtime claim.",
+          "next_step": "Resolve any independent REV-006 finding, then complete bounded component and release ordered KRN-024 genuine provider link measurement.",
+          "last_heartbeat": "2026-11-05T14:05:52+00:00",
+          "branch": "team/krn-022-coordinator-20261105",
+          "worktree": "worktrees/krn-022-coordinator-20261105",
+          "handoff": "docs/procedures/xnu-kernel-pthread-profile.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:14:05+00:00",
+      "action": "task.done:REV-006",
+      "owner": "codex-team-review-pthread-20261105-av",
+      "tasks": [
+        {
+          "id": "REV-006",
+          "status": "done",
+          "owner": "codex-team-review-pthread-20261105-av",
+          "priority": 99,
+          "progress_note": "Review-only commit0c0a226 ready:bounded no P0/P1/P2 at exact16a7497. PTHPREV-001 pass:3578 original artifact hashentries,six capsules including21acceptancechecks,actual982object closure39defs/61imports/zerooverlap,140declarations/284values and genuine metadata;fresh real callbackTU/type-rejection/VMalias/nativeSDKMIG/threadunifdef controls,15commands,70864KiB peakRSS,no heavybuild or mainartifact edits.",
+          "next_step": "Coordinator inspect and accept review/evidence before completion;next controlled link preserves BUILD_LTO=0,namespace remaps,nativealiases and all genuine required libraries;full SDK/privateAppleABI/crypto/link/runtime/native remain unqualified.",
+          "last_heartbeat": "2026-11-05T14:12:58+00:00",
+          "branch": "team/rev-pthread-20261105",
+          "worktree": "worktrees/rev-pthread-20261105",
+          "handoff": "worktrees/rev-pthread-20261105/docs/reviews/krn-022/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:14:13+00:00",
+      "action": "experiment.plan:CCPROV-003",
+      "owner": "codex-team-corecrypto-20261105-at"
+    },
+    {
+      "at": "2026-11-05T14:14:32+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-kernel-link-20261105-ax",
+      "tasks": [
+        {
+          "id": "KRN-024",
+          "status": "in_progress",
+          "owner": "codex-team-kernel-link-20261105-ax",
+          "priority": 99,
+          "last_heartbeat": "2026-11-05T14:14:32+00:00",
+          "branch": "team/krn-024-20261105",
+          "worktree": "worktrees/krn-024-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:16:30+00:00",
+      "action": "experiment.record:UFSHOST-002",
+      "owner": "codex-team-ufs-host-20261105-aw"
+    },
+    {
+      "at": "2026-11-05T14:16:52+00:00",
+      "action": "task.add:REV-007",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "REV-007",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:16:58+00:00",
+      "action": "task.update:DRV-004",
+      "owner": "codex-team-ufs-host-20261105-aw",
+      "tasks": [
+        {
+          "id": "DRV-004",
+          "status": "in_progress",
+          "owner": "codex-team-ufs-host-20261105-aw",
+          "priority": 80,
+          "progress_note": "Ready for coordinator review: scoped commit1e0b86c8e5a322c60718006b053739d96a641078. UFSHOST-002 commit-bound pass links22checks/504318 assertions,56 actual donor builder comparisons,2048 genuine Samsung MCQ tag cases,32SQ IDs,94guard lengths,100000 ASan/UBSan random completions,negative controls and ARM64 object. Main references unchanged; exact missing public blobs independently fetched/verified. No hardware/native qualification; original DRV-002 dependencies remain.",
+          "next_step": "Coordinator cherry-pick and independent explicit UFS check.py run with owned source cache, then primary make check; retain in_progress until accepted.",
+          "last_heartbeat": "2026-11-05T14:16:58+00:00",
+          "branch": "team/drv-004-20261105",
+          "worktree": "worktrees/drv-004-20261105",
+          "handoff": "worktrees/drv-004-20261105/docs/procedures/ufs-host/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:17:07+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-review-ufs-20261105-ay",
+      "tasks": [
+        {
+          "id": "REV-007",
+          "status": "in_progress",
+          "owner": "codex-team-review-ufs-20261105-ay",
+          "priority": 97,
+          "last_heartbeat": "2026-11-05T14:17:07+00:00",
+          "branch": "team/rev-ufs-20261105",
+          "worktree": "worktrees/rev-ufs-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:17:14+00:00",
+      "action": "experiment.plan:KPROV-001",
+      "owner": "codex-team-kernel-link-20261105-ax"
+    },
+    {
+      "at": "2026-11-05T14:18:38+00:00",
+      "action": "experiment.record:CCPROV-003",
+      "owner": "codex-team-corecrypto-20261105-at"
+    },
+    {
+      "at": "2026-11-05T14:18:45+00:00",
+      "action": "experiment.plan:CCPROV-004",
+      "owner": "codex-team-corecrypto-20261105-at"
+    },
+    {
+      "at": "2026-11-05T14:18:51+00:00",
+      "action": "experiment.plan:REVUFS-001",
+      "owner": "codex-team-review-ufs-20261105-ay"
+    },
+    {
+      "at": "2026-11-05T14:20:20+00:00",
+      "action": "experiment.record:CCPROV-004",
+      "owner": "codex-team-corecrypto-20261105-at"
+    },
+    {
+      "at": "2026-11-05T14:20:50+00:00",
+      "action": "task.update:KRN-023",
+      "owner": "codex-team-corecrypto-20261105-at",
+      "tasks": [
+        {
+          "id": "KRN-023",
+          "status": "in_progress",
+          "owner": "codex-team-corecrypto-20261105-at",
+          "priority": 94,
+          "progress_note": "Ready for coordinator review: scoped e4e11be+5004843+eb34ef5. Final CCPROV-004 bound5004843 passes43checks/29negatives, actual56-slot448-byte table=34relocations+1deferredSHA256+21unsupported;957selected source hashes,99probe deps,79demand refs;no initializer reference or supplied cc_kext in measured paths. Public restricted provider43assignments/13untouched is coverage fact, not ABI incompatibility proof. Both Git guards and historical hydration uncertainty recorded;all fullcrypto/FIPS/kernel/native flags false.",
+          "next_step": "Coordinator reviews/integrates three owned commits and shared checks; KRN-024 measures genuine current full link; retain in_progress until acceptance.",
+          "last_heartbeat": "2026-11-05T14:20:50+00:00",
+          "branch": "team/krn-023-20261105",
+          "worktree": "worktrees/krn-023-20261105",
+          "handoff": "worktrees/krn-023-20261105/docs/procedures/corecrypto-provider/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:21:03+00:00",
+      "action": "task.block:VM-002",
+      "owner": "codex-team-vm-20261105-am",
+      "tasks": [
+        {
+          "id": "VM-002",
+          "status": "blocked",
+          "owner": "codex-team-vm-20261105-am",
+          "priority": 70,
+          "progress_note": "Pinned donor verified;genuinely built5-source AVF shim and owned static arm64 PID1;12 real host controls pass. VMHOST001 inconclusive and VMHOST002 shim-only pass recorded. No XNU guest launched or runtime PID1 observed. Scoped commits f71ede2 and current evidence commit are ready for coordinator review.",
+          "next_step": "Supply provenance-qualified complete QEMU/AVF XNU kernel and generic ARM64 QEMU virt/TCG executable;then coordinator leases one bounded guest and reviews actual Darwin/PID1 console and termination. Main make check deferred to coordinator integration.",
+          "blocked_reason": "VM-004 now supplies genuinely built generic QEMU10.2.0 ARM64 virt/TCG and measured bounded empty-machine stopping;read-only existing VM002 preflight accepts it and reports only missing kernel. Still need complete linked provenance-qualified XNU guest kernel for selected QEMU/AVF board,mockfs raw-executable ramdisk and intended PSCI exit. Actual Darwin guest/PID1 execution and guest stopping remain unmeasured;E1S object closure is not a guest kernel. VM-002 remains blocked under original am owner.",
+          "last_heartbeat": "2026-11-05T14:21:03+00:00",
+          "branch": "team/vm-002-20261105",
+          "worktree": "worktrees/vm-002-20261105",
+          "handoff": "worktrees/vm-002-20261105/docs/procedures/vm-002/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:21:27+00:00",
+      "action": "task.update:VM-002",
+      "owner": "codex-team-vm-20261105-am",
+      "tasks": [
+        {
+          "id": "VM-002",
+          "status": "blocked",
+          "owner": "codex-team-vm-20261105-am",
+          "priority": 70,
+          "progress_note": "VM-004 resolved genericQEMU prerequisite with actual QEMU10.2.0 virt/TCG,cortex-a76 and bounded stopped-machine controls. Read-only existing VM002 harness with explicit built binary,old built shim and ownedPID1 returns exit2 with exactly one missing completekernel input;no guest started. Historical VM002 evidence remains inconclusive.",
+          "next_step": "Supply and independently qualify a complete selected QEMU/AVF XNU guest kernel with mockfs and PSCI exit;then obtain one concrete guest resource lease,capture genuine Darwin/PID1 console and measure guest/host stopping. VM004 followup handoff:worktrees/vm-004-20261105/docs/procedures/qemu-host/README.md. Keep VM002 blocked;no Linux substitute or source/object acceptance.",
+          "blocked_reason": "VM-004 now supplies genuinely built generic QEMU10.2.0 ARM64 virt/TCG and measured bounded empty-machine stopping;read-only existing VM002 preflight accepts it and reports only missing kernel. Still need complete linked provenance-qualified XNU guest kernel for selected QEMU/AVF board,mockfs raw-executable ramdisk and intended PSCI exit. Actual Darwin guest/PID1 execution and guest stopping remain unmeasured;E1S object closure is not a guest kernel. VM-002 remains blocked under original am owner.",
+          "last_heartbeat": "2026-11-05T14:21:27+00:00",
+          "branch": "team/vm-002-20261105",
+          "worktree": "worktrees/vm-002-20261105",
+          "handoff": "worktrees/vm-002-20261105/docs/procedures/vm-002/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:23:18+00:00",
+      "action": "experiment.record:KPROV-001",
+      "owner": "codex-team-kernel-link-20261105-ax"
+    },
+    {
+      "at": "2026-11-05T14:23:25+00:00",
+      "action": "experiment.record:REVUFS-001",
+      "owner": "codex-team-review-ufs-20261105-ay"
+    },
+    {
+      "at": "2026-11-05T14:23:45+00:00",
+      "action": "experiment.plan:REVUFS-002",
+      "owner": "codex-team-review-ufs-20261105-ay"
+    },
+    {
+      "at": "2026-11-05T14:24:29+00:00",
+      "action": "experiment.plan:KPROV-002",
+      "owner": "codex-team-kernel-link-20261105-ax"
+    },
+    {
+      "at": "2026-11-05T14:25:38+00:00",
+      "action": "experiment.record:KPROV-002",
+      "owner": "codex-team-kernel-link-20261105-ax"
+    },
+    {
+      "at": "2026-11-05T14:26:18+00:00",
+      "action": "experiment.record:QEMUHOST-001",
+      "owner": "codex-team-qemu-host-20261105-au"
+    },
+    {
+      "at": "2026-11-05T14:26:27+00:00",
+      "action": "task.update:VM-004",
+      "owner": "codex-team-qemu-host-20261105-au",
+      "tasks": [
+        {
+          "id": "VM-004",
+          "status": "in_progress",
+          "owner": "codex-team-qemu-host-20261105-au",
+          "priority": 93,
+          "progress_note": "Ready for coordinator review:commits d46e7ac plus evidence followup;genuine pinned QEMU10.2.0 binary SHA bca8564182c786eb00e9f43c3153328f68e2edf50bfabe28236dbaac438acc11. Actual virt/TCG/cortex-a76/serial and bounded stopped-empty-machine PASS. Final2job build94.295s,corrected session-tree RSSpeak938.57MiB,minimumavailable13.47GiB. Independent child-group kill/pause controls PASS;six failures retained. No guest OS/XNU execution. Originalam VM002blocked reason updated:QEMU resolved,completekernel/actualPID1+stop still missing.",
+          "next_step": "Coordinator reviews/cherry-picks implementation and evidence,then runs common checks for VM004 acceptance. No further build needed;exclusive heavy lease released. Keep VM002blocked until provenance-qualified full QEMU/AVF kernel and actual guest execution.",
+          "last_heartbeat": "2026-11-05T14:26:27+00:00",
+          "branch": "team/vm-004-20261105",
+          "worktree": "worktrees/vm-004-20261105",
+          "handoff": "worktrees/vm-004-20261105/docs/procedures/qemu-host/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:26:40+00:00",
+      "action": "experiment.record:REVUFS-002",
+      "owner": "codex-team-review-ufs-20261105-ay"
+    },
+    {
+      "at": "2026-11-05T14:27:07+00:00",
+      "action": "task.update:REV-007",
+      "owner": "codex-team-review-ufs-20261105-ay",
+      "tasks": [
+        {
+          "id": "REV-007",
+          "status": "in_progress",
+          "owner": "codex-team-review-ufs-20261105-ay",
+          "priority": 97,
+          "progress_note": "Review-only commit 8d9e53c88eb8e0f7d8a57599514f78884b9b097f ready; no actionable P0/P1/P2 for exact 1e0b86c host contract. REVUFS-002 pass after correcting reviewer backward-time fixture. Genuine declaration/descriptor/error/stale/lease tests and documented stride/epoch-reuse counterexamples pass ASan+UBSan; actual capsule/source hashes match. No hardware/native/DMA qualification.",
+          "next_step": "Coordinator inspect report/evidence, integrate review-only commit and run explicit UFS component runner with read-only source cache plus common checks; retain in_progress until acceptance",
+          "last_heartbeat": "2026-11-05T14:27:07+00:00",
+          "branch": "team/rev-ufs-20261105",
+          "worktree": "worktrees/rev-ufs-20261105",
+          "handoff": "worktrees/rev-ufs-20261105/docs/reviews/drv-004/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:29:33+00:00",
+      "action": "experiment.plan:KPROV-003",
+      "owner": "codex-team-kernel-link-20261105-ax"
+    },
+    {
+      "at": "2026-11-05T14:32:37+00:00",
+      "action": "experiment.record:KPROV-003",
+      "owner": "codex-team-kernel-link-20261105-ax"
+    },
+    {
+      "at": "2026-11-05T14:33:01+00:00",
+      "action": "task.add:KRN-025",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "KRN-025",
+          "status": "pending",
+          "owner": null,
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:33:13+00:00",
+      "action": "task.add:KRN-026",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "KRN-026",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:33:23+00:00",
+      "action": "task.add:KRN-027",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "KRN-027",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:33:33+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-cc-runtime-20261105-az",
+      "tasks": [
+        {
+          "id": "KRN-025",
+          "status": "in_progress",
+          "owner": "codex-team-cc-runtime-20261105-az",
+          "priority": 100,
+          "last_heartbeat": "2026-11-05T14:33:33+00:00",
+          "branch": "team/krn-025-20261105",
+          "worktree": "worktrees/krn-025-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:33:59+00:00",
+      "action": "experiment.plan:UFSHOST-003",
+      "owner": "codex-team-ufs-host-20261105-aw"
+    },
+    {
+      "at": "2026-11-05T14:34:24+00:00",
+      "action": "experiment.plan:CCPROV-005",
+      "owner": "codex-team-corecrypto-20261105-at"
+    },
+    {
+      "at": "2026-11-05T14:34:59+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-export-gaps-20261105-ba",
+      "tasks": [
+        {
+          "id": "KRN-026",
+          "status": "in_progress",
+          "owner": "codex-team-export-gaps-20261105-ba",
+          "priority": 98,
+          "last_heartbeat": "2026-11-05T14:34:59+00:00",
+          "branch": "team/krn-026-20261105",
+          "worktree": "worktrees/krn-026-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:35:37+00:00",
+      "action": "experiment.plan:CCKEXT-001",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:35:45+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-coordinator-docfix-20261105-bb",
+      "tasks": [
+        {
+          "id": "KRN-027",
+          "status": "in_progress",
+          "owner": "codex-coordinator-docfix-20261105-bb",
+          "priority": 90,
+          "last_heartbeat": "2026-11-05T14:35:45+00:00",
+          "branch": "team/krn-027-20261105",
+          "worktree": "worktrees/krn-027-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:35:54+00:00",
+      "action": "experiment.plan:CCDOC-001",
+      "owner": "codex-coordinator-docfix-20261105-bb"
+    },
+    {
+      "at": "2026-11-05T14:36:26+00:00",
+      "action": "experiment.plan:KPROV-004",
+      "owner": "codex-team-kernel-link-20261105-ax"
+    },
+    {
+      "at": "2026-11-05T14:37:42+00:00",
+      "action": "experiment.record:CCKEXT-001",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:38:05+00:00",
+      "action": "experiment.plan:CCKEXT-002",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:38:12+00:00",
+      "action": "experiment.record:KPROV-004",
+      "owner": "codex-team-kernel-link-20261105-ax"
+    },
+    {
+      "at": "2026-11-05T14:38:54+00:00",
+      "action": "experiment.record:CCKEXT-002",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:39:13+00:00",
+      "action": "experiment.plan:EXPGAP-001",
+      "owner": "codex-team-export-gaps-20261105-ba"
+    },
+    {
+      "at": "2026-11-05T14:39:20+00:00",
+      "action": "experiment.plan:CCKEXT-003",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:40:00+00:00",
+      "action": "experiment.record:CCPROV-005",
+      "owner": "codex-team-corecrypto-20261105-at"
+    },
+    {
+      "at": "2026-11-05T14:40:15+00:00",
+      "action": "experiment.record:UFSHOST-003",
+      "owner": "codex-team-ufs-host-20261105-aw"
+    },
+    {
+      "at": "2026-11-05T14:40:34+00:00",
+      "action": "task.done:VM-004",
+      "owner": "codex-team-qemu-host-20261105-au",
+      "tasks": [
+        {
+          "id": "VM-004",
+          "status": "done",
+          "owner": "codex-team-qemu-host-20261105-au",
+          "priority": 93,
+          "progress_note": "Ready for coordinator review:commits d46e7ac plus evidence followup;genuine pinned QEMU10.2.0 binary SHA bca8564182c786eb00e9f43c3153328f68e2edf50bfabe28236dbaac438acc11. Actual virt/TCG/cortex-a76/serial and bounded stopped-empty-machine PASS. Final2job build94.295s,corrected session-tree RSSpeak938.57MiB,minimumavailable13.47GiB. Independent child-group kill/pause controls PASS;six failures retained. No guest OS/XNU execution. Originalam VM002blocked reason updated:QEMU resolved,completekernel/actualPID1+stop still missing.",
+          "next_step": "Coordinator reviews/cherry-picks implementation and evidence,then runs common checks for VM004 acceptance. No further build needed;exclusive heavy lease released. Keep VM002blocked until provenance-qualified full QEMU/AVF kernel and actual guest execution.",
+          "last_heartbeat": "2026-11-05T14:26:27+00:00",
+          "branch": "team/vm-004-20261105",
+          "worktree": "worktrees/vm-004-20261105",
+          "handoff": "worktrees/vm-004-20261105/docs/procedures/qemu-host/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:40:45+00:00",
+      "action": "task.update:DRV-004",
+      "owner": "codex-team-ufs-host-20261105-aw",
+      "tasks": [
+        {
+          "id": "DRV-004",
+          "status": "in_progress",
+          "owner": "codex-team-ufs-host-20261105-aw",
+          "priority": 80,
+          "progress_note": "Coordinator accepted host criteria after independent REV-007 with no actionable findings. Explicit primary UFSHOST-003 passed22checks at artifacts/ufs-host/coordinator-integration-session1/evidence.json; common make check passed146tests at25236224f5a47c2340b5d2fe4fd6ef3ed6d2380a with artifacts/team-coordination/20261105-ah/integration-004/evidence.json. Native MMIO, DMA coherency/backend drain, hardware clocks, firmware and Apple ABI remain unqualified.",
+          "next_step": "Close accepted host preparation. DRV-002 retains its dependencies and separate native/backend/hardware gates.",
+          "last_heartbeat": "2026-11-05T14:40:45+00:00",
+          "branch": "team/drv-004-20261105",
+          "worktree": "worktrees/drv-004-20261105",
+          "handoff": "worktrees/drv-004-20261105/docs/procedures/ufs-host/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:40:58+00:00",
+      "action": "experiment.record:CCDOC-001",
+      "owner": "codex-coordinator-docfix-20261105-bb"
+    },
+    {
+      "at": "2026-11-05T14:41:10+00:00",
+      "action": "experiment.record:CCKEXT-003",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:41:17+00:00",
+      "action": "task.done:DRV-004",
+      "owner": "codex-team-ufs-host-20261105-aw",
+      "tasks": [
+        {
+          "id": "DRV-004",
+          "status": "done",
+          "owner": "codex-team-ufs-host-20261105-aw",
+          "priority": 80,
+          "progress_note": "Coordinator accepted host criteria after independent REV-007 with no actionable findings. Explicit primary UFSHOST-003 passed22checks at artifacts/ufs-host/coordinator-integration-session1/evidence.json; common make check passed146tests at25236224f5a47c2340b5d2fe4fd6ef3ed6d2380a with artifacts/team-coordination/20261105-ah/integration-004/evidence.json. Native MMIO, DMA coherency/backend drain, hardware clocks, firmware and Apple ABI remain unqualified.",
+          "next_step": "Close accepted host preparation. DRV-002 retains its dependencies and separate native/backend/hardware gates.",
+          "last_heartbeat": "2026-11-05T14:40:45+00:00",
+          "branch": "team/drv-004-20261105",
+          "worktree": "worktrees/drv-004-20261105",
+          "handoff": "worktrees/drv-004-20261105/docs/procedures/ufs-host/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:41:23+00:00",
+      "action": "task.done:KRN-027",
+      "owner": "codex-coordinator-docfix-20261105-bb",
+      "tasks": [
+        {
+          "id": "KRN-027",
+          "status": "done",
+          "owner": "codex-coordinator-docfix-20261105-bb",
+          "priority": 90,
+          "last_heartbeat": "2026-11-05T14:35:45+00:00",
+          "branch": "team/krn-027-20261105",
+          "worktree": "worktrees/krn-027-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:41:31+00:00",
+      "action": "experiment.plan:CCPROV-006",
+      "owner": "codex-team-corecrypto-20261105-at"
+    },
+    {
+      "at": "2026-11-05T14:41:37+00:00",
+      "action": "task.update:KRN-024",
+      "owner": "codex-team-kernel-link-20261105-ax",
+      "tasks": [
+        {
+          "id": "KRN-024",
+          "status": "in_progress",
+          "owner": "codex-team-kernel-link-20261105-ax",
+          "priority": 99,
+          "progress_note": "Ready for coordinator review: commit a8c4532 binds current 982-object SGAP graph, 3156 dependencies, four replacements, native filelists/14 HIB/1 KLD transforms, 981 real archive ordinals, accepted FHDR/PTHP providers and 83 native aliases. KPROV-003 passes 32 measurement checks; actual intact ld64 exits 1 missing -lcc_kext, no image. KPROV-004 passes 23 independent checks. Clang reserved-library omission is source-proven; cc runtime and 37 export-only requirements stay separate, no crypto/runtime/native qualification.",
+          "next_step": "Coordinator review and integrate scoped commit; run common make check. KRN-025 owns genuine compiler-runtime qualification and KRN-026 owns selected export-provider corrections; no further full link or device action in this task.",
+          "last_heartbeat": "2026-11-05T14:41:37+00:00",
+          "branch": "team/krn-024-20261105",
+          "worktree": "worktrees/krn-024-20261105",
+          "handoff": "worktrees/krn-024-20261105/docs/procedures/kernel-provider-link/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:41:46+00:00",
+      "action": "experiment.plan:CCKEXT-004",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:42:01+00:00",
+      "action": "experiment.record:EXPGAP-001",
+      "owner": "codex-team-export-gaps-20261105-ba"
+    },
+    {
+      "at": "2026-11-05T14:42:18+00:00",
+      "action": "task.add:REV-008",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "REV-008",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:42:40+00:00",
+      "action": "experiment.record:CCPROV-006",
+      "owner": "codex-team-corecrypto-20261105-at"
+    },
+    {
+      "at": "2026-11-05T14:42:51+00:00",
+      "action": "experiment.plan:CCPROV-007",
+      "owner": "codex-team-corecrypto-20261105-at"
+    },
+    {
+      "at": "2026-11-05T14:42:59+00:00",
+      "action": "experiment.plan:EXPGAP-002",
+      "owner": "codex-team-export-gaps-20261105-ba"
+    },
+    {
+      "at": "2026-11-05T14:43:32+00:00",
+      "action": "experiment.record:EXPGAP-002",
+      "owner": "codex-team-export-gaps-20261105-ba"
+    },
+    {
+      "at": "2026-11-05T14:43:41+00:00",
+      "action": "task.add:VM-005",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "VM-005",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:43:52+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-review-kernel-link-20261105-bc",
+      "tasks": [
+        {
+          "id": "REV-008",
+          "status": "in_progress",
+          "owner": "codex-team-review-kernel-link-20261105-bc",
+          "priority": 99,
+          "last_heartbeat": "2026-11-05T14:43:52+00:00",
+          "branch": "team/rev-kernel-link-20261105",
+          "worktree": "worktrees/rev-kernel-link-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:44:09+00:00",
+      "action": "experiment.record:CCKEXT-004",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:44:20+00:00",
+      "action": "experiment.plan:KLINKREV-001",
+      "owner": "codex-team-review-kernel-link-20261105-bc"
+    },
+    {
+      "at": "2026-11-05T14:44:43+00:00",
+      "action": "experiment.plan:EXPGAP-003",
+      "owner": "codex-team-export-gaps-20261105-ba"
+    },
+    {
+      "at": "2026-11-05T14:44:55+00:00",
+      "action": "experiment.plan:CCKEXT-005",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:45:27+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-avf-handoff-20261105-bd",
+      "tasks": [
+        {
+          "id": "VM-005",
+          "status": "in_progress",
+          "owner": "codex-team-avf-handoff-20261105-bd",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T14:45:27+00:00",
+          "branch": "team/vm-005-20261105",
+          "worktree": "worktrees/vm-005-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:45:37+00:00",
+      "action": "task.done:REV-007",
+      "owner": "codex-team-review-ufs-20261105-ay",
+      "tasks": [
+        {
+          "id": "REV-007",
+          "status": "done",
+          "owner": "codex-team-review-ufs-20261105-ay",
+          "priority": 97,
+          "progress_note": "Review-only commit 8d9e53c88eb8e0f7d8a57599514f78884b9b097f ready; no actionable P0/P1/P2 for exact 1e0b86c host contract. REVUFS-002 pass after correcting reviewer backward-time fixture. Genuine declaration/descriptor/error/stale/lease tests and documented stride/epoch-reuse counterexamples pass ASan+UBSan; actual capsule/source hashes match. No hardware/native/DMA qualification.",
+          "next_step": "Coordinator inspect report/evidence, integrate review-only commit and run explicit UFS component runner with read-only source cache plus common checks; retain in_progress until acceptance",
+          "last_heartbeat": "2026-11-05T14:27:07+00:00",
+          "branch": "team/rev-ufs-20261105",
+          "worktree": "worktrees/rev-ufs-20261105",
+          "handoff": "worktrees/rev-ufs-20261105/docs/reviews/drv-004/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:45:43+00:00",
+      "action": "experiment.record:CCPROV-007",
+      "owner": "codex-team-corecrypto-20261105-at"
+    },
+    {
+      "at": "2026-11-05T14:46:30+00:00",
+      "action": "task.update:KRN-023",
+      "owner": "codex-team-corecrypto-20261105-at",
+      "tasks": [
+        {
+          "id": "KRN-023",
+          "status": "in_progress",
+          "owner": "codex-team-corecrypto-20261105-at",
+          "priority": 94,
+          "progress_note": "Material correction ready: followups5e7d3bb+fc7f7da separate Clang cc_kext compiler support from corecrypto identity. Final planned CCPROV-007 bound5e7d3bb passes56checks/33negatives;3pinnedDriver/Darwin/ToolChain blobs match retainedcompiler;actual retained-driver backend omits absent support resource,explicitXlinker control retainsliteral. Removed libcc_kext search-directory/provider inference;56slot/21unsupported crypto audit unchanged and independently gated. PeakRSS160192KiB,noheavybuild or native execution.",
+          "next_step": "Coordinator cherry-picks two correction commits and runs common checks;KRN025 qualifies compiler-runtime independently of crypto implementation/init. Retain in_progress until acceptance.",
+          "last_heartbeat": "2026-11-05T14:46:30+00:00",
+          "branch": "team/krn-023-20261105",
+          "worktree": "worktrees/krn-023-20261105",
+          "handoff": "worktrees/krn-023-20261105/docs/procedures/corecrypto-provider/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:46:37+00:00",
+      "action": "experiment.record:CCKEXT-005",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:46:56+00:00",
+      "action": "experiment.record:EXPGAP-003",
+      "owner": "codex-team-export-gaps-20261105-ba"
+    },
+    {
+      "at": "2026-11-05T14:47:36+00:00",
+      "action": "experiment.plan:CCKEXT-006",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:47:46+00:00",
+      "action": "task.update:KRN-026",
+      "owner": "codex-team-export-gaps-20261105-ba",
+      "tasks": [
+        {
+          "id": "KRN-026",
+          "status": "in_progress",
+          "owner": "codex-team-export-gaps-20261105-ba",
+          "priority": 98,
+          "progress_note": "Ready for coordinator diagnosis review: commits d1d53a3 and 82fe955; EXPGAP00364checks/24commands, genuine native export bytes unchanged,982objects/3156dependencies preserved. Both full ARM64 placeholder recipes emit no providers; pinned tree lacks37 genuine target providers. Wrong architecture, exact donor deletion, disabled-feature and actual x86 source controls rejected. Evidence intentionally inconclusive; no replacements or native promotion.",
+          "next_step": "Coordinator inspect exact37-name missing ARM implementation/private ABI handoff, then approve original owner block with precise missing-input reason; KRN025 runtime work remains independent.",
+          "last_heartbeat": "2026-11-05T14:47:46+00:00",
+          "branch": "team/krn-026-20261105",
+          "worktree": "worktrees/krn-026-20261105",
+          "handoff": "worktrees/krn-026-20261105/docs/procedures/xnu-kernel-export-gaps.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:50:35+00:00",
+      "action": "experiment.record:CCKEXT-006",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:51:26+00:00",
+      "action": "experiment.record:KLINKREV-001",
+      "owner": "codex-team-review-kernel-link-20261105-bc"
+    },
+    {
+      "at": "2026-11-05T14:51:35+00:00",
+      "action": "experiment.plan:CCKEXT-007",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:51:49+00:00",
+      "action": "experiment.plan:KLINKREV-002",
+      "owner": "codex-team-review-kernel-link-20261105-bc"
+    },
+    {
+      "at": "2026-11-05T14:52:21+00:00",
+      "action": "experiment.plan:AVFHOST-001",
+      "owner": "codex-team-avf-handoff-20261105-bd"
+    },
+    {
+      "at": "2026-11-05T14:52:31+00:00",
+      "action": "task.add:KRN-028",
+      "owner": "codex-team-coordinator-20261105-ah",
+      "tasks": [
+        {
+          "id": "KRN-028",
+          "status": "pending",
+          "owner": null,
+          "priority": 85
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:53:36+00:00",
+      "action": "task.done:KRN-023",
+      "owner": "codex-team-corecrypto-20261105-at",
+      "tasks": [
+        {
+          "id": "KRN-023",
+          "status": "done",
+          "owner": "codex-team-corecrypto-20261105-at",
+          "priority": 94,
+          "progress_note": "Material correction ready: followups5e7d3bb+fc7f7da separate Clang cc_kext compiler support from corecrypto identity. Final planned CCPROV-007 bound5e7d3bb passes56checks/33negatives;3pinnedDriver/Darwin/ToolChain blobs match retainedcompiler;actual retained-driver backend omits absent support resource,explicitXlinker control retainsliteral. Removed libcc_kext search-directory/provider inference;56slot/21unsupported crypto audit unchanged and independently gated. PeakRSS160192KiB,noheavybuild or native execution.",
+          "next_step": "Coordinator cherry-picks two correction commits and runs common checks;KRN025 qualifies compiler-runtime independently of crypto implementation/init. Retain in_progress until acceptance.",
+          "last_heartbeat": "2026-11-05T14:46:30+00:00",
+          "branch": "team/krn-023-20261105",
+          "worktree": "worktrees/krn-023-20261105",
+          "handoff": "worktrees/krn-023-20261105/docs/procedures/corecrypto-provider/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:54:22+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-team-crypto-candidates-20261105-be",
+      "tasks": [
+        {
+          "id": "KRN-028",
+          "status": "in_progress",
+          "owner": "codex-team-crypto-candidates-20261105-be",
+          "priority": 85,
+          "last_heartbeat": "2026-11-05T14:54:22+00:00",
+          "branch": "team/krn-028-20261105",
+          "worktree": "worktrees/krn-028-20261105"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:54:39+00:00",
+      "action": "task.block:KRN-026",
+      "owner": "codex-team-export-gaps-20261105-ba",
+      "tasks": [
+        {
+          "id": "KRN-026",
+          "status": "blocked",
+          "owner": "codex-team-export-gaps-20261105-ba",
+          "priority": 98,
+          "progress_note": "Ready for coordinator diagnosis review: commits d1d53a3 and 82fe955; EXPGAP00364checks/24commands, genuine native export bytes unchanged,982objects/3156dependencies preserved. Both full ARM64 placeholder recipes emit no providers; pinned tree lacks37 genuine target providers. Wrong architecture, exact donor deletion, disabled-feature and actual x86 source controls rejected. Evidence intentionally inconclusive; no replacements or native promotion.",
+          "next_step": "Coordinator inspect exact37-name missing ARM implementation/private ABI handoff, then approve original owner block with precise missing-input reason; KRN025 runtime work remains independent.",
+          "blocked_reason": "Exact selected ARM64 provider inputs are unavailable:17 IOUnifiedAddressTranslator implementations with provenance-qualified class layout/vtable/type/dispatch ABI;7 pmap_iommu implementations;11 DART/SART/UAT/NVMe PPL implementations and hardware/ABI dependencies;2 pmap_has_iofilter_protected_write and pmap_cs_configuration ARM64 semantics/implementations. Native selection still requires all37 exports; public pmap sources are already-compiled placeholders. Root independently verified diagnosis and81 artifact hashes; no supported export/profile/object correction exists from supplied inputs.",
+          "last_heartbeat": "2026-11-05T14:54:39+00:00",
+          "branch": "team/krn-026-20261105",
+          "worktree": "worktrees/krn-026-20261105",
+          "handoff": "worktrees/krn-026-20261105/docs/procedures/xnu-kernel-export-gaps.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:54:57+00:00",
+      "action": "task.update:KRN-026",
+      "owner": "codex-team-export-gaps-20261105-ba",
+      "tasks": [
+        {
+          "id": "KRN-026",
+          "status": "blocked",
+          "owner": "codex-team-export-gaps-20261105-ba",
+          "priority": 98,
+          "progress_note": "Blocked with coordinator approval after independent final capsule and81 artifact hash verification. Integrated diagnosis34e2181+3376c9b and py_compile pass retained.37 genuine selected ARM64 providers/private ABI inputs remain unavailable; all native exports,features and982-object graph unchanged. Original owner and path reservations preserved; no completion or release.",
+          "next_step": "Supply provenance-qualified selected ARM64 implementation and class ABI inputs for17 IOUnifiedAddressTranslator,7 pmap_iommu,11 DART/SART/UAT/NVMe PPL and2 pmap query exports, then resume original ownership for source-backed provider qualification.",
+          "blocked_reason": "Exact selected ARM64 provider inputs are unavailable:17 IOUnifiedAddressTranslator implementations with provenance-qualified class layout/vtable/type/dispatch ABI;7 pmap_iommu implementations;11 DART/SART/UAT/NVMe PPL implementations and hardware/ABI dependencies;2 pmap_has_iofilter_protected_write and pmap_cs_configuration ARM64 semantics/implementations. Native selection still requires all37 exports; public pmap sources are already-compiled placeholders. Root independently verified diagnosis and81 artifact hashes; no supported export/profile/object correction exists from supplied inputs.",
+          "last_heartbeat": "2026-11-05T14:54:57+00:00",
+          "branch": "team/krn-026-20261105",
+          "worktree": "worktrees/krn-026-20261105",
+          "handoff": "docs/procedures/xnu-kernel-export-gaps.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:55:03+00:00",
+      "action": "experiment.record:CCKEXT-007",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:55:27+00:00",
+      "action": "experiment.plan:CCKEXT-008",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:55:37+00:00",
+      "action": "experiment.record:KLINKREV-002",
+      "owner": "codex-team-review-kernel-link-20261105-bc"
+    },
+    {
+      "at": "2026-11-05T14:56:00+00:00",
+      "action": "task.update:REV-008",
+      "owner": "codex-team-review-kernel-link-20261105-bc",
+      "tasks": [
+        {
+          "id": "REV-008",
+          "status": "in_progress",
+          "owner": "codex-team-review-kernel-link-20261105-bc",
+          "priority": 99,
+          "progress_note": "Review-only87ccd00 ready:bounded no P0/P1/P2 at exacta8c4532. KLINKREV-002 pass verifies3366retained artifact entries/45commandhashes,982objects/3156deps,native14HIB+1KLD,978filelist/981archive,FH/PTH realclosure83aliases;fresh driver dry-run confirms reservedcc omission/exactsingle restoration and missing-library/noimage gate,37export-only names distinct;threeactualreadonlyvalidatorrejections,no relink/build. KLINKREV-001 reviewerwhitespacefailure preserved.",
+          "next_step": "Coordinator inspect/accept review/evidence before completion;preserve missing compiler-runtime and37source-qualified export-provider followups,KRN025/026 owners;full kernel/crypto/SDK/privateABI/runtime/native remain unqualified.",
+          "last_heartbeat": "2026-11-05T14:56:00+00:00",
+          "branch": "team/rev-kernel-link-20261105",
+          "worktree": "worktrees/rev-kernel-link-20261105",
+          "handoff": "worktrees/rev-kernel-link-20261105/docs/reviews/krn-024/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T14:56:53+00:00",
+      "action": "experiment.plan:CRYCAND-001",
+      "owner": "codex-team-crypto-candidates-20261105-be"
+    },
+    {
+      "at": "2026-11-05T14:58:42+00:00",
+      "action": "experiment.record:CCKEXT-008",
+      "owner": "codex-team-cc-runtime-20261105-az"
+    },
+    {
+      "at": "2026-11-05T14:59:16+00:00",
+      "action": "task.update:KRN-025",
+      "owner": "codex-team-cc-runtime-20261105-az",
+      "tasks": [
+        {
+          "id": "KRN-025",
+          "status": "in_progress",
+          "owner": "codex-team-cc-runtime-20261105-az",
+          "priority": 100,
+          "progress_note": "Genuine LLVM17 source snapshot472files and public Libc132headers verified; full286-source compile survey retained160 failures from159 missing generated XNU alias header and1 public os availability header. Corrected resource include order/native feature extraction for next run. HTTP200 truncated named AvailabilityInternal Git blob rejected; bounded verified Git-object fallback in progress. No runtime archive qualified yet; all hardware/private/fullcrypto gates false.",
+          "next_step": "Finish verified public declaration headers and genuine generated headers, compile all selected runtime sources, then native archive/member/import/export, driver resource/link and wrong-input controls under existing bounded lease",
+          "last_heartbeat": "2026-11-05T14:59:16+00:00",
+          "branch": "team/krn-025-20261105",
+          "worktree": "worktrees/krn-025-20261105",
+          "handoff": "worktrees/krn-025-20261105/docs/procedures/xnu-cc-kext.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T15:00:18+00:00",
+      "action": "task.done:REV-008",
+      "owner": "codex-team-review-kernel-link-20261105-bc",
+      "tasks": [
+        {
+          "id": "REV-008",
+          "status": "done",
+          "owner": "codex-team-review-kernel-link-20261105-bc",
+          "priority": 99,
+          "progress_note": "Review-only87ccd00 ready:bounded no P0/P1/P2 at exacta8c4532. KLINKREV-002 pass verifies3366retained artifact entries/45commandhashes,982objects/3156deps,native14HIB+1KLD,978filelist/981archive,FH/PTH realclosure83aliases;fresh driver dry-run confirms reservedcc omission/exactsingle restoration and missing-library/noimage gate,37export-only names distinct;threeactualreadonlyvalidatorrejections,no relink/build. KLINKREV-001 reviewerwhitespacefailure preserved.",
+          "next_step": "Coordinator inspect/accept review/evidence before completion;preserve missing compiler-runtime and37source-qualified export-provider followups,KRN025/026 owners;full kernel/crypto/SDK/privateABI/runtime/native remain unqualified.",
+          "last_heartbeat": "2026-11-05T14:56:00+00:00",
+          "branch": "team/rev-kernel-link-20261105",
+          "worktree": "worktrees/rev-kernel-link-20261105",
+          "handoff": "worktrees/rev-kernel-link-20261105/docs/reviews/krn-024/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T15:00:25+00:00",
+      "action": "task.update:KRN-024",
+      "owner": "codex-team-kernel-link-20261105-ax",
+      "tasks": [
+        {
+          "id": "KRN-024",
+          "status": "in_progress",
+          "owner": "codex-team-kernel-link-20261105-ax",
+          "priority": 99,
+          "progress_note": "Coordinator accepted bounded measurement after independent REV-008 review 87ccd002 with no P0/P1/P2 findings. Implementation a8c4532 integrated as b52538c; review integrated as b3e9666. Main make check passed 146 tests at 065e32280cea165f22d29d5db6ea934d89e24b6c; evidence artifacts/team-coordination/20261105-ah/integration-005/evidence.json. Actual intact link FAILED, exit 1 missing -lcc_kext, and produced NO kernel image. Compiler-support runtime and 37 genuine ARM export providers remain distinct gates; no full kernel, Apple ABI, crypto, runtime or native qualification.",
+          "next_step": "Complete only accepted KRN-024 measurement. KRN-025 compiler-runtime owner remains active; KRN-026 source-provider owner remains blocked. No ownership takeover or further full relink until genuine new inputs.",
+          "last_heartbeat": "2026-11-05T15:00:25+00:00",
+          "branch": "team/krn-024-20261105",
+          "worktree": "worktrees/krn-024-20261105",
+          "handoff": "worktrees/krn-024-20261105/docs/procedures/kernel-provider-link/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T15:00:41+00:00",
+      "action": "task.done:KRN-024",
+      "owner": "codex-team-kernel-link-20261105-ax",
+      "tasks": [
+        {
+          "id": "KRN-024",
+          "status": "done",
+          "owner": "codex-team-kernel-link-20261105-ax",
+          "priority": 99,
+          "progress_note": "Coordinator accepted bounded measurement after independent REV-008 review 87ccd002 with no P0/P1/P2 findings. Implementation a8c4532 integrated as b52538c; review integrated as b3e9666. Main make check passed 146 tests at 065e32280cea165f22d29d5db6ea934d89e24b6c; evidence artifacts/team-coordination/20261105-ah/integration-005/evidence.json. Actual intact link FAILED, exit 1 missing -lcc_kext, and produced NO kernel image. Compiler-support runtime and 37 genuine ARM export providers remain distinct gates; no full kernel, Apple ABI, crypto, runtime or native qualification.",
+          "next_step": "Complete only accepted KRN-024 measurement. KRN-025 compiler-runtime owner remains active; KRN-026 source-provider owner remains blocked. No ownership takeover or further full relink until genuine new inputs.",
+          "last_heartbeat": "2026-11-05T15:00:25+00:00",
+          "branch": "team/krn-024-20261105",
+          "worktree": "worktrees/krn-024-20261105",
+          "handoff": "worktrees/krn-024-20261105/docs/procedures/kernel-provider-link/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T15:00:48+00:00",
+      "action": "experiment.plan:CCKEXT-009",
+      "owner": "codex-team-cc-runtime-20261105-az"
     }
   ]
 }
