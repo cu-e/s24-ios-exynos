@@ -1,0 +1,5 @@
+# SEN-001 independent source review procedure
+
+2026-11-05; REV-004; owner codex-team-review-sensors-20261105-ar.
+
+Inspect exact f6b20723b1b3c3e1acb39c68af90924956d0d147 and documentation follow-up 82c8e9482611ce42f89f2bc923bb9dfa9327609b. Keep implementation/reference checkout read-only. Audit actual source/evidence hashes and original HAL capture provenance without remeasuring the phone. Read actual pinned SHUB timestamp/bypass packet handling and GNSS constants/helpers/writer; distinguish the inconsistent GNSS struct. Compile a bounded independent parser harness from exact candidate bytes and execute extent, timestamp, atomic-output and unavailable-service cases under host ASan/UBSan. Register this procedure before verification; retain actual commands/exits/tool/source hashes and failure evidence. At most two small compiler jobs, no heavy build, less than 1GiB new resident memory. No phone, ADB, root, MMIO, flash or reboot operations. Publish actionable findings early and commit only this review directory. Keep task in progress for coordinator acceptance.
