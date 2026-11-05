@@ -1,0 +1,152 @@
+--- a/bsd/netinet6/esp_core.c
++++ b/bsd/netinet6/esp_core.c
+@@ -96,6 +96,7 @@
+ #include <netkey/keydb.h>
+ #include <netkey/key.h>
+ #include <libkern/crypto/des.h>
++#include <corecrypto/cc.h>
+ 
+ #include <net/net_osdep.h>
+ 
+@@ -765,21 +766,24 @@
+ 		    "unsupported ivlen/blocklen: %d %d\n",
+ 		    algo->name, ivlen, blocklen));
+ 		m_freem(m);
+-		return EINVAL;
++		result = EINVAL;
++		goto end;
+ 	}
+ 
+ 	if (m->m_pkthdr.len < bodyoff) {
+ 		ipseclog((LOG_ERR, "esp_cbc_decrypt %s: bad len %d/%u\n",
+ 		    algo->name, m->m_pkthdr.len, (u_int32_t)bodyoff));
+ 		m_freem(m);
+-		return EINVAL;
++		result = EINVAL;
++		goto end;
+ 	}
+ 	if ((m->m_pkthdr.len - bodyoff) % blocklen) {
+ 		ipseclog((LOG_ERR, "esp_cbc_decrypt %s: "
+ 		    "payload length must be multiple of %d\n",
+ 		    algo->name, blocklen));
+ 		m_freem(m);
+-		return EINVAL;
++		result = EINVAL;
++		goto end;
+ 	}
+ 
+ 	s = m;
+@@ -808,7 +812,9 @@
+ 	// Allocate blocksized buffer for unaligned or non-contiguous access
+ 	sbuf = (u_int8_t *)kalloc_data(blocklen, Z_NOWAIT);
+ 	if (sbuf == NULL) {
+-		return ENOBUFS;
++		m_freem(m);
++		result = ENOBUFS;
++		goto end;
+ 	}
+ 	while (soff < m->m_pkthdr.len) {
+ 		/* source */
+@@ -873,7 +879,15 @@
+ 			memcpy(sp, sp_unaligned, blocklen);
+ 		}
+ 		// no need to check output pointer alignment
+-		(*algo->blockdecrypt)(algo, sav, sp, mtod(d, u_int8_t *) + dn);
++		if ((*algo->blockdecrypt)(algo, sav, sp, mtod(d, u_int8_t *) + dn) != 0) {
++			/* Output is still a fresh chain, before the success splice. */
++			result = EINVAL;
++			m_freem(m);
++			if (d0) {
++				m_freem(d0);
++			}
++			goto end;
++		}
+ 
+ 		// update unaligned pointers
+ 		if (!IPSEC_IS_P2ALIGNED(sp_unaligned)) {
+@@ -910,11 +924,10 @@
+ 	scut->m_len = scutoff;
+ 	scut->m_next = d0;
+ 
+-	/* just in case */
+-	bzero(iv, sizeof(iv));
+-	bzero(sbuf, blocklen);
+ end:
++	cc_clear(sizeof(iv), iv);
+ 	if (sbuf != NULL) {
++		cc_clear(blocklen, sbuf);
+ 		kfree_data(sbuf, blocklen);
+ 	}
+ 	return result;
+@@ -1010,21 +1023,24 @@
+ 		    "unsupported ivlen/blocklen: %d %d\n",
+ 		    algo->name, ivlen, blocklen));
+ 		m_freem(m);
+-		return EINVAL;
++		result = EINVAL;
++		goto end;
+ 	}
+ 
+ 	if (m->m_pkthdr.len < bodyoff) {
+ 		ipseclog((LOG_ERR, "esp_cbc_encrypt %s: bad len %d/%u\n",
+ 		    algo->name, m->m_pkthdr.len, (u_int32_t)bodyoff));
+ 		m_freem(m);
+-		return EINVAL;
++		result = EINVAL;
++		goto end;
+ 	}
+ 	if ((m->m_pkthdr.len - bodyoff) % blocklen) {
+ 		ipseclog((LOG_ERR, "esp_cbc_encrypt %s: "
+ 		    "payload length must be multiple of %u\n",
+ 		    algo->name, (u_int32_t)algo->padbound));
+ 		m_freem(m);
+-		return EINVAL;
++		result = EINVAL;
++		goto end;
+ 	}
+ 
+ 	s = m;
+@@ -1053,7 +1069,9 @@
+ 	// Allocate blocksized buffer for unaligned or non-contiguous access
+ 	sbuf = (u_int8_t *)kalloc_data(blocklen, Z_NOWAIT);
+ 	if (sbuf == NULL) {
+-		return ENOBUFS;
++		m_freem(m);
++		result = ENOBUFS;
++		goto end;
+ 	}
+ 	while (soff < m->m_pkthdr.len) {
+ 		/* source */
+@@ -1125,7 +1143,15 @@
+ 			memcpy(sp, sp_unaligned, blocklen);
+ 		}
+ 		// no need to check output pointer alignment
+-		(*algo->blockencrypt)(algo, sav, sp, mtod(d, u_int8_t *) + dn);
++		if ((*algo->blockencrypt)(algo, sav, sp, mtod(d, u_int8_t *) + dn) != 0) {
++			/* Output is still a fresh chain, before the success splice. */
++			result = EINVAL;
++			m_freem(m);
++			if (d0) {
++				m_freem(d0);
++			}
++			goto end;
++		}
+ 
+ 		// update unaligned pointers
+ 		if (!IPSEC_IS_P2ALIGNED(sp_unaligned)) {
+@@ -1150,13 +1176,11 @@
+ 	scut->m_len = scutoff;
+ 	scut->m_next = d0;
+ 
+-	/* just in case */
+-	bzero(iv, sizeof(iv));
+-	bzero(sbuf, blocklen);
+-
+ 	key_sa_stir_iv(sav);
+ end:
++	cc_clear(sizeof(iv), iv);
+ 	if (sbuf != NULL) {
++		cc_clear(blocklen, sbuf);
+ 		kfree_data(sbuf, blocklen);
+ 	}
+ 	return result;

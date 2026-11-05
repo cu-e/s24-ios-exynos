@@ -1,0 +1,61 @@
+--- a/osfmk/minicrypto/mc_provider.c
++++ b/osfmk/minicrypto/mc_provider.c
+@@ -13,7 +13,7 @@
+  *   - AES in ECB, CBC and CTR modes (mc_aes.c; the TCP stack needs it at boot)
+  *
+  * NOT provided (function pointers left NULL; using them will fault):
+- * AES-GCM, DES/3DES, ChaCha20-Poly1305, RSA. Encrypted volumes, IPsec and
++ * AES-GCM, ChaCha20-Poly1305, RSA. Encrypted volumes, IPsec and
+  * signature checks need those; the boot path to a ramdisk shell does not.
+  */
+ #include <mach/mach_types.h>
+@@ -35,6 +35,7 @@
+ 
+ #include "minicrypto.h"
+ #include "kernel_provider.h"
++#include <platform/crypto/des/kernel_provider.h>
+ 
+ #ifndef MIN
+ #define MIN(a, b) ((a) < (b) ? (a) : (b))
+@@ -422,6 +423,16 @@
+ 	.ccaes_ctr_crypt = &mc_aes_ctr_crypt,
+ 	.ccaes_xts_encrypt = &s24_kernel_xts_encrypt,
+ 	.ccaes_xts_decrypt = &s24_kernel_xts_decrypt,
++	.ccdes_ecb_encrypt = &s24_kernel_des_ecb_encrypt,
++	.ccdes_ecb_decrypt = &s24_kernel_des_ecb_decrypt,
++	.ccdes_cbc_encrypt = &s24_kernel_des_cbc_encrypt,
++	.ccdes_cbc_decrypt = &s24_kernel_des_cbc_decrypt,
++	.cctdes_ecb_encrypt = &s24_kernel_tdes_ecb_encrypt,
++	.cctdes_ecb_decrypt = &s24_kernel_tdes_ecb_decrypt,
++	.cctdes_cbc_encrypt = &s24_kernel_tdes_cbc_encrypt,
++	.cctdes_cbc_decrypt = &s24_kernel_tdes_cbc_decrypt,
++	.ccdes_key_is_weak_fn = s24_kernel_des_key_is_weak,
++	.ccdes_key_set_odd_parity_fn = s24_kernel_des_key_set_odd_parity,
+ 
+ 	.ccrng_fn = mc_ccrng,
+ 
+@@ -466,12 +477,23 @@
+ 	    s24_kernel_xts_decrypt_mode() != mc_funcs.ccaes_xts_decrypt) {
+ 		panic("minicrypto: XTS preparation failed");
+ 	}
++	if (s24_kernel_des_prepare() != 0 ||
++	    s24_kernel_des_ecb_mode(0, 0) != mc_funcs.ccdes_ecb_encrypt ||
++	    s24_kernel_des_cbc_mode(0, 0) != mc_funcs.ccdes_cbc_encrypt ||
++	    s24_kernel_des_ecb_mode(0, 1) != mc_funcs.ccdes_ecb_decrypt ||
++	    s24_kernel_des_cbc_mode(0, 1) != mc_funcs.ccdes_cbc_decrypt ||
++	    s24_kernel_des_ecb_mode(1, 0) != mc_funcs.cctdes_ecb_encrypt ||
++	    s24_kernel_des_cbc_mode(1, 0) != mc_funcs.cctdes_cbc_encrypt ||
++	    s24_kernel_des_ecb_mode(1, 1) != mc_funcs.cctdes_ecb_decrypt ||
++	    s24_kernel_des_cbc_mode(1, 1) != mc_funcs.cctdes_cbc_decrypt) {
++		panic("minicrypto: DES preparation failed");
++	}
+ 	mc_funcs.ccsha256_di = ccsha256_di();
+ 	if (register_crypto_functions(&mc_funcs) != 0) {
+ 		return; /* a real provider got there first */
+ 	}
+ 	/* The PRNG context is ours; the kernel only hands the pointer back to us. */
+ 	register_and_init_prng((struct cckprng_ctx *)(void *)&mc_prng, &mc_prng_funcs);
+-	printf("minicrypto: registered (md5, sha1, sha2, hmac, aes-ecb/cbc/ctr/xts, hmac-drbg prng); no gcm, no RSA\n");
++	printf("minicrypto: registered (md5, sha1, sha2, hmac, aes-ecb/cbc/ctr/xts, des/tdes-ecb/cbc, hmac-drbg prng); no gcm, no RSA\n");
+ }
+ STARTUP(EARLY_BOOT, STARTUP_RANK_FIRST, minicrypto_init);
