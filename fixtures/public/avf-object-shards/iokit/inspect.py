@@ -88,16 +88,20 @@ def inspect(main, manifest, selectors):
         forced = [argv[position + 1] for position, argument in enumerate(argv) if argument == "-include"]
         forced_records = []
         for name in forced:
-            found = next((root / name for root in roots if (root / name).is_file()), None)
+            matches = list(dict.fromkeys(root / name for root in roots if (root / name).is_file()))
+            found = matches[0] if matches else None
             require(found is not None, "Forced include unresolved: " + name)
-            forced_records.append({"name": name, "path": str(found), "sha256": digest(found)})
+            forced_records.append({"name": name, "path": str(found), "sha256": digest(found),
+                "shadowed_candidates": [{"path": str(path), "sha256": digest(path)} for path in matches[1:]]})
         direct = re.findall(r'^\s*#\s*include\s*([<"])([^>"\n]+)[>"]', source.read_text(), re.M)
         literal = []
         for delimiter, name in direct:
             search = ([source.parent] if delimiter == '"' else []) + roots
-            found = next((root / name for root in search if (root / name).is_file()), None)
+            matches = list(dict.fromkeys(root / name for root in search if (root / name).is_file()))
+            found = matches[0] if matches else None
             literal.append({"name": name, "path": str(found) if found else None,
-                            "sha256": digest(found) if found else None})
+                            "sha256": digest(found) if found else None,
+                            "shadowed_candidates": [{"path": str(path), "sha256": digest(path)} for path in matches[1:]]})
         source_records.append({"id": identifier, "row_sha256": canonical(row),
             "bound_source": str(source), "bound_source_sha256": row["bound_source_sha256"],
             "generated_input": row["generated_input"], "language": row["language"], "configuration": str(config),

@@ -15,6 +15,9 @@ The selected report references canonical row/recipe/template hashes instead of
 copying compiler recipes. It observes literal direct includes without claiming
 conditional or transitive dependency closure. Missing search directories may be
 unused genuine upstream arguments; retain them as observations.
+Preserve the exact search ordering and record other existing candidates for each
+literal/forced include, including differing shadowed bytes. No empty search root
+is created and no genuine argument is removed to make admission pass.
 
 Run from this worktree with constrained standard-library Python:
 
