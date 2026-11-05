@@ -17,3 +17,8 @@ No restricted Apple provider implementation is copied into maintained files.
 Any future provider patch needs applicable rights, a pinned source/build profile,
 exact target header/context/signature and initialization integration, and real
 link/runtime assessment. Neither this audit nor algorithm KATs supplies those.
+
+The selected driver's `-lcc_kext` token is compiler-runtime support, rewritten
+by Clang's Darwin toolchain to a resource archive. It does not name or qualify
+the crypto implementation described here. No libcc_kext crypto patch is needed
+or supplied by this audit; compiler-runtime qualification is a separate gate.

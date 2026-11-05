@@ -46,7 +46,47 @@ def table_fields(header):
 
 def required_link(argv):
     if '-lcc_kext' not in argv:
-        raise ValueError('Required genuine cc_kext link input was removed')
+        raise ValueError('Native input compiler-support request -lcc_kext was removed')
+
+
+def driver_runtime_policy(driver, darwin, toolchain):
+    """Assert the reviewed pinned source policy, not a generic C++ parser."""
+    rewrite = re.search(r'if\s*\(Value == "cc_kext"\)\s*\{([^}]+)\}', driver)
+    if not rewrite or 'OPT_Z_reserved_lib_cckext' not in rewrite[1] or 'continue;' not in rewrite[1]:
+        raise ValueError('Missing unconditional cc_kext reserved-option rewrite')
+    body = re.search(r'void DarwinClang::AddCCKextLibArgs\(.*?^}', darwin, re.M | re.S)
+    if not body:
+        raise ValueError('Missing Darwin compiler-support override')
+    text = body[0]
+    if not re.search(r'isTargetIPhoneOS\(\)\)\s*\{\s*llvm::sys::path::append\(P, "libclang_rt.cc_kext_ios.a"\)', text):
+        raise ValueError('Wrong iPhoneOS compiler-runtime mapping')
+    if not re.search(r'if \(getVFS\(\).exists\(P\)\)\s*CmdArgs.push_back\(Args.MakeArgString\(P\)\)', text):
+        raise ValueError('Missing runtime-existence conditional; silent omission policy changed')
+    if 'getDriver().ResourceDir' not in text or '"lib", "darwin"' not in text:
+        raise ValueError('Wrong compiler runtime resource directory')
+    default = re.search(r'void ToolChain::AddCCKextLibArgs\(.*?^}', toolchain, re.M | re.S)
+    if not default or 'CmdArgs.push_back("-lcc_kext")' not in default[0]:
+        raise ValueError('Missing generic literal fallback; Darwin override must remain distinct')
+    return dict(identity='compiler-runtime-support', native_input='-lcc_kext',
+                reserved_option='OPT_Z_reserved_lib_cckext',
+                darwin_runtime='lib/darwin/libclang_rt.cc_kext_ios.a',
+                absent_resource_runtime_is_silently_omitted=True,
+                flag_identifies_corecrypto_provider=False)
+
+
+def reject_crypto_identity(policy):
+    if policy.get('flag_identifies_corecrypto_provider') is not False:
+        raise ValueError('Compiler support flag is not evidence of a corecrypto/KEC provider')
+
+
+def backend_linker_args(text):
+    for line in text.splitlines():
+        if not line.lstrip().startswith('"'):
+            continue
+        args = shlex.split(line)
+        if args and (Path(args[0]).name in ['ld', 'ld64', 'ld.lld'] or Path(args[0]).name.endswith('-ld')):
+            return args
+    raise ValueError('Actual driver plan contains no backend linker command')
 
 
 def table_observation(path, fields, offsets, assignments):
@@ -273,28 +313,54 @@ def main():
         poisoned.write_bytes(provider_source.read_bytes() + b'\n/* mutation */\n')
         reject('reject-source-hash-drift', lambda: verify_hash(poisoned, provider_row['source_sha256']))
         links = [row for row in parents['link']['commands'] if '-lcc_kext' in row['argv']]
-        check('actual-native-link-retains-required-cc_kext', bool(links))
+        check('native-input-retains-compiler-support-request', bool(links))
         for row in links:
             required_link(row['argv'])
             for key in ['stdout', 'stderr']:
                 if key in row and (root / row[key]).is_file():
                     bind(root / row[key])
-        reject('reject-required-library-removal', lambda: required_link([arg for arg in links[-1]['argv'] if arg != '-lcc_kext']))
-        search_directories = set()
-        for row in links:
-            for index, arg in enumerate(row['argv']):
-                if arg.startswith('-L'):
-                    name = row['argv'][index + 1] if arg == '-L' else arg[2:]
-                    path = Path(name)
-                    search_directories.add(str(path if path.is_absolute() else Path(row['cwd']) / path))
-        found_archives = [str(Path(directory) / name) for directory in search_directories
-                          for name in ['libcc_kext.a', 'libcc_kext.dylib'] if (Path(directory) / name).is_file()]
-        check('required-provider-not-present-in-measured-search-directories', not found_archives)
-        report['native_link'] = dict(parent=manifest['parents']['link'], required='cc_kext',
+        reject('reject-native-input-support-flag-removal', lambda: required_link([arg for arg in links[-1]['argv'] if arg != '-lcc_kext']))
+        driver_source = manifest['compiler_driver']
+        source_text = {}
+        for index, (name, facts) in enumerate(driver_source['files'].items()):
+            data = run(['git', '-C', root / driver_source['repository_path'], 'show', driver_source['revision'] + ':' + name],
+                       'pinned-driver-source-' + str(index))
+            check('driver-pinned-source-hash-' + str(index), hashlib.sha256(data).hexdigest() == facts['sha256'])
+            actual_source = bind(root / facts['retained_compiler_source'], facts['sha256'])
+            check('retained-compiler-source-matches-pin-' + str(index), actual_source.read_bytes() == data)
+            source_text[Path(name).name] = data.decode()
+        policy = driver_runtime_policy(source_text['Driver.cpp'], source_text['Darwin.cpp'], source_text['ToolChain.cpp'])
+        check('source-proves-compiler-runtime-mapping-not-crypto-identity', True, policy=policy)
+        reject('reject-source-rewrite-mutation', lambda: driver_runtime_policy(source_text['Driver.cpp'].replace('Value == "cc_kext"', 'Value == "other_runtime"'), source_text['Darwin.cpp'], source_text['ToolChain.cpp']))
+        reject('reject-source-runtime-name-mutation', lambda: driver_runtime_policy(source_text['Driver.cpp'], source_text['Darwin.cpp'].replace('libclang_rt.cc_kext_ios.a', 'libnot_corecrypto.a'), source_text['ToolChain.cpp']))
+        reject('reject-source-existence-gate-mutation', lambda: driver_runtime_policy(source_text['Driver.cpp'], source_text['Darwin.cpp'].replace('if (getVFS().exists(P))', 'if (true)'), source_text['ToolChain.cpp']))
+        reject('reject-compiler-runtime-as-crypto-provider-identity', lambda: reject_crypto_identity({**policy, 'flag_identifies_corecrypto_provider': True}))
+        resource_dir = Path(run([argv[0], '-print-resource-dir'], 'compiler-runtime-resource-dir').decode().strip())
+        runtime_path = resource_dir / policy['darwin_runtime']
+        runtime_present = runtime_path.exists()
+        check('current-compiler-support-resource-state-recorded', True, path=str(runtime_path), exists=runtime_present,
+              note='Presence alone does not qualify archive contents, ABI, crypto or native linking')
+        plan_row = next(row for row in links if '-###' in row['argv'])
+        plan = list(plan_row['argv'])
+        plan[plan.index('-o') + 1] = str(out / 'driver-plan-only-kernel')
+        run(plan, 'actual-native-driver-plan', Path(plan_row['cwd']))
+        expanded = backend_linker_args((out / 'actual-native-driver-plan.stderr.txt').read_text())
+        check('actual-backend-matches-conditional-support-runtime-policy', '-lcc_kext' not in expanded and
+              ((str(runtime_path) in expanded) if runtime_present else not any('clang_rt.cc_kext' in arg for arg in expanded)),
+              runtime_present=runtime_present)
+        forwarded = [arg for arg in plan if arg != '-lcc_kext'] + ['-Xlinker', '-lcc_kext']
+        run(forwarded, 'explicit-linker-forwarding-control', Path(plan_row['cwd']))
+        forwarded_expanded = backend_linker_args((out / 'explicit-linker-forwarding-control.stderr.txt').read_text())
+        check('explicit-Xlinker-control-retains-literal-library-token', '-lcc_kext' in forwarded_expanded)
+        report['native_link'] = dict(parent=manifest['parents']['link'], native_input_flag='-lcc_kext',
+                                     compiler_runtime_policy=policy, compiler_driver_sources=driver_source,
                                      historical_attempts=[parents['link']['full_link_attempt'], parents['link']['available_provider_attempt']],
-                                     actual_commands_with_required_library=len(links), current_archive_supplied=bool(found_archives),
-                                     measured_search_directories=sorted(search_directories), found_provider_archives=found_archives,
-                                     absence_scope='Only recorded explicit library search directories; not a global filesystem absence assertion')
+                                     actual_input_commands_with_support_request=len(links),
+                                     resource_dir=str(resource_dir), support_runtime_path=str(runtime_path), support_runtime_present=runtime_present,
+                                     actual_backend_arguments=expanded, literal_forwarding_control_arguments=forwarded_expanded,
+                                     corecrypto_provider_identity_established_by_flag=False,
+                                     crypto_provider_qualification_independent=True,
+                                     superseded_inference='CCPROV-001 through004 libcc_kext search-directory absence is irrelevant to Darwin compiler support resolution and does not establish a missing crypto provider archive')
         public_source = without_comments((metadata / 'corecrypto_kext.c').read_text())
         public_assignments = set(re.findall(r'kpis\.(\w+)\s*=', public_source))
         public_missing = sorted(set(fields) - public_assignments)
@@ -313,7 +379,7 @@ def main():
                                         selected_direct_object_reference=consumers.get('_corecrypto_kext_start', []),
                                         selected_direct_stop_reference=consumers.get('_corecrypto_kext_stop', []),
                                         initializer_linked_or_executed_qualified=False,
-                                        warning='A required archive search flag does not establish extraction or execution of its provider startup member')
+                                        warning='The compiler-support -lcc_kext request does not identify this crypto provider or establish its initialization')
         report['consumer_references'] = {field: [] for field in fields}
         report['demand_source_hashes'] = {}
         for selected in parents['coherent_objects']:
@@ -350,7 +416,7 @@ def main():
               catalog['consumer_references'] == report['consumer_references'])
         report['peak_child_RSS_KiB'] = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
         report['outcome'] = 'pass'
-        report['summary'] = 'Bounded genuine selected crypto input/ABI audit passes; full provider absent: 21 unsupported minicrypto slots, restricted public source omits 13 selected slots, required cc_kext remains unsupplied.'
+        report['summary'] = 'Bounded crypto input/ABI audit passes: 21 unsupported minicrypto slots; public candidate coverage/rights remain unqualified. Separate Clang source/driver evidence identifies -lcc_kext as compiler support whose missing resource archive is silently omitted, not crypto-provider identity.'
     except Exception as error:
         report['error'] = repr(error)
     finally:

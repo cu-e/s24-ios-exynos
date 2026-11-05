@@ -30,9 +30,13 @@ has34 static relocations,21 unsupported static zeros and one deferred SHA256
 descriptor assigned before registration. All56 slots and observed direct
 source demand are catalogued. Registration stores the pointer without
 size/version/coverage validation; startup, table lifetime and PRNG ownership
-remain integration gates. Required cc_kext is unsupplied in measured explicit
-library directories; no reference to public corecrypto_kext_start appears in
-the coherent982-object consumer graph. No full-link pass follows.
+remain integration gates. The earlier interpretation of -lcc_kext as a
+crypto-provider archive is withdrawn: selected Clang rewrites it to a reserved
+compiler-support option; Darwin appends libclang_rt.cc_kext_ios.a from its
+resource tree only if present. No reference to public corecrypto_kext_start
+appears in the coherent982-object consumer graph. That independent crypto
+initialization gap is unrelated to the support-library token. No full-link
+pass or crypto provider archive identity follows.
 
 Pinned public Apple corecrypto9612a959abb6eac0aac3ee6a7245c46365c9d81b is
 restricted evaluation source, not an established integration grant. Its kext
@@ -53,7 +57,8 @@ decoded all56 slots and agreed; its existing witness is hash-linked separately.
 
 Next: coordinator review/integration and shared checks; retain KRN-023
 in_progress until acceptance. KRN-024 measures the current full link with
-genuine firehose/pthread archives and retained cc_kext requirement. A matching
+genuine firehose/pthread archives and preserved compiler-support request;
+KRN-025 separately qualifies the compiler runtime. A matching crypto
 provider needs applicable rights, exact target/context/signature profile,
 intentional startup/entropy integration and real archive/import/link/runtime
 qualification. Full crypto/FIPS/private Apple ABI/full kernel/native device

@@ -2,6 +2,12 @@
 
 Task KRN-023, owner `codex-team-corecrypto-20261105-at`, 2026-11-05.
 
+**Correction:** the initial audit incorrectly equated `-lcc_kext` with a
+corecrypto/KEC provider archive. Selected Clang treats that token as a compiler
+support request. Its Darwin override selects a compiler-rt resource archive
+and silently omits it when absent. The crypto table measurements below remain
+valid; CCPROV-001 through004's archive-identity inference is withdrawn.
+
 Planned source-review experiment CCPROV-001:
 
 1. Bind selected full XNU and donor Git revisions, register_crypto header/body,
@@ -76,25 +82,44 @@ selftests and strictFIPS=0 DRBG setting do not establish complete algorithms,
 entropy quality, initialization ordering, thread/interrupt safety or FIPS.
 No registration was executed by this task.
 
-## Required archive and provider initialization
+## Compiler support request and separate crypto initialization
 
 Pinned [MakeInc.def](https://github.com/apple-oss-distributions/xnu/blob/c54f35ca767986246321eb901baf8f5ff7923f6a/makedefs/MakeInc.def#L859)
 sets `LD_KERNEL_LIBS = -lcc_kext`; the selected donor retains it. KLINK-011's
 three recorded actual driver/linker-plan commands retain that exact flag.
 Its two full-link attempts fail with no image, first at missing firehose,
 then at missing pthread after supplying only the genuine firehose archive.
-Those diagnostics do not prove cc_kext is the sole remaining input. The audit
-finds no libcc_kext archive/dylib in those commands' explicit three library
-search directories. This is a bounded path inventory, not a filesystem-wide
-absence assertion. The coordinator's later genuine pthread work is separate;
-KRN-024 will assess the next full link.
+Those are outer Clang arguments, not proof that ld64 receives a literal
+`-lcc_kext` search, or that this token names a corecrypto provider.
+
+Exact selected Clang source is
+[apple-libtapi fa9443738c1a18accef4244732ec6d6ee97a8133](https://github.com/tpoechtrager/apple-libtapi/tree/fa9443738c1a18accef4244732ec6d6ee97a8133).
+[Driver.cpp:494](https://github.com/tpoechtrager/apple-libtapi/blob/fa9443738c1a18accef4244732ec6d6ee97a8133/src/clang/lib/Driver/Driver.cpp#L494)
+unconditionally rewrites the user library token to `OPT_Z_reserved_lib_cckext`.
+[Darwin.cpp:2839](https://github.com/tpoechtrager/apple-libtapi/blob/fa9443738c1a18accef4244732ec6d6ee97a8133/src/clang/lib/Driver/ToolChains/Darwin.cpp#L2839)
+overrides the generic literal-library handling: it selects
+`ResourceDir/lib/darwin/libclang_rt.cc_kext_ios.a` for iPhoneOS and appends it
+only when `getVFS().exists(P)`. These three exact source blobs also match the
+retained source lineage of the actual qualified compiler; hashes are in
+inputs.json. This is compiler-runtime support, independent of crypto provider
+identity, registration, callback coverage and runtime assurance.
+
+The corrected audit runs the preserved genuine selected Clang driver with
+`-###`, identifies its actual resource directory, and inspects backend ld64
+arguments. A missing resource archive is silently omitted. An explicit
+`-Xlinker -lcc_kext` plan is a literal-forwarding control and does not supply
+or qualify any archive. No ld64 command is executed by these plans. The former
+libcc_kext search-directory inventory was irrelevant to Darwin's compiler-rt
+resolution and is removed. KRN-024 assesses the current full link; KRN-025 owns
+compiler-runtime qualification. Neither is a crypto-provider implementation.
 
 The current coherent982-object symbol-consumer graph has no reference to
 `_corecrypto_kext_start` or `_corecrypto_kext_stop`. The public provider defines
 those entry points, but this audit does not demonstrate archive-member
 extraction or execution of its initializer. The static-kernel startup hook,
 PRNG ownership and first-registration ordering must be explicitly qualified;
-a library flag and exported start symbol are insufficient.
+the compiler-support flag and an exported crypto start symbol establish
+neither extraction nor execution of a crypto provider.
 
 ## Public provider research and licensing
 
@@ -157,6 +182,9 @@ direct demand, verifies the maintained56-slot catalog, records79 demand
 references and99 probe dependencies, and measures the startup-symbol inventory.
 [qualified-audit.json](../../../fixtures/public/corecrypto-provider/qualified-audit.json)
 links the exact existing evidence capsule and its immutable digest.
+These historical capsules retain their original bytes and are superseded for
+the cc_kext interpretation. [driver-correction.md](driver-correction.md)
+plans the source-backed mapping check, real driver plans and correction replay.
 
 Controls change all21 actual zero-slot bytes individually and one active
 relocation, alter a real source hash, remove the required library flag, compile
@@ -181,9 +209,11 @@ actual exits and resource measurements remain in the local evidence capsule.
 3. Integrate one intentional startup/PRNG owner before consumers and reconcile
    the donor's EARLY_BOOT first registration. Prove archive-member extraction,
    initialization order, immutable table lifetime and proper failure handling.
-4. Build an actual matched `libcc_kext.a` only when inputs/rights permit, audit
-   members/undefined providers, and run the native full link retaining every
-   selected library/export/alias/symbolset requirement. KRN-024 and KRN-008 own
+4. Integrate a genuine crypto implementation under its actual chosen build
+   artifact identity only when inputs/rights permit. Audit its members/imports
+   and full selected link independently of compiler-runtime support. Preserve
+   the native `-lcc_kext` request and assess its Darwin compiler-rt expansion;
+   KRN-025 owns that separate support-library gate. KRN-024 and KRN-008 own
    full link/integration; KRN-004 retains private-ABI qualification.
 5. Algorithm, side-channel, entropy, negative/error/lifecycle and runtime tests
    remain necessary after ABI/link qualification. Passing KATs, this source
