@@ -86,3 +86,27 @@ component; it must not relabel historical measurements or invalidate their
 unchanged generated namespace. Future execution always needs stable three
 samples and an admitted root lease. VM-009 verification and execution contracts
 must distinguish those historical and prospective roles explicitly.
+
+## Second publication and ledger-queue deadline
+
+The exact independently reviewed RSS-only fix, reviewer metadata wrapper and
+followup review were published by root-approved plan SHA256
+`c018daa374f292e9185750572815abec95622825d5cc03244f3b78b4011b3f01`.
+MAIN is retained at `9572b9f4c15db35dcdff44343cdd87a9ff371bfa`.
+All 153 common tests passed in 13.124 seconds, including the previously failing
+JVM lifecycle test. The overall common pipeline nevertheless stopped at its
+180-second deadline while `board-check` waited for the shared lab ledger queue;
+make exited -15. Peak owned RSS was 269,807,616 bytes and no owned PIDs survived.
+The second failed capsule and matching lease release remain in the original
+integrator worktree at `artifacts/integration-gate/gate-publication-2/`.
+
+Root instructed no further common rerun until the measured validation bottleneck
+is addressed or the queue drains. LAB-003 owner
+`codex-lab-validation-20261106-dp` prepares a strictly per-validation optimization;
+root independently reviews it. This candidate already contains the reviewed
+historical namespace, separate prospective guard and REV-023 plus the explicit
+VM-008 consumer contract. Append only the frozen, root-reviewed LAB-003 source
+and approval bindings, then rebuild the exact current-HEAD plan. No namespace
+publication or task completion has occurred. VM-009 remains unaccepted pending
+independent output-containment and task-to-shard mapping controls; no shard
+compile is authorized before those corrections, acceptance and a root lease.
