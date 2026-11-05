@@ -1,6 +1,9 @@
 # VMPID1ABI-002: exact reviewed compiled candidate admission
 
-Original VM-025 owner `codex-guest-exec-20261106-dg` resumes in the same worktree.
+Original VM-025 owner `codex-guest-exec-20261106-dg` resumes in the separate
+`worktrees/vm-025-admission-20261106` follow-up worktree. The original physical
+`worktrees/vm-025-20261106` tool, fixture and inconclusive capsule stay frozen
+at their `2b11bcf` bytes, because VM-034's raw build independently binds them.
 Root explicitly approved this host-preflight phase after accepting REV-026's
 compiled review; no compiler, linker, binary inspection tool, guest, MAIN
 publication/common check or task completion is authorized by that approval.
@@ -42,3 +45,33 @@ Export the measured host-admission evidence and exact original image/provenance
 to the VM-024 packager, root and kernel integrator. Retain all runtime/PID1/
 stack/signing/console/kernel/boot/PSCI boundaries and the original inconclusive
 capsule. Original owner retains the task pending independent acceptance.
+
+## Physical historical witness correction
+
+Initial prospective edits and the eleven-command control run occurred in the
+original physical worktree before root identified its historical witness role.
+Commit `3fdc1f0ae467792135c32eea57a486cbbb58612c` and all reports remain preserved;
+they are not rewritten or relabeled. The initial driver setup failure assumed
+the replacement had a UUID command; it failed before any preflight CLI ran.
+The corrected control driver mutated an actual code NOP to YIELD instead.
+
+Root required moving prospective code/fixture to this separate follow-up and
+restoring only the original owned files. The original tool is again SHA256
+`206b3c2d84db15432e3131e4aeb2c072b0341c649d28b123d3a3ab9ae6239137`,
+fixture SHA256 is
+`ed77dcdddbdda17d7950c0826c7a9b84cc97e14734e856d2a447c17c4af72a8d`
+and original inconclusive evidence remains SHA256
+`14fc2db3b6c95cfc6d5c7ac984d086f1de4225b9788790ab0081e6d7acc5dae8`.
+The prospective fixture explicitly pins all three and verifies them against the
+actual raw-build tool/fixture witnesses. It now has forty-one input hashes.
+
+The already registered original procedure path remains present, unchanged from
+the registered document, for global ledger validity; it is a new document,
+not a historical input witness. Removing it during restoration briefly caused
+unrelated VM-024 ledger validation calls to reject before mutation; it was
+restored immediately. No old source, fixture or evidence capsule was rewritten.
+
+Root authorized only one fresh positive CLI in this follow-up after restoration,
+not repetition of compilation, independent review or the completed negative
+controls. The continuation evidence must distinguish those preserved controls
+from the fresh positive report and retain every runtime boundary.

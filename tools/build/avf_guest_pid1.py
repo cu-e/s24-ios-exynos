@@ -153,9 +153,21 @@ def candidate_review(main, fixture, candidate, descriptor_path):
             review["reviewed_candidate"] == endorsement["candidate_descriptor"], "Independent review chain changed")
     require(build["outcome"] == "pass" and build["candidate"] == candidate and
             admission["raw_build_evidence"] == endorsement["raw_build_evidence"], "Raw build chain changed")
+    baseline = fixture["historical_vm025"]
+    require(build["bindings"]["VM025_fixture"] == baseline["fixture"], "Historical fixture binding changed")
+    tool = build["tools"]["preflight"]
+    require(Path(tool["path"]).resolve() == path_under(main, baseline["implementation"]["path"]) and
+            tool["sha256"] == baseline["implementation"]["sha256"], "Historical tool binding changed")
+    for key in ("fixture", "implementation", "inconclusive_evidence"):
+        binding = baseline[key]
+        require(pinned.get(binding["path"]) == binding["sha256"], "Unpinned historical baseline: " + key)
+    original = json.loads(bounded_bytes(path_under(main, baseline["fixture"]["path"])))
+    require(fixture["inputs"][:len(original["inputs"])] == original["inputs"] and
+            fixture["legacy"] == original["legacy"] and original["qualified_candidates"] == [],
+            "Historical nineteen-input baseline was not retained")
     for path, digest in review["sha256"].items():
         require(pinned.get(path) == digest, "Independent reviewed input not pinned: " + path)
-    return endorsement
+    return dict(**endorsement, historical_vm025=baseline)
 
 
 def controls(data):

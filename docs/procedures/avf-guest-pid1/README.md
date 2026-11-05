@@ -91,7 +91,8 @@ The task remains in progress pending independent review and integrator acceptanc
 
 The next host-only experiment is documented in
 [`admission-002.md`](admission-002.md). Its fixture extends the original immutable
-input records to thirty-eight hashes; the old inconclusive evidence remains
+input records to forty-one hashes, including the frozen original physical
+tool/fixture/evidence witnesses; the old inconclusive evidence remains
 unchanged. This phase reruns no compiler or independent machine-code review.
 
 ## Measured handoff
