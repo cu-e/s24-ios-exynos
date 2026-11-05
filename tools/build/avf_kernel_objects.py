@@ -439,6 +439,7 @@ def process_table():
             except (FileNotFoundError, PermissionError):
                 result[int(entry.name)]['executable'] = None
         except (FileNotFoundError, ProcessLookupError):
+            result.pop(int(entry.name), None)
             continue
     return result
 
