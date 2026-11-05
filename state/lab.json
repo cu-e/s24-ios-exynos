@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T02:25:14+00:00",
+  "updated_at": "2026-11-05T02:32:54+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -2826,8 +2826,8 @@
     {
       "id": "RES-008",
       "title": "Validate actual XNU sysroot, SDK and donor build-tool requirements",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-xnu-inputs-20261105-i",
       "priority": 95,
       "scope": "host",
       "evidence_kind": "source-review",
@@ -2841,7 +2841,8 @@
         "fixtures/public/xnu-build-inputs",
         "docs/procedures/xnu-build-inputs.md",
         "tools/build/describe_kernel_inputs.py",
-        "docs/implementation.md"
+        "docs/implementation.md",
+        "tests/test_kernel_inputs.py"
       ],
       "acceptance": [
         "Distinguish selected iOS16.5 runtime/XNU profile, official Xcode SDK version and a custom Theos sysroot label using pinned build scripts and official Apple release data",
@@ -2852,12 +2853,95 @@
       "sources": [
         "s24-port",
         "apple-xnu",
-        "hakios"
+        "hakios",
+        "hakios-e1s-tools",
+        "theos-sdk-metadata"
       ],
       "steps": [
         "Review exact donor and embedded-era tool scripts as data",
         "Compare official SDK/runtime matrix and actual script/header assumptions",
         "Publish an input manifest and concrete build path or precise external gaps"
+      ],
+      "started_at": "2026-11-05T02:25:35+00:00",
+      "last_heartbeat": "2026-11-05T02:32:06+00:00",
+      "updated_at": "2026-11-05T02:32:54+00:00",
+      "branch": "main",
+      "progress_note": "Read-only component inventory verifies exact embedded tools and corrected E1S source; SDK metadata mismatch explained, actual missing tools/SDK/overlay/DriverKit and unresolved source gates retained; five targeted regressions pass",
+      "next_step": "Run full checks, record source-review evidence and complete this audit; KRN-002/003 carry actual tool/dependency builds",
+      "handoff": "research/notes/RES-008-xnu-build-inputs.md",
+      "evidence": "state/evidence/RES-008.json",
+      "evidence_sha256": "dddb2d7d24dd444c2e3d85963ff26609c4fb130699f139e16999ac40619c86e6",
+      "finished_at": "2026-11-05T02:32:54+00:00"
+    },
+    {
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "sources": [
+        "hakios-e1s-tools",
+        "apple-xnu"
+      ],
+      "depends_on": [
+        "RES-008"
+      ],
+      "id": "KRN-002",
+      "title": "Build and qualify pinned open-source XNU host generators and Mach-O tools",
+      "paths": [
+        "tools/build/xnu_host_tools.py",
+        "tests/test_xnu_host_tools.py",
+        "research/sources.json",
+        "research/notes/KRN-002-host-tools.md",
+        "docs/procedures/xnu-host-tools.md",
+        "fixtures/public/xnu-host-tools"
+      ],
+      "acceptance": [
+        "Pin and review actual host-generator/cctools/TAPI dependency sources and licenses; do not invoke rolling SDK installers",
+        "Build needed host tools into an isolated artifacts prefix using an explicit compiler; no global package or compiler-path mutations",
+        "Run actual MIG generation and generated host-tool fixtures, plus arm64 Mach-O object/archive/link symbol checks for claimed tool coverage",
+        "Record exact commands, versions, source/build hashes, real failures and missing components; no SDK, full kernel or hardware qualification inferred"
+      ],
+      "steps": [
+        "Start with declared MIG/unifdef/tcsh pins and inspect configure/autotools requirements",
+        "Build source-only host dependencies and Mach-O tooling with bounded parallelism",
+        "Publish actual usable tool prefix and remaining gaps for KRN-003/KRN-001"
+      ]
+    },
+    {
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "sources": [
+        "hakios-e1s-tools",
+        "apple-xnu"
+      ],
+      "depends_on": [
+        "RES-008",
+        "KRN-002"
+      ],
+      "id": "KRN-003",
+      "title": "Qualify E1S dependency compiler/board profiles and generated kernel archives",
+      "paths": [
+        "tools/build/xnu_dependencies.py",
+        "patches/build-inputs",
+        "tests/test_xnu_dependencies.py",
+        "research/notes/KRN-003-dependencies.md",
+        "docs/procedures/xnu-dependencies.md",
+        "fixtures/public/xnu-dependencies"
+      ],
+      "acceptance": [
+        "Use exact embedded-era donor source and an explicit host compiler; no hardcoded missing global compiler path or silently newer build entry",
+        "Trace and correct firehose/pthread BCM2837 defines for actual E1S headers; measure relevant architecture/layout/symbol contracts",
+        "With explicitly supplied/provenanced SDK and DriverKit headers, build genuine E1S dependency archives and record arm64 Mach-O member/symbol checks",
+        "Do not fabricate missing SDK inputs, accept unsupported iig RPC as functional support, bypass export failures or alter KRN-001 owner/reservations"
+      ],
+      "steps": [
+        "Audit actual E1S exported-header compilation against the donor dependency scripts",
+        "Retain small attributed patches for compiler and E1S profile selection",
+        "Produce verified dependency input artifacts for the original full-kernel task or record precise missing external inputs"
       ]
     }
   ],
@@ -6338,6 +6422,132 @@
           "last_heartbeat": "2026-11-05T02:05:12+00:00",
           "branch": "main",
           "handoff": "docs/procedures/emulator-qualification.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:25:35+00:00",
+      "action": "task.claim:RES-008",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "RES-008",
+          "status": "in_progress",
+          "owner": "codex-xnu-inputs-20261105-i",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T02:25:35+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:27:23+00:00",
+      "action": "task.refine:RES-008-readonly-input-checker-regressions",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "RES-008",
+          "status": "in_progress",
+          "owner": "codex-xnu-inputs-20261105-i",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T02:25:35+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:29:58+00:00",
+      "action": "task.update:RES-008",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "RES-008",
+          "status": "in_progress",
+          "owner": "codex-xnu-inputs-20261105-i",
+          "priority": 95,
+          "progress_note": "Confirmed Theos16.5 directory carries Version16.4 metadata; pinned embedded-era tools separately, identified absent absolute compilers, E1S dependency-board defines, partial iig and export gates",
+          "next_step": "Publish component inventory and concrete source-build/input follow-ups, then run full checks and retain original KRN/NAT claims",
+          "last_heartbeat": "2026-11-05T02:29:58+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:31:54+00:00",
+      "action": "task.add:KRN-002",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:31:55+00:00",
+      "action": "task.add:KRN-003",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "KRN-003",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:32:06+00:00",
+      "action": "task.refine:RES-008-exact-embedded-tool-and-metadata-sources",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "RES-008",
+          "status": "in_progress",
+          "owner": "codex-xnu-inputs-20261105-i",
+          "priority": 95,
+          "progress_note": "Confirmed Theos16.5 directory carries Version16.4 metadata; pinned embedded-era tools separately, identified absent absolute compilers, E1S dependency-board defines, partial iig and export gates",
+          "next_step": "Publish component inventory and concrete source-build/input follow-ups, then run full checks and retain original KRN/NAT claims",
+          "last_heartbeat": "2026-11-05T02:29:58+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:32:06+00:00",
+      "action": "task.update:RES-008",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "RES-008",
+          "status": "in_progress",
+          "owner": "codex-xnu-inputs-20261105-i",
+          "priority": 95,
+          "progress_note": "Read-only component inventory verifies exact embedded tools and corrected E1S source; SDK metadata mismatch explained, actual missing tools/SDK/overlay/DriverKit and unresolved source gates retained; five targeted regressions pass",
+          "next_step": "Run full checks, record source-review evidence and complete this audit; KRN-002/003 carry actual tool/dependency builds",
+          "last_heartbeat": "2026-11-05T02:32:06+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-008-xnu-build-inputs.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:32:54+00:00",
+      "action": "task.done:RES-008",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "RES-008",
+          "status": "done",
+          "owner": "codex-xnu-inputs-20261105-i",
+          "priority": 95,
+          "progress_note": "Read-only component inventory verifies exact embedded tools and corrected E1S source; SDK metadata mismatch explained, actual missing tools/SDK/overlay/DriverKit and unresolved source gates retained; five targeted regressions pass",
+          "next_step": "Run full checks, record source-review evidence and complete this audit; KRN-002/003 carry actual tool/dependency builds",
+          "last_heartbeat": "2026-11-05T02:32:06+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-008-xnu-build-inputs.md"
         }
       ]
     }

@@ -1,0 +1,103 @@
+{
+  "kind": "source-review",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T02:32:44+00:00",
+  "summary": "Pinned exact embedded-era E1S build tooling and metadata-only Theos input; confirmed16.5 directory carries16.4 metadata, traced real compiler/MIG/cctools/overlay/DriverKit/export and board-profile gaps, implemented read-only component inventory and113 passing host tests. No kernel compiled.",
+  "commit": "d42e4587092b2772b158d78b61f483ea7efe362a",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/sources.py",
+        "fetch",
+        "hakios-e1s-tools"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/sources.py",
+        "fetch",
+        "theos-sdk-metadata"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/sources.py",
+        "verify",
+        "hakios-e1s-tools",
+        "theos-sdk-metadata"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/build/describe_kernel_inputs.py",
+        "--prepared-run",
+        "artifacts/xnu-prepare/corrected-touch-xnu-session1"
+      ],
+      "exit_code": 2
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_kernel_inputs.py",
+        "-v"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "make",
+        "check"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/xnu-build-inputs/profile.json",
+    "fixtures/public/xnu-build-inputs/input-inventory-session1.json",
+    "fixtures/public/xnu-build-inputs/official-release-provenance.json",
+    "fixtures/public/xnu-build-inputs/source-verification.jsonl",
+    "fixtures/public/xnu-build-inputs/checks.json",
+    "tools/build/describe_kernel_inputs.py",
+    "research/notes/RES-008-xnu-build-inputs.md",
+    "docs/procedures/xnu-build-inputs.md",
+    "artifacts/xnu-build-inputs/session1/make-check.log"
+  ],
+  "sha256": {
+    "fixtures/public/xnu-build-inputs/profile.json": "f529ca50077771a3c04e3e2351688a4a456104a394b57ca9abe77a45e6b5dd22",
+    "fixtures/public/xnu-build-inputs/input-inventory-session1.json": "72f5662cda3718e9d9ec5c240a36e20524471cb76f35d08c4c24767efd7a081a",
+    "fixtures/public/xnu-build-inputs/official-release-provenance.json": "1ea5a451576a1d5ecaacb39943ee35c9747d3e61af979a37019305a50fb74758",
+    "fixtures/public/xnu-build-inputs/source-verification.jsonl": "33ab5a2d38a16856f183b9dfe922a52fe3a371e6eff2d7cd6d154199878fdf5e",
+    "fixtures/public/xnu-build-inputs/checks.json": "ac56b855ab99b33e5b5bb2bc0adb1f04dfc5257daacdcad473e309770ad7ef5b",
+    "tools/build/describe_kernel_inputs.py": "7cffcf200889388c68f8127ba02039e40f7779a08105a78e38144ae26cbdbda3",
+    "research/notes/RES-008-xnu-build-inputs.md": "26ccd05e959a7408c634b1b45e97324937a1c67c0e7bda29ee8dda13c556490a",
+    "docs/procedures/xnu-build-inputs.md": "fa7bdb97c9afe4e3154542f0150aa1ef235e07d8802b5f97517178473c9d578f",
+    "artifacts/xnu-build-inputs/session1/make-check.log": "d38121da10cf7e6588323c4515526aa97816ae6e6895ca6d6ad4120c7d123d30"
+  },
+  "acceptance_review": {
+    "sdk_runtime_labels": "Established by official Apple release data, exact Theos metadata and pinned donor environment/compiler/xcrun; runtime remains16.5",
+    "actual_build_inputs": "Exact embedded-compatible tools pinned; absolute compiler, host generators, cctools, external overlay/static libraries,17 DriverKit headers, iig limits and exports traced",
+    "availability": "Actual configured-path inventory verifies tools/prepared source and reports missing external inputs; source-build declarations separated from completed builds",
+    "next_steps": "KRN-002/003 added for genuine host tools/E1S dependencies; KRN-001 and NAT-001 task bytes, reserved files and scope flags unchanged"
+  },
+  "limitations": [
+    "Source-review pass is not the inventory outcome: actual inventory remains blocked/exit2, no full kernel or device executed",
+    "No SDK/header/library/firmware/userland archive downloaded; only two Theos metadata/README text files fetched",
+    "Theos current metadata cannot reconstruct the exact unpinned SDK used by historical donor builds; metadata alone never proves full SDK provenance or ABI",
+    "Board macro mismatch is established; actual affected layout/ABI must still be measured, not assumed corrupted",
+    "No clean export/symbolset pass, functional DriverKit RPC, signing enforcement or native hardware support established"
+  ]
+}

@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T02:25:15+00:00",
-  "ledger_updated_at": "2026-11-05T02:25:14+00:00",
-  "registry_sha256": "e55aa9805d427292f3dce0ab42650b2ec3d052a1b43935acdb83cfd9e401c1b4",
+  "generated_at": "2026-11-05T02:32:54+00:00",
+  "ledger_updated_at": "2026-11-05T02:32:54+00:00",
+  "registry_sha256": "00d34940209d2696af8f23e5318711338ad48970c7a6a188fbea8b1bcd2977be",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
-      "RES-008",
+      "KRN-002",
       "ESIM-004",
       "CELL-009",
       "VM-002",
@@ -23,6 +23,7 @@
       "NAT-001"
     ],
     "waiting": [
+      "KRN-003",
       "GPU-007",
       "GPU-009",
       "AUD-001",
@@ -67,6 +68,7 @@
       "BT-005"
     ],
     "done": [
+      "RES-008",
       "PLN-001",
       "SRC-001",
       "INT-001",
@@ -101,8 +103,8 @@
     {
       "id": "RES-008",
       "title": "Validate actual XNU sysroot, SDK and donor build-tool requirements",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-xnu-inputs-20261105-i",
       "priority": 95,
       "scope": "host",
       "evidence_kind": "source-review",
@@ -116,7 +118,8 @@
         "fixtures/public/xnu-build-inputs",
         "docs/procedures/xnu-build-inputs.md",
         "tools/build/describe_kernel_inputs.py",
-        "docs/implementation.md"
+        "docs/implementation.md",
+        "tests/test_kernel_inputs.py"
       ],
       "acceptance": [
         "Distinguish selected iOS16.5 runtime/XNU profile, official Xcode SDK version and a custom Theos sysroot label using pinned build scripts and official Apple release data",
@@ -127,16 +130,107 @@
       "sources": [
         "s24-port",
         "apple-xnu",
-        "hakios"
+        "hakios",
+        "hakios-e1s-tools",
+        "theos-sdk-metadata"
       ],
       "steps": [
         "Review exact donor and embedded-era tool scripts as data",
         "Compare official SDK/runtime matrix and actual script/header assumptions",
         "Publish an input manifest and concrete build path or precise external gaps"
       ],
-      "column": "ready",
+      "started_at": "2026-11-05T02:25:35+00:00",
+      "last_heartbeat": "2026-11-05T02:32:06+00:00",
+      "updated_at": "2026-11-05T02:32:54+00:00",
+      "branch": "main",
+      "progress_note": "Read-only component inventory verifies exact embedded tools and corrected E1S source; SDK metadata mismatch explained, actual missing tools/SDK/overlay/DriverKit and unresolved source gates retained; five targeted regressions pass",
+      "next_step": "Run full checks, record source-review evidence and complete this audit; KRN-002/003 carry actual tool/dependency builds",
+      "handoff": "research/notes/RES-008-xnu-build-inputs.md",
+      "evidence": "state/evidence/RES-008.json",
+      "evidence_sha256": "dddb2d7d24dd444c2e3d85963ff26609c4fb130699f139e16999ac40619c86e6",
+      "finished_at": "2026-11-05T02:32:54+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/RES-008.md"
+    },
+    {
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "sources": [
+        "hakios-e1s-tools",
+        "apple-xnu"
+      ],
+      "depends_on": [
+        "RES-008"
+      ],
+      "id": "KRN-002",
+      "title": "Build and qualify pinned open-source XNU host generators and Mach-O tools",
+      "paths": [
+        "tools/build/xnu_host_tools.py",
+        "tests/test_xnu_host_tools.py",
+        "research/sources.json",
+        "research/notes/KRN-002-host-tools.md",
+        "docs/procedures/xnu-host-tools.md",
+        "fixtures/public/xnu-host-tools"
+      ],
+      "acceptance": [
+        "Pin and review actual host-generator/cctools/TAPI dependency sources and licenses; do not invoke rolling SDK installers",
+        "Build needed host tools into an isolated artifacts prefix using an explicit compiler; no global package or compiler-path mutations",
+        "Run actual MIG generation and generated host-tool fixtures, plus arm64 Mach-O object/archive/link symbol checks for claimed tool coverage",
+        "Record exact commands, versions, source/build hashes, real failures and missing components; no SDK, full kernel or hardware qualification inferred"
+      ],
+      "steps": [
+        "Start with declared MIG/unifdef/tcsh pins and inspect configure/autotools requirements",
+        "Build source-only host dependencies and Mach-O tooling with bounded parallelism",
+        "Publish actual usable tool prefix and remaining gaps for KRN-003/KRN-001"
+      ],
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/KRN-002.md"
+    },
+    {
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "sources": [
+        "hakios-e1s-tools",
+        "apple-xnu"
+      ],
+      "depends_on": [
+        "RES-008",
+        "KRN-002"
+      ],
+      "id": "KRN-003",
+      "title": "Qualify E1S dependency compiler/board profiles and generated kernel archives",
+      "paths": [
+        "tools/build/xnu_dependencies.py",
+        "patches/build-inputs",
+        "tests/test_xnu_dependencies.py",
+        "research/notes/KRN-003-dependencies.md",
+        "docs/procedures/xnu-dependencies.md",
+        "fixtures/public/xnu-dependencies"
+      ],
+      "acceptance": [
+        "Use exact embedded-era donor source and an explicit host compiler; no hardcoded missing global compiler path or silently newer build entry",
+        "Trace and correct firehose/pthread BCM2837 defines for actual E1S headers; measure relevant architecture/layout/symbol contracts",
+        "With explicitly supplied/provenanced SDK and DriverKit headers, build genuine E1S dependency archives and record arm64 Mach-O member/symbol checks",
+        "Do not fabricate missing SDK inputs, accept unsupported iig RPC as functional support, bypass export failures or alter KRN-001 owner/reservations"
+      ],
+      "steps": [
+        "Audit actual E1S exported-header compilation against the donor dependency scripts",
+        "Retain small attributed patches for compiler and E1S profile selection",
+        "Produce verified dependency input artifacts for the original full-kernel task or record precise missing external inputs"
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: KRN-002"
+      ],
+      "card_path": "planning/tasks/KRN-003.md"
     },
     {
       "id": "PLN-001",
@@ -3315,46 +3409,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-05T01:39:23+00:00",
-      "action": "experiment.plan:EMULATOR-011",
-      "owner": "codex-emulator-qualification-20261105-h"
-    },
-    {
-      "at": "2026-11-05T01:44:01+00:00",
-      "action": "experiment.plan:EMULATOR-012",
-      "owner": "codex-emulator-qualification-20261105-h"
-    },
-    {
-      "at": "2026-11-05T01:49:34+00:00",
-      "action": "experiment.plan:EMULATOR-013",
-      "owner": "codex-emulator-qualification-20261105-h"
-    },
-    {
-      "at": "2026-11-05T01:54:06+00:00",
-      "action": "experiment.record:EMULATOR-008",
-      "owner": "codex-emulator-qualification-20261105-h"
-    },
-    {
-      "at": "2026-11-05T01:54:08+00:00",
-      "action": "experiment.record:EMULATOR-009",
-      "owner": "codex-emulator-qualification-20261105-h"
-    },
-    {
-      "at": "2026-11-05T01:54:09+00:00",
-      "action": "experiment.record:EMULATOR-010",
-      "owner": "codex-emulator-qualification-20261105-h"
-    },
-    {
-      "at": "2026-11-05T01:54:11+00:00",
-      "action": "experiment.record:EMULATOR-011",
-      "owner": "codex-emulator-qualification-20261105-h"
-    },
-    {
-      "at": "2026-11-05T01:54:12+00:00",
-      "action": "experiment.record:EMULATOR-012",
-      "owner": "codex-emulator-qualification-20261105-h"
-    },
-    {
       "at": "2026-11-05T01:58:53+00:00",
       "action": "task.refine:TST-002-publish-runtime-capability-and-handoff-evidence",
       "owner": "codex-emulator-qualification-20261105-h",
@@ -3467,12 +3521,140 @@
           "handoff": "docs/procedures/emulator-qualification.md"
         }
       ]
+    },
+    {
+      "at": "2026-11-05T02:25:35+00:00",
+      "action": "task.claim:RES-008",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "RES-008",
+          "status": "in_progress",
+          "owner": "codex-xnu-inputs-20261105-i",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T02:25:35+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:27:23+00:00",
+      "action": "task.refine:RES-008-readonly-input-checker-regressions",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "RES-008",
+          "status": "in_progress",
+          "owner": "codex-xnu-inputs-20261105-i",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T02:25:35+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:29:58+00:00",
+      "action": "task.update:RES-008",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "RES-008",
+          "status": "in_progress",
+          "owner": "codex-xnu-inputs-20261105-i",
+          "priority": 95,
+          "progress_note": "Confirmed Theos16.5 directory carries Version16.4 metadata; pinned embedded-era tools separately, identified absent absolute compilers, E1S dependency-board defines, partial iig and export gates",
+          "next_step": "Publish component inventory and concrete source-build/input follow-ups, then run full checks and retain original KRN/NAT claims",
+          "last_heartbeat": "2026-11-05T02:29:58+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:31:54+00:00",
+      "action": "task.add:KRN-002",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:31:55+00:00",
+      "action": "task.add:KRN-003",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "KRN-003",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:32:06+00:00",
+      "action": "task.refine:RES-008-exact-embedded-tool-and-metadata-sources",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "RES-008",
+          "status": "in_progress",
+          "owner": "codex-xnu-inputs-20261105-i",
+          "priority": 95,
+          "progress_note": "Confirmed Theos16.5 directory carries Version16.4 metadata; pinned embedded-era tools separately, identified absent absolute compilers, E1S dependency-board defines, partial iig and export gates",
+          "next_step": "Publish component inventory and concrete source-build/input follow-ups, then run full checks and retain original KRN/NAT claims",
+          "last_heartbeat": "2026-11-05T02:29:58+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:32:06+00:00",
+      "action": "task.update:RES-008",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "RES-008",
+          "status": "in_progress",
+          "owner": "codex-xnu-inputs-20261105-i",
+          "priority": 95,
+          "progress_note": "Read-only component inventory verifies exact embedded tools and corrected E1S source; SDK metadata mismatch explained, actual missing tools/SDK/overlay/DriverKit and unresolved source gates retained; five targeted regressions pass",
+          "next_step": "Run full checks, record source-review evidence and complete this audit; KRN-002/003 carry actual tool/dependency builds",
+          "last_heartbeat": "2026-11-05T02:32:06+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-008-xnu-build-inputs.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:32:54+00:00",
+      "action": "task.done:RES-008",
+      "owner": "codex-xnu-inputs-20261105-i",
+      "tasks": [
+        {
+          "id": "RES-008",
+          "status": "done",
+          "owner": "codex-xnu-inputs-20261105-i",
+          "priority": 95,
+          "progress_note": "Read-only component inventory verifies exact embedded tools and corrected E1S source; SDK metadata mismatch explained, actual missing tools/SDK/overlay/DriverKit and unresolved source gates retained; five targeted regressions pass",
+          "next_step": "Run full checks, record source-review evidence and complete this audit; KRN-002/003 carry actual tool/dependency builds",
+          "last_heartbeat": "2026-11-05T02:32:06+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-008-xnu-build-inputs.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "3891b1e4c31674691ca7fb8697cc35c4a2540d07d3e42a35946afac9819d00f7",
-    "BOARD.md": "16dd5a412253fc3ccdb919554ed806d4cf263dcff50514e4bb2379c0f367f51c",
-    "planning/tasks/RES-008.md": "b9d7026cef37288a35a54045252628e92aa79f83a8ec01fed5ca84331412680c",
+    "STATUS.md": "cb3712ac1487255baac58a15d7cc3ba694318e7b5e2db919a0eeea01b445f803",
+    "BOARD.md": "e89cd1249400a7911623f8ef442b2071eac1641469f72f33255e7aa0fc2336d6",
+    "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
+    "planning/tasks/KRN-002.md": "8f64782e204ac3d9c5cba0590739b427e91a232b746d3b854cc2999e62a11a30",
+    "planning/tasks/KRN-003.md": "4e46374fe8abf04cbf675698986ebc4184560b673f16428c2e020b149e54ffd9",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
     "planning/tasks/INT-001.md": "9d68fa75fae4c21f31f5ea4734c3f592ed0b41c6ed897d7b045a892c63549760",

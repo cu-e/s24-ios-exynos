@@ -21,6 +21,8 @@ RES-001 pins the exact S24 source and selected donor documentation. Preserve its
 
 BLD-001 builds the freestanding probe and XNU handoff loader; it must separately report full kernel readiness. TST-001 validates boot headers, ADT/FDT and memory bounds. The upstream check_all_exports failure is a build failure, even when a linked kernel exists. SDK/toolchain absence is an explicit dependency, never an excuse to claim a build.
 
+[RES-008 input analysis](../research/notes/RES-008-xnu-build-inputs.md) distinguishes the selected iOS16.5 runtime from SDK metadata: Apple SDK16.4 and the reviewed Theos16.5 directory are compatible labels in the documented app toolchain, not proof of private/kernel ABI. Use the [component inventory](procedures/xnu-build-inputs.md) instead of treating literal Version16.5 as sufficient or necessary. KRN-002 builds qualified open-source host tools; KRN-003 audits the E1S dependency board/compiler profile and generated archives. The original KRN-001 owner retains full-kernel build acceptance.
+
 Source fetch is explicit, SHA-pinned, does not run upstream scripts and does not recurse into submodules. Sources stay in references/. Builds run in artifacts/ copies so reviewed checkouts remain unchanged. Apple userland, SDKs, firmware and private device data are external local inputs, excluded from Git.
 
 ## Stage B: bounded experiments while Android runs
