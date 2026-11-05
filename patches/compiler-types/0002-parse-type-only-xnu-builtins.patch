@@ -1,0 +1,27 @@
+--- a/src/clang/lib/Parse/ParseExpr.cpp
++++ b/src/clang/lib/Parse/ParseExpr.cpp
+@@ -1758,6 +1758,24 @@
+     Res = ParseArrayTypeTrait();
+     break;
+ 
++  case tok::kw___builtin_xnu_type_signature:
++  case tok::kw___builtin_xnu_type_summary: {
++    bool Signature = Tok.is(tok::kw___builtin_xnu_type_signature);
++    SourceLocation Loc = ConsumeToken();
++    BalancedDelimiterTracker T(*this, tok::l_paren);
++    if (T.expectAndConsume()) return ExprError();
++    TypeResult Ty = ParseTypeName();
++    if (Ty.isInvalid()) {
++      SkipUntil(tok::r_paren, StopAtSemi);
++      return ExprError();
++    }
++    SourceLocation EndLoc = Tok.getLocation();
++    if (T.consumeClose()) return ExprError();
++    return Actions.ActOnUnaryExprOrTypeTraitExpr(
++        Loc, Signature ? UETT_XnuTypeSignature : UETT_XnuTypeSummary,
++        true, Ty.get().getAsOpaquePtr(), SourceRange(Loc, EndLoc));
++  }
++
+   case tok::kw___builtin_ptrauth_type_discriminator:
+     return ParseBuiltinPtrauthTypeDiscriminator();
+ 

@@ -1,0 +1,81 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T05:19:22+00:00",
+  "summary": "Actual ARM64 object from genuine selected allocation macros plus the known donor constant fallback is inspected and must be rejected; this is a negative-control verdict only, not compiler or allocator qualification.",
+  "commit": "fc4eef9e3106f248ee1b7b47e86cf9ad10798a59",
+  "commands": [
+    {
+      "argv": [
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang",
+        "-target",
+        "arm64-apple-ios16.5",
+        "-mkernel",
+        "-ffreestanding",
+        "-nostdinc",
+        "-std=gnu++17",
+        "-DKERNEL=1",
+        "-DKERNEL_PRIVATE=1",
+        "-DPRIVATE=1",
+        "-I",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/open-kernel-inputs/typed-pthread-session1/header-tree/src/Libraries/AvailabilityVersions/include",
+        "-I",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/open-kernel-inputs/typed-pthread-session1/mach-headers",
+        "-I",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-iig-abi/nyktis-invoke-guard-session1/setup-headers",
+        "-I",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-iig-abi/nyktis-invoke-guard-session1/generated",
+        "-I",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-iig-abi/nyktis-invoke-guard-session1/mach-server-headers",
+        "-I",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk",
+        "-I",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/bsd",
+        "-I",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/iokit",
+        "-I",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/libkern",
+        "-I",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/pexpert",
+        "-I",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/EXTERNAL_HEADERS",
+        "-I",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/libsa",
+        "-include",
+        "/home/egor/dev/pet/s24-ios-exynos/references/hakios-e1s-tools/xnu-deps/hostinc/xnu_clang_compat.h",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/fixtures/public/xnu-compiler-types/allocator-metadata.cpp",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-types/fallback-rejection-session1/bad-metadata.o"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/xnu-compiler-types/allocator-metadata.cpp",
+    "references/hakios-e1s-tools/xnu-deps/hostinc/xnu_clang_compat.h",
+    "artifacts/xnu-compiler-types/fallback-rejection-session1/verifier.py",
+    "artifacts/xnu-compiler-types/fallback-rejection-session1/stdout.txt",
+    "artifacts/xnu-compiler-types/fallback-rejection-session1/stderr.txt",
+    "artifacts/xnu-compiler-types/fallback-rejection-session1/report.json",
+    "artifacts/xnu-compiler-types/fallback-rejection-session1/bad-metadata.o"
+  ],
+  "sha256": {
+    "fixtures/public/xnu-compiler-types/allocator-metadata.cpp": "cd1b2d305cbff112b1b60faf4776ddf797d6f23ed77d3a53ebc145ca9f6cd427",
+    "references/hakios-e1s-tools/xnu-deps/hostinc/xnu_clang_compat.h": "aa94db87e8e0a0d283264ffd90339f95968ce7bb4480d20d3783c240aee04e52",
+    "artifacts/xnu-compiler-types/fallback-rejection-session1/verifier.py": "44b9003157dc3bfd71bf9a226272a277eba3207025678328401480ad0a339ac1",
+    "artifacts/xnu-compiler-types/fallback-rejection-session1/stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/xnu-compiler-types/fallback-rejection-session1/stderr.txt": "5be72a72e3ec16b77e67f0c6694bd42388fd04ff80861017b37bf681ede4dd56",
+    "artifacts/xnu-compiler-types/fallback-rejection-session1/report.json": "8ba53b981b40d70780471fa17c5545454cf410892fff1b9fa0b5c13359e2f9c8",
+    "artifacts/xnu-compiler-types/fallback-rejection-session1/bad-metadata.o": "cf4123cf5c11263795d867d5b01c1520dab44108045706b36eaa0c8240f084db"
+  },
+  "compiler_sha256": "6156dd4e5e466333197a00b8d20bca72c292186643b749dcaaa3aa9164afb1de",
+  "result": {
+    "compile_exit_code": 0,
+    "rejected": true,
+    "donor_constant_fallback_used_for_negative_control_only": true,
+    "production_compiler_qualified": false,
+    "rejection": "Actual type-sensitive allocator record differs from public expectations"
+  }
+}

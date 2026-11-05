@@ -724,8 +724,8 @@
       "id": "xnu-tapi",
       "url": "https://github.com/tpoechtrager/apple-libtapi",
       "revision": "fa9443738c1a18accef4244732ec6d6ee97a8133",
-      "relevance": "Source-built host tool/dependency in MACHOTOOLS-003/004; bounded real static Mach-O/runtime/owned text-stub fixtures pass. No selected SDK ABI, full XNU or native qualification.",
-      "license_notes": "Apple TAPI and LLVM component notices; review source build definitions before isolated compilation",
+      "relevance": "Real host Mach-O tooling plus TYPECOMP-008 experimental Clang17 source compiler: target AST-based allocator metadata, actual selected E1S/private17 IIG compiles and concrete misuse/binary controls pass. Full Apple compiler/SDK/private ABI/kernel/native equivalence remains unqualified.",
+      "license_notes": "Preserve actual src/clang/LICENSE.TXT and src/llvm/LICENSE.TXT Apache2 with LLVM exceptions and all per-file notices; top-level older NCSA/Apple TAPI notices remain distinct. Owned compiler patches retain the Clang component license; no Apple binary/SDK/archive grant or acquisition.",
       "trust": "primary-upstream",
       "local_device_verified": false,
       "review_files": [
@@ -738,7 +738,23 @@
         "src/llvm/CMakeLists.txt",
         "src/tapi/CMakeLists.txt",
         "src/tapi/tools/libtapi/CMakeLists.txt",
-        "src/clang/lib/Headers/stdatomic.h"
+        "src/clang/lib/Headers/stdatomic.h",
+        "src/clang/include/clang/Basic/TokenKinds.def",
+        "src/clang/include/clang/Basic/Attr.td",
+        "src/clang/include/clang/Basic/Builtins.def",
+        "src/clang/lib/Sema/SemaExpr.cpp",
+        "src/clang/lib/Sema/SemaExprCXX.cpp",
+        "src/clang/lib/Sema/SemaDeclAttr.cpp",
+        "src/clang/include/clang/AST/Expr.h",
+        "src/clang/include/clang/AST/ASTContext.h",
+        "src/clang/include/clang/AST/RecordLayout.h",
+        "src/clang/lib/Sema/TreeTransform.h",
+        "src/clang/LICENSE.TXT",
+        "src/llvm/LICENSE.TXT",
+        "src/clang/include/clang/AST/Stmt.h",
+        "src/clang/include/clang/AST/Decl.h",
+        "src/clang/lib/Parse/ParseExpr.cpp",
+        "src/clang/lib/Lex/PPMacroExpansion.cpp"
       ],
       "checkout_policy": "Named text/build/license review first; source-only expansion for isolated compilation; no rolling installer, SDK, firmware or submodule execution"
     },
@@ -862,7 +878,9 @@
         "src/Kernel/xnu/iokit/DriverKit/IOService.iig",
         "src/Kernel/xnu/iokit/DriverKit/OSObject.iig",
         "src/Kernel/xnu/iokit/DriverKit/IOService.iig.cpp",
-        "src/Kernel/xnu/iokit/DriverKit/OSObject.iig.cpp"
+        "src/Kernel/xnu/iokit/DriverKit/OSObject.iig.cpp",
+        "nix/pkgs/toolchain/clang-cross.nix",
+        "nix/pkgs/toolchain/llvm-cross.nix"
       ],
       "checkout_policy": "Only named pinned source/build/license text; no SDK/firmware/binary samples, submodules, Nix activation/global store setup or upstream execution"
     },

@@ -1,0 +1,149 @@
+--- a/src/clang/include/clang/Basic/TokenKinds.def
++++ b/src/clang/include/clang/Basic/TokenKinds.def
+@@ -435,6 +435,9 @@
+ // __alignof returns the preferred alignment of a type, the alignment
+ // clang will attempt to give an object of the type if allowed by ABI.
+ UNARY_EXPR_OR_TYPE_TRAIT(__alignof, PreferredAlignOf, KEYALL)
++UNARY_EXPR_OR_TYPE_TRAIT(__builtin_xnu_type_signature, XnuTypeSignature, KEYALL)
++UNARY_EXPR_OR_TYPE_TRAIT(__builtin_xnu_type_summary, XnuTypeSummary, KEYALL)
++TYPE_TRAIT_2(__builtin_xnu_types_compatible, XnuTypesCompatible, KEYALL)
+ KEYWORD(__attribute                 , KEYALL)
+ KEYWORD(__builtin_choose_expr       , KEYALL)
+ KEYWORD(__builtin_offsetof          , KEYALL)
+--- a/src/clang/include/clang/AST/Stmt.h
++++ b/src/clang/include/clang/AST/Stmt.h
+@@ -454,7 +454,7 @@
+ 
+     unsigned : NumExprBits;
+ 
+-    unsigned Kind : 3;
++    unsigned Kind : 4;
+     unsigned IsType : 1; // true if operand is a type, false if an expression.
+   };
+ 
+--- a/src/clang/include/clang/Basic/Attr.td
++++ b/src/clang/include/clang/Basic/Attr.td
+@@ -694,6 +694,13 @@
+ // Attributes begin here
+ //
+ 
++def XnuUsageSemantics : InheritableAttr {
++  let Spellings = [GCC<"xnu_usage_semantics">];
++  let Args = [VariadicStringArgument<"Semantics">];
++  let Subjects = SubjectList<[TypedefName, Field], ErrorDiag>;
++  let Documentation = [Undocumented];
++}
++
+ def AbiTag : Attr {
+   let Spellings = [GCC<"abi_tag", /*AllowInC*/0>];
+   let Args = [VariadicStringArgument<"Tags">];
+--- a/src/clang/lib/Sema/SemaExpr.cpp
++++ b/src/clang/lib/Sema/SemaExpr.cpp
+@@ -11,6 +11,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "TreeTransform.h"
++#include "clang/AST/XnuTypeMetadata.h"
+ #include "UsedDeclVisitor.h"
+ #include "clang/AST/ASTConsumer.h"
+ #include "clang/AST/ASTContext.h"
+@@ -4756,6 +4757,33 @@
+     return ExprError();
+ 
+   QualType T = TInfo->getType();
++
++  if (ExprKind == UETT_XnuTypeSignature || ExprKind == UETT_XnuTypeSummary) {
++    QualType ResultType = ExprKind == UETT_XnuTypeSignature
++        ? Context.getPointerType(Context.CharTy.withConst())
++        : Context.UnsignedIntTy;
++    if (T->isDependentType())
++      return new (Context) UnaryExprOrTypeTraitExpr(
++          ExprKind, TInfo, ResultType, OpLoc, R.getEnd());
++    if (RequireCompleteType(OpLoc, T, diag::err_incomplete_type))
++      return ExprError();
++    std::string Signature;
++    uint32_t Summary;
++    if (!XnuTypeMetadata(Context).compute(T, Signature, Summary)) {
++      Diag(OpLoc, getDiagnostics().getCustomDiagID(DiagnosticsEngine::Error,
++          "experimental XNU metadata does not support this type/layout"));
++      return ExprError();
++    }
++    if (ExprKind == UETT_XnuTypeSummary)
++      return IntegerLiteral::Create(Context, llvm::APInt(32, Summary),
++                                    Context.UnsignedIntTy, OpLoc);
++    QualType ArrayType = Context.getConstantArrayType(
++        Context.CharTy, llvm::APInt(64, Signature.size() + 1), nullptr,
++        ArrayType::Normal, 0);
++    auto *Literal = StringLiteral::Create(Context, Signature,
++        StringLiteral::Ordinary, false, ArrayType, OpLoc);
++    return ImpCastExprToType(Literal, ResultType, CK_ArrayToPointerDecay);
++  }
+ 
+   if (!T->isDependentType() &&
+       CheckUnaryExprOrTypeTraitOperand(T, OpLoc, R, ExprKind,
+--- a/src/clang/lib/Sema/SemaExprCXX.cpp
++++ b/src/clang/lib/Sema/SemaExprCXX.cpp
+@@ -12,6 +12,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "TreeTransform.h"
++#include "clang/AST/XnuTypeMetadata.h"
+ #include "TypeLocBuilder.h"
+ #include "clang/AST/ASTContext.h"
+ #include "clang/AST/ASTLambda.h"
+@@ -5689,6 +5690,19 @@
+   }
+   case BTT_IsSame:
+     return Self.Context.hasSameType(LhsT, RhsT);
++  case BTT_XnuTypesCompatible: {
++    if (Self.Context.hasSameType(LhsT, RhsT)) return true;
++    if (LhsT->isVoidType() || RhsT->isVoidType()) return false;
++    std::string Lhs, Rhs;
++    uint32_t LSum, RSum;
++    if (!XnuTypeMetadata(Self.Context).compute(LhsT, Lhs, LSum) ||
++        !XnuTypeMetadata(Self.Context).compute(RhsT, Rhs, RSum)) {
++      Self.Diag(KeyLoc, Self.getDiagnostics().getCustomDiagID(
++          DiagnosticsEngine::Error, "experimental XNU compatibility requires supported complete target layouts"));
++      return false;
++    }
++    return Lhs == Rhs;
++  }
+   case BTT_TypeCompatible: {
+     // GCC ignores cv-qualifiers on arrays for this builtin.
+     Qualifiers LhsQuals, RhsQuals;
+--- a/src/clang/lib/Sema/SemaDeclAttr.cpp
++++ b/src/clang/lib/Sema/SemaDeclAttr.cpp
+@@ -7345,6 +7345,23 @@
+   D->addAttr(::new (S.Context) ThreadAttr(S.Context, AL));
+ }
+ 
++static void handleXnuUsageSemanticsAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
++  if (!AL.checkAtLeastNumArgs(S, 1)) return;
++  llvm::SmallVector<StringRef, 2> Values;
++  for (unsigned I = 0; I != AL.getNumArgs(); ++I) {
++    StringRef Value;
++    if (!S.checkStringLiteralArgumentAttr(AL, I, Value)) return;
++    if (Value != "pointer" && Value != "data") {
++      S.Diag(AL.getLoc(), S.getDiagnostics().getCustomDiagID(
++          DiagnosticsEngine::Error, "unsupported XNU usage semantic"));
++      return;
++    }
++    Values.push_back(Value);
++  }
++  D->addAttr(::new (S.Context) XnuUsageSemanticsAttr(
++      S.Context, AL, Values.data(), Values.size()));
++}
++
+ static void handleAbiTagAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
+   SmallVector<StringRef, 4> Tags;
+   for (unsigned I = 0, E = AL.getNumArgs(); I != E; ++I) {
+@@ -9339,6 +9356,9 @@
+     handleHLSLResourceBindingAttr(S, D, AL);
+     break;
+ 
++  case ParsedAttr::AT_XnuUsageSemantics:
++    handleXnuUsageSemanticsAttr(S, D, AL);
++    break;
+   case ParsedAttr::AT_AbiTag:
+     handleAbiTagAttr(S, D, AL);
+     break;
