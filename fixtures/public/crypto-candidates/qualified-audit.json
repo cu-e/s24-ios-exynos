@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "kind": "source-review",
+  "origin": "local-host",
+  "task": "KRN-028",
+  "owner": "codex-team-crypto-candidates-20261105-be",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T15:44:49+00:00",
+  "tested_commit": "37c74737cc760602e9c392dccd1d67da13c48db8",
+  "experiment": "CRYCAND-002",
+  "plan_created_at": "2026-11-05T15:44:37+00:00",
+  "checks": 356,
+  "negative_controls": 57,
+  "source_files": 67,
+  "real_API_definitions_and_declarations": 44,
+  "missing_callbacks_assessed": 21,
+  "candidate_assessments": 42,
+  "backend_candidates": {
+    "mbedtls": {
+      "revision": "068ff080b369adfac81509f9b57b2afabaf82dc5",
+      "repository": "https://github.com/Mbed-TLS/mbedtls",
+      "component_license": "Apache-2.0 OR GPL-2.0-or-later; research plans elect Apache-2.0"
+    },
+    "bearssl": {
+      "revision": "7bea48e5e850ab4cafbe68d3765cdaba13a86d6f",
+      "repository": "https://www.bearssl.org/git/BearSSL",
+      "component_license": "MIT"
+    }
+  },
+  "layout": {
+    "witness": "worktrees/krn-028-20261105/tools/research/crypto-candidates/local/selected-layout-session1/evidence.json",
+    "sha256": "ea9c9d530ac8de7a7040ef8ca9cb0239d196c69c7b4771347cecee36b8299ca0",
+    "actual_target_compile_exit": 0,
+    "compiler_calls_total_for_task": 1,
+    "peak_child_RSS_KiB": 130620,
+    "values": {
+      "ccmode_ecb_bytes": 48,
+      "ccmode_cbc_bytes": 40,
+      "ccmode_xts_bytes": 80,
+      "ccmode_gcm_bytes": 80,
+      "ecb_context_alignment": 16,
+      "cbc_context_alignment": 16,
+      "xts_context_alignment": 16,
+      "gcm_context_alignment": 16,
+      "chacha_context_bytes": 256,
+      "chacha_context_alignment": 8,
+      "fixed_xts_encrypt_context_bytes": 1072,
+      "fixed_xts_decrypt_context_bytes": 1072,
+      "fixed_aes_cbc_context_bytes": 288,
+      "fixed_rsa_public_context_bytes": 1584,
+      "rsa_public_context_alignment": 8,
+      "rsa_max_key_bits": 4096
+    },
+    "foreign_backend_context_size_or_fit_qualified": false
+  },
+  "verifier_peak_child_RSS_KiB": 25680,
+  "independent_vectors": {
+    "origin": "Primary NIST CAVP KAT_TDES.zip and tdesmmt.zip",
+    "ordinary_ECB_CBC_cases_parsed": 1000,
+    "ordinary_files": 14,
+    "interleaved_CBCI_files_excluded": 7,
+    "algorithm_executed": false,
+    "vectors_are_AES_XTS": false,
+    "FIPS_or_CAVP_qualification": false
+  },
+  "next_bridge": {
+    "task": "KRN-029",
+    "scope": "Actual selected AES-XTS descriptors and real AES-ECB/mutable-tweak glue;independent host/ARM CPU vectors separately",
+    "plan": "docs/procedures/crypto-candidates/bridge-plan.md",
+    "key_semantics": "Separate per-key length;direction-specific data AES schedule;tweak key always encrypt;caller mutable tweak persists across split calls",
+    "fixed_selected_XTS_key_context_bytes": 1072,
+    "minimum_alignment": 16,
+    "selected_wrapper_ignores_xts_return": true,
+    "provider_implemented_by_KRN028": false
+  },
+  "qualifications": {
+    "source_provenance": true,
+    "requirements_coverage_assessed": true,
+    "selected_layout_measured": true,
+    "foreign_context_fit": false,
+    "backend_built": false,
+    "algorithm_executed": false,
+    "provider": false,
+    "FIPS": false,
+    "Apple_private_ABI": false,
+    "native": false
+  },
+  "acceptance": {
+    "all21_requirements_signatures_context_ownership_demand_bound": "pass with actual selected-source/type/layout facts",
+    "two_primary_real_backends_pins_component_notices_mappings_portability_assessed": "pass with explicit unsupported/API/heap/entropy/stack/ISA gates",
+    "repeatable_source_provenance_verifier_real_negatives_bridge_plan": "pass;no provider or fake SDK declarations"
+  },
+  "evidence": {
+    "worktrees/krn-028-20261105/tools/research/crypto-candidates/local/final-candidates-session1/evidence.json": "b2005722279b46242f66448f36e3d1206dd1258d71013d32f97ff24b132ac015"
+  },
+  "limitations": [
+    "No backend build or algorithm execution;1000vectors only parsed.",
+    "Exact foreign context fit,allocationcontext/cleanup,nonce-error/phase semantics and private Apple ABI remain unqualified.",
+    "CBC-CS3 missing in reviewed APIs;XTS stealing is a different mode.",
+    "Compiler-runtime library is not a crypto backend.",
+    "No phone/root/MMIO/flash/emulator/globalinstall/heavybuild."
+  ]
+}

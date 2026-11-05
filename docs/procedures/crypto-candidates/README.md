@@ -93,6 +93,14 @@ directions, including decrypt-only2-key cases. No candidate executed these
 vectors here. They are DES/TDES vectors, not the independent XTS vectors that
 KRN-029 must obtain. Informal vectors do not establish CAVP/FIPS validation.
 
+Final CRYCAND-002 is bound to commit
+`37c74737cc760602e9c392dccd1d67da13c48db8`:356 source/data checks pass,
+including57 negative controls, with no further compiler invocation. The
+verifier's peak child RSS is25680KiB; the sole earlier target layout compile
+peaked at130620KiB. Its registered plan precedes the actual final run.
+[qualified-audit.json](../../../fixtures/public/crypto-candidates/qualified-audit.json)
+binds the exact existing capsule, hashes, scopes and acceptance assessment.
+
 Register experiments in the primary ledger first. Existing pinned sources can
 be verified offline without another compiler call:
 
