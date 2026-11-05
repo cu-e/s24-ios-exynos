@@ -104,6 +104,7 @@ def audit(main, pins, output):
                              'sha256': row['bound_source_sha256'], 'configuration': str(configuration.relative_to(main)),
                              'configuration_sha256': row['configuration_sha256'],
                              'compile_argv_template': row['next_owned_compile_argv_template'],
+                             'direct_include_text': re.findall(r'^\s*#\s*include\s+([^\n]+)', path.read_text(), re.M),
                              'status': 'source_recipe_bound_not_compiled_by_VM031'})
     required = {'osfmk/mc_provider.o', 'osfmk/mc_aes.o', 'osfmk/mc_ce.o', 'osfmk/mc_digests.o',
                 'osfmk/mc_keywrap.o', 'osfmk/monocypher.o', 'osfmk/bearssl_aes_ct64.o',
@@ -167,6 +168,10 @@ def audit(main, pins, output):
             raise ValueError('Negative control accepted: ' + name)
     compiler_paths = {r['compile_argv_template'][0] for r in selected}
     compiler_pins = {p: sha(Path(p)) for p in compiler_paths}
+    ledger = json.loads((main / 'state/lab.json').read_text())
+    task_states = [{k: task.get(k) for k in ('id', 'title', 'status', 'evidence', 'evidence_sha256', 'blocked_reason', 'handoff')}
+                   for task in ledger['tasks'] if task['id'] in {
+                       'KRN-031', 'KRN-032', 'KRN-033', 'KRN-034', 'KRN-035', 'KRN-036', 'KRN-037', 'KRN-039'}]
     return {'task': 'VM-031', 'category': 'source-review', 'source_pins': pins,
             'selected_guest_object_count': len(graph), 'selected_source_rows_verified': len(graph),
             'crypto_and_startup_object_recipes': selected, 'compiler_files_hashed_not_executed': compiler_pins,
@@ -175,6 +180,7 @@ def audit(main, pins, output):
             'callbacks': callbacks, 'scanned_source_files': scanned,
             'scan_semantics': 'Comment-stripped direct g_crypto_funcs->field text; no preprocessor, call graph or runtime reachability proof. Selected object witnesses are source-recipe membership, never emitted symbols. Header/unselected references remain separately visible.',
             'startup_witnesses': startup_witnesses, 'separate_native_component_inputs': separate,
+            'reported_separate_task_states_not_reexecution': task_states,
             'negative_controls': controls, 'boundaries': {'compiler_executed': False, 'linked_image': False,
             'guest_executed': False, 'native_E1S_objects_reused': False, 'provider_registered': False,
             'entropy_or_thread_safety_qualified': False, 'full_crypto_or_private_ABI_qualified': False}}
@@ -201,7 +207,13 @@ def main():
     code = 1
     try:
         pins = json.loads((FIXTURE / 'inputs.json').read_text())
-        report['audit'] = audit(args.main.resolve(), pins, args.out)
+        result = audit(args.main.resolve(), pins, args.out)
+        route_path = args.out / 'route.json'
+        route_path.write_text(json.dumps(result, indent=2) + '\n')
+        report['route_manifest'] = {'path': str(route_path.resolve()), 'sha256': sha(route_path)}
+        report['audit_summary'] = {k: result[k] for k in ('selected_guest_object_count', 'selected_source_rows_verified',
+            'callback_count', 'static_assignments', 'deferred_assignments', 'unassigned_count')}
+        report['negative_controls'] = result['negative_controls']
         report['outcome'] = 'pass'
         report['summary'] = 'Exact genuine guest crypto callback/source/object/startup route traced; no compile, link or execution qualification.'
         code = 0
@@ -214,7 +226,10 @@ def main():
     report['current_image_memory'] = {line.split(':')[0]: line.split(':', 1)[1].strip()
         for line in Path('/proc/self/status').read_text().splitlines() if line.startswith(('VmRSS:', 'VmHWM:'))}
     report['historical_inherited_ru_maxrss_kib_not_admission'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-    report['artifacts'] = [str((args.out / 'evidence.json').resolve())]
+    report['artifacts'] = [str(p.resolve()) for p in args.out.iterdir() if p.is_file()]
+    if not report['artifacts']:
+        report['artifacts'] = [str((args.out / 'evidence.json').resolve())]
+    report['output_sha256'] = {str(p.resolve()): sha(p) for p in args.out.iterdir() if p.is_file()}
     (args.out / 'evidence.json').write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps({k: report[k] for k in ('outcome', 'summary', 'exit_code', 'elapsed_seconds', 'current_image_memory')}))
     return code
