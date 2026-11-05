@@ -16,6 +16,7 @@ from types import SimpleNamespace
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[3]
 TOOL = ROOT/'tools/build/avf_kernel_objects.py'
+TEST = Path(__file__).resolve()
 spec = importlib.util.spec_from_file_location('zombie_policy', TOOL)
 e = importlib.util.module_from_spec(spec); spec.loader.exec_module(e)
 
@@ -43,7 +44,7 @@ def main():
         check('entire helper differs only by active-zombie predicate', original.count(before) == 1 and corrected == original.replace(before, after))
         check('all legacy functions AST unchanged from reviewed fix1', all(ast.dump(a) == ast.dump(b) for a, b in zip([n for n in ast.parse(original).body if isinstance(n, ast.FunctionDef)], [n for n in ast.parse(corrected).body if isinstance(n, ast.FunctionDef)])))
         plan = project/'artifacts/plan.json'; e.write(plan, {'resource_profile': e.PROJECT_PROFILE})
-        caller = e.sha(__file__)
+        caller = e.sha(TEST)
         base = {'owner': 'synthetic-owner', 'experiment': 'SYNTHETIC-ZOMBIE', 'shard': 'synthetic-component',
                 'source_plan': 'artifacts/plan.json', 'source_plan_sha256': e.sha(plan),
                 'reviewed_executor_sha256': caller, 'max_jobs': 1, 'max_owned_rss_bytes': e.EXECUTOR_RSS}
@@ -63,13 +64,13 @@ def main():
                     'source_plan_sha256': base['source_plan_sha256'], 'qemu_allowed': False}
         observer_args = SimpleNamespace(main=project, out=project/'artifacts/observer', task='OBSERVER',
                                         owner=base['owner'], experiment=base['experiment'], shard=base['shard'])
-        observer = e.project_approval(observer_args, approval, executor_path=__file__); observer.reserve()
+        observer = e.project_approval(observer_args, approval, executor_path=TEST); observer.reserve()
         check('live original observer reservation samples normally', any(w.get('task') == 'OBSERVER' for w in observer.sample()['workloads']))
         worker_args = dict(vars(observer_args), task='WORKER', out=project/'artifacts/worker')
         worker_args = {key: str(value) if isinstance(value, Path) else value for key, value in worker_args.items()}
         worker_approval = dict(approval, task='WORKER'); pidfile = out/'orphan.pid'
         code = "import importlib.util,json,pathlib,subprocess,sys,types,os;s=importlib.util.spec_from_file_location('p',sys.argv[1]);p=importlib.util.module_from_spec(s);s.loader.exec_module(p);a=json.loads(sys.argv[2]);a['main']=pathlib.Path(a['main']);a['out']=pathlib.Path(a['out']);b=p.project_approval(types.SimpleNamespace(**a),json.loads(sys.argv[3]),executor_path=sys.argv[4]);b.reserve();child=subprocess.Popen(['sleep','8'],cwd='/tmp');pathlib.Path(sys.argv[5]).write_text(str(child.pid));os._exit(0)"
-        worker = subprocess.Popen([sys.executable, '-c', code, TOOL, json.dumps(worker_args), json.dumps(worker_approval), __file__, pidfile], cwd='/tmp', start_new_session=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        worker = subprocess.Popen([sys.executable, '-c', code, TOOL, json.dumps(worker_args), json.dumps(worker_approval), TEST, pidfile], cwd='/tmp', start_new_session=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         until = time.monotonic()+3; controller = None
         while time.monotonic() < until:
             controller = e.process_table().get(worker.pid)
