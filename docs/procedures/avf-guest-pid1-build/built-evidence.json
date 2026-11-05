@@ -1,0 +1,660 @@
+{
+  "task": "VM-034",
+  "owner": "codex-guest-pid1-20261106-dr",
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T21:31:40.601363+00:00",
+  "summary": "Actually source-built owned ARM64 static MachO PID1, corrected x0/x1/carry constraints and structural controls; independently reviewed ABI/candidate admission, real kernel exec/console/syscalls/PID1/stop remain unmeasured",
+  "commit": "60afd5dab564ee74c2062064c99c7da5e12b96f7",
+  "implementation_sha256": "84159162726758117ff54a85871835466cf0d5bd74623db43e4fa629bd5d69b5",
+  "bindings": {
+    "selected_source_pins": {
+      "scion-avf": "a6f4bc38aa244359cd365c976244a88c9d6b3304",
+      "apple-xnu": "c54f35ca767986246321eb901baf8f5ff7923f6a"
+    },
+    "selected_kernel_root": "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu",
+    "immutable_inputs": {
+      "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/bsd/kern/mach_loader.c": {
+        "sha256": "58a36847003e7eaf0bc5e2cc76cd206e0152ec601253888504a2a9f65dec7486",
+        "role": "Selected static executable, segment and LC_UNIXTHREAD loader"
+      },
+      "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/bsd/kern/kern_exec.c": {
+        "sha256": "90b6028b18558a42ddc0c8a2585058db180f51032ae17847f3d2d0c055f18807",
+        "role": "Actual Mach-O exec activator, stack and entry setup"
+      },
+      "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/bsd/kern/syscalls.master": {
+        "sha256": "163824910a25029dfc559fabd518ed3d2ec3539d7ff9f157dcd56067e6a6952b",
+        "role": "Actual five syscall number/signature definitions"
+      },
+      "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/bsd/dev/arm/systemcalls.c": {
+        "sha256": "7e77d5a0d4369f3b5bbf2f1fa60bea4b3fb5117319a3bfddeff8177622f0fdfd",
+        "role": "Actual register argument, carry and x0/x1 return handling"
+      },
+      "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/osfmk/arm64/sleh.c": {
+        "sha256": "e6bda6817d30ee0eb61a762112cf484e9200261b88032e5ed896078c1d9714ed",
+        "role": "Actual SVC exception dispatch"
+      },
+      "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/osfmk/arm64/proc_reg.h": {
+        "sha256": "129f4d42d97c8c403dd83ebbb99bb7ccc3954adfcbb9621bcf08f8f8b218b33b",
+        "role": "Actual syscall code register x16"
+      },
+      "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/osfmk/arm64/status.c": {
+        "sha256": "83aeff96e5562fb4d1e99015ebae74f787140b673d22cb43c4835f81ce36040a",
+        "role": "Actual ARM64 thread PC and default stack processing"
+      },
+      "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/osfmk/mach/arm/thread_status.h": {
+        "sha256": "5c824c3c4f9a235deda98402f95c6155e35c0438a1cbaf902edd42c510cc4a54",
+        "role": "Actual thread state flavor/count"
+      },
+      "src/virtualization/pid1.c": {
+        "sha256": "51c3e6ec9d123803a15ee81cc04f55a2c63fba568ee5c29033ed38a57afe828f",
+        "role": "Historical owned PID1 source with x1 assembly contract defect"
+      },
+      "docs/procedures/vm-002/evidence.json": {
+        "sha256": "a890c79171a3003d086c0a30e5056b99ff8052e34091b2634627480c9ce8a62f",
+        "role": "Historical provenance and compiler identity; no execution acceptance"
+      },
+      "worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/commands.json": {
+        "sha256": "0db0116ff7d6665cbfcc118601aa6f9b26caf2e1fc8f2ffab9bcd081d69efb36",
+        "role": "Historical exact compile/link argv and exits"
+      },
+      "worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/pid1": {
+        "sha256": "bc7575a3690d6da52752763c5de496631032bef92777e6fe5b341e8a0e3414f7",
+        "role": "Historical genuinely built owned executable"
+      },
+      "worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/pid1.o": {
+        "sha256": "296e929d097b15645a705f06251d91273c13554c92b08e3387e2440c89933696",
+        "role": "Historical genuinely compiled object"
+      },
+      "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/prepared-component.json": {
+        "sha256": "7a21c3261e5fba84df1b07466cfadca79dac93d10c60a48d82bd8bc2ebecf382",
+        "role": "Frozen selected source/hash/config namespace (review pending)"
+      },
+      "worktrees/vm-008-20261105/fixtures/public/avf-kernel-headers/qualified-component.json": {
+        "sha256": "058451939894bd48ccc2ad1fe8b8d85c515f2176d21c8025daa034be8e98abe7",
+        "role": "VM008 namespace capsule, no task acceptance inferred"
+      },
+      "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/configuration/bsd/DEVELOPMENT/Makefile": {
+        "sha256": "b0663161d069da9027b855e9eba4a9ab90a5b8a954f5afdbb8b17c13c398ac53",
+        "role": "Actual BSD DEVELOPMENT recipe selection"
+      },
+      "artifacts/xnu-macho-tools/macho-session4/report.json": {
+        "sha256": "f7802af5ca285e7f862d91e1a5e86ce4951218bf781784303f83cf2e6cf44070",
+        "role": "Source-built actual ld64 provenance, source pins and prefix hashes"
+      },
+      "artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-ld": {
+        "sha256": "f3cab070fef2c3fb39687e31bab86193f34ab95215fc4dbc8783f2a4f741563e",
+        "role": "Exact source-built historical static linker bytes; read only, never executed"
+      },
+      "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/osfmk/mach/arm/vm_param.h": {
+        "sha256": "eb24020fe382a83750c2337240ceb5607e05ef68af14390408652f4e4a74e5fb",
+        "role": "Selected genuine syscall/flag/interface/license source"
+      },
+      "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/osfmk/mach/arm/syscall_sw.h": {
+        "sha256": "e746a81ceba36faa9787671e0e2e0581c8d3453581c83c647f2cd2598352b1df",
+        "role": "Selected genuine syscall/flag/interface/license source"
+      },
+      "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/libsyscall/custom/SYS.h": {
+        "sha256": "40458623e1a7c3f1d0c4145a1d4fb0b37eeadf3165340bee752cf1ebe9cce284",
+        "role": "Selected genuine syscall/flag/interface/license source"
+      },
+      "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/bsd/sys/fcntl.h": {
+        "sha256": "084757ba7bf696ae64e0ed31d431ee9d8bea7fd2fb35e97b0826c668fab00cf7",
+        "role": "Selected genuine syscall/flag/interface/license source"
+      },
+      "worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/APPLE_LICENSE": {
+        "sha256": "e5881019d8766c1e88a5fe1dbca4ba40c78011d41fcb18f6e9f50df60182685b",
+        "role": "Selected genuine syscall/flag/interface/license source"
+      }
+    },
+    "VM025_fixture": {
+      "path": "worktrees/vm-025-20261106/fixtures/public/avf-guest-pid1/inputs.json",
+      "sha256": "ed77dcdddbdda17d7950c0826c7a9b84cc97e14734e856d2a447c17c4af72a8d"
+    },
+    "owned_source": {
+      "path": "worktrees/vm-034-20261106/src/guest/avf-pid1/pid1.c",
+      "sha256": "68de57b2e27480f39cabdcf1372176ddbf8e275b9c5309c2ac529c6e0be01190"
+    },
+    "legacy": {
+      "path": "worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/pid1",
+      "sha256": "bc7575a3690d6da52752763c5de496631032bef92777e6fe5b341e8a0e3414f7",
+      "source_path": "src/virtualization/pid1.c",
+      "source_sha256": "51c3e6ec9d123803a15ee81cc04f55a2c63fba568ee5c29033ed38a57afe828f"
+    },
+    "legacy_rejection": "PID1 source declares x1 as input-only to svc, but selected XNU overwrites x1 on successful integer/size syscall returns and errors. Compiler contract is invalid; runtime ABI and optimized machine-code safety remain unqualified. Historical compiler is existing NDK18, not the newly source-built guest compiler. Root assigned separate VM034 replacement; do not mutate blocked VM002.",
+    "namespace_accepted_by_this_task": false
+  },
+  "tools": {
+    "compiler": {
+      "path": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-cxx-storage/source-build-session2/clang",
+      "sha256": "7972eb2820ae25b5bedff1ea954cef9e9a0e4a15c7a8e440628e8b6540fafc82",
+      "source_commit": "fa9443738c1a18accef4244732ec6d6ee97a8133",
+      "report": "artifacts/xnu-compiler-cxx-storage/source-build-session2/report.json",
+      "report_sha256": "e7811221acf4c23493b9353215c7856a44e469b8c7b29a283d02ef6c9cfa714e"
+    },
+    "linker": {
+      "path": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-ld",
+      "sha256": "f3cab070fef2c3fb39687e31bab86193f34ab95215fc4dbc8783f2a4f741563e",
+      "source_commit": "904de2a71d4da6a9b30d2efaf912a10ddc7d9ddb",
+      "report": "artifacts/xnu-macho-tools/macho-session4/report.json",
+      "report_sha256": "f7802af5ca285e7f862d91e1a5e86ce4951218bf781784303f83cf2e6cf44070"
+    },
+    "nm": {
+      "path": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-nm",
+      "sha256": "8d63c922a0e87812fa92f9cee466f15adbe65ab069fb451550f6626a913d4008",
+      "source_commit": "904de2a71d4da6a9b30d2efaf912a10ddc7d9ddb",
+      "report": "artifacts/xnu-macho-tools/macho-session4/report.json",
+      "report_sha256": "f7802af5ca285e7f862d91e1a5e86ce4951218bf781784303f83cf2e6cf44070"
+    },
+    "runner": {
+      "path": "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-009-20261106/tools/build/avf_kernel_objects.py",
+      "sha256": "13213539409bade16162173c7b39709dbb3c7e78426fe1410b3f940ea01e4e47",
+      "review_admission_required": true
+    },
+    "preflight": {
+      "path": "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-025-20261106/tools/build/avf_guest_pid1.py",
+      "sha256": "206b3c2d84db15432e3131e4aeb2c072b0341c649d28b123d3a3ab9ae6239137",
+      "independent_candidate_admission_required": true
+    }
+  },
+  "admission": {
+    "path": "/home/egor/dev/pet/s24-ios-exynos/artifacts/team-coordination/20261106-team/pid1-small-build-approval.json",
+    "sha256": "22c5464e7fdc0ae6a49496a3cf611973e8ddfa6c445b2395632e7635bfd0b9cc",
+    "data": {
+      "task": "VM-034",
+      "owner": "codex-guest-pid1-20261106-dr",
+      "source_plan_sha256": "ffe6f8cc47732a52d2eefd2cc18a51335df427ef6c6460b254e0f97296d0445a",
+      "producer_sha256": "84159162726758117ff54a85871835466cf0d5bd74623db43e4fa629bd5d69b5",
+      "reviewed_runner_sha256": "13213539409bade16162173c7b39709dbb3c7e78426fe1410b3f940ea01e4e47",
+      "runner_reviewed": true,
+      "root_lease": "pid1-small-build-20261106-5",
+      "root_lease_path": "artifacts/team-coordination/20261106-team/pid1-small-build-lease.json",
+      "max_jobs": 1,
+      "max_project_jobs": 2,
+      "max_owned_rss_bytes": 268435456,
+      "qemu_allowed": false,
+      "independent_final_pid1_abi_acceptance": false,
+      "no_phone_operations": true
+    }
+  },
+  "candidate": {
+    "path": "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1",
+    "sha256": "fac53e7a7799b06e9ced2ef944d079803c49ebbdd60a5f294f92bdd0726775f3",
+    "source_path": "worktrees/vm-034-20261106/src/guest/avf-pid1/pid1.c",
+    "source_sha256": "68de57b2e27480f39cabdcf1372176ddbf8e275b9c5309c2ac529c6e0be01190"
+  },
+  "inspection": {
+    "structure": {
+      "entry": 4294983068,
+      "stack": "kernel default (LC_UNIXTHREAD SP=0)",
+      "segments": [
+        {
+          "name": "__PAGEZERO",
+          "va": 0,
+          "vmsize": 4294967296,
+          "fileoff": 0,
+          "filesize": 0,
+          "maxprot": 0,
+          "initprot": 0,
+          "command_offset": 32
+        },
+        {
+          "name": "__TEXT",
+          "va": 4294967296,
+          "vmsize": 16384,
+          "fileoff": 0,
+          "filesize": 16384,
+          "maxprot": 5,
+          "initprot": 5,
+          "command_offset": 104
+        },
+        {
+          "name": "__LINKEDIT",
+          "va": 4294983680,
+          "vmsize": 16384,
+          "fileoff": 16384,
+          "filesize": 128,
+          "maxprot": 1,
+          "initprot": 1,
+          "command_offset": 416
+        }
+      ],
+      "sections": [
+        {
+          "name": "__text",
+          "address": 4294983068,
+          "size": 504,
+          "offset": 15772
+        },
+        {
+          "name": "__cstring",
+          "address": 4294983572,
+          "size": 25,
+          "offset": 16276
+        },
+        {
+          "name": "__const",
+          "address": 4294983597,
+          "size": 82,
+          "offset": 16301
+        }
+      ],
+      "thread": {
+        "pc": 4294983068,
+        "sp": 0,
+        "command_offset": 528
+      },
+      "flags": 1
+    },
+    "actual_svc_count": 6,
+    "actual_svc_word": "0xd4001001",
+    "real_llvm_asm_records": [
+      "  %3 = tail call { i64, i64, i64, i64 } asm sideeffect \"svc #0x80\\0A\\09cset $3, cs\", \"={x0},={x1},={x16},=&r,{x2},{x3},{x4},{x5},{x0},{x1},{x16},~{memory},~{cc}\"(i64 0, i64 0, i64 0, i64 0, i64 ptrtoint (ptr @.str to i64), i64 2, i64 5) #3, !noalias !8, !srcloc !11",
+      "  %6 = tail call { i64, i64, i64, i64 } asm sideeffect \"svc #0x80\\0A\\09cset $3, cs\", \"={x0},={x1},={x16},=&r,{x2},{x3},{x4},{x5},{x0},{x1},{x16},~{memory},~{cc}\"(i64 0, i64 0, i64 0, i64 0, i64 0, i64 0, i64 20) #3, !noalias !12, !srcloc !11",
+      "  %11 = call { i64, i64, i64, i64 } asm sideeffect \"svc #0x80\\0A\\09cset $3, cs\", \"={x0},={x1},={x16},=&r,{x2},{x3},{x4},{x5},{x0},{x1},{x16},~{memory},~{cc}\"(i64 %9, i64 %10, i64 0, i64 0, i64 ptrtoint (ptr @.str.1 to i64), i64 11, i64 274) #3, !noalias !15, !srcloc !11",
+      "  %60 = call { i64, i64, i64, i64 } asm sideeffect \"svc #0x80\\0A\\09cset $3, cs\", \"={x0},={x1},={x16},=&r,{x2},{x3},{x4},{x5},{x0},{x1},{x16},~{memory},~{cc}\"(i64 %56, i64 0, i64 0, i64 0, i64 %4, i64 %59, i64 4) #3, !noalias !19, !srcloc !11",
+      "  %77 = call { i64, i64, i64, i64 } asm sideeffect \"svc #0x80\\0A\\09cset $3, cs\", \"={x0},={x1},={x16},=&r,{x2},{x3},{x4},{x5},{x0},{x1},{x16},~{memory},~{cc}\"(i64 %73, i64 0, i64 0, i64 0, i64 %4, i64 %76, i64 4) #3, !noalias !22, !srcloc !11",
+      "  %89 = call { i64, i64, i64, i64 } asm sideeffect \"svc #0x80\\0A\\09cset $3, cs\", \"={x0},={x1},={x16},=&r,{x2},{x3},{x4},{x5},{x0},{x1},{x16},~{memory},~{cc}\"(i64 0, i64 0, i64 0, i64 0, i64 %88, i64 0, i64 1) #3, !noalias !25, !srcloc !11"
+    ],
+    "actual_image_controls": [
+      {
+        "case": "truncated-header",
+        "outcome": "rejected",
+        "reason": "Truncated Mach-O header",
+        "sha256": "902cee240ca039a0fbdbeaadab110d549f050628af870cd46931ac507a288a8d"
+      },
+      {
+        "case": "truncated-file-backed-segment",
+        "outcome": "rejected",
+        "reason": "Segment extent outside input or address space",
+        "sha256": "9b316239d949c740763595a281bda712669e5cc406de139e664a6a0bcf51ac79"
+      },
+      {
+        "case": "wrong-cpu",
+        "outcome": "rejected",
+        "reason": "Expected thin little-endian arm64-all MH_EXECUTE",
+        "sha256": "8ed218aa426a76d650c04e203c728f08993d1a5f69b0c35f0e5a3f62c39a8fd0"
+      },
+      {
+        "case": "kernel-not-pid1",
+        "outcome": "rejected",
+        "reason": "Expected thin little-endian arm64-all MH_EXECUTE",
+        "sha256": "a8194de0c549c91af24c557649f40c2d274357c6409e37944f782d022b111110"
+      },
+      {
+        "case": "dynamic-flags",
+        "outcome": "rejected",
+        "reason": "Expected original static MH_NOUNDEFS contract; no DYLDLINK/PIE",
+        "sha256": "9c7542af431436068df7de3188537421a2bfc6b609f6367785fc59fb87726f56"
+      },
+      {
+        "case": "unbounded-command-count",
+        "outcome": "rejected",
+        "reason": "Unbounded Mach-O commands",
+        "sha256": "46eae4342c11cfb68d1a84d71c1687bdf638f182913084ba2209d2c61a429c5b"
+      },
+      {
+        "case": "zero-command-size",
+        "outcome": "rejected",
+        "reason": "Invalid command extent",
+        "sha256": "15851fa46706cd5b8d88ae12e03c06632eca1071ed29aefe4a526d096a50c3d8"
+      },
+      {
+        "case": "wrong-thread-flavor",
+        "outcome": "rejected",
+        "reason": "Wrong ARM64 thread state flavor/count",
+        "sha256": "76888702af185fdcdb16dbbd178ae5a8e6c27a20a3afeb780a9e511ff352d554"
+      },
+      {
+        "case": "wrong-thread-count",
+        "outcome": "rejected",
+        "reason": "Wrong ARM64 thread state flavor/count",
+        "sha256": "03bce34657e2e1ce70070775680708ddd43ecf2c435441154cd9e7946657a1d3"
+      },
+      {
+        "case": "nonzero-custom-stack",
+        "outcome": "rejected",
+        "reason": "Expected kernel-created default stack and zero initial registers/CPSR",
+        "sha256": "4f8d454fea46af8a21390eb0f86157e6642f49a4016194922195e949271da69a"
+      },
+      {
+        "case": "unaligned-entry",
+        "outcome": "rejected",
+        "reason": "Entry is not aligned file-backed executable memory",
+        "sha256": "7b1f79a7acf28ff0a4907b13151e554f6b6b6048d41001abc091dda699e1954c"
+      },
+      {
+        "case": "entry-in-pagezero",
+        "outcome": "rejected",
+        "reason": "Entry is not aligned file-backed executable memory",
+        "sha256": "32aec57eb0934a6ec8aa9f30f7915941fda8e0de8fba5201c67beecce9a20778"
+      },
+      {
+        "case": "entry-in-linkedit",
+        "outcome": "rejected",
+        "reason": "Entry is not aligned file-backed executable memory",
+        "sha256": "ad2138051d8513bc01288c87fc7a31a5aba5d77b41977c7faa293f3465829206"
+      },
+      {
+        "case": "write-execute",
+        "outcome": "rejected",
+        "reason": "Invalid segment permissions or writable executable segment",
+        "sha256": "5e03d49bc7d59ccaebb21780f62a3dd73f093e67a0bc819b62a5e74c02f507fe"
+      },
+      {
+        "case": "segment-file-overrun",
+        "outcome": "rejected",
+        "reason": "Segment extent outside input or address space",
+        "sha256": "fffa4b2a17ca5b6131a9a0d7b951c5753bf6d3bda247e214340c7802a376b501"
+      },
+      {
+        "case": "vm-overlap",
+        "outcome": "rejected",
+        "reason": "Section outside VM segment",
+        "sha256": "e59fa3511573785a8dd0160162b02badb2a0c02eaab9bea5332cb530d967e220"
+      },
+      {
+        "case": "dynamic-load-command",
+        "outcome": "rejected",
+        "reason": "Unsupported or dynamic load command",
+        "sha256": "982a80f30ba8a761be017e94e01df9e610b97418dd3490adc65c9dbd89f54c2d"
+      },
+      {
+        "case": "ELF-magic",
+        "outcome": "rejected",
+        "reason": "Expected thin little-endian arm64-all MH_EXECUTE",
+        "sha256": "86d79c7bd55c954ea79ce245ad638823be6f14642cda6f7e78dc06e08d366afb"
+      },
+      {
+        "case": "arm64e-subtype",
+        "outcome": "rejected",
+        "reason": "Expected thin little-endian arm64-all MH_EXECUTE",
+        "sha256": "be7ae94e4db8b08972adb5c7f03694e7c61a5d0c5e929cf2664e7d9b741289d2"
+      }
+    ],
+    "runtime_executed": false,
+    "independently_ABI_admitted": false
+  },
+  "compiler_executed": true,
+  "linker_executed": true,
+  "guest_executed": false,
+  "device_executed": false,
+  "current_image_memory_start": {
+    "VmHWM_bytes": 24899584,
+    "VmRSS_bytes": 23752704
+  },
+  "current_image_memory_end": {
+    "VmHWM_bytes": 27226112,
+    "VmRSS_bytes": 27226112
+  },
+  "raw_build_evidence": {
+    "path": "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/evidence.json",
+    "sha256": "01488b5be195fe61a0e0880c60b51190a7cb38c33dd0ba7af3d68ac22bc266b2"
+  },
+  "actual_products": {
+    "pid1": {
+      "path": "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1",
+      "sha256": "fac53e7a7799b06e9ced2ef944d079803c49ebbdd60a5f294f92bdd0726775f3",
+      "bytes": 16512
+    },
+    "pid1.ll": {
+      "path": "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1.ll",
+      "sha256": "894f382ca5bcc7669acc59125446902df7920c8c483b3c018f42d23995388112",
+      "bytes": 8375
+    },
+    "pid1.s": {
+      "path": "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1.s",
+      "sha256": "6be86cd7c63ce16b530c1e06411ad9d539e6a80c05e66587d17f22de39b8f108",
+      "bytes": 5104
+    },
+    "pid1.o": {
+      "path": "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1.o",
+      "sha256": "9175de9da005886db2a1d9d98524b3a2858d6662acc0444d9f5698f41966c8f7",
+      "bytes": 1392
+    },
+    "candidate.json": {
+      "path": "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/candidate.json",
+      "sha256": "0bdfc24445a1a213790546a79a62975691c9ff334cd6bedb6f954859cf41f63e",
+      "bytes": 325
+    },
+    "mockfs-provenance.json": {
+      "path": "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/mockfs-provenance.json",
+      "sha256": "28ea3ec9dab6cc84b0dbd024271e6b41413e69e62f060830ee0426a6ff2c0b25",
+      "bytes": 749
+    },
+    "handoff-index.json": {
+      "path": "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/handoff-index.json",
+      "sha256": "202b44e70cb5fbe7a502b0abbd972c94a0d34cd4d1c446b95d4c8ebab78be2bd",
+      "bytes": 681
+    }
+  },
+  "command_summary": [
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-cxx-storage/source-build-session2/clang",
+        "--target=arm64-apple-ios16.5",
+        "-O2",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-pie",
+        "-std=c11",
+        "-ffreestanding",
+        "-nostdinc",
+        "-fno-builtin",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-S",
+        "-emit-llvm",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-034-20261106/src/guest/avf-pid1/pid1.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1.ll"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "peak_sampled_total_owned_rss_bytes": 99954688,
+      "after": {
+        "recorded_at": "2026-11-05T21:31:43.101096+00:00",
+        "MemAvailable_bytes": 17085173760,
+        "SwapCached_bytes": 7028736,
+        "SwapTotal_bytes": 30064762880,
+        "SwapFree_bytes": 12622532608,
+        "pressure": {
+          "some": {
+            "avg10": 0.0,
+            "avg60": 0.04,
+            "avg300": 0.12,
+            "total": 1312146367.0
+          },
+          "full": {
+            "avg10": 0.0,
+            "avg60": 0.04,
+            "avg300": 0.1,
+            "total": 1046142849.0
+          }
+        },
+        "owned_tree_rss_bytes": 0,
+        "owned_processes": []
+      }
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-cxx-storage/source-build-session2/clang",
+        "--target=arm64-apple-ios16.5",
+        "-O2",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-pie",
+        "-x",
+        "ir",
+        "-S",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1.ll",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1.s"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "peak_sampled_total_owned_rss_bytes": 85729280,
+      "after": {
+        "recorded_at": "2026-11-05T21:31:45.237840+00:00",
+        "MemAvailable_bytes": 17102782464,
+        "SwapCached_bytes": 7028736,
+        "SwapTotal_bytes": 30064762880,
+        "SwapFree_bytes": 12622807040,
+        "pressure": {
+          "some": {
+            "avg10": 0.0,
+            "avg60": 0.03,
+            "avg300": 0.12,
+            "total": 1312150953.0
+          },
+          "full": {
+            "avg10": 0.0,
+            "avg60": 0.03,
+            "avg300": 0.1,
+            "total": 1046143422.0
+          }
+        },
+        "owned_tree_rss_bytes": 0,
+        "owned_processes": []
+      }
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-cxx-storage/source-build-session2/clang",
+        "--target=arm64-apple-ios16.5",
+        "-x",
+        "assembler",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1.s",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1.o"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "peak_sampled_total_owned_rss_bytes": 27222016,
+      "after": {
+        "recorded_at": "2026-11-05T21:31:47.279353+00:00",
+        "MemAvailable_bytes": 17060061184,
+        "SwapCached_bytes": 7028736,
+        "SwapTotal_bytes": 30064762880,
+        "SwapFree_bytes": 12622893056,
+        "pressure": {
+          "some": {
+            "avg10": 0.0,
+            "avg60": 0.03,
+            "avg300": 0.12,
+            "total": 1312151023.0
+          },
+          "full": {
+            "avg10": 0.0,
+            "avg60": 0.03,
+            "avg300": 0.1,
+            "total": 1046143485.0
+          }
+        },
+        "owned_tree_rss_bytes": 0,
+        "owned_processes": []
+      }
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-ld",
+        "-arch",
+        "arm64",
+        "-static",
+        "-e",
+        "_start",
+        "-iphoneos_version_min",
+        "16.5",
+        "-pagezero_size",
+        "0x100000000",
+        "-no_uuid",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1.o",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "peak_sampled_total_owned_rss_bytes": 27222016,
+      "after": {
+        "recorded_at": "2026-11-05T21:31:49.321067+00:00",
+        "MemAvailable_bytes": 17054683136,
+        "SwapCached_bytes": 7028736,
+        "SwapTotal_bytes": 30064762880,
+        "SwapFree_bytes": 12623212544,
+        "pressure": {
+          "some": {
+            "avg10": 0.0,
+            "avg60": 0.03,
+            "avg300": 0.12,
+            "total": 1312151024.0
+          },
+          "full": {
+            "avg10": 0.0,
+            "avg60": 0.03,
+            "avg300": 0.09,
+            "total": 1046143486.0
+          }
+        },
+        "owned_tree_rss_bytes": 0,
+        "owned_processes": []
+      }
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-nm",
+        "-u",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1"
+      ],
+      "exit_code": 0,
+      "outcome": "pass",
+      "peak_sampled_total_owned_rss_bytes": 27222016,
+      "after": {
+        "recorded_at": "2026-11-05T21:31:51.359654+00:00",
+        "MemAvailable_bytes": 17058885632,
+        "SwapCached_bytes": 7028736,
+        "SwapTotal_bytes": 30064762880,
+        "SwapFree_bytes": 12623294464,
+        "pressure": {
+          "some": {
+            "avg10": 0.0,
+            "avg60": 0.03,
+            "avg300": 0.12,
+            "total": 1312151024.0
+          },
+          "full": {
+            "avg10": 0.0,
+            "avg60": 0.03,
+            "avg300": 0.09,
+            "total": 1046143486.0
+          }
+        },
+        "owned_tree_rss_bytes": 0,
+        "owned_processes": []
+      }
+    }
+  ],
+  "max_sampled_total_owned_rss_bytes": 99954688,
+  "all_owned_children_quiescent": true,
+  "linker_warning": "ld: warning: directory not found for option '-F/System/Library/Frameworks/'",
+  "linker_warning_scope": "Source-built ld default framework search root absent; no framework/dyld/SDK was linked, no input namespace altered.",
+  "independently_ABI_admitted": false,
+  "guest_runtime_identity_measured": false,
+  "kernel_exec_codesign_stack_console_stop_measured": false,
+  "artifacts": [
+    "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/evidence.json",
+    "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1",
+    "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1.ll",
+    "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1.s",
+    "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/pid1.o",
+    "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/candidate.json",
+    "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/mockfs-provenance.json",
+    "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/handoff-index.json",
+    "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/static-link.stderr.txt",
+    "worktrees/vm-034-20261106/artifacts/avf-guest-pid1-build/build-1/undefined-symbols.stdout.txt"
+  ]
+}
