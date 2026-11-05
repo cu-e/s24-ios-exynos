@@ -115,3 +115,37 @@ only the two affected instrumented ESP fixture TUs, reusing guest/fortify/backen
 native objects. It records actual IS_P2ALIGNED(ptr1), GET_UNALIGNED_OFS(ptr1),
 sizeof(u_int32_t), IS_P2ALIGNED(ptr4) policy constants; expected ARM64 values are
 1,0,4,1, to be accepted only after actual object decoding.
+
+Final owner outcome: READY FOR REVIEW; retain in_progress, not accepted/done.
+Independent REV022 narrow source/object pass070aac... preceded the final guest.
+Frozen implementation/fixture subject8c3797d62efe6a800b9daa48fa01d8008b25b691
+was actually executed under a new explicit root lease, with candidate6
+SHAff28978367b9c2fafc6660042d60308f5617fc52a59761d8f03db0108d462366.
+Both actual fixture objects decode policy1,0,4,1 and genuine record layout
+256,8,216,8,224,80,24,16,88. Fresh compiler argv/source/output records prove the
+only rebuilt TUs were the two ESP fixtures; inherited reused_from fields describe
+row ancestry, not freshness of those new outputs. All guest/fortify/native/backend
+objects retained exact measured identities.
+
+Caller-guest4 actually PASS all six cases: positive1964 selected8/24 vectors,
+120 ESP cases and47,520 top-level CHECKs; wrong-cookie rejects before mapping;
+wrong expected answer fails at line49/check16; actual original caller matches12
+success packets then rejects at original status marker1426/case13; panic stops;
+spin triggers the3s watchdog. Additional internal FASSERTs are not included in
+47,520. All six process trees quiesced; lease released immediately, zero survivors.
+Whole16.290s, admission12.010s, peak72,773,632 bytes. Raw capsule
+artifacts/kernel-des/caller-guest4/evidence.json SHA256
+99cb37b8eba4980fecafa596caffbabbd14663d61d0e8ae9327120187892aff4.
+
+Final source/object/artifact replay performed no compiler or guest work. It checks
+1311 bindings, all988 actual sources/objects, all56 native slots, exact frozen Git
+source bytes, genuine record layout, all new-component strong import providers,
+strong cc_clear/memset_s/secure_memset/zeroizer identities and six cleanup results.
+artifacts/kernel-des/final-binding1/evidence.json PASS SHA256
+99c36bf9c95da0b4e68a6afdc6a52e7c2d36acb035218c3fd904411b6b444afe.
+Compact qualified-evidence.json references those receipts and preserved failures.
+No prior failed outcome was rewritten. Full provider startup, ESP SADB/lock/key
+allocation/maturity, inactive NFS/GSS/CTS, full kernel/crypto, private37 exports,
+optional/general APIs, FIPS/side channels and native board/Apple ABI stay unqualified.
+Await final REV022 runtime audit and coordinator/platform acceptance. No more test
+runs are needed unless review identifies a new material concern.

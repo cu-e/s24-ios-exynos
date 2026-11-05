@@ -63,8 +63,8 @@ measurements. prepare_caller.py prepares images without QEMU; --reuse-esp rebind
 identical ESP/fortify objects. execute_caller.py is the finite guest supervisor.
 Experiment.md contains the prospective resource/ownership plan.
 
-The current source candidate is awaiting actual CPU controls and independent
-REV022 acceptance. Inactive NFS/GSS/CTS integration, optional/general mode APIs,
+All six bounded CPU controls passed for source8c3797d; independent REV022 final
+runtime review and coordinator acceptance remain pending. Inactive NFS/GSS/CTS integration, optional/general mode APIs,
 full crypto, side channels, FIPS, private Apple ABI, XNU MMU/board and native device
 compatibility remain unqualified. No phone operation is part of this work.
 
@@ -72,3 +72,8 @@ The first CPU attempt exposed the synthetic-runtime compiler-profile requirement
 pre-MMU DT byte decoding must not become an unaligned64-bit load. The guest TU
 uses the exact accepted general-register/strict-alignment/no-outline-atomics
 profile. This fixture-only policy does not change genuine native kernel TUs.
+
+The actual positive run completed1964 selected-key vectors,120 ESP cases and47,520
+top-level checks; six controls and all child cleanup completed. See
+qualified-evidence.json and handoff.md for exact hashes, preserved failed attempts
+and source/object transitions. These results retain all stated qualification limits.
