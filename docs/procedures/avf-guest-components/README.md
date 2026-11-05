@@ -94,3 +94,12 @@ units' historical 132/5c process metadata remains intact. A new source-plan
 produced by the original component owner explicitly selects the prospective
 broker API; its exact bytes, adapter digest and process digest must appear in
 the root allocation. Old proposal metadata grants no execution authority.
+
+The original8b11 source and PASS88 evidence are frozen physically. The isolated
+ada7eb2 followup makes `independently_accepted=false` an unconditional execution
+refusal before engine import/allocation/mkdir. Its twelve focused controls
+exercise actual JSON/module pathname replacements after opening; hashing and
+parsing/execution consume one captured snapshot. Future approval loading uses
+VM-037's `load_project` API. The quarantined42f84 candidate is never executable
+through this followup. See [the review handoff](review-handoff.md) for exact
+source/evidence identities and the explicit corrected-policy adoption gate.
