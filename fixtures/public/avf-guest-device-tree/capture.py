@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import re
 import resource
+import signal
 import socket
 import subprocess
 import sys
@@ -20,6 +21,16 @@ RAM_LO, RAM_HI = 0x40000000, 0x50000000
 MAX_DUMP = 1024 * 1024
 RSS_LIMIT = 512 * 1024 * 1024
 DEADLINE = 55  # Includes admission; finite owned cleanup leaves the whole under60s.
+
+
+def interrupt_for_cleanup(signum, frame):
+    # BaseException must pass through procfs helpers that catch OSError.
+    raise KeyboardInterrupt("SIGTERM received; run owned-session cleanup")
+
+
+def enforce_running_floor(snapshot, spawned):
+    if spawned and snapshot["MemAvailable_bytes"] < 4 * 1024**3:
+        raise MemoryError("Post-spawn MemAvailable below4GiB; stop owned capture")
 
 
 def digest(path):
@@ -173,6 +184,7 @@ def execute(plan, lease_id):
     process, connection = None, None
     peak = 0
     old_cwd = Path.cwd()
+    previous_sigterm = signal.signal(signal.SIGTERM, interrupt_for_cleanup)
     with (out / "samples.jsonl").open("x") as samples, (out / "console.log").open("xb") as console:
         def guard():
             nonlocal peak
@@ -187,6 +199,7 @@ def execute(plan, lease_id):
             samples.write(json.dumps(snapshot) + "\n"); samples.flush()
             if peak > RSS_LIMIT:
                 raise MemoryError("Owned aggregate RSS exceeds512MiB")
+            enforce_running_floor(snapshot, process is not None)
             return snapshot
 
         try:
@@ -247,7 +260,7 @@ def execute(plan, lease_id):
             if record["exit_code"] != 0:
                 raise ValueError("QEMU quit returned nonzero")
             record.update(outcome="pass", capture_sha256=digest(destination), capture_size=destination.stat().st_size)
-        except Exception as error:
+        except BaseException as error:
             record["error"] = repr(error)
         finally:
             if connection is not None:
@@ -266,6 +279,7 @@ def execute(plan, lease_id):
             with open("/proc/self/status", encoding="ascii") as stream:
                 record["controller_current_image_VmHWM_bytes"] = next(int(line.split()[1]) * 1024 for line in stream if line.startswith("VmHWM:"))
             (out / "report.json").write_text(json.dumps(record, indent=2) + "\n")
+            signal.signal(signal.SIGTERM, previous_sigterm)
     print(json.dumps({key: record.get(key) for key in ("outcome", "error", "elapsed_seconds", "peak_total_owned_rss_bytes", "dynamic_extent")}))
     return 0 if record["outcome"] == "pass" else 2
 
