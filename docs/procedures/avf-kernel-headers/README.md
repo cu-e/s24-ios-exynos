@@ -118,15 +118,18 @@ owned process sessions are sampled every25ms, stopped on floor/deadline/RSS and
 checked for live survivors. One compiler job, <=256 MiB total owned sampled RSS,
 90/120s command deadlines; no heavy/full build. Largest measured accepted
 representative peak is 144.984375 MiB (final commit-bound OSData check). A 2GiB virtual mapping cap is separate from RSS.
-The first final read-only integrity verification exposed an inherited read_bytes
-hash helper: hashing the large host LLVM library drove controller ru_maxrss to
-1,752,977,408 bytes outside child sampling. That run is not resource-qualified;
-the earlier IIG library-hash path had the same unbounded helper. Both histories
-remain explicit. The corrected tool streams binary hashes, adds a <=256MiB
-controller finish gate, and requalifies the affected IIG producer/verification
-under that gate. Old successful compiler jobs were <=145MiB sampled aggregate;
-they are not evidence that the historical controller was bounded. The final
-measured descriptor reports separate controller and child resource facts.
+The first final integrity verifier recorded raw getrusage ru_maxrss of
+1,752,977,408 bytes. A bounded same-owned-PID control proved that this Linux
+counter can retain pre-exec history: current-image VmHWM was 12,226,560 bytes,
+rose to79,343,616 after an owned64MiB allocation, and reset to12,242,944 after
+exec while raw rusage stayed1,752,977,408. The inherited helper already used
+streaming hashes; the initial read_bytes/large-library diagnosis was incorrect.
+The corrected tool retains raw rusage, records initial/final /proc/self/status
+VmHWM/VmRSS, and gates the actual current executable image at256MiB. Child/session
+sampling still enforces aggregate resident memory during commands. The earlier
+false-positive finish-gate runs remain inconclusive evidence; they do not prove
+a live1.63GiB allocation. A corrected bounded IIG run requalifies the identical
+public products and read-only verification reports the actual current-image peak.
 No unrelated process termination, swap/cache changes, phone/ADB/MMIO/device,
 firmware loading or global install occurred.
 

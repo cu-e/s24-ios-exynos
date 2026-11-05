@@ -38,6 +38,16 @@ def stamp():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 
+def controller_usage():
+    # Linux ru_maxrss can retain a pre-exec ancestor high-water value. VmHWM
+    # measures this executable image; preserve both instead of misclassifying
+    # inherited history as a current controller allocation.
+    status = Path("/proc/self/status").read_text().splitlines()
+    values = {line.split(":", 1)[0]: int(line.split()[1]) * 1024 for line in status if line.startswith(("VmHWM:", "VmRSS:"))}
+    return {"current_image_peak_rss_bytes": values["VmHWM"], "current_rss_bytes": values["VmRSS"],
+            "raw_rusage_maxrss_bytes": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024}
+
+
 def available():
     return int(next(line.split()[1] for line in Path("/proc/meminfo").read_text().splitlines() if line.startswith("MemAvailable:"))) * 1024
 
@@ -64,7 +74,7 @@ class Headers:
                        "native_generated_products_used": False, "sdk_used": False, "fake_sdk_supplied": False,
                        "constant_allocator_fallback": False, "empty_iig_implementation_supplied": False,
                        "full_kernel_build_or_link": False, "guest_executed": False, "device_executed": False,
-                       "full_sdk_qualified": False, "private_apple_abi_qualified": False}
+                       "full_sdk_qualified": False, "private_apple_abi_qualified": False, "controller_start_usage": controller_usage()}
         ledger = json.loads((self.main / "state/lab.json").read_text())
         plans = [entry for entry in ledger["experiments"] if entry["id"] == args.experiment]
         if len(plans) != 1 or plans[0]["task"] != "VM-008" or plans[0]["kind"] != "host-test" or (args.mode != "verify" and plans[0]["status"] != "planned"):
@@ -1331,7 +1341,10 @@ def main():
     except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
         job.report["error"] = repr(error)
         job.report["outcome"] = "inconclusive" if isinstance(error, RuntimeError) else "fail"
-    peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
+    usage = controller_usage()
+    peak = usage["current_image_peak_rss_bytes"]
+    job.report["controller_finish_usage"] = usage
+    job.report["controller_peak_source"] = "/proc/self/status VmHWM for the current executable image; raw pre-exec rusage retained separately"
     job.report["host_controller_peak_rss_bytes"] = peak
     job.report["controller_rss_budget_bytes"] = 256 * 1024**2
     if peak > 256 * 1024**2:
