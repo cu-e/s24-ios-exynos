@@ -10,12 +10,16 @@ The source-review outcome is ready. Preserve the genuine frozen Scion guest
 route for the first console attempt; complete native adapter integration is not
 an established prerequisite. All 1080 guest source slots hash correctly. The
 56-field source table has 34 static assignments, one pre-registration SHA256
-assignment and 21 unsupported zero fields. The complete source scan covers 3842
+assignment and 21 unsupported zero fields. The composed-tree scan covers 3842
 C/H/CPP files with 89 direct textual field demands. The route manifest retains
 32 genuine crypto/startup source/configuration/compile recipes, source include
 text, exact compiler file identity (not executed), registration and PRNG source
 witnesses, and all field demands with selected-object membership or an explicit
 empty list for header/unselected source.
+
+The demand scan covers C/H/CPP files in the composed source root. Generated
+sources outside that root are hash-bound among the 1080 slots but are outside
+the textual demand corpus; final translation-unit/header closure is unmeasured.
 
 The provider's EARLY_BOOT/FIRST source registration precedes kmem's
 EARLY_BOOT/MIDDLE consumption. Selftests and CE initialization precede table

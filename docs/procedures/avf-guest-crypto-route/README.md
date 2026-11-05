@@ -89,6 +89,9 @@ The reader streams hashes, verifies every bound guest source, records direct
 source/header demand witnesses and rejects altered source/rank/callback/deferred
 SHA/publication order. Its source scan strips comments but does not preprocess;
 header or unselected source references retain empty selected-object witnesses.
+Demand counts cover C/H/CPP files in the composed source root. Generated files
+outside that root are hash-bound as selected slots but are outside the demand
+scan; this is not the final translation-unit or generated-header dependency graph.
 There is no inferred reachability or ABI offset measurement. Limits are 256 MiB
 address space and 60 seconds; current-image VmHWM/RSS are recorded separately
 from inherited historical `ru_maxrss`. No compile, preprocessor, generator, link,
