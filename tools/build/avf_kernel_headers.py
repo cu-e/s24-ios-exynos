@@ -19,13 +19,19 @@ import time
 import urllib.request
 
 sys.dont_write_bytecode = True
-from avf_kernel_source import sha, snapshot, write
+from avf_kernel_source import snapshot, write
 
 ROOT = Path(__file__).resolve().parents[2]
 COMPONENTS = ["osfmk", "bsd", "libkern", "iokit", "pexpert", "libsa", "security", "san"]
 GUARDS = {"GIT_NO_LAZY_FETCH": "1", "GIT_OPTIONAL_LOCKS": "0", "GIT_TERMINAL_PROMPT": "0", "PYTHONDONTWRITEBYTECODE": "1"}
 QEMU_TREE = "6a955269a8f4e17d21239f75cef9fbe66cffc56c"
 QEMU_CONFIG = "1571c785ae12ed79858fb9c81ebfce4ecd5414e4ce6af906820f6b9d61f68394"
+
+
+def sha(path):
+    """Hash even multi-GiB host libraries without materializing their bytes."""
+    with Path(path).open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
 def stamp():
@@ -1321,7 +1327,12 @@ def main():
     except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
         job.report["error"] = repr(error)
         job.report["outcome"] = "inconclusive" if isinstance(error, RuntimeError) else "fail"
-    job.report["host_controller_peak_rss_bytes"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
+    peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
+    job.report["host_controller_peak_rss_bytes"] = peak
+    job.report["controller_rss_budget_bytes"] = 256 * 1024**2
+    if peak > 256 * 1024**2:
+        job.report["outcome"] = "inconclusive"
+        job.report["controller_resource_error"] = "Controller RSS exceeded 256MiB; integrity alone is not a resource-qualified pass"
     job.report["finished_at"] = stamp()
     write(job.out / "report.json", job.report)
     print(json.dumps({k: job.report.get(k) for k in ["outcome", "error", "kernel_root"]}, indent=2))

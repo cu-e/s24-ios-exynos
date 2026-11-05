@@ -117,7 +117,16 @@ settings are removed. Compiler/generator admission requires >=4 GiB MemAvailable
 owned process sessions are sampled every25ms, stopped on floor/deadline/RSS and
 checked for live survivors. One compiler job, <=256 MiB total owned sampled RSS,
 90/120s command deadlines; no heavy/full build. Largest measured accepted
-representative peak is 140.25 MiB. A 2GiB virtual mapping cap is separate from RSS.
+representative peak is 144.984375 MiB (final commit-bound OSData check). A 2GiB virtual mapping cap is separate from RSS.
+The first final read-only integrity verification exposed an inherited read_bytes
+hash helper: hashing the large host LLVM library drove controller ru_maxrss to
+1,752,977,408 bytes outside child sampling. That run is not resource-qualified;
+the earlier IIG library-hash path had the same unbounded helper. Both histories
+remain explicit. The corrected tool streams binary hashes, adds a <=256MiB
+controller finish gate, and requalifies the affected IIG producer/verification
+under that gate. Old successful compiler jobs were <=145MiB sampled aggregate;
+they are not evidence that the historical controller was bounded. The final
+measured descriptor reports separate controller and child resource facts.
 No unrelated process termination, swap/cache changes, phone/ADB/MMIO/device,
 firmware loading or global install occurred.
 
