@@ -1,0 +1,54 @@
+{
+  "kind": "source-review",
+  "compiler_public_revision": "fa9443738c1a18accef4244732ec6d6ee97a8133",
+  "kernel_public_revision": "c54f35ca767986246321eb901baf8f5ff7923f6a",
+  "donor_revision": "c8860decc62c6d6180e609036d027a2997972420",
+  "parent_compiler_evidence": "VCOMP-002",
+  "parent_recipes_evidence": "KDECL-008",
+  "affected_sources": {
+    "iokit/MiniIOSurface.cpo": "IOSurfaceRootUserClient::fTraps -> IOExternalTrap::{object,func}; func is IOService member-function pointer",
+    "iokit/IONVRAM.cpo": "IONVRAMCHRPHandler/IONVRAMV3Handler::_varDict is OSSharedPtr<OSDictionary>&"
+  },
+  "rules": [
+    {
+      "file": "src/clang/lib/AST/ASTContext.cpp",
+      "rule": "ReferenceType storage uses target pointer width/alignment, language sizeof(reference) separately observes referent; getCXXABIKind accounts for LangOptions override"
+    },
+    {
+      "file": "src/clang/lib/CodeGen/CodeGenTypes.cpp",
+      "rule": "Lvalue/rvalue references become pointer to referent address space"
+    },
+    {
+      "file": "src/clang/lib/CodeGen/CGRecordLayoutBuilder.cpp",
+      "rule": "Field storage type comes from ConvertTypeForMem"
+    },
+    {
+      "file": "src/clang/lib/AST/ItaniumCXXABI.cpp",
+      "rule": "Member function pointers are two ptrdiff_t words with ptrdiff alignment and no representation padding"
+    },
+    {
+      "file": "src/clang/lib/CodeGen/ItaniumCXXABI.cpp",
+      "rule": "AppleARM64 inherits ARM method-pointer ABI; integer pair code-address/vtable-offset plus encoded this-adjustment/virtual flag"
+    },
+    {
+      "file": "osfmk/kern/kalloc.h",
+      "rule": "8-byte granules OR member encodings; ordinary pointer1, non-pointer scalar2, padding0; no PAC inference"
+    }
+  ],
+  "storage_expectations": {
+    "reference_field": "1 per stored 64-bit reference field; never classify referent",
+    "member_function_pointer": "22 from two integer representation words under exact effective AppleARM64 C++ ABI",
+    "IOExternalTrap": "24 bytes, alignment8, object offset0, func offset8, signature122, summary6"
+  },
+  "versioned_controls": {
+    "vector-reference": "Previously rejected field reference; now positive storage1/summary2, original report and fixture unchanged"
+  },
+  "limits": [
+    "Experimental public-source allocator model, no private Apple oracle or full semantic equivalence",
+    "Root reference, data-member pointer, foreign effective ABI, annotation/address space, PAC/arm64e and virtual-base record limits retained",
+    "Native execution, private SDK/IIG ABI, archive/link/full crypto remain unqualified"
+  ],
+  "failed_harness_findings": {
+    "CXXST-003": "watchOS arm64 still uses AppleARM64 ABI; explicitly override GenericItanium to test foreign effective ABI. Own PCH fixture emits unwind section; use consistent no-exception/no-unwind flags for the existing text+relocation canonical comparator."
+  }
+}

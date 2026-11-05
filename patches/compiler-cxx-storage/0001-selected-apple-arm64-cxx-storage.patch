@@ -1,0 +1,78 @@
+--- a/src/clang/include/clang/AST/XnuTypeMetadata.h
++++ b/src/clang/include/clang/AST/XnuTypeMetadata.h
+@@ -37,6 +37,41 @@
+     return Result;
+   }
+
++  // Only the selected Apple ARM64 C++ ABI has been qualified here.
++  bool appleArm64Storage() const {
++    const auto &Target = C.getTargetInfo();
++    return C.getLangOpts().CPlusPlus &&
++           C.getCXXABIKind() == TargetCXXABI::AppleARM64 &&
++           Target.getPointerWidth(LangAS::Default) == 64 &&
++           Target.getPointerAlign(LangAS::Default) == 64 &&
++           C.getTypeSize(C.getPointerDiffType()) == 64 &&
++           C.getTypeAlign(C.getPointerDiffType()) == 64;
++  }
++
++  bool referenceField(const FieldDecl *F, uint64_t Offset) {
++    // Reference fields use ConvertTypeForMem's pointer storage, independently
++    // of the language sizeof(referent). Never recurse into the referent.
++    if (!appleArm64Storage() || !isa<CXXRecordDecl>(F->getParent()) ||
++        F->getParent()->isUnion() || semantics(F)) return false;
++    QualType T = F->getType();
++    for (unsigned I = 0; ; ++I) {
++      if (I == 128 || T.getAddressSpace() != LangAS::Default) return false;
++      if (const auto *TT = dyn_cast<TypedefType>(T.getTypePtr()))
++        if (semantics(TT->getDecl())) return false;
++      QualType Next = T.getSingleStepDesugaredType(C);
++      if (Next == T) break;
++      T = Next;
++    }
++    const auto *Ref = T->getAs<ReferenceType>();
++    if (!Ref) return false;
++    QualType Value = Ref->getPointeeType();
++    if (!Value->isObjectType() || Value->isDependentType() ||
++        Value->isVariablyModifiedType() || Value->isSizelessType() ||
++        Value.getAddressSpace() != LangAS::Default ||
++        C.getTypeSize(T) != 64 || C.getTypeAlign(T) != 64) return false;
++    return mark(Offset, 64, 1);
++  }
++
+   bool walk(QualType T, uint64_t Offset, unsigned Override = 0) {
+     if (++Depth > 128) { --Depth; return false; }
+     bool Result = walkImpl(T, Offset, Override);
+@@ -50,13 +85,23 @@
+     if (T->isIncompleteArrayType()) return true; // A flexible tail has no storage.
+     if (T->isIncompleteType()) return false;
+     // Resolve scalar semantics without discarding an explicit field override.
+-    if (T->isReferenceType() || T->isMemberPointerType()) return false;
++    if (T->isReferenceType()) return false;
+     if (const auto *TT = dyn_cast<TypedefType>(T.getTypePtr())) {
+       unsigned Applied = Override ? Override : semantics(TT->getDecl());
+       return walk(TT->desugar(), Offset, Applied);
+     }
+     QualType Desugared = T.getSingleStepDesugaredType(C);
+     if (Desugared != T) return walk(Desugared, Offset, Override);
++    if (const auto *MP = dyn_cast<MemberPointerType>(T.getTypePtr())) {
++      // Selected Itanium AST ABI: a method pointer is two ptrdiff_t words.
++      // ARM CodeGen uses an integer code address/vtable offset plus encoded
++      // this-adjustment/virtual flag. They are scalar data, not heap pointers.
++      if (Override || !appleArm64Storage() || !MP->isMemberFunctionPointer() ||
++          T.getAddressSpace() != LangAS::Default ||
++          MP->getPointeeType().getAddressSpace() != LangAS::Default ||
++          C.getTypeSize(T) != 128 || C.getTypeAlign(T) != 64) return false;
++      return mark(Offset, 128, 2);
++    }
+     if (const auto *AT = dyn_cast<AtomicType>(T.getTypePtr())) {
+       QualType Value = AT->getValueType();
+       // Target atomic storage can have extra alignment/tail padding. The
+@@ -136,6 +181,8 @@
+         if (F->isBitField()) {
+           if (!mark(FieldOffset, F->getBitWidthValue(C), Override ? Override : 2))
+             return false;
++        } else if (F->getType()->isReferenceType()) {
++          if (!referenceField(F, FieldOffset)) return false;
+         } else if (!walk(F->getType(), FieldOffset, Override)) return false;
+       }
+       return true;
