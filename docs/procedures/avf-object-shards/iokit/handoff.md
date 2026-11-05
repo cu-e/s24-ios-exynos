@@ -26,6 +26,12 @@ The first source-check attempt failed before admission: naming the script
 The exact failed commands, tracebacks and input hashes are retained in
 `source-checks-attempt1.json`; its negative exits are not counted as successful
 rejection controls. The helper is renamed `source_admission.py` before retrying.
+The second attempt retained two successful changed-input rejection controls but
+failed positive admission on the real C recipe's argument ordering:
+`IOStringFuncs.o` places `-o` after its source; the 103 C++ recipes place it
+earlier. The source must occur exactly once, rather than being the final argv
+token. `source-checks-attempt2.json` preserves this failed assumption, and the
+fix preserves every genuine input argument and output placeholder.
 The earlier exploratory schema-introspection command assumed an object-shaped
 manifest and exited 1 with `AttributeError`; the real manifest is a JSON array.
 That failed exploratory read made no project changes and is not a positive

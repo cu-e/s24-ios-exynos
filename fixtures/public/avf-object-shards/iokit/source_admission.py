@@ -70,7 +70,7 @@ def inspect(main, manifest, selectors):
         require(argv.count("-o") == argv.count("-MF") == 1, "Ambiguous output/dependency options")
         require(argv[argv.index("-o") + 1] == "@NEXT_OBJECT_DIR@/" + identifier, "Output escapes shard")
         require(argv[argv.index("-MF") + 1] == "@NEXT_DEPENDENCY_DIR@/" + identifier + ".d", "Dependency escapes shard")
-        require(argv[-1] == str(source), "Template does not consume its bound source")
+        require(argv.count(str(source)) == 1, "Template does not consume exactly its bound source")
         require(argv[argv.index("-target") + 1] == "arm64-apple-ios16.5", "Foreign target")
         for flag in ("-DARM64_BOARD_CONFIG_BCM2837", "-DDEVELOPMENT", "-DXNU_NO_TYPE_BUILTINS=0", "-nostdinc", "-mkernel"):
             require(flag in argv and flag in shlex.split(row["genuine_expanded_recipe"]), "Required genuine flag missing: " + flag)
