@@ -131,6 +131,33 @@ def verify_inputs(main, fixture):
     return records
 
 
+def candidate_review(main, fixture, candidate, descriptor_path):
+    """Bind reviewed compiled evidence; this never qualifies kernel execution."""
+    endorsement = next((row for row in fixture.get("candidate_reviews", [])
+                        if row["candidate"] == candidate), None)
+    require(endorsement is not None, "Candidate has no exact compiled-review endorsement")
+    require(descriptor_path is not None and sha(descriptor_path) ==
+            endorsement["candidate_descriptor"]["sha256"], "Reviewed candidate descriptor bytes changed")
+    pinned = {row["path"]: row["sha256"] for row in fixture["inputs"]}
+    for key in ("candidate_descriptor", "compiled_admission", "review_evidence", "raw_build_evidence"):
+        binding = endorsement[key]
+        require(pinned.get(binding["path"]) == binding["sha256"], "Unpinned review binding: " + key)
+    admission = json.loads(bounded_bytes(path_under(main, endorsement["compiled_admission"]["path"])))
+    review = json.loads(bounded_bytes(path_under(main, endorsement["review_evidence"]["path"])))
+    build = json.loads(bounded_bytes(path_under(main, endorsement["raw_build_evidence"]["path"])))
+    require(admission["outcome"] == "pass" and admission["compiled_ABI_review_pass"] is True and
+            admission["candidate"] == candidate and admission["candidate_descriptor"] ==
+            endorsement["candidate_descriptor"], "Compiled admission does not bind the exact candidate")
+    require(review["outcome"] == "pass" and review["task"] == "REV-026" and
+            review["compiled_admission"] == endorsement["compiled_admission"] and
+            review["reviewed_candidate"] == endorsement["candidate_descriptor"], "Independent review chain changed")
+    require(build["outcome"] == "pass" and build["candidate"] == candidate and
+            admission["raw_build_evidence"] == endorsement["raw_build_evidence"], "Raw build chain changed")
+    for path, digest in review["sha256"].items():
+        require(pinned.get(path) == digest, "Independent reviewed input not pinned: " + path)
+    return endorsement
+
+
 def controls(data):
     parsed = macho(data)
     text = next(row for row in parsed["segments"] if row["name"] == "__TEXT")
@@ -186,7 +213,9 @@ def main():
     report = dict(schema_version=1, task="VM-025", evidence_kind="host-test",
                   started_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                   argv=sys.argv, guest_executed=False, compiler_executed=False,
-                  pid1_observed=False, native_device_qualified=False)
+                  pid1_observed=False, native_device_qualified=False,
+                  runtime_syscalls_qualified=False, stack_signing_console_qualified=False,
+                  qualification_scope="Compiled source/IR/ARM64/static Mach-O admission only")
     args.out.mkdir(parents=True, exist_ok=False)
     code = 1
     try:
@@ -203,9 +232,12 @@ def main():
         report["macho"] = macho(data)
         if args.controls:
             report["controls"] = controls(data)
-        approved = any(candidate == row for row in fixture["qualified_candidates"])
         legacy = candidate["sha256"] == fixture["legacy"]["sha256"]
-        report["abi_admission"] = "rejected" if legacy else "qualified" if approved else "unqualified"
+        approved = not legacy and any(candidate == row for row in fixture["qualified_candidates"])
+        if approved:
+            report["compiled_review"] = candidate_review(args.main.resolve(), fixture, candidate, args.candidate)
+        report["compiled_abi_admitted"] = approved
+        report["abi_admission"] = "rejected" if legacy else "compiled-only" if approved else "unqualified"
         report["reason"] = fixture["legacy_rejection"] if legacy else (
             "Exact independently reviewed candidate descriptor matched" if approved else
             "Candidate is structurally eligible but lacks an exact independently reviewed fixture entry")

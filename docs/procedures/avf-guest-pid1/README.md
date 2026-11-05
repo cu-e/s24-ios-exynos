@@ -1,14 +1,15 @@
 # VM-025: owned PID1 ABI admission
 
-The existing VM-002 executable is structurally eligible for the selected static
-arm64 loader, but its source has an invalid inline assembly contract. Admission
-must remain inconclusive. No compiler, guest, phone or executable input is run by
-this tool. Root assigned a separate VM-034 replacement; VM-002 source stays owned
-by its original blocked task.
+The existing VM-002 executable remains rejected for its invalid inline assembly
+contract. A separate VM-034 replacement has passed REV-026 independent compiled
+ABI review; root authorized the next read-only candidate admission phase.
+No compiler, guest, phone or executable input is run by this tool. VM-002 source
+stays owned by its original blocked task. Real kernel/PID1 execution remains
+unmeasured even when the new compiled candidate passes this host preflight.
 
 ## Exact source findings
 
-`fixtures/public/avf-guest-pid1/inputs.json` freezes nineteen real input hashes,
+The initial `fixtures/public/avf-guest-pid1/inputs.json` froze nineteen input hashes,
 including the historical source/object/executable/build commands/evidence and
 the actual VM-008 prepared selected XNU source. The source lineage is Scion
 `a6f4bc38aa244359cd365c976244a88c9d6b3304` over public XNU
@@ -62,13 +63,18 @@ LC_ALL=C PYTHONUTF8=1 PYTHONNOUSERSITE=1 python3 -s \
 Exit 2 is the expected honest result for the original artifact: structural
 inspection and corruption controls may pass while ABI admission is rejected.
 Exit 1 denotes invalid or changed input. Exit 0 requires an exact independently
-reviewed candidate entry in the maintained fixture; the initial list is empty.
+reviewed candidate entry in the maintained fixture. The initial list was empty;
+the new phase adds only the exact accepted VM-034 descriptor and its review chain.
 `--candidate FILE` takes an explicit JSON descriptor containing `path`, `sha256`,
 `source_path` and `source_sha256`, all relative to MAIN. A supplied hash binds
 bytes but never grants approval. Review must bind source-built tool/recipe
 provenance, corrected assembly semantics and executable identity before adding
 that exact descriptor to `qualified_candidates`. The original defective binary
-stays rejected even if added there accidentally.
+stays rejected even if added there accidentally. Successful admission reports
+`abi_admission=compiled-only`, explicitly leaves runtime/syscall/stack/signing/
+console qualification false, and verifies the original descriptor bytes plus
+the independent review, raw build and reviewed input/IR hashes. Descriptor
+formatting changes require review because its original byte hash is pinned.
 
 The parser checks a deliberately narrow arm64-all/static/16KiB/default-stack
 contract and rejects unsupported commands, dynamic linking, malformed extents,
@@ -82,6 +88,11 @@ VmRSS and VmHWM are reported; inherited `ru_maxrss` is not used.
 Fresh reports preserve every run, exact argv, exits, times and implementation,
 fixture and input hashes. No common `make check` or MAIN publication occurs here.
 The task remains in progress pending independent review and integrator acceptance.
+
+The next host-only experiment is documented in
+[`admission-002.md`](admission-002.md). Its fixture extends the original immutable
+input records to thirty-eight hashes; the old inconclusive evidence remains
+unchanged. This phase reruns no compiler or independent machine-code review.
 
 ## Measured handoff
 
