@@ -1,0 +1,19 @@
+{
+  "id": "NET-004",
+  "title": "Implement and link the native E1S PCIe/SysMMU/MSI Wi-Fi backend",
+  "status": "pending",
+  "owner": null,
+  "priority": 70,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": ["NET-001", "KRN-001"],
+  "paths": ["src/platform/wifi/native", "docs/procedures/net-004"],
+  "acceptance": [
+    "Concrete E1S power/PHY/PCIe/reset, SysMMU/cache and MSI primitives compile and link with the pinned XNU; no success-returning hardware stubs",
+    "Rebuild the exact selected Ath12kWifi runtime and board against one reviewed ABI/dependency pin, with component/file license review",
+    "Firmware/board/regulatory loading uses explicitly supplied matching local inputs; no sheng firmware, addresses, no-op cache sync or userdata layout inherited blindly",
+    "Keep actual endpoint, DMA reachability, IRQ delivery, calibration and hardware lifecycle qualification in NET-002/003"
+  ],
+  "sources": ["s24-linux", "ath12k-wifi-current", "unixnu-sheng-current", "linux-ath12k-stable"],
+  "steps": ["Match explicit board/firmware profile", "Implement real kernel callbacks and bounded worker teardown", "Build/link and retain negative-path evidence before separately scoped native execution"]
+}

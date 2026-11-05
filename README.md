@@ -30,6 +30,8 @@ python3 tools/lab.py task show KRN-001
 
 The [experimental SGPU transport](src/platform/gpu/abi/README.md) now has compiled C validation, a separate synthetic peer and AArch64 ELF/arm64 Mach-O layout checks. It performs no GPU operations and does not replace the pending XNU backend build.
 
+[Wi-Fi research](research/notes/RES-005-wifi-donors.md) adds a pinned native ath12k donor, a catalog/current ABI mismatch and Exynos DMA/MSI requirements. The [compiled Wi-Fi input boundary](src/platform/wifi/README.md) checks those interfaces and DMA ranges; real board callbacks, firmware and iOS16.5 integration remain missing.
+
 ## Run the host lab
 
 Source fetches and heavy builds are explicit. These commands do not select a phone:

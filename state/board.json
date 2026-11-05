@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T00:26:43+00:00",
-  "ledger_updated_at": "2026-11-05T00:26:42+00:00",
-  "registry_sha256": "8d5a82f62b9ed11949088ef0ec391461b1ea0ad9c7d3e1594b7638afe5c82fc8",
+  "generated_at": "2026-11-05T00:45:47+00:00",
+  "ledger_updated_at": "2026-11-05T00:45:46+00:00",
+  "registry_sha256": "cedca123e385f9d16e2579fd0354fd2f0bea6257376ae41024c4ca910f605031",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -12,7 +12,6 @@
       "VM-002",
       "UI-001",
       "USB-001",
-      "NET-001",
       "BT-001",
       "SEN-001",
       "ESIM-001",
@@ -32,6 +31,8 @@
       "PWR-001",
       "CELL-002",
       "CELL-004",
+      "NET-004",
+      "NET-005",
       "DRV-001",
       "DRV-002",
       "NAT-002"
@@ -69,7 +70,9 @@
       "RES-003",
       "RES-004",
       "GPU-011",
+      "RES-005",
       "GPU-006",
+      "NET-001",
       "CELL-001",
       "FND-001",
       "RES-001",
@@ -602,6 +605,64 @@
       "card_path": "planning/tasks/GPU-011.md"
     },
     {
+      "id": "RES-005",
+      "title": "Audit E1S KIWI Wi-Fi transport and native iOS donor compatibility",
+      "status": "done",
+      "owner": "codex-wifi-research-20261105-e",
+      "priority": 80,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002"
+      ],
+      "paths": [
+        "research/sources.json",
+        "research/notes/RES-005-wifi-donors.md",
+        "research/wifi-coverage.json",
+        "fixtures/public/wifi-research",
+        "docs/procedures/wifi-research.md",
+        "docs/implementation.md",
+        "state/capabilities.json",
+        "CAPABILITIES.md",
+        "README.md"
+      ],
+      "acceptance": [
+        "Trace pinned Samsung CNSS/KIWI PCIe, DMA, IRQ, MHI/QMI and firmware/board-data requirements without guessing the live endpoint",
+        "Review concrete native iOS Wi-Fi donor implementations and distinguish hardware transport from the selected OS station/frontend ABI",
+        "Record bounded primary web/GitHub/Reddit coverage, version differences, licensing and unavailable inputs",
+        "Update staged plan and capability evidence without changing device authorization or claiming native Wi-Fi"
+      ],
+      "sources": [
+        "s24-linux",
+        "unixnu",
+        "iosplus10",
+        "ios-lemonadep",
+        "ath12k-wifi",
+        "ath12k-wifi-current",
+        "unixnu-sheng",
+        "unixnu-sheng-current",
+        "linux-ath12k-stable"
+      ],
+      "steps": [
+        "Inspect pinned board and transport sources",
+        "Review donor code and dated reported acceptance",
+        "Publish concrete reusable interfaces, missing inputs and qualification gates"
+      ],
+      "started_at": "2026-11-05T00:28:47+00:00",
+      "last_heartbeat": "2026-11-05T00:45:45+00:00",
+      "updated_at": "2026-11-05T00:45:46+00:00",
+      "branch": "main",
+      "progress_note": "Five donor/reference checkouts pinned separately; catalog/current ABI and vendor/donor MSI mismatches documented; Exynos DMA obligations, licensing and bounded Reddit coverage preserved",
+      "next_step": "Implement real native callbacks and selected OS frontend under NET-004/005; continue independent subsystem research while kernel/recovery inputs remain missing",
+      "handoff": "research/notes/RES-005-wifi-donors.md",
+      "evidence": "state/evidence/RES-005.json",
+      "evidence_sha256": "79e706f6c4692dae6ee9bf256f1b24f639a0cd0946d4d2735b30b48875e01c06",
+      "finished_at": "2026-11-05T00:45:46+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/RES-005.md"
+    },
+    {
       "id": "VM-002",
       "title": "Build a pinned minimal XNU guest and host launch harness",
       "status": "pending",
@@ -818,8 +879,8 @@
     {
       "id": "NET-001",
       "title": "Specify and build the E1S KIWI Wi-Fi platform adapter",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-wifi-research-20261105-e",
       "priority": 70,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -828,22 +889,37 @@
       ],
       "paths": [
         "src/platform/wifi",
-        "docs/procedures/net-001"
+        "docs/procedures/net-001",
+        "tests/test_wifi_platform.py"
       ],
       "acceptance": [
         "Exact endpoint PCI identity remains a required input until measured",
-        "Separate Exynos PCIe/DMA/IRQ, firmware transport and iOS station integration"
+        "Separate Exynos PCIe/DMA/IRQ, firmware transport and iOS station integration",
+        "Host-buildable project-owned adapter validates pinned donor ABI, explicit profile inputs, callback availability and checked DMA-window translation; negative tests do not claim native hardware execution"
       ],
       "sources": [
         "s24-linux",
-        "unixnu"
+        "unixnu",
+        "ath12k-wifi-current",
+        "ath12k-wifi",
+        "unixnu-sheng-current"
       ],
       "steps": [
         "Inspect the task dependencies and pinned inputs",
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "ready",
+      "started_at": "2026-11-05T00:28:14+00:00",
+      "last_heartbeat": "2026-11-05T00:45:44+00:00",
+      "updated_at": "2026-11-05T00:45:46+00:00",
+      "branch": "main",
+      "progress_note": "Owned admission/DMA boundary compiles against exact current ABI; old ABI rejected; 16 donor vectors separated from controller capacity; sanitizers/four ARM objects and 86 project tests pass, with zero callback execution",
+      "next_step": "NET-004 actual Exynos/XNU backend and NET-005 iOS16.5 frontend; live endpoint/profile remains unknown",
+      "handoff": "docs/procedures/net-001/README.md",
+      "evidence": "state/evidence/NET-001.json",
+      "evidence_sha256": "775ffc25934c9b39c3f4b86ca03551b13df0fd6a790af1c7572c6616078555ad",
+      "finished_at": "2026-11-05T00:45:46+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NET-001.md"
     },
@@ -1195,6 +1271,83 @@
       "column": "ready",
       "reasons": [],
       "card_path": "planning/tasks/MISC-001.md"
+    },
+    {
+      "id": "NET-004",
+      "title": "Implement and link the native E1S PCIe/SysMMU/MSI Wi-Fi backend",
+      "status": "pending",
+      "owner": null,
+      "priority": 70,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NET-001",
+        "KRN-001"
+      ],
+      "paths": [
+        "src/platform/wifi/native",
+        "docs/procedures/net-004"
+      ],
+      "acceptance": [
+        "Concrete E1S power/PHY/PCIe/reset, SysMMU/cache and MSI primitives compile and link with the pinned XNU; no success-returning hardware stubs",
+        "Rebuild the exact selected Ath12kWifi runtime and board against one reviewed ABI/dependency pin, with component/file license review",
+        "Firmware/board/regulatory loading uses explicitly supplied matching local inputs; no sheng firmware, addresses, no-op cache sync or userdata layout inherited blindly",
+        "Keep actual endpoint, DMA reachability, IRQ delivery, calibration and hardware lifecycle qualification in NET-002/003"
+      ],
+      "sources": [
+        "s24-linux",
+        "ath12k-wifi-current",
+        "unixnu-sheng-current",
+        "linux-ath12k-stable"
+      ],
+      "steps": [
+        "Match explicit board/firmware profile",
+        "Implement real kernel callbacks and bounded worker teardown",
+        "Build/link and retain negative-path evidence before separately scoped native execution"
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: KRN-001"
+      ],
+      "card_path": "planning/tasks/NET-004.md"
+    },
+    {
+      "id": "NET-005",
+      "title": "Implement and compile the selected iOS 16.5 Wi-Fi station frontend",
+      "status": "pending",
+      "owner": null,
+      "priority": 70,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NET-004"
+      ],
+      "paths": [
+        "src/platform/wifi/ios16",
+        "docs/procedures/net-005"
+      ],
+      "acceptance": [
+        "Verify Apple80211 request/event layouts and wifid/configd/launchd expectations against explicitly supplied iPhone X iOS16.5 components",
+        "Compile the real IO/network frontend against selected XNU, with bounded asynchronous scan/join/cancel/timeout handling and packet ownership tests",
+        "Integrate original supplicant/control broker and selected credentials path without assuming OS27 association sizes or silently replacing the first OS",
+        "Record unsupported authentication/security/privacy profiles and leave physical Settings/network qualification to NET-003"
+      ],
+      "sources": [
+        "ath12k-wifi-current",
+        "unixnu-sheng-current",
+        "iosplus10",
+        "ios-lemonadep"
+      ],
+      "steps": [
+        "Inspect selected local OS frontend ABI",
+        "Implement bounded native station/control events and signed supplicant packaging",
+        "Compile and test ownership/error paths; preserve native acceptance gates"
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: NET-004"
+      ],
+      "card_path": "planning/tasks/NET-005.md"
     },
     {
       "id": "FND-001",
@@ -2213,7 +2366,8 @@
       "evidence_kind": "native-device",
       "depends_on": [
         "NET-001",
-        "DRV-003"
+        "DRV-003",
+        "NET-004"
       ],
       "paths": [
         "artifacts/wifi-native",
@@ -2232,7 +2386,7 @@
       "column": "gated",
       "reasons": [
         "Scope not authorized: native",
-        "Dependencies: NET-001, DRV-003"
+        "Dependencies: DRV-003, NET-004"
       ],
       "card_path": "planning/tasks/NET-002.md"
     },
@@ -2246,7 +2400,8 @@
       "evidence_kind": "native-device",
       "depends_on": [
         "NET-002",
-        "UI-002"
+        "UI-002",
+        "NET-005"
       ],
       "paths": [
         "artifacts/wifi-lifecycle",
@@ -2265,7 +2420,7 @@
       "column": "gated",
       "reasons": [
         "Scope not authorized: native",
-        "Dependencies: NET-002, UI-002"
+        "Dependencies: NET-002, UI-002, NET-005"
       ],
       "card_path": "planning/tasks/NET-003.md"
     },
@@ -2669,225 +2824,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-04T23:57:40+00:00",
-      "action": "task.add:RES-004",
-      "owner": "codex-gpu-research-20261105-c",
-      "tasks": [
-        {
-          "id": "RES-004",
-          "status": "pending",
-          "owner": null,
-          "priority": 80
-        }
-      ]
-    },
-    {
-      "at": "2026-11-04T23:57:40+00:00",
-      "action": "task.claim:RES-004",
-      "owner": "codex-gpu-research-20261105-c",
-      "tasks": [
-        {
-          "id": "RES-004",
-          "status": "in_progress",
-          "owner": "codex-gpu-research-20261105-c",
-          "priority": 80,
-          "last_heartbeat": "2026-11-04T23:57:40+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T00:05:01+00:00",
-      "action": "task.refine:GPU-006",
-      "owner": "codex-gpu-research-20261105-c",
-      "tasks": [
-        {
-          "id": "GPU-006",
-          "status": "in_progress",
-          "owner": "codex-gpu-research-20261105-c",
-          "priority": 70,
-          "progress_note": "Reviewed pinned SGPU/RADV ownership and power hazards; implementing bounded host ownership contract, no device I/O",
-          "next_step": "Test page granules, shared budget and resource retention after stop/timeout/fault",
-          "last_heartbeat": "2026-11-05T00:05:01+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T00:11:33+00:00",
-      "action": "task.add:GPU-011",
-      "owner": "codex-gpu-research-20261105-c",
-      "tasks": [
-        {
-          "id": "GPU-011",
-          "status": "pending",
-          "owner": null,
-          "priority": 80
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T00:11:33+00:00",
-      "action": "task.refine:GPU-007-ABI-prerequisite",
-      "owner": "codex-gpu-research-20261105-c",
-      "tasks": [
-        {
-          "id": "GPU-006",
-          "status": "in_progress",
-          "owner": "codex-gpu-research-20261105-c",
-          "priority": 70,
-          "progress_note": "Reviewed pinned SGPU/RADV ownership and power hazards; implementing bounded host ownership contract, no device I/O",
-          "next_step": "Test page granules, shared budget and resource retention after stop/timeout/fault",
-          "last_heartbeat": "2026-11-05T00:05:01+00:00",
-          "branch": "main"
-        },
-        {
-          "id": "GPU-007",
-          "status": "pending",
-          "owner": null,
-          "priority": 70
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T00:12:18+00:00",
-      "action": "task.update:GPU-006",
-      "owner": "codex-gpu-research-20261105-c",
-      "tasks": [
-        {
-          "id": "GPU-006",
-          "status": "in_progress",
-          "owner": "codex-gpu-research-20261105-c",
-          "priority": 70,
-          "progress_note": "Seven synthetic lifecycle groups pass within 75 project tests; contract reconciles 4 KiB GPU and conditional XNU CPU/VM pages; no device I/O",
-          "next_step": "GPU-011 compile bounded transport ABI with fake backend; native integration stays in GPU-007",
-          "last_heartbeat": "2026-11-05T00:12:18+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/gpu-006/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T00:12:18+00:00",
-      "action": "task.update:RES-004",
-      "owner": "codex-gpu-research-20261105-c",
-      "tasks": [
-        {
-          "id": "RES-004",
-          "status": "in_progress",
-          "owner": "codex-gpu-research-20261105-c",
-          "priority": 80,
-          "progress_note": "Pinned SGPU/RADV interfaces, power-sensitive MMR, VM wait, memory-guard scope, page policy and bounded Reddit/web coverage documented",
-          "next_step": "GPU-011 SDK-independent transport ABI, then gated XNU backend and Metal/presentation qualification",
-          "last_heartbeat": "2026-11-05T00:12:18+00:00",
-          "branch": "main",
-          "handoff": "research/notes/RES-004-xclipse-interfaces.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T00:12:18+00:00",
-      "action": "task.done:GPU-006",
-      "owner": "codex-gpu-research-20261105-c",
-      "tasks": [
-        {
-          "id": "GPU-006",
-          "status": "done",
-          "owner": "codex-gpu-research-20261105-c",
-          "priority": 70,
-          "progress_note": "Seven synthetic lifecycle groups pass within 75 project tests; contract reconciles 4 KiB GPU and conditional XNU CPU/VM pages; no device I/O",
-          "next_step": "GPU-011 compile bounded transport ABI with fake backend; native integration stays in GPU-007",
-          "last_heartbeat": "2026-11-05T00:12:18+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/gpu-006/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T00:12:19+00:00",
-      "action": "task.done:RES-004",
-      "owner": "codex-gpu-research-20261105-c",
-      "tasks": [
-        {
-          "id": "RES-004",
-          "status": "done",
-          "owner": "codex-gpu-research-20261105-c",
-          "priority": 80,
-          "progress_note": "Pinned SGPU/RADV interfaces, power-sensitive MMR, VM wait, memory-guard scope, page policy and bounded Reddit/web coverage documented",
-          "next_step": "GPU-011 SDK-independent transport ABI, then gated XNU backend and Metal/presentation qualification",
-          "last_heartbeat": "2026-11-05T00:12:18+00:00",
-          "branch": "main",
-          "handoff": "research/notes/RES-004-xclipse-interfaces.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T00:13:21+00:00",
-      "action": "task.claim:GPU-011",
-      "owner": "codex-sgpu-abi-20261105-d",
-      "tasks": [
-        {
-          "id": "GPU-011",
-          "status": "in_progress",
-          "owner": "codex-sgpu-abi-20261105-d",
-          "priority": 80,
-          "last_heartbeat": "2026-11-05T00:13:21+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T00:20:06+00:00",
-      "action": "experiment.plan:SGPUABI-001",
-      "owner": "codex-sgpu-abi-20261105-d"
-    },
-    {
-      "at": "2026-11-05T00:20:50+00:00",
-      "action": "experiment.record:SGPUABI-001",
-      "owner": "codex-sgpu-abi-20261105-d"
-    },
-    {
-      "at": "2026-11-05T00:20:51+00:00",
-      "action": "experiment.plan:SGPUABI-002",
-      "owner": "codex-sgpu-abi-20261105-d"
-    },
-    {
-      "at": "2026-11-05T00:22:54+00:00",
-      "action": "task.refine_sources_and_progress:GPU-011",
-      "owner": "codex-sgpu-abi-20261105-d",
-      "tasks": [
-        {
-          "id": "GPU-011",
-          "status": "in_progress",
-          "owner": "codex-sgpu-abi-20261105-d",
-          "priority": 80,
-          "progress_note": "Bounded C byte codec/dispatcher and separate synthetic peer implemented; 50000 ASan/UBSan mutations pass; AArch64 ELF and iOS16.5 arm64 Mach-O objects compile without SDK",
-          "next_step": "Review final wire limits and integration gaps, run full project checks, record failure/pass evidence and complete ABI-only task",
-          "last_heartbeat": "2026-11-05T00:22:54+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/gpu-011/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T00:23:33+00:00",
-      "action": "task.refine_paths:GPU-011-published-evidence",
-      "owner": "codex-sgpu-abi-20261105-d",
-      "tasks": [
-        {
-          "id": "GPU-011",
-          "status": "in_progress",
-          "owner": "codex-sgpu-abi-20261105-d",
-          "priority": 80,
-          "progress_note": "Bounded C byte codec/dispatcher and separate synthetic peer implemented; 50000 ASan/UBSan mutations pass; AArch64 ELF and iOS16.5 arm64 Mach-O objects compile without SDK",
-          "next_step": "Review final wire limits and integration gaps, run full project checks, record failure/pass evidence and complete ABI-only task",
-          "last_heartbeat": "2026-11-05T00:23:33+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/gpu-011/README.md"
-        }
-      ]
-    },
-    {
       "at": "2026-11-05T00:23:54+00:00",
       "action": "experiment.record:SGPUABI-002",
       "owner": "codex-sgpu-abi-20261105-d"
@@ -2937,11 +2873,216 @@
           "handoff": "docs/procedures/gpu-011/README.md"
         }
       ]
+    },
+    {
+      "at": "2026-11-05T00:28:14+00:00",
+      "action": "task.claim:NET-001",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "NET-001",
+          "status": "in_progress",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 70,
+          "last_heartbeat": "2026-11-05T00:28:14+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:28:46+00:00",
+      "action": "task.add:RES-005",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "RES-005",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:28:47+00:00",
+      "action": "task.claim:RES-005",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "RES-005",
+          "status": "in_progress",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T00:28:47+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:33:08+00:00",
+      "action": "task.refine:NET-001-interface-and-fixtures",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "NET-001",
+          "status": "in_progress",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 70,
+          "progress_note": "Found native XNU ath12k donor; catalog pin has older ABI than current docs. Reviewing separate pinned revisions and Exynos PCIe DMA/MSI paths; endpoint still unmeasured",
+          "next_step": "Build a checked platform-input/DMA boundary against exact current nw_abi.h; document real native backend and iOS16.5 frontend gates",
+          "last_heartbeat": "2026-11-05T00:33:08+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:38:18+00:00",
+      "action": "experiment.plan:WIFIABI-001",
+      "owner": "codex-wifi-research-20261105-e"
+    },
+    {
+      "at": "2026-11-05T00:39:03+00:00",
+      "action": "task.add:NET-004",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "NET-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 70
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:39:04+00:00",
+      "action": "task.add:NET-005",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "NET-005",
+          "status": "pending",
+          "owner": null,
+          "priority": 70
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:39:04+00:00",
+      "action": "task.refine_dependencies:concrete-wifi-backend-and-OS16-frontend",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "NET-002",
+          "status": "pending",
+          "owner": null,
+          "priority": 50
+        },
+        {
+          "id": "NET-003",
+          "status": "pending",
+          "owner": null,
+          "priority": 50
+        },
+        {
+          "id": "RES-005",
+          "status": "in_progress",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T00:28:47+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:42:56+00:00",
+      "action": "experiment.record:WIFIABI-001",
+      "owner": "codex-wifi-research-20261105-e"
+    },
+    {
+      "at": "2026-11-05T00:42:57+00:00",
+      "action": "experiment.plan:WIFIABI-002",
+      "owner": "codex-wifi-research-20261105-e"
+    },
+    {
+      "at": "2026-11-05T00:43:58+00:00",
+      "action": "experiment.record:WIFIABI-002",
+      "owner": "codex-wifi-research-20261105-e"
+    },
+    {
+      "at": "2026-11-05T00:45:44+00:00",
+      "action": "task.update:NET-001",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "NET-001",
+          "status": "in_progress",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 70,
+          "progress_note": "Owned admission/DMA boundary compiles against exact current ABI; old ABI rejected; 16 donor vectors separated from controller capacity; sanitizers/four ARM objects and 86 project tests pass, with zero callback execution",
+          "next_step": "NET-004 actual Exynos/XNU backend and NET-005 iOS16.5 frontend; live endpoint/profile remains unknown",
+          "last_heartbeat": "2026-11-05T00:45:44+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/net-001/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:45:45+00:00",
+      "action": "task.update:RES-005",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "RES-005",
+          "status": "in_progress",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 80,
+          "progress_note": "Five donor/reference checkouts pinned separately; catalog/current ABI and vendor/donor MSI mismatches documented; Exynos DMA obligations, licensing and bounded Reddit coverage preserved",
+          "next_step": "Implement real native callbacks and selected OS frontend under NET-004/005; continue independent subsystem research while kernel/recovery inputs remain missing",
+          "last_heartbeat": "2026-11-05T00:45:45+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-005-wifi-donors.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:45:46+00:00",
+      "action": "task.done:NET-001",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "NET-001",
+          "status": "done",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 70,
+          "progress_note": "Owned admission/DMA boundary compiles against exact current ABI; old ABI rejected; 16 donor vectors separated from controller capacity; sanitizers/four ARM objects and 86 project tests pass, with zero callback execution",
+          "next_step": "NET-004 actual Exynos/XNU backend and NET-005 iOS16.5 frontend; live endpoint/profile remains unknown",
+          "last_heartbeat": "2026-11-05T00:45:44+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/net-001/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:45:46+00:00",
+      "action": "task.done:RES-005",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "RES-005",
+          "status": "done",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 80,
+          "progress_note": "Five donor/reference checkouts pinned separately; catalog/current ABI and vendor/donor MSI mismatches documented; Exynos DMA obligations, licensing and bounded Reddit coverage preserved",
+          "next_step": "Implement real native callbacks and selected OS frontend under NET-004/005; continue independent subsystem research while kernel/recovery inputs remain missing",
+          "last_heartbeat": "2026-11-05T00:45:45+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-005-wifi-donors.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "f4b475dd9052164be634d18ab6a721cd59e99a12c5a7f60473dec019a17be3fc",
-    "BOARD.md": "492a084887e4d0482fb2af69f352f53be1bd814b32fbf32ca2bfcbb667810ac2",
+    "STATUS.md": "7b2219e71e4f1604867ec768a652b67169ebb14bbd4846d840c53656242a25ce",
+    "BOARD.md": "c73dd1984e5ec03205956cc8112fa00ce5e46baf61adfa4a69ab6ae3cb12b552",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
     "planning/tasks/INT-001.md": "9d68fa75fae4c21f31f5ea4734c3f592ed0b41c6ed897d7b045a892c63549760",
@@ -2953,13 +3094,14 @@
     "planning/tasks/CELL-009.md": "66ea4f72cf2188c549d905d23ebd40d47f4665721a52a8f939b58e066357ecd9",
     "planning/tasks/RES-004.md": "08bac80e27799418f00000fe2e775a3d800660263c225e58147765b25d905e9a",
     "planning/tasks/GPU-011.md": "80d1aa7ea8b4a3374af3e3373d65fdb0f18f581cfd9297d29b4e707dfb732580",
+    "planning/tasks/RES-005.md": "8bed1c3def30237963fab381a9b7130571df463daeb0a727c2c367496c02d5b8",
     "planning/tasks/VM-002.md": "d5451a25c99b8cdf14afc268bbafe4a12df15e62282b31b4f243cc54ac5f5dd8",
     "planning/tasks/UI-001.md": "cff7f24088dc0dd280965b81b735654985ab3f14be737424ef62bf42e1cfa695",
     "planning/tasks/USB-001.md": "aeb1f6cdd25c31a8ae88b49778bfe5fb25ef173807996a58bb8af652a62bb07e",
     "planning/tasks/GPU-006.md": "c4420e384a9ce1eaccb816f017b6212f8b8601974b7de2218916f3115d40464f",
     "planning/tasks/GPU-007.md": "6a2532661ad2838c05dbd0ccb16545e5849ce2ad209d00c3ba69d84197372508",
     "planning/tasks/GPU-009.md": "e9555218bd44f1bb576a6323c398f4bf63e9cd689a8bee3b0267d4a10fc1e915",
-    "planning/tasks/NET-001.md": "9aea34921de9656fefb4ac32fc49237bf2b80d11b8a1e0c51f5512107d6b0f37",
+    "planning/tasks/NET-001.md": "937e2d60c5901f29bf0ea1aaea7b8d897e14dc07d522e34e91df7fd09ef817b3",
     "planning/tasks/BT-001.md": "b70a7eef9a79a216c5e5703c3cc6eb2dd889743824b4a4c9ab0849834aa11b6b",
     "planning/tasks/AUD-001.md": "ad24878acc1e855423ab6d5f45b1a0cb7289bce59ed8c2621bb837679baa96f2",
     "planning/tasks/CAM-001.md": "22314f5add985fc2ca3de9f94e21c03f71a8289248b7b8a6e640e4cd434a2f84",
@@ -2970,6 +3112,8 @@
     "planning/tasks/CELL-004.md": "405eb4534873c8285637644c1f4a913afd663fb4e8dbc628d2eea10440fafc51",
     "planning/tasks/ESIM-001.md": "35d2eb01fcc3c31f09383f73868dc8b03b0c619d14d3b255f4ea38f229e2569e",
     "planning/tasks/MISC-001.md": "d2d92669c56ccc428feedd6af2f3c5bad4f0117107f1518c73999fb68d5c0270",
+    "planning/tasks/NET-004.md": "8bd5a17e9165df26cb213f576c2614428ff7e343f1f272f45e1bf5d5906dbeb4",
+    "planning/tasks/NET-005.md": "14907c958852b82d97046f0aeefe666073dd6309b0a26f3a119f1a7b4c0acc9f",
     "planning/tasks/FND-001.md": "ee81357df48cbcec414e6dc2f58f1325d8936e16bbbe8022d8b771c316d6b0f8",
     "planning/tasks/RES-001.md": "956b0cf0fe59602b13d98565c02c1486438c7f0451c2800e8d5c1a77e8e1d9fe",
     "planning/tasks/DEV-001.md": "387a0fc684445f6526c8517869714a41d884f7be2ebb11738782afaf0b404926",
@@ -2996,8 +3140,8 @@
     "planning/tasks/USB-002.md": "9f1e7d8d4951abdd4453efd531ee26d37d31e754957605894eafb6534a2ab46e",
     "planning/tasks/GPU-008.md": "8b10873253b9ad1f4cab2298e05f5359e7b9917aa4c7525bf7fb954ad06b74fb",
     "planning/tasks/GPU-010.md": "4749d305f26f3c16f7a9e7180a76696bbccdbe43ad5c29c46229e1bf68b27d8c",
-    "planning/tasks/NET-002.md": "5cfc6110ab57060398a4ed0fc937ef048102355814206fd29e88cc9086f53b58",
-    "planning/tasks/NET-003.md": "086ef3922386000fac59b36672a2d63627fbae1f59c2584cda2f292625485e79",
+    "planning/tasks/NET-002.md": "d29066526b3034e404542cde26c8b2f5feff13eaf064ce1d81a92e1551351a46",
+    "planning/tasks/NET-003.md": "3b578a7d362fc72029c832b43094480b56d5685402b8d311e58b27cc2e574ee0",
     "planning/tasks/BT-002.md": "0e428005b3c71c8f39a432e5dfe0fdc7fbc78c571160c616fed7b6b2f8aad90b",
     "planning/tasks/AUD-002.md": "eb5952fd0ebc9f3b02765eff1ca88a7598d9396be68c8678a08e0ed67fe1cead",
     "planning/tasks/CAM-002.md": "c103b76f2d577d2fbf0281ff75fb44a227eed2225665ea79158333b0566e6551",

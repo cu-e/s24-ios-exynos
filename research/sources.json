@@ -135,7 +135,12 @@
         "README.md",
         "LICENSE",
         "docs/porting/gpu.md",
-        "docs/drivers/adreno-metal.md"
+        "docs/drivers/adreno-metal.md",
+        "docs/porting/network.md",
+        "docs/drivers/ath12k-wifi.md",
+        "docs/devices/gts9uwifi.md",
+        "components.toml",
+        "devices.toml"
       ],
       "checkout_policy": "Explicit sparse source review; no submodules, toolchains, IPSWs or firmware"
     },
@@ -184,7 +189,19 @@
         "drivers/gpu/drm/samsung/gpu/sgpu/amdgpu_object.c",
         "drivers/gpu/drm/samsung/gpu/sgpu/sgpu_ifpo.c",
         "drivers/gpu/drm/samsung/gpu/sgpu/amdgpu_kms.c",
-        "arch/arm64/boot/dts/exynos/s5e9945-sgpu_common.dtsi"
+        "arch/arm64/boot/dts/exynos/s5e9945-sgpu_common.dtsi",
+        "drivers/net/wireless/cnss2/pci.h",
+        "drivers/net/wireless/cnss2/pci.c",
+        "drivers/net/wireless/cnss2/main.h",
+        "drivers/net/wireless/cnss2/qmi.c",
+        "drivers/net/wireless/cnss2/Makefile",
+        "drivers/net/wireless/cnss2/Kconfig",
+        "include/net/cnss2.h",
+        "include/net/cnss_common.h",
+        "drivers/net/wireless/cnss2/pci_exynos.c",
+        "drivers/net/wireless/cnss2/pci_platform.h",
+        "drivers/pci/controller/dwc/pcie-exynos-rc.c",
+        "drivers/pci/controller/dwc/pcie-exynos-rc.h"
       ],
       "checkout_policy": "Explicit sparse source review; no submodules, toolchains, IPSWs or firmware"
     },
@@ -325,7 +342,10 @@
         "README.md",
         "LICENSE",
         "THIRD_PARTY_NOTICES.md",
-        "docs/plan.md"
+        "docs/plan.md",
+        "docs/wifi-plan.md",
+        "patches/xnu/README-wifi.md",
+        "docs/audit/2026-10-26-wifi.md"
       ],
       "checkout_policy": "Sparse documentation/source review only; no submodules, firmware, SDK or upstream execution"
     },
@@ -389,6 +409,106 @@
       "license_notes": "AOSP documentation; inspect linked implementation licenses before reuse",
       "trust": "primary-upstream",
       "local_device_verified": false
+    },
+    {
+      "id": "ath12k-wifi",
+      "url": "https://github.com/UniXNU/Ath12kWifi",
+      "revision": "f6bf561f92cc42761bdd417fce1d53fe1db9477c",
+      "relevance": "Native XNU ath12k/mac80211/cfg80211 component and portable board ABI; candidate for KIWI after exact endpoint, firmware and OS qualification",
+      "license_notes": "No root LICENSE/COPYING or explicit license in selected nw_abi/runtime headers was found at this revision. Dependency code retains Linux/FreeBSD/supplicant notices. Separate grant/file review needed before incorporating donor implementations; owned boundary uses an external header only.",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "README.md",
+        "include/nw_abi.h",
+        "src/nw_wifi.c",
+        "src/nw_mhi.c",
+        "src/nw_pci.c",
+        "src/nw_qrtr_mhi.c",
+        "tools/sources.txt",
+        "tools/fetch-sources.sh",
+        "tools/test-mhi.sh",
+        "tests/mhi_host_test.c",
+        "shim/include/lx_plat.h",
+        "shim/src/mhi_hook.c"
+      ],
+      "checkout_policy": "Explicit sparse text review; no firmware, SDK, submodules, binary payloads or upstream execution"
+    },
+    {
+      "id": "unixnu-sheng",
+      "url": "https://github.com/UniXNU/UniXNU-sheng",
+      "revision": "516a780473a2ac59c8b438e132bb60204dda9e22",
+      "relevance": "WCN7850 board/OS Wi-Fi integration reference on SM8550; different PCIe/rail/IOMMU and OS27 profile",
+      "license_notes": "Root BSD-2-Clause-Patent LICENSE reviewed; dependency and individual-file notices remain separate; firmware not fetched",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "README.md",
+        "LICENSE",
+        "package/WifiProbe.cpp",
+        "package/WifiNet.cpp",
+        "package/WifiPcieTables.h",
+        "proprietary-files.txt",
+        "unixnu.lock"
+      ],
+      "checkout_policy": "Explicit sparse text review; no firmware, SDK, submodules, binary payloads or upstream execution"
+    },
+    {
+      "id": "ath12k-wifi-current",
+      "url": "https://github.com/UniXNU/Ath12kWifi",
+      "revision": "28de7b91d7a880682b777e0e3564245a99dbc3f5",
+      "relevance": "Separately pinned live HEAD observed 2026-11-05; compare current mac80211/cfg80211/supplicant ABI with stale catalog pin",
+      "license_notes": "No root LICENSE/COPYING or explicit license in selected nw_abi/runtime headers was found at this revision. Dependency code retains Linux/FreeBSD/supplicant notices. Separate grant/file review needed before incorporating donor implementations; owned boundary uses an external header only.",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "README.md",
+        "include/nw_abi.h",
+        "tools/source-lock.json",
+        "tools/sources.txt",
+        "tools/fetch-sources.sh",
+        "src/nw_wifi.c",
+        "src/nw_cfg80211_control.c",
+        "src/nw_mainline.c",
+        "shim/include/lx_plat.h",
+        "tools/test-cfg80211-control.py",
+        "tools/test-mainline-runtime.py"
+      ],
+      "checkout_policy": "Sparse text only; no submodules, firmware binaries, SDK or upstream execution"
+    },
+    {
+      "id": "unixnu-sheng-current",
+      "url": "https://github.com/UniXNU/UniXNU-sheng",
+      "revision": "460179565a018c741b93e0b1efa07c55d4de497a",
+      "relevance": "Separately pinned live HEAD observed 2026-11-05; current WifiProbe/WifiNet and firmware-manifest metadata, not Exynos board operations",
+      "license_notes": "Root BSD-2-Clause-Patent LICENSE reviewed; dependency and individual-file notices remain separate; firmware not fetched",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "README.md",
+        "LICENSE",
+        "package/WifiProbe.cpp",
+        "package/WifiNet.cpp",
+        "package/WifiFirmware.h",
+        "firmware/wcn7850/manifest.json",
+        "unixnu.lock"
+      ],
+      "checkout_policy": "Sparse text only; no submodules, firmware binaries, SDK or upstream execution"
+    },
+    {
+      "id": "linux-ath12k-stable",
+      "url": "https://github.com/gregkh/linux",
+      "revision": "458c6079fc1d41d564c37679c8ace02cd83ee817",
+      "relevance": "Linux v7.0.14 reference pinned by current Ath12kWifi source-lock; selected WCN7850 PCI/hardware/firmware metadata only, not a S24 native driver",
+      "license_notes": "Linux GPL-2.0 and individual driver SPDX notices; no implementation incorporated",
+      "trust": "primary-upstream",
+      "local_device_verified": false,
+      "review_files": [
+        "COPYING",
+        "drivers/net/wireless/ath/ath12k/wifi7/pci.c",
+        "drivers/net/wireless/ath/ath12k/wifi7/hw.c"
+      ],
+      "checkout_policy": "Selected sparse source text; no firmware, submodules or upstream execution"
     }
   ]
 }

@@ -1,0 +1,19 @@
+{
+  "id": "NET-005",
+  "title": "Implement and compile the selected iOS 16.5 Wi-Fi station frontend",
+  "status": "pending",
+  "owner": null,
+  "priority": 70,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": ["NET-004"],
+  "paths": ["src/platform/wifi/ios16", "docs/procedures/net-005"],
+  "acceptance": [
+    "Verify Apple80211 request/event layouts and wifid/configd/launchd expectations against explicitly supplied iPhone X iOS16.5 components",
+    "Compile the real IO/network frontend against selected XNU, with bounded asynchronous scan/join/cancel/timeout handling and packet ownership tests",
+    "Integrate original supplicant/control broker and selected credentials path without assuming OS27 association sizes or silently replacing the first OS",
+    "Record unsupported authentication/security/privacy profiles and leave physical Settings/network qualification to NET-003"
+  ],
+  "sources": ["ath12k-wifi-current", "unixnu-sheng-current", "iosplus10", "ios-lemonadep"],
+  "steps": ["Inspect selected local OS frontend ABI", "Implement bounded native station/control events and signed supplicant packaging", "Compile and test ownership/error paths; preserve native acceptance gates"]
+}

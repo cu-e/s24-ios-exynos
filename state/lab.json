@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T00:26:42+00:00",
+  "updated_at": "2026-11-05T00:45:46+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -1247,8 +1247,8 @@
     {
       "id": "NET-001",
       "title": "Specify and build the E1S KIWI Wi-Fi platform adapter",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-wifi-research-20261105-e",
       "priority": 70,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -1257,21 +1257,36 @@
       ],
       "paths": [
         "src/platform/wifi",
-        "docs/procedures/net-001"
+        "docs/procedures/net-001",
+        "tests/test_wifi_platform.py"
       ],
       "acceptance": [
         "Exact endpoint PCI identity remains a required input until measured",
-        "Separate Exynos PCIe/DMA/IRQ, firmware transport and iOS station integration"
+        "Separate Exynos PCIe/DMA/IRQ, firmware transport and iOS station integration",
+        "Host-buildable project-owned adapter validates pinned donor ABI, explicit profile inputs, callback availability and checked DMA-window translation; negative tests do not claim native hardware execution"
       ],
       "sources": [
         "s24-linux",
-        "unixnu"
+        "unixnu",
+        "ath12k-wifi-current",
+        "ath12k-wifi",
+        "unixnu-sheng-current"
       ],
       "steps": [
         "Inspect the task dependencies and pinned inputs",
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
-      ]
+      ],
+      "started_at": "2026-11-05T00:28:14+00:00",
+      "last_heartbeat": "2026-11-05T00:45:44+00:00",
+      "updated_at": "2026-11-05T00:45:46+00:00",
+      "branch": "main",
+      "progress_note": "Owned admission/DMA boundary compiles against exact current ABI; old ABI rejected; 16 donor vectors separated from controller capacity; sanitizers/four ARM objects and 86 project tests pass, with zero callback execution",
+      "next_step": "NET-004 actual Exynos/XNU backend and NET-005 iOS16.5 frontend; live endpoint/profile remains unknown",
+      "handoff": "docs/procedures/net-001/README.md",
+      "evidence": "state/evidence/NET-001.json",
+      "evidence_sha256": "775ffc25934c9b39c3f4b86ca03551b13df0fd6a790af1c7572c6616078555ad",
+      "finished_at": "2026-11-05T00:45:46+00:00"
     },
     {
       "id": "NET-002",
@@ -1283,7 +1298,8 @@
       "evidence_kind": "native-device",
       "depends_on": [
         "NET-001",
-        "DRV-003"
+        "DRV-003",
+        "NET-004"
       ],
       "paths": [
         "artifacts/wifi-native",
@@ -1310,7 +1326,8 @@
       "evidence_kind": "native-device",
       "depends_on": [
         "NET-002",
-        "UI-002"
+        "UI-002",
+        "NET-005"
       ],
       "paths": [
         "artifacts/wifi-lifecycle",
@@ -2280,6 +2297,128 @@
       "evidence": "state/evidence/GPU-011.json",
       "evidence_sha256": "93d6d8b223bd0a9c560d527a8b3eb28eaccce9bb258f59392208486591586977",
       "finished_at": "2026-11-05T00:26:42+00:00"
+    },
+    {
+      "id": "RES-005",
+      "title": "Audit E1S KIWI Wi-Fi transport and native iOS donor compatibility",
+      "status": "done",
+      "owner": "codex-wifi-research-20261105-e",
+      "priority": 80,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "RES-002"
+      ],
+      "paths": [
+        "research/sources.json",
+        "research/notes/RES-005-wifi-donors.md",
+        "research/wifi-coverage.json",
+        "fixtures/public/wifi-research",
+        "docs/procedures/wifi-research.md",
+        "docs/implementation.md",
+        "state/capabilities.json",
+        "CAPABILITIES.md",
+        "README.md"
+      ],
+      "acceptance": [
+        "Trace pinned Samsung CNSS/KIWI PCIe, DMA, IRQ, MHI/QMI and firmware/board-data requirements without guessing the live endpoint",
+        "Review concrete native iOS Wi-Fi donor implementations and distinguish hardware transport from the selected OS station/frontend ABI",
+        "Record bounded primary web/GitHub/Reddit coverage, version differences, licensing and unavailable inputs",
+        "Update staged plan and capability evidence without changing device authorization or claiming native Wi-Fi"
+      ],
+      "sources": [
+        "s24-linux",
+        "unixnu",
+        "iosplus10",
+        "ios-lemonadep",
+        "ath12k-wifi",
+        "ath12k-wifi-current",
+        "unixnu-sheng",
+        "unixnu-sheng-current",
+        "linux-ath12k-stable"
+      ],
+      "steps": [
+        "Inspect pinned board and transport sources",
+        "Review donor code and dated reported acceptance",
+        "Publish concrete reusable interfaces, missing inputs and qualification gates"
+      ],
+      "started_at": "2026-11-05T00:28:47+00:00",
+      "last_heartbeat": "2026-11-05T00:45:45+00:00",
+      "updated_at": "2026-11-05T00:45:46+00:00",
+      "branch": "main",
+      "progress_note": "Five donor/reference checkouts pinned separately; catalog/current ABI and vendor/donor MSI mismatches documented; Exynos DMA obligations, licensing and bounded Reddit coverage preserved",
+      "next_step": "Implement real native callbacks and selected OS frontend under NET-004/005; continue independent subsystem research while kernel/recovery inputs remain missing",
+      "handoff": "research/notes/RES-005-wifi-donors.md",
+      "evidence": "state/evidence/RES-005.json",
+      "evidence_sha256": "79e706f6c4692dae6ee9bf256f1b24f639a0cd0946d4d2735b30b48875e01c06",
+      "finished_at": "2026-11-05T00:45:46+00:00"
+    },
+    {
+      "id": "NET-004",
+      "title": "Implement and link the native E1S PCIe/SysMMU/MSI Wi-Fi backend",
+      "status": "pending",
+      "owner": null,
+      "priority": 70,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NET-001",
+        "KRN-001"
+      ],
+      "paths": [
+        "src/platform/wifi/native",
+        "docs/procedures/net-004"
+      ],
+      "acceptance": [
+        "Concrete E1S power/PHY/PCIe/reset, SysMMU/cache and MSI primitives compile and link with the pinned XNU; no success-returning hardware stubs",
+        "Rebuild the exact selected Ath12kWifi runtime and board against one reviewed ABI/dependency pin, with component/file license review",
+        "Firmware/board/regulatory loading uses explicitly supplied matching local inputs; no sheng firmware, addresses, no-op cache sync or userdata layout inherited blindly",
+        "Keep actual endpoint, DMA reachability, IRQ delivery, calibration and hardware lifecycle qualification in NET-002/003"
+      ],
+      "sources": [
+        "s24-linux",
+        "ath12k-wifi-current",
+        "unixnu-sheng-current",
+        "linux-ath12k-stable"
+      ],
+      "steps": [
+        "Match explicit board/firmware profile",
+        "Implement real kernel callbacks and bounded worker teardown",
+        "Build/link and retain negative-path evidence before separately scoped native execution"
+      ]
+    },
+    {
+      "id": "NET-005",
+      "title": "Implement and compile the selected iOS 16.5 Wi-Fi station frontend",
+      "status": "pending",
+      "owner": null,
+      "priority": 70,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NET-004"
+      ],
+      "paths": [
+        "src/platform/wifi/ios16",
+        "docs/procedures/net-005"
+      ],
+      "acceptance": [
+        "Verify Apple80211 request/event layouts and wifid/configd/launchd expectations against explicitly supplied iPhone X iOS16.5 components",
+        "Compile the real IO/network frontend against selected XNU, with bounded asynchronous scan/join/cancel/timeout handling and packet ownership tests",
+        "Integrate original supplicant/control broker and selected credentials path without assuming OS27 association sizes or silently replacing the first OS",
+        "Record unsupported authentication/security/privacy profiles and leave physical Settings/network qualification to NET-003"
+      ],
+      "sources": [
+        "ath12k-wifi-current",
+        "unixnu-sheng-current",
+        "iosplus10",
+        "ios-lemonadep"
+      ],
+      "steps": [
+        "Inspect selected local OS frontend ABI",
+        "Implement bounded native station/control events and signed supplicant packaging",
+        "Compile and test ownership/error paths; preserve native acceptance gates"
+      ]
     }
   ],
   "experiments": [
@@ -2613,6 +2752,36 @@
       "evidence_sha256": "b3a5c64eb4ad4156c310ce2867eb5e8b4322a12628bf46316a0b7e4e7d911c2a",
       "outcome": "pass",
       "recorded_at": "2026-11-05T00:25:56+00:00"
+    },
+    {
+      "id": "WIFIABI-001",
+      "task": "NET-001",
+      "owner": "codex-wifi-research-20261105-e",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Owned E1S input/callback and DMA-window boundary compiles against current pinned nw_abi, rejects old catalog ABI, passes 16384 valid/invalid range pairs under sanitizers, and compiles for AArch64 ELF/Mach-O without executing a callback or radio",
+      "procedure": "docs/procedures/net-001/README.md",
+      "timeout_seconds": 180,
+      "created_at": "2026-11-05T00:38:18+00:00",
+      "evidence": "state/evidence/WIFIABI-001.json",
+      "evidence_sha256": "2cba3aaf8ffff669494f9fa9f3d7d9e83b21c9e347333e1b9e4bd2ef81506e91",
+      "outcome": "inconclusive",
+      "recorded_at": "2026-11-05T00:42:56+00:00"
+    },
+    {
+      "id": "WIFIABI-002",
+      "task": "NET-001",
+      "owner": "codex-wifi-research-20261105-e",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Corrected boundary distinguishes 16 donor MSI vectors from controller capacity, rejects incompatible layouts/old ABI, and passes range/callback/sanitizer and AArch64 compile-only checks without hardware access",
+      "procedure": "docs/procedures/net-001/README.md",
+      "timeout_seconds": 180,
+      "created_at": "2026-11-05T00:42:57+00:00",
+      "evidence": "state/evidence/WIFIABI-002.json",
+      "evidence_sha256": "daa93613d25046e19e5f357f4253745ce6ad8d5d2a43a599526c29ebec6fe6da",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T00:43:58+00:00"
     }
   ],
   "events": [
@@ -4598,6 +4767,211 @@
           "last_heartbeat": "2026-11-05T00:26:42+00:00",
           "branch": "main",
           "handoff": "docs/procedures/gpu-011/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:28:14+00:00",
+      "action": "task.claim:NET-001",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "NET-001",
+          "status": "in_progress",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 70,
+          "last_heartbeat": "2026-11-05T00:28:14+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:28:46+00:00",
+      "action": "task.add:RES-005",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "RES-005",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:28:47+00:00",
+      "action": "task.claim:RES-005",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "RES-005",
+          "status": "in_progress",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T00:28:47+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:33:08+00:00",
+      "action": "task.refine:NET-001-interface-and-fixtures",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "NET-001",
+          "status": "in_progress",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 70,
+          "progress_note": "Found native XNU ath12k donor; catalog pin has older ABI than current docs. Reviewing separate pinned revisions and Exynos PCIe DMA/MSI paths; endpoint still unmeasured",
+          "next_step": "Build a checked platform-input/DMA boundary against exact current nw_abi.h; document real native backend and iOS16.5 frontend gates",
+          "last_heartbeat": "2026-11-05T00:33:08+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:38:18+00:00",
+      "action": "experiment.plan:WIFIABI-001",
+      "owner": "codex-wifi-research-20261105-e"
+    },
+    {
+      "at": "2026-11-05T00:39:03+00:00",
+      "action": "task.add:NET-004",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "NET-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 70
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:39:04+00:00",
+      "action": "task.add:NET-005",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "NET-005",
+          "status": "pending",
+          "owner": null,
+          "priority": 70
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:39:04+00:00",
+      "action": "task.refine_dependencies:concrete-wifi-backend-and-OS16-frontend",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "NET-002",
+          "status": "pending",
+          "owner": null,
+          "priority": 50
+        },
+        {
+          "id": "NET-003",
+          "status": "pending",
+          "owner": null,
+          "priority": 50
+        },
+        {
+          "id": "RES-005",
+          "status": "in_progress",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 80,
+          "last_heartbeat": "2026-11-05T00:28:47+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:42:56+00:00",
+      "action": "experiment.record:WIFIABI-001",
+      "owner": "codex-wifi-research-20261105-e"
+    },
+    {
+      "at": "2026-11-05T00:42:57+00:00",
+      "action": "experiment.plan:WIFIABI-002",
+      "owner": "codex-wifi-research-20261105-e"
+    },
+    {
+      "at": "2026-11-05T00:43:58+00:00",
+      "action": "experiment.record:WIFIABI-002",
+      "owner": "codex-wifi-research-20261105-e"
+    },
+    {
+      "at": "2026-11-05T00:45:44+00:00",
+      "action": "task.update:NET-001",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "NET-001",
+          "status": "in_progress",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 70,
+          "progress_note": "Owned admission/DMA boundary compiles against exact current ABI; old ABI rejected; 16 donor vectors separated from controller capacity; sanitizers/four ARM objects and 86 project tests pass, with zero callback execution",
+          "next_step": "NET-004 actual Exynos/XNU backend and NET-005 iOS16.5 frontend; live endpoint/profile remains unknown",
+          "last_heartbeat": "2026-11-05T00:45:44+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/net-001/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:45:45+00:00",
+      "action": "task.update:RES-005",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "RES-005",
+          "status": "in_progress",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 80,
+          "progress_note": "Five donor/reference checkouts pinned separately; catalog/current ABI and vendor/donor MSI mismatches documented; Exynos DMA obligations, licensing and bounded Reddit coverage preserved",
+          "next_step": "Implement real native callbacks and selected OS frontend under NET-004/005; continue independent subsystem research while kernel/recovery inputs remain missing",
+          "last_heartbeat": "2026-11-05T00:45:45+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-005-wifi-donors.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:45:46+00:00",
+      "action": "task.done:NET-001",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "NET-001",
+          "status": "done",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 70,
+          "progress_note": "Owned admission/DMA boundary compiles against exact current ABI; old ABI rejected; 16 donor vectors separated from controller capacity; sanitizers/four ARM objects and 86 project tests pass, with zero callback execution",
+          "next_step": "NET-004 actual Exynos/XNU backend and NET-005 iOS16.5 frontend; live endpoint/profile remains unknown",
+          "last_heartbeat": "2026-11-05T00:45:44+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/net-001/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T00:45:46+00:00",
+      "action": "task.done:RES-005",
+      "owner": "codex-wifi-research-20261105-e",
+      "tasks": [
+        {
+          "id": "RES-005",
+          "status": "done",
+          "owner": "codex-wifi-research-20261105-e",
+          "priority": 80,
+          "progress_note": "Five donor/reference checkouts pinned separately; catalog/current ABI and vendor/donor MSI mismatches documented; Exynos DMA obligations, licensing and bounded Reddit coverage preserved",
+          "next_step": "Implement real native callbacks and selected OS frontend under NET-004/005; continue independent subsystem research while kernel/recovery inputs remain missing",
+          "last_heartbeat": "2026-11-05T00:45:45+00:00",
+          "branch": "main",
+          "handoff": "research/notes/RES-005-wifi-donors.md"
         }
       ]
     }

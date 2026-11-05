@@ -80,6 +80,10 @@ Android RADV and a shader translator are not sufficient by themselves. Review pe
 | Cameras | Sensor identity → rails/MCLK → CSIS/DMA frame → ISP → OS camera integration |
 | Sensors/GNSS | Hub transport and timestamps → readings → OS services |
 | Power | Battery/RTC → thermal limits → DVFS → idle → suspend/wake → charging policy |
+
+The [Wi-Fi donor audit](../research/notes/RES-005-wifi-donors.md) identifies current Ath12kWifi as a conditional native-stack candidate and retains its older catalog pin separately. Its callback/event ABI changed; current documentation cannot validate an old binary/header pair. [NET-001](../src/platform/wifi/README.md) now compiles a structural-input/callback and checked DMA-range boundary, with live endpoint/firmware/profile fields still unknown. It performs no hardware operation.
+
+NET-004 must implement and link the real Exynos PCIe/power/PHY/SysMMU/cache/MSI backend with one matched donor runtime before NET-002 hardware tests. NET-005 must compile the selected iOS16.5 station frontend before NET-003 OS/security/lifecycle qualification. Do not inherit sheng's rails, SPI 141, 128 MiB arena, no-op cache callback, firmware hashes or OS27 association layouts. The exact endpoint, chip revision, matching local firmware/board/regulatory data and actual DMA/IRQ behavior remain explicit gates. Basic upstream WPA2 reports do not establish WPA3, enterprise, privacy, roaming or sleep/wake acceptance.
 | Other | Haptics, USB-C/PD, NFC, biometrics, video codecs and external display each require separate work and evidence |
 
 Local Android modules indicate KIWI V2/CNSS for Wi-Fi and CS35L43/ABOX for sound. Do not silently select Broadcom or copy S9/S20 register values. A camera ID is not a frame; battery readings are not charging control; Samsung biometrics are not Apple Secure Enclave.

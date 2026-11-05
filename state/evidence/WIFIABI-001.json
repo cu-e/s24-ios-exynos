@@ -1,0 +1,30 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "inconclusive",
+  "recorded_at": "2026-11-05T00:42:56+00:00",
+  "summary": "Boundary sanitizer/cross-target checks pass, but source review found the profile conflated vendor CNSS 32-vector allocation with selected mainline donor 16-vector layout; revise MSI input policy before task completion",
+  "commit": "1703c29c7863ea2d9864140c11c457828618e9a4",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "src/platform/wifi/check.py",
+        "--run",
+        "wifi-boundary-session1"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/wifi-research/wifi-boundary-session1.json"
+  ],
+  "sha256": {
+    "fixtures/public/wifi-research/wifi-boundary-session1.json": "ea67bf22ae67d2ebf9b8d46548af3870f98f58fa7d43ac6dcf77b26b7f9c6065"
+  },
+  "limitations": [
+    "Host command passed its tested policy; it did not establish donor/platform semantic compatibility",
+    "Supersede the conflated MSI profile with separately checked donor vector count and controller capacity",
+    "No callback, radio, firmware, native kernel or ARM execution"
+  ]
+}

@@ -199,25 +199,38 @@
     {
       "id": "wifi",
       "title": "Wi-Fi",
-      "implementation": "planned",
+      "implementation": "host-tested",
       "native_status": "not-tested",
       "local_observation": "kiwi_v2/cnss2 loaded; endpoint ID unavailable",
-      "upstream": "E1S KIWI overlay; UniXNU interface donor",
-      "next_check": "Measure exact endpoint and match firmware",
+      "upstream": "Pinned native ath12k candidate; owned host input/DMA boundary tested; actual Exynos backend, endpoint/firmware and iOS16.5 frontend unqualified",
+      "next_check": "NET-004 actual Exynos/XNU backend build after KRN-001; verify endpoint/firmware and NET-005 iOS16.5 station ABI before native qualification",
       "acceptance": "WPA2/WPA3, DHCP/DNS/HTTPS, iOS controls and reconnect",
       "tasks": [
         "NET-001",
         "NET-002",
-        "NET-003"
+        "NET-003",
+        "NET-004",
+        "NET-005",
+        "RES-005"
       ],
       "sources": [
         "s24-linux",
-        "unixnu"
+        "unixnu",
+        "ath12k-wifi",
+        "ath12k-wifi-current",
+        "unixnu-sheng-current",
+        "linux-ath12k-stable"
       ],
       "local_evidence": [
         {
           "path": "state/evidence/DEV-001.json",
           "sha256": "cc2d9d1fd6fa6790987cf225eb6b5554c542413992d62ac0f6ec42ccbb03b86f"
+        }
+      ],
+      "implementation_evidence": [
+        {
+          "path": "state/evidence/NET-001.json",
+          "sha256": "775ffc25934c9b39c3f4b86ca03551b13df0fd6a790af1c7572c6616078555ad"
         }
       ]
     },
