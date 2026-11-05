@@ -98,3 +98,43 @@ The finite command exited 0, elapsed 0.018132 seconds, controller VmHWM
 `e884676` / `f10dda9`, source capsules and evidence remain preserved.
 No compiler, QEMU, common check or publication occurred. Independent cn/root
 recheck remains required; no compiled ABI or execution adapter is accepted.
+
+## Concrete four-command planning handoff
+
+INT-003 independently rechecked the corrected predicate in source-only review
+`01978b6`; the original plan and corrected complete-plan hashes matched.
+Original owner registered `AVFPTH-003` as **planned**, timeout 720 seconds, on
+2026-11-05T22:22:27+00:00. No compile or archive command has executed.
+
+The proposed complete plan is `fixtures/public/avf-guest-pthread/compile-plan.json`.
+It contains three exact frozen compiler argv arrays with only declared `-MF`/`-o`
+placeholder substitution, followed by the genuine qualified cctools libtool
+`-static -csD -filelist FILE -o` command. The frozen filelist contains exactly
+`kern_init.o`, `kern_support.o`, `kern_synch.o` under the fresh absolute owned
+`artifacts/avf-guest-pthread/compile-1` output. Every command uses that explicit
+cwd. The output directory remains nonexistent; all product hashes remain null.
+The original source plan and evidence capsules have not changed.
+
+The selected accepted physical primary process module is now MAIN
+`tools/build/avf_kernel_objects.py`, SHA256
+`5c7b9c549e2740f3fad2a80c060e558dff3c9aa15e98bb2d9a56b33684e687d8`, at the
+`12a43eef` common boundary relayed by INT-003 from cm. Actual source hash and
+`run_child` AST equality to the earlier reviewed helper were checked. The old
+physical VM-009 worktree hash `132135...` is explicitly historical/unselected.
+
+The shared component execution adapter is missing and assigned to VM-036/dy.
+The helper is insufficient by itself to enforce component/task/input/runtime/
+output validity. Compiler ELF RUNPATH contains a literal backslash before
+`$ORIGIN` and an empty entry; the future adapter must reject needed-library
+shadows in cwd and relevant RUNPATH directories and verify actual loaded runtime.
+Small `/usr/lib64` library candidates and genuine libtool bytes were streamed
+through SHA256; candidate paths do not prove loader selection. No compiler,
+loader, ldd or archiver was run. No source/header hash matrix was repeated.
+
+`compile-planning-evidence.json` records only finite metadata consistency.
+The plan stays proposed-not-executable until the actual VM-036 adapter and
+input/runtime boundaries are independently reviewed and root grants a lease.
+Each unit remains serial, one compiler maximum, combined RSS at most 256 MiB,
+with the accepted helper's per-command admission and 120-second deadline.
+Actual products, dependencies, Mach-O/metadata/members, callback ABI, native
+alias/provider closure and all wider kernel/guest acceptance remain unmeasured.
