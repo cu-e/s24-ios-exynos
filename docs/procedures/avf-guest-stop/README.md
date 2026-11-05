@@ -147,6 +147,9 @@ See [evidence-final.json](evidence-final.json) and
 [experiment-2.md](experiment-2.md) for final commands and acceptance limits;
 [evidence.json](evidence.json) and [experiment.md](experiment.md) retain the
 unchanged earlier freeze.
+Final VMSTOP-002 ran five actual negative Python CLI commands; each exited 2
+with the expected classification. Maximum per-command elapsed time was
+0.117285 seconds and current-image VmHWM at most 19,648 KiB.
 
 ## Handoff
 
