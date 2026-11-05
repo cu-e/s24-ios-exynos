@@ -1,0 +1,42 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "recorded_at": "2026-11-05T03:05:09+00:00",
+  "summary": "Mixed C/C++ C11 atomics, actual dispatch runtime and real TAPI/cctools builds pass; first static-layout assertion fails because harness incorrectly requires generated LINKEDIT in input order. Actual image has static+PIE, high base and protections but fixture omitted XNU pagezero_size0. No broader qualification yet.",
+  "commit": "dd1b7ab540aa0f332b92e7af20dfb05b34e595a5",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/build/xnu_macho_tools.py",
+        "--run",
+        "macho-session3",
+        "--clang-bin",
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin",
+        "--jobs",
+        "2"
+      ],
+      "exit_code": 1
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/xnu-host-tools/macho-session3.json",
+    "fixtures/public/xnu-host-tools/macho-session3-layout-observation.json",
+    "artifacts/xnu-macho-tools/macho-session3/report.json",
+    "artifacts/xnu-macho-tools/macho-session3/builder.py",
+    "artifacts/xnu-macho-tools/macho-session3/fixtures/kernel-layout"
+  ],
+  "sha256": {
+    "fixtures/public/xnu-host-tools/macho-session3.json": "ec155bf436bc506e937795324d1af3bfccf2409a210aa2913bb84ba11cab04d1",
+    "fixtures/public/xnu-host-tools/macho-session3-layout-observation.json": "02efc903429ad9f8607f788bba721cce782dfd15587b028ddfb3c8e46582ad96",
+    "artifacts/xnu-macho-tools/macho-session3/report.json": "ec155bf436bc506e937795324d1af3bfccf2409a210aa2913bb84ba11cab04d1",
+    "artifacts/xnu-macho-tools/macho-session3/builder.py": "212514533ea145a3ff6b00b82812984a789a763ee3ba8f35b788bacf83261deb",
+    "artifacts/xnu-macho-tools/macho-session3/fixtures/kernel-layout": "aaccf37de5b47f68baa2cef559b92b3a928f66b3e3279b7a58a8af3b5f43e9ce"
+  },
+  "limitations": [
+    "Original fail outcome retained; changing the oracle later does not relabel this run",
+    "Source build/partial layout observation is not complete Mach-O tool, text-stub, full kernel or native qualification",
+    "Dependency build pass and exact prefix hashes can support explicitly registered reuse; no implicit restart or old-prefix mutation"
+  ]
+}

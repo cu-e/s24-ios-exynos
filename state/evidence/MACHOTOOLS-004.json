@@ -1,0 +1,49 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T03:07:15+00:00",
+  "summary": "Real pinned ld64/cctools with verified source-built TAPI/runtime dependencies pass static+PIE/no-PAGEZERO/high-base/non-overlap/protection checks, actual symbol/archive/export operations, owned arm64 text-stub linking and missing-symbol rejection. Full XNU not compiled.",
+  "commit": "dd1b7ab540aa0f332b92e7af20dfb05b34e595a5",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/build/xnu_macho_tools.py",
+        "--run",
+        "macho-session4",
+        "--clang-bin",
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin",
+        "--reuse-dependencies",
+        "artifacts/xnu-macho-tools/macho-session3",
+        "--jobs",
+        "2"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/xnu-host-tools/macho-session4.json",
+    "artifacts/xnu-macho-tools/macho-session4/report.json",
+    "artifacts/xnu-macho-tools/macho-session4/builder.py",
+    "artifacts/xnu-macho-tools/macho-session4/fixtures/kernel-layout",
+    "artifacts/xnu-macho-tools/macho-session4/fixtures/libfixture.a",
+    "artifacts/xnu-macho-tools/macho-session4/fixtures/edited.o",
+    "artifacts/xnu-macho-tools/macho-session4/fixtures/stub-client.dylib"
+  ],
+  "sha256": {
+    "fixtures/public/xnu-host-tools/macho-session4.json": "f7802af5ca285e7f862d91e1a5e86ce4951218bf781784303f83cf2e6cf44070",
+    "artifacts/xnu-macho-tools/macho-session4/report.json": "f7802af5ca285e7f862d91e1a5e86ce4951218bf781784303f83cf2e6cf44070",
+    "artifacts/xnu-macho-tools/macho-session4/builder.py": "960c160d7661ed341113dcc9c7f57b031fee2d8ac9b9cb6218b22542bca75b21",
+    "artifacts/xnu-macho-tools/macho-session4/fixtures/kernel-layout": "f0258f8833d096b5c29672de1746b1da6a99b68bd788d8566ad5635788564abd",
+    "artifacts/xnu-macho-tools/macho-session4/fixtures/libfixture.a": "4f844dc651ea3ae38d37c35abd4655e587c826350111fac8485566da33e49a87",
+    "artifacts/xnu-macho-tools/macho-session4/fixtures/edited.o": "d0ca590f35f4cf4795307a87a612f6b9c57f483031c074ff4892eda93bb2c5db",
+    "artifacts/xnu-macho-tools/macho-session4/fixtures/stub-client.dylib": "bffe7a8b6a75b3790b6cc9d8c3a1953f9f3bbb56363385e783f1ef04b0dbab3e"
+  },
+  "limitations": [
+    "Owned host fixture only; no actual selected SDK, full XNU compile/link/export matrix, kernel boot or physical S24 operation",
+    "LTO/XAR disabled consistently with BUILD_LTO0; bitcode packaging, all cctools options and every text-stub format remain unqualified",
+    "MACHOTOOLS-003 fail remains immutable; generated LINKEDIT tail contract is source-bound and includes the actual general pagezero_size0 flag",
+    "C/C++ atomic/runtime coverage comes from prior real003 component tests with exact verified immutable prefix reuse, not a relabeled overall003 pass"
+  ]
+}

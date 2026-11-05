@@ -1,11 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T02:42:33+00:00",
-  "ledger_updated_at": "2026-11-05T02:41:56+00:00",
-  "registry_sha256": "44236ab34d4fb7be54f5d3e964efc0bd4bfe77e07ed1522defdb84b57de785e6",
+  "generated_at": "2026-11-05T03:08:54+00:00",
+  "ledger_updated_at": "2026-11-05T03:08:54+00:00",
+  "registry_sha256": "64efe249f05fc333d23e31502c21d94d9fa28a19dcd822c2128bc39715bb7070",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
+      "KRN-003",
       "ESIM-004",
       "CELL-009",
       "VM-002",
@@ -16,15 +17,12 @@
       "DRV-001",
       "VM-001"
     ],
-    "in_progress": [
-      "KRN-002"
-    ],
+    "in_progress": [],
     "blocked": [
       "KRN-001",
       "NAT-001"
     ],
     "waiting": [
-      "KRN-003",
       "GPU-007",
       "GPU-009",
       "AUD-001",
@@ -70,6 +68,7 @@
     ],
     "done": [
       "RES-008",
+      "KRN-002",
       "PLN-001",
       "SRC-001",
       "INT-001",
@@ -155,7 +154,7 @@
       "card_path": "planning/tasks/RES-008.md"
     },
     {
-      "status": "in_progress",
+      "status": "done",
       "owner": "codex-xnu-host-tools-20261105-j",
       "scope": "host",
       "evidence_kind": "host-test",
@@ -165,7 +164,10 @@
         "apple-xnu",
         "xnu-mig",
         "xnu-unifdef",
-        "xnu-tcsh"
+        "xnu-tcsh",
+        "xnu-cctools",
+        "xnu-tapi",
+        "xnu-host-dispatch"
       ],
       "depends_on": [
         "RES-008"
@@ -179,7 +181,12 @@
         "research/notes/KRN-002-host-tools.md",
         "docs/procedures/xnu-host-tools.md",
         "fixtures/public/xnu-host-tools",
-        "patches/build-tools"
+        "patches/build-tools",
+        "tools/build/xnu_macho_tools.py",
+        "tests/test_xnu_macho_tools.py",
+        "docs/implementation.md",
+        "state/capabilities.json",
+        "CAPABILITIES.md"
       ],
       "acceptance": [
         "Pin and review actual host-generator/cctools/TAPI dependency sources and licenses; do not invoke rolling SDK installers",
@@ -193,16 +200,18 @@
         "Publish actual usable tool prefix and remaining gaps for KRN-003/KRN-001"
       ],
       "started_at": "2026-11-05T02:33:14+00:00",
-      "last_heartbeat": "2026-11-05T02:41:56+00:00",
-      "updated_at": "2026-11-05T02:41:56+00:00",
+      "last_heartbeat": "2026-11-05T03:08:53+00:00",
+      "updated_at": "2026-11-05T03:08:54+00:00",
       "branch": "main",
-      "progress_note": "Three pinned host generators genuinely built and tested in a private prefix; simple LLVM Mach-O operations pass, but actual kernel flag subset fails because static/image_base/segment_order are unimplemented despite linker exit0",
-      "next_step": "Pin/review/build compatible cctools ld64/TAPI and qualify real static layout/symbol/tool operations; keep KRN-002 in progress",
+      "progress_note": "Pinned generators and real ld64/TAPI/host runtime now build and pass actual generation, atomic/runtime, static Mach-O, archive/export and owned text-stub fixtures;119 host tests pass, qualified prefixes/hash manifest published",
+      "next_step": "KRN-003 consumes exact host inputs for explicit SDK/DriverKit and real E1S dependency archives; KRN-001 retains full kernel/export acceptance",
       "handoff": "research/notes/KRN-002-host-tools.md",
-      "column": "in_progress",
+      "evidence": "state/evidence/KRN-002.json",
+      "evidence_sha256": "42f2e60d88e9744c807d8aa02578af7ceade628d67e5be72ea2cf3bd7195090d",
+      "finished_at": "2026-11-05T03:08:54+00:00",
+      "column": "done",
       "reasons": [],
-      "card_path": "planning/tasks/KRN-002.md",
-      "report_health": "recent"
+      "card_path": "planning/tasks/KRN-002.md"
     },
     {
       "status": "pending",
@@ -239,10 +248,8 @@
         "Retain small attributed patches for compiler and E1S profile selection",
         "Produce verified dependency input artifacts for the original full-kernel task or record precise missing external inputs"
       ],
-      "column": "waiting",
-      "reasons": [
-        "Dependencies: KRN-002"
-      ],
+      "column": "ready",
+      "reasons": [],
       "card_path": "planning/tasks/KRN-003.md"
     },
     {
@@ -2256,7 +2263,7 @@
       "column": "gated",
       "reasons": [
         "Scope not authorized: android-app",
-        "Paths reserved by: NAT-001, KRN-002"
+        "Paths reserved by: NAT-001"
       ],
       "priority": 50,
       "card_path": "planning/tasks/GPU-003.md"
@@ -2340,8 +2347,7 @@
       "column": "gated",
       "reasons": [
         "Scope not authorized: android-app",
-        "Dependencies: GPU-003",
-        "Paths reserved by: KRN-002"
+        "Dependencies: GPU-003"
       ],
       "priority": 50,
       "card_path": "planning/tasks/GPU-005.md"
@@ -2415,7 +2421,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Paths reserved by: KRN-001, KRN-002"
+        "Paths reserved by: KRN-001"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-002.md"
@@ -2499,7 +2505,7 @@
       "column": "waiting",
       "reasons": [
         "Dependencies: NAT-001",
-        "Paths reserved by: NAT-001, KRN-001, KRN-002"
+        "Paths reserved by: NAT-001, KRN-001"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-002.md"
@@ -2543,7 +2549,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-002, NAT-004, KRN-001",
-        "Paths reserved by: NAT-001, KRN-001, KRN-002"
+        "Paths reserved by: NAT-001, KRN-001"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -2581,8 +2587,7 @@
       "column": "gated",
       "reasons": [
         "Scope not authorized: native",
-        "Dependencies: NAT-003, DRV-001, DRV-002",
-        "Paths reserved by: KRN-002"
+        "Dependencies: NAT-003, DRV-001, DRV-002"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -3397,19 +3402,6 @@
     }
   ],
   "agents": {
-    "codex-xnu-host-tools-20261105-j": [
-      {
-        "id": "KRN-002",
-        "status": "in_progress",
-        "last_heartbeat": "2026-11-05T02:41:56+00:00",
-        "report_health": "recent",
-        "progress_note": "Three pinned host generators genuinely built and tested in a private prefix; simple LLVM Mach-O operations pass, but actual kernel flag subset fails because static/image_base/segment_order are unimplemented despite linker exit0",
-        "next_step": "Pin/review/build compatible cctools ld64/TAPI and qualify real static layout/symbol/tool operations; keep KRN-002 in progress",
-        "handoff": "research/notes/KRN-002-host-tools.md",
-        "branch": "main",
-        "worktree": null
-      }
-    ],
     "codex-implementation-20261105": [
       {
         "id": "KRN-001",
@@ -3436,203 +3428,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-05T02:25:35+00:00",
-      "action": "task.claim:RES-008",
-      "owner": "codex-xnu-inputs-20261105-i",
-      "tasks": [
-        {
-          "id": "RES-008",
-          "status": "in_progress",
-          "owner": "codex-xnu-inputs-20261105-i",
-          "priority": 95,
-          "last_heartbeat": "2026-11-05T02:25:35+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T02:27:23+00:00",
-      "action": "task.refine:RES-008-readonly-input-checker-regressions",
-      "owner": "codex-xnu-inputs-20261105-i",
-      "tasks": [
-        {
-          "id": "RES-008",
-          "status": "in_progress",
-          "owner": "codex-xnu-inputs-20261105-i",
-          "priority": 95,
-          "last_heartbeat": "2026-11-05T02:25:35+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T02:29:58+00:00",
-      "action": "task.update:RES-008",
-      "owner": "codex-xnu-inputs-20261105-i",
-      "tasks": [
-        {
-          "id": "RES-008",
-          "status": "in_progress",
-          "owner": "codex-xnu-inputs-20261105-i",
-          "priority": 95,
-          "progress_note": "Confirmed Theos16.5 directory carries Version16.4 metadata; pinned embedded-era tools separately, identified absent absolute compilers, E1S dependency-board defines, partial iig and export gates",
-          "next_step": "Publish component inventory and concrete source-build/input follow-ups, then run full checks and retain original KRN/NAT claims",
-          "last_heartbeat": "2026-11-05T02:29:58+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T02:31:54+00:00",
-      "action": "task.add:KRN-002",
-      "owner": "codex-xnu-inputs-20261105-i",
-      "tasks": [
-        {
-          "id": "KRN-002",
-          "status": "pending",
-          "owner": null,
-          "priority": 95
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T02:31:55+00:00",
-      "action": "task.add:KRN-003",
-      "owner": "codex-xnu-inputs-20261105-i",
-      "tasks": [
-        {
-          "id": "KRN-003",
-          "status": "pending",
-          "owner": null,
-          "priority": 95
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T02:32:06+00:00",
-      "action": "task.refine:RES-008-exact-embedded-tool-and-metadata-sources",
-      "owner": "codex-xnu-inputs-20261105-i",
-      "tasks": [
-        {
-          "id": "RES-008",
-          "status": "in_progress",
-          "owner": "codex-xnu-inputs-20261105-i",
-          "priority": 95,
-          "progress_note": "Confirmed Theos16.5 directory carries Version16.4 metadata; pinned embedded-era tools separately, identified absent absolute compilers, E1S dependency-board defines, partial iig and export gates",
-          "next_step": "Publish component inventory and concrete source-build/input follow-ups, then run full checks and retain original KRN/NAT claims",
-          "last_heartbeat": "2026-11-05T02:29:58+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T02:32:06+00:00",
-      "action": "task.update:RES-008",
-      "owner": "codex-xnu-inputs-20261105-i",
-      "tasks": [
-        {
-          "id": "RES-008",
-          "status": "in_progress",
-          "owner": "codex-xnu-inputs-20261105-i",
-          "priority": 95,
-          "progress_note": "Read-only component inventory verifies exact embedded tools and corrected E1S source; SDK metadata mismatch explained, actual missing tools/SDK/overlay/DriverKit and unresolved source gates retained; five targeted regressions pass",
-          "next_step": "Run full checks, record source-review evidence and complete this audit; KRN-002/003 carry actual tool/dependency builds",
-          "last_heartbeat": "2026-11-05T02:32:06+00:00",
-          "branch": "main",
-          "handoff": "research/notes/RES-008-xnu-build-inputs.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T02:32:54+00:00",
-      "action": "task.done:RES-008",
-      "owner": "codex-xnu-inputs-20261105-i",
-      "tasks": [
-        {
-          "id": "RES-008",
-          "status": "done",
-          "owner": "codex-xnu-inputs-20261105-i",
-          "priority": 95,
-          "progress_note": "Read-only component inventory verifies exact embedded tools and corrected E1S source; SDK metadata mismatch explained, actual missing tools/SDK/overlay/DriverKit and unresolved source gates retained; five targeted regressions pass",
-          "next_step": "Run full checks, record source-review evidence and complete this audit; KRN-002/003 carry actual tool/dependency builds",
-          "last_heartbeat": "2026-11-05T02:32:06+00:00",
-          "branch": "main",
-          "handoff": "research/notes/RES-008-xnu-build-inputs.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T02:33:14+00:00",
-      "action": "task.claim:KRN-002",
-      "owner": "codex-xnu-host-tools-20261105-j",
-      "tasks": [
-        {
-          "id": "KRN-002",
-          "status": "in_progress",
-          "owner": "codex-xnu-host-tools-20261105-j",
-          "priority": 95,
-          "last_heartbeat": "2026-11-05T02:33:14+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T02:34:23+00:00",
-      "action": "task.update:KRN-002",
-      "owner": "codex-xnu-host-tools-20261105-j",
-      "tasks": [
-        {
-          "id": "KRN-002",
-          "status": "in_progress",
-          "owner": "codex-xnu-host-tools-20261105-j",
-          "priority": 95,
-          "progress_note": "Source-only host tooling investigation started; installed NDK28 LLVM has candidate Mach-O utilities, no Darwin link or generator coverage inferred yet",
-          "next_step": "Run preregistered LLVM capability fixture and inspect exact MIG/unifdef/tcsh source build definitions",
-          "last_heartbeat": "2026-11-05T02:34:23+00:00",
-          "branch": "main",
-          "handoff": "research/notes/KRN-002-host-tools.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T02:34:23+00:00",
-      "action": "experiment.plan:LLVMTOOLS-001",
-      "owner": "codex-xnu-host-tools-20261105-j"
-    },
-    {
-      "at": "2026-11-05T02:35:02+00:00",
-      "action": "experiment.record:LLVMTOOLS-001",
-      "owner": "codex-xnu-host-tools-20261105-j"
-    },
-    {
-      "at": "2026-11-05T02:36:50+00:00",
-      "action": "task.refine:KRN-002-owned-MIG-failure-propagation-patch",
-      "owner": "codex-xnu-host-tools-20261105-j",
-      "tasks": [
-        {
-          "id": "KRN-002",
-          "status": "in_progress",
-          "owner": "codex-xnu-host-tools-20261105-j",
-          "priority": 95,
-          "progress_note": "Source-only host tooling investigation started; installed NDK28 LLVM has candidate Mach-O utilities, no Darwin link or generator coverage inferred yet",
-          "next_step": "Run preregistered LLVM capability fixture and inspect exact MIG/unifdef/tcsh source build definitions",
-          "last_heartbeat": "2026-11-05T02:34:23+00:00",
-          "branch": "main",
-          "handoff": "research/notes/KRN-002-host-tools.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T02:38:19+00:00",
-      "action": "experiment.plan:HOSTGEN-001",
-      "owner": "codex-xnu-host-tools-20261105-j"
-    },
-    {
-      "at": "2026-11-05T02:39:31+00:00",
-      "action": "experiment.record:HOSTGEN-001",
-      "owner": "codex-xnu-host-tools-20261105-j"
-    },
     {
       "at": "2026-11-05T02:39:32+00:00",
       "action": "experiment.plan:HOSTGEN-002",
@@ -3670,14 +3465,180 @@
           "handoff": "research/notes/KRN-002-host-tools.md"
         }
       ]
+    },
+    {
+      "at": "2026-11-05T02:43:45+00:00",
+      "action": "task.refine:KRN-002-real-Mach-O-tool-source-build",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Three pinned host generators genuinely built and tested in a private prefix; simple LLVM Mach-O operations pass, but actual kernel flag subset fails because static/image_base/segment_order are unimplemented despite linker exit0",
+          "next_step": "Pin/review/build compatible cctools ld64/TAPI and qualify real static layout/symbol/tool operations; keep KRN-002 in progress",
+          "last_heartbeat": "2026-11-05T02:41:56+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:45:08+00:00",
+      "action": "task.refine:KRN-002-pinned-cctools-TAPI-host-runtime-sources",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Three pinned host generators genuinely built and tested in a private prefix; simple LLVM Mach-O operations pass, but actual kernel flag subset fails because static/image_base/segment_order are unimplemented despite linker exit0",
+          "next_step": "Pin/review/build compatible cctools ld64/TAPI and qualify real static layout/symbol/tool operations; keep KRN-002 in progress",
+          "last_heartbeat": "2026-11-05T02:41:56+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:50:53+00:00",
+      "action": "experiment.plan:MACHOTOOLS-001",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:51:29+00:00",
+      "action": "task.update:KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Pinned real ld64/TAPI/Linux host runtime sources; registered isolated source build and byte-level static Mach-O plus symbol/text-stub acceptance, no SDK or device scope",
+          "next_step": "Observe MACHOTOOLS-001, preserve exact outcome, resolve actual source-build failures and qualify real output semantics",
+          "last_heartbeat": "2026-11-05T02:51:29+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:53:04+00:00",
+      "action": "experiment.record:MACHOTOOLS-001",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:53:04+00:00",
+      "action": "experiment.plan:MACHOTOOLS-002",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:56:11+00:00",
+      "action": "experiment.record:MACHOTOOLS-002",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:56:11+00:00",
+      "action": "experiment.plan:MACHOTOOLS-003",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:57:42+00:00",
+      "action": "task.update:KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Two real runtime source-build failures retained; pinned Clang C11 header profile now passes actual C/C++ atomic interoperability and host dispatch once/parallel callbacks. MACHOTOOLS-003 currently builds TAPI on the owned live process.",
+          "next_step": "Finish the exact running TAPI/cctools build, verify actual static Mach-O semantics and symbol/text-stub operations; no kernel/phone inference",
+          "last_heartbeat": "2026-11-05T02:57:42+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:04:41+00:00",
+      "action": "experiment.plan:MACHOTOOLS-004",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T03:05:09+00:00",
+      "action": "experiment.record:MACHOTOOLS-003",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T03:07:14+00:00",
+      "action": "task.refine:KRN-002-publish-qualified-build-inputs",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Two real runtime source-build failures retained; pinned Clang C11 header profile now passes actual C/C++ atomic interoperability and host dispatch once/parallel callbacks. MACHOTOOLS-003 currently builds TAPI on the owned live process.",
+          "next_step": "Finish the exact running TAPI/cctools build, verify actual static Mach-O semantics and symbol/text-stub operations; no kernel/phone inference",
+          "last_heartbeat": "2026-11-05T02:57:42+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:07:15+00:00",
+      "action": "experiment.record:MACHOTOOLS-004",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T03:08:53+00:00",
+      "action": "task.update:KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Pinned generators and real ld64/TAPI/host runtime now build and pass actual generation, atomic/runtime, static Mach-O, archive/export and owned text-stub fixtures;119 host tests pass, qualified prefixes/hash manifest published",
+          "next_step": "KRN-003 consumes exact host inputs for explicit SDK/DriverKit and real E1S dependency archives; KRN-001 retains full kernel/export acceptance",
+          "last_heartbeat": "2026-11-05T03:08:53+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:08:54+00:00",
+      "action": "task.done:KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "done",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Pinned generators and real ld64/TAPI/host runtime now build and pass actual generation, atomic/runtime, static Mach-O, archive/export and owned text-stub fixtures;119 host tests pass, qualified prefixes/hash manifest published",
+          "next_step": "KRN-003 consumes exact host inputs for explicit SDK/DriverKit and real E1S dependency archives; KRN-001 retains full kernel/export acceptance",
+          "last_heartbeat": "2026-11-05T03:08:53+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "1e34e6416a9e3e12f3e992460f88f46fc69d0af808c3b0fe7b71349eb9cbfc92",
-    "BOARD.md": "181ceec51b692cfb3a69e11c104be33df74b6fc523bb0b9ead74f6feb470bb8a",
+    "STATUS.md": "c6ea376bcab5fd784b2547c56dfcdb892ada094787f4164e04886662c23f1a13",
+    "BOARD.md": "4eaabe3f2bc20374bc63edc37540f5dd7ac18f354c1bc681509e9f9bb4eca01c",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
-    "planning/tasks/KRN-002.md": "b938e703dc282682cd90947765520e8dc49ebe218de235f71ec8816ab8d919a9",
-    "planning/tasks/KRN-003.md": "4e46374fe8abf04cbf675698986ebc4184560b673f16428c2e020b149e54ffd9",
+    "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
+    "planning/tasks/KRN-003.md": "d505ee604a5b76faf68be1bb96befe1324e56f46d8acacd798105fe5cce8a2b6",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
     "planning/tasks/INT-001.md": "9d68fa75fae4c21f31f5ea4734c3f592ed0b41c6ed897d7b045a892c63549760",
@@ -3725,15 +3686,15 @@
     "planning/tasks/TST-001.md": "3142333fb7f8007775cb83ea67cb783be49b72664aaf32849d2449a19b36585b",
     "planning/tasks/GPU-001.md": "54d110d5d5bd67afb776017c7220e3e6ca7a1ffcad9289a3af35f2a7b5a992fa",
     "planning/tasks/GPU-002.md": "ed6a2e320b8b805c8d6ec97f1537439282c02f999c4a7542c95e2e31e7b76eca",
-    "planning/tasks/GPU-003.md": "7fc4f402306b7bc9c859d11db6ac66c35f6d5ddc529883e81065ab025b086ac0",
+    "planning/tasks/GPU-003.md": "5ac7cf14b7416e233ab949c38ab82df99fc6ec912e0df09f373c33e7765de2d0",
     "planning/tasks/GPU-004.md": "4f7b914361a5ff47439410c701bd907e3a3020383d4b33c91ce59b5fbdab2579",
-    "planning/tasks/GPU-005.md": "d10060606eecccc1a9b6f8080acb228e502706c375664961c15b67672d025d6d",
+    "planning/tasks/GPU-005.md": "181529961c422d48a66b2735db0db7d5634029395209e2fad9ef0db9be0adfea",
     "planning/tasks/DRV-001.md": "0e15c9a93f74cbd15da5e1507551c8599a25ac14bf857b1fc3cf62a672459ade",
-    "planning/tasks/DRV-002.md": "fbfcc9309e9635092efe668540290f4c1581a3d09ec9cea738f6321d0a71c417",
+    "planning/tasks/DRV-002.md": "4703fbdca6bded8e74343c2594cd79b972f866e3c97886d2da04230f8c672d4b",
     "planning/tasks/NAT-001.md": "555b180dd2cfda5c6a7e4623041660bfd01b1c074d7fd82a9be75e83b4af7bcf",
-    "planning/tasks/NAT-002.md": "02de9cc2489cd9bcb082040cff0a7764805ea251554e2851e093d163632d9985",
-    "planning/tasks/NAT-003.md": "9e2cb1b0947aa0545f6d323be2bb29078971fdd3ce3e084076c2cb62bb0d677c",
-    "planning/tasks/DRV-003.md": "da500aa4f722d3f2a1de0357d335ac0322bc039a6a9ab17488b5d1839ef1498f",
+    "planning/tasks/NAT-002.md": "f34fe5715fa2ad4191c245a616a5085603880a4e3cde470ecf07a88b0dafa607",
+    "planning/tasks/NAT-003.md": "2f832c66883cfbcb8a2b00c747837a6f441137e26bc61a42f872a413009f162c",
+    "planning/tasks/DRV-003.md": "9f4b0c2d613ce1afaa691fc3bc5618c13c8993ce197974af081e885ea0f113f4",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "1bdf1cd15a3f5b52db67c8865eede9f5039648dafb2a7c5c3f3e63143846ab29",

@@ -1,0 +1,25 @@
+{
+  "kind": "source-review",
+  "recorded_at": "2026-11-05T03:05:09+00:00",
+  "source_sha256": {
+    "references/xnu-cctools/cctools/ld64/src/ld/ld.cpp": "ca76184b080c8a340a254273777fb3acfbed1578b54f2724496d8046c7bc01e5",
+    "references/xnu-cctools/cctools/ld64/src/ld/OutputFile.cpp": "564fe14976f79bd86c3133c82e704606ea8e593cdb206bbff9832bfa6add7a41",
+    "references/apple-xnu/osfmk/arm64/arm_vm_init.c": "3aef6df1e86fea3061ef4b5b83053502e2c50bf2e636d6949c4d55a58181e3f5",
+    "artifacts/xnu-prepare/corrected-touch-xnu-session1/xnu/makedefs/MakeInc.def": "fd86f1eb9f171b68331ebbb156ed3dba01e5593c3148262fca0c5a3b8415b490"
+  },
+  "source_pins": {
+    "xnu-cctools": "904de2a71d4da6a9b30d2efaf912a10ddc7d9ddb",
+    "apple-xnu": "c54f35ca767986246321eb901baf8f5ff7923f6a",
+    "s24-port": "c8860decc62c6d6180e609036d027a2997972420"
+  },
+  "finding": "Input content segments honor custom ordering; ld64 appends generated LINKEDIT afterwards. Actual XNU source documents LINKEDIT after DATA, uses named segment lookup, and general linker flags set pagezero_size0. No requirement for generated LINKEDIT at literal position in segment_order was established.",
+  "fixture_contract": [
+    "Static ARM64 MH_EXECUTE with PIE and no dynamic linker flags/commands",
+    "No PAGEZERO; TEXT file offset0 at actual selected high base",
+    "Input TEXT/DATA_CONST/TEXT_EXEC/DATA order, generated LINKEDIT tail, monotonic non-overlap and correct protections"
+  ],
+  "limits": [
+    "Not a full XNU build, all segment variants, selected SDK ABI or hardware execution",
+    "Original MACHOTOOLS-003 assertion failure remains unchanged"
+  ]
+}

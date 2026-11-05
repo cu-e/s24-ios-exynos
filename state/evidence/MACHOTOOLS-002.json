@@ -1,0 +1,42 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "recorded_at": "2026-11-05T02:56:10+00:00",
+  "summary": "Pre-including stdatomic removes the first linkage error but actual libdispatch C++ compilation still fails: hosted C++ std::atomic functions do not accept the source C11 _Atomic objects. Header-order correction alone is insufficient; no runtime qualified.",
+  "commit": "dd1b7ab540aa0f332b92e7af20dfb05b34e595a5",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/build/xnu_macho_tools.py",
+        "--run",
+        "macho-session2",
+        "--clang-bin",
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin",
+        "--jobs",
+        "2"
+      ],
+      "exit_code": 1
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/xnu-host-tools/macho-session2.json",
+    "artifacts/xnu-macho-tools/macho-session2/report.json",
+    "artifacts/xnu-macho-tools/macho-session2/builder.py",
+    "artifacts/xnu-macho-tools/macho-session2/logs/05.stdout.txt",
+    "patches/build-tools/0002-libdispatch-atomic-header-linkage.patch"
+  ],
+  "sha256": {
+    "fixtures/public/xnu-host-tools/macho-session2.json": "fbbaed345e51ca2654df87a595f2c9c24b656a9a3211cdf13b968055eff661ae",
+    "artifacts/xnu-macho-tools/macho-session2/report.json": "fbbaed345e51ca2654df87a595f2c9c24b656a9a3211cdf13b968055eff661ae",
+    "artifacts/xnu-macho-tools/macho-session2/builder.py": "921e19721300c802a25c8ad5697001b95d17c96dd54ff6bc23ad3ae2a5cf93a1",
+    "artifacts/xnu-macho-tools/macho-session2/logs/05.stdout.txt": "8f9004e6f204fe3960aa41640c211cd0cd717e13295ef93c1cbbc963d32d6af2",
+    "patches/build-tools/0002-libdispatch-atomic-header-linkage.patch": "2c0f253d99e9bd1d5cae0de5ee0e2153dd7868349b828b84fbd1f0c4fe70fe99"
+  },
+  "limitations": [
+    "No runtime, TAPI, ld64, full kernel or hardware pass",
+    "A narrower header-order fix is not accepted as complete; actual C/C++ atomic type interoperability must be tested",
+    "No SDK or system compiler/library/package mutation"
+  ]
+}

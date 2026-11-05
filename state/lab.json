@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T02:41:56+00:00",
+  "updated_at": "2026-11-05T03:08:54+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -2874,7 +2874,7 @@
       "finished_at": "2026-11-05T02:32:54+00:00"
     },
     {
-      "status": "in_progress",
+      "status": "done",
       "owner": "codex-xnu-host-tools-20261105-j",
       "scope": "host",
       "evidence_kind": "host-test",
@@ -2884,7 +2884,10 @@
         "apple-xnu",
         "xnu-mig",
         "xnu-unifdef",
-        "xnu-tcsh"
+        "xnu-tcsh",
+        "xnu-cctools",
+        "xnu-tapi",
+        "xnu-host-dispatch"
       ],
       "depends_on": [
         "RES-008"
@@ -2898,7 +2901,12 @@
         "research/notes/KRN-002-host-tools.md",
         "docs/procedures/xnu-host-tools.md",
         "fixtures/public/xnu-host-tools",
-        "patches/build-tools"
+        "patches/build-tools",
+        "tools/build/xnu_macho_tools.py",
+        "tests/test_xnu_macho_tools.py",
+        "docs/implementation.md",
+        "state/capabilities.json",
+        "CAPABILITIES.md"
       ],
       "acceptance": [
         "Pin and review actual host-generator/cctools/TAPI dependency sources and licenses; do not invoke rolling SDK installers",
@@ -2912,12 +2920,15 @@
         "Publish actual usable tool prefix and remaining gaps for KRN-003/KRN-001"
       ],
       "started_at": "2026-11-05T02:33:14+00:00",
-      "last_heartbeat": "2026-11-05T02:41:56+00:00",
-      "updated_at": "2026-11-05T02:41:56+00:00",
+      "last_heartbeat": "2026-11-05T03:08:53+00:00",
+      "updated_at": "2026-11-05T03:08:54+00:00",
       "branch": "main",
-      "progress_note": "Three pinned host generators genuinely built and tested in a private prefix; simple LLVM Mach-O operations pass, but actual kernel flag subset fails because static/image_base/segment_order are unimplemented despite linker exit0",
-      "next_step": "Pin/review/build compatible cctools ld64/TAPI and qualify real static layout/symbol/tool operations; keep KRN-002 in progress",
-      "handoff": "research/notes/KRN-002-host-tools.md"
+      "progress_note": "Pinned generators and real ld64/TAPI/host runtime now build and pass actual generation, atomic/runtime, static Mach-O, archive/export and owned text-stub fixtures;119 host tests pass, qualified prefixes/hash manifest published",
+      "next_step": "KRN-003 consumes exact host inputs for explicit SDK/DriverKit and real E1S dependency archives; KRN-001 retains full kernel/export acceptance",
+      "handoff": "research/notes/KRN-002-host-tools.md",
+      "evidence": "state/evidence/KRN-002.json",
+      "evidence_sha256": "42f2e60d88e9744c807d8aa02578af7ceade628d67e5be72ea2cf3bd7195090d",
+      "finished_at": "2026-11-05T03:08:54+00:00"
     },
     {
       "status": "pending",
@@ -3572,6 +3583,66 @@
       "evidence_sha256": "5a7a79afcc50e8f8a26dc1d960ed70032bae1052c7316d58984c61545fadb06e",
       "outcome": "fail",
       "recorded_at": "2026-11-05T02:41:21+00:00"
+    },
+    {
+      "id": "MACHOTOOLS-001",
+      "task": "KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Pinned real cctools ld64 with source-built host dispatch BlocksRuntime and TAPI can honor static ARM64 XNU layout flags and genuine symbol archive export text-stub operations without SDK or global installation",
+      "procedure": "docs/procedures/xnu-host-tools.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T02:50:53+00:00",
+      "evidence": "state/evidence/MACHOTOOLS-001.json",
+      "evidence_sha256": "4c298c841224477afbc0d29da40eb6eba4b4275e9775faa25bae7493c896c011",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T02:53:04+00:00"
+    },
+    {
+      "id": "MACHOTOOLS-002",
+      "task": "KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "A pinned one-line stdatomic include-order correction allows the same host libdispatch runtime to build with actual NDK19/GCC15 headers, then real ld64/TAPI can be qualified through actual output semantics",
+      "procedure": "docs/procedures/xnu-host-tools.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T02:53:04+00:00",
+      "evidence": "state/evidence/MACHOTOOLS-002.json",
+      "evidence_sha256": "1b1f1fdcc1d97f2accc7429a530def18c46509856680ccd18fb94e657949ee89",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T02:56:11+00:00"
+    },
+    {
+      "id": "MACHOTOOLS-003",
+      "task": "KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Pinned LLVM C11 intrinsic header profile preserves actual mixed C/C++ atomic layout and operations, permits real host dispatch runtime, then ld64 TAPI static layout and symbol fixtures can be qualified without SDK or global compiler mutation",
+      "procedure": "docs/procedures/xnu-host-tools.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T02:56:11+00:00",
+      "evidence": "state/evidence/MACHOTOOLS-003.json",
+      "evidence_sha256": "a98b0b347d4bd6b5b16e7fd56bdef28457932a1e98c5cb178626043b0667dbe1",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T03:05:09+00:00"
+    },
+    {
+      "id": "MACHOTOOLS-004",
+      "task": "KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The real source-built ld64 honors the XNU documented static+PIE high-base input-segment order and generated LINKEDIT tail when general pagezero_size0 is included; actual archive exports and text-stub behavior also pass",
+      "procedure": "docs/procedures/xnu-host-tools.md",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-05T03:04:41+00:00",
+      "evidence": "state/evidence/MACHOTOOLS-004.json",
+      "evidence_sha256": "9b1b5e3c7ee9021f3c24d53dbe5027336551bee2173cc36ee9cc1057cc9cbcd9",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T03:07:15+00:00"
     }
   ],
   "events": [
@@ -6726,6 +6797,172 @@
           "progress_note": "Three pinned host generators genuinely built and tested in a private prefix; simple LLVM Mach-O operations pass, but actual kernel flag subset fails because static/image_base/segment_order are unimplemented despite linker exit0",
           "next_step": "Pin/review/build compatible cctools ld64/TAPI and qualify real static layout/symbol/tool operations; keep KRN-002 in progress",
           "last_heartbeat": "2026-11-05T02:41:56+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:43:45+00:00",
+      "action": "task.refine:KRN-002-real-Mach-O-tool-source-build",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Three pinned host generators genuinely built and tested in a private prefix; simple LLVM Mach-O operations pass, but actual kernel flag subset fails because static/image_base/segment_order are unimplemented despite linker exit0",
+          "next_step": "Pin/review/build compatible cctools ld64/TAPI and qualify real static layout/symbol/tool operations; keep KRN-002 in progress",
+          "last_heartbeat": "2026-11-05T02:41:56+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:45:08+00:00",
+      "action": "task.refine:KRN-002-pinned-cctools-TAPI-host-runtime-sources",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Three pinned host generators genuinely built and tested in a private prefix; simple LLVM Mach-O operations pass, but actual kernel flag subset fails because static/image_base/segment_order are unimplemented despite linker exit0",
+          "next_step": "Pin/review/build compatible cctools ld64/TAPI and qualify real static layout/symbol/tool operations; keep KRN-002 in progress",
+          "last_heartbeat": "2026-11-05T02:41:56+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:50:53+00:00",
+      "action": "experiment.plan:MACHOTOOLS-001",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:51:29+00:00",
+      "action": "task.update:KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Pinned real ld64/TAPI/Linux host runtime sources; registered isolated source build and byte-level static Mach-O plus symbol/text-stub acceptance, no SDK or device scope",
+          "next_step": "Observe MACHOTOOLS-001, preserve exact outcome, resolve actual source-build failures and qualify real output semantics",
+          "last_heartbeat": "2026-11-05T02:51:29+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T02:53:04+00:00",
+      "action": "experiment.record:MACHOTOOLS-001",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:53:04+00:00",
+      "action": "experiment.plan:MACHOTOOLS-002",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:56:11+00:00",
+      "action": "experiment.record:MACHOTOOLS-002",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:56:11+00:00",
+      "action": "experiment.plan:MACHOTOOLS-003",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T02:57:42+00:00",
+      "action": "task.update:KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Two real runtime source-build failures retained; pinned Clang C11 header profile now passes actual C/C++ atomic interoperability and host dispatch once/parallel callbacks. MACHOTOOLS-003 currently builds TAPI on the owned live process.",
+          "next_step": "Finish the exact running TAPI/cctools build, verify actual static Mach-O semantics and symbol/text-stub operations; no kernel/phone inference",
+          "last_heartbeat": "2026-11-05T02:57:42+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:04:41+00:00",
+      "action": "experiment.plan:MACHOTOOLS-004",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T03:05:09+00:00",
+      "action": "experiment.record:MACHOTOOLS-003",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T03:07:14+00:00",
+      "action": "task.refine:KRN-002-publish-qualified-build-inputs",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Two real runtime source-build failures retained; pinned Clang C11 header profile now passes actual C/C++ atomic interoperability and host dispatch once/parallel callbacks. MACHOTOOLS-003 currently builds TAPI on the owned live process.",
+          "next_step": "Finish the exact running TAPI/cctools build, verify actual static Mach-O semantics and symbol/text-stub operations; no kernel/phone inference",
+          "last_heartbeat": "2026-11-05T02:57:42+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:07:15+00:00",
+      "action": "experiment.record:MACHOTOOLS-004",
+      "owner": "codex-xnu-host-tools-20261105-j"
+    },
+    {
+      "at": "2026-11-05T03:08:53+00:00",
+      "action": "task.update:KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "in_progress",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Pinned generators and real ld64/TAPI/host runtime now build and pass actual generation, atomic/runtime, static Mach-O, archive/export and owned text-stub fixtures;119 host tests pass, qualified prefixes/hash manifest published",
+          "next_step": "KRN-003 consumes exact host inputs for explicit SDK/DriverKit and real E1S dependency archives; KRN-001 retains full kernel/export acceptance",
+          "last_heartbeat": "2026-11-05T03:08:53+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:08:54+00:00",
+      "action": "task.done:KRN-002",
+      "owner": "codex-xnu-host-tools-20261105-j",
+      "tasks": [
+        {
+          "id": "KRN-002",
+          "status": "done",
+          "owner": "codex-xnu-host-tools-20261105-j",
+          "priority": 95,
+          "progress_note": "Pinned generators and real ld64/TAPI/host runtime now build and pass actual generation, atomic/runtime, static Mach-O, archive/export and owned text-stub fixtures;119 host tests pass, qualified prefixes/hash manifest published",
+          "next_step": "KRN-003 consumes exact host inputs for explicit SDK/DriverKit and real E1S dependency archives; KRN-001 retains full kernel/export acceptance",
+          "last_heartbeat": "2026-11-05T03:08:53+00:00",
           "branch": "main",
           "handoff": "research/notes/KRN-002-host-tools.md"
         }

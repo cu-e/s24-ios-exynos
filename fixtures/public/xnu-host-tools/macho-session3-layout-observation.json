@@ -1,0 +1,82 @@
+{
+  "actual_macho": {
+    "filetype": 2,
+    "flags": 2097153,
+    "segments": [
+      {
+        "name": "__PAGEZERO",
+        "vmaddr": 0,
+        "vmsize": 4294967296,
+        "fileoff": 0,
+        "filesize": 0,
+        "maxprot": 0,
+        "initprot": 0
+      },
+      {
+        "name": "__TEXT",
+        "vmaddr": 18446744005107531776,
+        "vmsize": 16384,
+        "fileoff": 0,
+        "filesize": 16384,
+        "maxprot": 1,
+        "initprot": 1
+      },
+      {
+        "name": "__DATA_CONST",
+        "vmaddr": 18446744005107548160,
+        "vmsize": 16384,
+        "fileoff": 16384,
+        "filesize": 16384,
+        "maxprot": 1,
+        "initprot": 1
+      },
+      {
+        "name": "__TEXT_EXEC",
+        "vmaddr": 18446744005107564544,
+        "vmsize": 16384,
+        "fileoff": 32768,
+        "filesize": 16384,
+        "maxprot": 5,
+        "initprot": 5
+      },
+      {
+        "name": "__DATA",
+        "vmaddr": 18446744005107580928,
+        "vmsize": 16384,
+        "fileoff": 49152,
+        "filesize": 16384,
+        "maxprot": 3,
+        "initprot": 3
+      },
+      {
+        "name": "__LINKEDIT",
+        "vmaddr": 18446744005107597312,
+        "vmsize": 16384,
+        "fileoff": 65536,
+        "filesize": 128,
+        "maxprot": 1,
+        "initprot": 1
+      }
+    ],
+    "dylibs": [],
+    "commands": [
+      25,
+      25,
+      25,
+      25,
+      25,
+      25,
+      2,
+      11,
+      27,
+      42,
+      5
+    ]
+  },
+  "failure": "Overstrict oracle demanded generated LINKEDIT in the input-segment order; fixture also omitted actual XNU general pagezero_size0 flag",
+  "source_analysis": {
+    "ld64": "OutputFile::write adds LINKEDIT after prior input-section sort; FinalSection::segmentOrder sorts input sections",
+    "xnu": "arm_vm_init.c documents LINKEDIT after DATA and discovers segments by name; MakeInc.def general flags disable PAGEZERO"
+  },
+  "not_established": "This source-derived explanation is not a full XNU link or hardware result"
+}
