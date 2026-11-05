@@ -130,6 +130,12 @@ def source_rules(main, report):
     text_offset, shim_image_size = struct.unpack_from('<QQ', image_header, 8)
     require(text_offset == 0 and shim_image_size >= shim_path.stat().st_size, 'Shim Image extent invalid')
     report['qualified_shim'] = {'path': str(shim_path), **pins['qualified_shim'], 'image_size_including_bss_stack': shim_image_size}
+    qemu_root = main / 'worktrees/vm-004-20261105/artifacts/qemu-host/release-10.2.0'
+    require(digest(qemu_root / 'source-manifest.json') == pins['qemu']['source_manifest_sha256'], 'Qualified QEMU source manifest mismatch')
+    for name, expected in pins['qemu']['files'].items():
+        require(digest(qemu_root / 'source/qemu-10.2.0' / name) == expected['sha256'], 'QEMU load source changed: ' + name)
+        bindings.append({'role': 'qualified_qemu_source', 'path': name, **expected})
+    report['qemu_source'] = pins['qemu']
     source = texts['avf/shim/avfboot.c']
     shim_abi = boot_args_abi(source)
     kernel_abi = boot_args_abi((root / 'pexpert/pexpert/arm64/boot.h').read_text())
@@ -312,6 +318,17 @@ def layout_check(plan, image, package, rules):
             'fdt_read_before_kernel_copy': True}
 
 
+def qemu_plan(plan, package, shim_size):
+    """Pinned virt/arm64 -kernel/-initrd defaults, before execution."""
+    ram_base = number(plan['ram_base']); ram_size = number(plan['ram_size'])
+    require(ram_base == 0x40000000 and ram_size % (1 << 20) == 0, 'Expected generic virt RAM base and whole MiB size')
+    shim = add(ram_base, 2 << 20)
+    initrd = up(max(add(ram_base, min(ram_size // 2, 128 << 20)), add(shim, shim_size)), 4096)
+    dtb = up(add(initrd, package['size']), 2 << 20)
+    require(number(plan['shim_base']) == shim and number(plan['payload_base']) == initrd and number(plan['fdt_base']) == dtb, 'Declared plan differs from pinned QEMU default Image/initrd/FDT placement')
+    return {'shim_base': shim, 'payload_base': initrd, 'fdt_base': dtb, 'origin': 'Pinned QEMU source calculation; runtime FDT size/content unmeasured'}
+
+
 def synthetic_payload():
     """Owned parser-control bytes; never an XNU kernel or reusable boot artifact."""
     va = 0xfffffff007000000
@@ -334,6 +351,7 @@ def controls(out, rules):
     plan = {'ram_base': 0x40000000, 'ram_size': 256 << 20, 'shim_base': 0x40200000, 'shim_image_size': 0x20000,
             'fdt_base': 0x48200000, 'fdt_size': 0x10000, 'payload_base': 0x48000000, 'fdt_bootargs': ''}
     positive = layout_check(plan, image, package, rules)
+    qemu_plan(plan, package, plan['shim_image_size'])
     require(positive['window'] == [0x40000000, 0x4e000000], 'Independent 256 MiB alignment oracle differs')
     require(positive['topOfKernelData'] == 0x4301c000, 'Independent boot_args placement oracle differs')
     results = [{'case': 'owned-synthetic-positive', 'outcome': 'pass', 'layout': positive}]
@@ -353,6 +371,7 @@ def controls(out, rules):
     bad('initial-fdt-shim-overlap', {**plan, 'fdt_base': plan['shim_base']})
     bad('fdt-outside-ram', {**plan, 'fdt_base': 0x50000000})
     bad('unqualified-memory-carveout', {**plan, 'fdt_bootargs': 'scgpu.addr=0x45000000 scgpu.size=0x40000'})
+    bad('payload-memory-carveout', pkg={**package, 'command_line': 'scgpu.addr=0x45000000 scgpu.size=0x40000'})
     bad('bootargs-truncation', {**plan, 'fdt_bootargs': 'a' * 607})
     bad('shim-bss-kernel-overlap', {**plan, 'shim_image_size': 0x3000000})
     broken = copy.deepcopy(image); broken['segments'][0]['va'] -= 0x4000
@@ -372,6 +391,12 @@ def controls(out, rules):
     relocation = layout_check({**plan, 'payload_base': 0x43000000}, image, package, rules)
     require(relocation['payload_relocation'] is not None, 'Required payload relocation not planned')
     results.append({'case': 'overlapping-payload-relocated', 'outcome': 'pass', 'layout': relocation})
+    try:
+        qemu_plan({**plan, 'fdt_base': 0x48400000}, package, plan['shim_image_size'])
+    except ValueError as error:
+        results.append({'case': 'wrong-qemu-fdt-placement', 'outcome': 'expected-rejection', 'reason': str(error)})
+    else:
+        raise ValueError('Wrong QEMU FDT placement accepted')
     return results
 
 
@@ -415,6 +440,7 @@ def main():
             report['layout_sha256'] = digest(args.layout)
             plan = json.loads(args.layout.read_text())
             require(number(plan['shim_image_size']) == report['qualified_shim']['image_size_including_bss_stack'], 'Declared shim size excludes qualified Image/BSS/stack')
+            report['qemu_default_load_plan'] = qemu_plan(plan, pkg, report['qualified_shim']['image_size_including_bss_stack'])
             report['layout'] = layout_check(plan, image, pkg, rules)
             report['layout_preflight'] = 'pass'
         report['source_preflight'] = 'pass'

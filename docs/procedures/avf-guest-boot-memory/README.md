@@ -20,6 +20,12 @@ XNU files are matched both to their frozen SHA256 and the exact
 Scion modifications, rather than claiming those bytes are the public originals.
 The existing source-built AVF Image and build report are hash-bound, including
 its matching C/start/linker source identities. No E1S object/archive is reused.
+The qualified QEMU source manifest and its `hw/arm/virt.c` / `hw/arm/boot.c`
+bytes are also bound, at commit `698104725efad4b29079d857dfdebbd804e34c99`.
+For the generic arm64 virt `-kernel` route, preflight checks the source-derived
+Image placement at RAM+2 MiB, initrd placement at the greater of the Image end
+and RAM+min(RAM/2,128 MiB), and FDT placement after the initrd on a 2 MiB boundary.
+These calculations do not execute QEMU or inspect a runtime FDT.
 
 The selected source is read from the immutable VM-008 `prepare-2/source/xnu`
 tree. The namespace still requires independent VM-008 acceptance before any
