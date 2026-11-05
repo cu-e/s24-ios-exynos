@@ -1,0 +1,92 @@
+--- a/osfmk/arm64/caches_asm.s
++++ b/osfmk/arm64/caches_asm.s
+@@ -212,6 +212,7 @@
+ 	.globl EXT(CleanPoC_Dcache)
+ 	.globl EXT(clean_mmu_dcache)
+ LEXT(CleanPoC_Dcache)
++LEXT(clean_mmu_dcache)
+ #if  defined(APPLE_ARM64_ARCH_FAMILY)
+ 	dsb		sy
+ 	ret
+--- a/osfmk/arm64/start.s
++++ b/osfmk/arm64/start.s
+@@ -222,8 +222,8 @@
+ 	.align 3
+ 	.global EXT(LowResetVectorEnd)
+ LEXT(LowResetVectorEnd)
++#if WITH_CLASSIC_S2R
+ 	.global	EXT(SleepToken)
+-#if WITH_CLASSIC_S2R
+ LEXT(SleepToken)
+ 	.space	(stSize_NUM),0
+ #endif
+--- a/osfmk/arm/model_dep.c
++++ b/osfmk/arm/model_dep.c
+@@ -108,9 +108,9 @@
+ static struct kcdata_descriptor kc_panic_data;
+ 
+ extern char iBoot_version[];
+-#if defined(TARGET_OS_OSX) && defined(__arm64__)
++#if defined(XNU_TARGET_OS_OSX) && defined(__arm64__)
+ extern char iBoot_Stage_2_version[];
+-#endif /* defined(TARGET_OS_OSX) && defined(__arm64__) */
++#endif /* defined(XNU_TARGET_OS_OSX) && defined(__arm64__) */
+ 
+ extern volatile uint32_t        debug_enabled;
+ extern unsigned int         not_in_kdp;
+@@ -466,9 +466,9 @@
+ 	}
+ 
+ 	paniclog_append_noflush("iBoot version: %.128s\n", iBoot_version);
+-#if defined(TARGET_OS_OSX) && defined(__arm64__)
++#if defined(XNU_TARGET_OS_OSX) && defined(__arm64__)
+ 	paniclog_append_noflush("iBoot Stage 2 version: %.128s\n", iBoot_Stage_2_version);
+-#endif /* defined(TARGET_OS_OSX) && defined(__arm64__) */
++#endif /* defined(XNU_TARGET_OS_OSX) && defined(__arm64__) */
+ 
+ 	paniclog_append_noflush("secure boot?: %s\n", debug_enabled ? "NO": "YES");
+ 	paniclog_append_noflush("roots installed: %lld\n", roots_installed);
+--- a/pexpert/arm/pe_init.c
++++ b/pexpert/arm/pe_init.c
+@@ -37,9 +37,9 @@
+ #define FW_VERS_LEN 128
+ 
+ char iBoot_version[FW_VERS_LEN];
+-#if defined(TARGET_OS_OSX) && defined(__arm64__)
++#if defined(XNU_TARGET_OS_OSX) && defined(__arm64__)
+ char iBoot_Stage_2_version[FW_VERS_LEN];
+-#endif /* defined(TARGET_OS_OSX) && defined(__arm64__) */
++#endif /* defined(XNU_TARGET_OS_OSX) && defined(__arm64__) */
+ 
+ /*
+  * This variable is only modified once, when the BSP starts executing. We put it in __DATA_CONST
+@@ -249,9 +249,9 @@
+ 	PE_init_printf(TRUE);
+ 
+ 	printf("iBoot version: %s\n", iBoot_version);
+-#if defined(TARGET_OS_OSX) && defined(__arm64__)
++#if defined(XNU_TARGET_OS_OSX) && defined(__arm64__)
+ 	printf("iBoot Stage 2 version: %s\n", iBoot_Stage_2_version);
+-#endif /* defined(TARGET_OS_OSX) && defined(__arm64__) */
++#endif /* defined(XNU_TARGET_OS_OSX) && defined(__arm64__) */
+ 
+ 	if (kSuccess == SecureDTLookupEntry(0, "/chosen/memory-map", &entry)) {
+ 		boot_progress_element const *bootPict;
+@@ -474,7 +474,7 @@
+ 				bcopy(prop, iBoot_version, size);
+ 				iBoot_version[size - 1] = '\0';
+ 			}
+-#if defined(TARGET_OS_OSX) && defined(__arm64__)
++#if defined(XNU_TARGET_OS_OSX) && defined(__arm64__)
+ 			if (kSuccess == SecureDTGetProperty(entry, "system-firmware-version", (void const **) &prop, &size)) {
+ 				if (size > sizeof(iBoot_Stage_2_version)) {
+ 					size = sizeof(iBoot_Stage_2_version);
+@@ -482,7 +482,7 @@
+ 				bcopy(prop, iBoot_Stage_2_version, size);
+ 				iBoot_Stage_2_version[size - 1] = '\0';
+ 			}
+-#endif /* defined(TARGET_OS_OSX) && defined(__arm64__) */
++#endif /* defined(XNU_TARGET_OS_OSX) && defined(__arm64__) */
+ 			if (kSuccess == SecureDTGetProperty(entry, "unique-chip-id",
+ 			    (void const **) &prop, &size)) {
+ 				if (size > sizeof(gPlatformECID)) {
