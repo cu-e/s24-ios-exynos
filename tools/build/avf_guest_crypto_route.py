@@ -41,6 +41,11 @@ def clean(text):
     return re.sub(r'/\*.*?\*/|//[^\n]*', lambda m: '\n' * m[0].count('\n'), text, flags=re.S)
 
 
+def source_text(path):
+    # ASCII C tokens are identical; Latin-1 preserves every non-UTF8 source byte.
+    return path.read_text(encoding='latin-1')
+
+
 def parse(header, provider):
     body = clean(header).split('typedef struct crypto_functions {', 1)[1].split('}', 1)[0]
     fields = re.findall(r'\b(\w+)\s*;', body)
@@ -85,7 +90,7 @@ def audit(main, pins, output):
     sources = {}
     for name, expected in pins['sources'].items():
         bind(source_root / name, expected)
-        sources[name] = (source_root / name).read_text()
+        sources[name] = source_text(source_root / name)
     separate = {name: bind(main / name, expected) for name, expected in pins['separate_route_inputs'].items()}
     provider_name = 'osfmk/minicrypto/mc_provider.c'
     header_name = 'libkern/libkern/crypto/register_crypto.h'
@@ -104,7 +109,7 @@ def audit(main, pins, output):
                              'sha256': row['bound_source_sha256'], 'configuration': str(configuration.relative_to(main)),
                              'configuration_sha256': row['configuration_sha256'],
                              'compile_argv_template': row['next_owned_compile_argv_template'],
-                             'direct_include_text': re.findall(r'^\s*#\s*include\s+([^\n]+)', path.read_text(), re.M),
+                             'direct_include_text': re.findall(r'^\s*#\s*include\s+([^\n]+)', source_text(path), re.M),
                              'status': 'source_recipe_bound_not_compiled_by_VM031'})
     required = {'osfmk/mc_provider.o', 'osfmk/mc_aes.o', 'osfmk/mc_ce.o', 'osfmk/mc_digests.o',
                 'osfmk/mc_keywrap.o', 'osfmk/monocypher.o', 'osfmk/bearssl_aes_ct64.o',
@@ -115,7 +120,7 @@ def audit(main, pins, output):
     for path in sorted(source_root.rglob('*')):
         if path.suffix not in ('.c', '.h', '.cpp') or not path.is_file():
             continue
-        text = clean(path.read_text(errors='strict'))
+        text = clean(source_text(path))
         name = str(path.relative_to(source_root))
         scanned.append({'source': name, 'sha256': sha(path), 'selected_objects': by_source.get(str(path), [])})
         for match in re.finditer(r'\b(register_crypto_functions|register_and_init_prng)\s*\(', text):
@@ -181,7 +186,7 @@ def audit(main, pins, output):
             'callback_count': len(callbacks), 'static_assignments': len(assignments), 'deferred_assignments': len(deferred),
             'unassigned_count': sum(c['source_state'].startswith('unassigned') for c in callbacks),
             'callbacks': callbacks, 'scanned_source_files': scanned,
-            'scan_semantics': 'Comment-stripped direct g_crypto_funcs->field text; no preprocessor, call graph or runtime reachability proof. Selected object witnesses are source-recipe membership, never emitted symbols. Header/unselected references remain separately visible.',
+            'scan_semantics': 'Lossless Latin-1 byte-to-character decoding for ASCII C tokens, then comment-stripped direct g_crypto_funcs->field text; no preprocessor, call graph or runtime reachability proof. Selected object witnesses are source-recipe membership, never emitted symbols. Header/unselected references remain separately visible.',
             'startup_witnesses': startup_witnesses, 'separate_native_component_inputs': separate,
             'registration_and_prng_direct_text_witnesses': registration_text,
             'reported_separate_task_states_not_reexecution': task_states,
