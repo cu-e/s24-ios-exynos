@@ -56,3 +56,34 @@ step is independent review and root/kernel-integrator source-stage acceptance.
 Actual compilation additionally waits for
 VM008 and independently accepted VM009 plus explicit root resource admission
 and heavy lease. Keep VM-013 in progress until acceptance is real.
+
+## Accepted shared runner plan
+
+Root resumed the original owner for the next wave after VM008 and VM009 were
+accepted/done. VM013BUILD was registered in MAIN and remains planned for later
+actual root-authorized execution. No build result is recorded prematurely.
+
+The accepted shared runner (SHA256 13213539409bade16162173c7b39709dbb3c7e78426fe1410b3f940ea01e4e47)
+produced a fresh mode=plan in
+`artifacts/avf-object-shards/iokit/shared-plan-1/runner`. Shared run_child/supervisor
+and the root in-process launcher install(120) supplied finite source-only
+admission, aggregate RSS monitoring and owned-child cleanup. No additional
+executor or source checker was authored or invoked.
+
+Plan PASS: exactly 104 selected rows, preserving all 17 genuine generated IIG
+implementations; zero compiler starts. Plan SHA256 is
+`9682a4b1db4a9e289242c1096c99afd3f4f5ac605531c1acc904aa14461d90c8`.
+It retains every input_key, source/config pin, recipe-template digest and expanded
+argv. Input-bindings SHA256 is
+`60f7b4774bcec32ff83093629d5f1fa00ade24ecddbd4c64a2d6e96c8d75221e`.
+The measured whole guard took 99.639 s with 123822080-byte peak total owned RSS,
+three stable >=4 GiB samples and zero surviving owned processes.
+`shared-plan-evidence.json` binds exact plan/runner/guard/source-evidence hashes
+and all 104 selected input keys/template digests. Original source evidence bytes
+remain unchanged.
+
+Actual 104-object compilation, conditional compiler dependencies and historical
+IIG compile uncertainties remain unmeasured. The next step requires explicit
+root heavy group lease and exact approval binding. Then use only the accepted
+shared mode=execute, fresh owned artifacts, existing 600 s in-process guard and
+one serial compiler. No private ABI qualification follows from this plan.
