@@ -113,8 +113,10 @@ arm64 Mach-O. This is compile-only ARM evidence.
 
 All compiler jobs and tests run sequentially with owned-session cleanup,
 20-second command deadlines and a sampled 256 MiB total owned RSS budget. The
-initial passing run peaked at 126.984375 MiB. No heavy build lease is used.
-Final commit-bound measurements and artifact hashes are in `evidence.json`.
+final commit-bound run peaked at 137.1328125 MiB (sampled total owned RSS). No heavy build lease is used.
+The tested implementation is `cbec42fe1921b3571f440666075ab4c69566acbb`.
+Final commit-bound measurements and artifact hashes are in [`evidence.json`](evidence.json);
+the bound artifact index covers 160 retained files including the earlier failures.
 Main common checks and acceptance remain the coordinator's review step.
 
 ## Board provenance and unavailable native inputs
