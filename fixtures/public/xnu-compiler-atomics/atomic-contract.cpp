@@ -1,0 +1,58 @@
+// Owned target-layout and public granule expectations; C++ _Atomic extension.
+typedef unsigned long long Address __attribute__((xnu_usage_semantics("pointer")));
+typedef _Atomic(unsigned long long) AtomicAddress __attribute__((xnu_usage_semantics("pointer")));
+struct PlainPointer { void *pointer; };
+struct PlainData { unsigned long long data; };
+struct Pointer { _Atomic(void *) pointer; };
+struct Data { _Atomic(unsigned long long) data; };
+struct Mixed { _Atomic(void *) pointer; _Atomic(unsigned long long) data; };
+struct ThreeBytes { unsigned char bytes[3]; };
+struct ThreeWords { unsigned int words[3]; };
+struct AtomicThenPointer { _Atomic(ThreeWords) value; void *pointer; };
+struct __attribute__((packed)) PackedPointer { unsigned char marker; _Atomic(void *) pointer; };
+union Either { void *pointer; unsigned long long data; };
+struct Annotated { _Atomic(Address) one; AtomicAddress two; };
+struct DataOverride { _Atomic(Address) pointer __attribute__((xnu_usage_semantics("data"))); };
+struct PointerOverride { _Atomic(unsigned long long) value __attribute__((xnu_usage_semantics("pointer"))); };
+struct AtomicArray { _Atomic(void *) pointers[2]; };
+struct DataArrayOverride { Address words[2] __attribute__((xnu_usage_semantics("data"))); };
+struct NestedDataOverride { Address words[2][2] __attribute__((xnu_usage_semantics("data"))); };
+struct AtomicArrayOverride { _Atomic(Address) words[2] __attribute__((xnu_usage_semantics("data"))); };
+struct PointerArrayOverride { unsigned long long words[2] __attribute__((xnu_usage_semantics("pointer"))); };
+static_assert(sizeof(Pointer)==8 && alignof(Pointer)==8 && sizeof(Data)==8);
+static_assert(sizeof(Mixed)==16 && sizeof(_Atomic(ThreeWords))==16);
+static_assert(sizeof(AtomicThenPointer)==32 && __builtin_offsetof(AtomicThenPointer,pointer)==16);
+static_assert(sizeof(PackedPointer)==9 && __builtin_offsetof(PackedPointer,pointer)==1);
+static_assert(__builtin_xnu_type_summary(Pointer)==2 && __builtin_xnu_type_summary(Data)==4);
+static_assert(__builtin_xnu_type_summary(Mixed)==6);
+static_assert(__builtin_xnu_type_summary(_Atomic(ThreeBytes))==4);
+static_assert(__builtin_xnu_type_summary(_Atomic(ThreeWords))==4);
+static_assert(__builtin_xnu_type_summary(AtomicThenPointer)==7);
+static_assert(__builtin_xnu_type_summary(PackedPointer)==10);
+static_assert(__builtin_xnu_type_summary(_Atomic(Either))==8);
+static_assert(__builtin_xnu_type_summary(Annotated)==2);
+static_assert(__builtin_xnu_type_summary(DataOverride)==4);
+static_assert(__builtin_xnu_type_summary(PointerOverride)==2);
+static_assert(__builtin_xnu_type_summary(AtomicArray)==2);
+static_assert(__builtin_xnu_type_summary(DataArrayOverride)==4);
+static_assert(__builtin_xnu_type_summary(NestedDataOverride)==4);
+static_assert(__builtin_xnu_type_summary(AtomicArrayOverride)==4);
+static_assert(__builtin_xnu_type_summary(PointerArrayOverride)==2);
+static_assert(__builtin_xnu_type_signature(DataArrayOverride)[0]=='2' && __builtin_xnu_type_signature(DataArrayOverride)[1]=='2');
+static_assert(__builtin_xnu_type_signature(PointerArrayOverride)[0]=='1' && __builtin_xnu_type_signature(PointerArrayOverride)[1]=='1');
+static_assert(__builtin_xnu_types_compatible(Pointer,PlainPointer));
+static_assert(__builtin_xnu_types_compatible(Data,PlainData));
+static_assert(!__builtin_xnu_types_compatible(Pointer,PlainData));
+static_assert(__builtin_xnu_type_signature(Mixed)[0]=='1' && __builtin_xnu_type_signature(Mixed)[1]=='2');
+static_assert(__builtin_xnu_type_signature(AtomicThenPointer)[0]=='2' && __builtin_xnu_type_signature(AtomicThenPointer)[1]=='2');
+static_assert(__builtin_xnu_type_signature(AtomicThenPointer)[2]=='1' && __builtin_xnu_type_signature(AtomicThenPointer)[3]=='0');
+static_assert(__builtin_xnu_type_signature(PackedPointer)[0]=='3' && __builtin_xnu_type_signature(PackedPointer)[1]=='1');
+template<class T> struct AtomicMetadata {
+  static constexpr unsigned summary=__builtin_xnu_type_summary(_Atomic(T));
+  static constexpr const char *signature=__builtin_xnu_type_signature(_Atomic(T));
+};
+static_assert(AtomicMetadata<void*>::summary==2 && AtomicMetadata<unsigned long long>::summary==4);
+static_assert(AtomicMetadata<void*>::signature[0]=='1' && AtomicMetadata<unsigned long long>::signature[0]=='2');
+template<class T> auto atomic_symbol(T*) -> decltype((__builtin_xnu_type_summary(_Atomic(T)),0)) { return 41; }
+template int atomic_symbol<void*>(void**);
+unsigned atomic_contract(void) { return __builtin_xnu_type_summary(AtomicThenPointer); }

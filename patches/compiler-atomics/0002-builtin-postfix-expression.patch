@@ -1,0 +1,14 @@
+--- a/src/clang/lib/Parse/ParseExpr.cpp
++++ b/src/clang/lib/Parse/ParseExpr.cpp
+@@ -1771,9 +1771,10 @@
+     }
+     SourceLocation EndLoc = Tok.getLocation();
+     if (T.consumeClose()) return ExprError();
+-    return Actions.ActOnUnaryExprOrTypeTraitExpr(
++    Res = Actions.ActOnUnaryExprOrTypeTraitExpr(
+         Loc, Signature ? UETT_XnuTypeSignature : UETT_XnuTypeSummary,
+         true, Ty.get().getAsOpaquePtr(), SourceRange(Loc, EndLoc));
++    break;
+   }
+ 
+   case tok::kw___builtin_ptrauth_type_discriminator:

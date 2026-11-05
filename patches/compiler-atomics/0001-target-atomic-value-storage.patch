@@ -1,0 +1,39 @@
+--- a/src/clang/include/clang/AST/XnuTypeMetadata.h
++++ b/src/clang/include/clang/AST/XnuTypeMetadata.h
+@@ -49,18 +49,30 @@
+         T->isFunctionType() || T->isVoidType()) return false;
+     if (T->isIncompleteArrayType()) return true; // A flexible tail has no storage.
+     if (T->isIncompleteType()) return false;
++    // Resolve scalar semantics without discarding an explicit field override.
++    if (T->isReferenceType() || T->isMemberPointerType()) return false;
++    if (const auto *TT = dyn_cast<TypedefType>(T.getTypePtr())) {
++      unsigned Applied = Override ? Override : semantics(TT->getDecl());
++      return walk(TT->desugar(), Offset, Applied);
++    }
++    QualType Desugared = T.getSingleStepDesugaredType(C);
++    if (Desugared != T) return walk(Desugared, Offset, Override);
++    if (const auto *AT = dyn_cast<AtomicType>(T.getTypePtr())) {
++      QualType Value = AT->getValueType();
++      // Target atomic storage can have extra alignment/tail padding. The
++      // value begins at offset zero; classify its actual fields, not padding.
++      uint64_t StorageBits = C.getTypeSize(T);
++      uint64_t ValueBits = C.getTypeSize(Value);
++      if (StorageBits < ValueBits || Offset > TotalBits ||
++          StorageBits > TotalBits - Offset) return false;
++      return walk(Value, Offset, Override);
++    }
+     if (Override) {
+       if (!T->isScalarType()) return false; // Public scalar semantics only.
+       return mark(Offset, C.getTypeSize(T), Override);
+     }
+-    if (const auto *TT = dyn_cast<TypedefType>(T.getTypePtr())) {
+-      return walk(TT->desugar(), Offset, semantics(TT->getDecl()));
+-    }
+-    QualType Desugared = T.getSingleStepDesugaredType(C);
+-    if (Desugared != T) return walk(Desugared, Offset);
+     if (T->isPointerType() || T->isBlockPointerType() || T->isObjCObjectPointerType())
+       return mark(Offset, C.getTypeSize(T), 1);
+-    if (T->isReferenceType() || T->isMemberPointerType()) return false;
+     if (T->isArithmeticType() || T->isEnumeralType())
+       return mark(Offset, C.getTypeSize(T), 2);
+     if (const auto *AT = C.getAsConstantArrayType(T)) {

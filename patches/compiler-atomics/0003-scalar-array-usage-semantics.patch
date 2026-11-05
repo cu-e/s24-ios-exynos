@@ -1,0 +1,22 @@
+--- a/src/clang/include/clang/AST/XnuTypeMetadata.h
++++ b/src/clang/include/clang/AST/XnuTypeMetadata.h
+@@ -67,8 +67,8 @@
+           StorageBits > TotalBits - Offset) return false;
+       return walk(Value, Offset, Override);
+     }
+-    if (Override) {
+-      if (!T->isScalarType()) return false; // Public scalar semantics only.
++    if (Override && !T->isArrayType()) {
++      if (!T->isScalarType()) return false; // Scalar semantics, including array elements.
+       return mark(Offset, C.getTypeSize(T), Override);
+     }
+     if (T->isPointerType() || T->isBlockPointerType() || T->isObjCObjectPointerType())
+@@ -80,7 +80,7 @@
+       uint64_t Stride = C.getTypeSize(AT->getElementType());
+       if (Count > 131072 || (Stride && Count > TotalBits / Stride)) return false;
+       for (uint64_t I = 0; I < Count; ++I)
+-        if (!walk(AT->getElementType(), Offset + I * Stride)) return false;
++        if (!walk(AT->getElementType(), Offset + I * Stride, Override)) return false;
+       return true;
+     }
+     if (const auto *RT = T->getAs<RecordType>()) {
