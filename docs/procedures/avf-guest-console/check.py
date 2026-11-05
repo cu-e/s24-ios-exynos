@@ -44,6 +44,7 @@ class ConsoleControls(unittest.TestCase):
 
     def test_conflicting_or_silent_boot_args_rejected(self):
         for value in (console.DEFAULT_ARGS + " serial=0", "debug=0x8 serial=3",
+                      console.DEFAULT_ARGS.replace("-enable_kprintf_spam ", ""),
                       console.DEFAULT_ARGS.replace("serial=3", "serial=67"),
                       console.DEFAULT_ARGS.replace("console_quiet=0", "console_quiet=1")):
             with self.subTest(value=value), self.assertRaises(ValueError):

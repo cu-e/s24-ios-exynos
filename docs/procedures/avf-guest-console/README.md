@@ -31,7 +31,8 @@ The route is:
    `serial_putc_crlf` after `serial_init`. `debug=0x8` supplies `DB_KPRT`, while
    DEVELOPMENT additionally requires `-enable_kprintf_spam` to enable kprintf.
    `arm_init.c` prints `kprintf initialized` and the selected serial mode.
-   `serial=3` combines output bit1 and input bit2 without the on-demand bit64.
+   `serial=3` combines output mask `0x1` and input mask `0x2` without the
+   on-demand mask `0x40`.
 5. `arm_init.c` switches the console when serial output is selected and a
    device was found. `startup.c` later prints `version`; `MasterVersion` is
    22.5.0. A version banner is a later text observation, not PID1 or Stop proof.
