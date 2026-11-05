@@ -1,0 +1,1 @@
+Mbed TLS primitive sources at 068ff080b369adfac81509f9b57b2afabaf82dc5. Apache-2.0 license choice; full upstream LICENSE and per-file notices retained. Only common.h receives the recorded named freestanding include patch. No Apple implementation is copied. Shared mbedtls_platform_zeroize is imported from accepted XTS, never redefined.
