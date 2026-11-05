@@ -3,6 +3,18 @@
 Owner `codex-guest-exec-20261106-di`; branch `team/vm-027-20261106`;
 worktree `worktrees/vm-027-20261106`. All preparation is host-only.
 
+The actual-data gap is now resolved for the selected console contract. One
+root-leased run of the unchanged source-built shim and existing owned synthetic
+spin payload produced an Apple tree at `0x4300c000`, length `0x30fc` (12,540
+bytes). QMP confirmed paused state, saved precisely that virtual RAM extent,
+and quit with exit 0 and no surviving owned processes. The existing parser passed
+14 nodes and 38 property checks; all nine missing/malformed actual-byte copies
+were rejected. The dump SHA256 is
+`afa048b454b658399636030abe71bc706665fb722564459b93e75609f7d6d491`.
+See [capture evidence](evidence-capture.json). This observed a shim and synthetic
+spin fixture, with no XNU, PID1 or phone execution. The historical source-only
+inconclusive capsule remains unchanged.
+
 The owned parser and preflight target the exact Scion AVF shim at
 `a6f4bc38aa244359cd365c976244a88c9d6b3304`, with the accepted VM007 composed
 QEMU XNU tree `6a955269a8f4e17d21239f75cef9fbe66cffc56c` based on public XNU
@@ -71,7 +83,8 @@ address, byte count and acquisition process. The input must contain exactly
 Accepted VM005 historical evidence reports genuine shim/owned synthetic guest
 assertions over the translated Apple tree. Its `qemu.dtb` is an independently
 generated **input FDT**, not the emitted Apple tree. It cannot substitute for a
-raw Apple-tree capture. No new QEMU or compiler is authorized by this procedure.
+raw Apple-tree capture. The separately leased VM027DT-002 run now supplies that
+capture. No additional QEMU or compiler is authorized by this procedure.
 Any future capture needs root's explicit single-guest lease and a bounded owned
 runner; no phone operation is involved. Parser controls alone leave this task's
 actual-data acceptance open. Independent review, integrator acceptance and fresh

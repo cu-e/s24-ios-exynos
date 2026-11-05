@@ -68,4 +68,41 @@ owner, with one256MiB guest,512MiB aggregate RSS,3x4GiB admission one second apa
 55-second internal deadline and60-second outer timeout. Dump extent comes from
 the actual shim console and must fit guest RAM0x40000000..0x50000000 and<=1MiB;
 QMP stop/query-status/pmemsave/quit use only the canonical owned new capture path.
-No root lease has been granted yet; do not execute until explicit root approval.
+This prospective phase ended with root's explicit lease below; it does not
+authorize any further guest execution.
+
+## Actual capture and selected-console proof
+
+Root granted one QEMU lease `apple-dt-capture-20261106-10` for the exact revised
+plan and unchanged input binaries. VM027DT-002 capture exited 0 in 3.153174818
+seconds after three stable MemAvailable samples of 15,979,884,544,
+16,443,330,560 and 16,462,585,856 bytes, one second apart. QMP confirmed
+`running=false,status=paused`; native pmemsave read the actual dynamic Apple
+tree at `0x4300c000`, length `0x30fc` (12,540 bytes), and quit returned 0 with
+SHUTDOWN reason `host-qmp-quit`. The accepted supervisor found no surviving
+owned processes and zero owned RSS afterward. Root was notified to release the
+slot. No additional guest is authorized or required for this result.
+
+The dump SHA256 is
+`afa048b454b658399636030abe71bc706665fb722564459b93e75609f7d6d491`.
+Actual dynamic boot_args address was `0x4301c000`; the input FDT at `0x48200000`
+was never used as the capture target. Peak sampled aggregate owned RSS was
+52,047,872 bytes; capture controller current-image VmHWM was 22,769,664 bytes.
+
+Only the prepared actual parser/control command ran afterward. It independently
+rehashed all eight inputs, bound the exact QMP operation sequence/dump extent,
+passed the existing parser and selected-console preflight for 14 nodes and 38
+property checks, and rejected all nine preserved actual-byte copies: five
+missing properties, timer mismatch, unterminated UART string, truncation and
+overflowing GIC property length. Its current-image VmHWM was 20,234,240 bytes.
+The actual tree describes one CPU, HVC PSCI, PL011 and PCI, with no RAMDisk under
+the unchanged existing spin payload. Raw PID1/root packaging remains separate.
+
+New `evidence-capture.json` records PASS for this scoped host experiment and
+binds all 24 source/plan/control/capture artifacts. The old `evidence.json`
+remains INCONCLUSIVE and byte-identical; draft plan1 and its two root findings
+are preserved. Runtime code and input binaries did not change after root's plan
+review. No compiler, XNU, PID1, iOS, phone, physical MMIO or passthrough operation
+ran. This selected-console proof is not exhaustive property or hardware ABI
+qualification. Independent review, integrator acceptance and fresh MAIN common
+checks remain before original-owner task completion.

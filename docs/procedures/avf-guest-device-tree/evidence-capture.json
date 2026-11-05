@@ -1,0 +1,521 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "task": "VM-027",
+  "owner": "codex-guest-exec-20261106-di",
+  "recorded_at": "2026-11-05T21:55:07.255614+00:00",
+  "commit": "a1909242a9825470f982bb688be2f4e645eade96",
+  "implementation_commits": {
+    "parser": "b4a01245383434066b9c631083c140780948e91c",
+    "capture_draft": "026812316396879acefec38ca11d4bb673baa3a7",
+    "actual_controls": "f0ca63437a81a833f9681df3ffd63f86d030dc69",
+    "capture_guards": "5d03516319e32e96c8b7bf8c9090798d9a45e05c"
+  },
+  "summary": "One root-leased unchanged source-built AVF shim and existing synthetic spin guest emitted a genuine Apple tree. Dynamic virtual RAM capture passed: 12,540 bytes at 0x4300c000. The bounded parser passed 14 nodes and 38 selected console property checks; all nine actual-byte rejection copies were rejected. QMP confirmed paused state, native pmemsave and host QMP quit with exit 0 and no surviving owned process. No compiler, XNU, PID1 or phone execution.",
+  "commands": [
+    {
+      "argv": [
+        "timeout",
+        "60s",
+        "python3",
+        "-s",
+        "fixtures/public/avf-guest-device-tree/capture.py",
+        "--plan",
+        "artifacts/avf-guest-device-tree/capture-plan-2.json",
+        "--execute",
+        "--lease-id",
+        "apple-dt-capture-20261106-10"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 3.153174817969557
+    },
+    {
+      "argv": [
+        "timeout",
+        "30s",
+        "python3",
+        "-s",
+        "fixtures/public/avf-guest-device-tree/actual_controls.py",
+        "--capture-report",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-1/report.json",
+        "--out",
+        "artifacts/avf-guest-device-tree/actual-controls-1"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.030478130967821926
+    }
+  ],
+  "environment": {
+    "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-027-20261106",
+    "LC_ALL": "C",
+    "PYTHONUTF8": "1",
+    "PYTHONNOUSERSITE": "1",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "python_version": "3.14.8 (main, Oct  1 2026, 00:00:00) [GCC 15.3.1 20260722 (Red Hat 15.3.1-1)]"
+  },
+  "prospective_experiment": "VM027DT-002",
+  "root_lease_id": "apple-dt-capture-20261106-10",
+  "plan_sha256": "d7bf134f61520b9c56dbc6a9b31ee81f940e0a49895c0484087dd45fdec877b4",
+  "root_reviewed_draft_preserved": {
+    "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-plan-1.json",
+    "sha256": "88fe8c05b46b87db380d954f63ba8fbe66ad02124cda4fb06d8f6450e9f13425",
+    "runner_sha256": "5d5268ddd996fb93a8940f65ce44b967d7eb632b65b3d38b5a56484da00e2685",
+    "guard_findings": [
+      "Draft did not stop postspawn on MemAvailable<4GiB.",
+      "Draft SIGTERM could bypass Python finally while QEMU occupied a separateSID."
+    ],
+    "corrections": "Commit 5d03516 continuously enforces the memory floor and raises KeyboardInterrupt for SIGTERM; four targeted controls passed without starting a guest."
+  },
+  "measurements": {
+    "dynamic_extent": {
+      "address": 1124122624,
+      "length": 12540,
+      "boot_args_address": 1124188160
+    },
+    "dump_sha256": "afa048b454b658399636030abe71bc706665fb722564459b93e75609f7d6d491",
+    "dump_size": 12540,
+    "qemu_exit_code": 0,
+    "elapsed_seconds": 3.153174817969557,
+    "peak_total_owned_rss_bytes": 52047872,
+    "controller_current_image_VmHWM_bytes": 22769664,
+    "actual_controls_current_image_VmHWM_bytes": 20234240,
+    "admission_MemAvailable_bytes": [
+      15979884544,
+      16443330560,
+      16462585856
+    ],
+    "after_owned_processes": [],
+    "after_owned_tree_rss_bytes": 0,
+    "actual_nodes": 14,
+    "selected_property_checks": 38,
+    "actual_rejection_controls": 9,
+    "revalidated_input_pins": 8
+  },
+  "qemu_argv": [
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64",
+    "-machine",
+    "virt,gic-version=3",
+    "-accel",
+    "tcg",
+    "-cpu",
+    "cortex-a76",
+    "-smp",
+    "1",
+    "-m",
+    "256",
+    "-kernel",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+    "-nodefaults",
+    "-nic",
+    "none",
+    "-display",
+    "none",
+    "-serial",
+    "stdio",
+    "-monitor",
+    "none",
+    "-no-reboot",
+    "-initrd",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-005-20261105/artifacts/avf-handoff/run-final-221923b/spin-timeout.xnup",
+    "-qmp",
+    "unix:qmp.sock,server=on,wait=off"
+  ],
+  "qmp_transcript": [
+    {
+      "received": {
+        "QMP": {
+          "version": {
+            "qemu": {
+              "micro": 0,
+              "minor": 2,
+              "major": 10
+            },
+            "package": ""
+          },
+          "capabilities": [
+            "oob"
+          ]
+        }
+      }
+    },
+    {
+      "sent": {
+        "execute": "qmp_capabilities",
+        "id": 1
+      }
+    },
+    {
+      "received": {
+        "return": {},
+        "id": 1
+      }
+    },
+    {
+      "sent": {
+        "execute": "stop",
+        "id": 2
+      }
+    },
+    {
+      "received": {
+        "timestamp": {
+          "seconds": 1793915648,
+          "microseconds": 713104
+        },
+        "event": "STOP"
+      }
+    },
+    {
+      "received": {
+        "return": {},
+        "id": 2
+      }
+    },
+    {
+      "sent": {
+        "execute": "query-status",
+        "id": 3
+      }
+    },
+    {
+      "received": {
+        "return": {
+          "status": "paused",
+          "running": false
+        },
+        "id": 3
+      }
+    },
+    {
+      "sent": {
+        "execute": "pmemsave",
+        "id": 4,
+        "arguments": {
+          "val": 1124122624,
+          "size": 12540,
+          "filename": "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-1/apple-tree.adt"
+        }
+      }
+    },
+    {
+      "received": {
+        "return": {},
+        "id": 4
+      }
+    },
+    {
+      "sent": {
+        "execute": "quit",
+        "id": 5
+      }
+    },
+    {
+      "received": {
+        "timestamp": {
+          "seconds": 1793915648,
+          "microseconds": 755203
+        },
+        "event": "SHUTDOWN",
+        "data": {
+          "guest": false,
+          "reason": "host-qmp-quit"
+        }
+      }
+    },
+    {
+      "received": {
+        "return": {},
+        "id": 5
+      }
+    }
+  ],
+  "actual_preflight": {
+    "checks": [
+      "/:#address-cells",
+      "/:#size-cells",
+      "/:platform-name",
+      "/chosen:random-seed",
+      "/chosen:dram-base",
+      "/chosen:dram-size",
+      "/chosen:psci-method",
+      "/chosen:embedded-panic-log-size",
+      "/pram:reg",
+      "/arm-io:device_type",
+      "/arm-io:ranges",
+      "/arm-io:#address-cells",
+      "/arm-io:#size-cells",
+      "/arm-io/gic:compatible",
+      "/arm-io/gic:device_type",
+      "/arm-io/gic:reg",
+      "/arm-io/gic:virtual-timer-intid",
+      "/arm-io/uart0:compatible",
+      "/arm-io/uart0:device_type",
+      "/arm-io/uart0:reg",
+      "/arm-io/uart0:boot-console",
+      "/cpus/cpu0:device_type",
+      "/cpus/cpu0:state",
+      "/cpus/cpu0:reg",
+      "/cpus/cpu0:cpu-id",
+      "/cpus/cpu0:timebase-frequency",
+      "/cpus/cpu0:fixed-frequency",
+      "/cpus/cpu0:clock-frequency",
+      "/cpus/cpu0:bus-frequency",
+      "/cpus/cpu0:memory-frequency",
+      "/cpus/cpu0:peripheral-frequency",
+      "/pci0:compatible",
+      "/pci0:ecam",
+      "/pci0:bus-range",
+      "/pci0:pci-ranges",
+      "/pci0:intx-map",
+      "/pci0:intx-mask",
+      "/pci0:probe-only"
+    ],
+    "node_count": 14,
+    "cpu_count": 1,
+    "dram": [
+      1073741824,
+      1308622848
+    ],
+    "psci_method": "hvc",
+    "uart_driver": "arm,pl011",
+    "pci_present": true,
+    "ramdisk_present": false,
+    "kernel_executed": false,
+    "hardware_compatibility_qualified": false
+  },
+  "actual_controls": [
+    {
+      "name": "missing-gic-reg",
+      "pass": true,
+      "rejection": "missing /arm-io/gic:reg",
+      "path": "artifacts/avf-guest-device-tree/actual-controls-1/missing-gic-reg.adt",
+      "sha256": "ea2f4e226f24a532da026343108b5ed80faa976ccf6fb76f5bb18a0c6c87bf58",
+      "size": 12540
+    },
+    {
+      "name": "missing-psci-method",
+      "pass": true,
+      "rejection": "missing /chosen:psci-method",
+      "path": "artifacts/avf-guest-device-tree/actual-controls-1/missing-psci-method.adt",
+      "sha256": "2e2df1d3ad8eb1bc53b0e2bedf772e47e3fa35c7ecd6abcd07a49f29aa5e2901",
+      "size": 12540
+    },
+    {
+      "name": "missing-uart-compatible",
+      "pass": true,
+      "rejection": "missing /arm-io/uart0:compatible",
+      "path": "artifacts/avf-guest-device-tree/actual-controls-1/missing-uart-compatible.adt",
+      "sha256": "9f029715db38e44d5631013d2499b0f81fe66407c87d2f71bee2d9bec7a1b525",
+      "size": 12540
+    },
+    {
+      "name": "missing-cpu-state",
+      "pass": true,
+      "rejection": "missing /cpus/cpu0:state",
+      "path": "artifacts/avf-guest-device-tree/actual-controls-1/missing-cpu-state.adt",
+      "sha256": "7cb3fa4a822a6d27c464c6d91ca7295096f5d112da8d06975212a93138fecad5",
+      "size": 12540
+    },
+    {
+      "name": "missing-pci-ecam",
+      "pass": true,
+      "rejection": "missing /pci0:ecam",
+      "path": "artifacts/avf-guest-device-tree/actual-controls-1/missing-pci-ecam.adt",
+      "sha256": "1eecb174458729842166dc8fa1310a1c9f0cfc29f1c5bd9be40f30ed05c2ba31",
+      "size": 12540
+    },
+    {
+      "name": "actual-timer-consumer-mismatch",
+      "pass": true,
+      "rejection": "timer PPI differs from selected kernel constant 27",
+      "path": "artifacts/avf-guest-device-tree/actual-controls-1/actual-timer-consumer-mismatch.adt",
+      "sha256": "3202ba595df770156a49fccb8354df09bec70c7cb7d076c47b82a39e80b1a77f",
+      "size": 12540
+    },
+    {
+      "name": "unterminated-actual-uart-compatible",
+      "pass": true,
+      "rejection": "/arm-io/uart0:compatible: expected one terminated string",
+      "path": "artifacts/avf-guest-device-tree/actual-controls-1/unterminated-actual-uart-compatible.adt",
+      "sha256": "cc07df68ab61076f7e6d74234dee4355622b894bba2f8b97dc0eaa2d8454dc80",
+      "size": 12540
+    },
+    {
+      "name": "truncated-actual-tree",
+      "pass": true,
+      "rejection": "truncated tree at offset 12536, need 4",
+      "path": "artifacts/avf-guest-device-tree/actual-controls-1/truncated-actual-tree.adt",
+      "sha256": "24f939c9f986e2df347e22a9dbcb2d7a855cf79974e68396bd0ee23e2d26f554",
+      "size": 12539
+    },
+    {
+      "name": "malformed-actual-gic-length",
+      "pass": true,
+      "rejection": "truncated tree at offset 11516, need 4294967295",
+      "path": "artifacts/avf-guest-device-tree/actual-controls-1/malformed-actual-gic-length.adt",
+      "sha256": "c54e171dd3c80db6ee48a732d61f634714819b33a32fe97fcbc049af6889403b",
+      "size": 12540
+    }
+  ],
+  "artifact_bindings": [
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-1/apple-tree.adt",
+      "sha256": "afa048b454b658399636030abe71bc706665fb722564459b93e75609f7d6d491",
+      "size": 12540
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-1/console.log",
+      "sha256": "41632a0e31625f322f819031a013f59463399ff6def2c265efbdbb8a0755af33",
+      "size": 909
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-1/report.json",
+      "sha256": "02319a8a9c7de8f1fe1f9a3c10b35b24d51c4f4d095b4fd34d9830f9bc34d41e",
+      "size": 9944
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-1/samples.jsonl",
+      "sha256": "c6382629fb93db53ab43a59da655d7d1c133cd126b87c653f217ae3e75852be7",
+      "size": 5573
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/actual-timer-consumer-mismatch.adt",
+      "sha256": "3202ba595df770156a49fccb8354df09bec70c7cb7d076c47b82a39e80b1a77f",
+      "size": 12540
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/malformed-actual-gic-length.adt",
+      "sha256": "c54e171dd3c80db6ee48a732d61f634714819b33a32fe97fcbc049af6889403b",
+      "size": 12540
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/missing-cpu-state.adt",
+      "sha256": "7cb3fa4a822a6d27c464c6d91ca7295096f5d112da8d06975212a93138fecad5",
+      "size": 12540
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/missing-gic-reg.adt",
+      "sha256": "ea2f4e226f24a532da026343108b5ed80faa976ccf6fb76f5bb18a0c6c87bf58",
+      "size": 12540
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/missing-pci-ecam.adt",
+      "sha256": "1eecb174458729842166dc8fa1310a1c9f0cfc29f1c5bd9be40f30ed05c2ba31",
+      "size": 12540
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/missing-psci-method.adt",
+      "sha256": "2e2df1d3ad8eb1bc53b0e2bedf772e47e3fa35c7ecd6abcd07a49f29aa5e2901",
+      "size": 12540
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/missing-uart-compatible.adt",
+      "sha256": "9f029715db38e44d5631013d2499b0f81fe66407c87d2f71bee2d9bec7a1b525",
+      "size": 12540
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/report.json",
+      "sha256": "28c778ef2020294e3b55bb092d51f011fc966fc1a9e3066a1a156daf479e371e",
+      "size": 8000
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/truncated-actual-tree.adt",
+      "sha256": "24f939c9f986e2df347e22a9dbcb2d7a855cf79974e68396bd0ee23e2d26f554",
+      "size": 12539
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/unterminated-actual-uart-compatible.adt",
+      "sha256": "cc07df68ab61076f7e6d74234dee4355622b894bba2f8b97dc0eaa2d8454dc80",
+      "size": 12540
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-controls-1/report.json",
+      "sha256": "393c758d6a122516aa4d23390799f0193fbbabbcdfcfc7fda2c42dc3a152ea5e",
+      "size": 3104
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-guard-controls-1/report.json",
+      "sha256": "51e7095ffbc462eea97a308077713a6f1958f59480e7c997b0ced13ff975bb62",
+      "size": 622
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-plan-1.json",
+      "sha256": "88fe8c05b46b87db380d954f63ba8fbe66ad02124cda4fb06d8f6450e9f13425",
+      "size": 4522
+    },
+    {
+      "path": "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-plan-2.json",
+      "sha256": "d7bf134f61520b9c56dbc6a9b31ee81f940e0a49895c0484087dd45fdec877b4",
+      "size": 4522
+    },
+    {
+      "path": "worktrees/vm-027-20261106/fixtures/public/avf-guest-device-tree/capture.py",
+      "sha256": "8320c105c6862f832491b3937089b405c1357a8954c7b1f6d7b12cbd94a29455",
+      "size": 15787
+    },
+    {
+      "path": "worktrees/vm-027-20261106/fixtures/public/avf-guest-device-tree/capture_controls.py",
+      "sha256": "be5ac95db52b96fc2525c686bd338e5530218745636ad79ba09e202d33b534f3",
+      "size": 4637
+    },
+    {
+      "path": "worktrees/vm-027-20261106/fixtures/public/avf-guest-device-tree/capture_guard_controls.py",
+      "sha256": "5dc6fe823352c3309473dd63e1881ae96976d757993a8c8d509c57a798ea26e7",
+      "size": 2308
+    },
+    {
+      "path": "worktrees/vm-027-20261106/fixtures/public/avf-guest-device-tree/actual_controls.py",
+      "sha256": "44dd18910ae4b2e95b469b6f95dc5b949430127abdeb314723d54f2649324496",
+      "size": 6026
+    },
+    {
+      "path": "worktrees/vm-027-20261106/tools/build/avf_guest_device_tree.py",
+      "sha256": "84685695772d3eeb9e2d77fae6672ad75620d9edeb1b5cc7a69def2795074bcf",
+      "size": 12142
+    },
+    {
+      "path": "worktrees/vm-027-20261106/docs/procedures/avf-guest-device-tree/evidence.json",
+      "sha256": "2828d42e1b611ab39015b50d1c62cc23ff7ef166f3bc94bfd85bed89cade48f2",
+      "size": 7687
+    }
+  ],
+  "artifacts": [
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-1/apple-tree.adt",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-1/console.log",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-1/report.json",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-1/samples.jsonl",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/actual-timer-consumer-mismatch.adt",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/malformed-actual-gic-length.adt",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/missing-cpu-state.adt",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/missing-gic-reg.adt",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/missing-pci-ecam.adt",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/missing-psci-method.adt",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/missing-uart-compatible.adt",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/report.json",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/truncated-actual-tree.adt",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/actual-controls-1/unterminated-actual-uart-compatible.adt",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-controls-1/report.json",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-guard-controls-1/report.json",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-plan-1.json",
+    "worktrees/vm-027-20261106/artifacts/avf-guest-device-tree/capture-plan-2.json",
+    "worktrees/vm-027-20261106/fixtures/public/avf-guest-device-tree/capture.py",
+    "worktrees/vm-027-20261106/fixtures/public/avf-guest-device-tree/capture_controls.py",
+    "worktrees/vm-027-20261106/fixtures/public/avf-guest-device-tree/capture_guard_controls.py",
+    "worktrees/vm-027-20261106/fixtures/public/avf-guest-device-tree/actual_controls.py",
+    "worktrees/vm-027-20261106/tools/build/avf_guest_device_tree.py",
+    "worktrees/vm-027-20261106/docs/procedures/avf-guest-device-tree/evidence.json"
+  ],
+  "source_only_capsule_preserved": {
+    "path": "worktrees/vm-027-20261106/docs/procedures/avf-guest-device-tree/evidence.json",
+    "sha256": "2828d42e1b611ab39015b50d1c62cc23ff7ef166f3bc94bfd85bed89cade48f2",
+    "outcome": "inconclusive"
+  },
+  "limitations": [
+    "Observed source-built shim and existing owned synthetic spin execution only; no XNU kernel, PID1, iOS or phone execution.",
+    "The actual tree has no RAMDisk property with this existing payload; mockfs/raw PID1 packaging and ramdisk consumption are unmeasured.",
+    "The selected console contract is not exhaustive XNU/IOKit property closure or hardware/private ABI qualification.",
+    "No compiler, binary edit, physical MMIO, network/storage passthrough or source regeneration occurred.",
+    "Independent review, integrator acceptance and fresh MAIN common checks remain required; the original owner has not completed the task."
+  ]
+}
