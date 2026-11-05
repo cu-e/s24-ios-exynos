@@ -17,15 +17,17 @@ def main():
  report['admission_waits']=[];total_wait=0.0
  def command(argv,name,timeout=60):
   nonlocal total_wait
-  started=time.monotonic();samples=[];consecutive=0;admitted=False
+  started=time.monotonic();samples=[];consecutive=0;admitted=False;available=None
   while True:
+   elapsed=time.monotonic()-started
+   if elapsed>45 or total_wait+elapsed>180:break
    available=int(re.search(r'^MemAvailable:\s+(\d+) kB',Path('/proc/meminfo').read_text(),re.M)[1]);elapsed=time.monotonic()-started
    samples.append({'recorded_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'elapsed_seconds':elapsed,'mem_available_kib':available,'children_launched':False})
    consecutive=consecutive+1 if available>=4*1024*1024 else 0
    if consecutive>=3:admitted=True;break
    remaining=min(45-elapsed,180-total_wait-elapsed)
-   if remaining<=0:break
-   time.sleep(min(1,remaining))
+   if remaining<1:break
+   time.sleep(1)
   waited=time.monotonic()-started;total_wait+=waited
   report['admission_waits'].append({'name':name,'samples':samples,'wait_seconds':waited,'total_wait_seconds':total_wait,'admitted':admitted});report['total_admission_wait_seconds']=total_wait
   if not admitted:
