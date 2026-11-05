@@ -21,6 +21,14 @@ import time
 
 sys.dont_write_bytecode = True
 PIN = 'afc5cd206965de7e36a0aa17c4eb86a1f305689f386ccb22c55bd983567dd1dd'
+LEGACY_QUALIFICATION = '058451939894bd48ccc2ad1fe8b8d85c515f2176d21c8025daa034be8e98abe7'
+LEGACY_SELECTORS = '855246471cd69fc7b0e482b5247b1e249adc1453018c922698435bbc88972853'
+LEGACY_NAMESPACE = 'a2410326ba3560948edb9923b8dd8382d0557060ceaaf031735feef1bfbaa70a'
+FIREHOSE_MANIFEST = 'be02fbfc38a73831d3570e69b24277917e69efc09cd696cc853521c393edc298'
+FIREHOSE_QUALIFICATION = '3343a382452d05c382a15ea54e3835c3125c67c451cb586a1c3ed5a939b37174'
+FIREHOSE_SELECTORS = '408720d8bbdbc982079f778ce662f20051dc1d761b9ca216346896a5dabf0744'
+FIREHOSE_NAMESPACE = '25f22291e314445a01a4030e7db74f8cebd9a935b604eefc7b1ad9f5ee033461'
+FIREHOSE_SCHEMA = 'avf-firehose-namespace-v1'
 TREE = '6a955269a8f4e17d21239f75cef9fbe66cffc56c'
 CONFIG = '1571c785ae12ed79858fb9c81ebfce4ecd5414e4ce6af906820f6b9d61f68394'
 COMPILER = '7972eb2820ae25b5bedff1ea954cef9e9a0e4a15c7a8e440628e8b6540fafc82'
@@ -112,9 +120,9 @@ def validate_graph(rows):
     return ids
 
 
-def select(rows, selectors, shard):
+def select(rows, selectors, shard, manifest_pin=PIN):
     ids = validate_graph(rows)
-    if selectors['sha256'] != PIN or set(selectors['shards']) != set(SHARDS):
+    if selectors['sha256'] != manifest_pin or set(selectors['shards']) != set(SHARDS):
         raise ValueError('Wrong frozen shard contract')
     seen = set()
     for name, members in selectors['shards'].items():
@@ -202,26 +210,99 @@ def namespace(rows, index, digests):
     return result
 
 
+def accepted_profile(args):
+    identity = (args.manifest_sha256, args.qualification_sha256, args.selectors_sha256)
+    if identity == (PIN, LEGACY_QUALIFICATION, LEGACY_SELECTORS):
+        return {'manifest_sha256': PIN, 'namespace_sha256': LEGACY_NAMESPACE}
+    if identity == (FIREHOSE_MANIFEST, FIREHOSE_QUALIFICATION, FIREHOSE_SELECTORS):
+        return {'manifest_sha256': FIREHOSE_MANIFEST, 'namespace_sha256': FIREHOSE_NAMESPACE, 'schema': FIREHOSE_SCHEMA}
+    raise ValueError('Only the two exact independently accepted guest profiles are admitted')
+
+
+def profile_rules(main):
+    path = main/'tools/build/avf_firehose_namespace.py'; raw = path.read_bytes()
+    if hashlib.sha256(raw).hexdigest() != '53175258013de92822626b112aa4f25184c3c0dc6c8025b7075af299819b825c':
+        raise ValueError('Accepted namespace transition validator changed')
+    spec = importlib.util.spec_from_file_location('accepted_firehose_namespace', path)
+    module = importlib.util.module_from_spec(spec)
+    exec(compile(raw, str(path), 'exec'), module.__dict__)
+    return module
+
+
+def bound_profile_file(item):
+    canonical_output_path(item['path'])
+    if sha(item['path']) != item['sha256']:
+        raise ValueError('Accepted profile source/context artifact changed: '+item['path'])
+
+
+def firehose_profile(args, rows, descriptor):
+    rules = profile_rules(args.main)
+    if descriptor['namespace_version'] != FIREHOSE_SCHEMA or descriptor['namespace_digest'] != FIREHOSE_NAMESPACE or descriptor['parent_namespace_digest'] != LEGACY_NAMESPACE:
+        raise ValueError('Accepted namespace descriptor identity differs')
+    for key in ['object_manifest', 'selectors', 'source_proof', 'manifest_transition', 'namespace_receipt', 'object_input_keys', 'artifact_index', 'source_type_closure', 'consumer_contract']:
+        bound_profile_file(descriptor[key])
+    for item in descriptor['parents'].values():bound_profile_file(item)
+    if Path(descriptor['object_manifest']['path']) != args.manifest.resolve() or descriptor['object_manifest']['sha256'] != FIREHOSE_MANIFEST or descriptor['selectors']['sha256'] != FIREHOSE_SELECTORS:
+        raise ValueError('Descriptor does not bind exact new graph/selectors')
+    old_root = canonical_output_path(descriptor['old_root']['path'])
+    new_root = canonical_output_path(descriptor['new_root']['path'])
+    if os.path.lexists(old_root):raise ValueError('Historical absent root was materialized')
+    proof = load_project(descriptor['source_proof']['path'], descriptor['source_proof']['sha256'])
+    for item in [*proof['sources'], proof['header'], proof['unifdef'], proof['license']]:bound_profile_file(item)
+    rules.verify_export_recipe(Path(proof['sources'][1]['path']).read_text(), Path(proof['sources'][2]['path']).read_text(), proof['flags'])
+    rules.verify_overlay(new_root, proof['header']['sha256'])
+    parent = descriptor['parents']
+    old_rows = load_project(parent['parent_manifest']['path'], PIN)
+    changes = rules.validate_transition(old_rows, rows, old_root, new_root)
+    transition = load_project(descriptor['manifest_transition']['path'], descriptor['manifest_transition']['sha256'])
+    if transition['parent_manifest_sha256'] != PIN or transition['rows'] != changes:
+        raise ValueError('Accepted exact ordered same-slot root substitution proof differs')
+    old_selectors = load_project(args.main/'artifacts/team-coordination/20261106-team/object-shards.json', LEGACY_SELECTORS)
+    selectors = load_project(args.selectors, FIREHOSE_SELECTORS)
+    if selectors['shards'] != old_selectors['shards']:
+        raise ValueError('New selectors changed an ordered shard')
+    parent_namespace = load_project(parent['parent_namespace_receipt']['path'], parent['parent_namespace_receipt']['sha256'])
+    expected_namespace = rules.namespace_derivation(parent_namespace, new_root, old_root, proof['header']['sha256'])
+    receipt = load_project(descriptor['namespace_receipt']['path'], descriptor['namespace_receipt']['sha256'])
+    if expected_namespace != receipt or receipt['sha256'] != FIREHOSE_NAMESPACE:
+        raise ValueError('Namespace is not the exact accepted parent plus one exported header')
+    keys = load_project(descriptor['object_input_keys']['path'], descriptor['object_input_keys']['sha256'])
+    expected_keys = [rules.key(row, FIREHOSE_MANIFEST, FIREHOSE_NAMESPACE) for row in rows]
+    if keys['schema'] != FIREHOSE_SCHEMA or keys['keys'] != expected_keys:
+        raise ValueError('New profile input-key schema or complete row bindings changed')
+    qualified = load_project(parent['parent_qualification']['path'], LEGACY_QUALIFICATION)
+    qualified = dict(qualified, artifact_index=descriptor['artifact_index']['path'], artifact_index_sha256=descriptor['artifact_index']['sha256'], next_object_manifest=descriptor['object_manifest']['path'])
+    return qualified, {item['id']: item for item in expected_keys}, receipt
+
+
+def resume_profile(previous, plan):
+    if any(previous.get('provenance', {}).get(key) != plan['provenance'][key] for key in ['manifest_sha256', 'namespace_sha256']):
+        raise ValueError('Cross-profile resume is forbidden; old objects are never relabeled')
+
+
 def bind(args, out):
-    if args.manifest_sha256 != PIN:
-        raise ValueError('This reviewed executor requires the exact VM008 frozen graph')
-    rows = load(args.manifest, PIN)
-    selectors = load(args.selectors, args.selectors_sha256)
+    profile = accepted_profile(args); manifest_pin = profile['manifest_sha256']
+    read = load_project if 'schema' in profile else load
+    rows = read(args.manifest, manifest_pin)
+    selectors = read(args.selectors, args.selectors_sha256)
     if (args.main/selectors['source_manifest']).resolve() != args.manifest.resolve():
         raise ValueError('Selector source manifest identity differs')
-    selected = select(rows, selectors, args.shard)
-    qualified = load(args.qualification, args.qualification_sha256)
+    selected = select(rows, selectors, args.shard, manifest_pin)
+    qualified = read(args.qualification, args.qualification_sha256)
+    profile_keys = None; profile_namespace = None
+    if 'schema' in profile:
+        qualified, profile_keys, profile_namespace = firehose_profile(args, rows, qualified)
     if (args.main/qualified['next_object_manifest']).resolve() != args.manifest.resolve():
         raise ValueError('Qualified namespace does not bind this graph')
     index_path = args.main/qualified['artifact_index']
-    index = normalized_index(load(index_path, qualified['artifact_index_sha256'])['files'], args.main)
-    if index.get(str(args.manifest.resolve())) != PIN:
+    index = normalized_index(read(index_path, qualified['artifact_index_sha256'])['files'], args.main)
+    if index.get(str(args.manifest.resolve())) != manifest_pin:
         raise ValueError('Qualified artifact index does not bind frozen graph')
     cache = Digests()
     prepared_path = args.main/qualified['prepared_component']
     if cache.get(prepared_path) != index.get(str(prepared_path)):
         raise ValueError('Qualified prepared component changed')
-    prepared = load(prepared_path)
+    prepared = read(prepared_path, index[str(prepared_path)]) if 'schema' in profile else load(prepared_path)
     context = prepared['parent_source']
     for name in ['descriptor', 'composition_manifest']:
         if cache.get(context[name]) != context[name+'_sha256']:
@@ -248,14 +329,18 @@ def bind(args, out):
     inputs = namespace(rows, index, cache)
     inputs['files'].update(direct)
     inputs['sha256'] = canonical({k: inputs[k] for k in ['roots', 'absent_search_roots', 'files']})
-    provenance = {'manifest': str(args.manifest), 'manifest_sha256': PIN, 'qualification': str(args.qualification), 'qualification_sha256': args.qualification_sha256,
+    if inputs['sha256'] != profile['namespace_sha256'] or (profile_namespace is not None and any(inputs[k] != profile_namespace[k] for k in ['roots', 'absent_search_roots', 'files'])):
+        raise ValueError('Actual complete guest namespace differs from accepted profile')
+    provenance = {'manifest': str(args.manifest), 'manifest_sha256': manifest_pin, 'qualification': str(args.qualification), 'qualification_sha256': args.qualification_sha256,
                   'artifact_index': str(index_path), 'artifact_index_sha256': qualified['artifact_index_sha256'], 'selectors': str(args.selectors), 'selectors_sha256': sha(args.selectors),
                   'guest_tree': TREE, 'guest_config_sha256': CONFIG, 'compiler': compiler, 'namespace_sha256': inputs['sha256']}
     plan = {'schema_version': 1, 'provenance': provenance, 'shard': args.shard, 'selected': []}
     for row in selected:
         recipe = canonical(row['next_owned_compile_argv_template'])
         identity = canonical({'provenance': provenance, 'id': row['id'], 'source': row['bound_source_sha256'], 'configuration': row['configuration_sha256'], 'recipe': recipe})
+        if profile_keys is not None:identity = profile_keys[row['id']]['input_key']
         plan['selected'].append({'id': row['id'], 'input_key': identity, 'source': row['bound_source'], 'source_sha256': row['bound_source_sha256'], 'configuration': row['configuration'], 'configuration_sha256': row['configuration_sha256'], 'recipe_sha256': recipe, 'argv': expand(row, out), 'cwd': row['cwd']})
+    if 'schema' in profile:plan['source_profile'] = profile
     if getattr(args, 'resource_profile', 'legacy') == PROJECT_PROFILE:
         plan['resource_profile'] = PROJECT_PROFILE
     write(out/'input-bindings.json', inputs)
@@ -875,6 +960,13 @@ def task_shards(task, mode, requested):
         'fixtures/public/avf-object-shards/'+name,
         'docs/procedures/avf-object-shards/'+name,
     }.issubset(paths)}
+    profile_tooling = task['id'] == 'VM-039' and paths == {
+        'tools/build/avf_kernel_objects.py', 'fixtures/public/avf-guest-profile', 'docs/procedures/avf-guest-profile',
+    }
+    if task['id'] == 'VM-039':
+        if mode != 'plan' or not profile_tooling:
+            raise ValueError('VM039 tooling scope authorizes source-only plans, never compilation')
+        return {'authorized_shards': [], 'source_only_tooling_exception': True}
     tooling = task['id'] == 'VM-009' and paths == {
         'tools/build/avf_kernel_objects.py',
         'fixtures/public/avf-kernel-objects',
@@ -972,6 +1064,7 @@ def main():
                 previous = load(args.resume, args.resume_sha256)
                 if previous['executor_sha256'] != report['executor_sha256']:
                     raise ValueError('Resume runner implementation changed')
+                resume_profile(previous, plan)
                 prior = {r['id']: r for r in previous['objects'] if r['outcome'] == 'pass'}
                 report['resume'] = {'path': str(args.resume), 'sha256': args.resume_sha256}
             supervise = supervisor(args.main)
@@ -979,6 +1072,7 @@ def main():
                 identity = row['id']; output = out/'objects'/identity; dep = out/'dependencies'/(identity+'.d')
                 output.parent.mkdir(parents=True, exist_ok=True); dep.parent.mkdir(parents=True, exist_ok=True)
                 item = {'id': identity, 'input_key': row['input_key'], 'cwd': row['cwd'], 'outcome': 'fail', 'source': row['source'], 'source_sha256': row['source_sha256']}
+                if 'source_profile' in plan:item['source_profile'] = plan['source_profile']
                 try:
                     if identity in prior:
                         old = load(prior[identity]['record'], prior[identity]['record_sha256'])
@@ -1016,9 +1110,14 @@ def main():
                 gc.collect()
             # Close the namespace against changed or newly shadowing files, not
             # merely the dependency files of objects that happened to pass.
-            rows = load(args.manifest, PIN)
-            qualified = load(args.qualification, args.qualification_sha256)
-            index = normalized_index(load(args.main/qualified['artifact_index'], qualified['artifact_index_sha256'])['files'], args.main)
+            profile = accepted_profile(args)
+            rows = load_project(args.manifest, profile['manifest_sha256'])
+            qualified = load_project(args.qualification, args.qualification_sha256)
+            if 'schema' in profile:
+                item = qualified['artifact_index']
+                index = normalized_index(load_project(item['path'], item['sha256'])['files'], args.main)
+            else:
+                index = normalized_index(load(args.main/qualified['artifact_index'], qualified['artifact_index_sha256'])['files'], args.main)
             after = namespace(rows, index, cache)
             for path, digest in inputs['files'].items():
                 if cache.get(path) != digest:
