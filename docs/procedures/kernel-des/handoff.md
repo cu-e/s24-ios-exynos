@@ -61,3 +61,19 @@ artifacts/kernel-des/caller-candidate1/evidence.json, SHA256
 16a4b98aff52f2304f06f0fcc13ac969a3d234d4f4aaa91edc9dbdf0f356983d.
 No guest has run; six cases await an explicit new root lease, then actual results
 must replace prospective expectations. Root/REV022 acceptance still pending.
+
+First guest attempt caller-guest1 failed the positive before DES/mapping; no other
+case ran. Pinned shim reported ESR0x96000021, ELR0x4300cb08, FAR0x43060314 and
+natural exception shutdown. Linked instruction at0xfffffff00700cb08 is
+ldr x10,[x7], reading an8-byte DT property at4mod8. Preserve actual console,
+exit/samples and guest-alignment-inspection1 disassembly. Zero children survived;
+lease released immediately. This is not a passed positive or native-DES result.
+
+The owned guest compile omitted the exact accepted KRN031 synthetic-runtime
+profile. Caller-candidate2 restores -mgeneral-regs-only -mstrict-align
+-mno-outline-atomics for that guest TU only. Shared runtime/source/shim/QEMU and
+all actual native provider/caller/ESP/helper/algorithm/fortify objects are unchanged.
+Only guest TU recompiled; five images relinked and pointer/mapping proofs passed.
+Prepared capsule SHA2569d34b6ea29cbb76f5cdc4bfecef523ed07f33b36cbc49c324dc208cb2ed21fda,
+artifacts/kernel-des/caller-candidate2/evidence.json. All six actual cases remain
+pending a fresh explicit root lease. Do not infer a successful fix before execution.

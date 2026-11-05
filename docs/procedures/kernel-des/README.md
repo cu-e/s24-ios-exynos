@@ -67,3 +67,8 @@ The current source candidate is awaiting actual CPU controls and independent
 REV022 acceptance. Inactive NFS/GSS/CTS integration, optional/general mode APIs,
 full crypto, side channels, FIPS, private Apple ABI, XNU MMU/board and native device
 compatibility remain unqualified. No phone operation is part of this work.
+
+The first CPU attempt exposed the synthetic-runtime compiler-profile requirement:
+pre-MMU DT byte decoding must not become an unaligned64-bit load. The guest TU
+uses the exact accepted general-register/strict-alignment/no-outline-atomics
+profile. This fixture-only policy does not change genuine native kernel TUs.
