@@ -62,6 +62,9 @@ def prepare(main, owned, output, report, control):
     report["owned_sources"] = [pin(path) for directory in [owned / "src/platform/gpu/native/userclient", owned / "fixtures/public/gpu-userclient"]
                                for path in sorted(directory.rglob("*")) if path.is_file()]
     report["genuine_recipe_bindings"] = [cpp, c]
+    report["owned_output_directories"] = [str(output / name) for name in ["objects", "dependencies", "work", "host"]]
+    for directory in report["owned_output_directories"]:
+        Path(directory).mkdir()
     target_commands = []
     for row, source, name in [(cpp, owned / "src/platform/gpu/native/userclient/SGPUUserClient.cpp", "adapter"),
                               (cpp, owned / "src/platform/gpu/native/userclient/Policy.cpp", "policy"),
@@ -74,6 +77,7 @@ def prepare(main, owned, output, report, control):
         if name == "dispatcher" and not any(arg.startswith("-std=") for arg in argv): argv.insert(1, "-std=gnu11")
         target_commands.append({"name": name, "argv": argv, "cwd": str(output / "work"),
             "derived_from": row["id"], "output": str(output / "objects" / (name + ".o")),
+            "timeout_seconds": 120, "max_owned_rss_bytes": 268435456,
             "execution_status": "unmeasured; root lease required"})
     report["target_compile_plan"] = target_commands
     cc, cxx = Path("/usr/bin/cc"), Path("/usr/bin/c++")
@@ -86,6 +90,9 @@ def prepare(main, owned, output, report, control):
             str(owned / "fixtures/public/gpu-userclient/policy_controls.cpp"), str(host_object), "-o", str(output / "host/policy-controls")]},
         {"argv": [str(output / "host/policy-controls")], "environment": {"ASAN_OPTIONS": "detect_leaks=1:abort_on_error=1", "UBSAN_OPTIONS": "halt_on_error=1"}}
     ]
+    for command in report["host_controls_plan"]:
+        command.update(timeout_seconds=120, max_owned_rss_bytes=268435456,
+                       execution_status="unmeasured; root lease required")
     report["post_compile_inspection_plan"] = {"argv": [sys.executable, "-s", str(owned / "src/platform/gpu/native/userclient/inspect_objects.py"),
         "--directory", str(output / "objects"), "--output", str(output / "object-inspection.json")],
         "checks": ["ARM64 MH_OBJECT for all3 objects", "real IOUserClient override/provider emitted symbols",
