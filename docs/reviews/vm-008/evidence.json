@@ -1,0 +1,178 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T20:56:32.609074+00:00",
+  "task": "REV-023",
+  "experiment": "REVHEAD-001",
+  "owner": "codex-review-integration-20261106-ct",
+  "commit": "b967059b99438814e3017bd4adcc71dc1533a032",
+  "review_base_commit": "aac27cfbc0d71b34eda33ddf366c72427507ae0b",
+  "reviewed_candidate_commit": "2b5aa36092a672e38c2d5ae3173a57b2fb1b7dbc",
+  "summary": "Independent bounded source and selected-byte review accepts frozen VM008 public guest namespace and representative evidence within original experiment policy; no P0/P1/P2 source or evidence finding remains. No full kernel, SDK, private ABI, guest or device qualification.",
+  "commands": [
+    {
+      "argv": [
+        "timeout",
+        "190s",
+        "python3",
+        "-s",
+        "docs/reviews/vm-008/verify.py"
+      ],
+      "environment": {
+        "LC_ALL": "C",
+        "PYTHONUTF8": "1",
+        "PYTHONNOUSERSITE": "1",
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0"
+      },
+      "attempts": [
+        {
+          "script": "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verify-attempt1.py",
+          "report": "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verification-attempt1.json",
+          "exit_code": 1,
+          "error": "KeyError('allocator_metadata_sections')",
+          "cause": "Reviewer assumed an optional field existed in earlier object reports."
+        },
+        {
+          "script": "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verify-attempt2.py",
+          "report": "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verification-attempt2.json",
+          "exit_code": 1,
+          "error": "Independent allocator section parse equals evidence; earlier non-emission records omit field",
+          "cause": "Reviewer incorrectly inferred no metadata from an omitted field; independent parse found a real mockfs metadata section."
+        },
+        {
+          "script": "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verify.py",
+          "report": "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verification.json",
+          "exit_code": 0,
+          "elapsed_seconds": 5.823
+        }
+      ]
+    }
+  ],
+  "registration_attempts": [
+    {
+      "command": "experiment plan --id REVAVF-001 ... --kind host-test",
+      "exit_code": 2,
+      "registry_changed": false,
+      "reason": "CLI syntax rejected unsupported flags; execution did not start."
+    },
+    {
+      "command": "experiment plan REVHEAD-001 --task REV-023 --owner codex-review-integration-20261106-ct --hypothesis ... --procedure worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/experiment.md --timeout-seconds 180",
+      "exit_code": 0,
+      "created_at": "2026-11-05T20:54:04+00:00"
+    }
+  ],
+  "verification": {
+    "checks": 38910,
+    "compiler_generator_guest_started": false,
+    "detector_controls": {
+      "wrong_expected_hash_rejected": true,
+      "invalid_macho_rejected": true
+    },
+    "header_counts": {
+      "installed": 1869,
+      "genuine_filter_removed_empty_body": 36
+    },
+    "selected_next_objects": 1080,
+    "generated_sources": 55,
+    "actual_distinct_objects": 10,
+    "metadata": [
+      {
+        "segment": "__DATA_CONST",
+        "section": "__kalloc_type",
+        "size": 192,
+        "sha256": "9e12411376e53169dff72520ea042143cbaa6b459b0e0aa48bce3a47da15b47a"
+      }
+    ],
+    "independently_parsed_sections": {
+      "osfmk/startup.o": [],
+      "osfmk/arm_init.o": [],
+      "osfmk/start.o": [],
+      "osfmk/gic_v3_irq.o": [],
+      "bsd/mockfs_vfsops.o": [
+        {
+          "section": "__kalloc_type",
+          "segment": "__DATA_CONST",
+          "size": 192,
+          "sha256": "bd52b7aa9491d30a008178cad49d7890e3ce2c201962ee35475c9ed17a5a9ec8"
+        }
+      ],
+      "libkern/OSObject.cpo": [],
+      "iokit/OSObject.iig.cpo": [],
+      "pexpert/pe_init.o": [],
+      "osfmk/kalloc.o": [],
+      "libkern/OSData.cpo": [
+        {
+          "section": "__kalloc_type",
+          "segment": "__DATA_CONST",
+          "size": 192,
+          "sha256": "9e12411376e53169dff72520ea042143cbaa6b459b0e0aa48bce3a47da15b47a"
+        }
+      ]
+    },
+    "negative_controls": 4,
+    "objects": [
+      "bsd/mockfs_vfsops.o",
+      "iokit/OSObject.iig.cpo",
+      "libkern/OSData.cpo",
+      "libkern/OSObject.cpo",
+      "osfmk/arm_init.o",
+      "osfmk/gic_v3_irq.o",
+      "osfmk/kalloc.o",
+      "osfmk/start.o",
+      "osfmk/startup.o",
+      "pexpert/pe_init.o"
+    ],
+    "full_index_rehashed": false,
+    "source_descriptor_sha256": "058451939894bd48ccc2ad1fe8b8d85c515f2176d21c8025daa034be8e98abe7",
+    "elapsed_seconds": 5.823,
+    "current_image_peak_rss_bytes": 120283136,
+    "current_rss_bytes": 104894464,
+    "raw_rusage_maxrss_bytes": 120283136
+  },
+  "distinct_streamed_file_bindings": 5929,
+  "source_bindings": {
+    "descriptor_sha256": "058451939894bd48ccc2ad1fe8b8d85c515f2176d21c8025daa034be8e98abe7",
+    "producer_evidence_sha256": "6209dde21ba80535e3cc15139dc6165b5e120674920b9382257dddab3fa9fbf1",
+    "next_manifest_sha256": "afc5cd206965de7e36a0aa17c4eb86a1f305689f386ccb22c55bd983567dd1dd"
+  },
+  "resource_policy_resolution": {
+    "historical_single_pre_spawn_sample": true,
+    "historical_post_spawn_interval_ms": 25,
+    "root_accepts_original_plan_policy": true,
+    "historical_three_stable_sample_claim": false,
+    "prospective_guard_followup": "Separate producer branch/capsule pending; no historical header/TU rebuild."
+  },
+  "boundaries": {
+    "full_artifact_sweep_repeated": false,
+    "compiler_preprocessor_generator_make_started": false,
+    "guest_or_device_started": false,
+    "main_publication_or_common_check_run": false,
+    "full_sdk_private_abi_kernel_link_runtime_qualified": false
+  },
+  "artifacts": [
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/experiment.md",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/handoff.md",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verify.py",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verify-attempt1.py",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verify-attempt2.py",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verification.json",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verification-attempt1.json",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verification-attempt2.json",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/invalid-object-control.bin"
+  ],
+  "sha256": {
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/experiment.md": "3ff31b0448694ddae72b4fddfbe33af96151c1fbd1f53dc2cfc3cf0526a9ddf8",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/handoff.md": "4495ef164c0bc4100853d79a59167944a4f8881f8cd2460c6abfc96d0cfc4e56",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verify.py": "0215a9fce9000ff665443e4469fdbbd7991d1c292175404c10b9509d02b16ed6",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verify-attempt1.py": "295919a5cd38f8429d8f1b0d31c9e7b2c090f9af0b2179ce9be470f8dea536f7",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verify-attempt2.py": "08d0b70b196da6bf1202d4d1d1a12a6b57087a2f0d4bc4fcca37d26eb22fd5f1",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verification.json": "a4cc87f08be195990916ad970fad62d690f3e0380fd4953a3cafda4473e43edb",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verification-attempt1.json": "5d8a5f4478150225dec80ea1991fe3813b82a4b5fd4d2960351cedd1d5d60432",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/verification-attempt2.json": "f1a6efe896ce770c2f23167011831618d8e9cb6a3cf79404d540562bf67a11a5",
+    "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/invalid-object-control.bin": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925"
+  },
+  "handoff": "worktrees/rev-vm008-ct-20261106/docs/reviews/vm-008/handoff.md",
+  "next_step": "Root and integrator accept scoped review, bind separate prospective stable-admission followup and run MAIN common checks under the integration lock. Keep REV023 in progress until explicit acceptance."
+}
