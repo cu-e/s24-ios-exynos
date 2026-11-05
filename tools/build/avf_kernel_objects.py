@@ -4,6 +4,7 @@ import argparse
 import ctypes
 import datetime
 import gc
+import fcntl
 import hashlib
 import importlib.util
 import json
@@ -255,6 +256,8 @@ def bind(args, out):
         recipe = canonical(row['next_owned_compile_argv_template'])
         identity = canonical({'provenance': provenance, 'id': row['id'], 'source': row['bound_source_sha256'], 'configuration': row['configuration_sha256'], 'recipe': recipe})
         plan['selected'].append({'id': row['id'], 'input_key': identity, 'source': row['bound_source'], 'source_sha256': row['bound_source_sha256'], 'configuration': row['configuration'], 'configuration_sha256': row['configuration_sha256'], 'recipe_sha256': recipe, 'argv': expand(row, out), 'cwd': row['cwd']})
+    if getattr(args, 'resource_profile', 'legacy') == PROJECT_PROFILE:
+        plan['resource_profile'] = PROJECT_PROFILE
     write(out/'input-bindings.json', inputs)
     write(out/'execution-plan.json', plan)
     return plan, inputs, cache
@@ -400,11 +403,280 @@ def supervisor(main):
     return module
 
 
-def stable_memory(supervise, seconds=45):
+PROJECT_PROFILE = 'project-budget-v1'
+RESOURCE_QUEUE = 'artifacts/team-coordination/20261106-team/resource-queue.json'
+EXECUTOR_RSS = 512*1024**2
+
+
+def strict_fields(value, fields, label):
+    if type(value) is not dict or set(value) != set(fields):
+        raise ValueError('Wrong '+label+' schema')
+
+
+def strict_int(value, low, high, label):
+    if type(value) is not int or not low <= value <= high:
+        raise ValueError('Invalid '+label)
+    return value
+
+
+def process_table():
+    result = {}
+    for entry in Path('/proc').iterdir():
+        if not entry.name.isdecimal():
+            continue
+        try:
+            fields = (entry/'stat').read_text().rsplit(') ', 1)[1].split()
+            result[int(entry.name)] = {'pid': int(entry.name), 'start_ticks': int(fields[19]),
+                                      'ppid': int(fields[1]), 'session': int(fields[3]),
+                                      'state': fields[0], 'rss_bytes': int(fields[21])*resource.getpagesize()}
+            result[int(entry.name)]['swap_bytes'] = next((int(line.split()[1])*1024 for line in (entry/'status').read_text().splitlines() if line.startswith('VmSwap:')), 0)
+            try:
+                result[int(entry.name)]['cwd'] = str((entry/'cwd').resolve(strict=True))
+            except (FileNotFoundError, PermissionError):
+                result[int(entry.name)]['cwd'] = None
+            try:
+                result[int(entry.name)]['executable'] = (entry/'exe').resolve(strict=True).name
+            except (FileNotFoundError, PermissionError):
+                result[int(entry.name)]['executable'] = None
+        except (FileNotFoundError, ProcessLookupError):
+            continue
+    return result
+
+
+def process_identity(pid):
+    row = process_table()[pid]
+    return {key: row[key] for key in ['pid', 'start_ticks']}
+
+
+def owned_processes(identity, sessions, table):
+    pid = identity['pid']
+    if pid in table and table[pid]['start_ticks'] != identity['start_ticks']:
+        raise ValueError('Owned PID was reused; root reconciliation required')
+    members = {pid} if pid in table else set()
+    members.update(p for p, row in table.items() if row['session'] in sessions)
+    while True:
+        expanded = members | {p for p, row in table.items() if row['ppid'] in members}
+        if expanded == members:
+            return [table[p] for p in sorted(members) if table[p]['state'] != 'Z']
+        members = expanded
+
+
+class ProjectBudget:
+    """One root allocation, one stable lock inode, all admitted work accounted."""
+    def __init__(self, args, data, executor_sha256):
+        self.args = args; self.data = data
+        self.allocation_path = canonical_output_path(args.main/data['root_lease_path'])
+        self.allocation = load(self.allocation_path, data['root_lease_sha256'])
+        grant = self.allocation
+        strict_fields(grant, ['schema', 'id', 'policy_sha256', 'expires_at', 'max_compiler_jobs_total',
+                             'max_total_project_rss_bytes', 'slots', 'existing_work', 'light_rss_budget_bytes', 'six_job_measurement'], 'project allocation')
+        if grant['schema'] != PROJECT_PROFILE or grant['id'] != data['root_lease'] or grant['policy_sha256'] != sha(__file__):
+            raise ValueError('Unbound or incomplete root project allocation')
+        jobs = strict_int(grant['max_compiler_jobs_total'], 6, 8, 'global compiler jobs')
+        if jobs not in [6, 8] or type(grant['max_total_project_rss_bytes']) is not int or grant['max_total_project_rss_bytes'] != 6*GIB:
+            raise ValueError('Prospective project ceiling must be6/8 jobs and6GiB')
+        if type(grant['slots']) is not list or type(grant['existing_work']) is not list or not grant['slots']:
+            raise ValueError('Explicit finite allocation and existing workload inventory required')
+
+        if type(grant['light_rss_budget_bytes']) is not int or grant['light_rss_budget_bytes'] != 2*GIB:
+            raise ValueError('Root must reserve2GiB for discovered light/auxiliary work')
+        identities = set(); outputs = set(); reserved = 2*GIB; reserved_jobs = 0
+        for slot in grant['slots']:
+            strict_fields(slot, ['task', 'owner', 'experiment', 'shard', 'source_plan', 'source_plan_sha256', 'actual_output', 'reviewed_executor_sha256', 'max_jobs', 'max_owned_rss_bytes'], 'project slot')
+            for key in ['task', 'owner', 'experiment', 'shard']:
+                if type(slot[key]) is not str or not slot[key]:
+                    raise ValueError('Invalid slot identity')
+            for key in ['source_plan', 'actual_output']:
+                path = PurePosixPath(slot[key])
+                if type(slot[key]) is not str or path.is_absolute() or '..' in path.parts or str(path) != slot[key]:
+                    raise ValueError('Slot paths must be canonical relative MAIN paths')
+            if type(slot['reviewed_executor_sha256']) is not str or not re.fullmatch('[0-9a-f]{64}', slot['reviewed_executor_sha256']):
+                raise ValueError('Each slot binds its exact reviewed caller')
+            if type(slot['source_plan_sha256']) is not str or not re.fullmatch('[0-9a-f]{64}', slot['source_plan_sha256']) or type(slot['max_jobs']) is not int or slot['max_jobs'] != 1:
+                raise ValueError('Each executor has exactly one serial compiler')
+            if type(slot['max_owned_rss_bytes']) is not int or slot['max_owned_rss_bytes'] not in [256*1024**2, EXECUTOR_RSS]:
+                raise ValueError('Executor allocation exceeds supported measured cap')
+            if slot['task'] in identities or slot['actual_output'] in outputs:
+                raise ValueError('Duplicate allocation task/output')
+            outputs.add(slot['actual_output'])
+            identities.add(slot['task']); reserved += slot['max_owned_rss_bytes']; reserved_jobs += 1
+        seen_pids = set(); existing_reserved = 0
+        for work in grant['existing_work']:
+            strict_fields(work, ['pid', 'start_ticks', 'max_owned_rss_bytes', 'compiler_jobs', 'label'], 'existing project work')
+            strict_int(work['pid'], 1, 2**31-1, 'work PID'); strict_int(work['start_ticks'], 1, 2**64-1, 'work start identity')
+            strict_int(work['max_owned_rss_bytes'], 1, 6*GIB, 'existing work budget')
+            strict_int(work['compiler_jobs'], 0, jobs, 'existing compiler jobs')
+            if type(work['label']) is not str or not work['label'] or work['pid'] in seen_pids:
+                raise ValueError('Duplicate or unlabeled existing project work')
+            seen_pids.add(work['pid']); existing_reserved += work['max_owned_rss_bytes']; reserved_jobs += work['compiler_jobs']
+        if reserved > 6*GIB or existing_reserved > 2*GIB or reserved_jobs > jobs:
+            raise ValueError('Allocation exceeds project total including existing/light work')
+        selected = [s for s in grant['slots'] if all(s[k] == getattr(args, k) for k in ['task', 'owner', 'experiment', 'shard'])]
+        if len(selected) != 1 or selected[0]['source_plan_sha256'] != data['source_plan_sha256'] or selected[0]['reviewed_executor_sha256'] != executor_sha256:
+            raise ValueError('No exact task/owner/experiment/shard/plan allocation')
+        self.slot = selected[0]; self.rss_limit = self.slot['max_owned_rss_bytes']
+        if str(canonical_output_path(args.main/self.slot['actual_output'])) != str(args.out.resolve()):
+            raise ValueError('Root slot binds one exact canonical output')
+        self.source_plan = load(args.main/self.slot['source_plan'], self.slot['source_plan_sha256'])
+        if self.source_plan.get('resource_profile') != PROJECT_PROFILE:
+            raise ValueError('Prospective allocation requires a new project-budget plan')
+        if jobs == 8:
+            proof = grant['six_job_measurement']
+            strict_fields(proof, ['path', 'sha256'], 'six job measurement binding')
+            measured = load(args.main/proof['path'], proof['sha256'])
+            if measured.get('schema') != 'project-six-job-measurement-v1' or measured.get('outcome') != 'pass' or type(measured.get('max_compiler_jobs_observed')) is not int or measured['max_compiler_jobs_observed'] != 6 or type(measured.get('elapsed_seconds')) not in [int, float] or measured['elapsed_seconds'] <= 0 or type(measured.get('peak_project_rss_bytes')) is not int or not 0 < measured['peak_project_rss_bytes'] <= 6*GIB or measured.get('stable_memory_floor_bytes') != 4*GIB or not measured.get('samples'):
+                raise ValueError('Eight jobs require a bound actual measured six job trial')
+            for sample in measured['samples']:
+                if any(type(sample.get(k)) is not int for k in ['MemAvailable_bytes', 'project_rss_bytes', 'pswpin', 'pswpout']) or sample['MemAvailable_bytes'] < 4*GIB or sample['project_rss_bytes'] > 6*GIB:
+                    raise ValueError('Six job measurement lacks sustained memory/swap observations')
+        elif grant['six_job_measurement'] is not None:
+            raise ValueError('Six job grant must not claim an eight job prerequisite')
+        self.queue_path = canonical_output_path(args.main/data['resource_queue_path'])
+        self.state_path = self.allocation_path.with_suffix('.reservations.json')
+        self.lock_path = self.allocation_path.with_suffix('.budget.lock')
+        self.identity = process_identity(os.getpid()); self.registered = False
+        self.check_live()
+
+    def check_live(self):
+        if sha(self.allocation_path) != self.data['root_lease_sha256']:
+            raise ValueError('Root allocation changed')
+        expiry = datetime.datetime.fromisoformat(self.allocation['expires_at'])
+        if expiry.tzinfo is None or expiry <= datetime.datetime.now(datetime.timezone.utc):
+            raise ValueError('Root allocation expired')
+        queue = load(self.queue_path)
+        heavy = queue.get('heavy')
+        if type(heavy) is not dict or heavy.get('id') != self.allocation['id'] or heavy.get('allocation_path') != self.data['root_lease_path'] or heavy.get('allocation_sha256') != self.data['root_lease_sha256'] or heavy.get('slots') != self.allocation['slots']:
+            raise ValueError('Root resource queue does not hold this exact allocation')
+
+    def transaction(self, operation):
+        # Never unlink this inode, including after release; independent of lab/integration locks.
+        canonical_output_path(self.state_path); canonical_output_path(self.lock_path)
+        descriptor = os.open(self.lock_path, os.O_RDWR | os.O_CREAT | os.O_APPEND | os.O_NOFOLLOW, 0o600)
+        with os.fdopen(descriptor, 'a+') as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            self.check_live()
+            state = load(self.state_path) if self.state_path.exists() else {'allocation_sha256': self.data['root_lease_sha256'], 'entries': {}}
+            strict_fields(state, ['allocation_sha256', 'entries'], 'reservation state')
+            if state['allocation_sha256'] != self.data['root_lease_sha256'] or type(state['entries']) is not dict:
+                raise ValueError('Reservation state belongs to a different allocation')
+            result = operation(state)
+            temporary = self.state_path.with_suffix('.tmp')
+            with temporary.open('x') as stream:
+                json.dump(state, stream, sort_keys=True); stream.flush(); os.fsync(stream.fileno())
+            os.replace(temporary, self.state_path)
+            return result
+
+    def snapshot(self, state):
+        table = process_table(); observed = {}; details = []; executor_pids = set(); allowed_compiler_pids = set(); violations = []
+        for work in self.allocation['existing_work']:
+            rows = owned_processes(work, [], table)
+            rss = sum(p['rss_bytes'] for p in rows)
+            details.append({'label': work['label'], 'rss_bytes': rss, 'processes': rows})
+            if work['compiler_jobs']:
+                allowed_compiler_pids.update(p['pid'] for p in rows)
+            if rss > work['max_owned_rss_bytes']:
+                violations.append('existing-work-rss-budget')
+            observed.update((p['pid'], p) for p in rows)
+        slots = {s['task']: s for s in self.allocation['slots']}
+        for task, entry in state['entries'].items():
+            strict_fields(entry, ['identity', 'session', 'status'], 'executor reservation')
+            if task not in slots or entry['status'] not in ['active', 'complete']:
+                raise ValueError('Unallocated executor reservation')
+            strict_fields(entry['identity'], ['pid', 'start_ticks'], 'reservation identity')
+            strict_int(entry['identity']['pid'], 1, 2**31-1, 'reservation PID')
+            strict_int(entry['identity']['start_ticks'], 1, 2**64-1, 'reservation start identity')
+            if entry['session'] is not None:
+                strict_int(entry['session'], 1, 2**31-1, 'reservation session')
+            if entry['status'] == 'complete':
+                continue
+            if entry['identity']['pid'] not in table:
+                raise ValueError('Stale executor reservation; root must reconcile survivors')
+            rows = owned_processes(entry['identity'], [entry['session']] if entry['session'] else [], table)
+            rss = sum(p['rss_bytes'] for p in rows)
+            details.append({'task': task, 'rss_bytes': rss, 'processes': rows})
+            if rss > slots[task]['max_owned_rss_bytes']:
+                violations.append('executor-rss-budget')
+            executor_pids.update(p['pid'] for p in rows)
+            allowed_compiler_pids.update(p['pid'] for p in rows)
+            observed.update((p['pid'], p) for p in rows)
+        # Cwd discovers new short-lived project helpers; ancestry includes their
+        # descendants even when those children use a temporary working directory.
+        discovered = {p for p, row in table.items() if row['cwd'] is not None and Path(row['cwd']).is_relative_to(self.args.main)}
+        while True:
+            expanded = discovered | {p for p, row in table.items() if row['ppid'] in discovered}
+            if expanded == discovered:
+                break
+            discovered = expanded
+        observed.update((p, table[p]) for p in discovered if table[p]['state'] != 'Z')
+        if any(p not in allowed_compiler_pids and row['executable'] and re.fullmatch(r'(?:clang(?:\+\+)?(?:-\d+)?|(?:\w+-)?gcc(?:-\d+)?|g\+\+|cc1(?:plus)?|cc|c\+\+)', row['executable']) for p, row in observed.items()):
+            violations.append('unregistered-project-compiler')
+        light_rss = sum(row['rss_bytes'] for p, row in observed.items() if p not in executor_pids)
+        if light_rss > self.allocation['light_rss_budget_bytes']:
+            violations.append('light-rss-budget')
+        vm = {line.split()[0]: int(line.split()[1]) for line in Path('/proc/vmstat').read_text().splitlines() if line.startswith(('pswpin ', 'pswpout '))}
+        memory = {line.split(':')[0]+'_bytes': int(line.split()[1])*1024 for line in Path('/proc/meminfo').read_text().splitlines() if line.startswith(('MemAvailable:', 'SwapTotal:', 'SwapFree:', 'SwapCached:'))}
+        return {'recorded_at': stamp(), 'project_rss_bytes': sum(p['rss_bytes'] for p in observed.values()), 'violations': violations, 'light_rss_bytes': light_rss, 'project_processes': list(observed.values()), 'project_swap_bytes': sum(p['swap_bytes'] for p in observed.values()), 'workloads': details, **memory, **vm}
+
+    def reserve(self):
+        def operation(state):
+            if self.args.task in state['entries']:
+                raise ValueError('Duplicate executor/finished allocation requires a new root plan')
+            if self.snapshot(state)['violations']:
+                raise ValueError('Project allocation currently exceeds reserved budget')
+            state['entries'][self.args.task] = {'identity': self.identity, 'session': None, 'status': 'active'}
+        self.transaction(operation); self.registered = True
+
+    def sample(self, session=None):
+        def operation(state):
+            entry = state['entries'][self.args.task]
+            if entry['identity'] != self.identity or entry['status'] != 'active':
+                raise ValueError('Executor does not own active reservation')
+            entry['session'] = session
+            return self.snapshot(state)
+        return self.transaction(operation)
+
+    def release(self):
+        if not self.registered:
+            return
+        def operation(state):
+            entry = state['entries'][self.args.task]
+            if entry['identity'] != self.identity:
+                raise ValueError('Cannot release another executor')
+            session = entry['session']
+            if session and any(p['state'] != 'Z' and p['session'] == session for p in process_table().values()):
+                raise ValueError('Cannot release while owned session survives')
+            entry['session'] = None; entry['status'] = 'complete'
+        self.transaction(operation); self.registered = False
+
+
+def project_approval(args, data, *, executor_path=None):
+    strict_fields(data, ['schema', 'reviewed_executor_sha256', 'runner_reviewed', 'root_lease', 'root_lease_path',
+                         'root_lease_sha256', 'resource_queue_path', 'max_jobs_per_executor', 'task', 'owner',
+                         'experiment', 'shard', 'source_plan_sha256', 'qemu_allowed'], 'prospective executor approval')
+    executor_sha256 = sha(executor_path or __file__)
+    if data['resource_queue_path'] != RESOURCE_QUEUE:
+        raise ValueError('Only the canonical root resource queue grants allocations')
+    if data['schema'] != PROJECT_PROFILE or data['reviewed_executor_sha256'] != executor_sha256 or data['runner_reviewed'] is not True or type(data['max_jobs_per_executor']) is not int or data['max_jobs_per_executor'] != 1 or data['qemu_allowed'] is not False or any(data[k] != getattr(args, k) for k in ['task', 'owner', 'experiment', 'shard']):
+        raise ValueError('Approval must bind exact reviewed serial executor and owner experiment')
+    for key in ['root_lease_sha256', 'source_plan_sha256']:
+        if type(data[key]) is not str or not re.fullmatch('[0-9a-f]{64}', data[key]):
+            raise ValueError('Invalid approval hash')
+    for key in ['root_lease_path', 'resource_queue_path']:
+        path = PurePosixPath(data[key])
+        if path.is_absolute() or '..' in path.parts or str(path) != data[key] or not str(path).startswith('artifacts/'):
+            raise ValueError('Root allocation/queue must be canonical MAIN artifact paths')
+    return ProjectBudget(args, data, executor_sha256)
+
+
+def stable_memory(supervise, seconds=45, budget=None):
     start = time.monotonic(); samples = []; consecutive = 0
     while time.monotonic()-start <= seconds:
-        sample = supervise.sample(); samples.append(sample)
-        consecutive = consecutive+1 if sample['MemAvailable_bytes'] >= 4*GIB else 0
+        sample = supervise.sample()
+        if budget:
+            sample['project_budget'] = budget.sample()
+        samples.append(sample)
+        good = sample['MemAvailable_bytes'] >= 4*GIB and (not budget or (not sample['project_budget']['violations'] and sample['project_budget']['project_rss_bytes'] <= 6*GIB))
+        consecutive = consecutive+1 if good else 0
         if consecutive == 3:
             return {'admitted': True, 'samples': samples, 'elapsed_seconds': time.monotonic()-start}
         if seconds-(time.monotonic()-start) < 1:
@@ -413,9 +685,14 @@ def stable_memory(supervise, seconds=45):
     return {'admitted': False, 'samples': samples, 'elapsed_seconds': time.monotonic()-start}
 
 
-def run_child(argv, cwd, out, label, supervise, timeout=120, admit=True):
-    admission = stable_memory(supervise) if admit else {'admitted': True, 'not_compiler': True}
-    record = {'argv': [str(a) for a in argv], 'cwd': str(cwd), 'started_at': stamp(), 'timeout_seconds': timeout, 'rss_budget_bytes': 256*1024**2, 'admission': admission}
+def run_child(argv, cwd, out, label, supervise, timeout=120, admit=True, budget=None):
+    admission = stable_memory(supervise, budget=budget) if admit else {'admitted': True, 'not_compiler': True}
+    rss_limit = budget.rss_limit if budget else 256*1024**2
+    if budget:
+        admission['project_before'] = budget.sample()
+        if admission['project_before']['MemAvailable_bytes'] < 4*GIB or admission['project_before']['violations'] or admission['project_before']['project_rss_bytes'] > 6*GIB:
+            admission['admitted'] = False
+    record = {'argv': [str(a) for a in argv], 'cwd': str(cwd), 'started_at': stamp(), 'timeout_seconds': timeout, 'rss_budget_bytes': rss_limit, 'admission': admission}
     if not admission['admitted']:
         record.update(exit_code=None, outcome='resource-deferred', child_started=False)
         return record
@@ -435,11 +712,22 @@ def run_child(argv, cwd, out, label, supervise, timeout=120, admit=True):
             while True:
                 sample = supervise.sample(proc.pid)
                 controller = int(Path('/proc/self/statm').read_text().split()[1])*resource.getpagesize()
+                if budget:
+                    try:
+                        sample['project_budget'] = budget.sample(proc.pid)
+                    except Exception as error:
+                        record['project_budget_error'] = repr(error)
+                        record['stop_reason'] = 'project-admission'
+                        supervise.terminate(proc); break
                 sample['controller_rss_bytes'] = controller
                 sample['total_owned_rss_bytes'] = controller+sample['owned_tree_rss_bytes']
+                if budget:
+                    project = sample['project_budget']
+                    record['peak_project_rss_bytes'] = max(record.get('peak_project_rss_bytes', 0), project['project_rss_bytes'])
+                    record['peak_project_swap_bytes'] = max(record.get('peak_project_swap_bytes', 0), project['project_swap_bytes'])
                 peak = max(peak, sample['total_owned_rss_bytes']); samples.write(json.dumps(sample)+'\n'); samples.flush()
-                if peak > 256*1024**2 or time.monotonic()-started > timeout or (admit and sample['MemAvailable_bytes'] < 4*GIB):
-                    record['stop_reason'] = 'rss-budget' if peak > 256*1024**2 else 'deadline' if time.monotonic()-started > timeout else 'MemAvailable-floor'
+                if peak > rss_limit or (budget and (sample['project_budget']['project_rss_bytes'] > 6*GIB or sample['project_budget']['violations'])) or time.monotonic()-started > timeout or (admit and sample['MemAvailable_bytes'] < 4*GIB):
+                    record['stop_reason'] = 'rss-budget' if peak > rss_limit or (budget and (sample['project_budget']['project_rss_bytes'] > 6*GIB or sample['project_budget']['violations'])) else 'deadline' if time.monotonic()-started > timeout else 'MemAvailable-floor'
                     supervise.terminate(proc); break
                 if proc.poll() is not None:
                     break
@@ -449,10 +737,16 @@ def run_child(argv, cwd, out, label, supervise, timeout=120, admit=True):
             if any(p['state'] != 'Z' for p in supervise.sample(proc.pid)['owned_processes']):
                 supervise.terminate(proc)
             after = supervise.sample(proc.pid)
+            if budget:
+                try:
+                    record['project_after'] = budget.sample()
+                    record['host_swap_counter_deltas'] = {key: record['project_after'][key]-admission['project_before'][key] for key in ['pswpin', 'pswpout']}
+                except Exception as error:
+                    record['project_after_error'] = repr(error)
             record.update(after=after, elapsed_seconds=time.monotonic()-started, peak_total_owned_rss_bytes=peak, stdout_sha256=sha(stdout), stderr_sha256=sha(stderr))
     if any(p['state'] != 'Z' for p in after['owned_processes']):
         raise RuntimeError('Owned child survived finite cleanup')
-    record['outcome'] = 'resource-deferred' if record.get('stop_reason') in ['MemAvailable-floor', 'rss-budget'] else 'timeout' if record.get('stop_reason') else 'pass' if record['exit_code'] == 0 else 'fail'
+    record['outcome'] = 'resource-deferred' if record.get('stop_reason') in ['MemAvailable-floor', 'rss-budget', 'project-admission'] else 'timeout' if record.get('stop_reason') else 'pass' if record['exit_code'] == 0 else 'fail'
     return record
 
 
@@ -478,6 +772,11 @@ def approval(args):
     if not args.approval or not args.approval_sha256:
         raise ValueError('Explicit independently reviewed runner/root lease descriptor required')
     data = load(args.approval, args.approval_sha256)
+    if getattr(args, 'resource_profile', 'legacy') == PROJECT_PROFILE:
+        args.project_budget = project_approval(args, data)
+        return data
+    if data.get('schema') == PROJECT_PROFILE:
+        raise ValueError('Prospective approval requires explicit project-budget profile')
     if data.get('reviewed_executor_sha256') != sha(__file__) or data.get('runner_reviewed') is not True or not data.get('root_lease') or data.get('max_jobs_per_executor') != 1 or data.get('max_total_project_jobs') != 2 or data.get('max_total_project_rss_bytes', 3*GIB) > 2*GIB:
         raise ValueError('Execution approval does not bind reviewed runner and resource lease')
     ledger = load(args.main/'state/lab.json')
@@ -563,6 +862,7 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--resume', type=Path)
     parser.add_argument('--resume-sha256')
+    parser.add_argument('--resource-profile', choices=['legacy', PROJECT_PROFILE], default='legacy')
     parser.add_argument('--approval', type=Path)
     parser.add_argument('--approval-sha256')
     args = parser.parse_args(); args.main = args.main.resolve()
@@ -572,7 +872,14 @@ def main():
     try:
         if args.mode == 'execute':
             report['execution_approval'] = approval(args)
+            if hasattr(args, 'project_budget'):
+                args.project_budget.reserve()
         plan, inputs, cache = bind(args, out)
+        if hasattr(args, 'project_budget'):
+            source = args.project_budget.source_plan
+            if source['provenance'] != plan['provenance'] or source['shard'] != plan['shard'] or [(r['id'], r['input_key'], r['recipe_sha256']) for r in source['selected']] != [(r['id'], r['input_key'], r['recipe_sha256']) for r in plan['selected']]:
+                raise ValueError('New execution differs from the exact root-admitted source plan')
+            report['resource_profile'] = PROJECT_PROFILE
         report.update(provenance=plan['provenance'], shard=args.shard, selected_ids=[r['id'] for r in plan['selected']], input_bindings=str(out/'input-bindings.json'), input_bindings_sha256=sha(out/'input-bindings.json'))
         if args.mode == 'plan':
             report.update(outcome='pass', summary='Frozen genuine guest graph/shard/source/config/tool/header namespace validated; compiler not started, no object/kernel/guest claim')
@@ -598,7 +905,7 @@ def main():
                         shutil.copyfile(old['object'], output); shutil.copyfile(old['dependency_file'], dep)
                         item.update(old, object=str(output), dependency_file=str(dep), dependency_original_target=old.get('dependency_original_target', old['object']), reused_from={'record': prior[identity]['record'], 'record_sha256': prior[identity]['record_sha256']})
                     else:
-                        result = run_child(row['argv'], row['cwd'], out, identity.replace('/', '_'), supervise)
+                        result = run_child(row['argv'], row['cwd'], out, identity.replace('/', '_'), supervise, budget=getattr(args, 'project_budget', None))
                         report['commands'].append(result); report['compiler_started'] |= result.get('child_started', False)
                         item['command'] = result
                         if result['outcome'] == 'pass':
@@ -644,8 +951,14 @@ def main():
     finally:
         report['controller_memory'] = actual_controller_memory()
         report['controller_peak_rss_bytes'] = report['controller_memory']['exec_image_high_water_bytes']
-        if report['controller_peak_rss_bytes'] > 256*1024**2:
-            report.update(outcome='fail', controller_resource_error='Controller exceeded256MiB; not resource-qualified')
+        controller_limit = args.project_budget.rss_limit if hasattr(args, 'project_budget') else 256*1024**2
+        if report['controller_peak_rss_bytes'] > controller_limit:
+            report.update(outcome='fail', controller_resource_error='Controller exceeded admitted RSS cap; not resource-qualified' if hasattr(args, 'project_budget') else 'Controller exceeded256MiB; not resource-qualified')
+        if hasattr(args, 'project_budget'):
+            try:
+                args.project_budget.release()
+            except Exception as error:
+                report.update(outcome='fail', project_reservation_release_error=repr(error))
         report['artifact_hashes'] = {str(p): sha(p) for p in out.rglob('*') if p.is_file()}
         report['artifacts'] = list(report['artifact_hashes']); report['sha256'] = report['artifact_hashes']
         write(out/'evidence.json', report)
