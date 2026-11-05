@@ -7,7 +7,25 @@ integration role. Worktree `worktrees/int-platform-20261106`, branch
 component and independent-review files are exact scoped cherry-picks, with no
 original-owner, registry, generated-view or shared input edits.
 
-## Current handoff: 2026-11-05 22:30 UTC
+## Current handoff: 2026-11-05 22:46 UTC
+
+KRN-039/REV-022 are now published at exact
+`c171d01827443e287c7a74a9b2459113e37e5dac` by root-approved plan5316aec.
+Whole common check passed all 170 tests in 13.000 seconds, exit 0, peak owned
+RSS 400281600 bytes and no surviving owned processes. Matching cn lease15 was
+atomically released under the stable integration lock; exact readback preserves
+policy v2, project-wide six-compiler/6 GiB ceiling and every unrelated queue
+field. `des-publication.json` binds the actual publication/release capsules.
+Original ci/cl owners alone close their tasks after root's acceptance receipt.
+There was no extra source corpus, algorithm, compiler trial or guest execution.
+
+VM-038's new genuine Firehose namespace proposal is the next concrete source
+candidate; source-only facts c68cf193 are accepted, its qualifier freeze and
+explicit consumer version remain to be independently reviewed. Shared VM-036
+author dz continues adapter/source/runtime controls, preserving all actual
+failed attempts. Final new budget API is selected only after VM-037 review.
+
+## Earlier preparation snapshot: 2026-11-05 22:30 UTC
 
 Routing correction after that snapshot: actual VM-036 owner is dz/misc_worker,
 not the initially intended dy. The exact new physical process boundary and real
