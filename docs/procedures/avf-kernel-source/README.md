@@ -146,3 +146,51 @@ source/output/config/parent identities and retained failures.
 Main common checks and acceptance remain coordinator review steps. Stay source
 only: no compiler/header-route/fullbuild/link/QEMU/phone/MMIO, private Apple ABI,
 SDK equivalence, native operation or XNU/PID1/boot claim.
+
+## VM-008 handoff and read-only verification
+
+The reusable descriptor records both full source roots/configs:
+
+- Common source tree `188f23441033a5c673367a24b35814289a57a75e`.
+- Baseline tree `9eac2aced3b5388e64f35f4466bbdbfae4da5eea`, .config SHA256
+  `956fcf04bfb38242017c6515db7ae6844067fd1fc5fcd140c2685604160c91a0`.
+- QEMU tree `6a955269a8f4e17d21239f75cef9fbe66cffc56c`, .config SHA256
+  `1571c785ae12ed79858fb9c81ebfce4ecd5414e4ce6af906820f6b9d61f68394`.
+
+These outputs and originals are frozen by content/mode/Git identity manifests.
+Copy a chosen source/config into a **new VM-008-owned** preparation area before
+any setup/header generation. Do not regenerate in these published trees, reuse
+E1S objects/headers/archives, run donor installers, use allocator fallback or
+emit empty IIG implementations as a substitute for genuine inputs. Actual full
+public-header namespace/MIG/IIG/representative compile remains VM-008 work.
+VM-002 still needs a complete qualified actual XNU image and real owned PID1/
+stop execution; this source result does not satisfy that acceptance.
+
+Read-only component verification from MAIN after integration, fresh output:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 tools/build/avf_kernel_source.py verify \
+  --main /home/egor/dev/pet/s24-ios-exynos \
+  --cache /home/egor/dev/pet/s24-ios-exynos/worktrees/vm-007-20261105/artifacts/avf-kernel-source/cache \
+  --stage /home/egor/dev/pet/s24-ios-exynos/worktrees/vm-007-20261105/artifacts/avf-kernel-source/compose-final-ed9fdbf \
+  --out artifacts/avf-kernel-source/NEW-verify
+```
+
+Final descriptor/API verification at `01fe7a189583ccc12cbd4a824a7a0a53c1c30aef`
+passed8 read-only child commands, nine negative controls and20 excluded-object
+checks; sampled owned RSS peaked at53.61328125MiB. No source regeneration occurred.
+All shared/native parent witnesses match the full composition run. All source
+runs use one owned process session at a time, per-child256MiB address-space and
+sampled aggregate RSS limits and finite120/180/240-second stage deadlines with
+owned cleanup. These are sampled peaks, not continuous-memory proofs. The first
+failed short pack read had no resource sample; its0 field is not zero-memory
+usage. No swap/cache/global-process action or heavy build lease is used.
+
+Only authored tooling/docs and sanitized source/provenance metadata are committed.
+Source and complete component license notices remain together in owned artifacts:
+Scion MIT loader/tools and APSL kernel derivatives, public XNU/HFS APSL/per-file
+notices and third-party notices. No blanket license replaces individual notices.
+
+Final measurements and the 81118-artifact index are bound by
+[`evidence.json`](evidence.json). Qualified source counts and canonical descriptors
+are source-only; the next native/header/kernel/guest gates remain explicit.
