@@ -40,7 +40,8 @@ initialization. No E1S source object, SDK header or native archive is substitute
 `minicrypto_init` is registered at EARLY_BOOT/FIRST. Source order is digest/AES
 selftests, `mc_ce_start`, deferred SHA256, `register_crypto_functions`, then
 `register_and_init_prng` after successful registration. Registration retains the
-table pointer; an existing provider returns -1, so that branch also skips this
+table pointer; its static mutable callback table is not copied or sealed by
+registration. An existing provider returns -1, so that branch also skips this
 donor's PRNG initialization. Actual startup sorts by subsystem then rank and
 invokes the hooks; kmem's random context initialization is EARLY_BOOT/MIDDLE.
 The source order therefore supports this intended provider-before-kmem route.
@@ -92,3 +93,11 @@ There is no inferred reachability or ABI offset measurement. Limits are 256 MiB
 address space and 60 seconds; current-image VmHWM/RSS are recorded separately
 from inherited historical `ru_maxrss`. No compile, preprocessor, generator, link,
 QEMU, network acquisition, physical device action or MAIN common check occurs.
+
+The first planned run is retained under `runs/source-audit1`: it stopped on an
+actual non-UTF8 byte in source after admission, before completing the scan. Its
+current-image VmHWM was 73,028 KiB. The corrected reader uses lossless Latin-1
+for ASCII C tokens; no source byte or input hash changes. Read-only discovery
+failures are preserved separately in `discovery-failures.json`. A documentation
+patch initially failed to match its expected sentence and was reapplied to the
+actual sentence; it changed no source or measurement output.

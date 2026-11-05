@@ -1,0 +1,12 @@
+{
+  "kind": "session-discovery-history",
+  "scope": "Read-only discovery commands; no compiler or guest",
+  "timing_limit": "Individual discovery command timestamps were not captured; actual exits below were observed in tool results. The separately planned audit records precise time and hashes.",
+  "failures": [
+    {"cwd": "/home/egor/dev/pet/s24-ios-exynos", "command": "rg -n 'mc_provider|Scion|scion|startup|crypto' docs/procedures/avf* tools/build/avf* research/notes/VM-007* research/notes/KRN-039*", "exit_code": 1, "diagnostic": "zsh:1: no matches found: research/notes/VM-007*", "correction": "Use rg --files and explicit existing paths."},
+    {"cwd": "/home/egor", "command": "cat worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/libkern/crypto/register_crypto.c", "exit_code": 1, "diagnostic": "No such file or directory", "correction": "Repeat the read with explicit MAIN cwd."},
+    {"cwd": "/home/egor", "command": "rg -n 'crypto_functions|crypto_funcs|STARTUP\\(EARLY_BOOT|register_and_init_prng|crypto_init|mc_ce_start' worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/libkern/crypto worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/osfmk/vm/vm_kern.c worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/osfmk/prng/random.c worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/osfmk/kern/startup.c", "exit_code": 2, "diagnostic": "Relative source paths absent from /home/egor; prng/random.c also absent.", "correction": "Use MAIN cwd and genuine osfmk/prng/prng_random.c."},
+    {"cwd": "/home/egor/dev/pet/s24-ios-exynos", "command": "cat src/platform/crypto/chacha/chacha_native.c src/platform/crypto/xts/kernel_provider.h", "exit_code": 1, "diagnostic": "chacha_native.c absent; kernel_provider.h was read successfully.", "correction": "Use actual chacha/functions.c and functions.h."},
+    {"cwd": "/home/egor/dev/pet/s24-ios-exynos", "command": "rg -n 'g_crypto_funcs->|STARTUP\\(EARLY_BOOT|mc_ce_start|mc_ce_sha256_di' worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/libkern/libkern/crypto worktrees/vm-008-20261105/artifacts/avf-kernel-headers/prepare-2/source/xnu/EXTERNAL_HEADERS/corecrypto", "exit_code": 1, "diagnostic": "No matching direct field/startup token in the two requested header directories.", "correction": "Retain as no-match; complete source scan uses exact root and records all C/H/CPP source witnesses."}
+  ]
+}

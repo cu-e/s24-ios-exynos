@@ -210,6 +210,8 @@ def main():
     report = {'kind': 'source-review', 'origin': 'local-host', 'outcome': 'fail',
               'recorded_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
               'argv': sys.argv, 'cwd': os.getcwd(), 'tool_sha256': sha(Path(__file__)),
+              'python_argv': sys.orig_argv,
+              'inputs_sha256': sha(FIXTURE / 'inputs.json'),
               'python_sha256': sha(Path(sys.executable).resolve()),
               'resource_limits': {'address_space_bytes': 256 * 1024 * 1024, 'deadline_seconds': 60},
               'environment': {k: os.environ.get(k) for k in ('LC_ALL', 'PYTHONUTF8', 'PYTHONNOUSERSITE', 'PYTHONDONTWRITEBYTECODE')}}
