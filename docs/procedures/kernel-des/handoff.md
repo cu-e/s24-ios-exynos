@@ -77,3 +77,21 @@ Only guest TU recompiled; five images relinked and pointer/mapping proofs passed
 Prepared capsule SHA2569d34b6ea29cbb76f5cdc4bfecef523ed07f33b36cbc49c324dc208cb2ed21fda,
 artifacts/kernel-des/caller-candidate2/evidence.json. All six actual cases remain
 pending a fresh explicit root lease. Do not infer a successful fix before execution.
+
+Caller-guest2 verified the corrected handoff/mapping and1964 vector/helper prefix,
+then failed at guest.c63: this new fixture incorrectly expected CCERR_PARAMETER
+for overflow. Accepted unchanged des.c78 and its previously qualified suite101
+require CCERR_OVERFLOW. Preserve that failure, source location and exact trace;
+no ESP case or whole positive is accepted from it. Zero survivors; lease released.
+Only those two expected enums changed, with unchanged-output guards retained.
+Caller-candidate3 recompiled only guest and reused identical ESP/fortify/native/
+algorithm objects, prepared PASS SHA256
+9e93456a02897e2635b1eeadc577a2303180b6a18ddfa37be6be50d8d7c88c7f.
+All six actual cases require another explicit root lease.
+
+Historical native helper dependency transition is intentional: development3 and
+native-esp-clear1 retain the pre-host-guard helper hash97504d... . Actual matched
+strict rebuild in native-controls4 measures frozen812c9d... helper and proves
+identical native text/layout/callback metadata; the final988 graph binds that
+new source/object. Superseded predecessor source hashes are historical, not current
+closure. REV022 separately preserved a predecessor sweep failure at this boundary.

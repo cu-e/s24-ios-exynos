@@ -60,7 +60,7 @@ static int vectors_and_contracts(void)
   CHECK(e->init(e,ek,t?16:7,raw)==CCERR_PARAMETER&&!memcmp(ek,snapshot,768));CHECK(c->init(c,ck,t?16:9,raw)==CCERR_PARAMETER&&!memcmp(ck,snapshot,768));
   struct ccmode_ecb copy=*e;struct ccmode_cbc ccopy=*c;CHECK(copy.init(&copy,ek,t?24:8,raw)==CCERR_CALL_SEQUENCE);CHECK(ccopy.init(&ccopy,ck,t?24:8,raw)==CCERR_CALL_SEQUENCE);
   CHECK(e->init(e,ek,t?24:8,raw)==0&&c->init(c,ck,t?24:8,raw)==0);memset(out,0xa5,sizeof(out));memcpy(back,out,sizeof(out));
-  CHECK(e->ecb(ek,(size_t)-1/8+1,out,out)==CCERR_PARAMETER&&!memcmp(out,back,sizeof(out)));CHECK(c->cbc(ck,iv,(size_t)-1/8+1,out,out)==CCERR_PARAMETER&&!memcmp(out,back,sizeof(out)));
+  CHECK(e->ecb(ek,(size_t)-1/8+1,out,out)==CCERR_OVERFLOW&&!memcmp(out,back,sizeof(out)));CHECK(c->cbc(ck,iv,(size_t)-1/8+1,out,out)==CCERR_OVERFLOW&&!memcmp(out,back,sizeof(out)));
   CHECK(e->ecb(ek,1,out,out+1)==CCERR_PARAMETER&&!memcmp(out,back,sizeof(out)));CHECK(c->cbc(ck,iv,1,out,out+1)==CCERR_PARAMETER&&!memcmp(out,back,sizeof(out)));
   CHECK(e->ecb(ek,0,NULL,NULL)==0&&c->cbc(ck,NULL,0,NULL,NULL)==0);
   mbedtls_platform_zeroize(ek,768);mbedtls_platform_zeroize(ck,768);CHECK(e->ecb(ek,1,out,out)!=0&&c->cbc(ck,iv,1,out,out)!=0);
