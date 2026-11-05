@@ -1,0 +1,91 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "summary": "Actual selected E1S generator/configuration/unit commands; no full kernel/native or external ABI qualification",
+  "checks": [
+    {
+      "name": "witnessed-inputs",
+      "passed": true
+    },
+    {
+      "name": "actual-code-symbols-kalloc",
+      "passed": true,
+      "required": [
+        "_kalloc_ext",
+        "_kfree_ext",
+        "_kalloc_type_impl_external"
+      ]
+    },
+    {
+      "name": "actual-arm64-disassembly-kalloc",
+      "passed": true,
+      "instruction_lines": 5863
+    },
+    {
+      "name": "actual-code-symbols-OSData",
+      "passed": true,
+      "required": [
+        "__ZN6OSData12withCapacityEj",
+        "__ZN6OSData16initWithCapacityEj"
+      ]
+    },
+    {
+      "name": "actual-arm64-disassembly-OSData",
+      "passed": true,
+      "instruction_lines": 2404
+    },
+    {
+      "name": "actual-code-symbols-pe_identify_machine",
+      "passed": true,
+      "required": [
+        "_pe_identify_machine"
+      ]
+    },
+    {
+      "name": "actual-arm64-disassembly-pe_identify_machine",
+      "passed": true,
+      "instruction_lines": 639
+    }
+  ],
+  "units": [
+    {
+      "source": "osfmk/kern/kalloc.c",
+      "source_sha256": "05381b898a98188c271bc76f798a281d5eaaaee586acf4359001fba8a28df23c",
+      "component": "osfmk",
+      "exit_code": 0,
+      "actual_arm64_object": true,
+      "object_sha256": "eb9cc54d5ddf3ab2d39d5f46df136080eb47d334e7f7ab36b5c725365cca9311",
+      "diagnostic": "",
+      "missing_headers": []
+    },
+    {
+      "source": "libkern/c++/OSData.cpp",
+      "source_sha256": "61af50e2c5fc3bd22c1d05a2982ccddce6682c6b14ba35472199655074103ddc",
+      "component": "libkern",
+      "exit_code": 0,
+      "actual_arm64_object": true,
+      "object_sha256": "a0e41b9594df73fdc8c5e007ea5688be8c2812b34a5f1414ab232ebe637fccea",
+      "diagnostic": "__)\n      |                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nnote: (skipping 1 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\n<scratch space>:124:1: note: expanded from here\n  124 | kalloc_type_2\n      | ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1266:9: note: expanded from macro 'kalloc_type_2'\n 1266 |         static _KALLOC_TYPE_DEFINE(kt_view_var, type, KT_SHARED_ACCT);         \\\n      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1505:6: note: expanded from macro '_KALLOC_TYPE_DEFINE'\n 1505 |             .kt_zv.zv_name = \"site.\" #type,                             \\\n      |             ^~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/libkern/c++/OSData.cpp:586:32: warning: ISO C++ requires field designators to be specified in declaration order; field 'kt_size' will be initialized after field 'kt_signature' [-Wreorder-init-list]\n  586 |                 reserved = (typeof(reserved))kalloc_type(ExpansionData, (zalloc_flags_t)(Z_WAITOK | Z_ZERO));\n      |                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:635:27: note: expanded from macro 'kalloc_type'\n  635 | #define kalloc_type(...)  KALLOC_DISPATCH(kalloc_type, ##__VA_ARGS__)\n      |                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1421:2: note: expanded from macro 'KALLOC_DISPATCH'\n 1421 |         KALLOC_DISPATCH1(base, KALLOC_COUNT_ARGS(__VA_ARGS__), ##__VA_ARGS__)\n      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1419:40: note: expanded from macro 'KALLOC_DISPATCH1'\n 1419 | #define KALLOC_DISPATCH1(base, N, ...) __CONCAT(base, N)(__VA_ARGS__)\n      |                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nnote: (skipping 1 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\n<scratch space>:124:1: note: expanded from here\n  124 | kalloc_type_2\n      | ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1266:9: note: expanded from macro 'kalloc_type_2'\n 1266 |         static _KALLOC_TYPE_DEFINE(kt_view_var, type, KT_SHARED_ACCT);         \\\n      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1508:6: note: expanded from macro '_KALLOC_TYPE_DEFINE'\n 1508 |             .kt_signature = KALLOC_TYPE_EMIT_SIG(type),                 \\\n      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/libkern/c++/OSData.cpp:586:32: note: previous initialization for field 'kt_size' is here\n  586 |                 reserved = (typeof(reserved))kalloc_type(ExpansionData, (zalloc_flags_t)(Z_WAITOK | Z_ZERO));\n      |                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:635:27: note: expanded from macro 'kalloc_type'\n  635 | #define kalloc_type(...)  KALLOC_DISPATCH(kalloc_type, ##__VA_ARGS__)\n      |                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1421:2: note: expanded from macro 'KALLOC_DISPATCH'\n 1421 |         KALLOC_DISPATCH1(base, KALLOC_COUNT_ARGS(__VA_ARGS__), ##__VA_ARGS__)\n      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1419:40: note: expanded from macro 'KALLOC_DISPATCH1'\n 1419 | #define KALLOC_DISPATCH1(base, N, ...) __CONCAT(base, N)(__VA_ARGS__)\n      |                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nnote: (skipping 1 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\n<scratch space>:124:1: note: expanded from here\n  124 | kalloc_type_2\n      | ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1266:9: note: expanded from macro 'kalloc_type_2'\n 1266 |         static _KALLOC_TYPE_DEFINE(kt_view_var, type, KT_SHARED_ACCT);         \\\n      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1507:17: note: expanded from macro '_KALLOC_TYPE_DEFINE'\n 1507 |             .kt_size = sizeof(type),                                    \\\n      |                        ^~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/libkern/c++/OSData.cpp:598:32: warning: nested designators are a C99 extension [-Wc99-designator]\n  598 |                 reserved = (typeof(reserved))kalloc_type(ExpansionData, (zalloc_flags_t)(Z_WAITOK | Z_ZERO));\n      |                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:635:27: note: expanded from macro 'kalloc_type'\n  635 | #define kalloc_type(...)  KALLOC_DISPATCH(kalloc_type, ##__VA_ARGS__)\n      |                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1421:2: note: expanded from macro 'KALLOC_DISPATCH'\n 1421 |         KALLOC_DISPATCH1(base, KALLOC_COUNT_ARGS(__VA_ARGS__), ##__VA_ARGS__)\n      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1419:40: note: expanded from macro 'KALLOC_DISPATCH1'\n 1419 | #define KALLOC_DISPATCH1(base, N, ...) __CONCAT(base, N)(__VA_ARGS__)\n      |                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nnote: (skipping 1 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\n<scratch space>:135:1: note: expanded from here\n  135 | kalloc_type_2\n      | ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1266:9: note: expanded from macro 'kalloc_type_2'\n 1266 |         static _KALLOC_TYPE_DEFINE(kt_view_var, type, KT_SHARED_ACCT);         \\\n      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1505:6: note: expanded from macro '_KALLOC_TYPE_DEFINE'\n 1505 |             .kt_zv.zv_name = \"site.\" #type,                             \\\n      |             ^~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/libkern/c++/OSData.cpp:598:32: warning: ISO C++ requires field designators to be specified in declaration order; field 'kt_size' will be initialized after field 'kt_signature' [-Wreorder-init-list]\n  598 |                 reserved = (typeof(reserved))kalloc_type(ExpansionData, (zalloc_flags_t)(Z_WAITOK | Z_ZERO));\n      |                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:635:27: note: expanded from macro 'kalloc_type'\n  635 | #define kalloc_type(...)  KALLOC_DISPATCH(kalloc_type, ##__VA_ARGS__)\n      |                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1421:2: note: expanded from macro 'KALLOC_DISPATCH'\n 1421 |         KALLOC_DISPATCH1(base, KALLOC_COUNT_ARGS(__VA_ARGS__), ##__VA_ARGS__)\n      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1419:40: note: expanded from macro 'KALLOC_DISPATCH1'\n 1419 | #define KALLOC_DISPATCH1(base, N, ...) __CONCAT(base, N)(__VA_ARGS__)\n      |                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nnote: (skipping 1 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\n<scratch space>:135:1: note: expanded from here\n  135 | kalloc_type_2\n      | ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1266:9: note: expanded from macro 'kalloc_type_2'\n 1266 |         static _KALLOC_TYPE_DEFINE(kt_view_var, type, KT_SHARED_ACCT);         \\\n      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1508:6: note: expanded from macro '_KALLOC_TYPE_DEFINE'\n 1508 |             .kt_signature = KALLOC_TYPE_EMIT_SIG(type),                 \\\n      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/libkern/c++/OSData.cpp:598:32: note: previous initialization for field 'kt_size' is here\n  598 |                 reserved = (typeof(reserved))kalloc_type(ExpansionData, (zalloc_flags_t)(Z_WAITOK | Z_ZERO));\n      |                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:635:27: note: expanded from macro 'kalloc_type'\n  635 | #define kalloc_type(...)  KALLOC_DISPATCH(kalloc_type, ##__VA_ARGS__)\n      |                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1421:2: note: expanded from macro 'KALLOC_DISPATCH'\n 1421 |         KALLOC_DISPATCH1(base, KALLOC_COUNT_ARGS(__VA_ARGS__), ##__VA_ARGS__)\n      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1419:40: note: expanded from macro 'KALLOC_DISPATCH1'\n 1419 | #define KALLOC_DISPATCH1(base, N, ...) __CONCAT(base, N)(__VA_ARGS__)\n      |                                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nnote: (skipping 1 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)\n<scratch space>:135:1: note: expanded from here\n  135 | kalloc_type_2\n      | ^\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1266:9: note: expanded from macro 'kalloc_type_2'\n 1266 |         static _KALLOC_TYPE_DEFINE(kt_view_var, type, KT_SHARED_ACCT);         \\\n      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-prepare/e1s-dependency-source-session1/xnu/osfmk/kern/kalloc.h:1507:17: note: expanded from macro '_KALLOC_TYPE_DEFINE'\n 1507 |             .kt_size = sizeof(type),                                    \\\n      |                        ^~~~~~~~~~~~\n17 warnings generated.\n",
+      "missing_headers": []
+    },
+    {
+      "source": "pexpert/arm/pe_identify_machine.c",
+      "source_sha256": "3557bb1b2c17f721f5cad529299aee49d61e2000fb0768ee6c22791340343ccd",
+      "component": "pexpert",
+      "exit_code": 0,
+      "actual_arm64_object": true,
+      "object_sha256": "a7a9e4d2d2c0034c75e34c5186679718306d82a228ab5e418b08d54afc62d028",
+      "diagnostic": "",
+      "missing_headers": []
+    }
+  ],
+  "kernel_source_witness_sha256": "2cbd3feacc870b5c17aa760677a1b1a9bb18473ada0f69cdb342af253b9af339",
+  "compiler_sha256": "3e00352f47a31504c731e70e592a3d407ac3a6176c59b1638cbb7b8f98a3bd27",
+  "audited_parent_experiment": "KCONFIG-005",
+  "audited_parent_report_sha256": "b1e1bd020cc02f69d5eb2674abedfba9860815f4caa831bbc49b4247fecaae9a",
+  "source_report": "artifacts/xnu-kernel-config/code-audit-session1/report.json",
+  "source_report_sha256": "159b85dd57c8e38d2e2ca2a4cad31a719b9eea83097463ec4065055132b16a0c",
+  "evidence": "state/evidence/KCONFIG-006.json",
+  "evidence_sha256": "285b58452ffd9e9e1580987c31fbd52188f6bff928c16c7fc16039e614d15b9b"
+}

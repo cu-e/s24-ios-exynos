@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-05T06:12:08+00:00",
-  "ledger_updated_at": "2026-11-05T06:12:07+00:00",
-  "registry_sha256": "290b2313219787ce68d12c175bcbf04fd33be9ff745a4f97531daa989498d0e8",
+  "generated_at": "2026-11-05T06:27:05+00:00",
+  "ledger_updated_at": "2026-11-05T06:27:04+00:00",
+  "registry_sha256": "3a5d387fdbe83f700111e4d84a0d092371123b7f623996db25528f8f8708fd15",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
-      "KRN-007",
+      "KRN-008",
       "VM-002",
       "USB-001",
       "SEN-001",
@@ -71,6 +71,7 @@
       "BT-005"
     ],
     "done": [
+      "KRN-007",
       "KRN-006",
       "KRN-005",
       "RES-008",
@@ -108,10 +109,48 @@
   },
   "tasks": [
     {
-      "id": "KRN-007",
-      "title": "Generate witnessed selected XNU component configuration and compile actual kernel units",
+      "id": "KRN-008",
+      "title": "Build actual selected E1S kernel object closure from genuine component recipes",
       "status": "pending",
       "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "KRN-007"
+      ],
+      "paths": [
+        "tools/build/xnu_kernel_objects.py",
+        "patches/kernel-objects",
+        "fixtures/public/xnu-kernel-objects",
+        "docs/procedures/xnu-kernel-objects.md"
+      ],
+      "sources": [
+        "apple-xnu",
+        "s24-port",
+        "xnu-tapi"
+      ],
+      "acceptance": [
+        "Use the recorded KCONFIG-005 generator/configuration and HARDEN-002 compiler, preserve all original source/build/header/evidence bytes and other owners/device scopes",
+        "Generate actual selected RELEASE/ARM64/E1S component configurations and derive the selected C/C++/assembly/generated object inventory from genuine Makefile output; every selected source needs an explicit status, with no silent omission or subset presented as a whole kernel",
+        "Close actual internal source exports using real declarations and byte-verified outputs, trace per-file compiler/assembler defines/options and generated MIG/IIG/assym dependencies; do not fabricate SDK declarations or disable metadata checks",
+        "Compile the selected actual kernel object set in isolated outputs, retain each real command/exit/source/config/tool/output digest and classify remaining exact failures; a complete-object-set pass requires all selected required objects and genuine machine code, not only prior three-unit controls",
+        "Publish exact remaining full-kernel link/SDK/DriverKit/private ABI/recovery requirements; no full native iOS/GPU/Wi-Fi/radio result from successful compilation"
+      ],
+      "steps": [
+        "Verify the KCONFIG-005/006 component manifest and source/compiler/IIG/MIG/header witnesses",
+        "Inspect generated Makefile file selections, per-component imports and architecture/per-file recipes before invoking builds",
+        "Build actual exports/generated inputs and all selected objects with bounded host jobs and deterministic failure retention; split additional independent outcomes into narrow child tasks when needed"
+      ],
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/KRN-008.md"
+    },
+    {
+      "id": "KRN-007",
+      "title": "Generate witnessed selected XNU component configuration and compile actual kernel units",
+      "status": "done",
+      "owner": "codex-kernel-config-20261105-r",
       "scope": "host",
       "evidence_kind": "host-test",
       "priority": 98,
@@ -139,7 +178,17 @@
         "Inspect SETUP/config/mkheaders.c, component config files and Makefile templates before invoking the configuration tool",
         "Generate actual feature/export inputs with provenance, compile actual units with metadata checks enabled and retain all diagnostics"
       ],
-      "column": "ready",
+      "started_at": "2026-11-05T06:13:00+00:00",
+      "last_heartbeat": "2026-11-05T06:27:03+00:00",
+      "updated_at": "2026-11-05T06:27:04+00:00",
+      "branch": "main",
+      "progress_note": "All four bounded criteria assessed from actual fresh generator/doconf output,59 configuration headers,18 Make-verified source exports and3 real ARM64 objects. Independent code audit checks six expected definitions and8906 disassembly instruction lines;132 tests pass.13 capsules/1262 artifact digests,10889 compiler sources,198 build inputs and5111 prepared sources remain unchanged; other owners/scopes preserved.",
+      "next_step": "KRN-008: derive complete selected component/object/assembly/generated-input inventory and actual full per-file/warning recipes, build every required object in fresh paths, then resolve genuine full-kernel linking/input requirements",
+      "handoff": "docs/procedures/xnu-kernel-config.md",
+      "evidence": "state/evidence/KRN-007.json",
+      "evidence_sha256": "f4e2904ec8ccae339a7ba3e94eb53c3b738d87422bb1d11e129e67d4e89b7e38",
+      "finished_at": "2026-11-05T06:27:04+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/KRN-007.md"
     },
@@ -3824,148 +3873,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-05T06:03:24+00:00",
-      "action": "experiment.record:HARDEN-001",
-      "owner": "codex-compiler-hardening-20261105-q"
-    },
-    {
-      "at": "2026-11-05T06:03:56+00:00",
-      "action": "experiment.plan:HARDEN-002",
-      "owner": "codex-compiler-hardening-20261105-q"
-    },
-    {
-      "at": "2026-11-05T06:04:20+00:00",
-      "action": "experiment.record:HARDEN-002",
-      "owner": "codex-compiler-hardening-20261105-q"
-    },
-    {
-      "at": "2026-11-05T06:05:19+00:00",
-      "action": "experiment.plan:HARDEN-003",
-      "owner": "codex-compiler-hardening-20261105-q"
-    },
-    {
-      "at": "2026-11-05T06:05:33+00:00",
-      "action": "experiment.record:HARDEN-003",
-      "owner": "codex-compiler-hardening-20261105-q"
-    },
-    {
-      "at": "2026-11-05T06:05:33+00:00",
-      "action": "experiment.plan:HARDEN-004",
-      "owner": "codex-compiler-hardening-20261105-q"
-    },
-    {
-      "at": "2026-11-05T06:05:57+00:00",
-      "action": "experiment.record:HARDEN-004",
-      "owner": "codex-compiler-hardening-20261105-q"
-    },
-    {
-      "at": "2026-11-05T06:05:58+00:00",
-      "action": "experiment.plan:HARDEN-005",
-      "owner": "codex-compiler-hardening-20261105-q"
-    },
-    {
-      "at": "2026-11-05T06:06:29+00:00",
-      "action": "experiment.record:HARDEN-005",
-      "owner": "codex-compiler-hardening-20261105-q"
-    },
-    {
-      "at": "2026-11-05T06:06:30+00:00",
-      "action": "task.update:KRN-006",
-      "owner": "codex-compiler-hardening-20261105-q",
-      "tasks": [
-        {
-          "id": "KRN-006",
-          "status": "in_progress",
-          "owner": "codex-compiler-hardening-20261105-q",
-          "priority": 97,
-          "progress_note": "Reproduced SIGTRAP and invalid template symbol names; real new AST archive fixes evaluator and all three vendor-expression mangles. C/C++ PCH controls pass; genuine OSData.cpp compiles. Prior seven metadata cases, six negatives, three mutations and17 interfaces retain pass.",
-          "next_step": "Trace per-component private defines behind kalloc/pexpert diagnostics; preserve immutable reports and complete acceptance handoff",
-          "last_heartbeat": "2026-11-05T06:06:30+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/xnu-compiler-hardening.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T06:07:31+00:00",
-      "action": "experiment.plan:HARDEN-006",
-      "owner": "codex-compiler-hardening-20261105-q"
-    },
-    {
-      "at": "2026-11-05T06:07:59+00:00",
-      "action": "experiment.record:HARDEN-006",
-      "owner": "codex-compiler-hardening-20261105-q"
-    },
-    {
-      "at": "2026-11-05T06:08:00+00:00",
-      "action": "experiment.plan:HARDEN-007",
-      "owner": "codex-compiler-hardening-20261105-q"
-    },
-    {
-      "at": "2026-11-05T06:08:32+00:00",
-      "action": "experiment.record:HARDEN-007",
-      "owner": "codex-compiler-hardening-20261105-q"
-    },
-    {
-      "at": "2026-11-05T06:09:16+00:00",
-      "action": "task.add:KRN-007",
-      "owner": "codex-compiler-hardening-20261105-q",
-      "tasks": [
-        {
-          "id": "KRN-007",
-          "status": "pending",
-          "owner": null,
-          "priority": 98
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T06:10:52+00:00",
-      "action": "task.update:KRN-006",
-      "owner": "codex-compiler-hardening-20261105-q",
-      "tasks": [
-        {
-          "id": "KRN-006",
-          "status": "in_progress",
-          "owner": "codex-compiler-hardening-20261105-q",
-          "priority": 97,
-          "progress_note": "All four bounded criteria assessed against immutable HARDEN evidence. Added source-reviewed AST/serialization/demangler paths and exact KRN-007 component configuration requirements. Preserved SIGTRAP/invalid-symbol failures and two harness failures; no native claim.",
-          "next_step": "Run repository and complete source/build/evidence integrity checks, then commit KRN-006 and hand off ready KRN-007",
-          "last_heartbeat": "2026-11-05T06:10:52+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/xnu-compiler-hardening.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-05T06:10:53+00:00",
-      "action": "experiment.plan:HARDEN-008",
-      "owner": "codex-compiler-hardening-20261105-q"
-    },
-    {
-      "at": "2026-11-05T06:12:05+00:00",
-      "action": "experiment.record:HARDEN-008",
-      "owner": "codex-compiler-hardening-20261105-q"
-    },
-    {
-      "at": "2026-11-05T06:12:06+00:00",
-      "action": "task.update:KRN-006",
-      "owner": "codex-compiler-hardening-20261105-q",
-      "tasks": [
-        {
-          "id": "KRN-006",
-          "status": "in_progress",
-          "owner": "codex-compiler-hardening-20261105-q",
-          "priority": 97,
-          "progress_note": "Bounded AST/mangling/PCH/SFINAE and actual source-unit criteria pass;132 repository tests pass. Independent integrity audit verifies11 evidence capsules/1068 artifact digests,10889 original compiler source files,198 build inputs and5111 prepared kernel files. Device scopes and all other owners unchanged.",
-          "next_step": "KRN-007: build/run genuine selected configuration generator and compile units with actual generated meta_features and component private defines; full kernel/native gates remain",
-          "last_heartbeat": "2026-11-05T06:12:06+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/xnu-compiler-hardening.md"
-        }
-      ]
-    },
-    {
       "at": "2026-11-05T06:12:07+00:00",
       "action": "task.done:KRN-006",
       "owner": "codex-compiler-hardening-20261105-q",
@@ -3982,12 +3889,165 @@
           "handoff": "docs/procedures/xnu-compiler-hardening.md"
         }
       ]
+    },
+    {
+      "at": "2026-11-05T06:13:00+00:00",
+      "action": "task.claim-next",
+      "owner": "codex-kernel-config-20261105-r",
+      "tasks": [
+        {
+          "id": "KRN-007",
+          "status": "in_progress",
+          "owner": "codex-kernel-config-20261105-r",
+          "priority": 98,
+          "last_heartbeat": "2026-11-05T06:13:00+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:15:31+00:00",
+      "action": "experiment.plan:KCONFIG-001",
+      "owner": "codex-kernel-config-20261105-r"
+    },
+    {
+      "at": "2026-11-05T06:16:55+00:00",
+      "action": "experiment.record:KCONFIG-001",
+      "owner": "codex-kernel-config-20261105-r"
+    },
+    {
+      "at": "2026-11-05T06:16:56+00:00",
+      "action": "experiment.plan:KCONFIG-002",
+      "owner": "codex-kernel-config-20261105-r"
+    },
+    {
+      "at": "2026-11-05T06:17:48+00:00",
+      "action": "experiment.record:KCONFIG-002",
+      "owner": "codex-kernel-config-20261105-r"
+    },
+    {
+      "at": "2026-11-05T06:17:49+00:00",
+      "action": "experiment.plan:KCONFIG-003",
+      "owner": "codex-kernel-config-20261105-r"
+    },
+    {
+      "at": "2026-11-05T06:18:47+00:00",
+      "action": "experiment.record:KCONFIG-003",
+      "owner": "codex-kernel-config-20261105-r"
+    },
+    {
+      "at": "2026-11-05T06:18:48+00:00",
+      "action": "experiment.plan:KCONFIG-004",
+      "owner": "codex-kernel-config-20261105-r"
+    },
+    {
+      "at": "2026-11-05T06:19:43+00:00",
+      "action": "experiment.record:KCONFIG-004",
+      "owner": "codex-kernel-config-20261105-r"
+    },
+    {
+      "at": "2026-11-05T06:19:44+00:00",
+      "action": "experiment.plan:KCONFIG-005",
+      "owner": "codex-kernel-config-20261105-r"
+    },
+    {
+      "at": "2026-11-05T06:20:48+00:00",
+      "action": "experiment.record:KCONFIG-005",
+      "owner": "codex-kernel-config-20261105-r"
+    },
+    {
+      "at": "2026-11-05T06:21:30+00:00",
+      "action": "experiment.plan:KCONFIG-006",
+      "owner": "codex-kernel-config-20261105-r"
+    },
+    {
+      "at": "2026-11-05T06:22:31+00:00",
+      "action": "experiment.record:KCONFIG-006",
+      "owner": "codex-kernel-config-20261105-r"
+    },
+    {
+      "at": "2026-11-05T06:22:32+00:00",
+      "action": "task.add:KRN-008",
+      "owner": "codex-kernel-config-20261105-r",
+      "tasks": [
+        {
+          "id": "KRN-008",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:22:33+00:00",
+      "action": "task.update:KRN-007",
+      "owner": "codex-kernel-config-20261105-r",
+      "tasks": [
+        {
+          "id": "KRN-007",
+          "status": "in_progress",
+          "owner": "codex-kernel-config-20261105-r",
+          "priority": 98,
+          "progress_note": "Actual unpatched C generator and original doconf build all three selected RELEASE/E1S configurations. GNU Make independently matches18 internal export headers. Fresh KCONFIG-005 compiles genuine kalloc.c/OSData.cpp/pe_identify_machine.c; KCONFIG-006 confirms six expected code symbols and actual ARM64 disassembly. All failures retained.",
+          "next_step": "Publish reusable configuration/export/object witnesses, complete repository and integrity checks, then hand off full selected object closure to KRN-008",
+          "last_heartbeat": "2026-11-05T06:22:33+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-kernel-config.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:25:00+00:00",
+      "action": "experiment.plan:KCONFIG-007",
+      "owner": "codex-kernel-config-20261105-r"
+    },
+    {
+      "at": "2026-11-05T06:27:01+00:00",
+      "action": "experiment.record:KCONFIG-007",
+      "owner": "codex-kernel-config-20261105-r"
+    },
+    {
+      "at": "2026-11-05T06:27:03+00:00",
+      "action": "task.update:KRN-007",
+      "owner": "codex-kernel-config-20261105-r",
+      "tasks": [
+        {
+          "id": "KRN-007",
+          "status": "in_progress",
+          "owner": "codex-kernel-config-20261105-r",
+          "priority": 98,
+          "progress_note": "All four bounded criteria assessed from actual fresh generator/doconf output,59 configuration headers,18 Make-verified source exports and3 real ARM64 objects. Independent code audit checks six expected definitions and8906 disassembly instruction lines;132 tests pass.13 capsules/1262 artifact digests,10889 compiler sources,198 build inputs and5111 prepared sources remain unchanged; other owners/scopes preserved.",
+          "next_step": "KRN-008: derive complete selected component/object/assembly/generated-input inventory and actual full per-file/warning recipes, build every required object in fresh paths, then resolve genuine full-kernel linking/input requirements",
+          "last_heartbeat": "2026-11-05T06:27:03+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-kernel-config.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T06:27:04+00:00",
+      "action": "task.done:KRN-007",
+      "owner": "codex-kernel-config-20261105-r",
+      "tasks": [
+        {
+          "id": "KRN-007",
+          "status": "done",
+          "owner": "codex-kernel-config-20261105-r",
+          "priority": 98,
+          "progress_note": "All four bounded criteria assessed from actual fresh generator/doconf output,59 configuration headers,18 Make-verified source exports and3 real ARM64 objects. Independent code audit checks six expected definitions and8906 disassembly instruction lines;132 tests pass.13 capsules/1262 artifact digests,10889 compiler sources,198 build inputs and5111 prepared sources remain unchanged; other owners/scopes preserved.",
+          "next_step": "KRN-008: derive complete selected component/object/assembly/generated-input inventory and actual full per-file/warning recipes, build every required object in fresh paths, then resolve genuine full-kernel linking/input requirements",
+          "last_heartbeat": "2026-11-05T06:27:03+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/xnu-kernel-config.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "25204991b687615617ca97cd31695c84296f4f582c801a80949f7f90470d2aac",
-    "BOARD.md": "d534bf3b775973bc8b2d52d6cac0e62165cbc609c387ee4d42f43f2ee796ac42",
-    "planning/tasks/KRN-007.md": "1ee1c83d4ef6e3b99787967d8e6d6c80a01fea8c0a0fd49a553fbde33f4a60e0",
+    "STATUS.md": "e674289ae1fb62a197130c0b7869df47874a25f8082bf04b2c8a539ed17bbe2e",
+    "BOARD.md": "c0347d9e150a341549588cd5c84b213ee8d49e568b31d8eb590e1aba83aa3080",
+    "planning/tasks/KRN-008.md": "0ae17c17f777462ca8f074e5e231e6f1b0f702559792a16c79068443ba7ed265",
+    "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-006.md": "17787b37e62d7cb230c248532450af8108a583aca6b6e955cee29637f8e981a1",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
