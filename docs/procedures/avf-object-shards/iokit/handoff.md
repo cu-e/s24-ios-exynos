@@ -87,3 +87,41 @@ IIG compile uncertainties remain unmeasured. The next step requires explicit
 root heavy group lease and exact approval binding. Then use only the accepted
 shared mode=execute, fresh owned artifacts, existing 600 s in-process guard and
 one serial compiler. No private ABI qualification follows from this plan.
+
+## Actual wave2 execution
+
+Root explicitly activated VM-013 slot in guest-kernel-wave2-20261106-11 alongside
+VM-015, with exact approval SHA256
+`3727e69a2dbf4d973ad742ebaa670c92d393f48bf0e851748fd357e0e8992091`.
+The original VM013BUILD experiment was still planned. One invocation used the
+same physical reviewed MAIN runner and direct same-process reviewed launcher
+(600 s), fresh `artifacts/avf-object-shards/iokit/execute-001`, one compiler,
+120 s per command and <=256 MiB sampled controller+child RSS. No source edits,
+profile weakening, reruns, resume reuse or cap changes occurred.
+
+Actual result: runner exit 0, all 104/104 ARM64 Mach-O objects and their actual
+compiler dependency bindings PASS, including all 17 generated IIG implementations.
+The final unchanged-namespace closure also passed. This resolves the historical
+16 remaining generated-IIG compile uncertainties in the frozen guest context;
+selected private RPC/IIG ABI and link/runtime interoperability remain unqualified.
+
+Raw shared-executor evidence SHA256 is
+`d280910f050ef5ea0eaa8261ed6ab78d4e381cf68fc86310014e07dca397433c`
+at `artifacts/avf-object-shards/iokit/execute-001/evidence.json`. Every actual
+compiler command exited 0; all commands admitted on exactly three stable samples,
+minimum admission MemAvailable 13148397568 bytes. Peak aggregate controller+child
+RSS was 244248576 bytes, controller exec-image peak 129486848 bytes, zero surviving
+owned children. Largest actual compiler-command elapsed time was 3.076 s.
+
+`build-object-index.json` indexes each actual object/dependency/sidecar hash and
+actual dependency count without adding a validation engine. `build-evidence.json`
+binds the raw capsule, exact source/tool/profile/plan/approval/launch pins and
+resource results. The at-launch approval and full two-slot lease snapshot remain
+in `artifacts/avf-object-shards/iokit/execute-001-launch/authorization-at-launch.json`.
+No private records, SDK or E1S products were introduced.
+
+Root was asked to release ONLY VM-013's slot after the runner exited and cleanup
+was verified. The worker never edits either VM-015's slot or the whole group.
+VM013BUILD record was submitted in MAIN with the immutable raw executor evidence.
+Keep VM-013 in progress pending independent review, integrator acceptance and
+fresh MAIN common checks. No link, QEMU, console, PID1 or device result is claimed.
