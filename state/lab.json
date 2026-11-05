@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T03:08:54+00:00",
+  "updated_at": "2026-11-05T03:35:41+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -2931,14 +2931,17 @@
       "finished_at": "2026-11-05T03:08:54+00:00"
     },
     {
-      "status": "pending",
-      "owner": null,
+      "status": "blocked",
+      "owner": "codex-e1s-dependencies-20261105-k",
       "scope": "host",
       "evidence_kind": "host-test",
       "priority": 95,
       "sources": [
         "hakios-e1s-tools",
-        "apple-xnu"
+        "apple-xnu",
+        "xnu-availability",
+        "xnu-kernel-firehose",
+        "xnu-kernel-pthread"
       ],
       "depends_on": [
         "RES-008",
@@ -2964,7 +2967,15 @@
         "Audit actual E1S exported-header compilation against the donor dependency scripts",
         "Retain small attributed patches for compiler and E1S profile selection",
         "Produce verified dependency input artifacts for the original full-kernel task or record precise missing external inputs"
-      ]
+      ],
+      "started_at": "2026-11-05T03:11:01+00:00",
+      "last_heartbeat": "2026-11-05T03:35:41+00:00",
+      "updated_at": "2026-11-05T03:35:41+00:00",
+      "branch": "main",
+      "progress_note": "Built genuine E1S and BCM firehose archives and measured nine ABI fields; explicit C/C++ wrapper fixtures pass. Pthread fails at genuine TargetConditionals.h; complete SDK/DriverKit/export ABI remains unavailable. Retained all failed outcomes. Released finished shared source catalog reservation; retained narrow dependency implementation paths.",
+      "next_step": "Supply provenanced local SDK and matching DriverKit headers, then compile and inspect all actual E1S dependency archives; independent host tasks may proceed meanwhile",
+      "handoff": "research/notes/KRN-003-dependencies.md",
+      "blocked_reason": "Actual pthread compilation lacks genuine TargetConditionals.h; complete SDK/export ABI and matching DriverKit generated-header inputs have no explicitly supplied/provenanced local paths. Firehose and wrapper component passes do not satisfy full dependency acceptance."
     }
   ],
   "experiments": [
@@ -3643,6 +3654,81 @@
       "evidence_sha256": "9b1b5e3c7ee9021f3c24d53dbe5027336551bee2173cc36ee9cc1057cc9cbcd9",
       "outcome": "pass",
       "recorded_at": "2026-11-05T03:07:15+00:00"
+    },
+    {
+      "id": "E1SDEPS-001",
+      "task": "KRN-003",
+      "owner": "codex-e1s-dependencies-20261105-k",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Actual pinned firehose/pthread translation units can reveal exact E1S compiler/header/generator requirements through a bounded source-only include audit without SDK stand-ins or full export/archive claims",
+      "procedure": "docs/procedures/xnu-dependencies.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T03:14:40+00:00",
+      "evidence": "state/evidence/E1SDEPS-001.json",
+      "evidence_sha256": "f72aacd2a66c1e7fc0e69bc1244182584d46fa6696d1acd85c731f4642651cb9",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T03:20:49+00:00"
+    },
+    {
+      "id": "E1SDEPS-002",
+      "task": "KRN-003",
+      "owner": "codex-e1s-dependencies-20261105-k",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Adding genuine XNU libsa root string.h export mapping allows the real compiler to expose the next exact dependency header or semantic requirements without SDK stand-ins",
+      "procedure": "docs/procedures/xnu-dependencies.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T03:20:49+00:00",
+      "evidence": "state/evidence/E1SDEPS-002.json",
+      "evidence_sha256": "7756c33979ae132ae05d55788f4855743ef8e06d0fec411d09b4aaa4ec188aa2",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T03:24:00+00:00"
+    },
+    {
+      "id": "E1SDEPS-003",
+      "task": "KRN-003",
+      "owner": "codex-e1s-dependencies-20261105-k",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The unmodified real firehose implementation builds arm64 Mach-O objects/archives from genuine source headers in E1S and BCM profiles, with actual compiled ABI values measurable independently of the still-missing pthread SDK header",
+      "procedure": "docs/procedures/xnu-dependencies.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T03:24:01+00:00",
+      "evidence": "state/evidence/E1SDEPS-003.json",
+      "evidence_sha256": "1b70697ab0bbb82ee1eb1c2577aa7a67227d95f06ad74ee8aaa588ac0d68ffe3",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T03:28:16+00:00"
+    },
+    {
+      "id": "E1SDEPS-004",
+      "task": "KRN-003",
+      "owner": "codex-e1s-dependencies-20261105-k",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "The pinned guarded E1S donor patch applies in a private copy, rejects missing explicit compiler variables, and emits actual arm64 Mach-O through the selected C/C++ compilers without running setup or substituting SDK inputs",
+      "procedure": "docs/procedures/xnu-dependencies.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T03:30:52+00:00",
+      "evidence": "state/evidence/E1SDEPS-004.json",
+      "evidence_sha256": "e2898af710358733d85c07caa7e9693033c43f747cba47d867519ea240b9fb1e",
+      "outcome": "fail",
+      "recorded_at": "2026-11-05T03:33:14+00:00"
+    },
+    {
+      "id": "E1SDEPS-005",
+      "task": "KRN-003",
+      "owner": "codex-e1s-dependencies-20261105-k",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "Actual patched wrappers reject missing explicit C/C++ compilers and emit arm64 Mach-O in genuine freestanding E1S source-header mode; setup/pthread workflows remain unexecuted",
+      "procedure": "docs/procedures/xnu-dependencies.md",
+      "timeout_seconds": 300,
+      "created_at": "2026-11-05T03:33:14+00:00",
+      "evidence": "state/evidence/E1SDEPS-005.json",
+      "evidence_sha256": "546de26ce39383fe69610df5635c86adfefcbdb60dcf014d49a266468ede6cc7",
+      "outcome": "pass",
+      "recorded_at": "2026-11-05T03:34:05+00:00"
     }
   ],
   "events": [
@@ -6965,6 +7051,174 @@
           "last_heartbeat": "2026-11-05T03:08:53+00:00",
           "branch": "main",
           "handoff": "research/notes/KRN-002-host-tools.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:11:01+00:00",
+      "action": "task.claim:KRN-003",
+      "owner": "codex-e1s-dependencies-20261105-k",
+      "tasks": [
+        {
+          "id": "KRN-003",
+          "status": "in_progress",
+          "owner": "codex-e1s-dependencies-20261105-k",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T03:11:01+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:11:02+00:00",
+      "action": "task.refine:KRN-003-pin-real-kernel-dependency-sources",
+      "owner": "codex-e1s-dependencies-20261105-k",
+      "tasks": [
+        {
+          "id": "KRN-003",
+          "status": "in_progress",
+          "owner": "codex-e1s-dependencies-20261105-k",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T03:11:01+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:12:24+00:00",
+      "action": "task.refine:KRN-003-exact-availability-firehose-pthread-pins",
+      "owner": "codex-e1s-dependencies-20261105-k",
+      "tasks": [
+        {
+          "id": "KRN-003",
+          "status": "in_progress",
+          "owner": "codex-e1s-dependencies-20261105-k",
+          "priority": 95,
+          "last_heartbeat": "2026-11-05T03:11:01+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:14:39+00:00",
+      "action": "task.update:KRN-003",
+      "owner": "codex-e1s-dependencies-20261105-k",
+      "tasks": [
+        {
+          "id": "KRN-003",
+          "status": "in_progress",
+          "owner": "codex-e1s-dependencies-20261105-k",
+          "priority": 95,
+          "progress_note": "Exact kernel firehose/pthread/availability source pins fetched; traced full exporthdrs DriverKit generator requirement and donor minimal TargetConditionals stand-in. No actual dependency archives or SDK ABI qualified yet",
+          "next_step": "Register bounded real compiler/include audit with explicit E1S profile; measure genuine source/generator gaps before deciding SDK dependencies",
+          "last_heartbeat": "2026-11-05T03:14:39+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-003-dependencies.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:14:40+00:00",
+      "action": "experiment.plan:E1SDEPS-001",
+      "owner": "codex-e1s-dependencies-20261105-k"
+    },
+    {
+      "at": "2026-11-05T03:20:49+00:00",
+      "action": "experiment.record:E1SDEPS-001",
+      "owner": "codex-e1s-dependencies-20261105-k"
+    },
+    {
+      "at": "2026-11-05T03:20:49+00:00",
+      "action": "experiment.plan:E1SDEPS-002",
+      "owner": "codex-e1s-dependencies-20261105-k"
+    },
+    {
+      "at": "2026-11-05T03:24:00+00:00",
+      "action": "experiment.record:E1SDEPS-002",
+      "owner": "codex-e1s-dependencies-20261105-k"
+    },
+    {
+      "at": "2026-11-05T03:24:01+00:00",
+      "action": "experiment.plan:E1SDEPS-003",
+      "owner": "codex-e1s-dependencies-20261105-k"
+    },
+    {
+      "at": "2026-11-05T03:28:16+00:00",
+      "action": "experiment.record:E1SDEPS-003",
+      "owner": "codex-e1s-dependencies-20261105-k"
+    },
+    {
+      "at": "2026-11-05T03:30:52+00:00",
+      "action": "experiment.plan:E1SDEPS-004",
+      "owner": "codex-e1s-dependencies-20261105-k"
+    },
+    {
+      "at": "2026-11-05T03:33:14+00:00",
+      "action": "experiment.record:E1SDEPS-004",
+      "owner": "codex-e1s-dependencies-20261105-k"
+    },
+    {
+      "at": "2026-11-05T03:33:14+00:00",
+      "action": "experiment.plan:E1SDEPS-005",
+      "owner": "codex-e1s-dependencies-20261105-k"
+    },
+    {
+      "at": "2026-11-05T03:34:05+00:00",
+      "action": "experiment.record:E1SDEPS-005",
+      "owner": "codex-e1s-dependencies-20261105-k"
+    },
+    {
+      "at": "2026-11-05T03:35:40+00:00",
+      "action": "task.update:KRN-003",
+      "owner": "codex-e1s-dependencies-20261105-k",
+      "tasks": [
+        {
+          "id": "KRN-003",
+          "status": "in_progress",
+          "owner": "codex-e1s-dependencies-20261105-k",
+          "priority": 95,
+          "progress_note": "Built genuine E1S and BCM firehose archives and measured nine ABI fields; explicit C/C++ wrapper fixtures pass. Pthread fails at genuine TargetConditionals.h; complete SDK/DriverKit/export ABI remains unavailable. Retained all failed outcomes.",
+          "next_step": "Supply provenanced local SDK and matching DriverKit headers, then compile and inspect all actual E1S dependency archives; independent host tasks may proceed meanwhile",
+          "last_heartbeat": "2026-11-05T03:35:40+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-003-dependencies.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:35:40+00:00",
+      "action": "task.refine:KRN-003:release-finished-source-catalog",
+      "owner": "codex-e1s-dependencies-20261105-k",
+      "tasks": [
+        {
+          "id": "KRN-003",
+          "status": "in_progress",
+          "owner": "codex-e1s-dependencies-20261105-k",
+          "priority": 95,
+          "progress_note": "Built genuine E1S and BCM firehose archives and measured nine ABI fields; explicit C/C++ wrapper fixtures pass. Pthread fails at genuine TargetConditionals.h; complete SDK/DriverKit/export ABI remains unavailable. Retained all failed outcomes. Released finished shared source catalog reservation; retained narrow dependency implementation paths.",
+          "next_step": "Supply provenanced local SDK and matching DriverKit headers, then compile and inspect all actual E1S dependency archives; independent host tasks may proceed meanwhile",
+          "last_heartbeat": "2026-11-05T03:35:40+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-003-dependencies.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-05T03:35:41+00:00",
+      "action": "task.block:KRN-003",
+      "owner": "codex-e1s-dependencies-20261105-k",
+      "tasks": [
+        {
+          "id": "KRN-003",
+          "status": "blocked",
+          "owner": "codex-e1s-dependencies-20261105-k",
+          "priority": 95,
+          "progress_note": "Built genuine E1S and BCM firehose archives and measured nine ABI fields; explicit C/C++ wrapper fixtures pass. Pthread fails at genuine TargetConditionals.h; complete SDK/DriverKit/export ABI remains unavailable. Retained all failed outcomes. Released finished shared source catalog reservation; retained narrow dependency implementation paths.",
+          "next_step": "Supply provenanced local SDK and matching DriverKit headers, then compile and inspect all actual E1S dependency archives; independent host tasks may proceed meanwhile",
+          "blocked_reason": "Actual pthread compilation lacks genuine TargetConditionals.h; complete SDK/export ABI and matching DriverKit generated-header inputs have no explicitly supplied/provenanced local paths. Firehose and wrapper component passes do not satisfy full dependency acceptance.",
+          "last_heartbeat": "2026-11-05T03:35:41+00:00",
+          "branch": "main",
+          "handoff": "research/notes/KRN-003-dependencies.md"
         }
       ]
     }

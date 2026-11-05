@@ -1,0 +1,52 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "recorded_at": "2026-11-05T03:20:49+00:00",
+  "summary": "Actual E1S/BCM raw-source compiler audit verifies10/4 versus8/1 CPU/cluster macros and64-bit pointers, but all eight genuine dependency syntax attempts fail at missing root string.h. XNU already supplies that header through libsa export mapping; no SDK absence or ABI corruption inferred.",
+  "commit": "563481d3dbf06f79d726d8f7315e83d91df91331",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/build/prepare_xnu.py",
+        "--run",
+        "e1s-dependency-source-session1"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/build/xnu_dependencies.py",
+        "--run",
+        "include-session1",
+        "--clang",
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang",
+        "--prepared-run",
+        "artifacts/xnu-prepare/e1s-dependency-source-session1",
+        "--audit-includes"
+      ],
+      "exit_code": 1
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/xnu-dependencies/include-session1.json",
+    "artifacts/xnu-dependencies/include-session1/builder.py",
+    "artifacts/xnu-dependencies/include-session1/kernel-source-files.json",
+    "artifacts/xnu-dependencies/include-session1/E1S-firehose.stderr.txt",
+    "artifacts/xnu-dependencies/include-session1/E1S-kern_init.stderr.txt"
+  ],
+  "sha256": {
+    "fixtures/public/xnu-dependencies/include-session1.json": "7ab8b8dc34f73634bd1b787b02b2b4f919653884dd79e0d301c71654a6c112fd",
+    "artifacts/xnu-dependencies/include-session1/builder.py": "165bfbe24b1d7270ca628a91df39b6f098571c01ddc6834f799b812bc1e27bac",
+    "artifacts/xnu-dependencies/include-session1/kernel-source-files.json": "2cbd3feacc870b5c17aa760677a1b1a9bb18473ada0f69cdb342af253b9af339",
+    "artifacts/xnu-dependencies/include-session1/E1S-firehose.stderr.txt": "969cb0da1db7c347ce078cfadf49cf08045b26f630d19899445cb64d50e43ee1",
+    "artifacts/xnu-dependencies/include-session1/E1S-kern_init.stderr.txt": "eb4026877b97c793a41c56cb0bcad23b1644242318cf7ebc530c69f838fc939b"
+  },
+  "limitations": [
+    "Raw source directories are not full exported headers; missing string.h is a real source-export alias gap, not a missing API implementation",
+    "No actual object/archive/layout comparison, full exporthdrs, selected SDK/DriverKit ABI or device result",
+    "Donor TargetConditionals stand-in deliberately excluded; KRN-003 remains incomplete"
+  ]
+}

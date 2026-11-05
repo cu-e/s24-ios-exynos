@@ -1,0 +1,42 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "recorded_at": "2026-11-05T03:24:00+00:00",
+  "summary": "Using the genuine XNU libsa string.h export mapping, actual firehose syntax passes for both E1S and BCM2837; all pthread translation units fail at actual missing TargetConditionals.h. No SDK stand-in, object/archive or layout pass inferred.",
+  "commit": "563481d3dbf06f79d726d8f7315e83d91df91331",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/build/xnu_dependencies.py",
+        "--run",
+        "include-session2",
+        "--clang",
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang",
+        "--prepared-run",
+        "artifacts/xnu-prepare/e1s-dependency-source-session1",
+        "--audit-includes"
+      ],
+      "exit_code": 1
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/xnu-dependencies/include-session2.json",
+    "artifacts/xnu-dependencies/include-session2/builder.py",
+    "artifacts/xnu-dependencies/include-session2/kernel-source-files.json",
+    "artifacts/xnu-dependencies/include-session2/E1S-kern_init.stderr.txt"
+  ],
+  "sha256": {
+    "fixtures/public/xnu-dependencies/include-session2.json": "0b560a2221522c0b3d37c7ed64216b106fc1c6d47be5b74c4e5ba31b66dbafaa",
+    "artifacts/xnu-dependencies/include-session2/builder.py": "f548dd580ca8994bbf27896b8f61225175e9905519fb0798237e19d5e21cf42c",
+    "artifacts/xnu-dependencies/include-session2/kernel-source-files.json": "2cbd3feacc870b5c17aa760677a1b1a9bb18473ada0f69cdb342af253b9af339",
+    "artifacts/xnu-dependencies/include-session2/E1S-kern_init.stderr.txt": "2828f77e6f6d5f722446e92a16a4bb7b849c6737f8674b51599e0be3dc9b0518"
+  },
+  "limitations": [
+    "Overall fail retained; firehose syntax success is a component result, not archive or hardware execution",
+    "Missing SDK TargetConditionals is not replaced by the donor minimal stand-in",
+    "Bare empty BCM2837 define is present in the raw macro output; initial parser displayed null for empty definitions, so do not infer it was undefined",
+    "Complete pthread/archive/header ABI and KRN-003 acceptance remain incomplete"
+  ]
+}

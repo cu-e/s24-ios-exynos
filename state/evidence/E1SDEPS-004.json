@@ -1,0 +1,40 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "recorded_at": "2026-11-05T03:33:14+00:00",
+  "summary": "Actual donor patch applies and rejects missing explicit C compiler, but fixture omitted freestanding kernel flags and entered host libc headers. Positive C failed at sys/_symbol_aliasing.h; C++ not attempted. This is a fixture-profile failure, not an SDK or compiler qualification.",
+  "commit": "563481d3dbf06f79d726d8f7315e83d91df91331",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/build/xnu_dependencies.py",
+        "--run",
+        "profile-session1",
+        "--clang",
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang",
+        "--prepared-run",
+        "artifacts/xnu-prepare/e1s-dependency-source-session1",
+        "--verify-profile"
+      ],
+      "exit_code": 1
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/xnu-dependencies/profile-session1.json",
+    "artifacts/xnu-dependencies/profile-session1/builder.py",
+    "artifacts/xnu-dependencies/profile-session1/profile-c.stderr.txt",
+    "patches/build-inputs/0001-explicit-e1s-dependency-profile.patch"
+  ],
+  "sha256": {
+    "fixtures/public/xnu-dependencies/profile-session1.json": "1ef2f1b77bcecde8c305cbd1f30f1128024b647063f6993d5f55991f1bf780f6",
+    "artifacts/xnu-dependencies/profile-session1/builder.py": "8d7cca8355c4197659c6c8c1383654d027ce785254f5e23912e8047079846cff",
+    "artifacts/xnu-dependencies/profile-session1/profile-c.stderr.txt": "0ea66ceb35a32847343f89a4e57b368a54495e823641b07f3517fbb0344c38a0",
+    "patches/build-inputs/0001-explicit-e1s-dependency-profile.patch": "eac4987aac02ff5a2b3a6cd1b84cc91f59c619ad25930348032727503aab57c1"
+  },
+  "limitations": [
+    "No setup/pthread script or phone executed",
+    "Negative compiler guard passed only for C before this failure; no overall wrapper pass"
+  ]
+}

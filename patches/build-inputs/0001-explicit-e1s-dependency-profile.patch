@@ -1,0 +1,39 @@
+diff --git a/xnu-deps/host/bin/xnu-clang b/xnu-deps/host/bin/xnu-clang
+--- a/xnu-deps/host/bin/xnu-clang
++++ b/xnu-deps/host/bin/xnu-clang
+@@ -16,3 +16,10 @@
+ done
+-exec /usr/bin/$drv -include "$HB/../../hostinc/xnu_clang_compat.h" -target arm64-apple-ios${XNU_SDK_VERSION:-16.5} --ld-path="$HB/ld64" \
++if [ "$drv" = clang++ ]; then
++  compiler=${S24_XNU_CLANGXX:?Set S24_XNU_CLANGXX to the explicit installed clang++ executable}
++else
++  compiler=${S24_XNU_CLANG:?Set S24_XNU_CLANG to the explicit installed clang executable}
++fi
++case "$compiler" in /*) ;; *) echo "XNU compiler path must be absolute" >&2; exit 1;; esac
++[ -x "$compiler" ] || { echo "XNU compiler is not executable" >&2; exit 1; }
++exec "$compiler" -include "$HB/../../hostinc/xnu_clang_compat.h" -target arm64-apple-ios${XNU_SDK_VERSION:-16.5} --ld-path="$HB/ld64" \
+   -w "${extra[@]}" "${args[@]}"
+diff --git a/xnu-deps/setup.sh b/xnu-deps/setup.sh
+--- a/xnu-deps/setup.sh
++++ b/xnu-deps/setup.sh
+@@ -150,2 +150,3 @@
+ stage2() {
++	[ "${MACHINE:-}" = E1S ] || die "stage 2 requires explicit MACHINE=E1S"
+ 	[ -f "$XNU_SRC/makedefs/MakeInc.def" ] || die "no kernel tree in $XNU_SRC (xnu/apply.sh makes it)"
+@@ -172,3 +173,3 @@
+ 			-DDISPATCH_USE_DTRACE=0 -DOS_ATOMIC_CONFIG_MEMORY_ORDER_DEPENDENCY=1 \
+-			-DOS_ATOMIC_CONFIG_STARVATION_FREE_ONLY=0 -DOS_FIREHOSE_SPI=1 -DARM64_BOARD_CONFIG_BCM2837 \
++			-DOS_ATOMIC_CONFIG_STARVATION_FREE_ONLY=0 -DOS_FIREHOSE_SPI=1 -DARM64_BOARD_CONFIG_E1S \
+ 			-Ilibdispatch -Ilibdispatch/src -Ilibdispatch/src/firehose \
+diff --git a/xnu-deps/build/pthread/build.sh b/xnu-deps/build/pthread/build.sh
+--- a/xnu-deps/build/pthread/build.sh
++++ b/xnu-deps/build/pthread/build.sh
+@@ -9,2 +9,3 @@
+ source ../../../xnu-env.sh
++[ "${MACHINE:-}" = E1S ] || { echo "pthread kext requires explicit MACHINE=E1S" >&2; exit 1; }
+ X=$XNU_SRC; E=$X/BUILD/obj/EXPORT_HDRS; P=$XNUDEPS/libpthread
+@@ -14,3 +15,3 @@
+   xnu-clang -arch arm64 -c -Os -mkernel -nostdinc -fno-builtin -fno-common -Wno-int-conversion \
+-    -DKERNEL=1 -DKERNEL_PRIVATE=1 -DPRIVATE=1 -D__PTHREAD_EXPOSE_INTERNALS__=1 -Dpthread_kern=pthread_kext_kern -Dcurrent_uthread=pthread_kext_current_uthread -D__DARWIN_64_BIT_INO_T=1 -DARM64_BOARD_CONFIG_BCM2837 \
++    -DKERNEL=1 -DKERNEL_PRIVATE=1 -DPRIVATE=1 -D__PTHREAD_EXPOSE_INTERNALS__=1 -Dpthread_kern=pthread_kext_kern -Dcurrent_uthread=pthread_kext_current_uthread -D__DARWIN_64_BIT_INO_T=1 -DARM64_BOARD_CONFIG_E1S \
+     -Iinc -I$P -I$E/osfmk -I$E/bsd -I$E/libkern -I$E/pexpert -I$E/iokit -I$E/security -I$X/EXTERNAL_HEADERS \

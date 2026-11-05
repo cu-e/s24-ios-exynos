@@ -1,0 +1,46 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T03:28:16+00:00",
+  "summary": "Unmodified pinned kernel firehose builds real arm64 Mach-O objects/archives in E1S and BCM profiles using genuine open-source headers; actual nine-field compiler ABI records show only CPU/cluster differences and identical implementation object hashes. Pthread/SDK/full KRN-003 remain incomplete.",
+  "commit": "563481d3dbf06f79d726d8f7315e83d91df91331",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/build/xnu_dependencies.py",
+        "--run",
+        "firehose-session1",
+        "--clang",
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang",
+        "--prepared-run",
+        "artifacts/xnu-prepare/e1s-dependency-source-session1",
+        "--build-firehose"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/xnu-dependencies/firehose-session1.json",
+    "artifacts/xnu-dependencies/firehose-session1/builder.py",
+    "artifacts/xnu-dependencies/firehose-session1/E1S-libfirehose_kernel.a",
+    "artifacts/xnu-dependencies/firehose-session1/BCM2837-libfirehose_kernel.a",
+    "artifacts/xnu-dependencies/firehose-session1/E1S-abi.o",
+    "artifacts/xnu-dependencies/firehose-session1/BCM2837-abi.o"
+  ],
+  "sha256": {
+    "fixtures/public/xnu-dependencies/firehose-session1.json": "e4f9c8625b688dca46ac5a1947667b9feb4fb00f2734e60529591ce68204e650",
+    "artifacts/xnu-dependencies/firehose-session1/builder.py": "e5a39bb87455631240c686e287a6e4cd965557d3501d058fdd2cdf9782bc4e4b",
+    "artifacts/xnu-dependencies/firehose-session1/E1S-libfirehose_kernel.a": "0b4608274630df99cad5b74799cdbaf5715a29f5cf8f9d6f37a15a1908cb7f7e",
+    "artifacts/xnu-dependencies/firehose-session1/BCM2837-libfirehose_kernel.a": "16d22773825b26d5c518903b52287c41e8a1d28c1abe9a190db7463f3d5929e0",
+    "artifacts/xnu-dependencies/firehose-session1/E1S-abi.o": "e1914437c12c9636dc83fef3ea35caee19803fc1c61ed61235862729c33a6158",
+    "artifacts/xnu-dependencies/firehose-session1/BCM2837-abi.o": "57c8af0d2b489f7687d26e9006202495289899b0dc431a37b708dca38e6ce8dd"
+  },
+  "limitations": [
+    "A genuine firehose component/archive pass is not a pthread/full kernel/selected SDK or native-device pass",
+    "Only the nine named compiled ABI fields and these exact profile objects were compared; no general ABI equivalence or corruption claim",
+    "Raw source-header profile is explicitly separate from full exporthdrs, SDK provenance, DriverKit or generated RPC behavior",
+    "No target ARM64 code executed and no phone/global SDK/compiler state changed"
+  ]
+}

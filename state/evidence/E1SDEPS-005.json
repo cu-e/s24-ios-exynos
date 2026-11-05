@@ -1,0 +1,42 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-05T03:34:04+00:00",
+  "summary": "Privately applied exact donor patch; actual C/C++ wrappers reject missing explicit compiler variables and emit real arm64 Mach-O objects using genuine E1S source headers in explicit freestanding kernel mode. Setup/pthread workflows and full SDK ABI remain unqualified.",
+  "commit": "563481d3dbf06f79d726d8f7315e83d91df91331",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/build/xnu_dependencies.py",
+        "--run",
+        "profile-session2",
+        "--clang",
+        "/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/clang",
+        "--prepared-run",
+        "artifacts/xnu-prepare/e1s-dependency-source-session1",
+        "--verify-profile"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "fixtures/public/xnu-dependencies/profile-session2.json",
+    "artifacts/xnu-dependencies/profile-session2/builder.py",
+    "artifacts/xnu-dependencies/profile-session2/profile-c.o",
+    "artifacts/xnu-dependencies/profile-session2/profile-cpp.o",
+    "patches/build-inputs/0001-explicit-e1s-dependency-profile.patch"
+  ],
+  "sha256": {
+    "fixtures/public/xnu-dependencies/profile-session2.json": "74ec30e879bb227aaa66adca7e705d91eaeab9e1bd108279f58509201262e110",
+    "artifacts/xnu-dependencies/profile-session2/builder.py": "f7e432d45f933cecd05cac1448e2d726e372e41465d67d4a080e4aadf0baa056",
+    "artifacts/xnu-dependencies/profile-session2/profile-c.o": "5d9afc42f09b2848d884549b0fafd9f4231eb40afd817b84de79a0b27d8bd072",
+    "artifacts/xnu-dependencies/profile-session2/profile-cpp.o": "74dbfd77d534c86fb73a1e82c5f9770f18d11af92eefdb525e2d4c21ce886d07",
+    "patches/build-inputs/0001-explicit-e1s-dependency-profile.patch": "eac4987aac02ff5a2b3a6cd1b84cc91f59c619ad25930348032727503aab57c1"
+  },
+  "limitations": [
+    "No upstream setup/pthread workflow, complete exporthdrs, selected SDK or device execution",
+    "Donor diagnostic filtering/type builtin fallback retained; no Apple compiler equivalence claim"
+  ]
+}
