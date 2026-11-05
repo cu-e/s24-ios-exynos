@@ -632,7 +632,8 @@ class ProjectBudget:
             entry = state['entries'][self.args.task]
             if entry['identity'] != self.identity or entry['status'] != 'active':
                 raise ValueError('Executor does not own active reservation')
-            entry['session'] = session
+            if session is not None:
+                entry['session'] = session
             return self.snapshot(state)
         return self.transaction(operation)
 
