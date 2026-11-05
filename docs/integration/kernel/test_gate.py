@@ -219,6 +219,99 @@ class GateTests(unittest.TestCase):
         self.assertIn("including ignored files", evidence["error"])
         self.assertEqual((self.root / "ignored-new.txt").read_text(), "preserve ignored data\n")
 
+    def history(self, transient="transient.txt", final="renamed.txt"):
+        path = self.candidate / transient
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("preserved historical content\n")
+        self.git(self.candidate, "add", "-f", transient)
+        self.git(self.candidate, "commit", "-m", "historical addition")
+        added = self.git(self.candidate, "rev-parse", "HEAD")
+        self.git(self.candidate, "mv", transient, final)
+        self.git(self.candidate, "commit", "-m", "historical rename")
+        tip = self.git(self.candidate, "rev-parse", "HEAD")
+        commits = [self.tip, added, tip]
+        self.plan.update(candidate_head=tip, commits=commits,
+                         commit_map=[{"source": value, "candidate": value} for value in commits],
+                         paths=["source.txt", final], historical_paths=[transient])
+        self.save_plan()
+
+    def assert_history_rejected(self, message):
+        self.save_plan()
+        code, evidence = self.finish(self.start())
+        self.assertEqual(code, 2, evidence)
+        self.assertIn(message, evidence["error"])
+        self.assertEqual(self.git(self.root, "rev-parse", "HEAD"), self.base)
+
+    def test_explicit_history_allows_real_add_rename_and_light_publication(self):
+        self.history()
+        code, evidence = self.publish_with_light_check()
+        self.assertEqual(code, 0, evidence)
+        self.assertEqual(evidence["audit"]["historical_paths"], ["transient.txt"])
+        self.assertTrue(evidence["common_check"]["same_lock_held"])
+        self.assertFalse((self.root / "transient.txt").exists())
+        self.assertEqual((self.root / "renamed.txt").read_text(), "preserved historical content\n")
+
+    def test_omitted_and_unused_history_are_rejected(self):
+        self.history()
+        del self.plan["historical_paths"]
+        self.assert_history_rejected("exact net/historical plan")
+        self.plan["historical_paths"] = ["transient.txt", "unused.txt"]
+        self.assert_history_rejected("exact net/historical plan")
+
+    def test_duplicate_overlapping_and_noncanonical_history_are_rejected(self):
+        self.history()
+        for values, message in [(["transient.txt", "transient.txt"], "unique and disjoint"),
+                                (["transient.txt", "source.txt"], "unique and disjoint"),
+                                (["./transient.txt"], "Literal relative"),
+                                (["sub/../transient.txt"], "Literal relative"),
+                                (["/transient.txt"], "Literal relative")]:
+            with self.subTest(values=values):
+                self.plan["historical_paths"] = values
+                self.assert_history_rejected(message)
+
+    def test_transient_lock_cannot_replace_held_inode(self):
+        self.history("state/.integration.lock")
+        with gate.integration_lock(self.root):
+            inode = (self.root / "state/.integration.lock").stat().st_ino
+        self.assert_history_rejected("Registry/generated view or lock")
+        self.assertEqual((self.root / "state/.integration.lock").stat().st_ino, inode)
+
+    def test_transient_generated_path_is_forbidden(self):
+        self.history("planning/transient.md")
+        self.assert_history_rejected("Registry/generated view or lock")
+
+    def test_dirty_historical_path_and_ancestor_are_preserved(self):
+        self.history("scratch/transient.txt")
+        (self.root / "scratch").mkdir()
+        data = self.root / "scratch/transient.txt"
+        data.write_text("untracked primary data\n")
+        self.assert_history_rejected("dirty primary paths")
+        self.assertEqual(data.read_text(), "untracked primary data\n")
+        data.unlink()
+        data.parent.rmdir()
+        (self.root / "scratch").write_text("untracked ancestor\n")
+        self.assert_history_rejected("dirty primary paths")
+        self.assertEqual((self.root / "scratch").read_text(), "untracked ancestor\n")
+
+    def test_ignored_historical_path_cannot_overwrite_primary_data(self):
+        self.history("ignored-new.txt")
+        path = self.root / "ignored-new.txt"
+        path.write_text("ignored primary data\n")
+        self.assert_history_rejected("including ignored files")
+        self.assertEqual(path.read_text(), "ignored primary data\n")
+
+    def test_historical_symlink_parent_is_rejected(self):
+        self.history("scratch/transient.txt")
+        (self.root / ".git/info/exclude").write_text("scratch\n")
+        (self.root / "scratch").symlink_to(self.root / "artifacts", target_is_directory=True)
+        # Ignore the parent link so this reaches the distinct symlink-parent guard.
+        self.assert_history_rejected("primary symlink")
+
+    def test_historical_mapping_still_requires_exact_source_patch(self):
+        self.history()
+        self.plan["commit_map"][1]["source"] = self.base
+        self.assert_history_rejected("exact patches differ")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -120,22 +120,28 @@ def audit(root, plan):
         require(patch_sha(root, entry["source"]) == patch_sha(root, entry["candidate"]), "Source/candidate exact patches differ")
     paths = set(plan["paths"])
     require(len(paths) == len(plan["paths"]) and paths, "Nonempty unique exact path set required")
-    for name in paths:
+    historical = set(plan.get("historical_paths", []))
+    require(len(historical) == len(plan.get("historical_paths", [])) and not paths & historical,
+            "Historical paths must be unique and disjoint from net paths")
+    all_paths = paths | historical
+    for name in all_paths:
         path = Path(name)
         require(not path.is_absolute() and path.as_posix() == name and ".." not in path.parts and name != ".", "Literal relative paths required")
         require(name not in FORBIDDEN and not name.startswith(("state/", "planning/")), "Registry/generated view or lock in source candidate")
     changed = set(filter(None, git(root, "diff", "--name-only", "--no-renames", "-z", plan["base_head"], plan["candidate_head"]).decode().split("\0")))
     require(changed == paths, "Candidate changed paths differ from exact plan")
-    # Check every commit too: temporary changes to forbidden/unreviewed paths are not allowed.
+    # Bind transient paths explicitly; temporary forbidden/unreviewed changes still fail.
+    touched_paths = set()
     for commit in commits:
         touched = set(filter(None, git(root, "diff-tree", "--no-commit-id", "--name-only", "--no-renames", "-r", "-z", commit).decode().split("\0")))
-        require(touched <= paths, "Candidate commit touches an unplanned path")
+        touched_paths.update(touched)
+    require(touched_paths == all_paths, "Candidate commit paths differ from exact net/historical plan")
     require(not git(root, "diff", "--cached", "--name-only", "-z"), "Primary index has staged changes")
     dirty = set(filter(None, (git(root, "diff", "--name-only", "--no-renames", "-z", "HEAD") +
                              git(root, "ls-files", "--others", "--exclude-standard", "-z")).decode().split("\0")))
-    require(not any(a == b or a.startswith(b + "/") or b.startswith(a + "/") for a in paths for b in dirty), "Candidate intersects dirty primary paths")
-    tracked = set(filter(None, git(root, "ls-files", "-z", "--", *sorted(paths)).decode().split("\0")))
-    for name in paths:
+    require(not any(a == b or a.startswith(b + "/") or b.startswith(a + "/") for a in all_paths for b in dirty), "Candidate intersects dirty primary paths")
+    tracked = set(filter(None, git(root, "ls-files", "-z", "--", *sorted(all_paths)).decode().split("\0")))
+    for name in all_paths:
         require(name in tracked or not os.path.lexists(root / name), "New candidate path already exists in primary (including ignored files)")
         require(not any((root / parent).is_symlink() for parent in Path(name).parents), "Candidate parent is a primary symlink")
     bindings = plan["bindings"]
@@ -144,7 +150,8 @@ def audit(root, plan):
         require(re.fullmatch(r"[0-9a-f]{64}", binding["sha256"]), "Full binding SHA256 required")
         require(sha(inside(root, binding["path"])) == binding["sha256"], "Capsule binding changed: " + binding["path"])
     return {"base_head": plan["base_head"], "candidate_head": plan["candidate_head"],
-            "paths": sorted(paths), "dirty_primary_paths": sorted(dirty), "commit_map": mapping,
+            "paths": sorted(paths), "historical_paths": sorted(historical),
+            "dirty_primary_paths": sorted(dirty), "commit_map": mapping,
             "bindings": bindings}
 
 

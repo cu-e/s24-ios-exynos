@@ -70,6 +70,14 @@ from the exact bytes whose digest is recorded. All other file hashes stream.
 An audit passes without granting publication permission. A changed base/plan
 requires refreshed root approval before publication.
 
+Optional `historical_paths` lists exact transient names touched by reviewed
+commits but absent from the final diff. It defaults to empty. The two unique
+path lists must be disjoint, and their union must equal all paths touched by
+the complete commit interval. Both lists receive all forbidden-path, dirty
+intersection, ignored-file collision and symlink-parent checks. Net `paths`
+must remain nonempty. See [historical-paths.md](historical-paths.md) for the
+bounded qualification and preserved rename-history use case.
+
 Every source-to-candidate mapping must have an identical binary/full-index patch
 with external diff and text conversion disabled. All `state/` and `planning/`
 paths are forbidden, including both lock files. Ignored data at a new candidate
