@@ -550,30 +550,7 @@ def own_process(argv, cwd, supervisor, stop, *, seconds, operation=None, guard_e
     return record
 
 
-def collect(plan_path, lease_id, stop):
-    stop.check()
-    plan = read_json(plan_path, bound=16 << 20)
-    main = Path(plan['main'])
-    require(Path(plan_path).absolute() == Path(plan_path).resolve() and
-            Path(plan_path).resolve().is_relative_to((ROOT / 'artifacts/avf-kernel-boot').resolve()),
-            'Plan must be canonical inside collector artifacts')
-    fresh = prepare(main, plan['image_id'], Path(plan['cwd']), stop)
-    # Source command timings vary; every operative vector and digest must match.
-    for key in ('admission', 'descriptor', 'collector_sha256', 'fixture_sha256', 'argv',
-                'cwd', 'layout', 'package', 'checked_layout', 'combined_boot_args'):
-        require(fresh[key] == plan[key], 'Plan changed before launch: ' + key)
-    initial_lease = lease(main, lease_id, plan_path, plan)
-    pins = read_json(FIXTURE)
-    supervisor = helper(main, pins, 'process')
-    for _ in range(3):
-        stop.check()
-        require(lease(main, lease_id, plan_path, plan) == initial_lease, 'Root lease changed')
-        sample = supervisor.sample()
-        require(sample['MemAvailable_bytes'] >= 4 << 30 and not supervisor.pressured(sample), 'Stable memory admission failed')
-        time.sleep(1)
-    out = output_dir(plan['cwd']); out.mkdir(parents=True, exist_ok=False)
-    def running_lease():
-        require(lease(main, lease_id, plan_path, plan) == initial_lease, 'Root lease changed/revoked')
+def protocol_operation(main, pins, plan, out):
     def operation(process, guard, record):
         connection = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         connection.settimeout(.02)
@@ -618,7 +595,6 @@ def collect(plan_path, lease_id, stop):
                                    'address': base, 'size': length, 'sha256': digest(capture),
                                    'before_cont': True, 'Apple_serialized_tree': False}
             guard(); qmp.command('cont')
-            record['guest_started'] = True
             record['cont_acknowledged_at'] = now()
             record['apple_tree'] = {'outcome': 'unmeasured', 'reason': 'No post-shim checkpoint captured before guest stop'}
             while process.poll() is None:
@@ -652,8 +628,37 @@ def collect(plan_path, lease_id, stop):
                 pass
         finally:
             connection.close(); os.close(directory)
+    return operation
+
+
+def collect(plan_path, lease_id, stop):
+    stop.check()
+    plan = read_json(plan_path, bound=16 << 20)
+    main = Path(plan['main'])
+    require(Path(plan_path).absolute() == Path(plan_path).resolve() and
+            Path(plan_path).resolve().is_relative_to((ROOT / 'artifacts/avf-kernel-boot').resolve()),
+            'Plan must be canonical inside collector artifacts')
+    fresh = prepare(main, plan['image_id'], Path(plan['cwd']), stop)
+    # Source command timings vary; every operative vector and digest must match.
+    for key in ('admission', 'descriptor', 'collector_sha256', 'fixture_sha256', 'argv',
+                'cwd', 'layout', 'package', 'checked_layout', 'combined_boot_args'):
+        require(fresh[key] == plan[key], 'Plan changed before launch: ' + key)
+    initial_lease = lease(main, lease_id, plan_path, plan)
+    pins = read_json(FIXTURE)
+    supervisor = helper(main, pins, 'process')
+    for _ in range(3):
+        stop.check()
+        require(lease(main, lease_id, plan_path, plan) == initial_lease, 'Root lease changed')
+        sample = supervisor.sample()
+        require(sample['MemAvailable_bytes'] >= 4 << 30 and not supervisor.pressured(sample), 'Stable memory admission failed')
+        time.sleep(1)
+    out = output_dir(plan['cwd']); out.mkdir(parents=True, exist_ok=False)
+    def running_lease():
+        require(lease(main, lease_id, plan_path, plan) == initial_lease, 'Root lease changed/revoked')
+    operation = protocol_operation(main, pins, plan, out)
     record = own_process(plan['argv'], out, supervisor, stop, seconds=DEADLINE,
                          operation=operation, guard_extra=running_lease)
+    record['guest_started'] = bool(record.get('cont_acknowledged_at'))
     record.update(protocol=PROTOCOL, plan_sha256=digest(plan_path), lease_id=lease_id,
                   lease_entry_sha256=initial_lease, image_descriptor_sha256=plan['admission']['descriptor']['sha256'],
                   combined_boot_args=plan['combined_boot_args'], source_to_link=plan['descriptor']['files']['source_to_link'])
@@ -687,7 +692,8 @@ def assess_observations(console, events, record):
     require(isinstance(events, list) and all(isinstance(e, dict) and isinstance(e.get('data', {}), dict)
                                            for e in events), 'Typed QMP events required')
     for token in (b'Darwin Kernel Version', b'VM002: pid=1 ostype=Darwin owned-entry=v1',
-                  b'avf: powering off (PSCI SYSTEM_OFF)'):
+                  b'avf: powering off (PSCI SYSTEM_OFF)', b'avfboot: jumping to XNU at',
+                  b'avfboot: HakiOS XNU boot for crosvm/AVF and QEMU virt'):
         if console.count(token) != 1:
             reasons.append('Expected exactly one marker: ' + token.decode())
     tokens = [b'Darwin Kernel Version', b'VM002: pid=1 ostype=Darwin owned-entry=v1',
@@ -698,13 +704,20 @@ def assess_observations(console, events, record):
     if not any(token in console for token in (b'initproc failed to start', b'initproc exited')):
         reasons.append('Expected critical initproc panic absent')
     critical = [console.find(token) for token in (b'initproc failed to start', b'initproc exited') if token in console]
-    if len(critical) != 1 or not positions[2] <= critical[0] < positions[3]:
+    if (len(critical) != 1 or sum(console.count(token) for token in
+            (b'initproc failed to start', b'initproc exited')) != 1
+            or not positions[2] <= critical[0] < positions[3]):
         reasons.append('Critical initproc panic ordering is not established')
     if console.count(b'avf: kernel panic: panic(') != 1:
         reasons.append('Repeated or missing kernel panic')
     bootlines = re.findall(rb'^avfboot: boot-args: (.*)\r?$', console, re.M)
     if len(bootlines) != 1 or bootlines[0].rstrip(b'\r') != record.get('combined_boot_args', '').encode():
         reasons.append('Actual final shim boot args do not bind the complete vector')
+    shim_positions = [console.find(token) for token in
+        (b'avfboot: HakiOS XNU boot for crosvm/AVF and QEMU virt', b'avfboot: boot-args:',
+         b'avfboot: jumping to XNU at', b'Darwin Kernel Version')]
+    if any(pos < 0 for pos in shim_positions) or shim_positions != sorted(shim_positions):
+        reasons.append('Shim/argument/jump/kernel ordering is not established')
     if any(token in console.lower() for token in (b'synthetic', b'avfboot: fatal:', b'firmware refused')):
         reasons.append('Synthetic/shim failure/firmware refusal recorded')
     shutdowns = [event for event in events if event.get('event') == 'SHUTDOWN']
@@ -712,7 +725,9 @@ def assess_observations(console, events, record):
         reasons.append('Exactly one guest-origin QMP shutdown required')
     if any(event.get('event') in {'RESET', 'GUEST_PANICKED'} for event in events):
         reasons.append('Unexpected reset/paravirtual panic event')
-    if not record.get('resume_observed') or not record.get('cont_acknowledged_at') or not record.get('input_fdt'):
+    if any(token in console for token in (b'avf: halt (PSCI SYSTEM_OFF)', b'avf: reboot (PSCI SYSTEM_RESET)')):
+        reasons.append('Unexpected additional kernel PSCI intent')
+    if record.get('resume_observed') is not True or not record.get('cont_acknowledged_at') or not record.get('input_fdt'):
         reasons.append('Paused Linux FDT admission and explicit cont/RESUME not established')
     if (type(record.get('exit_code')) is not int or record['exit_code'] != 0
             or record.get('live_owned_pids') != [] or record.get('stop_reason')
@@ -721,7 +736,7 @@ def assess_observations(console, events, record):
     elapsed, deadline = record.get('elapsed_seconds'), record.get('deadline_seconds')
     if type(elapsed) not in (int, float) or type(deadline) not in (int, float) or not 0 <= elapsed < deadline <= DEADLINE:
         reasons.append('Finite actual termination interval not established')
-    if record.get('host_signals') or record.get('timed_out'):
+    if record.get('host_signals') != [] or record.get('timed_out') is not False:
         reasons.append('Host cleanup cannot establish guest shutdown')
     return {'classification': 'consistent-observations-awaiting-review' if not reasons else 'inconclusive',
             'reasons': reasons, 'genuine_kernel_qualified': False, 'pid1_runtime_qualified': False,

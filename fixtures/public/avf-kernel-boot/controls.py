@@ -194,7 +194,8 @@ class Controls(unittest.TestCase):
 
     def test_observation_sequence_never_qualifies_kernel(self):
         combined = 'debug=0x8 rd=md0 ' + c.APPEND
-        text = ('avfboot: boot-args: ' + combined + '\nDarwin Kernel Version 22.5.0: authored control\n'
+        text = ('avfboot: HakiOS XNU boot for crosvm/AVF and QEMU virt\n'
+                'avfboot: boot-args: ' + combined + '\navfboot: jumping to XNU at 0xfffffff007004000\nDarwin Kernel Version 22.5.0: authored control\n'
                 'VM002: pid=1 ostype=Darwin owned-entry=v1\navf: kernel panic: panic(initproc exited)\n'
                 'avf: powering off (PSCI SYSTEM_OFF)\n').encode()
         events = [{'event': 'SHUTDOWN', 'data': {'guest': True, 'reason': 'guest-shutdown'}}]
@@ -208,7 +209,9 @@ class Controls(unittest.TestCase):
                     (text, events * 2, record), (text, [{'event': 'SHUTDOWN', 'data': {'guest': False, 'reason': 'host-qmp-quit'}}], record),
                     (text, events, {**record, 'timed_out': True}), (text, events, {**record, 'exit_code': False}),
                     (text, events, {**record, 'combined_boot_args': c.APPEND}),
-                    (text, events, {**record, 'resume_observed': False})]
+                    (text, events, {**record, 'resume_observed': False}),
+                    (text + b'initproc exited again\n', events, record),
+                    (text, events, {**record, 'timed_out': 0})]
         for raw, qmp, supervisor in failures:
             self.assertEqual(c.assess_observations(raw, qmp, supervisor)['classification'], 'inconclusive')
         c.write_json(OUT / 'authored-observation-controls.json', {'kind': 'authored-controls-not-guest', 'positive': result, 'negative_cases': len(failures)})
@@ -240,6 +243,56 @@ class Controls(unittest.TestCase):
         with patch.object(c.subprocess, 'Popen', side_effect=AssertionError('unexpected spawn')):
             reject(lambda: c.own_process([sys.executable], place, None, stop, seconds=1), 'Already stopped')
         self.assertEqual(list(place.iterdir()), [])
+
+    def test_real_process_file_output_limit(self):
+        place = area('process-file-limit'); supervisor = c.helper(MAIN, c.read_json(c.FIXTURE), 'process')
+        program = 'import os\nfor i in range(80): os.write(1, b"x" * 65536)'
+        result = c.own_process([sys.executable, '-s', '-c', program], place, supervisor, c.Stop(),
+                               seconds=3, memory_floor=False, rss_limit=256 << 20)
+        self.assertNotEqual(result['exit_code'], 0); self.assertEqual(result['live_owned_pids'], [])
+        self.assertLessEqual(result['outputs']['console.log']['size'], c.MAX_LOG)
+        self.assertFalse(result['guest_started']); c.write_json(place / 'record.json', result)
+
+    def test_real_python_peer_paused_input_fdt_protocol(self):
+        place = area('process-qmp-peer'); data = fdt_bytes()
+        (place / 'authored-source.dtb').write_bytes(data)
+        program = '''import json,socket,pathlib
+s=socket.socket(socket.AF_UNIX);s.bind("qmp.sock");s.listen(1)
+connection,_=s.accept();stream=connection.makefile("rwb",buffering=0)
+stream.write(b'{"QMP":{}}\\r\\n')
+for raw in stream:
+ request=json.loads(raw);name=request["execute"]
+ if name=="pmemsave":
+  arguments=request["arguments"];size=arguments["size"]
+  pathlib.Path(arguments["filename"]).write_bytes(pathlib.Path("authored-source.dtb").read_bytes()[:size])
+ result={"running":False,"status":"paused"} if name=="query-status" else {}
+ stream.write((json.dumps({"return":result,"id":request["id"]})+"\\r\\n").encode())
+ if name=="cont":
+  stream.write(b'{"event":"RESUME","data":{}}\\r\\n')
+  stream.write(b'{"event":"SHUTDOWN","data":{"guest":false,"reason":"host-qmp-quit"}}\\r\\n')
+  print("Owned Python protocol peer; no guest",flush=True)
+  break
+connection.close();s.close()
+'''
+        (place / 'peer.py').write_text(program)
+        pins = c.read_json(c.FIXTURE)
+        plan = {'layout': {'fdt_base': 0x48200000, 'fdt_size': len(data), 'payload_base': 0x48000000},
+                'package': {'size': 64}, 'checked_layout': {'apple_device_tree_capacity': [0x43000000, 0x43010000],
+                                                         'boot_args_page': [0x43010000, 0x43014000]}}
+        supervisor = c.helper(MAIN, pins, 'process')
+        result = c.own_process([sys.executable, '-s', 'peer.py'], place, supervisor, c.Stop(), seconds=5,
+                               operation=c.protocol_operation(MAIN, pins, plan, place), memory_floor=False,
+                               rss_limit=256 << 20)
+        # This is a host Python peer. Generic protocol 'cont' is not CPU execution.
+        result['authored_host_control'] = True
+        self.assertFalse(result['guest_started'])
+        self.assertEqual(result['exit_code'], 0); self.assertIsNone(result['stop_reason'])
+        self.assertEqual(result['live_owned_pids'], []); self.assertEqual(result['host_signals'], [])
+        self.assertEqual(result['input_fdt']['sha256'], c.digest(place / 'authored-source.dtb'))
+        self.assertFalse(result['input_fdt']['Apple_serialized_tree'])
+        events = [row['message'] for row in result['qmp'] if row['direction'] == 'received' and 'event' in row['message']]
+        self.assertFalse(next(event for event in events if event['event'] == 'SHUTDOWN')['data']['guest'])
+        c.write_json(place / 'record.json', result)
 
     def test_root_lease_expiry_and_mutation(self):
         place = area('lease'); queue = place / 'artifacts/team-coordination/20261106-team/resource-queue.json'
