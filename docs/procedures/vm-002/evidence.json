@@ -1,0 +1,434 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "inconclusive",
+  "recorded_at": "2026-11-05T13:40:54.308726+00:00",
+  "task": "VM-002",
+  "experiment": "VMHOST-001",
+  "owner": "codex-team-vm-20261105-am",
+  "summary": "Pinned AVF shim and owned static arm64 PID1 compile and link; 12 real host parser/deadline controls pass. No XNU guest launched or PID1 runtime observed: complete compatible XNU guest kernel and generic QEMU virt/TCG input are absent.",
+  "commit": "f71ede2410c8fcd786617c74b15c1c065d7cfcaf",
+  "commands": [
+    {
+      "name": "checkout",
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "recorded_at": "2026-11-05T13:32:28.702609+00:00",
+      "elapsed_seconds": 0.011,
+      "log": "artifacts/vm-002/inventory-20261105/checkout.txt"
+    },
+    {
+      "name": "donor-commit",
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "recorded_at": "2026-11-05T13:32:28.713481+00:00",
+      "elapsed_seconds": 0.01,
+      "log": "artifacts/vm-002/inventory-20261105/donor-commit.txt"
+    },
+    {
+      "name": "donor-status",
+      "argv": [
+        "git",
+        "-C",
+        "/home/egor/dev/pet/s24-ios-exynos/references/scion-avf",
+        "status",
+        "--short"
+      ],
+      "exit_code": 0,
+      "recorded_at": "2026-11-05T13:32:28.723565+00:00",
+      "elapsed_seconds": 0.008,
+      "log": "artifacts/vm-002/inventory-20261105/donor-status.txt"
+    },
+    {
+      "name": "host",
+      "argv": [
+        "uname",
+        "-a"
+      ],
+      "exit_code": 0,
+      "recorded_at": "2026-11-05T13:32:28.731931+00:00",
+      "elapsed_seconds": 0.007,
+      "log": "artifacts/vm-002/inventory-20261105/host.txt"
+    },
+    {
+      "name": "compiler",
+      "argv": [
+        "/home/egor/.local/bin/clang",
+        "--version"
+      ],
+      "exit_code": 0,
+      "recorded_at": "2026-11-05T13:32:28.738752+00:00",
+      "elapsed_seconds": 0.031,
+      "log": "artifacts/vm-002/inventory-20261105/compiler.txt"
+    },
+    {
+      "name": "linker",
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-ld",
+        "-v"
+      ],
+      "exit_code": 0,
+      "recorded_at": "2026-11-05T13:32:28.769764+00:00",
+      "elapsed_seconds": 0.015,
+      "log": "artifacts/vm-002/inventory-20261105/linker.txt"
+    },
+    {
+      "name": "kernel-preflight",
+      "argv": [
+        "python3",
+        "/home/egor/dev/pet/s24-ios-exynos/tools/build/kernel_preflight.py"
+      ],
+      "exit_code": 2,
+      "recorded_at": "2026-11-05T13:32:28.785196+00:00",
+      "elapsed_seconds": 0.127,
+      "log": "artifacts/vm-002/inventory-20261105/kernel-preflight.txt"
+    },
+    {
+      "name": "pid1-compile",
+      "argv": [
+        "/home/egor/.local/bin/clang",
+        "--target=arm64-apple-macos12",
+        "-Os",
+        "-ffreestanding",
+        "-nostdlib",
+        "-fno-stack-protector",
+        "-fno-builtin",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-c",
+        "src/virtualization/pid1.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/pid1.o"
+      ],
+      "exit_code": 0,
+      "recorded_at": "2026-11-05T13:32:28.912548+00:00",
+      "elapsed_seconds": 0.04,
+      "log": "artifacts/vm-002/inventory-20261105/pid1-compile.txt"
+    },
+    {
+      "name": "pid1-link",
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-ld",
+        "-arch",
+        "arm64",
+        "-static",
+        "-e",
+        "_start",
+        "-macosx_version_min",
+        "12.0",
+        "-pagezero_size",
+        "0x100000000",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/pid1.o",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/pid1"
+      ],
+      "exit_code": 0,
+      "recorded_at": "2026-11-05T13:32:28.952330+00:00",
+      "elapsed_seconds": 0.025,
+      "log": "artifacts/vm-002/inventory-20261105/pid1-link.txt"
+    },
+    {
+      "name": "pid1-file",
+      "argv": [
+        "file",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/pid1"
+      ],
+      "exit_code": 0,
+      "recorded_at": "2026-11-05T13:32:28.977359+00:00",
+      "elapsed_seconds": 0.017,
+      "log": "artifacts/vm-002/inventory-20261105/pid1-file.txt"
+    },
+    {
+      "name": "host-prerequisites",
+      "argv": [
+        "python3",
+        "src/virtualization/host.py",
+        "--out",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/missing-guest-inputs"
+      ],
+      "exit_code": 2,
+      "recorded_at": "2026-11-05T13:32:28.994867+00:00",
+      "elapsed_seconds": 0.256,
+      "log": "artifacts/vm-002/inventory-20261105/host-prerequisites.txt"
+    },
+    {
+      "name": "host-controls",
+      "argv": [
+        "python3",
+        "src/virtualization/check.py",
+        "--pid1",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/pid1",
+        "--out",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/controls"
+      ],
+      "exit_code": 0,
+      "recorded_at": "2026-11-05T13:34:01.054050+00:00",
+      "elapsed_seconds": 3.042,
+      "log": "artifacts/vm-002/inventory-20261105/host-controls.txt"
+    },
+    {
+      "name": "available-pid1-missing-guest",
+      "argv": [
+        "python3",
+        "src/virtualization/host.py",
+        "--pid1",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/pid1",
+        "--pid1-sha256",
+        "bc7575a3690d6da52752763c5de496631032bef92777e6fe5b341e8a0e3414f7",
+        "--out",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/available-pid1-missing-guest"
+      ],
+      "exit_code": 2,
+      "recorded_at": "2026-11-05T13:34:01.094257+00:00",
+      "elapsed_seconds": 0.04,
+      "log": "artifacts/vm-002/inventory-20261105/available-pid1-missing-guest.txt"
+    },
+    {
+      "name": "diff-check",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "recorded_at": "2026-11-05T13:34:01.098728+00:00",
+      "elapsed_seconds": 0.004,
+      "log": "artifacts/vm-002/inventory-20261105/diff-check.txt"
+    },
+    {
+      "name": "android-qemu-version",
+      "argv": [
+        "/home/egor/Android/Sdk/emulator/qemu/linux-x86_64/qemu-system-aarch64",
+        "--version"
+      ],
+      "exit_code": 127,
+      "recorded_at": "2026-11-05T13:36:35.659328+00:00",
+      "elapsed_seconds": 0.015,
+      "log": "artifacts/vm-002/inventory-20261105/android-qemu-version.txt"
+    },
+    {
+      "name": "android-qemu-machines",
+      "argv": [
+        "/home/egor/Android/Sdk/emulator/qemu/linux-x86_64/qemu-system-aarch64",
+        "-machine",
+        "help"
+      ],
+      "exit_code": 127,
+      "recorded_at": "2026-11-05T13:36:35.662357+00:00",
+      "elapsed_seconds": 0.003,
+      "log": "artifacts/vm-002/inventory-20261105/android-qemu-machines.txt"
+    },
+    {
+      "name": "android-qemu-accelerators",
+      "argv": [
+        "/home/egor/Android/Sdk/emulator/qemu/linux-x86_64/qemu-system-aarch64",
+        "-accel",
+        "help"
+      ],
+      "exit_code": 127,
+      "recorded_at": "2026-11-05T13:36:35.664613+00:00",
+      "elapsed_seconds": 0.002,
+      "log": "artifacts/vm-002/inventory-20261105/android-qemu-accelerators.txt"
+    },
+    {
+      "name": "android-qemu-version-env",
+      "argv": [
+        "/home/egor/Android/Sdk/emulator/qemu/linux-x86_64/qemu-system-aarch64",
+        "--version"
+      ],
+      "environment_override": {
+        "LD_LIBRARY_PATH": "/home/egor/Android/Sdk/emulator/lib64:/home/egor/Android/Sdk/emulator/lib64/qt/lib"
+      },
+      "exit_code": 1,
+      "recorded_at": "2026-11-05T13:36:49.494660+00:00",
+      "elapsed_seconds": 0.173,
+      "log": "artifacts/vm-002/inventory-20261105/android-qemu-version-env.txt"
+    },
+    {
+      "name": "android-qemu-machines-env",
+      "argv": [
+        "/home/egor/Android/Sdk/emulator/qemu/linux-x86_64/qemu-system-aarch64",
+        "-machine",
+        "help"
+      ],
+      "environment_override": {
+        "LD_LIBRARY_PATH": "/home/egor/Android/Sdk/emulator/lib64:/home/egor/Android/Sdk/emulator/lib64/qt/lib"
+      },
+      "exit_code": 1,
+      "recorded_at": "2026-11-05T13:36:49.588852+00:00",
+      "elapsed_seconds": 0.094,
+      "log": "artifacts/vm-002/inventory-20261105/android-qemu-machines-env.txt"
+    },
+    {
+      "name": "android-qemu-accelerators-env",
+      "argv": [
+        "/home/egor/Android/Sdk/emulator/qemu/linux-x86_64/qemu-system-aarch64",
+        "-accel",
+        "help"
+      ],
+      "environment_override": {
+        "LD_LIBRARY_PATH": "/home/egor/Android/Sdk/emulator/lib64:/home/egor/Android/Sdk/emulator/lib64/qt/lib"
+      },
+      "exit_code": 2,
+      "recorded_at": "2026-11-05T13:36:49.686809+00:00",
+      "elapsed_seconds": 0.098,
+      "log": "artifacts/vm-002/inventory-20261105/android-qemu-accelerators-env.txt"
+    },
+    {
+      "name": "final-prerequisites",
+      "argv": [
+        "python3",
+        "src/virtualization/host.py",
+        "--pid1",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/pid1",
+        "--pid1-sha256",
+        "bc7575a3690d6da52752763c5de496631032bef92777e6fe5b341e8a0e3414f7",
+        "--shim",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+        "--shim-sha256",
+        "283f6740424011959ebe03e71ce910a81bbfa3b7ba31c6395ab6f8aab77eaf87",
+        "--qemu",
+        "/home/egor/Android/Sdk/emulator/qemu/linux-x86_64/qemu-system-aarch64",
+        "--out",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/existing-shim-pid1-android-qemu"
+      ],
+      "environment_override": {
+        "LD_LIBRARY_PATH": "/home/egor/Android/Sdk/emulator/lib64:/home/egor/Android/Sdk/emulator/lib64/qt/lib"
+      },
+      "exit_code": 2,
+      "recorded_at": "2026-11-05T13:37:28.734354+00:00",
+      "elapsed_seconds": 0.226,
+      "log": "artifacts/vm-002/inventory-20261105/final-prerequisites.txt"
+    },
+    {
+      "name": "final-host-controls",
+      "argv": [
+        "python3",
+        "src/virtualization/check.py",
+        "--pid1",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/pid1",
+        "--out",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/final-controls"
+      ],
+      "exit_code": 0,
+      "recorded_at": "2026-11-05T13:40:10.543356+00:00",
+      "elapsed_seconds": 3.047,
+      "log": "artifacts/vm-002/inventory-20261105/final-host-controls.txt"
+    },
+    {
+      "name": "syntax",
+      "argv": [
+        "python3",
+        "-m",
+        "py_compile",
+        "src/virtualization/host.py",
+        "src/virtualization/build_shim.py",
+        "src/virtualization/check.py"
+      ],
+      "exit_code": 0,
+      "recorded_at": "2026-11-05T13:40:10.589590+00:00",
+      "elapsed_seconds": 0.046,
+      "log": "artifacts/vm-002/inventory-20261105/syntax.txt"
+    },
+    {
+      "name": "final-source-prerequisites",
+      "argv": [
+        "python3",
+        "src/virtualization/host.py",
+        "--pid1",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/pid1",
+        "--pid1-sha256",
+        "bc7575a3690d6da52752763c5de496631032bef92777e6fe5b341e8a0e3414f7",
+        "--shim",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image",
+        "--shim-sha256",
+        "283f6740424011959ebe03e71ce910a81bbfa3b7ba31c6395ab6f8aab77eaf87",
+        "--qemu",
+        "/home/egor/Android/Sdk/emulator/qemu/linux-x86_64/qemu-system-aarch64",
+        "--out",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/final-source-prerequisites"
+      ],
+      "exit_code": 2,
+      "recorded_at": "2026-11-05T13:40:10.931593+00:00",
+      "elapsed_seconds": 0.34,
+      "log": "artifacts/vm-002/inventory-20261105/final-source-prerequisites.txt",
+      "environment_override": {
+        "LD_LIBRARY_PATH": "/home/egor/Android/Sdk/emulator/lib64:/home/egor/Android/Sdk/emulator/lib64/qt/lib"
+      }
+    }
+  ],
+  "artifacts": [
+    "worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/commands.json",
+    "worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/final-controls/report.json",
+    "worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/final-source-prerequisites/report.json",
+    "worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/kernel-preflight.txt",
+    "worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/report.json",
+    "worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/reviewed-source-hashes.json",
+    "worktrees/vm-002-20261105/artifacts/vm-002/artifact-sha256.json",
+    "worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/pid1",
+    "worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image"
+  ],
+  "provenance": {
+    "donor": {
+      "url": "https://github.com/Scion-Project/hackios-xnu-kernel",
+      "commit": "a6f4bc38aa244359cd365c976244a88c9d6b3304",
+      "license": "MIT loader/tools; APSL2 kernel derivative; component notices retained",
+      "reviewed_source_hashes": "worktrees/vm-002-20261105/artifacts/vm-002/inventory-20261105/reviewed-source-hashes.json"
+    },
+    "toolchain": {
+      "clang": {
+        "path": "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/bin/clang-18",
+        "sha256": "0e14b158c3e11fc5da5e585d01e8a586aa14b6e57f544f9db737745b18201a79"
+      },
+      "ld.lld": {
+        "path": "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld",
+        "sha256": "79542ea7d099f9400ac3c2e6da4071722730e74f2e04352081100895df289cce"
+      },
+      "llvm-objcopy": {
+        "path": "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-objcopy",
+        "sha256": "3616ad8fd65e33fb878ce718edaaee78f013dac969839cf66330162c77e959e5"
+      },
+      "llvm-readelf": {
+        "path": "/home/egor/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf",
+        "sha256": "9034e65c92eb97bf174524f19d826f4251a803c256cb4c097c8fd24542318483"
+      }
+    },
+    "source_sha256": {
+      "src/virtualization/build_shim.py": "6392a9b0689a42c9f2d1f0d95dd0138198fb3efb2214ab332523fc4469f15798",
+      "src/virtualization/check.py": "a953de1d3140ca225bf483560d13190ec6bd98ff4dc78a1247d05fe819d7ba5c",
+      "src/virtualization/host.py": "1782ecaa35b02c5feed6dee5ede6e4e02ee6162aeb6735a51d00cec639034131",
+      "src/virtualization/pid1.c": "51c3e6ec9d123803a15ee81cc04f55a2c63fba568ee5c29033ed38a57afe828f"
+    },
+    "source_build_report": "worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/report.json"
+  },
+  "acceptance": {
+    "donor_pinned_before_reuse": true,
+    "actual_xnu_guest_execution": false,
+    "owned_guest_pid1_observed": false,
+    "bounded_host_process_stop_control": true,
+    "guest_stop_measured": false,
+    "task_complete": false
+  },
+  "specific_blockers": [
+    "Need a complete linked provenance-qualified XNU kernel for selected QEMU/AVF board, mockfs raw-executable ramdisk and PSCI exit configuration. No qualified image supplied; E1S object closure is not a guest kernel.",
+    "Need generic qemu-system-aarch64 exposing virt and tcg; installed Android frontend help exits1/2 instead and no generic executable is on PATH."
+  ],
+  "limitations": [
+    "Host source/build/deadline results do not establish guest execution or any S24 hardware capability.",
+    "Actual PID1 syscall ABI, Darwin console and guest PSCI stop path remain unmeasured.",
+    "Existing selected-kernel preflight exits2 for missing explicit SDK/dependency paths; this does not prove every open-core route requires proprietary inputs.",
+    "No VM/heavy build lease requested or used. No phone/ADB/root/MMIO/flash/reboot/global install/unrelated-process termination.",
+    "Main make check deferred to coordinator review/integration; scoped controls and staged diff check passed."
+  ]
+}
