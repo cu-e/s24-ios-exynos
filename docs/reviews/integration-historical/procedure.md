@@ -1,0 +1,9 @@
+# REVHIST-001: independent historical-path gate review
+
+Task REV-030; owner codex-review-history-gate-20261106-dx; separate worktree worktrees/rev-history-gate-20261106; reservation docs/reviews/integration-historical.
+
+Inspect the genuine eight VM013 source commits (6265fbe through62d5ad1), independently derive net changes and every parent-to-commit touched path using no-rename Git diffs, and bind the original gate. Reproduce its rejection of the actual transient inspect.py history using bounded disposable repositories with real add/delete/rename and source-to-cherry-picked-candidate mappings. Keep source and candidate patches bound separately.
+
+Wait for the exact frozen INT002 implementation before evaluating it. Check optional historical_paths defaults, exact touched-union completeness, no duplicate/unused/overlapping declarations, canonical literal paths, forbidden registry/planning/locks, dirty primary paths, ignored new data, symlink ancestry, stale HEAD and mapped patch mismatch across the full net+historical union. Preserve old-plan acceptance/rejection behavior and nonempty net-path policy. Use genuine temporary Git repos with finite subprocess deadlines and capture commands/exits/stdout/stderr/decisions. No real MAIN publication, common check, compiler, guest, phone or producer source edit. All outputs stay in the reserved review directory or temporary repositories; original registry writes use MAIN lab.py only.
+
+Run stdlib Python in the constrained environment, single serial Git child, 180-second suite deadline, <=256MiB current-image controller RSS; record /proc VmHWM separately from inherited rusage. No large file materialization. Save actual failures, exact tool/commit/report hashes, bounded verdict and handoff. Root/integrator acceptance and fresh serialized MAIN common checks are required before original dx owner closes REV030.
