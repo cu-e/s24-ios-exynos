@@ -1,0 +1,45 @@
+{
+  "kind": "non-executable-future-contract",
+  "task": "VM-040",
+  "protocol": "vm040-paused-cont-v1",
+  "current_genuine_image": null,
+  "current_image_admission": null,
+  "current_guest_lease": null,
+  "required_image_files": [
+    "kernel", "payload", "ramdisk", "pid1", "candidate", "package", "fdt",
+    "layout", "source_to_link", "image_qualification", "stop_protocol"
+  ],
+  "argv_template": [
+    "@EXACT_PINNED_SOURCE_BUILT_QEMU@", "-machine", "virt,gic-version=3",
+    "-accel", "tcg", "-cpu", "cortex-a76", "-smp", "1", "-m", "256",
+    "-nodefaults", "-nic", "none", "-display", "none", "-serial", "stdio",
+    "-monitor", "none", "-no-reboot", "-S", "-kernel", "@EXACT_MATCHED_SHIM_IMAGE@",
+    "-initrd", "@EXACT_ADMITTED_XNUP@", "-dtb", "@EXACT_ADMITTED_INPUT_FDT@",
+    "-append", "cpus=1 -v serial=3 -enable_kprintf_spam console_quiet=0 disable-uart-irq=1 avf_exit=1",
+    "-qmp", "unix:qmp.sock,server=on,wait=off"
+  ],
+  "cwd": "@ROOT_LEASE_BOUND_FRESH_CANONICAL_COLLECTOR_RUN_DIRECTORY@",
+  "qmp_sequence": [
+    "typed greeting", "qmp_capabilities", "stop", "query-status: paused/prelaunch",
+    "pmemsave: source-derived Linux FDT address,40-byte header,new owned filename",
+    "pmemsave: exact Linux FDT total length within declared capacity,new owned filename",
+    "validate Linux input FDT properties/extents/hash before cont",
+    "cont", "observe RESUME",
+    "optional after unique genuine shim tree-complete checkpoint: stop/query-status/Apple tree capture/parser/cont",
+    "collect typed guest-origin SHUTDOWN separately from host quit/cleanup",
+    "reap owned session,verify no survivors,freeze raw logs/events/lineage"
+  ],
+  "limits": {
+    "guests": 1,
+    "guest_memory_mib": 256,
+    "owned_rss_limit_bytes": 536870912,
+    "spawn_to_deadline_seconds": 60,
+    "maximum_log_bytes_each": 4194304,
+    "maximum_input_fdt_bytes": 2097152,
+    "maximum_Apple_tree_bytes": 65536,
+    "minimum_MemAvailable_bytes": 4294967296,
+    "pre_spawn_memory_samples": 3
+  },
+  "legacy_VM030": "Unchanged baseline rejection of -S/PID1; a NEW image-bound protocol descriptor and independent review are mandatory.",
+  "qualification": "No real image, XNU, PID1, natural guest stop or S24 result is established. This template cannot authorize execution."
+}
