@@ -12,7 +12,7 @@ import resource
 import struct
 import sys
 import time
-from types import SimpleNamespace
+from types import ModuleType
 
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[2]
@@ -31,10 +31,17 @@ def canonical(value):
 
 
 def load(path, expected=None):
+    # Hash and parse the same bounded byte snapshot. A separate hash/open pair
+    # can qualify one inode and parse a replacement even without a symlink.
     path = Path(path)
-    if path.stat().st_size > 64*1024**2 or (expected and sha(path) != expected):
+    with path.open('rb') as stream:
+        before=os.fstat(stream.fileno())
+        data=stream.read(64*1024**2+1)
+        after=os.fstat(stream.fileno())
+    fields=lambda st:(st.st_dev,st.st_ino,st.st_size,st.st_mtime_ns,st.st_ctime_ns)
+    if fields(before)!=fields(after) or len(data)>64*1024**2 or (expected and hashlib.sha256(data).hexdigest()!=expected):
         raise ValueError('Changed or oversized frozen JSON: '+str(path))
-    return json.loads(path.read_text())
+    return json.loads(data)
 
 
 def write(path, value):
@@ -43,10 +50,12 @@ def write(path, value):
 
 
 def module(path, expected, name):
-    if sha(path) != expected:
+    path=Path(path)
+    with path.open('rb') as stream:data=stream.read(1024**2+1)
+    if len(data)>1024**2 or hashlib.sha256(data).hexdigest()!=expected:
         raise ValueError('Changed pinned Python boundary: '+str(path))
-    spec = importlib.util.spec_from_file_location(name, path)
-    result = importlib.util.module_from_spec(spec); spec.loader.exec_module(result)
+    result=ModuleType(name);result.__file__=str(path)
+    exec(compile(data,str(path),'exec'),result.__dict__)
     return result
 
 
@@ -131,16 +140,21 @@ def pinned(policy, main, key):
     return path
 
 
+def pinned_json(policy,main,key):
+    record=policy['pins'][key]
+    return load(main/record['path'],record['sha256'])
+
+
 def prepare(main, kind):
     policy = load(POLICY, POLICY_SHA256)
     helper = module(pinned(policy, main, 'helper'), policy['pins']['helper']['sha256'], 'component_frozen_helper')
-    unit = load(pinned(policy, main, kind+'_unit'))
-    source = load(pinned(policy, main, kind+'_source'))
+    unit = pinned_json(policy,main,kind+'_unit')
+    source = pinned_json(policy,main,kind+'_source')
     producer = module(pinned(policy, main, kind+'_producer'), policy['pins'][kind+'_producer']['sha256'], 'component_'+kind)
     if kind == 'pthread':
         pinned(policy, main, 'pthread_freeze'); producer.validate_plan(source)
     else:
-        graph = load(pinned(policy, main, 'graph'))
+        graph = pinned_json(policy,main,'graph')
         original = next(r for r in graph if r['id'] == 'bsd/subr_log.o')
         producer.validate_guest_row(original, main, Path(original['next_owned_compile_argv_template'][0]))
     out = canonical_path(unit['owned_output_directory'] if kind == 'firehose' else unit['output'])
@@ -149,10 +163,10 @@ def prepare(main, kind):
         raise ValueError('Pinned real compiler/archiver changed')
     for key in ['contract', 'review', 'qualification', 'graph', 'resource', 'compiler_descriptor', 'archiver_descriptor', 'supervisor']:
         pinned(policy, main, key)
-    index = helper.normalized_index(load(pinned(policy, main, 'index'))['files'], main)
-    review = load(pinned(policy, main, 'source_review'))
+    index = helper.normalized_index(pinned_json(policy,main,'index')['files'], main)
+    review = pinned_json(policy,main,'source_review')
     index.update(review['bindings'])
-    supplement = load(pinned(policy, main, kind+'_supplement'))
+    supplement = pinned_json(policy,main,kind+'_supplement')
     if kind == 'pthread':
         source_root = main/policy['components'][kind]['worktree']/'artifacts/avf-guest-pthread/prepare-2/source/pthread'
         index.update({str(source_root/r['path']):r['prepared_sha256'] for r in supplement})
@@ -166,7 +180,7 @@ def prepare(main, kind):
             elif isinstance(value, list):
                 for child in value: records(child)
         records(supplement)
-        index.update(load(pinned(policy, main, 'firehose_namespace'))['files'])
+        index.update(pinned_json(policy,main,'firehose_namespace')['files'])
     return policy, helper, unit, commands, index, out
 
 
@@ -477,10 +491,10 @@ def execute(args):
     if args.out!=out:raise ValueError('Execution output must equal exact original unit output')
     ownership=owner_authority(load(args.main/'state/lab.json'),policy['components'][args.component],args,out)
     process=policy['prospective_process']
-    if not process:raise ValueError('Reviewed prospective common budget/process pin is not yet published')
+    if not process or process.get('independently_accepted') is not True:raise ValueError('Prospective process policy is control-only until explicit independent/root acceptance')
     engine=module(args.main/process['path'],process['sha256'],'component_budget_engine')
     args.shard=args.component
-    approval=load(args.approval,args.approval_sha256)
+    approval=engine.load_project(args.approval,args.approval_sha256)
     budget=engine.project_approval(args,approval,executor_path=Path(__file__))
     planned,inputs=plan(args.main,args.component)
     if budget.source_plan!=planned:raise ValueError('Root allocation does not bind the exact current component plan')
