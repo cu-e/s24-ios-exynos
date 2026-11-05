@@ -87,3 +87,16 @@ common checks under `state/.integration.lock`; this worker runs no `make check`.
 The original owner retains the claim until independent review, integrator
 acceptance and fresh MAIN common checks. The next action is review of the
 scoped commit and bound host evidence. The runtime timer/IRQ gate remains open.
+
+Implementation commit: `b4ae11ed2db7d248e5c8d594d3d5b6a8d3a163d1`.
+The commit-bound suite at
+`worktrees/vm-029-20261106/artifacts/avf-guest-timer-irq/final-b4ae11e/`
+passed the genuine inspection and eight launch rejection controls. Two real CLI
+rejections retain exit 2 reports: changed input identity and a deliberately
+re-pinned QEMU timer definition of 30 against guest 27. These changed inputs
+are test-local copies; original sources remain untouched. The successful
+inspector's current-image `/proc` VmHWM was 73,351,168 bytes. It completed in
+under one second with no child, compiler or guest. See [evidence.json](evidence.json)
+for commands, actual exits, tools, exact input/output hashes, prior runs and
+limitations. The CLI control driver executes three finite inspector processes
+sequentially; the inspector itself starts none.
