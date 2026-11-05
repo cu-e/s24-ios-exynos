@@ -13,11 +13,40 @@ spec=importlib.util.spec_from_file_location('qualified_avf',ROOT/'tools/verify/a
 avf=importlib.util.module_from_spec(spec);spec.loader.exec_module(avf)
 def digest(p):
     with Path(p).open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
+# Coordinator-authorized bounded resource admission, not an algorithm retry loop.
+RESOURCE_WAIT_USED = 0.0
+class ResourceDeferred(RuntimeError):
+    pass
+
+def admit(out, name, argv):
+    global RESOURCE_WAIT_USED
+    started=time.monotonic();remaining=max(0.0,180.0-RESOURCE_WAIT_USED)
+    deadline=started+min(45.0,remaining);streak=0;admitted=False;available=0
+    with (out/(name+'.admission.samples.jsonl')).open('x') as log:
+        while True:
+            available=int(next(x.split()[1] for x in Path('/proc/meminfo').read_text().splitlines() if x.startswith('MemAvailable:')))
+            stamp=time.monotonic()
+            streak=streak+1 if available>=4*1024**2 else 0
+            row={'recorded_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'elapsed_seconds':round(stamp-started,6),'MemAvailable_KiB':available,'memory_pressure':Path('/proc/pressure/memory').read_text(),'consecutive_admitted_samples':streak}
+            log.write(json.dumps(row)+'\n');log.flush()
+            if streak>=3 and stamp<=deadline:
+                # A fresh final check immediately precedes process creation.
+                fresh=int(next(x.split()[1] for x in Path('/proc/meminfo').read_text().splitlines() if x.startswith('MemAvailable:')))
+                if fresh>=4*1024**2:
+                    available=fresh;admitted=True;break
+                streak=0
+            if stamp>=deadline:break
+            time.sleep(min(1.0,max(0.0,deadline-time.monotonic())))
+    elapsed=time.monotonic()-started;RESOURCE_WAIT_USED+=elapsed
+    record={'argv':[str(x) for x in argv],'floor_KiB':4*1024**2,'consecutive_samples_required':3,'interval_seconds':1,'per_command_wait_limit_seconds':45,'total_wait_limit_seconds':180,'elapsed_seconds':elapsed,'cumulative_resource_wait_seconds':RESOURCE_WAIT_USED,'MemAvailable_final_KiB':available,'admitted':admitted,'child_spawned_at_this_stage':False}
+    (out/(name+'.admission.json')).write_text(json.dumps(record,indent=2)+'\n')
+    if not admitted:raise ResourceDeferred(name+': resource-deferred admission deadline, MemAvailable='+str(available)+'KiB; no child spawned')
+    return available
+
 # Process-session monitoring/cleanup derives from accepted VM-005. This owner
 # deliberately uses RSS only: lld and ASan reserve large sparse virtual regions.
 def run(argv, out, name, seconds=5, limit_mib=256):
-    available=int(next(x.split()[1] for x in Path("/proc/meminfo").read_text().splitlines() if x.startswith("MemAvailable:")))
-    if available<4*1024**2:raise RuntimeError("MemAvailable floor: "+str(available)+" KiB")
+    available = admit(out, name, argv)
     start = time.monotonic()
     record = {"argv": [str(x) for x in argv], "started_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
               "timeout_seconds": seconds, "rss_budget_mib": limit_mib, "outcome": "fail",
@@ -189,9 +218,12 @@ def main():
    report['guest_resource_allowance']='Exclusive coordinator grant:256MiB guest RAM,512MiB total owned RSS including process/device/supervisor overhead; host/compiler runs retain256MiB. Floor4GiB and aggregate2GiB preserved.'
    guest(command,out,corpus,report,images,git)
   report['outcome']='pass';report['summary']='Genuine typed DES/TDES ECB/CBC/helper component: primary NIST and independent OpenSSL, sanitized host and typed ARM; actual CPU only if guest_cases present; no provider/general roundkey/privateApple/native/FIPS/sidechannel claim'
+ except ResourceDeferred as error:
+  report['outcome']='inconclusive';report['error']=repr(error);report['summary']='Algorithm qualification resource-deferred/inconclusive; bounded resource admission stopped before next child, not an algorithm defect: '+str(error)
  except Exception as error:
   report['error']=repr(error);report['summary']='Qualification failed/stopped without a pass claim: '+repr(error)
  finally:
+  report['resource_wait_seconds']=RESOURCE_WAIT_USED
   report['owned_source_hashes']={str(p.relative_to(ROOT)):digest(p) for p in sorted(HERE.rglob('*')) if p.is_file() and '__pycache__'not in str(p)}
   for p in [MAIN/'fixtures/public/avf-handoff/runtime.h',ROOT/'tools/build/qemu_host.py',ROOT/'tools/verify/avf_handoff.py']:report['owned_source_hashes'][str(p)]=digest(p)
   report['artifact_hashes']={str(p.relative_to(MAIN)):digest(p) for p in sorted(out.rglob('*')) if p.is_file()};report['artifacts']=list(report['artifact_hashes']);report['finished_at']=datetime.datetime.now(datetime.timezone.utc).isoformat();(out/'evidence.json').write_text(json.dumps(report,indent=2)+'\n')
