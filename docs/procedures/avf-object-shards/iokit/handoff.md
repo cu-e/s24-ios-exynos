@@ -20,8 +20,12 @@ by hashes rather than reconstructed or copied. The shared VM009 runner owns
 future compilation. Neither dependency closure nor IIG private ABI is qualified
 by lexical include observations.
 
-Experiment VMIOKITPREP-001 was submitted once to the MAIN ledger. Execution
-waits for successful registration; pending lock waits are not measurements.
+Experiment VMIOKITPREP-001 was submitted once and registered in the MAIN ledger.
+The first source-check attempt failed before admission: naming the script
+`inspect.py` shadowed Python 3.14's standard-library module imported by argparse.
+The exact failed commands, tracebacks and input hashes are retained in
+`source-checks-attempt1.json`; its negative exits are not counted as successful
+rejection controls. The helper is renamed `source_admission.py` before retrying.
 The earlier exploratory schema-introspection command assumed an object-shaped
 manifest and exited 1 with `AttributeError`; the real manifest is a JSON array.
 That failed exploratory read made no project changes and is not a positive

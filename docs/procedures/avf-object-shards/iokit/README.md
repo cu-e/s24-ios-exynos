@@ -23,7 +23,7 @@ Run from this worktree with constrained standard-library Python:
 
 ```sh
 LC_ALL=C PYTHONUTF8=1 PYTHONNOUSERSITE=1 python3 -s \
-  fixtures/public/avf-object-shards/iokit/inspect.py \
+  fixtures/public/avf-object-shards/iokit/source_admission.py \
   --main /home/egor/dev/pet/s24-ios-exynos \
   --out docs/procedures/avf-object-shards/iokit/selected-source-manifest.json
 ```
