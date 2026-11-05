@@ -11,7 +11,11 @@ Frozen manifest SHA256 is
 `inputs.json` pins all exact reports, source/compiler helpers and headers.
 `fixtures/public/avf-guest-allocator-metadata/evidence.json` records all four local
 runs, commands, exits, SHA256s, timestamps and actual `/proc/self/status` HWM.
-The final run passes at 71,696 KiB VmHWM. No compiler/linker/generator/guest ran.
+The initial final run passes at 71,696 KiB VmHWM. Supplemental preflight-5 also
+requires actual kalloc.o relocations to all four boundary symbols and passes at
+71,512 KiB VmHWM. Its exact report and SHA are recorded separately in
+`fixtures/public/avf-guest-allocator-metadata/boundary-relocations-evidence.json`;
+the original experiment capsule remains immutable. No compiler/linker/generator/guest ran.
 
 OSData has the genuine 192-byte `__DATA_CONST,__kalloc_type` section with
 `S_ATTR_LIVE_SUPPORT` (0x08000000), 8-byte alignment, and six ARM64 unsigned

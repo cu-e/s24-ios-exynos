@@ -185,6 +185,10 @@ def run(args, report):
             expected = {'section$' + edge + '$__DATA_CONST$__kalloc_' + kind for edge in ('start', 'end') for kind in ('type', 'var')}
             require({s['name'] for s in boundaries} == expected and all(s['type'] == 1 for s in boundaries), 'consumer boundary symbol contract changed')
             witness['undefined_section_boundaries'] = boundaries
+            references = [dict(section=s['section'], **r) for s in parsed['sections']
+                          for r in s['relocations'] if r.get('target') in expected]
+            require({r['target'] for r in references} == expected, 'consumer boundary relocation references missing')
+            witness['section_boundary_relocations'] = references
         report['witnesses'].append(witness)
     controls = json.loads(paths['controls_report'].read_text())
     historical = next(r for r in controls['negative_controls'] if r['name'] == 'stock-compiler-real-metadata')
