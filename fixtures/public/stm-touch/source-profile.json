@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-05",
+  "scope": "source-review and host-test; no device execution",
+  "sources": [
+    {
+      "repository": "s24-linux",
+      "commit": "417484173abc2c4fa93e738ea82ad9f2e84911b1",
+      "path": "drivers/input/sec_input/stm_spi/stm_dev.h",
+      "url": "https://github.com/dx4m/android-kernel-samsung-e1s/blob/417484173abc2c4fa93e738ea82ad9f2e84911b1/drivers/input/sec_input/stm_spi/stm_dev.h",
+      "sha256": "7f1d0eefae4dbd9d1ea28de29f360b8a647285664f6f72f54d7bebb317af5521",
+      "role": "Protocol declarations/status constants; factual layout input"
+    },
+    {
+      "repository": "s24-linux",
+      "commit": "417484173abc2c4fa93e738ea82ad9f2e84911b1",
+      "path": "drivers/input/sec_input/stm_spi/stm_core.c",
+      "url": "https://github.com/dx4m/android-kernel-samsung-e1s/blob/417484173abc2c4fa93e738ea82ad9f2e84911b1/drivers/input/sec_input/stm_spi/stm_core.c",
+      "sha256": "edc50c28340dfb0a28a9203583294f34456bb21984bb7be131ad2efb7de285f2",
+      "role": "Protocol declarations/status constants; factual layout input"
+    },
+    {
+      "repository": "s24-linux",
+      "commit": "417484173abc2c4fa93e738ea82ad9f2e84911b1",
+      "path": "drivers/input/sec_input/stm_spi/stm_reg.h",
+      "url": "https://github.com/dx4m/android-kernel-samsung-e1s/blob/417484173abc2c4fa93e738ea82ad9f2e84911b1/drivers/input/sec_input/stm_spi/stm_reg.h",
+      "sha256": "c14ef89cd1b6de7fef4a1960434ab2ed0630c0b3eac39cca5010d90a99fcb801",
+      "role": "Protocol declarations/status constants; factual layout input"
+    },
+    {
+      "repository": "s24-port",
+      "commit": "c8860decc62c6d6180e609036d027a2997972420",
+      "path": "xnu/e1s/patches/0003-e1s-touch.patch",
+      "url": "https://github.com/RNDMBG/iOS-On-S24/blob/c8860decc62c6d6180e609036d027a2997972420/xnu/e1s/patches/0003-e1s-touch.patch",
+      "sha256": "e62c65a1eb6e69899fb1cfec6ccf53df52427d0d51bfe148cdd015f40175cf1e",
+      "role": "Read-only differential donor decoder input; correction applied by existing UI-006 helper"
+    }
+  ],
+  "correction": {
+    "path": "patches/display-input/0001-e1s-stm-coordinate-nibbles.patch",
+    "sha256": "705cba452a520ee98fd0ed93d37bbdb22a7f3004513c7c7dc8acdd63d78dd5bf",
+    "role": "Existing project correction: X takes byte3 high nibble and Y takes low nibble"
+  },
+  "ownership": {
+    "implementation": "Project-authored C11 factual protocol parser and acknowledged UI-001 adapter; no donor implementation copied",
+    "fixtures": "Project-authored synthetic records; not phone captures",
+    "test_extracts": "Actual corrected donor post_event extraction kept only in ignored local artifacts",
+    "licensing": [
+      "Samsung stm_core.c retains Copyright (C) 2020 Samsung Electronics Co., Ltd. and GNU GPL version 2 notice in its source repository; no notice removed or source file redistributed here.",
+      "stm_dev.h and stm_reg.h must be assessed in their pinned Samsung repository context; no independent permissive grant is asserted.",
+      "E1S added touch patch has no per-file license notice. Existing project qualification finds no blanket grant for all E1S additions; inclusion in an Apple/APSL source tree does not establish one. Full donor source is not committed here."
+    ]
+  },
+  "wire": {
+    "record_bytes": 16,
+    "contacts": 10,
+    "coordinate_bits": 12,
+    "inclusive_maximum": 4095,
+    "x": "(byte1 << 4) | (byte3 >> 4)",
+    "y": "(byte2 << 4) | (byte3 & 15)",
+    "actions": {
+      "1": "press",
+      "2": "move",
+      "3": "release"
+    },
+    "supported_touch_types": {
+      "0": "normal",
+      "3": "glove",
+      "5": "palm",
+      "6": "wet"
+    }
+  },
+  "behavioral_policy": [
+    "Strict all-zero empty record admission is project policy; donor checks only byte0.",
+    "MOVE/UP without acknowledged DOWN is rejected; donor implicit MOVE-to-DOWN promotion is not reused.",
+    "Any Samsung error status or known ready/reset status invalidates logical stream; cancellation must be acknowledged. No controller reset is performed."
+  ],
+  "read_only_inputs": [
+    "research/notes/RES-007-display-input.md",
+    "src/platform/display/contract.h",
+    "src/platform/display/contract.c",
+    "tests/test_e1s_touch_regression.py"
+  ],
+  "source_only_board_context": {
+    "bus": "SPI9",
+    "max_hz": 10000000,
+    "chip_select": "gpp9[3]",
+    "irq": "gpa1[2]",
+    "irq_intid": 42,
+    "qualification": "Pinned source context from RES-007; not measured bus/IRQ behavior"
+  },
+  "unverified": [
+    "Physical SPI transfer and error/loss detection",
+    "Power rails and ordering",
+    "IRQ polarity, trigger and delivery",
+    "Controller firmware identity",
+    "Sensor calibration and real contact behavior",
+    "Orientation on physical panel",
+    "Suspend/resume and wake",
+    "Native iOS16.5 HID dispatch and Apple ABI",
+    "Stop hardware quiescence and safe Android return"
+  ],
+  "device_executed": false
+}
