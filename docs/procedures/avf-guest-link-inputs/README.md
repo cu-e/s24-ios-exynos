@@ -40,3 +40,15 @@ that copying the osfmk command also copied osfmk CONFIG_DEFINES into other conte
 AVFLINKPREP-002 corrects each component to its own exact doconf declaration and
 uses the genuine empty inherited CONFIG_DEFINES for top-level/config queries.
 Prior artifacts are retained and cannot qualify final tail compile templates.
+
+AVFLINKPLAN-001 resumes the original VM022 owner for a read-only final execution
+plan. It verifies the194 currently produced objects through three exact raw
+executor capsules/sidecars, object/source/dependency hashes and ARM64 MH_OBJECT
+headers; maps the full1080 graph to disjoint producing shards and future roots;
+and binds VM023's actual287-member source-built runtime/resource route. It reads
+fresh VM020/021 provider proposals as missing inputs. It records the source-backed
+Mach-O-to-XNUP-to-shim route and finite future commands, with no compiler, archive,
+linker, section processor, packager or QEMU execution. Existing compiled bytes
+are never transformed or copied by this phase. All current outputs and proposed
+future paths remain distinct, and all production/guest commands require separate
+independent review, complete inputs and explicit root resource leases.

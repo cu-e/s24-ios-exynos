@@ -15,6 +15,7 @@ import shutil
 import shlex
 import signal
 import subprocess
+import struct
 import sys
 import time
 
@@ -479,19 +480,253 @@ class Preparation:
             self.report['resource_error'] = 'Current executable image exceeded256MiB'
         dump(self.out / 'evidence.json', self.report)
 
+    def link_plan(self):
+        """Read-only admission and a finite proposed command chain, never execution."""
+        self.inputs()
+        self.admit()
+        fixture = Path(__file__).resolve().parents[2] / 'fixtures/public/avf-guest-link-inputs'
+        spec_path = fixture / 'link-plan-inputs.json'
+        self.bind(spec_path)
+        spec = json.load(spec_path.open())
+        selected = spec['selectors']
+        self.bind(self.main / selected['path'], selected['sha256'])
+        selectors = json.load((self.main / selected['path']).open())['shards']
+        parent_path = fixture / 'prepared-component.json'
+        self.bind(parent_path)
+        parent = json.load(parent_path.open())
+        contract_path = self.main / parent['source_query_contract']['path']
+        self.bind(contract_path, parent['source_query_contract']['sha256'])
+        contract = json.load(contract_path.open())
+        require_profile(contract['top_level_variables'])
+        text_path = self.main / parent['text_inputs']['path']
+        self.bind(text_path, parent['text_inputs']['sha256'])
+        text = json.load(text_path.open())
+        for path, expected in text['outputs'].items():
+            self.bind(path, expected)
+        for path, expected in spec['pinned_context'].items():
+            self.bind(self.main / path, expected)
+        by_id = {row['id']:row for row in self.graph}
+        owner = {}
+        for shard, ids in selectors.items():
+            if shard not in spec['producers']:
+                raise ValueError('Every genuine shard needs a producer path contract')
+            for identifier in ids:
+                if identifier in owner:
+                    raise ValueError('Overlapping shard ownership')
+                owner[identifier] = shard
+        if set(owner) != set(by_id):
+            raise ValueError('Exact disjoint full1080 ownership required')
+        actual = {}
+        for shard, producer in spec['producers'].items():
+            if 'raw_evidence' not in producer:
+                continue
+            raw_path = self.main / producer['raw_evidence']
+            self.bind(raw_path, producer['raw_evidence_sha256'])
+            raw = json.load(raw_path.open())
+            if raw['outcome'] != 'pass' or raw.get('provenance', {}).get('manifest_sha256') != GRAPH_SHA:
+                raise ValueError('Exact passing genuine guest raw capsule required')
+            if set(row['id'] for row in raw['objects']) != set(selectors[shard]):
+                raise ValueError('Raw capsule does not cover its exact assigned shard')
+            execution_plan_path = self.main/producer['execution_root']/'execution-plan.json'
+            expected_plan_sha = raw['artifact_hashes'][str(execution_plan_path)]
+            self.bind(execution_plan_path, expected_plan_sha)
+            execution_plan = json.load(execution_plan_path.open())
+            planned = {row['id']:row for row in execution_plan['selected']}
+            for item in raw['objects']:
+                record_path = Path(item['record'])
+                self.bind(record_path, item['record_sha256'])
+                record = json.load(record_path.open())
+                identifier = item['id']
+                original = by_id[identifier]
+                obj = self.main / producer['execution_root'] / 'objects' / identifier
+                dep = self.main / producer['execution_root'] / 'dependencies' / (identifier + '.d')
+                if (record['id'] != identifier or record['outcome'] != 'pass' or record['command']['exit_code'] != 0 or
+                    Path(record['object']) != obj or Path(record['dependency_file']) != dep or
+                    record['source_sha256'] != original['bound_source_sha256']):
+                    raise ValueError('Object record differs from exact source/output contract: ' + identifier)
+                if (record['command']['argv'] != planned[identifier]['argv'] or
+                    record['input_key'] != planned[identifier]['input_key']):
+                    raise ValueError('Actual compiler argv/input key differ from saved expanded execution plan')
+                self.bind(obj, record['object_sha256'])
+                self.bind(dep, record['dependency_file_sha256'])
+                self.bind(record['source'], original['bound_source_sha256'])
+                with obj.open('rb') as stream:
+                    header = stream.read(32)
+                if len(header) != 32 or struct.unpack_from('<II',header) != (0xfeedfacf, 0x100000c) or struct.unpack_from('<I',header,12)[0] != 1:
+                    raise ValueError('Actual ARM64 MH_OBJECT bytes required: ' + identifier)
+                actual[identifier] = dict(object=str(obj), object_sha256=record['object_sha256'],
+                    dependency_file=str(dep), dependency_file_sha256=record['dependency_file_sha256'],
+                    record=str(record_path), record_sha256=item['record_sha256'],
+                    raw_evidence=str(raw_path), raw_evidence_sha256=producer['raw_evidence_sha256'],
+                    execution_plan=str(execution_plan_path),execution_plan_sha256=expected_plan_sha,
+                    input_key=record['input_key'], actual_bytes_verified=True,
+                    private_IIG_ABI_qualified=False)
+        if len(actual) != spec['expected_actual_objects']:
+            raise ValueError('Expected exact194 current verified outputs')
+        future = self.main / spec['owned_future_execution_root']
+        if future.exists():
+            raise ValueError('Proposed final execution root must remain fresh and unexecuted')
+        mapped = []
+        for identifier in contract['ordered_link_ids']:
+            shard = owner[identifier]
+            producer = spec['producers'][shard]
+            producer_root = producer['execution_root']
+            future_template = (str(self.main/producer_root) if producer_root else producer['execution_root_placeholder']) + '/objects/' + identifier
+            row = dict(id=identifier, shard=shard, producer_task=producer['task'],
+                source=by_id[identifier]['bound_source'], source_sha256=by_id[identifier]['bound_source_sha256'],
+                producer_object=str(self.main/producer_root/'objects'/identifier) if producer_root else None,
+                future_object_path_template=future_template,
+                producer_root_status=producer['root_status'],
+                owned_staged_object=str(future/'objects'/identifier.split('/')[0]/'DEVELOPMENT'/identifier.split('/')[1]),
+                status='verified actual bytes' if identifier in actual else 'missing accepted producer capsule',
+                exists_at_snapshot=(self.main/producer_root/'objects'/identifier).is_file() if producer_root else None)
+            if identifier in actual:
+                row.update(actual[identifier])
+            mapped.append(row)
+        runtime_spec = json.load((self.main/'worktrees/vm-023-20261106/fixtures/public/avf-guest-compiler-runtime/inputs.json').open())
+        for key in ['archive', 'members', 'descriptor', 'compiler', 'linker']:
+            row = runtime_spec['inputs'][key]
+            self.bind(self.main/row['path'], row['sha256'])
+        runtime = json.load((self.main/'worktrees/vm-023-20261106/artifacts/avf-guest-compiler-runtime/final-0e44b04/report.json').open())
+        runtime_members = json.load((self.main/'worktrees/vm-023-20261106/artifacts/avf-guest-compiler-runtime/final-0e44b04/archive-members.json').open())
+        if runtime['outcome'] != 'pass' or runtime['archive']['members'] != 287 or len(runtime_members) != 287:
+            raise ValueError('Exact qualified287-member runtime route required')
+        resource_root = str((self.main/runtime_spec['inputs']['archive']['path']).parents[2])
+        provider_rows = {}
+        for name, row in spec['providers'].items():
+            path = self.main/row['archive']
+            provider_rows[name] = dict(row, path=str(path), exists_at_snapshot=path.is_file(),
+                admitted=False, required_checks=['genuine DEVELOPMENT BCM2837/MAX_CPUS8/MAX_CPU_CLUSTERS1 profile',
+                    'reviewed component executor and explicit root lease', 'actual source/object/depfile hashes',
+                    'ARM64 types and allocator metadata', 'exact archive member bytes/order',
+                    'actual imports and selected guest definitions/layout/aliases'])
+        donor = self.h/'prepare-2/source/scion'
+        chain_sources = ['avf/README.md','avf/qemu-avf.sh','avf/shim/avfboot.c','xnuloader/mkpayload.py']
+        for name in chain_sources:
+            self.bind_index(donor/name)
+        shim_report = json.load((self.main/'worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/report.json').open())
+        shim_matches = []
+        for row in shim_report['sources']:
+            path = donor/row['path']
+            self.bind_index(path)
+            shim_matches.append(dict(path=str(path), current_sha256=sha(path),
+                                     compiled_source_sha256=row['sha256'], matches=sha(path)==row['sha256']))
+        replacement = {'@GUEST_LINK_ROOT@':str(future/'stage'), '@GUEST_PROVIDER_CONTEXT@':str(future/'providers')}
+        def expand(value):
+            for old, new in replacement.items():
+                value = value.replace(old,new)
+            return value
+        link_argv = [expand(value) for value in contract['next_owned_link_argv_template']]
+        link_argv[1:1] = ['-resource-dir',resource_root]
+        stage = future/'stage'
+        command_plan = [dict(stage='create fresh owned production directories only after admission',
+            argv=['mkdir','-p',str(stage),str(stage/(contract['top_level_variables']['KERNEL_FILE_NAME']+'.link')),
+                str(future/'providers/usr/local/lib/kernel/platform'),
+                *[str(future/'objects'/component/'DEVELOPMENT') for component in contract['component_order']]],timeout_seconds=15)]
+        object_copy_plan = [dict(id=row['id'],argv_template=['cp','--reflink=auto',
+            row['producer_object'] or row['future_object_path_template'],row['owned_staged_object']],
+            required_source_sha256=row.get('object_sha256'),
+            blocked=row['id'] not in actual,original_is_immutable=True) for row in mapped]
+        for name in ['all-kpi.exp','all-alias.exp','symbolsets.plist','version.c']:
+            source = next(path for path in text['outputs'] if Path(path).name == name)
+            command_plan.append(dict(stage='copy exact genuine text input',
+                argv=['cp','--reflink=auto',source,str(stage/name)],required_source_sha256=text['outputs'][source],timeout_seconds=15))
+        for component in contract['component_order']:
+            query_report = json.load((contract_path.parent/'evidence.json').open())
+            query = next(c for c in query_report['commands'] if c['cwd'].endswith('/queries/'+component))
+            args = query['argv'].copy()
+            rewrite = {'TARGET':str(future/'objects'/component), 'OBJROOT':str(future), 'OBJPATH':str(stage)}
+            args = [next((key+'='+value for key,value in rewrite.items() if item.startswith(key+'=')), item) for item in args]
+            args[-1] = component+'.filelist'
+            args += ['-j1','SEG_HACK='+str(self.main/self.tools['setsegname']), 'LOG_LDFILELIST=:']
+            args += [part for target in contract['components'][component]['variables']['OBJS'].split()+['.CFLAGS','.CXXFLAGS','.SFLAGS'] for part in ['-o',target]]
+            command_plan.append(dict(stage='genuine staged component filelist and HIB/KLD transforms',component=component,
+                argv=args,cwd=str(future/'objects'/component/'DEVELOPMENT'), timeout_seconds=120,
+                logging_port='LOG_LDFILELIST=: changes only cosmetic logging',
+                requires='fresh copies of every accepted component object; originals remain immutable'))
+        command_plan.append(dict(stage='genuine component-order filelist concatenation',
+            argv=['cat',*[str(future/'objects'/component/'DEVELOPMENT'/(component+'.filelist')) for component in contract['component_order']]],
+            stdout_path=str(stage/'link.filelist'),timeout_seconds=15,expected_lines=1080))
+        for key, recipe in contract['tail_compile_recipe_templates'].items():
+            target = key.removeprefix('TAIL_')
+            args = shlex.split(recipe.replace('@FRESH_VERSION_C@',str(stage/'version.c')))
+            args += ['-o',str(stage/target)]
+            command_plan.append(dict(stage='fresh genuine top-level tail compilation',target=target,argv=args,
+                cwd=str(stage),timeout_seconds=120,requires='accepted namespace, separate new compiler lease; preserve all genuine flags'))
+        command_plan.append(dict(stage='genuine last constructor segment transform',
+            argv=[str(self.main/self.tools['setsegname']),'-s','__DATA','-n','__LASTDATA_CONST','-o',str(stage/'lastkernelconstructor.o__'),str(stage/'lastkernelconstructor.o')],
+            rename_after_success=[str(stage/'lastkernelconstructor.o__'),str(stage/'lastkernelconstructor.o')],timeout_seconds=30))
+        command_plan.append(dict(stage='genuine DEVELOPMENT direct image link',argv=link_argv,cwd=str(stage),timeout_seconds=180,
+            requires='all1080 staged/transformed objects, four fresh tails, accepted providers/imports and independent plan review/root link lease'))
+        command_plan.append(dict(stage='optional genuine static link archive after successful image, as original Make dependency requires',
+            argv=[expand(value) for value in contract['next_owned_archive_argv_template']],cwd=str(stage),timeout_seconds=120,
+            expected_members=1083,nonlto_outside_archive=True))
+        image = stage/(contract['top_level_variables']['KERNEL_FILE_NAME']+'.unstripped')
+        payload = future/'payload-console.xnup'
+        command_plan.append(dict(stage='source-supported console-only XNUP package',
+            argv=['python3','-s',str(donor/'xnuloader/mkpayload.py'),'-o',str(payload),'--no-version','kernel='+str(image),'--cmdline=-v avf_exit=1'],
+            timeout_seconds=30,requires='actual complete genuine Mach-O passes independent entry/segment/memory layout checks and packaging admission',
+            ramdisk='optional in source; absence cannot qualify PID1/VM002 full acceptance'))
+        command_plan.append(dict(stage='separate bounded guest proposal only',
+            argv=['timeout','--signal=TERM','--kill-after=5s','60s',str(self.main/'worktrees/vm-004-20261105/artifacts/qemu-host/build-6/build/qemu-system-aarch64'),
+                  '-M','virt,gic-version=3','-accel','tcg','-cpu','cortex-a76','-smp','1','-m','256',
+                  '-kernel',str(self.main/'worktrees/vm-002-20261105/artifacts/vm-002/shim-20261105/Image'),'-initrd',str(payload),
+                  '-nographic','-serial','stdio','-monitor','none','-no-reboot'],
+            requires='exclusive root QEMU lease plus reviewed runtime console/timer/MMU/DT/PSCI/stop gates; owned process accounting and preserved logs',
+            timeout_is_boot_success=False,source_wrapper_default_2GiB_not_used=True))
+        plan = dict(schema_version=1,task='VM-022',profile='ARM64/DEVELOPMENT/BCM2837',executed=False,
+            ready_for_link=False,explicit_root_lease_present=False,
+            ordered_object_map=mapped,verified_actual_objects=len(actual),missing_accepted_objects=1080-len(actual),
+            providers=provider_rows,runtime=dict(archive=runtime_spec['inputs']['archive'],resource_root=resource_root,
+                members=287,driver_route_measured_by_VM023=True,link_only_resource_override=True,
+                archive_wide_import_candidates=runtime['archive']['external_imports'],actual_pulled_member_imports_unmeasured=True),
+            shim_source_comparison=shim_matches,all_compiled_shim_source_hashes_match=all(row['matches'] for row in shim_matches),
+            source_supported_route='genuine uncompressed ARM64 Mach-O -> XNUP kernel entry -> existing source-built AVF shim Image; no kernelcache/IM4P conversion in this route',
+            future_execution_root=str(future),command_plan=command_plan,object_copy_plan=object_copy_plan,
+            macho_image_admission_required=dict(format='little-endian ARM64 MH_EXECUTE Mach-O, not ELF/fat/compressed/kernelcache',
+                bounded_load_commands=True,segments='LC_SEGMENT_64 file extents within actual image; vmsize>=filesize; nonwrapping ranges',
+                minimum_nonempty_segment_vmaddr='0xfffffff007000000',
+                entry='nonzero PC in bounded LC_UNIXTHREAD; executable mapped range; selected __start definition',
+                layout='actual segment order/protections/aliases/metadata and complete definitions verified after real link',
+                physical_extent='same matched shim source RAM/slide/payload/ramdisk/panic-region formula must fit the root-leased256MiB guest',
+                payload='XNUP u32 lengths/16-byte entry alignment and total extents; no oversized-host-memory packager run',
+                validation_executed=False),
+            source_chain_scope='The old shim/QEMU evidence is synthetic CPU handoff only; it is not genuine XNU runtime evidence.',
+            missing_required_inputs=['886 accepted object outputs','four freshly compiled top-level tails','accepted fresh firehose archive/profile/imports',
+                'accepted fresh pthread archive/profile/imports/aliases','actual final symbol and pulled-runtime-member closure',
+                'independent link plan review and explicit root leases','actual Mach-O entry/segment/extent image validation'],
+            unresolved_queued_owner_roots=[row for row in spec['producers'].values() if row['execution_root'] is None],
+            full_runtime_additional_gate='accepted owned PID1/mockfs root and its actual runtime ABI; console-only route cannot satisfy PID1 acceptance',
+            staging_actions_required=['copy accepted194 and future886 original objects into new owned component/DEVELOPMENT paths',
+                'copy hash-bound all-kpi.exp/all-alias.exp/symbolsets.plist/version.c into owned stage',
+                'concatenate genuine component filelists in exact eight-component order into stage/link.filelist',
+                'record fresh HIB/KLD/constructor postprocessing output hashes; preserve original objects',
+                'stage accepted fresh provider archives as providers/usr/local/lib/kernel/libfirehose_kernel.a and libpthread_kext.a',
+                'validate all input hashes/leases again immediately before every production step'])
+        dump(self.out/'final-link-execution-plan.json',plan)
+        self.report['checks'] = ['exact1080 disjoint producer mapping','194 actual raw sidecar/object/depfile/source bindings',
+            '194 actual ARM64 MH_OBJECT headers','real287-member cc_kext descriptor/archive/driver resource route',
+            'fresh providers stay unadmitted','Mach-O/XNUP/shim source route retained; no commands executed']
+        self.report['plan_summary'] = dict(verified_actual_objects=len(actual),missing_accepted_objects=886,
+            command_count=len(command_plan),executed=False,shim_sources_match=plan['all_compiled_shim_source_hashes_match'])
+        self.report['prepared_final_plan'] = dict(path=str(self.out/'final-link-execution-plan.json'),sha256=sha(self.out/'final-link-execution-plan.json'))
+        self.report['outcome'] = 'pass'
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--main', type=Path, required=True)
     parser.add_argument('--vm008', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
-    parser.add_argument('--mode', choices=['prepare', 'metadata'], default='prepare')
+    parser.add_argument('--mode', choices=['prepare', 'metadata', 'link-plan'], default='prepare')
     parser.add_argument('--prepared', type=Path)
     parser.add_argument('--experiment')
     args = parser.parse_args()
     run = Preparation(args)
     try:
-        if args.mode == 'metadata':
+        if args.mode == 'link-plan':
+            run.link_plan()
+        elif args.mode == 'metadata':
             run.metadata()
         else:
             run.prepare()
