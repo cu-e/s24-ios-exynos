@@ -1237,8 +1237,12 @@ class Headers:
             if snapshot(path) != files:
                 raise ValueError("Prepared or immutable parent guest source/config changed")
         for name, report in qualified["accepted_phase_reports"].items():
-            if json.loads((self.main / report).read_text())["outcome"] != "pass":
+            phase = json.loads((self.main / report).read_text())
+            if phase["outcome"] != "pass":
                 raise ValueError("Bounded phase is not an actual pass: " + name)
+            if name == "public-iig" and (phase.get("controller_rss_budget_bytes") != 256 * 1024**2 or
+                                          not 0 < phase.get("host_controller_peak_rss_bytes", 0) <= 256 * 1024**2):
+                raise ValueError("IIG library hashing/generation lacks corrected bounded-controller evidence")
         objects = {}
         for name in qualified["accepted_object_records"]:
             data = json.loads((self.main / name).read_text())
