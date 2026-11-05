@@ -7,7 +7,48 @@ integration role. Worktree `worktrees/int-platform-20261106`, branch
 component and independent-review files are exact scoped cherry-picks, with no
 original-owner, registry, generated-view or shared input edits.
 
-## KRN-036 + REV-021: prepared, publication pending
+## Current handoff: 2026-11-05 22:30 UTC
+
+KRN-036/REV-021 published at exact `36c7dce7c18a2cefbf5ae41032915b2a8a5a8006`.
+The continuously locked whole common check passed all 170 tests, exit 0,
+19.398 seconds, peak owned RSS 383209472 bytes, with no surviving owned processes.
+The matching cn lease is released. `cts3-publication.json` binds the actual
+publication/release capsules. Original component owners retain task closure.
+The separate native fortified-memory and NFS ignored-return gates remain open.
+
+KRN-039/REV-022 bounded source intake passes: 2239 identities, actual 988-object
+Mach-O graph, 28 selected unique strong providers and the six existing CPU
+control receipts. See `kernel-des-20261106/qualified-intake.json` and report.
+The isolated candidate `52855d9b3a76160fad10c73bac19488a05e144a9` is preserved
+by branch `team/int-platform-des-frozen-20261106`; its fd201707-based plan is
+stale and must not publish. No native DES prerequisite is imposed on console.
+
+Root prioritized the shared VM-036 component executor. The independent contract
+is frozen at `8ccdbd8`, SHA256
+`47df3f55f5d539eb36dd5a795b422fa21adf449965582dfcd57359985a87f352`.
+The proposed VM-020 and VM-021 four-command units independently match their
+unchanged source templates with only declared output substitutions, genuine
+archive filelists and original-owner planned experiments. See
+`guest-component-executor-20261106/qualified-plan-review.json`. The original
+2112-check source matrix was not repeated. No compiler or archiver ran.
+VM-036 dy may now implement/review one shared executor using this contract;
+original cx/cy retain actual experiment recording after acceptance and a lease.
+
+Actual VM-014 OSKext compilation now exposes a missing
+`os/firehose_buffer_private.h`. Original VM-020 cx traces its genuine export and
+install layout; cn independently reviews it, and cm owns future namespace
+integration. Propose a new qualified immutable namespace/manifest after the
+current wave captures its failures. Never alter old/current namespace trees,
+artifact indexes, source inputs or active job limits. No automatic retry.
+
+The user roadmap was read from the new attachment. Existing wave3 retains its
+two-job plan. New boundary plans use a project-wide ceiling of six compilers and
+6 GiB new process RSS, stable 4 GiB admission, wall/peak-RSS/active-swap evidence;
+these small component units remain serial within 256 MiB. Eight compilers need a
+later measured trial. Shared MAIN publication/common remain serialized under
+the existing integration lock. No hardware authorization was added.
+
+## Historical initial KRN-036 + REV-021 preparation
 
 The bounded CBC-CS3 component is accepted for isolated integration based on
 the exact frozen implementation/review, verified real capsule/log/dependency
@@ -60,7 +101,7 @@ integration remains unqualified. Provider/private ABI/FIPS/side-channel/native/
 full-kernel gates remain explicit. Only original cb/ck owners close their tasks
 after final coordinator integration acceptance; INT-003 does not impersonate them.
 
-## Shared gate and next step
+## Historical initial shared-gate handoff
 
 INT-002's kernel integrator owns the sole `tools/integration_gate.py`. Use its
 frozen/root-reviewed tool for both integrators. One stable
