@@ -60,7 +60,7 @@ def prepare(main, owned, output, report, control):
     for relative in ["src/platform/gpu/abi/sgpu_abi.c", "src/platform/gpu/abi/sgpu_abi.h"]:
         report["inputs"].append(pin(owned / relative, gpu011["sha256"][relative]))
     report["owned_sources"] = [pin(path) for directory in [owned / "src/platform/gpu/native/userclient", owned / "fixtures/public/gpu-userclient"]
-                               for path in sorted(directory.rglob("*")) if path.is_file()]
+                               for path in sorted(directory.rglob("*")) if path.is_file() and path.suffix in {".cpp", ".hpp", ".py"}]
     report["genuine_recipe_bindings"] = [cpp, c]
     report["owned_output_directories"] = [str(output / name) for name in ["objects", "dependencies", "work", "host"]]
     for directory in report["owned_output_directories"]:
