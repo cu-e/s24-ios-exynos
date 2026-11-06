@@ -33,3 +33,26 @@ this preparer never compiles or implements a new executor. Preserve actual
 errors without automatic source/header repair, then inspect real MachO bytes,
 MD closure and cleanup. No full kernel, link, export/provider/SDK/privateABI,
 SMP, physical RAM, recovery or phone qualification is asserted.
+
+Root59 actual result: pe_bootargs compiled successfully, physical ARM64
+MH_OBJECT4024B SHA bf122f77f9734ce981b36d14a6d5dd3ed560258a45d0fbe6796d435a4ec3ebd3,
+with177 actual dependency entries matched to source/plan. pe_identify_machine
+failed at genuine kern/simple_lock.h. E1SFIRST001 is recorded FAIL; both actual
+commands and raw356c745e remain immutable. The original wrapper's summary176
+count was a metadata typo; its actual177-entry array is authoritative.
+
+Correction is isolated in worktrees/str-007-e1s-first-objects-fix1-20261106,
+branch team/str-007-e1s-first-objects-fix1-20261106, preserving original WT and
+namespace. New development-exports.json adds exactly six raw source headers
+through genuine kern/machine/arm Make declarations. No header body is invented
+or flag disabled. prepare.py --only pe_identify_machine.o creates a fresh
+163-header namespace with all63 same actual config bytes and real sanitizer
+setup. Actual source-copy/Make-query/sed/validator exit0; no compiler was run.
+
+Selected follow-up plan: artifacts/e1s-first-objects/prepare-003/compile-plan.json
+SHA eb63a2e79d55b731ae4c0127a12f59751abf258243e855ce139fd8a276afa2b0.
+One command only,497 pinned inputs. previous_successful_product binds the old
+first object/MD/receipt unchanged with recompiled=false. E1SFIRST002 is planned,
+not a compile PASS. Root received the exact256MiB/serial/120child/600whole request.
+The retry object/MD files remain absent. Root alone grants/runs; no automatic
+retry or new source flags are authorized by this preparation.

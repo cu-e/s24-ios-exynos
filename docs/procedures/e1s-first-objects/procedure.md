@@ -17,3 +17,13 @@ actual missing-header/compiler error is evidence, not permission to fabricate
 inputs or retry silently. Preserve all actual MD, MachO bytes, source/config/
 compiler/runtime hashes and cleanup. No native link/SDK/privateABI/provider,
 SMP or phone/hardware qualification follows from these two objects.
+
+E1SFIRST002 follow-up: first actual root59 pe_bootargs succeeded, second failed
+on kern/simple_lock.h. Preserve original WT/namespace/object and failure receipt.
+New fix1 WT adds six genuine raw transitive headers using source Make declarations
+and calls prepare.py --only pe_identify_machine.o into a fresh prepare003 tree.
+E1SFIRST002 remains planned after source preparation; only the second compiler
+command is authorized to be proposed for the new root allocation. Never rerun
+pe_bootargs or invent flags/headers. The first failure wrapper's summary says176
+MD entries in error; its actual array contains177, verified against source/plan.
+The177 array and physical first-product hash are authoritative; keep old wrapper.

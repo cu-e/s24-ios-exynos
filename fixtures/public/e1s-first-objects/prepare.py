@@ -24,6 +24,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--main', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--only', choices=['pe_bootargs.o','pe_identify_machine.o'])
     a = parser.parse_args(); m = a.main.resolve(); out = a.out.absolute()
     assert out == out.resolve() and not out.exists()
     parent = m/'worktrees/str-004-e1s-profile-20261106'
@@ -65,6 +66,17 @@ _v =
             assert manifest[row['source']]==row['sha256']
             assert manifest[row['declaration']]==row['declaration_sha256']
             assert exports.setdefault(row['destination'],row)==row
+    extra_path=Path(__file__).with_name('development-exports.json')
+    extra=json.loads(extra_path.read_text());inputs[str(extra_path)]=sha(extra_path)
+    for row in extra['rows']:
+        assert manifest[row['source']]==row['sha256'] and manifest[row['declaration']]==row['declaration_sha256']
+        declaration=(source/row['declaration']).read_text().replace('\\\n',' ')
+        listed=re.findall(r'^'+row['list_variable']+r'\s*=\s*(.*)$',declaration,re.M)
+        assert len(listed)==1 and Path(row['source']).name in shlex.split(listed[0])
+        assert re.search(r'^EXPORT_'+row['export_kind']+r'_DIR\s*=\s*'+row['export_directory']+r'\s*$',declaration,re.M)
+        assert row['source']=='osfmk/'+row['export_directory']+'/'+Path(row['source']).name
+        assert row['destination']=='EXPORT_HDRS/'+row['source']
+        assert exports.setdefault(row['destination'],row)==row
     for relative,row in exports.items():
         for rel,digest in [(row['source'],row['sha256']),(row['declaration'],row['declaration_sha256'])]:
             assert sha(source/rel)==digest;inputs[str(source/rel)]=digest
@@ -124,6 +136,7 @@ _v =
     commands=[]
     for line in p.stdout.splitlines():
         if not line.startswith('E1SCMD|'):continue
+        if a.only and line.split('|',2)[1]!=a.only:continue
         _,target,expanded=line.split('|',2);argv=shlex.split(expanded)
         assert argv[0]==str(compiler) and '-c' in argv and '-DARM64_BOARD_CONFIG_E1S' in argv
         assert not any('BCM2837' in word for word in argv)
@@ -132,7 +145,8 @@ _v =
         assert sha(src)==manifest[str(src.relative_to(source))];inputs[str(src)]=sha(src)
         commands.append({'id':'pexpert/'+target,'argv':argv,'cwd':str(cfg),'object':str(cfg/target),
                          'depfile':str(cfg/target.replace('.o','.d')),'genuine_expanded_recipe':expanded})
-    assert len(commands)==2 and commands[0]['id']=='pexpert/pe_bootargs.o'
+    assert len(commands)==(1 if a.only else 2)
+    if a.only:assert commands[0]['id']=='pexpert/'+a.only
     for p in [source/'makedefs/MakeInc.def',source/'makedefs/MakeInc.rule',source/'makedefs/MakeInc.cmd',query]:inputs[str(p)]=sha(p)
     for c in commands:assert not Path(c['object']).exists() and not Path(c['depfile']).exists()
     plan={'schema':'e1s-first-native-objects-plan-v1','task':'STR-007','owner':'codex-e1s-first-objects-20261106-sr7',
@@ -142,6 +156,17 @@ _v =
           'input_sha256':inputs,'max_jobs':1,'max_owned_rss_bytes':256*1024**2,'child_timeout_seconds':120,'whole_timeout_seconds':600,
           'native_donor_policy':{'BUILD_LTO':0,'BUILD_WERROR':0,'same_source_policy_as_actual_native_receipt':True},
           'SDK_provided':False,'SDKROOT_is_absent':not (out/'unavailable-sdk').exists(),'compiler_execution':False,'hardware_execution':False}
+    if a.only:
+        prior_path=Path(__file__).resolve().parents[3]/'docs/procedures/e1s-first-objects/actual-001-evidence.json'
+        prior=json.loads(prior_path.read_text());product=prior['successful_product']
+        assert prior['commands'][0]['exit_code']==0
+        assert sha(product['path'])==product['sha256'] and sha(product['depfile'])==product['depfile_sha256']
+        plan['previous_successful_product']={'path':product['path'],'sha256':product['sha256'],
+            'depfile':product['depfile'],'depfile_sha256':product['depfile_sha256'],
+            'actual_dependency_count':len(product['actual_dependencies']),
+            'receipt':str(prior_path),'receipt_sha256':sha(prior_path),
+            'recompiled':False}
+        for path in [prior_path,Path(product['path']),Path(product['depfile'])]:inputs[str(path)]=sha(path)
     (out/'compile-plan.json').write_text(json.dumps(plan,indent=2)+'\n')
     print(json.dumps({'plan':str(out/'compile-plan.json'),'sha256':sha(out/'compile-plan.json'),'commands':len(commands),'exports':len(exports)}))
 
