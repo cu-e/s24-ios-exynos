@@ -57,12 +57,21 @@ info, stage, progress, status and failure calls, unchanged row padding/prefix,
 and the exact flush extent. The original16x16 controls still exercise clipped
 and invalid descriptors. No additional algorithm implementation is substituted.
 
-Selected prospective retry is artifacts/e1s-framebuffer/prepare-3/plan.json,
+Root54 executed the selected retry once: artifacts/e1s-framebuffer/prepare-3/plan.json,
 SHA136996ea5ad15c387c50db7e1585854d81b7fcb17ca4b4d4ddfb7ca544fa86e1,
-with exactly six commands. STR005FB-002 requires new root admission; no author
-compiler/control execution occurred. The display overlay and RAM parent bytes
+with exactly six commands, all exit0. STR005FB-002 actual PASS: baseline9
+unsafe-behavior reproductions, patched55 ASan/UBSan controls, and AArch64 loader,
+FDT and UI objects. Raw evidence5c0e998d is bound by evidence.json; elapsed5.777s,
+maximum sampled child-tree RSS99,930,112 bytes, controller HWM31,133,696 bytes,
+zero owned survivors. No author rerun occurred. All selected input/output hashes
+were read back unchanged after execution. The original failed run remains FAIL. The display overlay and RAM parent bytes
 are unchanged. Read-only canonical57d comparisons match all eight donor source/
 header/font blobs (compatible-source-proof.json). Overlay check/apply on owned
 copies and exact post-overlay body hashes succeeded. Literal.patch context
 lines trigger Git whitespace diagnostics as patch text; source/fixture/procedure
 diff checking excludes that patch representation. No global Git policy changed.
+
+Source publication/common and independent acceptance remain pending. This overlay
+is not yet invoked by the ordinary E1S builder; a separate dependent hook must
+apply immutable RAM23b31 then display0689 before ordinary loader compilation.
+No native image, physical scanout or S24 boot success is claimed.
