@@ -82,3 +82,14 @@ project-budget-v1/onejob/512MiB/whole1200. It must remain PLANNED until actual
 execution. Its execute-001 directory is absent; no private configuration copy,
 loader, compiler, Make or generator ran. Source-plan RSS/duration are unknown,
 not measured. Wait common84 PASS and a separate exact root ProjectBudget grant.
+
+## Root86 actual execution
+
+Root subsequently dispatched STR029BUILD-001 once under its exact allocation.
+All36 actual support objects and their MD/current-input/resource checks pass;
+all40 loader/compiler child exits0, own reservation complete, independent
+retained-session scan empty. See `actual-build-001-handoff.md` and
+`build-001-evidence.json` for exact raw/product/authority/resource pins. The
+earlier source-only phase descriptions above remain historical. Root86's
+aggregate FAIL belongs to a separate STR-028 failure; support exit0/PASS36
+does not establish a whole-wave or kernel result. Keep STR-029 in progress.
