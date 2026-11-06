@@ -1,10 +1,10 @@
 # Separate auxiliary native layout measurements: source plan only
 
 Original STR018 owner remains `codex-e1s-development-providers-20261106-sr18`.
-`layout-plan.json` binds `layout-plan-001/execution-plan.json` SHA256
-`1b6aae04b95c2df05128a40b96e871849bef5d4dae4790e7897b4b2c33ca9858`
+`layout-plan.json` binds `layout-plan-002/execution-plan.json` SHA256
+`c2ca4c4ad198b8edc2e231aa8949fee6c2afb4ee401c86e0934496fb3e522f10`
 and source capsule SHA256
-`51491ecee6e7eae855115a7ea385fc063b16a2f997c0cef73e14a75813f9a536`.
+`3ced912675c14ace9e350027e6e1c2e22bbf3690c07fae0539133f859cdf6d5a`.
 Prospective experiment `E1SPROVIDERLAYOUT-001` is separate from ROOT104 production
 and ROOT111 tool reads. Fresh `layout-probe-001` is absent. No compiler,
 preprocessor, layout probe or target tool has run for this source preparation.
@@ -54,9 +54,10 @@ in its genuine file-backed const section using existing core.macho_snapshot.
 Require ARM64 subtype0 MH_OBJECT, exact224-byte bounds, no record relocations,
 and no unexpected external definitions/imports or functions. A bounded existing
 snapshot.read_range and standard struct.unpack(<28Q) read the data; there is no
-new Mach-O parser. Check record metadata, actual CPU10/cluster4/PHY9 and selected
-MACH_ASSERT1/DEVELOPMENT1, then require all28 actual fields equal between the two
-contexts. Preserve actual arrays, commands, MD, diagnostic/resource records,
+new Mach-O parser. Check record metadata, actual CPU10/cluster4/PHY9 and DEVELOPMENT1. Compare all structural layout fields and these required
+metadata/tuple fields between contexts. MACH_ASSERT is recorded independently
+per genuine recipe and may differ; retain both values and do not force1 or
+change flags to obtain equality. Preserve actual arrays, commands, MD, diagnostic/resource records,
 input/output hashes and zero-owned-survivor cleanup. No numeric Firehose size
 is accepted from source planning or unsupported ROOT111 disassembly.
 
@@ -65,3 +66,7 @@ Native pthread_shims/subr_log actual consumer products/MD, callback compatibilit
 and final selected native definition/alias bindings remain separate requirements.
 Even passing these records does not establish full private ABI, a final link or
 image, runtime, hardware or iOS. No device or QEMU operation is proposed.
+
+Prior source plan0011b6aae04 and capsule51491ece remain preserved. Plan002
+changes only the MACH_ASSERT comparison policy; both TUs, both commands,
+contexts, pins, record columns and resource bounds are unchanged.
