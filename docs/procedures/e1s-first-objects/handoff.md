@@ -56,3 +56,14 @@ first object/MD/receipt unchanged with recompiled=false. E1SFIRST002 is planned,
 not a compile PASS. Root received the exact256MiB/serial/120child/600whole request.
 The retry object/MD files remain absent. Root alone grants/runs; no automatic
 retry or new source flags are authorized by this preparation.
+
+Root62 actual follow-up PASS: only pe_identify_machine was compiled, exit0,
+ARM64 MH_OBJECT43512B SHA b62b985bfead23bbd97bce77d46f2a1a5b3912d73cbcb389fa0feda9b06a592a,
+190 actualMD entries verified. Both actualMD closures include the exact E1S.h
+and board_config.h carrying10CPU4cluster source capacity. The original first
+object bf122f77 remains unchanged. qualified-objects.json binds both real products,
+367 dependency edges and separate historical source namespaces, with no relabel.
+evidence.json records E1SFIRST002 PASS; E1SFIRST001 remains FAIL. Await independent
+CM/root publication/common acceptance before originalSR7 taskclosure. Next real
+native stage is a narrow remaining5componentDEVELOPMENTconfig generation task
+depending on acceptedSTR004, not another broad profile audit or new framework.
