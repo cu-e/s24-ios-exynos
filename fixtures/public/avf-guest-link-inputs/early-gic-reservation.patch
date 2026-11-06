@@ -1,0 +1,48 @@
+--- a/osfmk/arm64/arm_vm_init.c
++++ b/osfmk/arm64/arm_vm_init.c
+@@ -50,6 +50,7 @@
+ #include <libkern/section_keywords.h>
+ 
+ #include <san/kasan.h>
++#include <os/overflow.h>
+ 
+ #if __ARM_KERNEL_PROTECT__
+ /*
+@@ -2382,6 +2383,37 @@
+ 	va_l1 = dynamic_memory_begin;
+ 	va_l1_end = va_l1 + ((2 + (mem_segments * 10)) << 20);
+ 	va_l1_end += round_page(args->Video.v_height * args->Video.v_rowBytes);
++
++	/* VM022: GIC MMIO is mapped by io_map before dynamic pmap allocation. */
++	DTEntry gic_entry;
++	if (SecureDTLookupEntry(NULL, "/arm-io/gic", &gic_entry) == kSuccess) {
++		const uint64_t *gic_reg;
++		unsigned int gic_reg_size;
++		uint64_t gic_extra = 0;
++
++		if (SecureDTGetProperty(gic_entry, "reg", (const void **)&gic_reg,
++		    &gic_reg_size) != kSuccess || gic_reg_size < 4 * sizeof(uint64_t)) {
++			panic("arm_vm_init: invalid early GIC reg");
++		}
++		for (unsigned int i = 1; i < 4; i += 2) {
++			uint64_t rounded_span;
++
++			/* Reserve round_page(size + maximum physical page offset). */
++			if (gic_reg[i] == 0 ||
++			    os_add_overflow(gic_reg[i], (uint64_t)PAGE_MASK, &rounded_span) ||
++			    os_add_overflow(rounded_span, (uint64_t)PAGE_MASK, &rounded_span)) {
++				panic("arm_vm_init: early GIC span overflow");
++			}
++			rounded_span &= ~(uint64_t)PAGE_MASK;
++			if (os_add_overflow(gic_extra, rounded_span, &gic_extra)) {
++				panic("arm_vm_init: early GIC reservation overflow");
++			}
++		}
++		if (os_add_overflow(va_l1_end, gic_extra, &va_l1_end) ||
++		    va_l1_end > VM_MAX_KERNEL_ADDRESS - 0x7FFFFFULL) {
++			panic("arm_vm_init: early GIC VA reservation overflow");
++		}
++	}
+ 	va_l1_end = (va_l1_end + 0x00000000007FFFFFULL) & 0xFFFFFFFFFF800000ULL;
+ 
+ 	cpu_l1_tte = cpu_tte + ((va_l1 & ARM_TT_L1_INDEX_MASK) >> ARM_TT_L1_SHIFT);
