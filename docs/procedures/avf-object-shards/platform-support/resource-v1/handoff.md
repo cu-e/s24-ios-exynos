@@ -29,3 +29,30 @@ exact plan/hash/output/task/owner/experiment. No resume, arbitrary flags, engine
 edits, common checks or MAIN publication. Preserve prior AF193 plan and VM018
 DONE. INT002/root receive this source-plan receipt for independent assessment;
 actual objects/deps/runtime remain unmeasured for this new profile.
+
+
+## Grant30 actual attempt: refused before compiler
+
+Root explicitly granted one exact execute attempt. Grant receipt SHA
+639fa3c34d4ccd25d406d1a5f2bdc8b44c8976a7c7cddb2eca950256c80f139a,
+approval283fdf25, allocation77a7de19, unchanged physical9929 helper and64e7
+1200-second in-process launcher were stream-verified before direct exec.
+Actual launcher PID139589/start_ticks59818914 at2026-11-06T07:31:16.111600+00:00.
+It returned exit1 immediately: `Root allocation/queue must be canonical MAIN
+artifact paths`. This is an admission refusal: compiler_startedfalse,
+commands[], objects[], all13 unattempted. No retry, resume, flags, source or pin
+change occurred. No compile failure or source finding is inferred.
+
+Raw immutable failed build-001/runner/evidence.json SHA
+ d59e91e6e3e533e63f96ea92ba700408907dc9a75bae77783f871b658179c5ac;
+terminal build-001-terminal.json SHA
+6011267a1252069e2286a931fef2271c213a16682b19e5f339e25594b01b8ecf.
+Both paths are under this WT's resource-v1 artifact root. Current image HWM
+31170560B; inherited1380720640B is separately labelled. Launcher PID absent,
+no child commands began; neither allocation-adjacent nor canonical wave30
+reservation file exists. Global queue was not released or changed by EO.
+
+Next: root owns any corrected allocation and new explicit attempt authorization.
+Preserve this failed directory/receipt and prior plan; never overwrite/retry
+build-001 implicitly. Actual experiment VM043RESOURCEBUILD-001 records this
+failed outcome. No current compiler/process remains; VM043 stays in progress.
