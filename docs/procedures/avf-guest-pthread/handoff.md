@@ -138,3 +138,41 @@ Each unit remains serial, one compiler maximum, combined RSS at most 256 MiB,
 with the accepted helper's per-command admission and 120-second deadline.
 Actual products, dependencies, Mach-O/metadata/members, callback ABI, native
 alias/provider closure and all wider kernel/guest acceptance remain unmeasured.
+
+## Original-owner accepted AF193 intake
+
+Root permitted only new original-owner source-plan derivation after accepted
+MAIN `27352788619e594314a1a85a12f07e82fc279184` / common 170 PASS. Original
+owner cy registered new actual experiment `AVFPTH-004`; it remains **planned**
+and has not been recorded as build PASS. The old AVFPTH-003 and historical
+source/unit/filelist bytes were preserved.
+
+One exact final physical adapter CLI child ran `--mode plan` with all original
+task/owner/experiment flags, through accepted physical AF193 `run_child` with no
+budget/approval CLI flags. It exited 0 in 3.778310 seconds.
+The three admitted MemAvailable samples were
+17269317632, 17200558080, 17825230848 bytes.
+Sampled combined controller/owned-child peak was 112533504
+bytes, below 256 MiB; no owned process survived. No compiler or archiver ran.
+
+New plan: `artifacts/avf-guest-pthread/derived-af193-1/plan/execution-plan.json`,
+SHA256 `288b255bfb5d38798a6889a7569596e5f04401752f3230e60c470017cbaa94bc`; canonical JSON SHA256
+`5cab47a4a445f606fe2eb0ad15c814265e655311a6083b583c48ee51249d4279`.
+Sibling input bindings SHA256 `683311bdafbd5d9c5b33462bb4ab7dc14eb5840944c31327b0dea731319ec44f`.
+The derived files bind final adapter `e62d7592...`, policy `748db1c0...`, and
+physical VM039/ej AF193. They happen to match the prior reviewer-owned plan
+bytes; this intake was nevertheless generated through the actual original-owner
+CLI under the new planned experiment, without copying old review artifacts.
+
+`derived-af193-evidence.json` gives exact artifact paths/hashes, command/exit/
+resource evidence and the future execute argv template. The actual future
+component product output remains `artifacts/avf-guest-pthread/compile-1` and is
+absent; product hashes remain null. Future execute uses this same physical
+adapter, original VM021/cy/AVFPTH-004 flags, output compile-1, and root's later
+exact `--approval` / `--approval-sha256` values. No approval is invented here.
+
+Root must intake both new original-owner component plans and grant the later
+serial compiler allocation before any execute invocation. No loader, QEMU,
+common check, publication or budget044 repin was performed. All compiled ABI,
+provider/member/dependency/layout/alias and wider kernel acceptance remain
+unmeasured. Task VM-021 remains in progress under the original owner.
