@@ -1,0 +1,72 @@
+--- a/osfmk/arm64/start.s
++++ b/osfmk/arm64/start.s
+@@ -637,15 +637,24 @@
+ .endmacro
+ 
+ /*
+- * E1S bring-up: leave the checkpoint in the reserved sec_debug_next page
+- * before the MMU is enabled. The loader writes the magic at 0x912ff000.
+- */
++ * E1S checkpoints belong to the kernel image, not an assumed reserved PA.
++ * Keep the slot file-backed: these stores precede C/BSS initialization.
++ * All callers execute with the MMU off (or V=P), so ADRP/ADD yields its PA.
++ * Only x9/x10 are scratch, as in the original marker.
++ */
++#if defined(E1S)
++	.section __DATA,__data
++	.align 3
++Le1s_boot_marker:
++	.quad 0x4531534d41524b00
++	.text
++#endif
+ .macro E1S_BOOT_MARK n
+ #if defined(E1S)
+-	movz	x9, #0xf000
+-	movk	x9, #0x912f, lsl #16
++	adrp	x9, Le1s_boot_marker@page
++	add	x9, x9, Le1s_boot_marker@pageoff
+ 	movz	x10, #\n
+-	str	x10, [x9, #8]
++	str	x10, [x9]
+ #endif
+ .endm
+ 
+--- a/bsd/dev/e1s_log.c
++++ b/bsd/dev/e1s_log.c
+@@ -5,9 +5,6 @@
+ #include <sys/systm.h>
+ #include <sys/types.h>
+ 
+-extern vm_offset_t ml_io_map(vm_offset_t phys_addr, vm_size_t size);
+-
+-#define E1S_LOG_PA          0x91300000UL   /* 0x91200000 + 1 MiB */
+ #define E1S_LOG_SIZE        (1U << 20)
+ #define E1S_LOG_DATA_OFF    0x100U
+ #define E1S_LOG_RING_SIZE   (E1S_LOG_SIZE - E1S_LOG_DATA_OFF)
+@@ -23,6 +20,8 @@
+ 	uint64_t seq;
+ };
+ 
++/* Kernel-image BSS: reserved by the linked segment vmsize, never MMIO. */
++static uint8_t e1s_log_storage[E1S_LOG_SIZE] __attribute__((aligned(8)));
+ static volatile uint8_t *e1s_log;
+ static volatile uint64_t e1s_log_total;
+ static volatile uint64_t e1s_log_seq;
+@@ -78,15 +77,9 @@
+ 	}
+ 	e1s_log_total = 0;
+ 	e1s_log_seq = 0;
+-	e1s_log = (volatile uint8_t *)ml_io_map(E1S_LOG_PA, E1S_LOG_SIZE);
+-	if (e1s_log == NULL) {
+-		printf("e1s-log: cannot map %#lx; console log disabled\n",
+-		    E1S_LOG_PA);
+-		return;
+-	}
++	e1s_log = e1s_log_storage;
+ 	e1s_log_write_header();
+-	printf("e1s-log: console ring at physical %#lx, %u KiB; "
+-	    "dump 2 MiB at 0x91200000\n", E1S_LOG_PA,
++	printf("e1s-log: image-owned console ring, %u KiB\n",
+ 	    E1S_LOG_RING_SIZE >> 10);
+ }
+ 
