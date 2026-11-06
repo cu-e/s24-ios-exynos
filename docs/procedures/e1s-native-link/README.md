@@ -63,3 +63,15 @@ missing/duplicate/reordered/wrong-profile/unqualified/escaped authority, exact03
 slots, and real missing/changed/symlink bindings. It never creates a fake complete
 catalog or runs a target decoder/tool. Controls are once-only, finite and retain
 failures/deferrals. Common publication belongs to root after independent review.
+
+## Frozen source result
+
+Initial source commit29686d50164cefef1f32b9d2fd4e7a1ace5dc982 and physical caller
+b3b8beaf07ab6fa88126964ba7b5d917ea95604f384da404c612e1343c41df12 passed
+STR036SOURCE-001 once:20 source controls, exit0,2.454735s, sampled combined
+controller/child peak76013568B against268435456B, owned-after empty. The raw
+process/result/log/sampling files remain in the original worktree
+`artifacts/e1s-native-link/source-001`; conventional evidence pins them. No
+actual target-tool or complete-plan output was produced. No repeated common test
+or source batch is authorized or needed for this freeze. Independent source
+review/root publication is pending; original SR36 retains ownership.
