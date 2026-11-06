@@ -56,7 +56,7 @@ def fdt_bytes(*, duplicate=False):
         body.extend(b'\0' * (-len(body) % 4))
     begin(''); prop('#address-cells', struct.pack('>I', 2)); prop('#size-cells', struct.pack('>I', 2))
     if duplicate: prop('#size-cells', struct.pack('>I', 2))
-    begin('memory@40000000'); prop('reg', struct.pack('>QQ', 0x40000000, 256 << 20)); end()
+    begin('memory@40000000'); prop('device_type', b'memory\0'); prop('reg', struct.pack('>QQ', 0x40000000, 256 << 20)); end()
     begin('psci'); prop('method', b'hvc\0'); end()
     begin('pl011@9000000'); prop('reg', struct.pack('>QQ', 0x09000000, 0x1000)); prop('compatible', b'arm,pl011\0'); end()
     begin('intc@8000000'); prop('reg', struct.pack('>4Q', 0x08000000, 0x10000, 0x080a0000, 0xf60000)); prop('compatible', b'arm,gic-v3\0'); end()

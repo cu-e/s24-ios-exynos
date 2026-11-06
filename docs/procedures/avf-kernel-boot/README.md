@@ -1,5 +1,12 @@
 # VM-040: lineage-bound genuine kernel collector preparation
 
+REV-037 correction is prepared separately in `worktrees/vm-040-lease-20261106`.
+The original physical worktree, source and control capsules remain frozen.
+The original19 passing host tests did not detect a pre-spawn lease window or
+invalid source predicates in the authored FDT. See `lease-regression-002.md`
+and `fdt-regression-003.md` for the prospective focused corrections. A corrected
+authored fixture is source-valid host data, not actual QEMU FDT qualification.
+
 Owner `codex-guest-collector-20261106-eh`, branch
 `team/vm-040-eh-20261106`, worktree `worktrees/vm-040-eh-20261106`, base
 `d596c07d5bbb1ef8f8bca1107a4bbc0c7db7ac42`.

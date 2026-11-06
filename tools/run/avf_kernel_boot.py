@@ -205,13 +205,19 @@ def fdt(data):
 def fdt_contract(props, layout, package):
     require(props[('/', '#address-cells')] == struct.pack('>I', 2) and
             props[('/', '#size-cells')] == struct.pack('>I', 2), 'FDT root cell widths')
-    memory = [value for (node, name), value in props.items() if node.startswith('/memory@') and name == 'reg']
-    require(len(memory) == 1 and memory[0] == struct.pack('>QQ', 0x40000000, 256 << 20), 'FDT RAM differs')
+    memory = [node for (node, name), value in props.items()
+              if node.count('/') == 1 and name == 'device_type' and value == b'memory\0']
+    require(len(memory) == 1 and props.get((memory[0], 'reg')) ==
+            struct.pack('>QQ', 0x40000000, 256 << 20), 'FDT memory device_type or RAM span differs')
     require(props[('/psci', 'method')] == b'hvc\0', 'FDT PSCI must be HVC')
     require(props[('/pl011@9000000', 'reg')] == struct.pack('>QQ', 0x09000000, 0x1000), 'FDT PL011 mapping')
-    require(b'arm,pl011\0' in props[('/pl011@9000000', 'compatible')], 'FDT PL011 compatible')
-    require(b'arm,gic-v3\0' in props[('/intc@8000000', 'compatible')], 'FDT GICv3 compatible')
-    require(struct.unpack('>4Q', props[('/intc@8000000', 'reg')])[::2] == (0x08000000, 0x080a0000), 'FDT GIC addresses')
+    def compatible(node, expected):
+        raw = props[(node, 'compatible')]
+        return raw.endswith(b'\0') and expected in raw[:-1].split(b'\0')
+    require(compatible('/pl011@9000000', b'arm,pl011'), 'FDT PL011 compatible token')
+    require(compatible('/intc@8000000', b'arm,gic-v3'), 'FDT GICv3 compatible token')
+    require(struct.unpack('>4Q', props[('/intc@8000000', 'reg')]) ==
+            (0x08000000, 0x10000, 0x080a0000, 0xf60000), 'FDT GIC register spans differ from pinned QEMU')
     timer = struct.unpack('>12I', props[('/timer', 'interrupts')])
     require(timer[6] == 1 and timer[7] == 11, 'FDT virtual timer must be PPI27')
     require(props[('/chosen', 'bootargs')] == APPEND.encode() + b'\0', 'FDT append differs')
@@ -482,6 +488,16 @@ def own_process(argv, cwd, supervisor, stop, *, seconds, operation=None, guard_e
     with (cwd / 'console.log').open('xb') as console, (cwd / 'stderr.log').open('xb') as stderr:
         try:
             stop.check()
+            record['before_spawn'] = supervisor.sample()
+            own_rss = int(memory_self()['VmRSS'].split()[0]) * 1024
+            require(own_rss <= rss_limit, 'Controller RSS exceeds pre-spawn admission limit')
+            if memory_floor:
+                require(record['before_spawn']['MemAvailable_bytes'] >= 4 << 30
+                        and not supervisor.pressured(record['before_spawn']),
+                        'Memory availability/pressure admission revoked before spawn')
+            if guard_extra:
+                guard_extra()
+            stop.check()
             process = subprocess.Popen(argv, cwd=cwd, stdin=subprocess.DEVNULL, stdout=console,
                                        stderr=stderr, start_new_session=True, preexec_fn=child_limits,
                                        env={**os.environ, 'LC_ALL': 'C', 'PYTHONUTF8': '1',
@@ -646,12 +662,13 @@ def collect(plan_path, lease_id, stop):
     initial_lease = lease(main, lease_id, plan_path, plan)
     pins = read_json(FIXTURE)
     supervisor = helper(main, pins, 'process')
-    for _ in range(3):
+    for sample_index in range(3):
         stop.check()
         require(lease(main, lease_id, plan_path, plan) == initial_lease, 'Root lease changed')
         sample = supervisor.sample()
         require(sample['MemAvailable_bytes'] >= 4 << 30 and not supervisor.pressured(sample), 'Stable memory admission failed')
-        time.sleep(1)
+        if sample_index < 2:
+            time.sleep(1)
     out = output_dir(plan['cwd']); out.mkdir(parents=True, exist_ok=False)
     def running_lease():
         require(lease(main, lease_id, plan_path, plan) == initial_lease, 'Root lease changed/revoked')
