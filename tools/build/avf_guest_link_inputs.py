@@ -5,6 +5,7 @@ import argparse
 from collections import Counter
 from datetime import datetime, timezone
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -24,6 +25,14 @@ GRAPH_SHA = 'afc5cd206965de7e36a0aa17c4eb86a1f305689f386ccb22c55bd983567dd1dd'
 LINK_TOOLS_SHA = '00f56086d206e6c470f9c5622d8be4832f24cdccbb044689fa8894c3d3a8d1dd'
 HOST_INPUTS_SHA = '10f7c68ba08d2c72226d4f6b37d0f09e8755c8bca9e8dae9af0c7e3f08da3cf8'
 LIMIT = 256 * 1024 * 1024
+RUNNER_SHA = 'af193e91ef5a7c24cbba0f797415cc1f2944673e62aadc6d4ace4511810582e0'
+TAILS = ('nonlto.o', 'version.o', 'lastkerneldataconst.o', 'lastkernelconstructor.o')
+OWNER = 'codex-guest-exec-20261106-cu'
+CONTRACT_SHA = '125a7627c1178d3812f3e618c8f8bcc125cb77520be100013cbcc710b84c9d3a'
+TEXT_SHA = '1b630006261b7a00ba111cf5bb1b242faaf53514e26c50574da41ce043cfbc00'
+NAMESPACE_DESCRIPTOR_SHA = '3343a382452d05c382a15ea54e3835c3125c67c451cb586a1c3ed5a939b37174'
+# Exact accepted VM038 artifact-index entry; this is a source sanitizer policy.
+SANITIZER_SHA = '8032fef3c05dc51b16f1b1dffe3ce11db686c6abedd382843a5e2415fa52a1d2'
 
 
 def sha(path):
@@ -713,15 +722,313 @@ class Preparation:
         self.report['outcome'] = 'pass'
 
 
+def accepted_runner(main):
+    """Reuse the reviewed supervisor, write confinement, and root project budget."""
+    path = main / 'tools/build/avf_kernel_objects.py'
+    if sha(path) != RUNNER_SHA:
+        raise ValueError('Exact accepted AF193 common executor required')
+    spec = importlib.util.spec_from_file_location('vm022_accepted_objects', path)
+    module = importlib.util.module_from_spec(spec)
+    sys.dont_write_bytecode = True
+    spec.loader.exec_module(module)
+    return module
+
+
+def resolve_tail_argv(recipe, target, query_root, actual_root, old_root, new_root, out):
+    """Only resolve Make OBJROOT, the accepted namespace transition, and outputs."""
+    if target not in TAILS:
+        raise ValueError('Unknown top-level tail')
+    original = shlex.split(recipe)
+    if (original.count('-MF') != 1 or original.count('-c') != 1 or '-o' in original or
+        original[original.index('-MF') + 1] != target[:-2] + '.d'):
+        raise ValueError('Exact genuine one-output -MD/-MF tail recipe required')
+    if '-MD' not in original or '-nostdinc' not in original or '-flto' in original:
+        raise ValueError('Genuine non-LTO dependency-producing tail flags required')
+    result, changes = [], []
+    for number, token in enumerate(original):
+        replacement = token
+        # The two paths come from the same source MakeInc.def OBJROOT variable.
+        for suffix in ['/EXPORT_HDRS', '/san/']:
+            prefix = str(query_root) + suffix
+            if token.startswith('-I' + prefix) or token.startswith('-fsanitize-ignorelist=' + prefix):
+                replacement = token.replace(str(query_root), str(actual_root), 1)
+        if token == '-I' + old_root:
+            replacement = '-I' + new_root
+        if token == '@FRESH_VERSION_C@':
+            replacement = str(out / 'source-context/version.c')
+        if number == original.index('-MF') + 1:
+            replacement = str(out / 'dependencies' / token)
+        if replacement != token:
+            changes.append(dict(position=number, original=token, resolved=replacement))
+        result.append(replacement)
+    if (sum(item['original'] == '-I' + old_root for item in changes) != 1 or
+        any(str(query_root) in token or '@' in token for token in result)):
+        raise ValueError('Unresolved query path or missing exact namespace substitution')
+    return result + ['-o', str(out / 'objects' / target)], changes
+
+
+def tail_plan(args, common):
+    """Derive a deterministic executable plan without scanning/hash-repeating the corpus."""
+    main, out = args.main.resolve(), common.canonical_output_path(args.execute_out)
+    owned = Path(__file__).resolve().parents[2] / 'artifacts/avf-guest-link-inputs'
+    if not out.is_relative_to(owned) or out.exists():
+        raise ValueError('Tail execution root must be a fresh canonical original-owner artifact path')
+    bindings = {str(Path(__file__).resolve()): sha(__file__),
+                str(main / 'tools/build/avf_kernel_objects.py'): RUNNER_SHA}
+    def bound(path, expected):
+        path = Path(path)
+        value = common.load_project(path, expected)
+        bindings[str(path)] = expected
+        return value
+    parent = main / 'worktrees/vm-022-20261106/artifacts/avf-guest-link-inputs'
+    contract_path = parent / 'preparation-4/prepared-link-inputs.json'
+    contract = bound(contract_path, CONTRACT_SHA)
+    require_profile(contract['top_level_variables'])
+    text = bound(parent / 'text-1/prepared-text-inputs.json', TEXT_SHA)
+    descriptor_path = main / ('worktrees/vm-038-20261106/docs/procedures/'
+        'avf-firehose-namespace/qualification-session1/qualified-component.json')
+    descriptor = bound(descriptor_path, NAMESPACE_DESCRIPTOR_SHA)
+    if (descriptor['namespace_digest'] != common.FIREHOSE_NAMESPACE or
+        descriptor['namespace_version'] != common.FIREHOSE_SCHEMA):
+        raise ValueError('Accepted new guest namespace required')
+    receipt = bound(descriptor['namespace_receipt']['path'], descriptor['namespace_receipt']['sha256'])
+    if common.canonical({k: receipt[k] for k in ['roots', 'absent_search_roots', 'files']}) != descriptor['namespace_digest']:
+        raise ValueError('Exact same-byte namespace receipt required')
+    h = args.vm008.resolve() / 'artifacts/avf-kernel-headers'
+    # Original successful VM008 query supplies actual OBJROOT, not an invented -I.
+    report_path = h / 'handoff-1/report.json'
+    query_evidence = bound(parent / 'preparation-4/evidence.json',
+        '03af641f495e521c291b4e0f7dfbdf3231d42159e434687a1a4ff7e44d30c750')
+    expected_report = query_evidence['input_bindings'].get(str(report_path))
+    if not expected_report:
+        raise ValueError('Original query evidence must bind the producing VM008 report')
+    report = bound(report_path, expected_report)
+    base = next(row['argv'] for row in report['commands']
+                if any('query-objects-osfmk.mk' in token for token in row['argv']))
+    actual_root = Path(next(token.split('=', 1)[1] for token in base if token.startswith('OBJROOT=')))
+    if actual_root != h / 'handoff-1':
+        raise ValueError('Unexpected original source-query OBJROOT')
+    query_root = contract_path.parent
+    source_root = h / 'prepare-2/source/xnu'
+    commands = []
+    version_path = next(path for path in text['outputs'] if Path(path).name == 'version.c')
+    bindings[version_path] = text['outputs'][version_path]
+    for target in TAILS:
+        recipe = contract['tail_compile_recipe_templates']['TAIL_' + target]
+        argv, changes = resolve_tail_argv(recipe, target, query_root, actual_root,
+            descriptor['old_root']['path'], descriptor['new_root']['path'], out)
+        expected_source = str(out / 'source-context/version.c') if target == 'version.o' else str(source_root / 'libsa' / (target[:-2] + '.c'))
+        if argv[-3] != expected_source:
+            raise ValueError('Tail source position differs from genuine recipe')
+        source_hash = (text['outputs'][version_path] if target == 'version.o' else
+                       query_evidence['input_bindings'][expected_source])
+        bindings[str(Path(shlex.split(recipe)[0]))] = common.COMPILER
+        if target != 'version.o':
+            bindings[expected_source] = source_hash
+        ignorelist = next(token.split('=', 1)[1] for token in argv if token.startswith('-fsanitize-ignorelist='))
+        bindings[ignorelist] = SANITIZER_SHA
+        commands.append(dict(target=target, source=expected_source, source_sha256=source_hash,
+            original_argv=shlex.split(recipe), argv=argv, substitutions=changes,
+            cwd=str(out / 'source-context'), object=str(out / 'objects' / target),
+            dependency_file=str(out / 'dependencies' / (target[:-2] + '.d')), timeout_seconds=120))
+    # Bind the exact source rules that emitted the templates and transform.
+    for path, digest in query_evidence['input_bindings'].items():
+        if path.startswith(str(source_root / 'makedefs/')):
+            bindings[path] = digest
+    tool = main / contract['tools']['setsegname']
+    bindings[str(tool)] = contract['tools']['setsegname_sha256']
+    return dict(schema='avf-guest-link-tails-v1', resource_profile='project-budget-v1',
+        task='VM-022', owner=OWNER, shard='guest-link-tails', executor_sha256=sha(__file__),
+        common_executor_sha256=RUNNER_SHA, profile='ARM64/DEVELOPMENT/BCM2837',
+        actual_output=str(out), commands=commands, input_bindings=bindings,
+        namespace_receipt=descriptor['namespace_receipt'], namespace_digest=descriptor['namespace_digest'],
+        sanitizer_source_index=descriptor['artifact_index'],
+        original_query_root=str(query_root), resolved_OBJROOT=str(actual_root),
+        original_OBJROOT_assignment=next(token for token in base if token.startswith('OBJROOT=')),
+        fresh_version_source=dict(path=version_path, sha256=text['outputs'][version_path]),
+        constructor_transform=dict(argv=[str(tool), '-s', '__DATA', '-n', '__LASTDATA_CONST',
+            '-o', str(out / 'objects/lastkernelconstructor.o__'), str(out / 'objects/lastkernelconstructor.o')],
+            temporary=str(out / 'objects/lastkernelconstructor.o__'),
+            final=str(out / 'objects/lastkernelconstructor.o')),
+        target_production_executed=False, archive_executed=False, link_executed=False,
+        runtime_executed=False, private_apple_abi_qualified=False)
+
+
+def tail_ownership(args, common):
+    args.main = args.main.resolve()
+    args.out = common.canonical_output_path(args.out)
+    ledger = common.load_project(args.main / 'state/lab.json')
+    task = next(item for item in ledger['tasks'] if item['id'] == 'VM-022')
+    experiment = next((item for item in ledger['experiments'] if item['id'] == args.experiment), None)
+    worktree = Path(__file__).resolve().parents[2]
+    if (args.task != 'VM-022' or args.owner != OWNER or args.shard != 'guest-link-tails' or
+        task['owner'] != OWNER or task['status'] != 'in_progress' or
+        common.canonical_output_path(args.main / task['worktree']) != worktree or
+        not args.out.is_relative_to(worktree / 'artifacts/avf-guest-link-inputs') or args.out.exists() or
+        not experiment or experiment['task'] != 'VM-022' or experiment['owner'] != OWNER or experiment['status'] != 'planned'):
+        raise ValueError('Fresh original-owner VM022 output, owned worktree and planned experiment required')
+
+
+def verify_constructor_transform(raw, transformed):
+    """Compare every actual byte; only eligible section segment names may change."""
+    if raw.stat().st_size > 16 * 1024**2:
+        raise ValueError('Unexpectedly oversized constructor object')
+    data = bytearray(raw.read_bytes())
+    count, size = struct.unpack_from('<II', data, 16)
+    cursor, changed = 32, []
+    for unused in range(count):
+        command, extent = struct.unpack_from('<II', data, cursor)
+        if command == 25:
+            sections = struct.unpack_from('<I', data, cursor + 64)[0]
+            for number in range(sections):
+                at = cursor + 72 + number * 80
+                name = data[at:at+16].split(b'\0')[0].decode('ascii')
+                segment = data[at+16:at+32].split(b'\0')[0].decode('ascii')
+                flags = struct.unpack_from('<I', data, at+64)[0]
+                if segment == '__DATA' and not flags & 0x02000000:
+                    data[at+16:at+32] = b'__LASTDATA_CONST'[:16].ljust(16, b'\0')
+                    changed.append(name)
+        cursor += extent
+    if cursor != 32 + size or '__mod_init_func' not in changed or data != transformed.read_bytes():
+        raise ValueError('Actual constructor output differs from genuine eligible-section rename')
+    return changed
+
+
+def execute_tails(args, common):
+    """Only the separately admitted four-tail phase; never link or package here."""
+    tail_ownership(args, common)
+    supplied = common.load_project(args.source_plan, args.source_plan_sha256)
+    args.execute_out = args.out
+    expected = tail_plan(args, common)
+    if supplied != expected:
+        raise ValueError('Production must exactly reconstruct the reviewed source-derived tail plan')
+    approval = common.load_project(args.approval, args.approval_sha256)
+    if approval['source_plan_sha256'] != args.source_plan_sha256:
+        raise ValueError('Root approval must bind this exact source plan')
+    budget = common.project_approval(args, approval, executor_path=Path(__file__))
+    report = dict(kind='host-test', origin='local-host', outcome='inconclusive', commands=[], objects={},
+        recorded_at=datetime.now(timezone.utc).isoformat(), resource_profile='project-budget-v1',
+        task=args.task, owner=args.owner, experiment=args.experiment, shard=args.shard,
+        executor_sha256=sha(__file__), source_plan_sha256=args.source_plan_sha256,
+        compiler_started=False, archive_executed=False, link_executed=False, guest_executed=False,
+        initial_process=proc_status(), initial_raw_ru_maxrss_bytes=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss*1024)
+    args.out.mkdir(parents=True, exist_ok=False)
+    shutil.copyfile(__file__, args.out / 'builder.py')
+    reserved = False
+    try:
+        budget.reserve()
+        reserved = True
+        supervise = common.supervisor(args.main)
+        cache = common.Digests()
+        for path, digest in expected['input_bindings'].items():
+            if cache.get(path) != digest:
+                raise ValueError('Changed source/tool/recipe input: ' + path)
+        for directory in ['source-context', 'objects', 'dependencies', 'commands', 'raw']:
+            (args.out / directory).mkdir()
+        version = expected['fresh_version_source']
+        shutil.copyfile(version['path'], args.out / 'source-context/version.c')
+        receipt = common.load_project(expected['namespace_receipt']['path'], expected['namespace_receipt']['sha256'])
+        index = dict(receipt['files'])
+        index[str(args.out / 'source-context/version.c')] = version['sha256']
+        rows = [dict(cwd=row['cwd'], bound_source=row['source'], next_owned_compile_argv_template=row['argv']) for row in expected['commands']]
+        # Shared namespace validator rejects new shadows, deleted files and directory symlinks.
+        before = common.namespace(rows, index, cache)
+        report['recipe_namespace_sha256'] = before['sha256']
+        report['accepted_parent_namespace_sha256'] = expected['namespace_digest']
+        dump(args.out / 'input-bindings.json', before)
+        dump(args.out / 'execution-plan.json', expected)
+        for number, row in enumerate(expected['commands']):
+            budget.sample()
+            if common.namespace(rows, index, cache) != before:
+                raise ValueError('Tail include/source namespace changed before compilation')
+            command = common.run_child(row['argv'], Path(row['cwd']), args.out,
+                'commands/' + str(number) + '-' + row['target'], supervise, timeout=row['timeout_seconds'], budget=budget)
+            report['commands'].append(command)
+            report['compiler_started'] |= command.get('child_started', False)
+            if command['outcome'] != 'pass':
+                raise ValueError('Actual bounded tail compiler failed: ' + row['target'])
+            obj, dep = Path(row['object']), Path(row['dependency_file'])
+            measured = common.macho(obj)
+            dependencies = common.dependencies(dep, row['cwd'], obj)
+            if row['source'] not in dependencies:
+                raise ValueError('Actual compiler dependencies omit the genuine tail source')
+            dep_hashes = {path: cache.get(path) for path in dependencies}
+            if any(index.get(path) != digest for path, digest in dep_hashes.items()):
+                raise ValueError('Compiler used an unbound or changed header/source')
+            report['objects'][row['target']] = dict(measured, object=str(obj),
+                source=row['source'], source_sha256=row['source_sha256'], dependency_file=str(dep),
+                dependency_file_sha256=sha(dep), dependencies=dep_hashes)
+        transform = expected['constructor_transform']
+        raw = args.out / 'raw/lastkernelconstructor.o'
+        shutil.copyfile(transform['final'], raw)
+        command = common.run_child(transform['argv'], args.out / 'source-context', args.out,
+            'commands/4-constructor-segment', supervise, timeout=30, budget=budget)
+        report['commands'].append(command)
+        if command['outcome'] != 'pass':
+            raise ValueError('Genuine last-constructor transform failed')
+        report['constructor_before_transform'] = report['objects']['lastkernelconstructor.o']['sha256']
+        common.macho(transform['temporary'])
+        report['constructor_renamed_sections'] = verify_constructor_transform(raw, Path(transform['temporary']))
+        Path(transform['temporary']).replace(transform['final'])
+        report['objects']['lastkernelconstructor.o'].update(common.macho(transform['final']))
+        if common.namespace(rows, index, cache) != before:
+            raise ValueError('Tail namespace changed during production')
+        for path, digest in expected['input_bindings'].items():
+            if cache.get(path) != digest:
+                raise ValueError('Bound production input changed')
+        report['outcome'] = 'pass'
+    except Exception as error:
+        report.update(outcome='fail', error=repr(error))
+    finally:
+        try:
+            report['budget_release'] = budget.release() if reserved else 'not reserved'
+        except Exception as error:
+            report.update(outcome='fail', budget_release_error=repr(error))
+        report['final_process'] = proc_status()
+        report['final_raw_ru_maxrss_bytes'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss*1024
+        dump(args.out / 'evidence.json', report)
+    return 0 if report['outcome'] == 'pass' else 2
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--main', type=Path, required=True)
     parser.add_argument('--vm008', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
-    parser.add_argument('--mode', choices=['prepare', 'metadata', 'link-plan'], default='prepare')
+    parser.add_argument('--mode', choices=['prepare', 'metadata', 'link-plan', 'tail-plan', 'execute-tails'], default='prepare')
     parser.add_argument('--prepared', type=Path)
     parser.add_argument('--experiment')
+    parser.add_argument('--task', default='VM-022')
+    parser.add_argument('--owner', default=OWNER)
+    parser.add_argument('--shard', default='guest-link-tails')
+    parser.add_argument('--execute-out', type=Path)
+    parser.add_argument('--source-plan', type=Path)
+    parser.add_argument('--source-plan-sha256')
+    parser.add_argument('--approval', type=Path)
+    parser.add_argument('--approval-sha256')
     args = parser.parse_args()
+    if args.mode in ['tail-plan', 'execute-tails']:
+        common = accepted_runner(args.main.resolve())
+        if args.mode == 'execute-tails':
+            if not args.source_plan or not args.source_plan_sha256 or not args.approval or not args.approval_sha256 or not args.experiment:
+                parser.error('execute-tails requires exact plan hash, approval and planned experiment')
+            return execute_tails(args, common)
+        if not args.execute_out:
+            parser.error('tail-plan requires the distinct future --execute-out')
+        tail_ownership(args, common)
+        initial = proc_status()
+        plan = tail_plan(args, common)
+        args.out.mkdir(parents=True, exist_ok=False)
+        dump(args.out / 'execution-plan.json', plan)
+        shutil.copyfile(__file__, args.out / 'builder.py')
+        dump(args.out / 'evidence.json', dict(kind='host-test', origin='local-host', outcome='pass',
+            task=args.task, owner=args.owner, experiment=args.experiment, source_only=True,
+            argv=sys.argv, builder_sha256=sha(__file__), compiler_executed=False,
+            archive_executed=False, linker_executed=False, guest_executed=False,
+            plan_sha256=sha(args.out / 'execution-plan.json'), initial_process=initial,
+            final_process=proc_status(), raw_ru_maxrss_bytes=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss*1024))
+        print(json.dumps(dict(outcome='pass', source_only=True, plan=str(args.out / 'execution-plan.json'), sha256=sha(args.out / 'execution-plan.json'))))
+        return 0
     run = Preparation(args)
     try:
         if args.mode == 'link-plan':
