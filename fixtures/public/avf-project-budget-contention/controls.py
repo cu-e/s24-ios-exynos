@@ -118,7 +118,7 @@ def main():
                 check('actual prechild '+mode+' lock holder acquired', ready.exists())
                 result = e.run_child([sys.executable, '-c', "raise RuntimeError('must never start')"], ROOT, sandbox, 'before-'+mode, supervise, admit=mode=='stable-memory', budget=project.budget)
                 commands.append(result); prechild_records.append(result)
-                check('prechild '+mode+' lock failure is explicit nonpass without child or invented sample', result['outcome']=='resource-deferred' and result['resource_qualification']=='inconclusive' and result['execution_outcome']=='not-started' and result['child_started'] is False and result['exit_code'] is None and 'Project budget lock acquisition timed out' in result['project_admission_error'] and not list(sandbox.glob('*.stdout.txt')) and not result['admission'])
+                check('prechild '+mode+' lock failure is explicit nonpass without child or invented sample', result['outcome']=='resource-deferred' and result['resource_qualification']=='inconclusive' and result['execution_outcome']=='not-started' and result['child_started'] is False and result['exit_code'] is None and 'Project budget lock acquisition timed out' in result['project_admission_error'] and not list(sandbox.glob('*.stdout.txt')) and (result['admission'] is None or (result['admission']['admitted'] is False and 'project_before' not in result['admission'])))
             finally:holder.wait(timeout=3);project.budget.release()
         # Exercise main's real dispatch/report loop with the actual rejected
         # admission record, two synthetic source rows and no object fabrication.

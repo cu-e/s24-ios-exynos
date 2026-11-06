@@ -884,6 +884,8 @@ def run_child(argv, cwd, out, label, supervise, timeout=120, admit=True, budget=
     except Exception as error:
         if not budget:
             raise
+        if admission is not None:
+            admission['admitted'] = False
         # A failed admission has no child or complete resource observation.
         # Keep it as a command record so the caller stops before another row.
         return {'argv': [str(a) for a in argv], 'cwd': str(cwd), 'started_at': stamp(),
