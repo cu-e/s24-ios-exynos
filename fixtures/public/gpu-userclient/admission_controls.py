@@ -43,6 +43,11 @@ def main():
             p=out/(phase+"-plan.json");p.write_text(json.dumps(plans[phase],indent=2)+"\n");artifacts.append(str(p))
             refuses(phase+"-pending-interface",lambda:admission.execute(p,admission.sha(p),out/"absent-approval.json"),"Final accepted VM044/046")
             check(phase+"-no-output",not actual.exists())
+            command=[sys.executable,'-s',str(ROOT/'src/platform/gpu/native/userclient/launcher.py'),'--plan',str(p),'--plan-sha256',admission.sha(p),'--approval',str(out/'absent-approval.json')]
+            cli=subprocess.run(command,capture_output=True,text=True,timeout=3)
+            (out/(phase+'-cli.stderr')).write_text(cli.stderr)
+            record.setdefault('admission_cli',[]).append({'argv':command,'exit_code':cli.returncode,'stderr':cli.stderr})
+            check(phase+'-launcher-CLI-refuses',cli.returncode==2 and 'Final accepted VM044/046' in cli.stderr)
         check("separate-phases",len(plans['native']['commands'])==3 and len(plans['host-sanitizer']['commands'])==3 and plans['native']['commands']!=plans['host-sanitizer']['commands'])
         hostspec=copy.deepcopy(admission.policy())
         hostspec['execution_enabled']=True
@@ -53,6 +58,13 @@ def main():
         refuses('changed-argv',lambda:admission.execute(p,admission.sha(p),out/'absent-approval.json'),'Source plan/argv')
         p=out/'native-plan.json'
         refuses('changed-plan-hash',lambda:admission.execute(p,'0'*64,out/'absent-approval.json'),'same-byte JSON')
+        caller=out/'changed-caller';caller.mkdir()
+        shutil.copyfile(ROOT/'src/platform/gpu/native/userclient/launcher.py',caller/'launcher.py')
+        (caller/'admission.py').write_text((ROOT/'src/platform/gpu/native/userclient/admission.py').read_text()+'\n# changed refusal witness\n')
+        command=[sys.executable,'-s',str(caller/'launcher.py'),'--plan',str(p),'--plan-sha256',admission.sha(p),'--approval',str(out/'absent-approval.json')]
+        cli=subprocess.run(command,capture_output=True,text=True,timeout=3)
+        record['admission_cli'].append({'argv':command,'exit_code':cli.returncode,'stderr':cli.stderr})
+        check('changed-executor-before-evaluation',cli.returncode==2 and 'changed executor source' in cli.stderr)
         refuses('nonfinite-deadline',lambda:launcher.guarded(lambda:None,float('inf')),'Finite whole-phase')
         before={s:signal.getsignal(s) for s in [signal.SIGINT,signal.SIGTERM,signal.SIGALRM]}
         check('normal-handler-restoration',launcher.guarded(lambda:17,1)['result']==17 and before=={s:signal.getsignal(s) for s in before})

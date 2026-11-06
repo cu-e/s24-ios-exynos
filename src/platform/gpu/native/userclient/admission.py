@@ -182,6 +182,7 @@ def execute(plan_path, plan_sha, approval_path):
     if sha(MAIN/"tools/build/qemu_host.py")!=binding["supervisor_sha256"]:
         raise ValueError("Final accepted supervisor changed")
     budget.reserve()
+    phase_record={"phase":exact["phase"],"outcome":"incomplete","hardware_result":False,"native_ABI_qualified":False}
     try:
         args.out.mkdir(parents=True,exist_ok=False)
         if exact["phase"]=="host-sanitizer": (args.out/"host").mkdir()
@@ -199,10 +200,24 @@ def execute(plan_path, plan_sha, approval_path):
                 sys.argv=[inspector.__file__,"--directory",str(args.out),"--output",str(args.out/"object-inspection.json")]
                 inspector.main()  # Pure bounded parsing of actual objects; no linker or stubs.
             finally: sys.argv=previous
+        phase_record["outcome"]="host-commands-pass"
+    except BaseException as error:
+        phase_record["error"]=repr(error)
+        raise
     finally:
         # Shared release revalidates retained process/session identities and
         # refuses an unsafe release. Never substitute a local broker or kill.
-        budget.release()
+        try:
+            budget.release()
+            phase_record["reservation_released"]=True
+        except BaseException as error:
+            phase_record["reservation_released"]=False
+            phase_record["release_error"]=repr(error)
+            raise
+        finally:
+            if args.out.is_dir():
+                with (args.out/"phase-result.json").open("x") as stream:
+                    json.dump(phase_record,stream,indent=2);stream.write("\n")
 
 
 def main():

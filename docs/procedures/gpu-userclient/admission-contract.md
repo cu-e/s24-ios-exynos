@@ -53,6 +53,11 @@ experiment, independent `gpu-userclient` shard and canonical fresh output.
 Whole-phase cancellation is installed before validation/admission. Compiler
 stable-admission/global six/6GiB remain shared-policy requirements.
 
+Future command and release failures retain separate primary/release error
+fields in the owned phase result, plus each actual command's diagnostics.
+This future allocated path is authored and unexecuted here. Current refusal
+controls never reserve a budget or enter that path.
+
 The source controls exercise cancellation after recorded fixture readiness;
 they do not qualify cancellation during Popen initialization, SIGKILL of the
 controller, session escape, future helper changes or final budget allocation.

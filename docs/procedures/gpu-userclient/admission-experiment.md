@@ -18,8 +18,9 @@ and verifies original seven C++/header/fixture/dispatcher hashes. Native has no
 archive/link stage; host sanitizer has a separate C compile/C++ link/fixture run
 proposal. Neither executes here. The future actual directories stay absent.
 
-Refusal controls cover missing final interface for each phase, actual AF193's
-missing RSS-only method, changed argv/plan digest, nonfinite/inherited deadline,
+Refusal controls cover missing final interface for each phase through the
+actual launcher CLI, actual AF193's missing RSS-only method, changed executor
+bytes before evaluation, changed argv/plan digest, nonfinite/inherited deadline,
 and an added native source in a separate fixture mirror. The latter contains
 only a comment; no Apple headers/provider/type is invented. Inspect false
 backend/hardware/native-ABI flags and unchanged source closure.

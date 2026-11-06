@@ -8,7 +8,7 @@ from pathlib import Path
 from types import ModuleType
 
 sys.dont_write_bytecode=True
-ADMISSION_SHA="e4e7a322a25ba01bb0a36fd500cac44ebeb197bb58fcdce1d68c5b95602f8f96"
+ADMISSION_SHA="99b6cc21ca41a6b8153e26474466f29ef0443101f274cda1f20815e21c1ea756"
 
 
 class Cancelled(BaseException):
