@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import signal
 import subprocess
 import sys
 import time
@@ -30,6 +31,8 @@ def main():
         try:call()
         except (ValueError,KeyError,OSError,TypeError) as error:checks.append({'name':name,'pass':True,'rejection':repr(error)})
         else:raise ValueError('Invalid admission accepted: '+name)
+    def deadline(signum,frame):raise TimeoutError('Bounded source-profile control deadline180s')
+    previous_handler=signal.signal(signal.SIGALRM,deadline);signal.setitimer(signal.ITIMER_REAL,180)
     try:
         supervise=e.supervisor(args.main);admission=[]
         for n in range(3):
@@ -110,6 +113,7 @@ def main():
         report['after_resources']=supervise.sample();report['outcome']='resource-deferred' if report['after_resources']['MemAvailable_bytes']<4*e.GIB or supervise.pressured(report['after_resources']) else 'pass';report['summary']='Three actual source-only profiles preserve old bytes and BFA8 AST; exact resource1080 transition/keys/index/namespace/authority/resume negatives retained; no compiler'
     except Exception as error:report['error']=repr(error)
     finally:
+        signal.setitimer(signal.ITIMER_REAL,0);signal.signal(signal.SIGALRM,previous_handler)
         report['controller_memory']=e.actual_controller_memory();report['source_hashes']={str(p):e.sha(p) for p in [TOOL,Path(__file__)]};report['artifact_hashes']={str(p):e.sha(p) for p in out.rglob('*') if p.is_file() and not p.is_symlink()};report['artifacts']=list(report['artifact_hashes']);report['sha256']=report['artifact_hashes'];e.write(out/'evidence.json',report);print(json.dumps({k:report.get(k) for k in ['outcome','error','controller_memory']}|{'checks':len(checks)},indent=2))
     return report['outcome']!='pass'
 
