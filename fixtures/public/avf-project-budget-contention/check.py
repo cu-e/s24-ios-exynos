@@ -84,7 +84,7 @@ def worker(args):
     try:
         budget.reserve()
         child = subprocess.Popen([sys.executable, '-c', 'import time;time.sleep(45)'], cwd='/tmp', start_new_session=True)
-        save(root/('ready-'+str(work)), {'pid': os.getpid(), 'child': child.pid, 'identity': budget.identity})
+        save(root/('ready-'+str(work)), {'pid': os.getpid(), 'child': child.pid, 'child_identity': e.process_identity(child.pid), 'identity': budget.identity})
         wait_file(root/'go', 30)
         for number in range(8):
             began = time.monotonic()
@@ -98,7 +98,7 @@ def worker(args):
         wait_file(root/('release-'+str(work)), 30)
         os.killpg(child.pid, signal.SIGTERM); child.wait(timeout=3)
         budget.release()
-        report['outcome'] = 'pass' if not report['errors'] else 'measured-contention'
+        report['outcome'] = 'pass' if not report['errors'] else 'measured-contention' if all('Project budget lock acquisition timed out' in item['error'] for item in report['errors']) else 'fail'
         save(root/('released-'+str(work)), {'outcome': report['outcome']})
         wait_file(root/'exit', 20)
     except Exception as error:report['error'] = repr(error)
@@ -171,6 +171,9 @@ def main():
                       timeout_count=len(timeouts), transaction_count=len(transactions), max_acquisition_wait_seconds=max(r.get('wait_seconds', 0) for r in transactions),
                       max_held_upper_seconds=max(r.get('held_upper_seconds', 0) for r in transactions),
                       summary='Actual six-process broker monitoring boundary measured; monitor timeouts are retained observations, not compiler results')
+        report['after_resources'] = supervisor.sample()
+        if report['after_resources']['MemAvailable_bytes'] < 4*e.GIB or supervisor.pressured(report['after_resources']):
+            report['outcome'] = 'resource-deferred'
     except Exception as error:report['error'] = repr(error)
     finally:
         for proc in workers:
@@ -178,6 +181,18 @@ def main():
         for proc in workers:
             try:proc.wait(timeout=3)
             except subprocess.TimeoutExpired:proc.kill(); proc.wait(timeout=3)
+        # A worker interrupted by the harness cannot leave its separately owned
+        # child session behind. Validate recorded starts before signalling.
+        children = []
+        for ready in root.glob('ready-*'):
+            record = e.load_project(ready); child = record['child_identity']; children.append(child)
+            current = e.process_table().get(child['pid'])
+            if current and current['start_ticks'] == child['start_ticks'] and current['state'] != 'Z':
+                try:os.killpg(child['pid'], signal.SIGTERM)
+                except ProcessLookupError:pass
+        time.sleep(.05)
+        report['owned_after'] = [p for p in e.process_table().values() if p['state'] != 'Z' and any(p['session'] == c['pid'] for c in children)]
+        if report['owned_after']:report.update(outcome='fail', cleanup_error='Created child session survived cleanup')
         report['elapsed_seconds'] = time.monotonic()-started
         report['controller_memory'] = e.actual_controller_memory()
         report['source_hashes'] = {str(p): e.sha(p) for p in [args.engine, TEST]}
