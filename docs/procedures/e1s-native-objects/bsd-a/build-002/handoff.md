@@ -1,0 +1,13 @@
+# STR024BUILD-002 actual root105 cancellation and21 qualified new origins
+
+Original SR24 did not duplicate root105 dispatch. Physical2676caller/planed170fe3/manifest87cd operated only fresh bsd-a-build-002 under serial1/512MiB. Root outer1890second timeout/guard was separate from frozen plan3600.
+
+Root terminal receipt14d458e595858e85f5afdc4ea8e6873f6516f5e5d001e0b7afcd74bda5abed5c confirms intentional TERM at15:38:21Z: global-host PSI fullavg10=2.52 crossed2 despite16.5GiB available memory. Root exit1/zero survivors/allcomplete/heavy released. Raw own report outcomeFAIL, OwnedCancellation signals[15,15], elapsed157.480651122s, SHAe0a190080aaa1f4b1ea71a583f91f6dadeab698ae421cbb7fc5ca83452571131. Do not relabel root cancellation as a compiler/source or owned-RSS-limit error.
+
+Twenty-one actual compiler exits0 produced original indices4..24, nfs_srvcache.o through fasttrap.o. Every object validity/actual MD input/resource field isPASS. Loader exit0; no compiler error diagnostic. Next original25 systrace_args.o was cancelled in project admission before launch: exitnull, child_startedfalse, not-started/resource-inconclusive. Maximum owned-tree RSS198938624B; controller HWM81711104B/RSS63266816B.22terminal sessions and final owned_survivors are empty.
+
+Raw bytes copied to raw-evidence.json. actual-products.jsond3c29327... preserves complete21object/actualMD dependency maps and original002paths/hashes; owned-output-inventory.jsoncd662ddf... hashes182retained files. Every own object/MD byte was checked against raw records without compiler/dependency corpus rerun. Actual execution-plan is semantically equal to approved source-plan; serialization fileSHA remains a distinct observed value. All warnings/logs/private inputs/products remain at immutable original outputpaths.
+
+partial-25-origins.json9b07b1f9... explicitly composes only original4from failed001 and21from failed002, ordered original indices[0:25]. Both parentFAIL statuses/provenance remain unchanged; no origin/path/hash/qualification is relabeled. Required170collection is incomplete,145missing; no170descriptor or taskclosure is claimed. Actual002experiment is recordedFAIL once after this root terminal receipt. CM receives the21prefix package for independent actual review.
+
+Root authorizes only a new source-only003manifest/experiment for original[25:170]145 remaining rows, excluding all25qualified origins. Keep physical2676/nativeflags/runtime/context/limits unchanged and fresh own003output absent until a future rootgrant afterrecovery. No retry/recompile, helperfix, relaxedthreshold, other-project operation, commoncheck, queue or hardware action occurred.
