@@ -50,10 +50,33 @@ See [procedure](plan-001-procedure.md) and [receipt](plan-001-result.json).
 Planning RSS was not measured and remains unqualified. The declared actual
 output and all private projections remain absent.
 
-Next: wait for publication/common84 PASS and root's exact native allocation
-and execute grant for STR022BUILD-001. Do not duplicate the executor or rerun
-planning. Any actual compilation requires a separate root allocation: one serial
+Root dispatched STR022BUILD-001 once under wave85. The raw trial remains FAIL:
+five actual objects passed compiler, MD/input and resource qualification, then
+`osfmk/kdp_common.o` was deferred before compiler because project admission
+reported `Stale executor reservation; root must reconcile survivors`. The
+raw SHA256 is `74ac81f1fdcbfb22b42bd0c32687f8af767a7ba255887229475ec1e9b116dfa1`.
+The [failed result](build-001-result.json) and
+[read-only physical audit](build-001-physical-audit.json) preserve exact root
+argv/exit1, five ARM64 Mach-O objects, 412 unique actual MD dependency hashes,
+own reservation complete and zero current owned survivors. Original001 FAIL
+was recorded through MAIN lab.py, CLI exit 0. No repair or retry followed.
+
+Root separately authorized one new source-only suffix plan, preserving the
+five qualified prefix origins from failed001. New STR022BUILD-002 selects
+original IDs `[5:160]` (155), `kdp_common.o` through `atm.o`. Its strict manifest
+SHA256 is `c7e10be7c2b480a2637729785a6763a73788d8edb87f552627007c0398c08a4f`;
+the single plan export exited zero with empty stderr and plan SHA256
+`cb9247af83a76b1055d438f6b454dabb78be221a8b51e37f080885e5ef6d3d61`.
+See [new procedure](plan-002-procedure.md) and [receipt](plan-002-result.json).
+Fresh build-002 remains absent and planning RSS unqualified. Same physical
+caller, source and recipe flags remain unchanged.
+
+Next: wait for root wave85 reconciliation and a new exact native allocation
+and execute grant for STR022BUILD-002. Do not duplicate the executor, rerun
+planning or reexecute the five prefix objects. Any actual compilation requires
+a separate root allocation: one serial
 compiler, at most 512 MiB combined owned RSS, within the root six-job/six-GiB
 wave. Preserve future failures and fresh actual MD closure. Independent review
-and root publication/common acceptance precede closure. No compiler, caller,
-private projection, generator, linker, QEMU or device operation ran here.
+and root publication/common acceptance precede closure. New002 preparation ran
+the source-only caller once; it created no private projection and invoked no
+loader, compiler, generator, linker, QEMU or device operation.
