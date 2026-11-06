@@ -48,3 +48,16 @@ Actual170 objects and MD closure, resource outcome, archive/link/image/runtime,
 private37 ABI and phone/hardware success remain unmeasured. Conventional
 source-preparation evidence deliberately reports inconclusive for the eventual
 compile task. No task closure, MAIN publication/common, link or QEMU is requested.
+
+
+Root authorized source plan001 through frozen minimal native caller2676a8ed.
+Strict manifest native-slice-001.json SHA97470fe29becb7d148e2296ea8ba9c5cda1fac37eda8b8ebff09c715491745a7 preserves exact170 IDs.
+Plan /home/egor/dev/pet/s24-ios-exynos/worktrees/str-025-e1s-native-bsd-b-20261106/artifacts/e1s-native-compile/bsd-b/plan-001/plan.json SHA20e20ba8bd4d39124092467983a9986f9638d8f28e1758cd8f5287feeaf6bd7b; raw CLI exit0, empty stderr, source-plan RSS
+unmeasured. Original argv canonical digests match all170 original recipe vectors.
+Caller records6659 input bindings and72 future projection entries; no
+projection or prospective actual output exists. Preregistered STR025BUILD-001
+remains PLANNED for actual host-test execution, not consumed by this sourceplan.
+Proposed whole bound1800s, serial1/512MiB slot only after common84PASS and separate
+root exact ProjectBudget grant with existing outerwatchdog. Do not execute or
+rerun a plan without root direction. Preserve caller physicalpath/pins and all
+source/native/generated/portableprofile boundaries from the original handoff.
