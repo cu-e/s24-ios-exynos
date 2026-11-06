@@ -796,8 +796,15 @@ class ProjectBudget:
     def sample(self, session=None, *, lock_timeout=.5):
         if session is not None:
             strict_int(session, 1, 2**31-1, 'owned child session')
-            table = process_table()
-            self.observed_sessions.setdefault(str(session), table[session]['start_ticks'] if session in table else None)
+            key = str(session)
+            try:
+                fields = Path('/proc', key, 'stat').read_text().rsplit(') ', 1)[1].split()
+                start = int(fields[19])
+            except (FileNotFoundError, ProcessLookupError):
+                start = None
+            self.observed_sessions.setdefault(key, start)
+            # Every request reads this PID afresh; every locked snapshot still
+            # checks the retained identity against a fresh full process table.
         def operation(state):
             entry = state['entries'][self.args.task]
             if entry['identity'] != self.identity or entry['status'] != 'active':
@@ -875,6 +882,7 @@ def run_child(argv, cwd, out, label, supervise, timeout=120, admit=True, budget=
     record = {'argv': [str(a) for a in argv], 'cwd': str(cwd), 'started_at': stamp(), 'timeout_seconds': timeout, 'rss_budget_bytes': rss_limit, 'admission': admission}
     if not admission['admitted']:
         record.update(exit_code=None, outcome='resource-deferred', child_started=False)
+        if budget:record.update(execution_outcome='not-started', resource_qualification='inconclusive')
         return record
     temp = out/'tmp'; temp.mkdir(exist_ok=True)
     home = out/'home'; home.mkdir(exist_ok=True)
@@ -931,6 +939,9 @@ def run_child(argv, cwd, out, label, supervise, timeout=120, admit=True, budget=
             record.update(after=after, elapsed_seconds=time.monotonic()-started, peak_total_owned_rss_bytes=peak, stdout_sha256=sha(stdout), stderr_sha256=sha(stderr))
     if any(p['state'] != 'Z' for p in after['owned_processes']):
         raise RuntimeError('Owned child survived finite cleanup')
+    if budget:
+        record['execution_outcome'] = 'pass' if record['exit_code'] == 0 else 'fail'
+        record['resource_qualification'] = 'inconclusive' if record.get('project_after_error') or record.get('project_budget_error') else 'fail' if record.get('stop_reason') else 'pass'
     record['outcome'] = 'resource-deferred' if record.get('stop_reason') in ['MemAvailable-floor', 'rss-budget', 'project-admission'] else 'timeout' if record.get('stop_reason') else 'pass' if record['exit_code'] == 0 else 'fail'
     return record
 
@@ -1066,6 +1077,7 @@ def main():
             report['execution_approval'] = approval(args)
             if hasattr(args, 'project_budget'):
                 args.project_budget.reserve()
+                report['resource_qualification'] = 'pass'
         plan, inputs, cache = bind(args, out)
         if hasattr(args, 'project_budget'):
             source = args.project_budget.source_plan
@@ -1102,7 +1114,12 @@ def main():
                         result = run_child(row['argv'], row['cwd'], out, identity.replace('/', '_'), supervise, budget=getattr(args, 'project_budget', None))
                         report['commands'].append(result); report['compiler_started'] |= result.get('child_started', False)
                         item['command'] = result
-                        if result['outcome'] == 'pass':
+                        if 'resource_qualification' in result:
+                            item['resource_qualification'] = result['resource_qualification']
+                            if result['resource_qualification'] != 'pass':report['resource_qualification'] = result['resource_qualification']
+                        # Validated object bytes are a separate fact from a
+                        # missing/failed resource measurement after child exit.
+                        if result['outcome'] == 'pass' or result.get('execution_outcome') == 'pass':
                             info = macho(output, identity == 'libkern/OSData.cpo')
                             deps = dependencies(dep, row['cwd'], output)
                             if str(Path(row['source']).resolve()) not in deps:
@@ -1124,7 +1141,7 @@ def main():
                 report['objects'].append({'id': identity, 'outcome': item['outcome'], 'record': str(record_path), 'record_sha256': sha(record_path)})
                 write(out/'progress-next.json', report)
                 os.replace(out/'progress-next.json', out/'progress.json')
-                if item['outcome'] in ['resource-deferred', 'timeout']:
+                if item['outcome'] in ['resource-deferred', 'timeout'] or item.get('resource_qualification', 'pass') != 'pass':
                     break
                 gc.collect()
             # Close the namespace against changed or newly shadowing files, not
@@ -1143,7 +1160,7 @@ def main():
                     raise ValueError('Input changed during selected execution: ' + path)
             if after['roots'] != inputs['roots'] or after['absent_search_roots'] != inputs['absent_search_roots'] or any(inputs['files'].get(p) != d for p, d in after['files'].items()):
                 raise ValueError('Guest namespace changed during compilation')
-            report['outcome'] = 'pass' if len(report['objects']) == len(plan['selected']) and all(x['outcome'] == 'pass' for x in report['objects']) else 'fail'
+            report['outcome'] = 'pass' if len(report['objects']) == len(plan['selected']) and all(x['outcome'] == 'pass' for x in report['objects']) and report.get('resource_qualification', 'pass') == 'pass' else 'fail'
             report['summary'] = 'Actual selected guest object outcomes retained; no full kernel/link/guest/SDK/private ABI claim'
     except Exception as error:
         report['error'] = repr(error)
@@ -1152,12 +1169,13 @@ def main():
         report['controller_peak_rss_bytes'] = report['controller_memory']['exec_image_high_water_bytes']
         controller_limit = args.project_budget.rss_limit if hasattr(args, 'project_budget') else 256*1024**2
         if report['controller_peak_rss_bytes'] > controller_limit:
+            if hasattr(args, 'project_budget'):report['resource_qualification'] = 'fail'
             report.update(outcome='fail', controller_resource_error='Controller exceeded admitted RSS cap; not resource-qualified' if hasattr(args, 'project_budget') else 'Controller exceeded256MiB; not resource-qualified')
         if hasattr(args, 'project_budget'):
             try:
                 args.project_budget.release()
             except Exception as error:
-                report.update(outcome='fail', project_reservation_release_error=repr(error))
+                report.update(outcome='fail', resource_qualification='inconclusive', project_reservation_release_error=repr(error))
         report['artifact_hashes'] = {str(p): sha(p) for p in out.rglob('*') if p.is_file()}
         report['artifacts'] = list(report['artifact_hashes']); report['sha256'] = report['artifact_hashes']
         write(out/'evidence.json', report)

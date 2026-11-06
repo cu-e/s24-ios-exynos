@@ -57,7 +57,10 @@ def main():
         def nodes(text):return {n.name: n for n in ast.parse(text).body if isinstance(n, (ast.ClassDef, ast.FunctionDef))}
         old_nodes = nodes(original); new_nodes = nodes(source)
         changed = [name for name in old_nodes if ast.dump(old_nodes[name]) != ast.dump(new_nodes[name])]
-        check('only proc resolution and final child qualification functions changed', set(changed) == {'process_table', 'run_child'})
+        check('only proc resolution and final child qualification functions changed', set(changed) == {'process_table', 'ProjectBudget', 'run_child', 'main'})
+        old_methods = {n.name:n for n in old_nodes['ProjectBudget'].body if isinstance(n,ast.FunctionDef)}
+        new_methods = {n.name:n for n in new_nodes['ProjectBudget'].body if isinstance(n,ast.FunctionDef)}
+        check('only requested-session lookup changes inside broker class', [n for n in old_methods if ast.dump(old_methods[n]) != ast.dump(new_methods[n])] == ['sample'])
         check('all profile/key/recipe/ownership/allocation/finitewait/watchdog guard ASTs unchanged', all(ast.dump(old_nodes[n]) == ast.dump(new_nodes[n]) for n in old_nodes if n not in changed))
         first = out/'outside/ancestor/common'; first.mkdir(parents=True); inside = out/'new-project'; inside.mkdir()
         one = subprocess.Popen([sys.executable, '-c', 'import time;time.sleep(15)'], cwd=first, start_new_session=True)
@@ -93,6 +96,17 @@ def main():
         queue = json.loads(queue_saved); queue['heavy']['id'] = 'wrong'; state.queue.write_text(json.dumps(queue))
         rejects('invalid live root allocation still rejected', b.sample); state.queue.write_bytes(queue_saved)
         b.release()
+        single = Project(out/'single-request'); child = subprocess.Popen(['sleep','8'],cwd='/tmp',start_new_session=True)
+        original_table = e.process_table; calls = []
+        def count_table():calls.append(time.monotonic());return original_table()
+        try:
+            e.process_table = count_table
+            single.budget.sample(child.pid)
+            check('requested-session sampling performs exactly one fresh full locked scan', len(calls) == 1)
+            start = int(Path('/proc',str(child.pid),'stat').read_text().rsplit(') ',1)[1].split()[19])
+            check('fresh requested PID start identity retained exactly', single.budget.observed_sessions[str(child.pid)] == start)
+        finally:
+            e.process_table = original_table; supervise.terminate(child); single.budget.release()
         for mode in ['timeout', 'violations', 'aggregate', 'floor']:
             project = Project(out/('after-'+mode)); base_budget = project.budget
             class FinalControl:
@@ -116,14 +130,14 @@ def main():
             code = "from pathlib import Path;import sys;Path(sys.argv[1]).write_text('genuine owned Python child output')"
             try:
                 result = e.run_child([sys.executable, '-c', code, sandbox/'product.txt'], ROOT, sandbox, 'after-'+mode, supervise, timeout=5, admit=mode == 'floor', budget=proxy); commands.append(result)
-                check('final '+mode+' cannot qualify passing child/object credit', result['exit_code'] == 0 and result['outcome'] == 'resource-deferred' and (sandbox/'product.txt').read_text() == 'genuine owned Python child output' and not result['after']['owned_processes'])
+                check('final '+mode+' cannot qualify passing child/object credit', result['exit_code'] == 0 and result['execution_outcome'] == 'pass' and result['resource_qualification'] != 'pass' and result['outcome'] == 'resource-deferred' and (sandbox/'product.txt').read_text() == 'genuine owned Python child output' and not result['after']['owned_processes'])
                 if mode == 'timeout':check('actual competing lock timeout retained in final sample error', 'Project budget lock acquisition timed out' in result['project_after_error'])
             finally:
                 if proxy.holder is not None:proxy.holder.wait(timeout=3)
                 base_budget.release()
         report['after_resources'] = supervise.sample()
         if report['after_resources']['MemAvailable_bytes'] < 4*e.GIB or supervise.pressured(report['after_resources']):report['outcome'] = 'resource-deferred'
-        else:report.update(outcome='pass', summary='Fresh strict proc resolution, within-scan ancestry/deleted-path, unchanged guards, invalid/stale authority and final resource qualification controls passed')
+        else:report.update(outcome='pass', summary='Fresh strict proc resolution and direct session-stat lookup, within-scan ancestry/deleted-path, unchanged guards, invalid/stale authority and separate child/resource verdict controls passed')
     except Exception as error:report['error'] = repr(error)
     finally:
         report['controller_memory'] = e.actual_controller_memory(); report['source_hashes'] = {str(p):e.sha(p) for p in [TOOL, TEST]}

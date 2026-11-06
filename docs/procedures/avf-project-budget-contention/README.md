@@ -58,3 +58,24 @@ lock error while AF193 still called it pass. The original capsule and genuine
 object bytes remain unchanged. Prospectively, final sampling exceptions or
 resource violations now produce resource-deferred qualification rather than
 object credit, preserving the successful child exit and its artifacts.
+
+The first corrected FE093 measurement is retained as a partial improvement:
+2/60 finite timeouts remained (baseline6/60). Independent controls saw0/48 in
+both versions, which demonstrates host-load variance rather than a guarantee.
+No favorable rerun was selected. That source/capsule stays physically unchanged
+in `vm-044-ep-20261106`; the next correction uses a separate fix1 worktree.
+
+The same timing records reveal a second full scan outside each transaction:
+`sample(session)` scanned all PIDs merely to obtain one requested SID's start,
+then performed the full fresh locked scan. Median outside time was59.83ms in
+the baseline and37.50ms in FE093. The final correction reads only that requested
+`/proc/PID/stat` afresh; the existing immutable start identity is still checked
+against the complete fresh locked table on every sample. No snapshot or path
+validation moves outside the lock and no new cache is introduced.
+
+Object and resource verdicts are distinct. A successful child whose final sample
+is missing can still have its genuine Mach-O bytes and dependencies validated;
+those object facts remain in its sidecar. Resource qualification is explicitly
+inconclusive/failed, further compiler admission stops, and the whole run cannot
+claim PASS or qualify a later eight-job trial. Child exit and output hashes are
+retained. Historical AF193/CW77 records are not rewritten.
