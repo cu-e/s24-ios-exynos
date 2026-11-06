@@ -1135,6 +1135,8 @@ def main():
                             item['outcome'] = result['outcome']
                 except Exception as error:
                     item.update(outcome='fail', validation_error=repr(error))
+                if item.get('resource_qualification', 'pass') != 'pass':
+                    report['resource_qualification'] = item['resource_qualification']
                 if item['outcome'] != 'pass':
                     item['partial_artifacts'] = {str(p): sha(p) for p in [output, dep] if p.is_file()}
                 record_path = out/(identity.replace('/', '_')+'.object.json'); write(record_path, item)
