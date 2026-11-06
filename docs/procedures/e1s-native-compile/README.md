@@ -122,3 +122,14 @@ here. No compiler, loader, target or cancellation control is executed. Frozen
 2676 and the six existing002 worker plans are not changed. Independent source
 review/publication/common/root acceptance precede adoption and a separate actual
 worker grant. Header-only reuse transfers no SDK, archive, object or ABI result.
+
+NATIVEFIREHOSE-SOURCE-001 actual single source-plan CLI returned0 in5.706428s.
+Its65 IDs/recipes/original native vectors match actualSTR028[12:] exactly;
+derived argv differs only by the new own output prefix. The plan declares one
+freshly14be-hashed libkern private-header overlay and leaves its prospective
+output absent. Other11 function ASTs, all three helper hashes and physical2676
+are unchanged. No source/shared-namespace mutation or other-worker/target execution occurred;
+source-only RSS was not measured. The source plan SHA is4a6d3b7fafc3940a94309171b4e8ef7fd1250bcca259e1ba1f215535f16c67b7.
+Conventional source-only evidence is firehose-header-evidence.json. Independent
+review/publication/common/root acceptance and actual worker admission remain
+separate; this is not a successful native OSKext or ABI result.
