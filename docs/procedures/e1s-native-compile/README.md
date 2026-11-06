@@ -60,3 +60,15 @@ Admission/deadline/cancellation, unknown inputs or shadow changes stop dispatch.
 Command observations are retained before cancellation unwinds. Broker release,
 owned terminal sessions and cleanup errors are recorded; original component
 ordering is independent of completion order. No archive/link/tail stage runs.
+
+Independent source review rejected initial1d12 for two admission boundaries.
+Its physical caller and all source-only CLI receipts remain in the original
+STR030 worktree; source-review-001.json records the initial result as
+inconclusive. The separate fix1 worktree adds cancellation.cleanup around both
+broker reserve and its local flag, then checks cancellation before mkdir.
+It also directly uses unchanged common.namespace on native shared-CWD views
+and the exact indexed input set, comparing full namespace/absence/hash state
+before and after execution. This catches newly shadowing headers and directory
+symlinks, including __has_include decisions; actual MD remains a separate check.
+Private CWD inventory remains independent of the immutable shared namespace.
+No helper globals, common source or native flags changed.
