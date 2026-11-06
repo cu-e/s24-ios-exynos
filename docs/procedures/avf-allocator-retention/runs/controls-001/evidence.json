@@ -1,0 +1,347 @@
+{
+  "task": "VM-048",
+  "owner": "codex-guest-allocator-witness-20261106-fc",
+  "experiment": "VM048RETENTION-001",
+  "kind": "host-test",
+  "recorded_at": "2026-11-06T07:09:30.108640+00:00",
+  "argv": [
+    "fixtures/public/avf-allocator-retention/check.py",
+    "--main",
+    "/home/egor/dev/pet/s24-ios-exynos",
+    "--out",
+    "docs/procedures/avf-allocator-retention/runs/controls-001"
+  ],
+  "outcome": "fail",
+  "checks": [
+    {
+      "name": "source-derived-fixed64-variable80-and22zones",
+      "pass_result": true
+    },
+    {
+      "name": "invented-variable-layout",
+      "pass_result": true,
+      "rejection": "Source-qualified ARM64 layout contract changed"
+    },
+    {
+      "name": "exact-real-osdata",
+      "pass_result": true,
+      "sha256": "0b7b02f0881ce38c08df27ebbb21dee03b251e1a5f8be85af3a18754d5276458"
+    },
+    {
+      "name": "exact-real-kalloc",
+      "pass_result": true,
+      "sha256": "006623101892d71322813c7f4c90bf24f09501ddf837ed60ae7a4bc3cf71d3c8"
+    },
+    {
+      "name": "exact-real-osarray",
+      "pass_result": true,
+      "sha256": "cab729751da1702170a95c4aed02de488af26bffe4446d587bc03234a75d5e9f"
+    },
+    {
+      "name": "real-osdata-three-records",
+      "pass_result": true
+    },
+    {
+      "name": "real-osarray-three-records",
+      "pass_result": true
+    },
+    {
+      "name": "real-kalloc16refs-four-boundaries",
+      "pass_result": true,
+      "evidence": {
+        "object_sha256": "006623101892d71322813c7f4c90bf24f09501ddf837ed60ae7a4bc3cf71d3c8",
+        "counts": {
+          "section$start$__DATA_CONST$__kalloc_type": 4,
+          "section$end$__DATA_CONST$__kalloc_type": 4,
+          "section$start$__DATA_CONST$__kalloc_var": 4,
+          "section$end$__DATA_CONST$__kalloc_var": 4
+        },
+        "arm64_explicit_addend_pairs": 17
+      }
+    },
+    {
+      "name": "nonzero-inline-signature-substring",
+      "pass_result": true
+    }
+  ],
+  "compiler_executed": false,
+  "linker_executed": false,
+  "external_section_tool_executed": false,
+  "guest_executed": false,
+  "actual_final_image_measured": false,
+  "full_kernel_retention_qualified": false,
+  "fixture_sha256": "5e3bcf13e721126e8ce55f625dfea912c087a1a2f995304740a67e6e89f088cf",
+  "checker_sha256": "c3b66c8e80ba49794ef2e81dbc3079a6d8c81ca0d7f3c85ed8d8ea7e3b4c8f9c",
+  "core_sha256": "0631a7d8f310e881d08105c4229c1e22ccb771eb52453648e0a1f1aae4c18464",
+  "tool_sha256": "1d0e1a6af967c9ac66168b252240cdc407ffd7a9b6d2ac5ffc9ed08a1cd6c89a",
+  "source_contract": {
+    "abi": "arm64-lp64-little-endian",
+    "alignment": 8,
+    "kc_format": "static",
+    "layouts": {
+      "fixed": {
+        "integers": {
+          "flags": [
+            40,
+            4
+          ],
+          "size": [
+            44,
+            4
+          ]
+        },
+        "section": "__kalloc_type",
+        "stride": 64,
+        "strings": {
+          "name": 16,
+          "signature": 32
+        },
+        "zero": [
+          [
+            0,
+            16
+          ],
+          [
+            24,
+            8
+          ],
+          [
+            48,
+            16
+          ]
+        ]
+      },
+      "variable": {
+        "integers": {
+          "flags": [
+            72,
+            4
+          ],
+          "size_header": [
+            2,
+            2
+          ],
+          "size_type": [
+            4,
+            4
+          ],
+          "version": [
+            0,
+            2
+          ]
+        },
+        "section": "__kalloc_var",
+        "stride": 80,
+        "strings": {
+          "name": 16,
+          "signature_header": 56,
+          "signature_type": 64
+        },
+        "zero": [
+          [
+            8,
+            8
+          ],
+          [
+            24,
+            32
+          ],
+          [
+            76,
+            4
+          ]
+        ]
+      }
+    },
+    "live_support": 134217728,
+    "lto_rule": "USE_LTO=1 enables conditional dead_strip",
+    "pointer_encoding": "unslid-u64",
+    "schema": 1,
+    "segment": "__DATA_CONST",
+    "selected_data_const_protection": [
+      1,
+      1
+    ],
+    "sources": {
+      "compiler_semantics": "6fe9f27461be647d14006558f4b79a9fad620170f33a22ce875b3aeb66b3b69d",
+      "kalloc_consumer": "05381b898a98188c271bc76f798a281d5eaaaee586acf4359001fba8a28df23c",
+      "kalloc_header": "ed1ede09dade21c6d20bd7494b263278b0adeddc4a356c849b9305a7931321d1",
+      "link_recipe": "755d0fde3e8ddd46e235ed58c0664394014250e1dae7e7021bd07ad0ecae65b8",
+      "loader_header": "8780a1e622375833b563f488bc820422c2fb5b8727bb8df8ceaa73ab6f0f88e3",
+      "relocation_header": "c190e13a45e54e4dd513e8465f521cb1ad0327fcce02405afc6958544eb53f2a",
+      "selected_link_contract": "125a7627c1178d3812f3e618c8f8bcc125cb77520be100013cbcc710b84c9d3a",
+      "zalloc_header": "fa29ef19600c860cfa00b21c8f494b9439044c0d1efda276586c9c95c01aeccc"
+    },
+    "variable_zones": 22
+  },
+  "actual_object_witnesses": {
+    "osdata": {
+      "schema": 1,
+      "source_contract_sha256": "a97265f568b7bc44a55ec710b55e4077f2a2493548a2755205bff0eaa0ef6778",
+      "tool_sha256": "1d0e1a6af967c9ac66168b252240cdc407ffd7a9b6d2ac5ffc9ed08a1cd6c89a",
+      "object_sha256": "0b7b02f0881ce38c08df27ebbb21dee03b251e1a5f8be85af3a18754d5276458",
+      "metadata_records": {
+        "6163ba27aa6a83389691ac55819e49f8c5898477dab7a31137c35f097bcad5ca": {
+          "record": {
+            "kind": "fixed",
+            "flags": 100,
+            "size": 16,
+            "name": "site.ExpansionData",
+            "signature": "12"
+          },
+          "count": 3
+        }
+      },
+      "pointers": [
+        {
+          "kind": "fixed",
+          "address": 160,
+          "string": "12",
+          "inline_addend": 0,
+          "symbol": "l_.str.3",
+          "target_address": 4735
+        },
+        {
+          "kind": "fixed",
+          "address": 144,
+          "string": "site.ExpansionData",
+          "inline_addend": 0,
+          "symbol": "l_.str.2",
+          "target_address": 4716
+        },
+        {
+          "kind": "fixed",
+          "address": 96,
+          "string": "12",
+          "inline_addend": 0,
+          "symbol": "l_.str.3",
+          "target_address": 4735
+        },
+        {
+          "kind": "fixed",
+          "address": 80,
+          "string": "site.ExpansionData",
+          "inline_addend": 0,
+          "symbol": "l_.str.2",
+          "target_address": 4716
+        },
+        {
+          "kind": "fixed",
+          "address": 32,
+          "string": "12",
+          "inline_addend": 0,
+          "symbol": "l_.str.3",
+          "target_address": 4735
+        },
+        {
+          "kind": "fixed",
+          "address": 16,
+          "string": "site.ExpansionData",
+          "inline_addend": 0,
+          "symbol": "l_.str.2",
+          "target_address": 4716
+        }
+      ],
+      "qualification": "historical-object-byte-witness-only"
+    },
+    "osarray": {
+      "schema": 1,
+      "source_contract_sha256": "a97265f568b7bc44a55ec710b55e4077f2a2493548a2755205bff0eaa0ef6778",
+      "tool_sha256": "1d0e1a6af967c9ac66168b252240cdc407ffd7a9b6d2ac5ffc9ed08a1cd6c89a",
+      "object_sha256": "cab729751da1702170a95c4aed02de488af26bffe4446d587bc03234a75d5e9f",
+      "metadata_records": {
+        "54f9d8c5602a22e583f9737726d2335fc8e2b0e01c405a9a7527474a1ca7fa3e": {
+          "record": {
+            "kind": "variable",
+            "version": 1,
+            "size_header": 0,
+            "size_type": 8,
+            "flags": 228,
+            "name": "site.ArrayPtrType",
+            "signature_header": null,
+            "signature_type": "1"
+          },
+          "count": 3
+        }
+      },
+      "pointers": [
+        {
+          "kind": "variable",
+          "address": 224,
+          "string": "1",
+          "inline_addend": 0,
+          "symbol": "l_.str.3",
+          "target_address": 4968
+        },
+        {
+          "kind": "variable",
+          "address": 176,
+          "string": "site.ArrayPtrType",
+          "inline_addend": 0,
+          "symbol": "l_.str.2",
+          "target_address": 4950
+        },
+        {
+          "kind": "variable",
+          "address": 144,
+          "string": "1",
+          "inline_addend": 0,
+          "symbol": "l_.str.3",
+          "target_address": 4968
+        },
+        {
+          "kind": "variable",
+          "address": 96,
+          "string": "site.ArrayPtrType",
+          "inline_addend": 0,
+          "symbol": "l_.str.2",
+          "target_address": 4950
+        },
+        {
+          "kind": "variable",
+          "address": 64,
+          "string": "1",
+          "inline_addend": 0,
+          "symbol": "l_.str.3",
+          "target_address": 4968
+        },
+        {
+          "kind": "variable",
+          "address": 16,
+          "string": "site.ArrayPtrType",
+          "inline_addend": 0,
+          "symbol": "l_.str.2",
+          "target_address": 4950
+        },
+        {
+          "kind": "variable",
+          "address": 136,
+          "string": null,
+          "inline_addend": 0,
+          "symbol": null,
+          "target_address": 0
+        },
+        {
+          "kind": "variable",
+          "address": 56,
+          "string": null,
+          "inline_addend": 0,
+          "symbol": null,
+          "target_address": 0
+        },
+        {
+          "kind": "variable",
+          "address": 216,
+          "string": null,
+          "inline_addend": 0,
+          "symbol": null,
+          "target_address": 0
+        }
+      ],
+      "qualification": "historical-object-byte-witness-only"
+    }
+  },
+  "error": "ValueError('Allocator site name violates selected emission macro')",
+  "elapsed_seconds": 0.1533543940167874,
+  "exit_code": 2
+}
