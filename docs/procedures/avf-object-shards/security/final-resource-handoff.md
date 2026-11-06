@@ -53,3 +53,12 @@ source-only `VM019FINALPLAN-001` history remains preserved. Register
 `VM019FINALBUILD-001` against `final-resource-build.md` and leave it PLANNED until
 actual execution after a separate root grant, binding the same sealed absent
 actual output. No plan rerun is needed or performed.
+
+Actual grant30 subsequently ran once under `VM019FINALBUILD-001` and was refused
+before any compiler because the allocation path was outside canonical MAIN
+artifacts. See `wave30-refusal.md` for immutable terminal hashes and cleanup.
+Root requested recording that actual refusal FAIL, then a distinct
+`VM019FINALBUILD-002` PLANNED with fresh absent `final-resource-execute-002/runner`.
+Both CLI operations succeeded. Source plan ced65ff9 and all selected keys/recipes
+are reused unchanged by explicit root instruction; no replan or worker retry.
+Hold for a separate corrected root31 grant and its exact argv.
