@@ -3,6 +3,7 @@
 from __future__ import annotations
 import argparse
 from collections import Counter
+from contextlib import contextmanager
 from datetime import datetime, timezone
 import hashlib
 import importlib.util
@@ -15,6 +16,7 @@ import resource
 import shutil
 import shlex
 import signal
+import stat
 import subprocess
 import struct
 import sys
@@ -869,11 +871,38 @@ def tail_ownership(args, common):
         raise ValueError('Fresh original-owner VM022 output, owned worktree and planned experiment required')
 
 
+def constructor_snapshots(raw, transformed):
+    """Bound both FD reads and reject growth/replacement during either snapshot."""
+    paths, descriptors = [Path(raw),Path(transformed)], []
+    identity = lambda s: (s.st_dev,s.st_ino,s.st_size,s.st_mtime_ns,s.st_ctime_ns)
+    try:
+        for path in paths:
+            descriptors.append(os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK|os.O_CLOEXEC))
+        before = [os.fstat(fd) for fd in descriptors]
+        length = before[0].st_size
+        if (length > 16*1024**2 or any(not stat.S_ISREG(s.st_mode) for s in before) or
+            before[1].st_size != length):
+            raise ValueError('Equal bounded regular constructor files required before reading')
+        snapshots = []
+        for fd in descriptors:
+            # Hard read bound remains valid if a regular file grows after fstat.
+            with os.fdopen(os.dup(fd),'rb') as stream:
+                data = stream.read(length+1)
+            if len(data) != length:
+                raise ValueError('Constructor file grew/truncated during bounded FD read')
+            snapshots.append(data)
+        for path,fd,original in zip(paths,descriptors,before):
+            if identity(os.fstat(fd)) != identity(original) or identity(path.lstat()) != identity(original):
+                raise ValueError('Constructor FD/path identity or bytes changed during snapshot')
+        return snapshots
+    finally:
+        for fd in descriptors:os.close(fd)
+
+
 def verify_constructor_transform(raw, transformed):
     """Compare every actual byte; only eligible section segment names may change."""
-    if raw.stat().st_size > 16 * 1024**2:
-        raise ValueError('Unexpectedly oversized constructor object')
-    data = bytearray(raw.read_bytes())
+    original, actual = constructor_snapshots(raw,transformed)
+    data = bytearray(original)
     count, size = struct.unpack_from('<II', data, 16)
     cursor, changed = 32, []
     for unused in range(count):
@@ -889,12 +918,85 @@ def verify_constructor_transform(raw, transformed):
                     data[at+16:at+32] = b'__LASTDATA_CONST'[:16].ljust(16, b'\0')
                     changed.append(name)
         cursor += extent
-    if cursor != 32 + size or '__mod_init_func' not in changed or data != transformed.read_bytes():
+    if cursor != 32 + size or '__mod_init_func' not in changed or data != actual:
         raise ValueError('Actual constructor output differs from genuine eligible-section rename')
     return changed
 
 
+class OwnedCancellation(RuntimeError):
+    """An owned controller signal that must unwind shared child cleanup first."""
+
+
+class CancellationState:
+    def __init__(self):
+        self.signals, self.deferred, self.raised = [], 0, False
+
+    def check(self):
+        if self.signals:
+            self.raised = True
+            raise OwnedCancellation('Owned controller cancelled by signals '+str(self.signals))
+
+    def handle(self, number, frame):
+        self.signals.append(number)
+        if not self.deferred and not self.raised:self.check()
+
+    @contextmanager
+    def cleanup(self):
+        self.deferred += 1
+        try:yield
+        finally:self.deferred -= 1
+
+    @contextmanager
+    def command(self, budget):
+        """Defer async raises; use AF193's caught live-budget callback instead."""
+        original = budget.sample
+        seen_session = False
+        def sample(session=None, lock_timeout=.5):
+            nonlocal seen_session
+            result = original(session,lock_timeout=lock_timeout)
+            if session is not None:seen_session = True
+            # session!=None is the caught work-loop callback; before any
+            # session, admission has no child. Final budget.sample(None)
+            # must finish without a cancellation exception.
+            if self.signals and (session is not None or not seen_session):self.check()
+            return result
+        budget.sample = sample
+        self.deferred += 1
+        try:yield
+        finally:
+            budget.sample = original
+            self.deferred -= 1
+        self.check()
+
+
+@contextmanager
+def owned_cancellation():
+    prior = {number: signal.getsignal(number) for number in [signal.SIGTERM, signal.SIGINT]}
+    state = CancellationState()
+    try:
+        for number in prior:signal.signal(number,state.handle)
+        yield state
+    finally:
+        for number,handler in prior.items():signal.signal(number,handler)
+
+
+def run_owned_child(common, cancellation, *args, **kwargs):
+    command = None
+    try:
+        with cancellation.command(kwargs['budget']):
+            command = common.run_child(*args,**kwargs)
+    except OwnedCancellation as error:
+        error.command = command
+        raise
+    return command
+
+
 def execute_tails(args, common):
+    with owned_cancellation() as cancellation:
+        return execute_tails_reserved(args, common, cancellation)
+
+
+def execute_tails_reserved(args, common, cancellation):
     """Only the separately admitted four-tail phase; never link or package here."""
     tail_ownership(args, common)
     supplied = common.load_project(args.source_plan, args.source_plan_sha256)
@@ -912,10 +1014,10 @@ def execute_tails(args, common):
         executor_sha256=sha(__file__), source_plan_sha256=args.source_plan_sha256,
         compiler_started=False, archive_executed=False, link_executed=False, guest_executed=False,
         initial_process=proc_status(), initial_raw_ru_maxrss_bytes=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss*1024)
-    args.out.mkdir(parents=True, exist_ok=False)
-    shutil.copyfile(__file__, args.out / 'builder.py')
     reserved = False
     try:
+        args.out.mkdir(parents=True, exist_ok=False)
+        shutil.copyfile(__file__, args.out / 'builder.py')
         budget.reserve()
         reserved = True
         supervise = common.supervisor(args.main)
@@ -941,7 +1043,7 @@ def execute_tails(args, common):
             budget.sample()
             if common.namespace(rows, index, cache) != before:
                 raise ValueError('Tail include/source namespace changed before compilation')
-            command = common.run_child(row['argv'], Path(row['cwd']), args.out,
+            command = run_owned_child(common, cancellation, row['argv'], Path(row['cwd']), args.out,
                 'commands/' + str(number) + '-' + row['target'], supervise, timeout=row['timeout_seconds'], budget=budget)
             report['commands'].append(command)
             report['compiler_started'] |= command.get('child_started', False)
@@ -961,7 +1063,7 @@ def execute_tails(args, common):
         transform = expected['constructor_transform']
         raw = args.out / 'raw/lastkernelconstructor.o'
         shutil.copyfile(transform['final'], raw)
-        command = common.run_child(transform['argv'], args.out / 'source-context', args.out,
+        command = run_owned_child(common, cancellation, transform['argv'], args.out / 'source-context', args.out,
             'commands/4-constructor-segment', supervise, timeout=30, budget=budget)
         report['commands'].append(command)
         if command['outcome'] != 'pass':
@@ -978,15 +1080,26 @@ def execute_tails(args, common):
                 raise ValueError('Bound production input changed')
         report['outcome'] = 'pass'
     except Exception as error:
+        if isinstance(error,OwnedCancellation) and getattr(error,'command',None) is not None:
+            report['commands'].append(error.command)
+            report['compiler_started'] |= error.command.get('child_started',False)
         report.update(outcome='fail', error=repr(error))
     finally:
-        try:
-            report['budget_release'] = budget.release() if reserved else 'not reserved'
-        except Exception as error:
-            report.update(outcome='fail', budget_release_error=repr(error))
-        report['final_process'] = proc_status()
-        report['final_raw_ru_maxrss_bytes'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss*1024
-        dump(args.out / 'evidence.json', report)
+        with cancellation.cleanup():
+            try:
+                report['budget_release'] = budget.release() if reserved or budget.registered else 'not reserved'
+            except Exception as error:
+                report.update(outcome='fail', budget_release_error=repr(error))
+            if cancellation.signals:report.update(outcome='fail',cancelled_signals=cancellation.signals)
+            report['final_process'] = proc_status()
+            report['final_raw_ru_maxrss_bytes'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss*1024
+            if args.out.is_dir():
+                dump(args.out / 'evidence.json', report)
+                # A first cancellation during evidence serialization is recorded
+                # after that finite write; a rewrite can only write failure.
+                if cancellation.signals and report['outcome'] != 'fail':
+                    report.update(outcome='fail',cancelled_signals=cancellation.signals)
+                    dump(args.out / 'evidence.json',report)
     return 0 if report['outcome'] == 'pass' else 2
 
 
