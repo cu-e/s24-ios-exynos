@@ -107,3 +107,34 @@ fix or fresh experiment/plan/allocation. Preserve original77 graph/profile and
 all partial native outputs/MD/stderr. Original SR28 records actual failed
 STR028BUILD-001 exactly once, updates progress and waits. No target/compiler/
 loader/Make/CLI repeat, helper edit, common/publication/taskclose/link/QEMU.
+
+
+## Root89 accepted header caller; original remaining65 source plan ready
+
+Root89 source033 publication/common170PASS permits original SR28 to prepare
+STR028BUILD-002 (own host-test PLANNED, preregistrationCLI0), exact original
+libkern[12:77]65 IDs. No STR033 source-review identity is borrowed. Physical
+caller now explicitly selected is str-033-e1s-native-firehose-header-20261106/
+fixtures/public/e1s-native-compile/native_compile.py SHA
+007077d1eabdf0e3d9e8c1ac86121291f6dd9c12eabf38adc8fd4bae50120188.
+Fixed authority44277ad6 projects existing genuine HOST-SOURCE-EXPORT14be header
+in the private CWD; no shared1334/source5111/flags/resource/cancellation change.
+Root87 produced no fresh export. No SDK/provider/archive/ABI inference follows.
+
+Own strict manifest slice-002.json SHA
+2533cb342532baa720c82453f2d20c34a6cad8813b538f89ebb9bbf1ab66c669,
+source prepcommit4e3bddc5de64cc623fa42a1f502619319171a541, uses whole1800,
+fresh artifacts/e1s-native-compile/libkern/build-002. Old001rawde716, physical
+2676 and independently accepted first12 prefix facts remain unchanged.
+Source-plan mode executed ONCE, exit0/empty stderr/5.840583269s/RSSunknown.
+Own raw plan-002/actual-plan.json SHA
+797c465e03068f29b7e14d19e8e582b73b119e36b39a00eaa4eb976b667957ad,
+outside prospective actualoutput, which remains absent. Exactly65 original
+argv/recipes/sourcehashes match initial[12:77],6566 indexedinputs,15 prospective
+privatefiles (14cfg+1realheader). No projection/compiler/loader/Make ran.
+
+Root received exact manifest/plan identity promptly for next SERIAL actual
+allocation with external1890watchdog. No execute until separate root grant,
+no prefix replay/resume/identity borrowing/extra flags. Preserve initialFAIL and
+all old source/actual bytes. plan-002-evidence.json binds exact own source-plan
+receipt; actualMD/object/resource checks and independent acceptance remain later.
