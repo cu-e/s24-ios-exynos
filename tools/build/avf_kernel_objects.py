@@ -31,6 +31,11 @@ FIREHOSE_QUALIFICATION = '3343a382452d05c382a15ea54e3835c3125c67c451cb586a1c3ed5
 FIREHOSE_SELECTORS = '408720d8bbdbc982079f778ce662f20051dc1d761b9ca216346896a5dabf0744'
 FIREHOSE_NAMESPACE = '25f22291e314445a01a4030e7db74f8cebd9a935b604eefc7b1ad9f5ee033461'
 FIREHOSE_SCHEMA = 'avf-firehose-namespace-v1'
+RESOURCE_MANIFEST = '80cc9fe56c584e77f183b7bdfe442cb9aeb66c06d616660474ac0b940f120da4'
+RESOURCE_QUALIFICATION = 'eb2ca4400478800b4d72f5d231eb73f6d13c2ba41ffb477c28a07f5e6baff5a4'
+RESOURCE_SELECTORS = 'a2379193252975a5dac47dd27a41703ae5497e64f93591612670695e46c58d8e'
+RESOURCE_NAMESPACE = 'fdfc50d351c6c175422de7ce2c75f8a14c0228997ef8de921c9cdec3e97b1172'
+RESOURCE_SCHEMA = 'avf-resource-namespace-v1'
 TREE = '6a955269a8f4e17d21239f75cef9fbe66cffc56c'
 CONFIG = '1571c785ae12ed79858fb9c81ebfce4ecd5414e4ce6af906820f6b9d61f68394'
 COMPILER = '7972eb2820ae25b5bedff1ea954cef9e9a0e4a15c7a8e440628e8b6540fafc82'
@@ -218,7 +223,11 @@ def accepted_profile(args):
         return {'manifest_sha256': PIN, 'namespace_sha256': LEGACY_NAMESPACE}
     if identity == (FIREHOSE_MANIFEST, FIREHOSE_QUALIFICATION, FIREHOSE_SELECTORS):
         return {'manifest_sha256': FIREHOSE_MANIFEST, 'namespace_sha256': FIREHOSE_NAMESPACE, 'schema': FIREHOSE_SCHEMA}
-    raise ValueError('Only the two exact independently accepted guest profiles are admitted')
+    if identity == (RESOURCE_MANIFEST, RESOURCE_QUALIFICATION, RESOURCE_SELECTORS):
+        if getattr(args, 'resource_profile', 'legacy') != PROJECT_PROFILE:
+            raise ValueError('Matching compiler-resource profile requires explicit project-budget-v1')
+        return {'manifest_sha256': RESOURCE_MANIFEST, 'namespace_sha256': RESOURCE_NAMESPACE, 'schema': RESOURCE_SCHEMA}
+    raise ValueError('Only the three exact independently accepted guest profiles are admitted')
 
 
 def profile_rules(main):
@@ -277,6 +286,61 @@ def firehose_profile(args, rows, descriptor):
     return qualified, {item['id']: item for item in expected_keys}, receipt
 
 
+def resource_profile(args, rows, descriptor):
+    path = canonical_output_path(args.main/'tools/build/avf_resource_namespace.py')
+    raw = path.read_bytes()
+    if hashlib.sha256(raw).hexdigest() != 'dd30589d316fbc5ebd64f8612a96a88247a9159152286a6200379106734b1e76':
+        raise ValueError('Accepted resource namespace validator changed')
+    spec = importlib.util.spec_from_file_location('accepted_resource_namespace', path)
+    rules = importlib.util.module_from_spec(spec)
+    exec(compile(raw, str(path), 'exec'), rules.__dict__)
+    if descriptor['namespace_version'] != RESOURCE_SCHEMA or descriptor['namespace_digest'] != RESOURCE_NAMESPACE or descriptor['parent_namespace_digest'] != FIREHOSE_NAMESPACE:
+        raise ValueError('Accepted resource descriptor identity differs')
+    for key in ['object_manifest', 'selectors', 'source_proof', 'manifest_transition', 'namespace_receipt', 'object_input_keys', 'artifact_index', 'source_type_closure', 'consumer_contract']:
+        bound_profile_file(descriptor[key])
+    for item in descriptor['parents'].values():bound_profile_file(item)
+    if Path(descriptor['object_manifest']['path']) != args.manifest.resolve() or descriptor['object_manifest']['sha256'] != RESOURCE_MANIFEST or descriptor['selectors']['sha256'] != RESOURCE_SELECTORS or Path(descriptor['selectors']['path']) != args.selectors.resolve():
+        raise ValueError('Resource descriptor does not bind exact graph/selectors')
+    parent = descriptor['parents']
+    old_rows = load_project(parent['parent_manifest']['path'], FIREHOSE_MANIFEST)
+    old_descriptor = load_project(parent['parent_qualification']['path'], FIREHOSE_QUALIFICATION)
+    parent_args = argparse.Namespace(main=args.main, manifest=Path(parent['parent_manifest']['path']), selectors=Path(old_descriptor['selectors']['path']))
+    qualified, _, parent_namespace = firehose_profile(parent_args, old_rows, old_descriptor)
+    if parent['parent_index'] != {key: old_descriptor['artifact_index'][key] for key in ['path', 'sha256']} or parent['parent_namespace_receipt'] != {key: old_descriptor['namespace_receipt'][key] for key in ['path', 'sha256']}:
+        raise ValueError('Resource parent index/namespace lineage changed')
+    old_root = canonical_output_path(descriptor['old_root']['path'])
+    root = canonical_output_path(descriptor['new_root']['path'])
+    if root != canonical_output_path(Path(args.qualification).parent/'resource/lib/clang/17/include'):
+        raise ValueError('Resource root differs from the exact accepted qualification slot')
+    if os.path.lexists(old_root):raise ValueError('Historical resource root was materialized')
+    rules.verify_resources(profile_rules(args.main), root, descriptor['new_root']['files'])
+    transition = load_project(descriptor['manifest_transition']['path'], descriptor['manifest_transition']['sha256'])
+    changes = rules.validate_transition(profile_rules(args.main), old_rows, rows, old_root, root)
+    if transition['parent_manifest_sha256'] != FIREHOSE_MANIFEST or transition['rows'] != changes or transition['changed_rows'] != 1 or transition['exact_changed_argv_index'] != 244 or transition['preserved_flag_index'] != 243:
+        raise ValueError('Resource change is not the single exact existing APFS operand244')
+    selectors = load_project(args.selectors, RESOURCE_SELECTORS)
+    old_selectors = load_project(old_descriptor['selectors']['path'], FIREHOSE_SELECTORS)
+    if selectors['shards'] != old_selectors['shards']:
+        raise ValueError('Resource selectors changed an ordered shard')
+    receipt = load_project(descriptor['namespace_receipt']['path'], descriptor['namespace_receipt']['sha256'])
+    expected = rules.namespace_derivation(parent_namespace, old_root, root, descriptor['new_root']['files'])
+    if receipt != expected or receipt['sha256'] != RESOURCE_NAMESPACE or len(parent_namespace['files']) != 6722 or len(receipt['files']) != 6725:
+        raise ValueError('Resource namespace is not the exact parent plus three headers')
+    old_index = normalized_index(load_project(parent['parent_index']['path'], parent['parent_index']['sha256'])['files'], args.main)
+    index = normalized_index(load_project(descriptor['artifact_index']['path'], descriptor['artifact_index']['sha256'])['files'], args.main)
+    if len(old_index) != 53997 or len(index) != 54046 or any(index.get(p) != digest for p, digest in old_index.items()):
+        raise ValueError('Resource index must preserve all53997 inherited entries plus49')
+    keys = load_project(descriptor['object_input_keys']['path'], descriptor['object_input_keys']['sha256'])
+    expected_keys = [rules.object_key(row, RESOURCE_MANIFEST, RESOURCE_NAMESPACE) for row in rows]
+    if keys['schema'] != RESOURCE_SCHEMA or keys['keys'] != expected_keys:
+        raise ValueError('Resource input-key schema or full1080 bindings differ')
+    contract = load_project(descriptor['consumer_contract']['path'], descriptor['consumer_contract']['sha256'])
+    if contract['schema'] != RESOURCE_SCHEMA or contract['manifest'] != descriptor['object_manifest'] or contract['namespace'] != RESOURCE_NAMESPACE or contract['input_keys'] != descriptor['object_input_keys'] or contract['parent_manifest'] != parent['parent_manifest'] or contract['parent_namespace'] != FIREHOSE_NAMESPACE or contract['derived_selectors'] != descriptor['selectors'] or contract['retired_absent_root'] != str(old_root) or contract['new_root'] != str(root) or contract['changed_rows'] != ['bsd/apfs_deflate.o'] or contract['argv_index'] != 244 or contract['flag'] != '-idirafter' or contract['actual_retry_authorized'] is not False:
+        raise ValueError('Resource consumer admission contract differs')
+    qualified = dict(qualified, artifact_index=descriptor['artifact_index']['path'], artifact_index_sha256=descriptor['artifact_index']['sha256'], next_object_manifest=descriptor['object_manifest']['path'])
+    return qualified, {item['id']: item for item in expected_keys}, receipt
+
+
 def resume_profile(previous, plan):
     if any(previous.get('provenance', {}).get(key) != plan['provenance'][key] for key in ['manifest_sha256', 'namespace_sha256']):
         raise ValueError('Cross-profile resume is forbidden; old objects are never relabeled')
@@ -293,7 +357,8 @@ def bind(args, out):
     qualified = read(args.qualification, args.qualification_sha256)
     profile_keys = None; profile_namespace = None
     if 'schema' in profile:
-        qualified, profile_keys, profile_namespace = firehose_profile(args, rows, qualified)
+        validator = resource_profile if profile['schema'] == RESOURCE_SCHEMA else firehose_profile
+        qualified, profile_keys, profile_namespace = validator(args, rows, qualified)
     if (args.main/qualified['next_object_manifest']).resolve() != args.manifest.resolve():
         raise ValueError('Qualified namespace does not bind this graph')
     index_path = args.main/qualified['artifact_index']
@@ -1050,6 +1115,10 @@ def task_shards(task, mode, requested):
         'fixtures/public/avf-object-shards/'+name,
         'docs/procedures/avf-object-shards/'+name,
     }.issubset(paths)}
+    if task['id'] == 'VM-046':
+        if mode != 'plan' or paths != {'tools/build/avf_kernel_objects.py', 'fixtures/public/avf-resource-profile', 'docs/procedures/avf-resource-profile'}:
+            raise ValueError('VM046 literal tooling scope authorizes source-only plans, never compilation')
+        return {'authorized_shards': [], 'source_only_tooling_exception': True}
     profile_tooling = task['id'] == 'VM-039' and paths == {
         'tools/build/avf_kernel_objects.py', 'fixtures/public/avf-guest-profile', 'docs/procedures/avf-guest-profile',
     }
@@ -1129,6 +1198,7 @@ def main():
     parser.add_argument('--approval', type=Path)
     parser.add_argument('--approval-sha256')
     args = parser.parse_args(); args.main = args.main.resolve()
+    if args.manifest_sha256 == RESOURCE_MANIFEST:accepted_profile(args)
     out = owned_out(args)
     shutil.copyfile(__file__, out/'executor.py')
     report = {'kind': 'host-test', 'origin': 'local-host', 'outcome': 'fail', 'recorded_at': stamp(), 'argv': [sys.executable, *sys.argv], 'summary': 'Guest object executor did not complete selected validation', 'executor_sha256': sha(__file__), 'ownership_binding': args.ownership_binding, 'commands': [], 'objects': [], 'compiler_started': False, 'full_kernel_build_or_link': False, 'guest_executed': False, 'device_executed': False, 'sdk_qualified': False, 'private_apple_abi_qualified': False}
