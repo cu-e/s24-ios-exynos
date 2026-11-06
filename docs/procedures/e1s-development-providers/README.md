@@ -88,4 +88,6 @@ Only the first 31 header operations are proposed for the next separate grant.
 `header-only-plan.json` bind the thin adapter, unchanged reviewed process and
 budget APIs, exact four MIG prerequisite copies, 315 output checks and 32 native
 filter-flag guards. No four-compiler/archive/layout admission follows from a
-header-only grant or result. `execute-001` remains absent at source freeze.
+header-only grant or result. That earlier source freeze preceded the retained ROOT87 first-command failure.
+Current target-spelling correction and fresh planned `execute-002` are detailed
+in the header-only procedure; no retry has run.
