@@ -45,3 +45,24 @@ and source registry; PATH is explicitly /usr/bin:/bin. Root's proposed budget is
 120-second child timeouts. This is a request, not an active lease or execution
 grant. The author only registers the plan; root must admit and supervise it.
 Probe+loader qualification remains distinct from an XNU kernel or physical boot.
+
+Root grant39 executed the planned builder exactly once: outer exit0 in2.098s;
+19 logged builder commands all exit0. Commands1/2 check/apply the exact23b31
+snapshot before the eight target compiles at3,4,9..14. Report.source_patch.applied
+is true; all six prepared source identities match the STR002 patched/original
+pins. The eight product hashes and sizes were re-read without rebuilding.
+
+Actual builder report SHA191465bece0dafb800ae3f8ba2764189d077d3a7baed9d05908bd1a71d12dcd6;
+root supervisor capsule SHA85747434c0a1aa4f5a29dc4f1e158ca8bc9176a53fe57bff47d23f280ec00267.
+Observed owned-tree peak111210496B; root controller VmHWM29999104B; zero owned
+survivors. Host swap/memory values remain host observations, not project-causal
+swap attribution. No author rerun, extra negative builder invocation or compiler
+command occurred. build-evidence.json binds actual commands, source/tool pins,
+patch snapshot, prepared source and all products. It qualifies the freestanding
+probe and E1S handoff loader only; no XNU kernel, Apple userland, physical safe
+RAM window, image boot/runtime or phone execution is established.
+
+The source/plan commits remain45522ff and62f8257; this additive final docs commit
+records actual evidence. Next: CM independent review/minimal currentHEAD
+integration, root publication/common acceptance, then original SR3 closure.
+Do not close the task or rerun the builder before that boundary.

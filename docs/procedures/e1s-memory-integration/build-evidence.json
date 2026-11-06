@@ -1,0 +1,610 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-06T09:38:36+00:00",
+  "summary": "Root-admitted existing E1S builder PASS:19commands all exit0, exact23b31 snapshot checked/applied before8 AArch64 targetcompiles, verified8 probe/loader products and6 prepared source hashes, zero owned survivors. Freestanding probe+handoffloader only; no XNU kernel/userland or hardware execution.",
+  "task": "STR-003",
+  "owner": "codex-e1s-builder-20261106-sr3",
+  "experiment": "STR003BUILD-001",
+  "commit": "62f825773a26cec9fe4306687c37679bd210cea9",
+  "builder_source_commit": "45522ff0156d2683a9978d1612e52e2f092dde4c",
+  "root_execution_grant": 39,
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-003-e1s-builder-20261106/tools/build/e1s.py",
+        "--root",
+        "/home/egor/dev/pet/s24-ios-exynos",
+        "--run",
+        "str003-memory-20261106-001"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos",
+      "exit_code": 0,
+      "elapsed_seconds": 2.098,
+      "invoked_by": "root admitted runner, not author rerun"
+    }
+  ],
+  "builder_commands": [
+    {
+      "argv": [
+        "zig",
+        "version"
+      ],
+      "exit_code": 0,
+      "stdout": "0.16.0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "apply",
+        "--check",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader-memory-validation.patch"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "apply",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader-memory-validation.patch"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s/start.S",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/probe/start.S.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s/probe.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/probe/probe.c.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s/probe.c:560:24: warning: unused function 'be16' [-Wunused-function]\n  560 | static inline uint16_t be16(const uint8_t *p)\n      |                        ^~~~\n1 warning generated.\n"
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-static",
+        "-nostdlib",
+        "-Wl,--build-id=none",
+        "-Wl,-T,/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s/loader.ld",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/probe/start.S.o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/probe/probe.c.o",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/probe/probe.elf"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "objcopy",
+        "-O",
+        "binary",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/probe/probe.elf",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/probe/Image"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/source/tools/e1s/fix_image.py",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/probe/Image"
+      ],
+      "exit_code": 0,
+      "stdout": "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/probe/Image: 97104 bytes\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/source/tools/e1s/mkboot.py",
+        "--kernel",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/probe/Image",
+        "--output",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/probe/boot.img",
+        "--os-version",
+        "15.0.0",
+        "--os-patch-level",
+        "2025-08",
+        "--tar"
+      ],
+      "exit_code": 0,
+      "stdout": "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/probe/boot.img: 102416 bytes\n  kernel: 97104 bytes at offset 4096\n  os_version: 15.0.0 2025-08 -> 0x1e000198\n  sha256: 7a267eedb50243446af1f96a770b0e4707496e1499c4a25503e1fcb3f8023169\n/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/probe/boot.img.tar: 112640 bytes, sha256 c3085d823c61cc5b4f276fb66c91786d4a89e0a039421de8016cf9ae078141f8\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/start.S",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/start.S.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/loader.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/loader.c.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/ui.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/ui.c.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/adt_patch.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/adt_patch.c.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/gic.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/gic.c.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-O2",
+        "-g0",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-stack-protector",
+        "-fno-pic",
+        "-fno-zero-initialized-in-bss",
+        "-mstrict-align",
+        "-mgeneral-regs-only",
+        "-Wall",
+        "-Wextra",
+        "-c",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/fdt.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/fdt.c.o"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "cc",
+        "-target",
+        "aarch64-freestanding",
+        "-static",
+        "-nostdlib",
+        "-Wl,--build-id=none",
+        "-Wl,-T,/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/loader.ld",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/start.S.o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/loader.c.o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/ui.c.o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/adt_patch.c.o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/gic.c.o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/fdt.c.o",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/loader.elf"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "zig",
+        "objcopy",
+        "-O",
+        "binary",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/loader.elf",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/Image"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/source/tools/e1s/fix_image.py",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/Image"
+      ],
+      "exit_code": 0,
+      "stdout": "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/Image: 135168 bytes\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/source/tools/e1s/mkboot.py",
+        "--kernel",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/Image",
+        "--output",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/boot.img",
+        "--os-version",
+        "15.0.0",
+        "--os-patch-level",
+        "2025-08",
+        "--tar"
+      ],
+      "exit_code": 0,
+      "stdout": "/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/boot.img: 139280 bytes\n  kernel: 135168 bytes at offset 4096\n  os_version: 15.0.0 2025-08 -> 0x1e000198\n  sha256: 821e645d6853a0c547c0228b682026886a0a0fe8852ad25aedafd2c2b0643df4\n/home/egor/dev/pet/s24-ios-exynos/artifacts/e1s-build/str003-memory-20261106-001/loader/boot.img.tar: 143360 bytes, sha256 c09de64146fe3bf0ee51a1e48fcebdb75e6765529e7dc3052b47a570868a3ed3\n",
+      "stderr": ""
+    }
+  ],
+  "artifacts": [
+    "artifacts/team-coordination/20261106-team/strategy-reassessment-20261106/builder-build-001/evidence.json",
+    "artifacts/e1s-build/str003-memory-20261106-001/report.json",
+    "worktrees/str-003-e1s-builder-20261106/docs/procedures/e1s-memory-integration/build-plan-001.json",
+    "artifacts/team-coordination/20261106-team/strategy-reassessment-20261106/run-builder-build-001.py",
+    "worktrees/str-003-e1s-builder-20261106/tools/build/e1s.py",
+    "patches/e1s-boot/0001-loader-memory-validation.patch",
+    "artifacts/e1s-build/str003-memory-20261106-001/loader-memory-validation.patch",
+    "worktrees/str-003-e1s-builder-20261106/tools/sources.py",
+    "tools/sources.py",
+    "research/sources.json",
+    "artifacts/e1s-build/str003-memory-20261106-001/probe/probe.elf",
+    "artifacts/e1s-build/str003-memory-20261106-001/probe/Image",
+    "artifacts/e1s-build/str003-memory-20261106-001/probe/boot.img",
+    "artifacts/e1s-build/str003-memory-20261106-001/probe/boot.img.tar",
+    "artifacts/e1s-build/str003-memory-20261106-001/loader/loader.elf",
+    "artifacts/e1s-build/str003-memory-20261106-001/loader/Image",
+    "artifacts/e1s-build/str003-memory-20261106-001/loader/boot.img",
+    "artifacts/e1s-build/str003-memory-20261106-001/loader/boot.img.tar",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/loader.c",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/fdt.c",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/fdt.h",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/ui.h",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/adt_patch.h",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/gic.h"
+  ],
+  "sha256": {
+    "artifacts/team-coordination/20261106-team/strategy-reassessment-20261106/builder-build-001/evidence.json": "85747434c0a1aa4f5a29dc4f1e158ca8bc9176a53fe57bff47d23f280ec00267",
+    "artifacts/e1s-build/str003-memory-20261106-001/report.json": "191465bece0dafb800ae3f8ba2764189d077d3a7baed9d05908bd1a71d12dcd6",
+    "worktrees/str-003-e1s-builder-20261106/docs/procedures/e1s-memory-integration/build-plan-001.json": "5f2517f46ac70ce4b7eec70f234c71a7853efd41aa2bc6d2d4d8273a4828cb25",
+    "artifacts/team-coordination/20261106-team/strategy-reassessment-20261106/run-builder-build-001.py": "4592bb60e32aedabd3c0fe45247437355bfcc04fb8b766e3637f8f379e564bf4",
+    "worktrees/str-003-e1s-builder-20261106/tools/build/e1s.py": "2b7519e92bef64849325c9bce2abd1b6f582c419921168e7133ef9e95bfd23e3",
+    "patches/e1s-boot/0001-loader-memory-validation.patch": "23b31c44ed9dba9c2da2e5b56ccbe97cd67fa41efff3ec032130eabca6718ae1",
+    "artifacts/e1s-build/str003-memory-20261106-001/loader-memory-validation.patch": "23b31c44ed9dba9c2da2e5b56ccbe97cd67fa41efff3ec032130eabca6718ae1",
+    "worktrees/str-003-e1s-builder-20261106/tools/sources.py": "9dac5d579ff4b997ec09707b4f1e5eb117fb30a9ba10b2e561f0ae5232128712",
+    "tools/sources.py": "9dac5d579ff4b997ec09707b4f1e5eb117fb30a9ba10b2e561f0ae5232128712",
+    "research/sources.json": "8db3fa9782ffd6b14d9f50199957de51fc423c3d302fb65d9512c95cbf50fe26",
+    "artifacts/e1s-build/str003-memory-20261106-001/probe/probe.elf": "976b229a86349554d829db7cdbfa60dec6de1f1de2fe95c6986a389c5128be33",
+    "artifacts/e1s-build/str003-memory-20261106-001/probe/Image": "7588c09b590bc9fb1c1c418df486fff81ad923ce2ada3129e94146ee6cb48a2d",
+    "artifacts/e1s-build/str003-memory-20261106-001/probe/boot.img": "7a267eedb50243446af1f96a770b0e4707496e1499c4a25503e1fcb3f8023169",
+    "artifacts/e1s-build/str003-memory-20261106-001/probe/boot.img.tar": "c3085d823c61cc5b4f276fb66c91786d4a89e0a039421de8016cf9ae078141f8",
+    "artifacts/e1s-build/str003-memory-20261106-001/loader/loader.elf": "bc9e645697881782f37280bfac012b9e255c390b1889d0a40c6631a49f828560",
+    "artifacts/e1s-build/str003-memory-20261106-001/loader/Image": "55e98e92095990de5b29b474045ee5070d29d65c3cb5043dba4119529c126ad8",
+    "artifacts/e1s-build/str003-memory-20261106-001/loader/boot.img": "821e645d6853a0c547c0228b682026886a0a0fe8852ad25aedafd2c2b0643df4",
+    "artifacts/e1s-build/str003-memory-20261106-001/loader/boot.img.tar": "c09de64146fe3bf0ee51a1e48fcebdb75e6765529e7dc3052b47a570868a3ed3",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/loader.c": "5231f80f630b04d7faab51cb7b8feddeeadb9cb07514b806d6d2e5c962455c6f",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/fdt.c": "cce31dc1e49434c0b392120dbb190ce40928791a1a156fb15a3443844b56ff1a",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/fdt.h": "c754f08a04d76968567e6c2ee2d1d91130e6abed6ba8429979b5cb9b04eb78dc",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/ui.h": "3cd9082c78cd654aa916c6ddcc2688568d46089cdcc27991f24ce0fc03c1e9bc",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/adt_patch.h": "8c9bd6fc32e58b134a2f62567cac3c3e7d2c0254846c331813103529992f0ecf",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/gic.h": "386eaa0208d331f074fba1b6538b3fc26d47ec50fe71afc65daa5b0131f390a7"
+  },
+  "raw_capsule": "artifacts/team-coordination/20261106-team/strategy-reassessment-20261106/builder-build-001/evidence.json",
+  "raw_capsule_sha256": "85747434c0a1aa4f5a29dc4f1e158ca8bc9176a53fe57bff47d23f280ec00267",
+  "builder_report": "artifacts/e1s-build/str003-memory-20261106-001/report.json",
+  "builder_report_sha256": "191465bece0dafb800ae3f8ba2764189d077d3a7baed9d05908bd1a71d12dcd6",
+  "products": [
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/probe/probe.elf",
+      "size": 164472,
+      "sha256": "976b229a86349554d829db7cdbfa60dec6de1f1de2fe95c6986a389c5128be33"
+    },
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/probe/Image",
+      "size": 97104,
+      "sha256": "7588c09b590bc9fb1c1c418df486fff81ad923ce2ada3129e94146ee6cb48a2d"
+    },
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/probe/boot.img",
+      "size": 102416,
+      "sha256": "7a267eedb50243446af1f96a770b0e4707496e1499c4a25503e1fcb3f8023169"
+    },
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/probe/boot.img.tar",
+      "size": 112640,
+      "sha256": "c3085d823c61cc5b4f276fb66c91786d4a89e0a039421de8016cf9ae078141f8"
+    },
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/loader/loader.elf",
+      "size": 201872,
+      "sha256": "bc9e645697881782f37280bfac012b9e255c390b1889d0a40c6631a49f828560"
+    },
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/loader/Image",
+      "size": 135168,
+      "sha256": "55e98e92095990de5b29b474045ee5070d29d65c3cb5043dba4119529c126ad8"
+    },
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/loader/boot.img",
+      "size": 139280,
+      "sha256": "821e645d6853a0c547c0228b682026886a0a0fe8852ad25aedafd2c2b0643df4"
+    },
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/loader/boot.img.tar",
+      "size": 143360,
+      "sha256": "c09de64146fe3bf0ee51a1e48fcebdb75e6765529e7dc3052b47a570868a3ed3"
+    }
+  ],
+  "prepared_source_sha256": {
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/loader.c": "5231f80f630b04d7faab51cb7b8feddeeadb9cb07514b806d6d2e5c962455c6f",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/fdt.c": "cce31dc1e49434c0b392120dbb190ce40928791a1a156fb15a3443844b56ff1a",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/fdt.h": "c754f08a04d76968567e6c2ee2d1d91130e6abed6ba8429979b5cb9b04eb78dc",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/ui.h": "3cd9082c78cd654aa916c6ddcc2688568d46089cdcc27991f24ce0fc03c1e9bc",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/adt_patch.h": "8c9bd6fc32e58b134a2f62567cac3c3e7d2c0254846c331813103529992f0ecf",
+    "artifacts/e1s-build/str003-memory-20261106-001/source/shim/e1s-xnu/gic.h": "386eaa0208d331f074fba1b6538b3fc26d47ec50fe71afc65daa5b0131f390a7"
+  },
+  "source_provenance": {
+    "id": "s24-port",
+    "origin": "https://github.com/RNDMBG/iOS-On-S24",
+    "revision": "c8860decc62c6d6180e609036d027a2997972420",
+    "clean": true,
+    "review_file_sha256": {
+      "README.md": "dd023897cbfc0f6b1690fd8a510a491e9ad6b4d5e669a8ac08db3e6a90fa2272",
+      "E1S_PROGRESS.md": "be7bc81ac98fc6892d14cc9274abe7e0cacb59371b17c087ca4219ce945e2797",
+      "xnu/hackios/README.md": "454b04e943d7fb829c06e9017019f8813492a876bbaf477c8b67488e13eafee8",
+      "docs/e1s-hardware-map.md": "b8d4d3e8870099de7e1dbf77516d7acd1ed9ded67e1e3dc6881fec1005a4e6d8",
+      "docs/e1s-userland.md": "f82c3a6216e13edaf70e40ec6d41da284bad1a614a6bb01fceecd5f2a992f3d5",
+      "docs/e1s-hackios-port-map.md": "15a49b9ad7c318645e0763f9467bb872499a51a5c33d644a1f04b72ef00349fd",
+      "shim/e1s-xnu/loader.c": "0786d63bfaa81ec93a3632fdfccc23997c36eb846855b411d091ec6adfe37c50",
+      "xnu/e1s/patches/0003-e1s-touch.patch": "e62c65a1eb6e69899fb1cfec6ccf53df52427d0d51bfe148cdd015f40175cf1e",
+      "xnu/e1s/patches/0010-e1s-display.patch": "8aed03f1544d1b4920dfe702c93b96de603ca2ab555a85c550bec4b2698af033",
+      "xnu/e1s/patches/0002-e1s-input.patch": "96c63c4728cc440b50e062fd77f68ff73aa923d8142805f8ca87aa069b8d3236",
+      "xnu/hackios/LICENSE": "ce93889b3df4f6d0319aa1cc75b194dd633145fb0e20b581aa3dc2c37d8f79f5",
+      "xnu/hackios/files/iokit/Kernel/MiniIOMobileFramebuffer.cpp": "78141b3294b6c16b9173d5a7af64dc0b8a16f57d8027c93be608ef9dbbf764e9",
+      "xnu/hackios/files/iokit/Kernel/MiniIOSurface.cpp": "88a59bb62df6d11a084b957154f6222747710f903b7475644074677c8347e3f7",
+      "xnu/hackios/files/iokit/Kernel/MiniIOSurface.h": "48f962c8ce00188d79f5dc2ef8cb67891d532e4c163d59f19877f09d0fe1af83",
+      "xnu/hackios/files/bsd/sys/redwood_input.h": "5b00cd093e1b806c300d17f3d2bd0f4fbd41cb266cdf992756d88c5087ab7b02",
+      "xnu/hackios/files/bsd/dev/redwood_input.c": "c2d9f98a906fb43e2d6cd1639d258379fc356c35e3c8556bcd013e9f12f0ddc9",
+      "xnu/hackios/files/osfmk/arm64/gic_v3_irq.c": "efc5fb6dd1366db577c993d16956c0f3004819b66b25599d5cb462a47268c731",
+      "shim/e1s-xnu/fdt.c": "ec072f30579711801a6a302aa76332bf658e31896e3d87fa8a16d0533f97b945",
+      "tools/e1s/test_e1s_touch.py": "b4533bc5a789ee81cbb011b8823764a570afa5e341cf63ce48dff1eb6a0101c7"
+    },
+    "submodules_fetched": false,
+    "local_device_verified": false
+  },
+  "source_patch": {
+    "path": "patches/e1s-boot/0001-loader-memory-validation.patch",
+    "source_task": "STR-002",
+    "source_commit": "6a1c05d4119acd5146d56d7fc9070742584140cd",
+    "expected_sha256": "23b31c44ed9dba9c2da2e5b56ccbe97cd67fa41efff3ec032130eabca6718ae1",
+    "applied": true,
+    "sha256": "23b31c44ed9dba9c2da2e5b56ccbe97cd67fa41efff3ec032130eabca6718ae1",
+    "snapshot": "artifacts/e1s-build/str003-memory-20261106-001/loader-memory-validation.patch",
+    "applied_to": "artifacts/e1s-build/str003-memory-20261106-001/source"
+  },
+  "tool_pins": {
+    "python": {
+      "path": "/usr/bin/python3",
+      "resolved_path": "/usr/bin/python3.14",
+      "sha256": "e5c6e9f7342cc22734b05ea3c34dd4a1543c7079b086f21b400595bc3583fd0c",
+      "size_bytes": 11544
+    },
+    "zig": {
+      "path": "/usr/bin/zig",
+      "resolved_path": "/usr/bin/zig",
+      "sha256": "0ae5631224291a4cb5867e694f687bcd3b1de5820eedf155d10b893a16dee92b",
+      "size_bytes": 25979280
+    },
+    "git": {
+      "path": "/usr/bin/git",
+      "resolved_path": "/usr/bin/git",
+      "sha256": "300ab75cd7f1f6ccdef3f85e1425675647f62fdb25867438c1b5033a1713955f",
+      "size_bytes": 4843256
+    }
+  },
+  "source_verifier_pins": {
+    "source_verifier": {
+      "path": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-003-e1s-builder-20261106/tools/sources.py",
+      "resolved_path": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-003-e1s-builder-20261106/tools/sources.py",
+      "sha256": "9dac5d579ff4b997ec09707b4f1e5eb117fb30a9ba10b2e561f0ae5232128712",
+      "size_bytes": 4827
+    },
+    "main_source_verifier": {
+      "path": "/home/egor/dev/pet/s24-ios-exynos/tools/sources.py",
+      "resolved_path": "/home/egor/dev/pet/s24-ios-exynos/tools/sources.py",
+      "sha256": "9dac5d579ff4b997ec09707b4f1e5eb117fb30a9ba10b2e561f0ae5232128712",
+      "size_bytes": 4827
+    }
+  },
+  "target_compile_command_indices": [
+    3,
+    4,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+  ],
+  "resource_budget": {
+    "max_aggregate_rss_bytes": 2147483648,
+    "max_serial_builder_processes": 1,
+    "whole_command_deadline_seconds": 600,
+    "existing_builder_per_child_timeout_seconds": 120,
+    "execution_requires_separate_root_admission": true,
+    "actual_lease": null,
+    "qemu_allowed": false
+  },
+  "resource_observations": {
+    "elapsed_seconds": 2.111055401037447,
+    "peak_owned_tree_rss_bytes": 111210496,
+    "controller_status": {
+      "VmHWM_bytes": 29999104,
+      "VmRSS_bytes": 26877952
+    }
+  },
+  "owned_after": [],
+  "compiler_executed_by_root": true,
+  "builder_rerun_by_author": false,
+  "hardware_execution": false,
+  "xnu_kernel_built": false,
+  "apple_userland": false,
+  "limitations": [
+    "Fullfreestandingprobe+E1Shandoffloader build only; no measured safe RAM window or physical boot/runtime proof.",
+    "Missing/changed/nonapplicable patch refusal is source-reviewed, not separately executed here; no extra builder run was requested.",
+    "Source publication and currentcommon acceptance still pending; hold original-owner closure."
+  ]
+}
