@@ -21,6 +21,8 @@ import subprocess
 import struct
 import sys
 import time
+import sqlite3
+import tempfile
 
 HEADERS_SHA = '058451939894bd48ccc2ad1fe8b8d85c515f2176d21c8025daa034be8e98abe7'
 GRAPH_SHA = 'afc5cd206965de7e36a0aa17c4eb86a1f305689f386ccb22c55bd983567dd1dd'
@@ -1113,83 +1115,226 @@ def execute_tails_reserved(args, common, cancellation):
 LINK_PROFILE_PINS = {}
 
 
-def bounded_macho(path, image=False):
-    """Inspect actual object/image commands, sections and external symbols."""
-    path = Path(path)
-    length = path.stat().st_size
-    with path.open('rb') as stream:
-        header = stream.read(32)
-        if len(header) != 32:
-            raise ValueError('Truncated Mach-O header')
-        magic, cpu, subtype, kind, count, extent, flags, reserved = struct.unpack('<8I', header)
-        if (magic, cpu, kind) != (0xfeedfacf, 0x100000c, 2 if image else 1) or subtype != 0:
-            raise ValueError('Actual thin little-endian ARM64 MH_EXECUTE/MH_OBJECT required')
-        if extent > min(length-32, 16*1024**2) or count > extent//8:
-            raise ValueError('Invalid bounded load-command region')
-        cursor, segments, sections, symbols, symtab, entries = 32, [], [], {}, None, []
-        for unused in range(count):
-            stream.seek(cursor); cmd, size = struct.unpack('<II', stream.read(8))
-            if size < 8 or size % 8 or cursor+size > 32+extent:
-                raise ValueError('Invalid Mach-O load-command extent')
-            if cmd == 25:
-                if size < 72:
-                    raise ValueError('Truncated segment')
-                stream.seek(cursor); data = stream.read(72)
-                name = data[8:24].split(b'\0')[0].decode('ascii')
-                address, memory, offset, stored, maximum, initial, nsects, unused_flags = struct.unpack_from('<4Q4I', data, 24)
-                if (memory < stored or offset+stored > length or address+memory >= 2**64 or
-                    nsects > (size-72)//80 or initial & ~maximum):
-                    raise ValueError('Invalid segment file/memory/protection extent')
-                segments.append(dict(name=name, address=address, size=memory, offset=offset,
-                    stored=stored, maximum=maximum, initial=initial))
-                for number in range(nsects):
-                    at = cursor+72+number*80; stream.seek(at); sec = stream.read(80)
-                    secname, segname, secaddr, secsize, secoff, align, reloc, nr, attrs, r1, r2, r3 = struct.unpack('<16s16sQQ8I', sec)
-                    zero = attrs & 255 in [1, 12, 18]
-                    if (align > 63 or reloc+nr*8 > length or (not zero and secoff+secsize > length) or
-                        (image and (secaddr < address or secaddr+secsize > address+memory))):
-                        raise ValueError('Invalid section/relocation extent')
-                    sections.append(dict(name=secname.split(b'\0')[0].decode('ascii'),
-                        segment=segname.split(b'\0')[0].decode('ascii'), address=secaddr,
-                        size=secsize, offset=secoff, flags=attrs, segment_name_offset=at+16))
-            elif cmd == 2:
-                if size != 24 or symtab is not None:
-                    raise ValueError('Duplicate or invalid symbol command')
-                stream.seek(cursor+8); symtab = struct.unpack('<4I', stream.read(16))
-            elif cmd == 5:
-                # ARM_THREAD_STATE64 flavor6, count68; shim reads PC at state[32].
-                if size != 288:
-                    raise ValueError('Wrong bounded ARM64 UNIXTHREAD state size')
-                stream.seek(cursor+8); flavor, words = struct.unpack('<II', stream.read(8))
-                stream.seek(cursor+16+32*8); pc = struct.unpack('<Q', stream.read(8))[0]
-                if (flavor, words) != (6, 68) or not pc:
-                    raise ValueError('Wrong ARM64 thread state/zero PC')
-                entries.append(pc)
-            cursor += size
-        if cursor != 32+extent or symtab is None:
-            raise ValueError('Incomplete commands or missing actual symbol table')
-        symoff, nsyms, stroff, strsize = symtab
-        if (symoff+nsyms*16 > length or stroff+strsize > length or
-            nsyms > 2_000_000 or strsize > 64*1024**2):
-            raise ValueError('Invalid or oversized symbol/string extent')
-        stream.seek(stroff); strings = stream.read(strsize)
-        deadline = time.monotonic()+30
-        for number in range(nsyms):
-            if number % 4096 == 0 and time.monotonic() > deadline:
-                raise ValueError('Bounded symbol inspection deadline exceeded')
+class CoherentFile:
+    """One no-follow regular FD for parsing, hashing and final path identity."""
+    def __init__(self, path):
+        self.path = Path(path)
+        self.resources = []
+        fd = os.open(self.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC)
+        try:
+            self.before = os.fstat(fd)
+            if not stat.S_ISREG(self.before.st_mode):
+                raise ValueError('Regular inspection file required')
+            self.stream = os.fdopen(fd, 'rb')
+        except BaseException:
+            os.close(fd)
+            raise
+        self.length = self.before.st_size
+        try:self.check()
+        except BaseException:
+            self.stream.close()
+            raise
+
+    @staticmethod
+    def identity(value):
+        return tuple(getattr(value, name) for name in
+                     ('st_dev', 'st_ino', 'st_mode', 'st_size', 'st_mtime_ns', 'st_ctime_ns'))
+
+    def check(self):
+        expected = self.identity(self.before)
+        if (self.identity(os.fstat(self.stream.fileno())) != expected or
+            self.identity(self.path.lstat()) != expected):
+            raise ValueError('Inspection FD/path bytes or identity changed')
+
+    def digest(self):
+        self.check()
+        self.stream.seek(0)
+        digest, remaining = hashlib.sha256(), self.length
+        while remaining:
+            block = self.stream.read(min(1024**2, remaining))
+            if not block:raise ValueError('Inspection file shrank while hashing')
+            digest.update(block); remaining -= len(block)
+        if self.stream.read(1):raise ValueError('Inspection file grew while hashing')
+        self.check()
+        return digest.hexdigest()
+
+    def own(self, resource):
+        self.resources.append(resource)
+        return resource
+
+    def iter_range(self, offset, size, chunk=1024**2):
+        if (type(offset) is not int or type(size) is not int or type(chunk) is not int or
+            offset < 0 or size < 0 or offset+size > self.length or not 0 < chunk <= 1024**2):
+            raise ValueError('Inspection range exceeds retained FD or chunk budget')
+        self.check()
+        position = offset
+        while position < offset+size:
+            self.stream.seek(position)
+            block = self.stream.read(min(chunk,offset+size-position))
+            if not block:raise ValueError('Inspection range truncated')
+            position += len(block)
+            yield block
+        self.check()
+
+    def read_range(self, offset, size):
+        if type(size) is not int or size > 1024**2:raise ValueError('Use integer streamed ranges above1MiB')
+        return b''.join(self.iter_range(offset,size))
+
+    def __enter__(self):return self
+
+    def __exit__(self, typ, value, traceback):
+        try:
+            if typ is None:self.check()
+        finally:
+            try:
+                for resource in reversed(self.resources):resource.close()
+            finally:self.stream.close()
+
+
+class SymbolIndex:
+    """Disk-backed exact symbol mapping; fixed SQLite page cache, streaming cursors."""
+    def __init__(self):
+        self.temporary = tempfile.TemporaryDirectory(prefix='vm022-symbols-')
+        self.db = sqlite3.connect(str(Path(self.temporary.name)/'symbols.db'))
+        self.db.execute('PRAGMA cache_size=-2048')
+        self.db.execute('PRAGMA temp_store=FILE')
+        self.db.execute('PRAGMA journal_mode=OFF')
+        self.db.execute('PRAGMA synchronous=OFF')
+        self.db.execute('CREATE TABLE symbols(name TEXT PRIMARY KEY, type INTEGER, section INTEGER, value BLOB, undefined INTEGER) WITHOUT ROWID')
+        self.count = 0
+
+    @staticmethod
+    def record(row):
+        return dict(type=row[0], section=row[1], value=struct.unpack('<Q',row[2])[0], undefined=bool(row[3]))
+
+    def add(self, name, typ, section, value):
+        fields = (typ,section,struct.pack('<Q',value),int((typ & 0x0e) == 0 and value == 0))
+        cursor = self.db.execute('INSERT OR IGNORE INTO symbols VALUES(?,?,?,?,?)',(name,*fields))
+        if cursor.rowcount:self.count += 1
+        elif self[name] != self.record(fields):raise ValueError('Conflicting external symbol definitions')
+
+    def finish(self):self.db.commit()
+    def __len__(self):return self.count
+    def get(self,name,default=None):
+        row = self.db.execute('SELECT type,section,value,undefined FROM symbols WHERE name=?',(name,)).fetchone()
+        return default if row is None else self.record(row)
+    def __getitem__(self,name):
+        value = self.get(name)
+        if value is None:raise KeyError(name)
+        return value
+    def __contains__(self,name):return self.get(name) is not None
+    def items(self):
+        for name,typ,section,value,undefined in self.db.execute('SELECT name,type,section,value,undefined FROM symbols ORDER BY name'):
+            yield name,self.record((typ,section,value,undefined))
+    def values(self):
+        for row in self.db.execute('SELECT type,section,value,undefined FROM symbols'):
+            yield self.record(row)
+    def close(self):
+        if getattr(self,'db',None) is not None:
+            self.db.close();self.db = None
+            self.temporary.cleanup()
+    def __del__(self):self.close()
+
+
+def symbol_name(stream, start, size, offset, cache):
+    if offset >= size:raise ValueError('Symbol string index outside table')
+    parts = []
+    while offset < size:
+        page = offset//65536
+        if page not in cache:
+            if len(cache) == 4:cache.pop(next(iter(cache)))
+            stream.seek(start+page*65536)
+            cache[page] = stream.read(min(65536,size-page*65536))
+        block = cache[page][offset%65536:]
+        if not block:raise ValueError('Truncated symbol string table')
+        end = block.find(b'\0')
+        if end >= 0:
+            parts.append(block[:end]);return b''.join(parts).decode('utf-8')
+        parts.append(block);offset += len(block)
+    raise ValueError('Unterminated actual external symbol')
+
+
+def parse_macho_snapshot(snapshot, image=False):
+    """Borrow the retained regular FD; caller owns this view and compact index."""
+    stream, length = snapshot.stream, snapshot.length
+    stream.seek(0)
+    header = stream.read(32)
+    if len(header) != 32:
+        raise ValueError('Truncated Mach-O header')
+    magic, cpu, subtype, kind, count, extent, flags, reserved = struct.unpack('<8I', header)
+    if (magic, cpu, kind) != (0xfeedfacf, 0x100000c, 2 if image else 1) or subtype != 0:
+        raise ValueError('Actual thin little-endian ARM64 MH_EXECUTE/MH_OBJECT required')
+    if extent > min(length-32, 16*1024**2) or count > extent//8:
+        raise ValueError('Invalid bounded load-command region')
+    cursor, segments, sections, symbols, symtab, entries = 32, [], [], snapshot.own(SymbolIndex()), None, []
+    for unused in range(count):
+        stream.seek(cursor); cmd, size = struct.unpack('<II', stream.read(8))
+        if size < 8 or size % 8 or cursor+size > 32+extent:
+            raise ValueError('Invalid Mach-O load-command extent')
+        if cmd == 25:
+            if size < 72:
+                raise ValueError('Truncated segment')
+            stream.seek(cursor); data = stream.read(72)
+            name = data[8:24].split(b'\0')[0].decode('ascii')
+            address, memory, offset, stored, maximum, initial, nsects, unused_flags = struct.unpack_from('<4Q4I', data, 24)
+            if (memory < stored or offset+stored > length or address+memory >= 2**64 or
+                size != 72+nsects*80 or initial & ~maximum):
+                raise ValueError('Invalid segment file/memory/protection extent')
+            segments.append(dict(name=name, address=address, size=memory, offset=offset,
+                stored=stored, maximum=maximum, initial=initial))
+            for number in range(nsects):
+                at = cursor+72+number*80; stream.seek(at); sec = stream.read(80)
+                secname, segname, secaddr, secsize, secoff, align, reloc, nr, attrs, r1, r2, r3 = struct.unpack('<16s16sQQ8I', sec)
+                zero = attrs & 255 in [1, 12, 18]
+                if (align > 63 or reloc+nr*8 > length or (not zero and secoff+secsize > length) or
+                    (image and (secaddr < address or secaddr+secsize > address+memory))):
+                    raise ValueError('Invalid section/relocation extent')
+                section_segment = segname.split(b'\0')[0].decode('ascii')
+                if image and (section_segment != name or (not zero and
+                    (secoff < offset or secoff+secsize > offset+stored or
+                     secoff-offset != secaddr-address))):
+                    raise ValueError('Section parent or VM/file mapping differs from segment')
+                sections.append(dict(name=secname.split(b'\0')[0].decode('ascii'),
+                    segment=segname.split(b'\0')[0].decode('ascii'), address=secaddr,
+                    size=secsize, offset=secoff, align=align, flags=attrs, segment_name_offset=at+16,
+                    relocation_offset=reloc, relocation_count=nr, parent_segment=name))
+        elif cmd == 2:
+            if size != 24 or symtab is not None:
+                raise ValueError('Duplicate or invalid symbol command')
+            stream.seek(cursor+8); symtab = struct.unpack('<4I', stream.read(16))
+        elif cmd == 5:
+            # ARM_THREAD_STATE64 flavor6, count68; shim reads PC at state[32].
+            if size != 288:
+                raise ValueError('Wrong bounded ARM64 UNIXTHREAD state size')
+            stream.seek(cursor+8); flavor, words = struct.unpack('<II', stream.read(8))
+            stream.seek(cursor+16+32*8); pc = struct.unpack('<Q', stream.read(8))[0]
+            if (flavor, words) != (6, 68) or not pc:
+                raise ValueError('Wrong ARM64 thread state/zero PC')
+            entries.append(pc)
+        cursor += size
+    if cursor != 32+extent or symtab is None:
+        raise ValueError('Incomplete commands or missing actual symbol table')
+    symoff, nsyms, stroff, strsize = symtab
+    if (symoff+nsyms*16 > length or stroff+strsize > length or
+        nsyms > 2_000_000 or strsize > 64*1024**2):
+        raise ValueError('Invalid or oversized symbol/string extent')
+    # Nlist records and names are streamed; no per-symbol Python dictionary.
+    # Cardinality controls inspection time, not validity or resident storage.
+    deadline = time.monotonic()+max(30, nsyms/10000)
+    strings, batch = {}, b''
+    for number in range(nsyms):
+        if number % 4096 == 0:
+            if time.monotonic() > deadline:raise ValueError('Symbol inspection resource deadline deferred')
             stream.seek(symoff+number*16)
-            name, typ, section, description, value = struct.unpack('<IBBHQ', stream.read(16))
-            if typ & 0xe0 or not typ & 1:
-                continue
-            end = strings.find(b'\0', name) if name < strsize else -1
-            if end < 0 or section > len(sections):
-                raise ValueError('Invalid actual external symbol')
-            name = strings[name:end].decode('utf-8')
-            symbol = dict(type=typ, section=section, value=value,
-                          undefined=(typ & 0x0e) == 0 and value == 0)
-            if name in symbols and symbols[name] != symbol:
-                raise ValueError('Conflicting external symbol definitions')
-            symbols[name] = symbol
+            batch = stream.read(min(4096,nsyms-number)*16)
+            if len(batch) != min(4096,nsyms-number)*16:raise ValueError('Truncated symbol records')
+        name, typ, section, description, value = struct.unpack_from('<IBBHQ',batch,(number%4096)*16)
+        if typ & 0xe0 or not typ & 1:continue
+        if section > len(sections):raise ValueError('Invalid actual external symbol section')
+        name = symbol_name(stream,stroff,strsize,name,strings)
+        symbols.add(name,typ,section,value)
+    symbols.finish()
+    digest = snapshot.digest()
     if image:
         active = sorted([s for s in segments if s['size']], key=lambda s: s['address'])
         if not active or active[0]['address'] < 0xfffffff007000000 or len(entries) != 1:
@@ -1203,21 +1348,58 @@ def bounded_macho(path, image=False):
             any(s['type'] & 0x0e == 0 for s in symbols.values())):
             raise ValueError('Entry symbol mismatch or unresolved final external imports')
         entry_section = sections[entry_symbol['section']-1]
-        if not entry_section['address'] <= entries[0] < entry_section['address']+entry_section['size']:
-            raise ValueError('Actual __start definition outside its section')
+        if (entry_section['flags'] & 255 in [1,12,18] or
+            not entry_section['address'] <= entries[0] < entry_section['address']+entry_section['size'] or
+            not any(segment['address'] <= entries[0] < segment['address']+segment['stored'] and
+                    segment['initial'] & 4 for segment in active)):
+            raise ValueError('Actual __start must be inside its file-backed loaded executable section')
         names = [segment['name'] for segment in segments]
         if len(names) != len(set(names)):raise ValueError('Duplicate image segment names')
-    return dict(file_size=length, sha256=sha(path), filetype=kind, segments=segments,
-                sections=sections, external_symbols=symbols, entry=entries[0] if len(entries) == 1 else None)
+    return dict(file_size=length, sha256=digest, filetype=kind, segments=segments,
+                sections=sections, external_symbols=symbols,
+                symbol_table=dict(offset=symoff,count=nsyms,strings_offset=stroff,strings_size=strsize),
+                entry=entries[0] if len(entries) == 1 else None)
+
+
+def macho_symbol(snapshot, view, number):
+    table = view['symbol_table']
+    if type(number) is not int or not 0 <= number < table['count']:
+        raise ValueError('Original nlist index outside retained symbol table')
+    name,typ,section,description,value = struct.unpack('<IBBHQ',snapshot.read_range(table['offset']+16*number,16))
+    if section > len(view['sections']):raise ValueError('Original nlist section outside retained image')
+    return dict(name=symbol_name(snapshot.stream,table['strings_offset'],table['strings_size'],name,{}),
+                type=typ,section=section,description=description,value=value)
+
+@contextmanager
+def macho_snapshot(path, image=False):
+    """Borrowed view lifetime includes both coherent input FD and symbol store."""
+    with CoherentFile(path) as snapshot:
+        view = parse_macho_snapshot(snapshot,image=image)
+        yield snapshot,view
+
+
+def bounded_macho(path, image=False, symbol_names=()):
+    """Return JSON primitives only; complete symbols are borrowed in a context."""
+    with macho_snapshot(path,image=image) as (snapshot,view):
+        selected = {}
+        for number,name in enumerate(symbol_names):
+            if number >= 16384:raise ValueError('Selected-symbol reporting exceeds bounded profile')
+            value = view['external_symbols'].get(name)
+            if value is not None:selected[name] = value
+        return {**view,'external_symbol_count':len(view['external_symbols']),
+                'external_symbols':selected}
+
+
+class ArchiveMembers(list):
+    pass
 
 
 def stream_archive(path):
     """Hash actual BSD archive members in ordinal order without reading the archive whole."""
-    result, toc = [], 0
-    length = Path(path).stat().st_size
-    if length > 2*1024**3:
-        raise ValueError('Archive exceeds bounded2GiB inspection profile')
-    with Path(path).open('rb') as stream:
+    result, toc = ArchiveMembers(), 0
+    with CoherentFile(path) as snapshot:
+        length,stream = snapshot.length,snapshot.stream
+        if length > 2*1024**3:raise ValueError('Archive exceeds bounded2GiB inspection profile')
         if stream.read(8) != b'!<arch>\n':
             raise ValueError('Actual BSD ar archive required')
         while stream.tell() < length:
@@ -1253,6 +1435,7 @@ def stream_archive(path):
                 raise ValueError('Invalid archive alignment padding')
         if stream.tell() != length or not result or toc != 1:
             raise ValueError('Invalid or empty actual archive')
+        result.sha256,result.file_size = snapshot.digest(),length
     return result
 
 
@@ -1267,21 +1450,24 @@ def verify_segment_processing(original, result, passes):
                 segment = new
         if segment != section['segment']:
             substitutions[section['segment_name_offset']] = segment.encode()[:16].ljust(16, b'\0')
-    if Path(original).stat().st_size != Path(result).stat().st_size:
-        raise ValueError('Segment processing changed object size')
-    with Path(original).open('rb') as left, Path(result).open('rb') as right:
+    with CoherentFile(original) as left_snapshot, CoherentFile(result) as right_snapshot:
+        if left_snapshot.length != right_snapshot.length:
+            raise ValueError('Segment processing changed object size')
+        left,right = left_snapshot.stream,right_snapshot.stream
         position = 0
-        while True:
-            block = bytearray(left.read(1024**2))
-            if not block:
-                break
+        while position < left_snapshot.length:
+            block = bytearray(left.read(min(1024**2,left_snapshot.length-position)))
+            if not block:raise ValueError('Original transform input shrank')
             for at, replacement in substitutions.items():
                 low, high = max(position, at), min(position+len(block), at+16)
-                if low < high:
-                    block[low-position:high-position] = replacement[low-at:high-at]
+                if low < high:block[low-position:high-position] = replacement[low-at:high-at]
             if block != right.read(len(block)):
                 raise ValueError('Non-source-defined transformed object bytes')
             position += len(block)
+        if left.read(1) or right.read(1):raise ValueError('Transform input/output grew beyond exact EOF')
+        if left_snapshot.digest() != view['sha256']:
+            raise ValueError('Transform source differs from parsed object')
+        right_snapshot.check()
     return sorted(substitutions)
 
 
@@ -1370,6 +1556,92 @@ def production_vectors(args, common):
         qemu_execution_implemented=False,runtime_qualified=False,private_apple_abi_qualified=False)
 
 
+# No generic relocation-aware allocator retention proof or measured runtime
+# link-map instrumentation has been accepted. A parser pass is intermediate.
+LINK_COMPLETION_PINS = {}
+
+
+def require_link_receipt(linked, common):
+    """Typed measured product gate, evaluated before any package root approval."""
+    if (not isinstance(linked,dict) or linked.get('schema') != 'avf-guest-link-result-v2' or
+        linked.get('phase') != 'guest-link-stage' or linked.get('kind') != 'host-test' or
+        linked.get('origin') != 'local-host' or linked.get('task') != 'VM-022' or
+        linked.get('owner') != OWNER or linked.get('outcome') != 'pass' or
+        linked.get('source_only') is not False or
+        linked.get('direct_link_command_started') is not True or
+        linked.get('archive_command_started') is not True or
+        linked.get('complete_link_product') is not True or
+        linked.get('resource_profile') != 'project-budget-v1' or
+        linked.get('guest_executed') is not False):
+        raise ValueError('Typed complete measured VM022 link/archive receipt required')
+    profile = linked.get('profile')
+    if (not isinstance(profile,dict) or
+        LINK_PROFILE_PINS.get(profile.get('manifest',{}).get('sha256')) != profile):
+        raise ValueError('Receipt lacks the exact accepted complete source profile')
+    completion = linked.get('completion')
+    if not isinstance(completion,dict) or LINK_COMPLETION_PINS.get(completion.get('sha256')) != completion:
+        raise ValueError('Relocation-aware allocator retention and selected runtime link-map closure are not accepted')
+    if (linked.get('executor_sha256') != sha(__file__) or
+        linked.get('common_executor_sha256') != RUNNER_SHA):
+        raise ValueError('Receipt does not bind this exact reviewed executor/policy')
+    commands = linked.get('commands')
+    if (not isinstance(commands,list) or not commands or
+        any(c.get('outcome') != 'pass' or c.get('exit_code') != 0 or
+            c.get('child_started') is not True or c.get('after',{}).get('owned_processes') != [] for c in commands)):
+        raise ValueError('Complete measured successful child runtime/cleanup required')
+    for name in ['image','archive']:
+        binding = linked.get(name)
+        if not isinstance(binding,dict) or not isinstance(binding.get('path'),str) or not re.fullmatch('[0-9a-f]{64}',binding.get('sha256','')):
+            raise ValueError('Exact measured image/archive byte bindings required')
+    return linked
+
+
+def producer_identity(raw, execution, record, row, profile, authority, common):
+    """Derive original literal authorization and keys from accepted source rules."""
+    ownership = raw.get('ownership_binding',{})
+    task = next((item for item in authority.get('tasks',[]) if item['id'] == ownership.get('task')),None)
+    if (not task or task.get('owner') != ownership.get('owner') or
+        raw.get('kind') != 'host-test' or raw.get('origin') != 'local-host' or
+        raw.get('source_only',False) is not False or raw.get('compiler_started') is not True or
+        raw.get('resource_profile') != 'project-budget-v1' or
+        raw.get('resource_qualification') != 'pass' or
+        ownership.get('mode') != 'execute' or ownership.get('source_only_tooling_exception') is not False or
+        ownership.get('literal_task_paths') != task.get('paths') or
+        ownership.get('requested_shard') != raw.get('shard')):
+        raise ValueError('Original actual compiler owner/task/literal reservations required')
+    authorization = common.task_shards(task,'execute',raw['shard'])
+    if ownership.get('authorized_shards') != authorization['authorized_shards']:
+        raise ValueError('Original task does not literally reserve this shard')
+    if execution.get('schema_version') != 1 or execution.get('shard') != raw['shard']:
+        raise ValueError('Original executable source plan identity required')
+    provenance = raw.get('provenance',{})
+    compiler = provenance.get('compiler',{})
+    if (execution.get('provenance') != provenance or compiler.get('sha256') != common.COMPILER or
+        provenance.get('compiler_sha256',common.COMPILER) != common.COMPILER or
+        compiler.get('path') != row['next_owned_compile_argv_template'][0] or
+        provenance.get('manifest_sha256') != profile['manifest']['sha256'] or
+        provenance.get('namespace_sha256') != profile['namespace_sha256']):
+        raise ValueError('Original raw/plan compiler and complete source provenance differ')
+    recipe = common.canonical(row['next_owned_compile_argv_template'])
+    if profile['manifest']['sha256'] == common.PIN:
+        expected = common.canonical(dict(provenance=provenance,id=row['id'],source=row['bound_source_sha256'],
+            configuration=row['configuration_sha256'],recipe=recipe))
+    elif profile['manifest']['sha256'] == common.FIREHOSE_MANIFEST:
+        rules = common.profile_rules(Path(compiler['path']).parents[3])
+        expected = rules.key(row,profile['manifest']['sha256'],profile['namespace_sha256'])['input_key']
+    else:
+        raise ValueError('Future046 key derivation needs separate exact source qualification')
+    selected = next((item for item in execution.get('selected',[]) if item['id'] == row['id']),None)
+    if (not selected or selected.get('input_key') != expected or record.get('input_key') != expected or
+        record.get('command',{}).get('child_started') is not True):
+        raise ValueError('Producer input key is not independently source-derived or compiler never started')
+    approval = raw.get('execution_approval',{})
+    if (approval.get('task') != task['id'] or approval.get('owner') != task['owner'] or
+        approval.get('shard') != raw['shard'] or approval.get('reviewed_executor_sha256') != raw.get('executor_sha256') or
+        approval.get('runner_reviewed') is not True or not approval.get('root_lease')):
+        raise ValueError('Original measured root grant/executor provenance required')
+
+
 def admission_inputs(request, plan, common):
     """Credit original measured capsules only; no guessed rows or cross-profile relabel."""
     if request.get('schema') != 'avf-guest-link-admission-v1':
@@ -1391,6 +1663,12 @@ def admission_inputs(request, plan, common):
         if acceptance['accepted_evidence'].get(binding['path']) != binding['sha256']:
             raise ValueError('Unaccepted original producer evidence')
         return bound(binding)
+    if not isinstance(request.get('producer_authority'),dict):
+        raise ValueError('Accepted immutable original-owner ledger authority required')
+    authority_capsule = accepted(request['producer_authority'])
+    if authority_capsule.get('schema') != 'avf-guest-producer-authority-v1':
+        raise ValueError('Typed original-owner authority capsule required')
+    authority = accepted(authority_capsule['ledger'])
     rows = bound(profile['manifest'])
     common.validate_graph(rows)
     graph = {row['id']:row for row in rows}
@@ -1407,6 +1685,7 @@ def admission_inputs(request, plan, common):
         if identifier not in graph or identifier in objects:
             raise ValueError('Foreign or duplicate object admission')
         raw = accepted(item['raw_evidence']); record = bound(item['record']); execution = bound(item['execution_plan'])
+        producer_identity(raw,execution,record,graph[identifier],profile,authority,common)
         ownership = raw['ownership_binding']
         if (ownership['mode'] != 'execute' or ownership['source_only_tooling_exception'] or
             raw['shard'] not in ownership['authorized_shards'] or
@@ -1470,7 +1749,7 @@ def admission_inputs(request, plan, common):
         if capsule['outcome'] != 'pass':
             raise ValueError('Missing actual accepted component archive')
         archive = capsule['archive']; actual = stream_archive(archive['path'])
-        if ([row['name'] for row in actual] != expected_names or cache.get(archive['path']) != archive['sha256'] or
+        if ([row['name'] for row in actual] != expected_names or actual.sha256 != archive['sha256'] or
             [(row['name'],row['sha256']) for row in actual] != [(row['name'],row['sha256']) for row in archive['members']]):
             raise ValueError('Actual provider archive member bytes/order mismatch')
         by_name = {Path(path).name:(path,row) for path,row in capsule['objects'].items()}
@@ -1489,7 +1768,7 @@ def admission_inputs(request, plan, common):
     if cache.get(runtime['archive']['path']) != runtime['archive']['sha256']:
         raise ValueError('Changed runtime archive')
     members = bound(runtime['members']); actual = stream_archive(runtime['archive']['path'])
-    if len(actual) != 287 or [(r['name'],r['sha256']) for r in actual] != [(r['name'],r['sha256']) for r in members]:
+    if actual.sha256 != runtime['archive']['sha256'] or len(actual) != 287 or [(r['name'],r['sha256']) for r in actual] != [(r['name'],r['sha256']) for r in members]:
         raise ValueError('Runtime member lineage mismatch')
     if str(Path(runtime['archive']['path']).parents[2]) != plan['runtime_root']:
         raise ValueError('Runtime archive outside qualified link-only driver resource root')
@@ -1533,7 +1812,10 @@ def execute_link_stage_reserved(args, common, cancellation):
     if approval['source_plan_sha256'] != args.source_plan_sha256:
         raise ValueError('Root grant must bind the exact separate link-stage plan')
     budget = common.project_approval(args,approval,executor_path=Path(__file__))
-    report = dict(kind='host-test',outcome='fail',task=args.task,owner=args.owner,experiment=args.experiment,
+    report = dict(schema='avf-guest-link-result-v2',phase='guest-link-stage',kind='host-test',origin='local-host',
+        outcome='fail',source_only=False,complete_link_product=False,resource_profile='project-budget-v1',
+        common_executor_sha256=RUNNER_SHA,profile=request['profile'],
+        task=args.task,owner=args.owner,experiment=args.experiment,
         source_plan_sha256=args.source_plan_sha256,executor_sha256=sha(__file__),commands=[],
         compiler_frontend_requested=False,direct_link_command_started=False,archive_command_started=False,guest_executed=False,
         private_apple_abi_qualified=False,initial_process=proc_status())
@@ -1605,7 +1887,9 @@ def execute_link_stage_reserved(args, common, cancellation):
         if '-resource-dir' not in plan['link_argv'] or any('-undefined' in token or '-exported_symbols_list' in token for token in plan['link_argv']):
             raise ValueError('Invalid genuine DEVELOPMENT direct-link flags')
         run(plan['link_argv'],'direct-image',stage,180)
-        image = bounded_macho(plan['image'],image=True)
+        alias_pairs = [line.split() for line in (stage/'all-alias.exp').read_text().splitlines() if line.strip()]
+        export_candidates = [line.strip() for line in (stage/'all-kpi.exp').read_text().splitlines() if line.strip()]
+        image = bounded_macho(plan['image'],image=True,symbol_names=[*export_candidates,*(name for pair in alias_pairs for name in pair)])
         source_order = next(token.split(',',2)[2].split(':') for token in plan['link_argv'] if token.startswith('-Wl,-segment_order,'))
         actual_order = [segment['name'] for segment in sorted(image['segments'],key=lambda row:row['address'])
                         if segment['size'] and segment['name'] in source_order]
@@ -1634,7 +1918,9 @@ def execute_link_stage_reserved(args, common, cancellation):
             symbols = image['external_symbols']
             if source not in symbols or alias not in symbols or symbols[source]['value'] != symbols[alias]['value']:
                 raise ValueError('Actual final image alias definition mismatch: '+alias)
-        dump(args.out/'image-inspection.json',image)
+        dump(args.out/'image-inspection.json',{**image,'external_symbols':
+            dict(count=image['external_symbol_count'],storage='closed-bounded-disk-index',
+                 bytes_bound_by_image_sha256=image['sha256'])})
         candidates = [line.strip() for line in (stage/'all-kpi.exp').read_text().splitlines() if line.strip()]
         report['DEVELOPMENT_export_candidates_absent'] = [name for name in candidates if name not in image['external_symbols']]
         report['DEVELOPMENT_export_list_forced'] = False
@@ -1649,9 +1935,11 @@ def execute_link_stage_reserved(args, common, cancellation):
             if measured['cache'].get(binding['path']) != binding['sha256']:
                 raise ValueError('Original immutable producer object changed')
         validate_tools()
-        report.update(outcome='pass',image=dict(path=plan['image'],sha256=image['sha256']),
-            archive=dict(path=plan['archive'],sha256=sha(plan['archive']),members=1083),
-            actual_selected_archive_member_imports_unmeasured=True,runtime_qualified=False)
+        report.update(outcome='incomplete',image=dict(path=plan['image'],sha256=image['sha256']),
+            archive=dict(path=plan['archive'],sha256=members.sha256,members=1083),
+            allocator_retention_qualified=False,actual_selected_archive_member_imports_unmeasured=True,
+            completion_gate='Closed: genuine relocation-aware allocator retention and source-qualified selected runtime link-map/member/import measurements required',
+            runtime_qualified=False)
     except Exception as error:
         if isinstance(error,OwnedCancellation) and getattr(error,'command',None) is not None:
             report['commands'].append(error.command)
@@ -1690,8 +1978,7 @@ def xnup_vectors(args, common):
         request = common.load_project(args.admission,args.admission_sha256)
         admission = dict(path=str(args.admission.resolve()),sha256=args.admission_sha256)
         if request['schema'] != 'avf-guest-xnup-admission-v1':raise ValueError('Explicit package admission required')
-        linked = common.load_project(request['link_evidence']['path'],request['link_evidence']['sha256'])
-        if linked['outcome'] != 'pass':raise ValueError('Missing actual successful genuine direct-link/archive phase')
+        linked = require_link_receipt(common.load_project(request['link_evidence']['path'],request['link_evidence']['sha256']),common)
         image = linked['image']
     return dict(schema='avf-guest-xnup-production-v1',resource_profile='project-budget-v1',
         task='VM-022',owner=OWNER,executor_sha256=sha(__file__),common_executor_sha256=RUNNER_SHA,
@@ -1706,9 +1993,9 @@ def xnup_vectors(args, common):
 
 def inspect_xnup(path, kernel, cmdline=b'-v avf_exit=1\0'):
     """Stream actual XNUP entries, compare kernel bytes and source exact padding."""
-    length = Path(path).stat().st_size
     result, terminated = [], False
-    with Path(path).open('rb') as stream:
+    with CoherentFile(path) as snapshot:
+        length, stream = snapshot.length, snapshot.stream
         header = stream.read(8)
         if len(header) != 8 or struct.unpack('<II',header) != (0x50554e58,length-8):
             raise ValueError('Invalid actual XNUP header/length')
@@ -1737,7 +2024,8 @@ def inspect_xnup(path, kernel, cmdline=b'-v avf_exit=1\0'):
             if stream.read(-size%16) != bytes(-size%16):raise ValueError('Nonzero XNUP padding')
             result.append(name)
         if not terminated or result != ['kernel','cmdline']:raise ValueError('Missing ordered console entries/terminator')
-    return dict(sha256=sha(path),file_size=length,entries=result,ramdisk_present=False,PID1_qualified=False)
+        digest = snapshot.digest()
+    return dict(sha256=digest,file_size=length,entries=result,ramdisk_present=False,PID1_qualified=False)
 
 
 def execute_xnup(args, common):
@@ -1757,6 +2045,8 @@ def execute_xnup_reserved(args, common, cancellation):
     if (accepted.get('schema') != 'avf-guest-link-acceptance-v1' or accepted.get('outcome') != 'pass' or
         accepted['accepted_evidence'].get(request['link_evidence']['path']) != request['link_evidence']['sha256']):
         raise ValueError('Independent actual link acceptance is required before packaging')
+    linked = require_link_receipt(common.load_project(request['link_evidence']['path'],request['link_evidence']['sha256']),common)
+    if linked['image'] != plan['image']:raise ValueError('Package plan/image differs from typed link receipt')
     approval = common.load_project(args.approval,args.approval_sha256)
     if approval['source_plan_sha256'] != args.source_plan_sha256:raise ValueError('Wrong separate package root grant')
     budget = common.project_approval(args,approval,executor_path=Path(__file__))
