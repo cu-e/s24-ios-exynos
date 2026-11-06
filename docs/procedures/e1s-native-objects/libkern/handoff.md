@@ -59,3 +59,51 @@ allocation/caller-plan-manifest identity/out approval and outer watchdog. Use
 same frozen caller; no fork/flag override/replan/oldobject credit. Independent
 actual MD/object/resource review and root integration/common precede original
 owner closure. This source plan grants no target tool or runtime/ABI claim.
+
+
+## Root-dispatched wave86 actual result: FAIL at genuine Firehose header
+
+Root alone dispatched STR028BUILD-001 once under native-wave86 allocation
+c37d888fb1394c1b2f69a2d69ed10e2be4607ea555c074d33a40404acf00bff0,
+approvalf2b5c32a962f9d02ff83c23c637f60bc1f966ec4ae00c8ac49024f7ba0212d8d.
+Exact caller2676/sourceplan0e41/manifest1a906 stayed frozen. Root timeout wrapper
+PID1128723/start62195480, callerPID1128724/start62195480; root start
+2026-11-06T14:07:21.724736+00:00. SR28 did not duplicate execution.
+
+The actual caller failed after94.276114260s. First12 objects retain PASS object,
+actualMD/input and resource dimensions, including OSData genuine192B __kalloc_type.
+Row12 libkern/OSKext.cpo compilerexit1, resourcePASS, no object produced/no MD
+qualification: STR014 libkern/c++/OSKext.cpp:38:10 missing
+`os/firehose_buffer_private.h`. All64 subsequent original rows were unattempted.
+This is a source-input blocker, not a budget stop; no stub, fake header, include
+fallback, source/flag/helper edit, fix, retry or resume was made. Root received
+the first diagnostic promptly. The whole77 slice is not PASS.
+
+Raw build-001/evidence.json SHA
+ de716ff3990f58e2834c882525050c6870fe4448310195c4c4e5d22aa8f955c8;
+compile-12.stderr.txt SHA
+d058dd948ca85d18bc5552dce5ff82b9142a8af9b0f9c1b40a067c93dcd6b501.
+Conventional actual evidence.json SHA
+bbac74c989d77e97a31431e42bae6072b1b914947abbf23dfef1aebd1270236a
+has existing raw/object/MD/authority artifact paths and preserves the failed
+outcome for original-owner registration. Root observed whole-process exit is
+kept separate pending its watchdog receipt; actual failing compilerexit1 is
+recorded directly. Do not derive a native SDK/runtime success from partials.
+
+Read-only audit-001/evidence.json SHA
+4c69c4d804c1878ae3c0a91c9a04bfad5f283abeaadc347d7c67081dcec942e5
+checks12 physical MachO/MD closures393unique imports, current6566indexedinputs,
+namespace/absence/runtime lookup,14privateprojectionfiles and actual trusted
+loader mapping, using unchanged accepted2676/9929 APIs without target tools.
+Owner verification PASS does not change actual wholeFAIL or stand in for a
+separate actor's review. Audit2.001s/currentVmHWM44228KiB/256MiBAS/120s bound.
+All14 observed loader/compiler commands resourcequalified. Caller HWM81870848B,
+maxaggregate147177472B, observedproject922734592B. Terminal14sessions have no
+owned survivors; own reservationCOMPLETE, exact currentpid/start matches0,
+release_errorabsent. Global wave/queue remains root-owned, never released bySR28.
+
+Next root reviews this actual dependency finding before any new source/input
+fix or fresh experiment/plan/allocation. Preserve original77 graph/profile and
+all partial native outputs/MD/stderr. Original SR28 records actual failed
+STR028BUILD-001 exactly once, updates progress and waits. No target/compiler/
+loader/Make/CLI repeat, helper edit, common/publication/taskclose/link/QEMU.
