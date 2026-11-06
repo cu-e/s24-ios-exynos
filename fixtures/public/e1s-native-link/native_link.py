@@ -241,6 +241,7 @@ def make_plan(request_binding):
         b = binding(selected[identifier]['object']); copies.append(dict(id=identifier,source=b,destination=str(out/'objects'/identifier)))
     for tail in contract['tail_order']:
         b = read(tail['object']); inputs[b['path']] = b['sha256']; copies.append(dict(id='tail/'+tail['name'],source=b,destination=str(cwd/tail['name'])))
+        b = read(tail['depfile']); inputs[b['path']] = b['sha256']
     metadata = read(policy['metadata'],True)
     require(len(metadata['metadata']) == 22 and metadata['outcome'] == 'pass', 'Genuine22 metadata products required')
     inputs[policy['metadata']['path']] = policy['metadata']['sha256']
@@ -300,6 +301,7 @@ def execute(plan,source_plan,source_sha,approval_binding):
     with core.owned_cancellation() as cancel:
         def checkpoint():
             cancel.check()
+            require(not Path('/etc/ld.so.preload').exists() or not Path('/etc/ld.so.preload').read_text().strip(), 'Unqualified loader preload')
             remaining = plan['whole_seconds']-(time.monotonic()-started)
             require(remaining > 0, 'Whole native link deadline exceeded')
             snapshot = budget.sample(lock_timeout=min(.5,remaining))
@@ -395,7 +397,6 @@ def execute(plan,source_plan,source_sha,approval_binding):
             hashes(plan['inputs']); inventory()
             for name,runtime in plan['runtime']['programs'].items():
                 require(api('native').runtime_lookup(runtime,plan['cwd']) == plan['runtime_lookup'][name], 'Pre-link ELF lookup shadow changed')
-            require(not Path('/etc/ld.so.preload').exists() or not Path('/etc/ld.so.preload').read_text().strip(), 'Unqualified loader preload')
             report['staged_input_sha256'] = dict(staged)
             report['link_executed'] = True
             command('native-driver-link',plan['driver'])

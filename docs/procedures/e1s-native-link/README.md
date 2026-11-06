@@ -75,3 +75,14 @@ process/result/log/sampling files remain in the original worktree
 actual target-tool or complete-plan output was produced. No repeated common test
 or source batch is authorized or needed for this freeze. Independent source
 review/root publication is pending; original SR36 retains ownership.
+
+## Additive input correction
+
+The original29686/ad9e physical worktree and source001 remain unchanged. A
+separate fix1 worktree adds the four actual tail MD files to the future execution
+plan hashes and moves the existing host-preload rejection into the universal
+checkpoint, before the first loader observation and every later child. Source
+admission functions exercised by the20 original controls remain byte-for-byte
+unchanged except the unexecuted complete-plan tail-input extension. This is a
+source correction; no repeated batch or target observation qualifies its future
+execution lifecycle. Independent review must bind both source identities.
