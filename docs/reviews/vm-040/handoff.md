@@ -131,7 +131,9 @@ image-bound paused/cont stop protocol. It rehashes ordered1080 sources, producer
 objects, raw compile receipts/dependencies and link inputs. This is a future
 complete-image admission route, not an available qualified image. Full admitted
 prepare/execute remains unmeasured. Source checks cannot replace independent
-complete link closure/transform/SDK/private-ABI/image review.
+complete link closure/transform/image review, and establish no SDK/private-ABI
+or native compatibility. Missing guest inputs must follow actual link evidence;
+this review does not assert that every open-source AVF route requires an SDK.
 
 The final proposed append string is not the whole kernel command line: the
 shim defaults/XNUP/FDT arguments must reconstruct the exact complete vector,
