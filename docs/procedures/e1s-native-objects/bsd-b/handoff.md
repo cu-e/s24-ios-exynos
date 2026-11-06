@@ -106,3 +106,21 @@ originalpartition166/remaining161. No003 compile or loader invoked.
 experiment and absentbuild002 are preserved, never claimed as actualrun.001
 five qualified products retain original2676 provenance without relabeling.
 003 is preregisteredPLANNED; wait separate root exactProjectBudget grant.
+
+
+Root106 ACTUAL STR025BUILD-003 TERMINAL FAIL: root hostmemory/PSI guard sent
+TERM, controller records OwnedCancellation signals[15]. Seven new objects
+restricted_in_port through pktsched_fq_codel have actual ARM64object/MD/resource
+PASS. Eighth pktsched_netem started then exit-15/resourceinconclusive, no
+qualified objectrow;157 laterIDs unattempted. No compilerdiagnosticerror.
+Raw003 SHA8c9fc5cd7ecc7c103dfb9fb4ac69f82a1d4a537398b4809b9f0c716800fbe5b6. Rootreceipt fa954181 confirms timeoutexit1,
+allcomplete/released/zero survivors; controller1391078/timeout1391074 retired.
+Successful child observations remain valid; cancelledchild RSS unobserved (raw0
+not claimed as measured). Header14be was actually copied unchanged in003cwd.
+Source/caller/context/flags not modified; no worker queue action or retry.
+partial-build-003.json binds7newproducts with complete raw MD provenance.
+qualified-prefix-012.json combines original001five plus003seven in original
+order, preserving different caller/sourceplan identities,12of170ONLY.002 stays
+PLANNED/unexecuted/absent. OriginalSR25 records003 FAIL exactlyonce. Root now
+authorizes SOURCEONLY004 for remaining158 originalpartition[12:170], starting
+pktsched_netem, same007077/header/context/flags; no actualtargetuntilfreshgrant.
