@@ -8,6 +8,14 @@ signals are recorded without interrupting that cleanup. Existing timer authority
 is refused. Prior handlers are restored on exit. No subprocess, process broker,
 GPU provider or Apple type is implemented in either file.
 
+The signal-restoration correction blocks ALRM, TERM and INT through timer and
+handler restoration, then restores the exact prior mask last. Pending signals
+reach the caller's restored handlers; a caller-blocked pending signal stays
+blocked. The b20a7697 source freeze and original process controls remain
+historical. Current focused proof and launcher/plan hashes are in
+`signalfix-source-binding.json`, `signalfix-evidence.json` and
+[signalfix-handoff.md](signalfix-handoff.md).
+
 The native phase has exactly three genuine C++ adapter/policy/C dispatcher
 commands. Full inherited flags, argument order and genuine cwd remain fixed;
 only source/-o/-MF change. After a future admitted compile, the existing exact

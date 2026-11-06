@@ -108,3 +108,10 @@ freeze in a separate worktree. Native and host-sanitizer phases are distinct;
 both refuse with no final accepted VM044/046 binding. Python-only process
 controls establish bounded cancellation of recorded fixture sessions, not
 compiler/sanitizer admission or GPU runtime.
+
+Current launcher restoration correction:
+[signalfix-handoff.md](signalfix-handoff.md). Its focused real-signal proof
+preserves the old admission packet and fixes the first-cancellation restoration
+counterexample by restoring the exact old mask after all handlers and the timer.
+Use `fixtures/public/gpu-userclient/signalfix-source-binding.json` for the new
+launcher and source-phase plan hashes. Both actual phases remain disabled.

@@ -39,8 +39,15 @@ def guarded(callback, seconds=600):
             record["outcome"]="cancelled"
         return record
     finally:
-        signal.setitimer(signal.ITIMER_REAL,0)
-        for number,handler in previous.items(): signal.signal(number,handler)
+        # Pending cancellation belongs to the caller once cleanup is complete.
+        # Restore every handler/timer while blocked, then restore the exact
+        # caller mask last so pending delivery cannot abort partial restoration.
+        prior_mask=signal.pthread_sigmask(signal.SIG_BLOCK,set(previous))
+        try:
+            signal.setitimer(signal.ITIMER_REAL,0)
+            for number,handler in previous.items(): signal.signal(number,handler)
+        finally:
+            signal.pthread_sigmask(signal.SIG_SETMASK,prior_mask)
 
 
 def main():
