@@ -64,3 +64,21 @@ this phase. Historical RELEASE/BCM/guest objects and failures remain untouched.
 Actual compilation, MD/Mach-O qualification, independent review and root common
 acceptance remain outstanding. No archive, link, kernel image, QEMU, private ABI,
 native runtime or phone result is established. Keep STR-029 in progress.
+
+## Root-authorized source plan
+
+After root source-only authorization, the frozen corrected STR030 physical
+caller2676 ran plan exactly once with exit0/empty stderr. The original source
+slice and its evidence were preserved. New strict manifest
+`native-slice-001.json` has SHA256
+`ba087b7c9a2d6976a58c8e043c7301590b57dca7b2a7c3ae4186e62e83b9f521`;
+raw plan `artifacts/e1s-native-compile/support/plan-001/source-plan.json` has
+SHA256 `e9816938a1627dd5449edbb4a6d61f9236609505afc01d11dda988d64e43c1d2`.
+See `build-001.md` and `source-plan-001-evidence.json` for exact command,
+identity, raw exit/log pins, 36 selections, 6525 inputs and prospective outputs.
+
+Prospective experiment is STR029BUILD-001, with source-plan resource profile
+project-budget-v1/onejob/512MiB/whole1200. It must remain PLANNED until actual
+execution. Its execute-001 directory is absent; no private configuration copy,
+loader, compiler, Make or generator ran. Source-plan RSS/duration are unknown,
+not measured. Wait common84 PASS and a separate exact root ProjectBudget grant.
