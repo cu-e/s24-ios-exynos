@@ -72,3 +72,15 @@ before and after execution. This catches newly shadowing headers and directory
 symlinks, including __has_include decisions; actual MD remains a separate check.
 Private CWD inventory remains independent of the immutable shared namespace.
 No helper globals, common source or native flags changed.
+
+The corrected namespace refusal in source-review-002.json remains a FAIL:
+support's genuine include roots see STR014's existing isolated `.git` metadata,
+which its5111-file source manifest intentionally excludes. Root accepted the
+actual18-file census, correcting the preliminary17 estimate. The separate fix2
+adds only `source-metadata.json`, a fixed explicit NONSOURCE path/hash/mode
+binding for those existing files and their directory names/modes. It publishes
+no config content, adds no header/source, and neither invokes Git nor excludes
+metadata from namespace checking. Every plan carries those exact pins; pre/post
+checks reject changes or new metadata/shadows. The5111 source manifest,1334
+shared files and native flags remain unchanged. Physical initial/FIX1 callers,
+raw source-plan exports and both failed/inconclusive capsules are retained.

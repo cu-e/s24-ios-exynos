@@ -21,6 +21,7 @@ INTERFACE = MAIN/'worktrees/str-016-e1s-development-body-graph-20261106/fixtures
 PINS = [(COMMON, '9929a7d6f1e748770f54abf3e101350648092027a18c419a242d0348f620f755'),
         (CORE, '9f80e32305ce84e33ab27bcf37d589465a97c2d03c5eb6830fd3540f204400c5'),
         (SUPERVISOR, 'faaa9b707a8bb48b1ee502a2c58c9b876eb7859ad5b0ff6541bae27c20ed9f99')]
+SOURCE_METADATA_SHA = '44a3b329931630c4447314b0e683db0c0ef571e615c1bb016321424c278b64b8'
 RUNTIME_SHA = '94685ae6c56a3785b8c61c5422fb53bd8750ca92ad9caa76e9bf691bab35d12d'
 INTERFACE_SHA = 'c866f73c539870f87edbbb503de8c6418c0334541801ceb4d5cd56bac6f9a579'
 
@@ -94,6 +95,10 @@ def derive(common, manifest_path, manifest_sha):
     inputs[str(MAIN/'fixtures/public/e1s-native-source-ports/source-context.json')] = '3b87fdab0a2953438c7fd78f420e138604c258b5d09b97c444187737347df8dc'
     source_manifest = bound({'path':source_context['source_manifest'], 'sha256':source_context['source_manifest_sha256']})
     inputs.update({str(Path(graph['source_root'])/p): h for p,h in source_manifest.items()})
+    metadata = common.load_project(HERE/'source-metadata.json', SOURCE_METADATA_SHA)
+    require(metadata['root'] == str(Path(graph['source_root'])/'.git') and metadata['source_manifest_sha256'] == graph['source_manifest_sha256'], 'Wrong existing non-source metadata context')
+    inputs[str(HERE/'source-metadata.json')] = SOURCE_METADATA_SHA
+    inputs.update(metadata['files'])
     inputs.update({row['path']:row['sha256'] for row in context['files'].values()})
     require(len(context['files']) == 1334 and len(context['selected_source_bindings']) == 1042, 'Incomplete native context index')
     selected = [p for p in partitions['partitions'] if p['id'] == manifest['partition']]
@@ -153,7 +158,7 @@ def derive(common, manifest_path, manifest_sha):
     inputs.update(runtime['files'])
     for path,h in inputs.items():
         require(Path(path).resolve(strict=True) == Path(path) and not Path(path).is_symlink() and digest(path) == h, 'Changed/aliased native input: '+path)
-    result = dict(schema='e1s-native-component-plan-v1', resource_profile='project-budget-v1', task=manifest['task'], owner=manifest['owner'], experiment=manifest['experiment'], shard=manifest['partition'], manifest={'path':str(manifest_path),'sha256':manifest_sha}, executor_sha256=digest(__file__), out=str(out), whole_seconds=manifest['whole_seconds'], max_jobs=1, max_owned_rss_bytes=512*1024**2, graph=interface['graph'], context=interface['consumer_context'], profile=interface['portable_compiler_profile_selection'], commands=rows, projections=projections, inputs=inputs, absent_inputs=sorted(absent), runtime=runtime, runtime_lookup={cwd:runtime_lookup(runtime,cwd) for cwd in sorted({r['cwd'] for r in rows})}, loader_commands={cwd:[runtime['interpreter'],'--list',str(compiler)] for cwd in sorted({r['cwd'] for r in rows})}, compiled=False)
+    result = dict(schema='e1s-native-component-plan-v1', resource_profile='project-budget-v1', task=manifest['task'], owner=manifest['owner'], experiment=manifest['experiment'], shard=manifest['partition'], manifest={'path':str(manifest_path),'sha256':manifest_sha}, executor_sha256=digest(__file__), out=str(out), whole_seconds=manifest['whole_seconds'], max_jobs=1, max_owned_rss_bytes=512*1024**2, graph=interface['graph'], context=interface['consumer_context'], profile=interface['portable_compiler_profile_selection'], commands=rows, projections=projections, inputs=inputs, absent_inputs=sorted(absent), runtime=runtime, nonsource_metadata=metadata, runtime_lookup={cwd:runtime_lookup(runtime,cwd) for cwd in sorted({r['cwd'] for r in rows})}, loader_commands={cwd:[runtime['interpreter'],'--list',str(compiler)] for cwd in sorted({r['cwd'] for r in rows})}, compiled=False)
     result['namespace'] = native_namespace(common, result)
     return result
 
@@ -182,6 +187,10 @@ def runtime_lookup(runtime, cwd):
 
 
 def verify(common, plan):
+    metadata = plan['nonsource_metadata']; root = Path(metadata['root'])
+    nodes = [root, *root.rglob('*')]
+    require(all(not p.is_symlink() for p in nodes) and {str(p):p.stat().st_mode & 0o7777 for p in nodes} == metadata['modes'], 'Existing non-source metadata names/modes changed')
+    require({str(p) for p in nodes if p.is_file()} == set(metadata['files']), 'Existing non-source metadata inventory changed')
     require(native_namespace(common, plan) == plan['namespace'], 'Native include namespace/shadow changed')
     for path,h in plan['inputs'].items():
         require(Path(path).resolve(strict=True) == Path(path) and not Path(path).is_symlink() and digest(path) == h, 'Changed/aliased admitted native input: '+path)
