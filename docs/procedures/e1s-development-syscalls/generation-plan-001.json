@@ -1,0 +1,235 @@
+{
+  "schema": "e1s-development-syscall-generation-plan-v1",
+  "kind": "source-review",
+  "origin": "local-host",
+  "task": "STR-010",
+  "owner": "codex-e1s-development-syscalls-20261106-sr10",
+  "experiment": "E1SDEVELOPMENTSYSCALLS-001",
+  "phase": "planned-not-executed",
+  "execution_authority": false,
+  "classification": "Original native DEVELOPMENT ARM64 E1S source generation only; no compiler or native runtime.",
+  "actual_output": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1",
+  "setup": "Fresh generation root absent before rootgrant; create generated/bsd/sys beneath same owned root before commands. All cwd/stdout/stderr/temporary/output paths remain below this root for Landlock(out).",
+  "resource_contract": {
+    "max_jobs": 1,
+    "max_owned_rss_bytes": 268435456,
+    "child_timeout_seconds": 30,
+    "whole_timeout_seconds": 300,
+    "root_approval_required": true
+  },
+  "helpers": {
+    "common": {
+      "path": "/home/egor/dev/pet/s24-ios-exynos/tools/build/avf_kernel_objects.py",
+      "sha256": "9929a7d6f1e748770f54abf3e101350648092027a18c419a242d0348f620f755",
+      "bytes": 86709
+    },
+    "cancellation": {
+      "path": "/home/egor/dev/pet/s24-ios-exynos/tools/build/avf_guest_link_inputs.py",
+      "sha256": "9f80e32305ce84e33ab27bcf37d589465a97c2d03c5eb6830fd3540f204400c5",
+      "bytes": 144185
+    },
+    "supervisor": {
+      "path": "/home/egor/dev/pet/s24-ios-exynos/tools/build/qemu_host.py",
+      "sha256": "faaa9b707a8bb48b1ee502a2c58c9b876eb7859ad5b0ff6541bae27c20ed9f99",
+      "bytes": 17342
+    },
+    "interface": "Root uses existing common.run_child(argv,cwd,generation_root,label,qemu_host,timeout=30,budget=rootapprovedbudget) via run_owned_child(common,cancellation,...), inside owned_cancellation(); defer release/evidence cleanup with cancellation.cleanup(). No common module BCM globals/profile consumed, no helper edits.",
+    "stdout_note": "Existing run_child outputs separate label.stdout.txt/label.stderr.txt under generation_root. Materialize select-master stdout byte-identically before command2; raw0/1 expressly accepted, other exits stop."
+  },
+  "commands": [
+    {
+      "id": "select-master",
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/generators-session2/prefix/bin/unifdef",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-004-e1s-profile-20261106/artifacts/xnu-prepare/e1s-profile-002/xnu/bsd/kern/syscalls.master"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd",
+      "accepted_exit_codes": [
+        0,
+        1
+      ],
+      "timeout_seconds": 30,
+      "stdout_materialization": {
+        "source": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/select-master.stdout.txt",
+        "destination": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/bsd.syscalls.master",
+        "when": "Only after actual root-supervised termination exit0/1 and separate stderr report; stream-copy exact stdout to fresh path, preserve rawexit, require source/destination SHA256 equality.",
+        "max_bytes": 1048576,
+        "matches_existing_method": "tools/build/xnu_kernel_syscalls.py:Syscalls.generate_syscalls select-master + stdout copy; no legacy helper executed"
+      }
+    },
+    {
+      "id": "generate-table",
+      "argv": [
+        "/usr/bin/env",
+        "TARGET=/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd",
+        "/bin/sh",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-004-e1s-profile-20261106/artifacts/xnu-prepare/e1s-profile-002/xnu/bsd/kern/makesyscalls.sh",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/bsd.syscalls.master",
+        "table"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd",
+      "accepted_exit_codes": [
+        0
+      ],
+      "timeout_seconds": 30,
+      "expected_output": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/init_sysent.c",
+      "derivation": "Exact original script/master/mode from actual make-n; envTARGET reproduces original exported parent context and /bin/sh the script interpreter. Ignore only original /dev/null stdout redirection; separate supervisor stdout/stderr retained."
+    },
+    {
+      "id": "generate-names",
+      "argv": [
+        "/usr/bin/env",
+        "TARGET=/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd",
+        "/bin/sh",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-004-e1s-profile-20261106/artifacts/xnu-prepare/e1s-profile-002/xnu/bsd/kern/makesyscalls.sh",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/bsd.syscalls.master",
+        "names"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd",
+      "accepted_exit_codes": [
+        0
+      ],
+      "timeout_seconds": 30,
+      "expected_output": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/syscalls.c",
+      "derivation": "Exact original script/master/mode from actual make-n; envTARGET reproduces original exported parent context and /bin/sh the script interpreter. Ignore only original /dev/null stdout redirection; separate supervisor stdout/stderr retained."
+    },
+    {
+      "id": "generate-systrace",
+      "argv": [
+        "/usr/bin/env",
+        "TARGET=/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd",
+        "/bin/sh",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-004-e1s-profile-20261106/artifacts/xnu-prepare/e1s-profile-002/xnu/bsd/kern/makesyscalls.sh",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/bsd.syscalls.master",
+        "systrace"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd",
+      "accepted_exit_codes": [
+        0
+      ],
+      "timeout_seconds": 30,
+      "expected_output": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/systrace_args.c",
+      "derivation": "Exact original script/master/mode from actual make-n; envTARGET reproduces original exported parent context and /bin/sh the script interpreter. Ignore only original /dev/null stdout redirection; separate supervisor stdout/stderr retained."
+    },
+    {
+      "id": "generate-header",
+      "argv": [
+        "/usr/bin/env",
+        "TARGET=/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd",
+        "/bin/sh",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-004-e1s-profile-20261106/artifacts/xnu-prepare/e1s-profile-002/xnu/bsd/kern/makesyscalls.sh",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/bsd.syscalls.master",
+        "header"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/sys",
+      "accepted_exit_codes": [
+        0
+      ],
+      "timeout_seconds": 30,
+      "expected_output": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/sys/syscall.h",
+      "derivation": "Exact original script/master/mode from actual make-n; envTARGET reproduces original exported parent context and /bin/sh the script interpreter. Ignore only original /dev/null stdout redirection; separate supervisor stdout/stderr retained."
+    },
+    {
+      "id": "generate-proto",
+      "argv": [
+        "/usr/bin/env",
+        "TARGET=/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd",
+        "/bin/sh",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-004-e1s-profile-20261106/artifacts/xnu-prepare/e1s-profile-002/xnu/bsd/kern/makesyscalls.sh",
+        "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/bsd.syscalls.master",
+        "proto"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/sys",
+      "accepted_exit_codes": [
+        0
+      ],
+      "timeout_seconds": 30,
+      "expected_output": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/sys/sysproto.h",
+      "derivation": "Exact original script/master/mode from actual make-n; envTARGET reproduces original exported parent context and /bin/sh the script interpreter. Ignore only original /dev/null stdout redirection; separate supervisor stdout/stderr retained."
+    }
+  ],
+  "expected_products": [
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/bsd.syscalls.master",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/init_sysent.c",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/syscalls.c",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/systrace_args.c",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/sys/syscall.h",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/generate-1/generated/bsd/sys/sysproto.h"
+  ],
+  "source_input_fixture": {
+    "path": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/fixtures/public/e1s-development-syscalls/input.json",
+    "sha256": "0f257cbea359ca3aab007ac22a7d2148e38a8686e781870f228becd828506202",
+    "bytes": 19140
+  },
+  "input_sha256": {
+    "/home/egor/dev/pet/s24-ios-exynos/fixtures/public/e1s-development-configs/generated-development.json": "6b0ac2c8e82b2837a94f628ee5c291105559a0607e3febac56fc7e7b6527cf9a",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-004-e1s-profile-20261106/artifacts/xnu-prepare/e1s-profile-002/xnu/bsd/kern/makesyscalls.sh": "97e7825fbfeaf7762193810c4709f0ea0c5b31fbd7878a386a56be1518f05725",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/source/bsd/kern/makesyscalls.sh": "97e7825fbfeaf7762193810c4709f0ea0c5b31fbd7878a386a56be1518f05725",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-004-e1s-profile-20261106/artifacts/xnu-prepare/e1s-profile-002/xnu/bsd/kern/syscalls.master": "163824910a25029dfc559fabd518ed3d2ec3539d7ff9f157dcd56067e6a6952b",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/source/bsd/kern/syscalls.master": "163824910a25029dfc559fabd518ed3d2ec3539d7ff9f157dcd56067e6a6952b",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-004-e1s-profile-20261106/artifacts/xnu-prepare/e1s-profile-002/xnu/bsd/sys/Makefile": "8e6d2607a6bf99a3f46066f3b8730bf0f35fd64f74bd2080f613d9cbd55c5fdb",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/source/bsd/sys/Makefile": "8e6d2607a6bf99a3f46066f3b8730bf0f35fd64f74bd2080f613d9cbd55c5fdb",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-004-e1s-profile-20261106/artifacts/xnu-prepare/e1s-profile-002/xnu/makedefs/MakeInc.rule": "2f7fdaec6e37000e908f241a944f2b97e91c6bdd8686292ab50b06256d16ecb2",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/source/makedefs/MakeInc.rule": "2f7fdaec6e37000e908f241a944f2b97e91c6bdd8686292ab50b06256d16ecb2",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-004-e1s-profile-20261106/artifacts/xnu-prepare/e1s-profile-002/xnu/makedefs/MakeInc.def": "fd86f1eb9f171b68331ebbb156ed3dba01e5593c3148262fca0c5a3b8415b490",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/source/makedefs/MakeInc.def": "fd86f1eb9f171b68331ebbb156ed3dba01e5593c3148262fca0c5a3b8415b490",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-004-e1s-profile-20261106/artifacts/xnu-prepare/e1s-profile-002/xnu/bsd/conf/Makefile.template": "511930dd48977805f54196c90e47ea8aab845668d8ad7d96159645f6e9e5b321",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/source/bsd/conf/Makefile.template": "511930dd48977805f54196c90e47ea8aab845668d8ad7d96159645f6e9e5b321",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-009-e1s-development-configs-20261106/artifacts/e1s-development-configs/configuration-001/configuration/bsd/DEVELOPMENT/Makefile": "c5af4f56b5277f0d149869f1b20ac5ee950a4ae242e73426b491084e4e6f12f9",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/configuration/bsd/DEVELOPMENT/Makefile": "c5af4f56b5277f0d149869f1b20ac5ee950a4ae242e73426b491084e4e6f12f9",
+    "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-kernel-objects/compile-session2/host-commands.mk": "5806768eb04672f8c2c8d86ca773f323e9c80624cf2e267d4963799db52fb6f9",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/host-commands.mk": "5806768eb04672f8c2c8d86ca773f323e9c80624cf2e267d4963799db52fb6f9",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/query-plan.json": "2c803f8ed2e450c5bccaf0dfca8ff8853e251f39d73b972584e4d8e97e26c19d",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/query-results.json": "ff64822cde4845f07954879e5a286c696432bfff3bd4b66a1a0cf2e694880f6b",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/accepted-full8-descriptor.json": "6b0ac2c8e82b2837a94f628ee5c291105559a0607e3febac56fc7e7b6527cf9a",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/query-bsd.mk": "5b8689731e6e9dee9cacd94c4fe1e4b316e6a932d72e2feec1893f63e3852905",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/query-sys.mk": "4aa102350b6599b93896cbf24fa01d03aad7ba8db896db5f54501294e7e4274b",
+    "/home/egor/dev/pet/s24-ios-exynos/tools/build/xnu_kernel_syscalls.py": "2d33981c3b2c3f7a7853437bbaef34fc405e37a095a68b36cc00cba3518f5c0e",
+    "/usr/bin/env": "d76d8988c3ae835a287fbd007e6f14612103f4549b304344784ec2f7735db664",
+    "/usr/bin/sh": "72c31946a6b51c6332022dce2b542931b825d1174d5efc014ef9a1d5385d4c32",
+    "/usr/bin/sed": "402b5be8193bf8610c8978e446957e8651dbf81249894bbadbd523ca3fe39beb",
+    "/usr/bin/awk": "a6ac4a205b2fcd11849f0a27deadd662de8986348480b6647050569ed7401cee",
+    "/usr/bin/cat": "b29ec12065f3dc8d48490a8e969d792f81bc12421f1489f678534df100e2ef86",
+    "/usr/bin/rm": "1a0ffbbfa4e55700fac1133531c3c826cf28f8deb184681997bda0b4572ff04f",
+    "/usr/bin/touch": "7e699a690828e7d2e2f6c47e2e74f530f197e0c6d0cc62a4c1de4b8ea557bd42",
+    "/usr/bin/make": "2dadfb9212573afcddc183353794f2fb22ef3df0afffd700ca93a905ad79f2f5",
+    "/usr/bin/bash": "72c31946a6b51c6332022dce2b542931b825d1174d5efc014ef9a1d5385d4c32",
+    "/usr/bin/tr": "9b82b153084303b58a9e22e6eada2809133ff6209a32b623a839387e55541168",
+    "/usr/bin/printf": "3967febb0239ecb4052cf2eb879bdcd222cdbf927d9f342c0b62f303b3609b61",
+    "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-host-tools/generators-session2/prefix/bin/unifdef": "50e680f427efbe5a4f4e9fe92423c89c16c730ba43cc316b25005084f67358d3",
+    "/home/egor/dev/pet/s24-ios-exynos/tools/build/avf_kernel_objects.py": "9929a7d6f1e748770f54abf3e101350648092027a18c419a242d0348f620f755",
+    "/home/egor/dev/pet/s24-ios-exynos/tools/build/avf_guest_link_inputs.py": "9f80e32305ce84e33ab27bcf37d589465a97c2d03c5eb6830fd3540f204400c5",
+    "/home/egor/dev/pet/s24-ios-exynos/tools/build/qemu_host.py": "faaa9b707a8bb48b1ee502a2c58c9b876eb7859ad5b0ff6541bae27c20ed9f99",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/bsd-s24_native_query.stdout": "194c6daf5dd48ea1bcf62eb65753e669846411f093a0aded9db0c345e3aae05c",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/bsd-s24_native_query.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/bsd-s24_native_query-bound0.stdout": "565173b944c59767b30b50e9c708c2684434caed7bf943b987f3a9e801ff824e",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/bsd-s24_native_query-bound0.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/bsd-bsd.syscalls.master.stdout": "5e023f3a12070c10a8ab5a6f8c6214b5e593a6a768f0141613bd30f188a57836",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/bsd-bsd.syscalls.master.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/bsd-init_sysent.c.stdout": "799d492c837115351ed06b343799e83e1b67554b08bacabf80d77fe0e37fa128",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/bsd-init_sysent.c.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/bsd-syscalls.c.stdout": "86aa64b79470ee7f8866336aafa273eb09dae6ff0f6e8aece1d571326b0ee5e9",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/bsd-syscalls.c.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/bsd-systrace_args.c.stdout": "f9ff38f90d339f6367a2526ee0a8bcf88732bf855205a2bfec678d8ce41252e9",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/bsd-systrace_args.c.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/sys-s24_native_query.stdout": "b6e33719a6e2165f426efcedd6825874bef42fa1f2a575db395330ae8af0db88",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/sys-s24_native_query.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/sys-syscall.h.stdout": "cbbc346ee529011b63d5502be83c4caa6d616b161d078e926b8b582939595691",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/sys-syscall.h.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/sys-sysproto.h.stdout": "a5f139abd31fe6cc48d728e500d5683c57c497d8f42547ab7dda7d72df733277",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/artifacts/e1s-development-syscalls/prepare-1/sys-sysproto.h.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-010-e1s-development-syscalls-20261106/fixtures/public/e1s-development-syscalls/input.json": "0f257cbea359ca3aab007ac22a7d2148e38a8686e781870f228becd828506202"
+  },
+  "qualification_after_actual": [
+    "Record all6 actual argv/cwd/rawexits/stdout/stderr/time/resource/cleanup; unifdef0/1 acceptance explicit.",
+    "Master stdout size<=1MiB and byte-identical copied master; failedpartial neveradopted.",
+    "Actual selectedmaster+five generatedoutput hashes/nonemptyoutputs and identity of generator/profile/config/source inputs.",
+    "Original generated C conditionals retained, actual native BSD CONFIG/MI source headers unmodified; no RELEASE/BCM/fabricated header output adoption."
+  ],
+  "limits": [
+    "No hardcoded RELEASE Syscalls/Mig inputs helper invocation, no duplicated generator implementation or new controller.",
+    "BOUND_CHECKS query-only values are not compiler qualification and absent from actual6 generator vectors; future nativecompile must use real feature result.",
+    "Generated files not yet present or qualified; taskcompletion requires actual grant/measurement and independent/publication/common acceptance.",
+    "No QEMU/phone/SDK/privateABI/fullkernel/runtime proof."
+  ]
+}
