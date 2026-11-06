@@ -1,0 +1,3 @@
+# Image-owned E1S kernel diagnostics
+
+Local STR034 overlay against the exact accepted STR014 derived XNU tree. Original donor patches0011/0012/0014 remain unchanged; source/header/license attribution and required preimages are documented in `docs/procedures/e1s-kernel-log/README.md` and the pinned fixture. Changes only the early diagnostic marker storage and C ring storage, with no native flags, exports or driver behavior changes. Do not apply to any existing accepted source tree or transfer old object qualification. This is source review; actual assembly/C/link/layout/payload/hardware checks are deferred.
