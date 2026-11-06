@@ -26,18 +26,23 @@ argv/filelists and absent canonical execution roots. Both intakes now pass21
 focused source/authority comparisons: AVFFH-002 and AVFPTH-004 remain PLANNED,
 plans5221e312/288b255b match the accepted derived bytes. See
 `component-integration-20261106/original-plan-intake.json` for exact paths,
-canonical approval digests, wrapper and future argv templates. Root will grant
-an actual serial ONE-compiler,256MiB controller-plus-tree allocation separately.
-The immutable root launcher supplies a600-second whole deadline and each child
-retains120 seconds. No component compiler,
-archiver, loader-main or guest result exists from grant21. Original DZ's VM036
-remains active until actual intended component criteria are met; original owners
-alone record products and eventually close tasks after explicit acceptance.
+canonical approval digests, wrapper and future argv templates. The subsequent
+allocation used serial ONE-compiler,256MiB controller-plus-tree limits.
+Grant21 itself produced no component object. Root subsequently granted serial22:
+both real rebuilds passed, each with four actual loader resolutions, three
+compiles and its exact archive. Firehose took26.795 seconds, pthread22.5816.
+Root verified terminal PIDs/reservations and released serial22. Independent raw
+byte/dependency/runtime review passed1636 FH and1834 pthread checks. The archives
+are57b99a60 (provider.o only) and75953383 (kern_init/support/synch exactly).
+The immutable launcher retained600 whole/120 child deadlines. Original owners
+alone close tasks after final product packet/common/root acceptance.
 
 VM022 cu received source-only product/report schema and exact future archive
 membership: Firehose provider.o only, pthread kern_init/support/synch.o exactly.
-All products remain missing until measured and independently accepted. Full
-link/provider/native/private-ABI/FIPS and hardware gates remain separate.
+Both selected-profile products now qualify their guest rebuild criteria;
+`component-integration-20261106/actual-product-review.md` and its two wrappers
+bind the actual results. Full link/provider/registration/runtime/native/private-
+ABI/FIPS and hardware gates remain separate VM022/link obligations.
 The separate CTS3 native fortified-memory and NFS ignored-return limitations
 remain open; the selected DES strong-provider result does not transfer to a
 different profile or object graph.
@@ -48,8 +53,10 @@ sanitizers, typed overrides, IOConnect and Xclipse remain unmeasured. Its old
 afc5/two-job proposal needs fresh process/runtime/namespace/resource admission
 before any future root compile lease. It is not a first-console dependency.
 
-Next: route root's distinct serial allocation to the original owner and intake
-actual products/failures, preserving all absent-result boundaries until measured.
-No publication/common or extra compiler may overlap a future root
-wave. Coordinate any later integration using fresh MAIN HEAD and one stable
+Next: stage the root-selected combined actual-product/review, corrected tail
+executor/REV039 and source-only VM045/REV040 packet from current8261 or later.
+VM044 remains excluded until independently ready; no silent policy upgrade.
+Request exact root plan approval and serial common grant. No publication/common
+or extra compiler may overlap a future root wave. Coordinate integration using
+fresh MAIN HEAD and one stable
 shared integration lock; never edit another owner's registry or frozen source.
