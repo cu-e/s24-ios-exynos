@@ -57,33 +57,46 @@ error/status separation, storage alias and unknown quiescence retention. The
 fixture supplies no fake Apple class or vtable and never manufactures a GPU
 allocation or completed fence. These controls are authored but unexecuted.
 
-`src/platform/gpu/native/userclient/prepare.py` only writes a compile/control
-plan and hashes inputs. It verifies the frozen VM-008 manifest, actual 104 iokit
-context, IOUserClient.cpo/IOStringFuncs.o source/configuration recipes, VM-007
-canonical public declarations, exact source-built compiler and unchanged
-GPU-011 dispatcher/header. Its target plan retains the genuine guest flags and
-namespace, substitutes only owned source/object/dependency paths, and expands
-the recipe's relative include root to its original absolute context. It plans
-three ARM64 Mach-O objects: the typed adapter, portable policy and unchanged C
-dispatcher. No old native object is an input. Native C/host sanitizer tools are
-hash-pinned without invocation; their actual versions remain unmeasured here.
+The current source-only entry point is
+`src/platform/gpu/native/userclient/current_plan.py`, with the pinned policy in
+`fixtures/public/gpu-userclient/current-policy.json`. It reuses the accepted
+AF193 shared helper to validate the be02 manifest, 25f complete namespace,
+3343 qualification, real 1080 keys and actual 104 IOKit context. Three commands
+derive from genuine IOUserClient.cpo/IOStringFuncs.o recipes, replacing only
+source/object/dependency operands and retaining exact flags/order and genuine
+read-only cwd. The original kernel C++/portable fixture/dispatcher bytes match
+the preserved physical `de6c14afef8e2de29f06cc16ede6023ef0824f5c` freeze.
+
+`prepare.py`, `source-plan.json`, `evidence.json` and `handoff.md` preserve the
+historical GPUINGRESS-001 afc5/two-job proposal. They are not current execution
+instructions. Current evidence and the final plan binding are in
+`current-evidence.json` and `current-source-plan.json`; see
+[current-experiment.md](current-experiment.md) and
+[future-execution-contract.md](future-execution-contract.md).
 
 ```sh
 LC_ALL=C PYTHONUTF8=1 PYTHONNOUSERSITE=1 python3 -s \
-  src/platform/gpu/native/userclient/prepare.py \
+  src/platform/gpu/native/userclient/current_plan.py \
   --main /home/egor/dev/pet/s24-ios-exynos \
-  --output artifacts/gpu-userclient/new-source-plan
+  --output /home/egor/dev/pet/s24-ios-exynos/worktrees/gpu-012-current-20261106/artifacts/gpu-userclient/new-plan \
+  --actual-output /home/egor/dev/pet/s24-ios-exynos/worktrees/gpu-012-current-20261106/artifacts/gpu-userclient/new-actual \
+  --experiment REGISTERED_PLANNED_SOURCE_EXPERIMENT
 ```
 
 The plan includes host ASan/UBSan controls and a future pure-Python Mach-O
 inspection of actual overrides, C symbols, allocator metadata and unresolved
 kernel imports. The inspection supplies no stubs and establishes no link or
-runtime result. Source-hash and wrong-target metadata rejection controls are
-available through `--control`; they alter only in-memory copies.
+runtime result. Current `--control` cases reject stale budget, changed helper,
+mixed old/current profile and added flags. They alter only in-memory copies.
+The actual output stays absent. Host compiler versions, runtime dependencies
+and sanitizer behavior remain unmeasured. Current AF193's 2GiB RLIMIT_AS
+conflicts with ASan shadow memory; the future RSS-only sanitizer contract needs
+separate review and authority. VM044/045 adoption is prospective and requires
+one explicit final helper/profile repin before actual execution.
 
 Real compilation and sanitizer execution require an explicit root lease and
 reviewed shared budget, stable memory admission, finite commands and owned RSS
 monitoring. Independent review must precede admission. Current actual results
-and retained failures belong in `evidence.json`; compilation, host runtime,
+and retained failures belong in `current-evidence.json`; compilation, host runtime,
 guest, native Xclipse and phone acceptance must stay separate. Main publication
 and common checks are exclusively the permanent integrator's responsibility.
