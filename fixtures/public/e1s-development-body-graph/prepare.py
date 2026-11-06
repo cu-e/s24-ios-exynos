@@ -4,6 +4,7 @@ import argparse
 from collections import Counter
 import hashlib
 import json
+from itertools import zip_longest
 from pathlib import Path
 import re
 import resource
@@ -59,17 +60,36 @@ def recipe_blocks(text):
 
 
 class Graph:
-    def __init__(self, main, out):
+    def __init__(self, main, out, reuse=None):
         self.main = main.resolve()
-        self.out = out.absolute()
+        self.report_out = out.absolute()
+        self.out = reuse.absolute() if reuse else self.report_out
+        self.reuse = reuse is not None
         owned = Path(__file__).resolve().parents[3]
-        if self.out != self.out.resolve() or self.out.exists() or not self.out.is_relative_to(owned / 'artifacts/e1s-development-body-graph'):
+        artifact_root = owned / 'artifacts/e1s-development-body-graph'
+        if self.report_out != self.report_out.resolve() or self.report_out.exists() or not self.report_out.is_relative_to(artifact_root):
             raise ValueError('Use fresh canonical owned artifact output')
+        if self.reuse and (self.out != self.out.resolve() or not self.out.is_relative_to(artifact_root) or not self.out.is_dir()):
+            raise ValueError('Reuse only a retained owned component-stage directory')
         self.inputs = {}
-        self.commands = []
+        self.commands = json.loads((self.out / 'commands.json').read_text()) if self.reuse else []
         self.rows = []
         self.components = {}
         self.actual_generated = {}
+        self.memory_samples = []
+        self.memory_checks = 0
+
+    def memory(self, phase):
+        fields = {}
+        for line in Path('/proc/self/status').read_text().splitlines():
+            if line.startswith(('VmRSS:', 'VmHWM:', 'VmPeak:', 'VmSize:')):
+                key, value, _ = line.split()
+                fields[key.rstrip(':')] = int(value) * 1024
+        self.memory_checks += 1
+        if not self.memory_samples or fields != self.memory_samples[-1]['bytes']:
+            self.memory_samples.append({'phase': phase, 'bytes': fields})
+        if fields['VmRSS'] > 256 * 1024**2 or fields['VmHWM'] > 256 * 1024**2:
+            raise ValueError('Actual parent RSS exceeded256MiB source-query budget')
 
     def pin(self, path, expected=None):
         path = Path(path)
@@ -87,6 +107,7 @@ class Graph:
         return json.loads(path.read_text())
 
     def load(self):
+        self.memory('load-start')
         self.context = self.load_json(self.main / 'fixtures/public/e1s-native-source-ports/source-context.json',
                                      '3b87fdab0a2953438c7fd78f420e138604c258b5d09b97c444187737347df8dc')
         self.source = Path(self.context['source_root'])
@@ -123,17 +144,20 @@ class Graph:
             self.pin(Path(feature[name]['path']), feature[name]['sha256'])
         self.feature_binding = {'path': str(feature_path), 'sha256': sha(feature_path)}
         self.pin(Path(__file__))
-        self.out.mkdir(parents=True)
+        self.report_out.mkdir(parents=True)
+        if self.reuse:
+            self.pin(self.out / 'prepare.py')
         self.config_roots = {}
         for component, data in self.config['components'].items():
             root = self.out / 'configuration' / component / 'DEVELOPMENT'
-            root.mkdir(parents=True)
+            root.mkdir(parents=True, exist_ok=self.reuse)
             for name, digest in data['generated_files'].items():
                 original = within(Path(data['root']), name)
                 self.pin(original, digest)
                 copied = within(root, name)
                 copied.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(original, copied)
+                if not self.reuse:
+                    shutil.copyfile(original, copied)
                 self.pin(copied, digest)
                 self.actual_generated[str(copied)] = {'kind': 'actual-config-product', 'producer': 'STR-009/STR-004', 'sha256': digest}
             self.config_roots[component] = root
@@ -142,7 +166,8 @@ class Graph:
             self.pin(original, digest)
             copied = within(self.out, destination)
             copied.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(original, copied)
+            if not self.reuse:
+                shutil.copyfile(original, copied)
             self.pin(copied, digest)
         # Import actual generated header bytes by their typed producer identities,
         # not as raw source. Missing producers remain absent.
@@ -154,10 +179,11 @@ class Graph:
             original = Path(product['path'])
             self.pin(original, product['sha256'])
             copied = within(self.out, row['destination'])
-            if copied.exists():
+            if copied.exists() and not self.reuse:
                 raise ValueError('Generated/raw header collision')
             copied.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(original, copied)
+            if not self.reuse:
+                shutil.copyfile(original, copied)
             self.pin(copied, product['sha256'])
             self.generated_header_imports.append({'destination': str(copied), 'producer': row})
         self.pending_headers = [r for r in self.producers['rows'] if 'product' not in r]
@@ -173,13 +199,26 @@ class Graph:
             raise ValueError('Native Linux query shim changed')
         self.pin(oldshim)
         self.shim = self.out / 'host-commands.mk'
-        self.shim.write_text(expected)
+        if self.reuse:
+            if self.shim.read_text() != expected:
+                raise ValueError('Retained component-stage shim changed')
+        else:
+            self.shim.write_text(expected)
         self.pin(self.shim)
         for tool in ['/usr/bin/make', '/bin/bash', '/usr/bin/tr']:
             self.pin(Path(tool).resolve())
         for name in ['makedefs/MakeInc.def', 'makedefs/MakeInc.rule', 'makedefs/MakeInc.kernel']:
             self.pin(self.source / name, self.manifest[name])
         self.sanitizer_setup()
+        tool_descriptor = self.main / 'fixtures/public/xnu-kernel-direct-tail/qualified-component.json'
+        self.pin(tool_descriptor)
+        tool = json.loads(tool_descriptor.read_text())['tool']
+        self.seg_hack = self.main / tool['tool']
+        self.pin(self.seg_hack, tool['sha256'])
+        self.pin(self.main / tool['source'], tool['source_sha256'])
+        self.pin(self.source / 'SETUP/setsegname/setsegname.c', tool['original_sha256'])
+        self.segment_tool = {'path': str(self.seg_hack), 'sha256': tool['sha256'],
+                             'source_sha256': tool['original_sha256'], 'executed': False}
 
     def sanitizer_setup(self):
         makefile = self.source / 'san/memory/Makefile'
@@ -192,9 +231,21 @@ class Graph:
         for p in [*sources, validator]:
             self.pin(p, self.manifest[str(p.relative_to(self.source))])
         target = self.out / 'san/kasan-blacklist-arm64'
-        target.parent.mkdir()
+        target.parent.mkdir(exist_ok=self.reuse)
         argv = ['/usr/bin/sed', '-e', 's,^src:\\./,src:' + str(self.source) + '/,', *map(str, sources)]
         self.pin(Path('/usr/bin/sed'))
+        if self.reuse:
+            if self.commands[0]['argv'] != argv or self.commands[0]['exit_code'] != 0:
+                raise ValueError('Retained actual sanitizer command context differs')
+            expected = re.sub(rb'^src:\./', ('src:' + str(self.source) + '/').encode(), b''.join(p.read_bytes() for p in sources), flags=re.M)
+            if target.read_bytes() != expected or self.commands[1]['exit_code'] != 0:
+                raise ValueError('Retained actual sanitizer body/validation differs')
+            self.pin(target)
+            self.sanitizer = {'path': str(target), 'sha256': sha(target), 'source_rule': str(makefile),
+                              'source_rule_sha256': sha(makefile), 'derived_source_path_rewrite': str(self.source),
+                              'source_order': list(map(str, sources)), 'actual_generator_exits': [0, 0],
+                              'reused_actual_setup_from': str(self.out), 'generator_reexecuted': False}
+            return
         generated = subprocess.run(argv, capture_output=True, timeout=10)
         self.commands.append({'argv': argv, 'cwd': str(self.out), 'exit_code': generated.returncode,
                               'stdout_saved_as': str(target)})
@@ -224,24 +275,34 @@ class Graph:
                 'CURRENT_KERNEL_CONFIG=DEVELOPMENT', 'CURRENT_KERNEL_CONFIG_LC=development',
                 'CURRENT_MACHINE_CONFIG=E1S', 'CURRENT_MACHINE_CONFIG_LC=e1s', 'PLATFORM=iPhoneOS',
                 'SDKROOT=' + str(self.out / 'unavailable-sdk'), 'CC=' + str(self.compiler), 'CXX=' + str(self.compiler),
+                'SEG_HACK=' + str(self.seg_hack),
                 'MakeInc_cmd=' + str(self.shim), 'ARCH_STRING_FOR_CURRENT_MACHINE_CONFIG=arm64',
                 'BUILD_WERROR=0', 'BUILD_LTO=0', 'DEPLOYMENT_TARGET_FLAGS=-target arm64-apple-ios16.5 -DXNU_TARGET_OS_IOS',
                 'SEED_DEFINES=-DXNU_NO_TYPE_BUILTINS=0', 'SHELL=/bin/bash', 'LOGCOLORS=n']
 
     def run_query(self, query, component, variant, label, cwd):
+        self.memory('before-Make-' + label)
         argv = ['/usr/bin/make', '--no-print-directory', '-rR', '-f', str(query), *self.args(component),
                 'BOUND_CHECKS=' + str(variant), 'e1s_body_query']
         env = {'PATH': '/usr/bin:/bin', 'LC_ALL': 'C', 'LANG': 'C'}
         start = time.monotonic()
-        p = subprocess.run(argv, cwd=cwd, env=env, capture_output=True, text=True, timeout=30)
-        stdout = self.out / 'queries' / (label + '-bounds' + str(variant) + '.stdout.txt')
+        stdout = self.report_out / 'queries' / (label + '-bounds' + str(variant) + '.stdout.txt')
+        stdout.parent.mkdir(parents=True, exist_ok=True)
         stderr = stdout.with_suffix('.stderr.txt')
-        stdout.write_text(p.stdout); stderr.write_text(p.stderr)
-        self.commands.append({'argv': argv, 'cwd': str(cwd), 'env': env, 'exit_code': p.returncode,
-                              'stdout': str(stdout), 'stderr': str(stderr), 'wall_seconds': time.monotonic() - start})
-        if p.returncode or p.stderr.strip():
-            raise ValueError('Source-only Make query failed: ' + label + ': ' + p.stderr[-2000:])
-        includes = [line.split('|', 1)[1] for line in p.stdout.splitlines() if line.startswith('E1SBODY_INCLUDES|')]
+        command = {'argv': argv, 'cwd': str(cwd), 'env': env, 'exit_code': None,
+                   'stdout': str(stdout), 'stderr': str(stderr)}
+        self.commands.append(command)
+        def make_limits():
+            resource.setrlimit(resource.RLIMIT_AS, (256 * 1024**2, 256 * 1024**2))
+        with stdout.open('w') as out, stderr.open('w') as err:
+            p = subprocess.run(argv, cwd=cwd, env=env, stdout=out, stderr=err, timeout=30, preexec_fn=make_limits)
+        self.memory('after-Make-' + label)
+        command.update(exit_code=p.returncode, wall_seconds=time.monotonic() - start)
+        diagnostic = stderr.read_text()
+        if p.returncode or diagnostic.strip():
+            raise ValueError('Source-only Make query failed: ' + label + ': ' + diagnostic[-2000:])
+        with stdout.open() as f:
+            includes = [line.strip().split('|', 1)[1] for line in f if line.startswith('E1SBODY_INCLUDES|')]
         if len(includes) != 1:
             raise ValueError('Missing Make include provenance')
         for name in includes[0].split():
@@ -250,7 +311,37 @@ class Graph:
                 self.pin(path, self.manifest[str(path.relative_to(self.source))])
             elif str(path) not in self.inputs:
                 raise ValueError('Unqualified Make include: ' + str(path))
-        return p.stdout
+        return stdout
+
+    @staticmethod
+    def variables(path):
+        values = {}
+        with path.open() as f:
+            for line in f:
+                if line.startswith('E1SBODY_VAR|'):
+                    _, key, value = line.rstrip('\n').split('|', 2)
+                    values[key] = value
+        if set(values) != set(KEYS):
+            raise ValueError('Incomplete component variable inventory')
+        return values
+
+    @staticmethod
+    def records(path):
+        current = None
+        with path.open() as f:
+            for line in f:
+                if line.startswith('E1SBODY_SOURCE|'):
+                    if current is not None:
+                        yield current
+                    _, target, source = line.rstrip('\n').split('|', 2)
+                    current = {'target': target, 'source': source, 'steps': {}}
+                elif line.startswith('E1SBODY_STEP|'):
+                    _, target, index, value = line.rstrip('\n').split('|', 3)
+                    if current is None or target != current['target']:
+                        raise ValueError('Interleaved actual Make recipe stream')
+                    current['steps'][index] = value
+        if current is not None:
+            yield current
 
     def inventory_component(self, component, root):
         makefile = root / 'Makefile'
@@ -285,22 +376,13 @@ class Graph:
         query.write_text('\n'.join(lines) + '\n')
         self.pin(query)
         variants = {}
+        outputs = {}
         for bounds in [0, 1]:
-            out = self.run_query(query, component, bounds, component, root)
-            values, sources, steps = {}, {}, {}
-            for line in out.splitlines():
-                if line.startswith('E1SBODY_VAR|'):
-                    _, key, value = line.split('|', 2); values[key] = value
-                elif line.startswith('E1SBODY_SOURCE|'):
-                    _, target, value = line.split('|', 2); sources[target] = value
-                elif line.startswith('E1SBODY_STEP|'):
-                    _, target, index, value = line.split('|', 3)
-                    steps.setdefault(target, {})[index] = value
-            if set(values) != set(KEYS):
-                raise ValueError('Incomplete component variable inventory')
-            variants[str(bounds)] = {'values': values, 'sources': sources, 'steps': steps}
+            outputs[str(bounds)] = self.run_query(query, component, bounds, component, root)
+            variants[str(bounds)] = {'values': self.variables(outputs[str(bounds)]),
+                                    'actual_recipe_stream': str(outputs[str(bounds)])}
         selection_keys = ['OBJS', 'LIBOBJS', 'CFILES', 'COBJS', 'CXXFILES', 'CXXOBJS', 'SFILES', 'SOBJS', 'HIB_FILES', 'KLD_FILES']
-        if any(variants['0']['values'][k] != variants['1']['values'][k] for k in selection_keys) or variants['0']['sources'] != variants['1']['sources']:
+        if any(variants['0']['values'][k] != variants['1']['values'][k] for k in selection_keys):
             raise ValueError('Source graph selection depends on compiler-query feature variant')
         selected = variants['0']['values']['OBJS'].split()
         if len(selected) != len(set(selected)):
@@ -310,17 +392,25 @@ class Graph:
                                       'query_variants': variants, 'source_selection_equal_between_variants': True,
                                       'filelist_recipe_source': text[text.index('$(COMPONENT).filelist:'):text.index('ifeq ($(RC_ProjectName)')],
                                       'selected_feature_BOUND_CHECKS': self.feature['BOUND_CHECKS']}
-        for index, target in enumerate(selected):
-            if target not in recipes or target not in variants['0']['sources']:
+        selected_set = set(selected)
+        rows_by_target = {}
+        for zero, one in zip_longest(self.records(outputs['0']), self.records(outputs['1'])):
+            self.memory('recipe-' + component)
+            if zero is None or one is None or (zero['target'], zero['source']) != (one['target'], one['source']):
+                raise ValueError('Source/target recipe selection differs between actual query variants')
+            target = zero['target']
+            if target not in selected_set:
+                continue
+            if target not in recipes or target in rows_by_target:
                 raise ValueError('Selected object has no genuine source/recipe: ' + component + '/' + target)
-            expression = variants['0']['sources'][target]
+            expression = zero['source']
             source = Path(expression) if Path(expression).is_absolute() else root / expression
             source = source.resolve()
             row = {'id': component + '/' + target, 'component': component, 'target': target,
-                   'selection_index': index, 'original_source_expression': source_expressions[target],
+                   'selection_index': selected.index(target), 'original_source_expression': source_expressions[target],
                    'source': str(source), 'original_recipe_lines': recipes[target]['recipe'],
-                   'expanded_steps_by_query_BOUND_CHECKS': {str(b): variants[str(b)]['steps'][target] for b in [0, 1]},
-                   'selected_expanded_steps': variants[str(self.feature['BOUND_CHECKS'])]['steps'][target],
+                   'expanded_steps_by_query_BOUND_CHECKS': {'0': zero['steps'], '1': one['steps']},
+                   'selected_expanded_steps': (zero if self.feature['BOUND_CHECKS'] == 0 else one)['steps'],
                    'compiler_feature_decision_qualified': True, 'compiler_vector_input_closure_complete': False, 'object_compiled': False}
             row['language'] = 'c++' if source.suffix in ('.cp', '.cpp') else 'asm' if source.suffix in ('.s', '.S') else 'c'
             compiles = []
@@ -344,7 +434,52 @@ class Graph:
                            expected_Make_path_not_materialized=True)
             else:
                 row.update(source_kind='pending-genuine-generated-producer', source_sha256=None)
-            self.rows.append(row)
+            recipe_path = self.out / 'recipes' / component / (target + '.json')
+            write(recipe_path, row)
+            light = {k: v for k, v in row.items() if k not in ['expanded_steps_by_query_BOUND_CHECKS', 'selected_expanded_steps', 'selected_compiler_argv', 'original_recipe_lines']}
+            light['recipe'] = {'path': str(recipe_path), 'sha256': sha(recipe_path)}
+            rows_by_target[target] = light
+        if set(rows_by_target) != selected_set:
+            raise ValueError('Missing selected recipe records in actual Make stream')
+        self.rows.extend(rows_by_target[target] for target in selected)
+
+    def restore_components(self):
+        """Consume completed actual component facts; never rerun their Make queries."""
+        for component, root in self.config_roots.items():
+            self.memory('restore-' + component)
+            variants = {}
+            for bounds in [0, 1]:
+                path = self.out / 'queries' / (component + '-bounds' + str(bounds) + '.stdout.txt')
+                self.pin(path)
+                variants[str(bounds)] = {'values': self.variables(path), 'actual_recipe_stream': str(path)}
+            for key in ['OBJS', 'LIBOBJS', 'CFILES', 'COBJS', 'CXXFILES', 'CXXOBJS', 'SFILES', 'SOBJS', 'HIB_FILES', 'KLD_FILES']:
+                if variants['0']['values'][key] != variants['1']['values'][key]:
+                    raise ValueError('Retained actual source selection is inconsistent')
+            selected = variants['0']['values']['OBJS'].split()
+            if len(selected) != len(set(selected)):
+                raise ValueError('Duplicate retained selected object')
+            text = (root / 'Makefile').read_text()
+            self.components[component] = {'makefile': str(root / 'Makefile'), 'makefile_sha256': sha(root / 'Makefile'),
+                'ordered_OBJS': selected, 'ordered_LIBOBJS': variants['0']['values']['LIBOBJS'].split(),
+                'query_variants': variants, 'source_selection_equal_between_variants': True,
+                'filelist_recipe_source': text[text.index('$(COMPONENT).filelist:'):text.index('ifeq ($(RC_ProjectName)')],
+                'selected_feature_BOUND_CHECKS': self.feature['BOUND_CHECKS'], 'Make_requery_performed': False}
+            for index, target in enumerate(selected):
+                recipe = self.out / 'recipes' / component / (target + '.json')
+                self.pin(recipe)
+                row = json.loads(recipe.read_text())
+                if (row['id'], row['selection_index']) != (component + '/' + target, index):
+                    raise ValueError('Retained recipe selection/order differs')
+                if row['selected_expanded_steps'] != row['expanded_steps_by_query_BOUND_CHECKS'][str(self.feature['BOUND_CHECKS'])]:
+                    raise ValueError('Retained recipe selected wrong actual compiler feature')
+                if row['source_kind'] == 'actual-native-derived-source':
+                    source = Path(row['source'])
+                    self.pin(source, self.manifest[str(source.relative_to(self.source))])
+                    if row['source_sha256'] != sha(source):
+                        raise ValueError('Retained source identity differs')
+                light = {k: v for k, v in row.items() if k not in ['expanded_steps_by_query_BOUND_CHECKS', 'selected_expanded_steps', 'selected_compiler_argv', 'original_recipe_lines']}
+                light['recipe'] = {'path': str(recipe), 'sha256': sha(recipe)}
+                self.rows.append(light)
 
     def tails(self):
         path = self.source / 'makedefs/MakeInc.kernel'
@@ -374,14 +509,15 @@ class Graph:
                 if row['original_profile_removal'] not in text:
                     raise ValueError('Constructor source policy changed')
             output.append(row)
-        write(self.out / 'direct-tails.json', output)
+        write(self.report_out / 'direct-tails.json', output)
         self.query_tails_and_link(output, text)
         return output
 
     def query_tails_and_link(self, tails, kernel_text):
         root = self.out / 'configuration/kernel/DEVELOPMENT'
-        root.mkdir(parents=True)
-        query = self.out / 'queries/kernel.mk'
+        root.mkdir(parents=True, exist_ok=self.reuse)
+        query = self.report_out / 'queries/kernel.mk'
+        query.parent.mkdir(parents=True, exist_ok=True)
         cmdfile = self.source / 'makedefs/MakeInc.cmd'
         self.pin(cmdfile, self.manifest['makedefs/MakeInc.cmd'])
         platform = re.findall(r'^SUPPORTED_PLATFORMS :=.*$', cmdfile.read_text(), re.M)
@@ -409,12 +545,13 @@ class Graph:
         for bounds in [0, 1]:
             stdout = self.run_query(query, 'kernel', bounds, 'kernel', root)
             steps, link_values = {}, {}
-            for line in stdout.splitlines():
-                if line.startswith('E1STAIL|'):
-                    _, target, index, value = line.split('|', 3)
-                    steps.setdefault(target, {})[index] = value
-                elif line.startswith('E1SLINK|'):
-                    _, key, value = line.split('|', 2); link_values[key] = value
+            with stdout.open() as stream:
+                for line in stream:
+                    if line.startswith('E1STAIL|'):
+                        _, target, index, value = line.rstrip('\n').split('|', 3)
+                        steps.setdefault(target, {})[index] = value
+                    elif line.startswith('E1SLINK|'):
+                        _, key, value = line.rstrip('\n').split('|', 2); link_values[key] = value
             if set(steps) != {r['target'] for r in tails} or link_values['USE_LTO'] == '1':
                 raise ValueError('Incomplete native direct-tail/non-LTO linker query')
             variants[str(bounds)] = {'direct_tail_steps': steps, 'link': link_values}
@@ -422,18 +559,20 @@ class Graph:
             row['expanded_steps_by_query_BOUND_CHECKS'] = {str(b): variants[str(b)]['direct_tail_steps'][row['target']] for b in [0, 1]}
             row['selected_expanded_steps'] = variants[str(self.feature['BOUND_CHECKS'])]['direct_tail_steps'][row['target']]
             compiles = [shlex.split(step) for step in row['selected_expanded_steps'].values()
-                        if shlex.split(step) and shlex.split(step)[0] == str(self.compiler)]
+                        if step.lstrip().startswith(str(self.compiler) + ' ')]
             if len(compiles) != 1:
                 raise ValueError('Incomplete selected direct-tail compiler vector')
             row['selected_compiler_argv'] = compiles[0]
+            row['postprocess_tool_binding'] = self.segment_tool if row['target'] == 'lastkernelconstructor.o' else None
         self.link = {'original_non_LTO_driver_recipe': link, 'original_prerequisite_expression': prerequisite,
                      'query_variants': variants, 'selected': variants[str(self.feature['BOUND_CHECKS'])]['link'],
                      'actual_linker_or_backend_probe_executed': False, 'link_input_closure_complete': False,
                      'private37_ABI_unchanged': True}
-        write(self.out / 'direct-tails.json', tails)
-        write(self.out / 'link-driver.json', self.link)
+        write(self.report_out / 'direct-tails.json', tails)
+        write(self.report_out / 'link-driver.json', self.link)
 
     def finish(self, tails):
+        self.memory('finish')
         for path, digest in self.inputs.items():
             if sha(path) != digest:
                 raise ValueError('Input changed during source query: ' + path)
@@ -451,12 +590,18 @@ class Graph:
                                        'BOUND_CHECKS': self.feature['BOUND_CHECKS'], 'no_probe_executed_by_STR016': True,
                                        'both_query_variants_preserved': True, 'full_compiler_input_closure_qualified': False},
                   'mandatory_sanitizer_rule': self.sanitizer, 'link_driver': self.link,
+                  'segment_postprocessor': self.segment_tool, 'component_context_root': str(self.out),
+                  'reused_completed_component_stage': self.reuse, 'component_queries_reexecuted': not self.reuse,
                   'SDK_provided': False, 'target_tools_executed': False, 'old_objects_adopted': False,
                   'full_kernel_or_private37_ABI_or_runtime_or_hardware_qualified': False}
-        write(self.out / 'body-graph.json', result)
-        write(self.out / 'commands.json', self.commands)
-        write(self.out / 'input-bindings.json', self.inputs)
-        write(self.out / 'preparation-result.json', {'outcome': 'pass', 'objects': len(self.rows),
+        write(self.report_out / 'body-graph.json', result)
+        write(self.report_out / 'commands.json', self.commands)
+        write(self.report_out / 'input-bindings.json', self.inputs)
+        write(self.report_out / 'memory-samples.json', {'parent_RSS_cap_bytes': 256 * 1024**2,
+              'parent_AS_cap': None, 'serial_Make_AS_cap_bytes': 256 * 1024**2,
+              'work_boundary_checks': self.memory_checks, 'samples': self.memory_samples,
+              'aggregate_child_RSS_peak_not_sampled': True})
+        write(self.report_out / 'preparation-result.json', {'outcome': 'pass', 'objects': len(self.rows),
               'component_count': len(self.components), 'direct_tails': len(tails),
               'status_counts': result['status_counts'], 'actual_Make_commands': len(self.commands),
               'controller_status': [line for line in Path('/proc/self/status').read_text().splitlines() if line.startswith(('VmRSS:', 'VmHWM:'))]})
@@ -467,26 +612,32 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--main', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--reuse-components', type=Path)
     args = parser.parse_args()
-    resource.setrlimit(resource.RLIMIT_AS, (256 * 1024**2, 256 * 1024**2))
     available = int(next(l.split()[1] for l in Path('/proc/meminfo').read_text().splitlines() if l.startswith('MemAvailable:'))) * 1024
     if available < 4 * 1024**3:
         raise ValueError('Require at least4GiB MemAvailable for source queries')
     start = time.monotonic()
-    g = Graph(args.main, args.out)
+    g = Graph(args.main, args.out, args.reuse_components)
     try:
         g.load()
-        for component, root in g.config_roots.items():
-            g.inventory_component(component, root)
+        if g.reuse:
+            g.restore_components()
+        else:
+            for component, root in g.config_roots.items():
+                g.inventory_component(component, root)
+                print(json.dumps({'component': component, 'selected_objects': len(g.components[component]['ordered_OBJS']),
+                                  'source_statuses': dict(Counter(r['source_kind'] for r in g.rows if r['component'] == component))}), flush=True)
         tails = g.tails()
         result = g.finish(tails)
         print(json.dumps({'outcome': 'pass', 'objects': result['selected_component_objects'],
                           'status_counts': result['status_counts'], 'wall_seconds': time.monotonic() - start}))
     except Exception as error:
-        if g.out.exists():
-            write(g.out / 'preparation-result.json', {'outcome': 'fail', 'error': type(error).__name__ + ': ' + str(error),
+        if g.report_out.exists():
+            write(g.report_out / 'preparation-result.json', {'outcome': 'fail', 'error': type(error).__name__ + ': ' + str(error),
                                                      'wall_seconds': time.monotonic() - start})
-            write(g.out / 'commands.json', g.commands)
+            write(g.report_out / 'commands.json', g.commands)
+            write(g.report_out / 'memory-samples.json', {'work_boundary_checks': g.memory_checks, 'samples': g.memory_samples})
         raise
 
 
