@@ -47,3 +47,9 @@ Root received the exact plan/input-binding hashes, count, experiment, owner,
 worktree and absent proposed output promptly. The later second-wave build needs
 a separate new root allocation and registered build experiment. Keep VM-019 in
 progress. No worker MAIN publication/common checks or task closure is performed.
+
+Root's follow-up requires a distinct actual planned experiment. The recorded
+source-only `VM019FINALPLAN-001` history remains preserved. Register
+`VM019FINALBUILD-001` against `final-resource-build.md` and leave it PLANNED until
+actual execution after a separate root grant, binding the same sealed absent
+actual output. No plan rerun is needed or performed.
