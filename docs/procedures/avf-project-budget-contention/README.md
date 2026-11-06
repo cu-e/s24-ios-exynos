@@ -121,3 +121,26 @@ It proves one command/one resource-deferred object record, resources inconclusiv
 and no second dispatch. It fabricates no Mach-O object and makes no source or
 namespace qualification claim. Final-sample checks preserve real successful
 Python child bytes while recording incomplete or failed resource qualification.
+
+A separate fix3 prototype tests kernel blocking flock with a raising, finite
+one-shot SIGALRM. It does not claim FIFO ordering. The stable broker inode,
+0.5-second maximum and complete locked validation stay unchanged. This prototype
+is initially unused by transactions; only after its actual cancellation controls
+pass will the transaction call be switched. A new six-controller measurement
+requires its own registration and exact source freeze.
+
+The prototype accepts a single-thread main interpreter, an unblocked/nonpending
+SIGALRM and either no active timer or a callable one-shot outer alarm. Other
+thread, periodic, ignored/default active timer or blocked/pending contexts refuse
+before blocking. Setup/restore mask only SIGALRM; TERM/INT handlers are untouched.
+An earlier outer handler is called at its original deadline and its exception
+propagates; a later outer timer is restored with elapsed time deducted. The
+replacement handler raises because Python3.14 retries EINTR. Pending replacement
+alarms are consumed while blocked during restoration, so they cannot leak into a
+restored outer handler. Real process controls check timeout, earlier deadline,
+remaining-timer restoration, immediate success, unsupported contexts and repeated
+TERM/INT cancellation with owned child cleanup.
+
+Primary API references: [Python fcntl](https://docs.python.org/3.14/library/fcntl.html),
+[Python signals](https://docs.python.org/3.14/library/signal.html),
+[Linux flock](https://man7.org/linux/man-pages/man2/flock.2.html).
