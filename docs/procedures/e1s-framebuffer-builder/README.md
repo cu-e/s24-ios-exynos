@@ -42,3 +42,15 @@ build XNU or establish a native boot, safe physical framebuffer ownership,
 scanout, MMIO, Android recovery or phone behavior. Earlier fixed log/boot-mark
 writes and all physical preconditions documented by STR005 remain unchanged.
 Independent review, publication/common and root acceptance precede SR8 closure.
+
+Root60 executed STR008BUILD-001 once: all21 ordinary builder commands exited0.
+RAM check/apply at indices1/2 precede display check/apply3/4 and all8 target
+compiles5/6/11..16. Exact23b31/0689 snapshots report applied=true; all8 products,
+post-overlay source bodies, tool and input hashes were read back exact. Raw
+882ffb73 and actual report4419e266 are bound in evidence.json. Elapsed4.364s,
+peak sampled owned-tree RSS137,654,272 bytes, root controller HWM30,789,632 bytes,
+zero survivors. No author rerun or additional compiler control occurred.
+
+Ready for independent review and minimal publication/common; originalSR8 claim
+remains open until explicit root acceptance. Earlier STR003/STR005 physical
+witnesses and all failed results remain unchanged.
