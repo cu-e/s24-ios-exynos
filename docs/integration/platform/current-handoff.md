@@ -1,0 +1,45 @@
+# INT-003 current platform handoff
+
+Original owner `codex-integrator-platform-20261106-cn`, still in progress.
+Earlier handoff/source/report bytes remain immutable because published plans
+bind them. This new current handoff supplements those historical snapshots.
+
+Root-approved grant21 published the exact combined VM-036 correction and final
+AF193 adoption candidate at27352788619e594314a1a85a12f07e82fc279184. The single
+continuously locked common check passed170 tests in16.614 seconds, exit0,
+peak409260032 bytes, zero owned survivors. Exact matching lease21 was released
+atomically under the stable integration lock with exact readback: heavy/qemu
+null, all unrelated fields and policyv2/six-global6GiB preserved. Root accepted
+source/common; `component-integration-20261106/publication.json` binds receipts.
+
+The frozen physical adapter is
+`worktrees/vm-036-dz-af193-20261106/tools/build/avf_guest_components.py`,
+SHAe62d7592fc35cdc3c011eac2ee537bdcfa09e3ab9308cf17d422e0b7f39e29aa;
+policy748db1c0 selects the exact accepted physical VM-039 AF193 process engine.
+All three reproduced P2s and the narrow adoption are independently reviewed.
+The 951/stage1 and75fe/stage2 preparation packets remain preserved. There is no
+automatic VM-044 repin or component execution from this source acceptance.
+
+Original cx/VM020 and cy/VM021 were explicitly activated for fresh derived
+source plans under NEW planned actual experiments, preserving immutable units,
+argv/filelists and absent canonical execution roots. Root will grant an actual
+serial ONE-compiler allocation after both plan intakes. No component compiler,
+archiver, loader-main or guest result exists from grant21. Original DZ's VM036
+remains active until actual intended component criteria are met; original owners
+alone record products and eventually close tasks after explicit acceptance.
+
+VM022 cu received source-only product/report schema and exact future archive
+membership: Firehose provider.o only, pthread kern_init/support/synch.o exactly.
+All products remain missing until measured and independently accepted. Full
+link/provider/native/private-ABI/FIPS and hardware gates remain separate.
+
+Bounded GPU012 source intake7f33334 passed31 canonical-body/recipe comparisons
+with no concrete authentication/snapshot/session-contract finding. Compilation,
+sanitizers, typed overrides, IOConnect and Xclipse remain unmeasured. Its old
+afc5/two-job proposal needs fresh process/runtime/namespace/resource admission
+before any future root compile lease. It is not a first-console dependency.
+
+Next: intake original cx/cy exact new plans and route root's distinct serial
+allocation. No publication/common or extra compiler may overlap a future root
+wave. Coordinate any later integration using fresh MAIN HEAD and one stable
+shared integration lock; never edit another owner's registry or frozen source.
