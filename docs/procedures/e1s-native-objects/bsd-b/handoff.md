@@ -124,3 +124,21 @@ order, preserving different caller/sourceplan identities,12of170ONLY.002 stays
 PLANNED/unexecuted/absent. OriginalSR25 records003 FAIL exactlyonce. Root now
 authorizes SOURCEONLY004 for remaining158 originalpartition[12:170], starting
 pktsched_netem, same007077/header/context/flags; no actualtargetuntilfreshgrant.
+
+
+CM independently PREFIXONLY accepted actual003new7: finalreviewd9aff7176b8536022526c7c244e6be8941aa39176fd57aae21e69f94eaef7efa,
+combined12-products56755b310ddd429e42dbb169724b4f10cd55d05146491295788b550e679b0c64,
+products401bed71220a059fe70b7c42b470b9d5afc0f37027b65a6badae0f87c227dd91,
+evidencef5a870d79de09946b4d28254cd8fca4b7a4024ba2633584fc25bc8a4d674fc52.
+No whole003/170 pass, eighthcancelled remainsunqualified. Root106 thresholds
+and unrelated projects stay unchanged; worker performs no queue action.
+
+STR025BUILD-004 preregisteredPLANNED. One sourceCLIexit0/empty stderr plan004
+/home/egor/dev/pet/s24-ios-exynos/worktrees/str-025-e1s-native-bsd-b-20261106/artifacts/e1s-native-compile/bsd-b/plan-004/plan.json
+SHAc38fcc616647dfba60050d840f17790c00396bfc8783d69d7f2029cd627c6b5f; manifest e77f4fc594b05b1c24804a871d94bb61989399ba7ba5f0f633fbb74cad41c777.
+Exactlyremaining158 original[12:170], firstpktsched_netem,lastsubr_sbuf, unchanged
+007077/FH14be/context/profile/nativeflags/whole1800. Originalargvsubsetproof
+fbcb6d92d0f8b1c4c71c37a3800aa81bd4a808d7f8b1b8f8b38f140df029cac4; derivedvectors onlyprivateoutputprefix differs from003[7:].
+Futurebuild004 absent/no projection/targettools; sourceRSSunmeasured. Current
+accepted12+pending158 covers original170 exactlyonce, retaining per-attempt
+provenance. Await fresh explicit root actual004 grant; no retry/resume/fixes.
