@@ -97,9 +97,15 @@ endpoints and refusal of the unqualified payload-RAM fallback. This does not
 establish that a supplied DTB describes every firmware carve-out. A nonempty
 reservation list is a conservative acceptance policy, not physical RAM proof.
 The first admitted host compile failed because the extracted regression fixture
-omitted two original loader constants. Its failure is preserved as STRMEM-001;
-the original owner is correcting the fixture before a fresh measured run.
-No tests or target objects are credited from that failure.
+omitted two original loader constants. Its failure is preserved as STRMEM-001.
+After copying the exact donor definitions into the extraction, the fresh
+STRMEM-002 run passed all six genuine commands: six baseline reproductions,
+35 patched controls under ASan/UBSan and two AArch64 freestanding compilations.
+Both output objects have ELF machine183. The measured batch took3.351seconds;
+all owned sessions were empty afterward. This is a host-verified E1S donor
+loader correction; full loader linkage and actual hardware behavior remain
+separate. Raw result SHA256 is
+`bc377c3975df286869892be6094c695852e10a0b3d2ca9552cc9d7cf268c4c90`.
 
 The real immediate queue is STR-002 correctness/actual-C verification, followed
 by STR-003's small hook in the existing E1S builder so the reviewed patch is
