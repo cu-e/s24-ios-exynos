@@ -62,3 +62,25 @@ implementation, not a selected private Apple IIG oracle. Generated-source
 compilation, private ABI, full kernel/link/runtime/hardware and old-object credit
 remain unqualified. Independent review/publication/common/root acceptance are
 required before originalSR17 closure.
+
+## Root77 runner preparation (not execution)
+
+The artifact runner is `artifacts/e1s-development-iig/root77/run-native-iig-001.py`
+(SHA256 `e581d3ae0ca5d35abc80a82f9690c557de0ea42bd818e146aa69e4a40995b5da`).
+It adapts the existing source-generation runner and calls pinned `qemu_host.run`
+with the existing cancellation and work guard: one serial parser, 512 MiB combined
+controller/session RSS, 120 seconds per child, and 600 seconds for the operation.
+It uses no Landlock output sandbox and adds no shared executor. The existing
+supervisor records combined stdout/stderr, live session samples and bounded
+owned cleanup. A separate exact root grant and live exclusive `light_compile`
+allocation are required before any target invocation; the template is explicitly
+unapproved.
+
+Syntax parsing and read-only preflight passed: all 6,334 input hashes, ten host
+library resolution/hash bindings and 17 executable/include vectors matched;
+the prospective output was absent. The preparation receipt is
+`artifacts/e1s-development-iig/root77/runner-preparation.json`
+(SHA256 `93ec59bdf87d8197de25faae6cc9efa0cfb75a708cf6f8d7906cb51da79952df`).
+The runner verifies fresh generated products and copies the 17 exact source
+headers only after all 17 generators succeed. No parser or compiler executed in
+this preparation. Root76 MIG admission precedes the prospective root77 run.
