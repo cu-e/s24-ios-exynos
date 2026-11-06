@@ -88,3 +88,21 @@ is first5+remaining165 exactlyonce. Same2676 physicalcaller. Empty stderr/raw
 exit0 saved; sourceplanRSS unmeasured. Futurebuild002 absent/privateprojection
 notcreated. STR025BUILD-002 preregistered PLANNED, actualexecutionNOTgranted.
 Wait separate root less-concurrent exact allocation after85 reconciliation.
+
+
+Root89 proactively authorized ADDITIVE STR025BUILD-003/source-only for accepted
+STR033 caller007077d1eabdf0e3d9e8c1ac86121291f6dd9c12eabf38adc8fd4bae50120188.
+Manifest e768fddee19eafbb9b510dff5f06987ed0bd9931b76ee7a65a2ce00bf80b8664
+keeps SAME165 remaining IDs/whole1800 and freshbuild003. One planCLIexit0,
+empty stderr; plan003 SHA7d86e3581f5f72485e639f56321e8115e2a88a3c3b40fa6adabae899480dedc3. Originalargv proof SHAf47550624b2d1fdedffdde05aa61fa3b9a982cde2e62c1705bf8425adee6075f
+exactlymatches002 for all165 IDs; derivedargv differs only ownoutputprefix,
+source/recipe/graph/sharedcontext/portableprofile remain unchanged. Sourceproof
+records72unchanged config projections plus exactlyone genuine2582byte14be
+Firehoseheader under futureprivateBSDcwd/os via existing-I. No actualprojection.
+Root007077 headerauthority source lineage remains HOST-SOURCE-EXPORT, no fresh
+nativeexport/SDK/archive/providerABI/layout credit. Actualsubr_log include is
+originalpartition166/remaining161. No003 compile or loader invoked.
+002 is now superseded for actualexecution only: old2676plan, unexecutedplanned
+experiment and absentbuild002 are preserved, never claimed as actualrun.001
+five qualified products retain original2676 provenance without relabeling.
+003 is preregisteredPLANNED; wait separate root exactProjectBudget grant.
