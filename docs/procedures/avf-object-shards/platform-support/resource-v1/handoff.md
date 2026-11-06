@@ -56,3 +56,37 @@ Next: root owns any corrected allocation and new explicit attempt authorization.
 Preserve this failed directory/receipt and prior plan; never overwrite/retry
 build-001 implicitly. Actual experiment VM043RESOURCEBUILD-001 records this
 failed outcome. No current compiler/process remains; VM043 stays in progress.
+
+
+## Grant31 new002 actual result: 13 PASS
+
+Root separately granted experiment VM043RESOURCEBUILD-002/fresh build-002,
+canonical allocation61dd3304 and approvalf97fde50, unchanged9929 executor and
+64e7 whole1200-second launcher. Exact source plan88eadd reused with unchanged
+provenance/shard/selected13 keys/recipes; metadata authority is separate.
+Direct exact command started PID171034/start59873541 at
+2026-11-06T07:40:22.286534+00:00; tool session55923 exited0. All13 actual compiler
+commands and resulting objects/dependencies PASS, resourcequalificationPASS.
+No retry/resume/source/flags/pin changes or old-profile credit.
+
+Raw build-002/runner/evidence.json SHA
+4c409f2bc90f9737f53d1806f39b831112666879e4f2f3e087e1b9bb240c3c3e;
+actual plan e14376b8eb9d9e684b56ed9ac848441ee4996e25ea7dd20fce6cb5ad1baf8bed;
+input-bindings295e6edab63199b6ee1bcd245d43ede66dcb1c1429edc599389bc53f10307406.
+Terminal426b7375884a63e929001e488d6d2a0fad544bfbf08e5ac8389212c924e104bf,
+reservation snapshotc620b42023ab9c40e6782652c796af595630f0f1678e2c417e01eb2d86067166.
+The conventional actual capsule is this directory's evidence.json. It binds all
+actual13 sidecars/object/dep hashes and reports unique imports from those actual
+sidecars; CN independently assesses physical objects without compiler rerun.
+
+Aggregate per-command peak217890816B <512MiB; project peak observed694611968B
+<6GiB, sum child elapsed7.210957603s. Current helper exec-image HWM176758784B;
+inherited1380720640B separately labelled. All13 after-process lists empty,
+launcher absent, exact pid/start matches0, own reservationCOMPLETE. Global queue
+is root-owned and was not released by EO. No process/compiler remains for EO.
+
+Next: record actual experiment PASS, send exact scoped result commit and hashes
+to CN/root/INT002 for independent review and serialized current-HEAD common
+acceptance. Original EO alone closes VM043 after explicit root acceptance.
+Do not rerun compile/MD/plan/common, publish MAIN, link or run QEMU. Preserve
+failed30, all prior plans and old VM018DONE. This is13 object evidence only.
