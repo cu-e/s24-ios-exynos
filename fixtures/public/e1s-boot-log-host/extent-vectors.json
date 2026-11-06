@@ -1,0 +1,87 @@
+{
+  "schema": "e1s-boot-log-prospective-extent-oracle-v1",
+  "origin": "source-derived Python arbitrary-precision arithmetic; actual C not executed",
+  "vectors": [
+    {
+      "id": "normal-inline",
+      "image": "0x80000000",
+      "actual_linker_end": "0x80040000",
+      "selected_payload": "0x80040000",
+      "expected_success": true,
+      "expected_reserved_size": "0x2040000",
+      "invalid_preserves_output_sentinel": false
+    },
+    {
+      "id": "external-payload",
+      "image": "0x80000000",
+      "actual_linker_end": "0x80300000",
+      "selected_payload": "0x90000000",
+      "expected_success": true,
+      "expected_reserved_size": "0x12000000",
+      "invalid_preserves_output_sentinel": false
+    },
+    {
+      "id": "payload-below",
+      "image": "0x80000000",
+      "actual_linker_end": "0x80040000",
+      "selected_payload": "0x10000000",
+      "expected_success": true,
+      "expected_reserved_size": "0x2040000",
+      "invalid_preserves_output_sentinel": false
+    },
+    {
+      "id": "larger-loader",
+      "image": "0x80000000",
+      "actual_linker_end": "0x83000000",
+      "selected_payload": "0x70000000",
+      "expected_success": true,
+      "expected_reserved_size": "0x3000000",
+      "invalid_preserves_output_sentinel": false
+    },
+    {
+      "id": "end-before-image",
+      "image": "0x80000000",
+      "actual_linker_end": "0x7fffffff",
+      "selected_payload": "0x80040000",
+      "expected_success": false,
+      "expected_reserved_size": null,
+      "invalid_preserves_output_sentinel": true
+    },
+    {
+      "id": "payload-offset-overflow",
+      "image": "0x0",
+      "actual_linker_end": "0xffffffffffffffff",
+      "selected_payload": "0xffffffffffffffff",
+      "expected_success": false,
+      "expected_reserved_size": null,
+      "invalid_preserves_output_sentinel": true
+    },
+    {
+      "id": "excluded-end-overflow",
+      "image": "0xffffffffffffffef",
+      "actual_linker_end": "0xffffffffffffffff",
+      "selected_payload": "0xffffffffffffffef",
+      "expected_success": false,
+      "expected_reserved_size": null,
+      "invalid_preserves_output_sentinel": true
+    },
+    {
+      "id": "largest-safe-excluded-end",
+      "image": "0xfffffffffdfbffff",
+      "actual_linker_end": "0xfffffffffdfc0000",
+      "selected_payload": "0x0",
+      "expected_success": true,
+      "expected_reserved_size": "0x2040000",
+      "invalid_preserves_output_sentinel": false
+    },
+    {
+      "id": "default-reserve",
+      "image": "0x0",
+      "actual_linker_end": "0x40000",
+      "selected_payload": "0x0",
+      "expected_success": true,
+      "expected_reserved_size": "0x2040000",
+      "invalid_preserves_output_sentinel": false
+    }
+  ]
+}
