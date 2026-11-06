@@ -1,0 +1,11 @@
+# STR011 handoff
+
+Owner: `codex-e1s-development-exports-20261106-sr11`. Worktree/branch: `str-011-e1s-development-exports-20261106` / `team/str-011-e1s-development-exports-20261106`, based on accepted MAIN `b993ad9678ed3c77713087f62dafb5d40e36ceec`.
+
+The source-only full raw namespace is ready for independent review. Read `README.md`, the fixture descriptor, actual `prepare-003/{source-export-manifest,traversal,query-inventory,input-bindings,commands}.json`, and `controls-001/evidence.json`. The descriptor provides all physical paths. No generator/compiler grant is requested for this completed source-copy/query outcome.
+
+Actual preparation command: `timeout --signal=TERM --kill-after=5s 600s python3 -B fixtures/public/e1s-development-exports/prepare.py --main /home/egor/dev/pet/s24-ios-exynos --out /home/egor/dev/pet/s24-ios-exynos/worktrees/str-011-e1s-development-exports-20261106/artifacts/e1s-development-exports/prepare-003`, exit0. Actual checker: `timeout --signal=TERM --kill-after=5s 120s python3 -B fixtures/public/e1s-development-exports/check.py --prepared artifacts/e1s-development-exports/prepare-003 --out artifacts/e1s-development-exports/controls-001`, exit0. The planned experiment is E1SEXPORTPREP-003; previous001/002 are recorded FAIL and preserved.
+
+Source input: STR004 prepared manifest `f884bf7fa08afdffd2f4ba0840ae44d666f1b9848700aaa8f5f88e4dcbe42ba2` and native source profile `8ef30b4a7481ea1d00c14edc409aa7e72b17eca93f269bb0bc41179f615cf99d`. Configuration input: accepted STR009 full eight-component descriptor `6b0ac2c8e82b2837a94f628ee5c291105559a0607e3febac56fc7e7b6527cf9a`; all 165 actual generated products copied by hash, no regeneration. Qualified compiler7972 is pinned as a future context input only and never executed. Actual source Make rules/recursive modes and included files are hash-bound.
+
+Next: independent source/namespace/controls acceptance, root integration/common, then original-owner closure once. Native full-body consumers can use the exact raw namespace; generated rows must resolve through genuine separate producers. Preserve separate MIG modes, manual device rule, external header contexts, fresh assym and six-TU source-port derivative authority. Do not treat raw namespace acceptance as complete SDK, 37 private ABI closure, native kernel/runtime, CPU bringup or safe physical RAM proof.

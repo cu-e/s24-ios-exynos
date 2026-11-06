@@ -18,4 +18,8 @@ python3 -B fixtures/public/e1s-development-exports/prepare.py \
 
 Run serially with finite 20-second Make query timeouts. Preserve real errors and partial outputs rather than changing source declarations or silently skipping a directory. Save every actual command, Make output, included Makefile identity, copied source/config hash and typed generated requirement. Before acceptance, apply bounded semantic rejection controls to provenance, traversal, path containment, conflicting destinations and generated/raw ownership. No broad source corpus replay or compiler execution is needed.
 
+`prepare-001` exited0 but yielded zero exports and is recorded as a failed qualification: generated component Makefiles select configured object bodies/flags, while source component Makefiles declare the root export traversal. The corrected `prepare-002` queries source Makefiles for export declarations, passing the exact actual generated configuration flags. Only the separate selected MIG root inventory queries the generated osfmk Makefile. The prior source/output snapshot remains unchanged, including its rejected self-reported pass.
+
+`prepare-002` materialized the real namespace but failed commands JSON serialization under the unchanged 256MiB address-space cap; the exception-path serializer raised the same `MemoryError`. Preserve that partial output and source snapshot as failed. `prepare-003` streams JSON into files rather than assembling another complete serialized string; selection, namespace and limits remain unchanged.
+
 The result is a raw export namespace and MIG prerequisite inventory. Complete generated-header closure, 37 private exported ABI requirements, kernel/provider link, native startup, physical RAM and device behavior remain unqualified.

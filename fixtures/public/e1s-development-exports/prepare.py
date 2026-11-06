@@ -11,6 +11,7 @@ import resource
 import shlex
 import shutil
 import subprocess
+import sys
 import time
 
 OWNER = 'codex-e1s-development-exports-20261106-sr11'
@@ -28,7 +29,9 @@ def sha(path):
 
 def write(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2) + '\n')
+    with path.open('w') as f:
+        json.dump(data, f, indent=2)
+        f.write('\n')
 
 
 def below(root, relative):
@@ -53,6 +56,7 @@ class Preparation:
         self.inputs = {}
         self.commands = []
         self.cache = {}
+        self.query_records = []
         self.rows = []
         self.by_output = {}
         self.source_files = {}
@@ -123,20 +127,21 @@ class Preparation:
                               'compiler_or_generator_execution': False,
                               'CFLAGS_or_compiler_capability_qualified': False}
 
-    def query(self, component, directory):
-        key = (component, str(directory))
+    def query(self, component, directory, configured=False):
+        key = (component, str(directory), configured)
         if key in self.cache:
             return self.cache[key]
         relative = directory.relative_to(self.source)
         self.source_pin(directory / 'Makefile')
-        makefile = self.configs[component] / 'Makefile' if directory == self.source / component else directory / 'Makefile'
+        makefile = self.configs[component] / 'Makefile' if configured else directory / 'Makefile'
         if makefile.is_relative_to(self.source):
             self.source_pin(makefile)
         else:
             self.pin(makefile)
         cwd = self.out / 'query-build' / relative
         cwd.mkdir(parents=True, exist_ok=True)
-        query = self.out / 'queries' / (str(relative).replace('/', '-') + '.mk')
+        role = '-configured' if configured else '-declared'
+        query = self.out / 'queries' / (str(relative).replace('/', '-') + role + '.mk')
         query.parent.mkdir(exist_ok=True)
         query.write_text('include ' + str(makefile) + '\n' + ''.join('$(info E1SEXPORT|' + k + '|$(' + k + '))\n' for k in KEYS) +
                          '$(info E1SMAKEFILES|$(MAKEFILE_LIST))\n.PHONY: e1s_exports_query\ne1s_exports_query: ;\n')
@@ -161,7 +166,7 @@ class Preparation:
             env = {'PATH': '/usr/bin:/bin', 'LANG': 'C', 'LC_ALL': 'C'}
             before = time.monotonic()
             p = subprocess.run(argv, cwd=cwd, env=env, capture_output=True, text=True, timeout=20)
-            label = str(relative).replace('/', '-') + '-bounds' + str(bounds)
+            label = str(relative).replace('/', '-') + role + '-bounds' + str(bounds)
             (self.out / 'queries' / (label + '.stdout.txt')).write_text(p.stdout)
             (self.out / 'queries' / (label + '.stderr.txt')).write_text(p.stderr)
             self.commands.append({'argv': argv, 'cwd': str(cwd), 'env': env, 'exit_code': p.returncode,
@@ -183,6 +188,9 @@ class Preparation:
             alternatives.append(values)
         if alternatives[0] != alternatives[1]:
             raise ValueError('Export/MIG selections depend on query-only bounds setting')
+        self.query_records.append({'component': component, 'directory': str(relative),
+                                   'configured': configured, 'makefile': str(makefile),
+                                   'query': str(query), 'values': alternatives[0]})
         self.cache[key] = alternatives[0]
         return alternatives[0]
 
@@ -194,7 +202,7 @@ class Preparation:
                'list': 'EXPORT_' + mode + ('_GEN_LIST' if generated else '_LIST'),
                'destination': destination, 'name': name, 'generated': generated,
                'declaration': str((directory / 'Makefile').relative_to(self.source)),
-               'query_makefile': str(self.configs[component] / 'Makefile') if directory == self.source / component else str(directory / 'Makefile')}
+               'query_makefile': str(directory / 'Makefile')}
         if generated:
             row['status'] = 'requires_actual_generated_producer'
         else:
@@ -239,7 +247,7 @@ class Preparation:
         write(self.out / 'source-export-manifest.json', self.rows)
 
     def mig_prerequisites(self):
-        root = self.query('osfmk', self.source / 'osfmk')
+        root = self.query('osfmk', self.source / 'osfmk', configured=True)
         rows = []
         for child in root['COMP_SUBDIRS'].split():
             directory = below(self.source / 'osfmk', child)
@@ -247,11 +255,16 @@ class Preparation:
             selected = {key: values[key] for key in KEYS if key.startswith('MIG') or key in ['COMP_FILES', 'DEVICE_FILES']}
             if any(value for key, value in selected.items() if key.startswith('MIG')):
                 rows.append({'directory': str(directory.relative_to(self.source)), 'selection': selected,
+                             'mode_output_lists': {
+                                 'internal': {k: selected[k].split() for k in ['MIG_KUHDRS', 'MIG_KSHDRS', 'MIG_KUSRC', 'MIG_KSSRC']},
+                                 'export': {k: selected[k].split() for k in ['MIG_UUHDRS', 'MIG_USHDRS']}},
                              'internal_and_export_outputs_must_remain_separate': True, 'actual_generation': False})
         write(self.out / 'mig-prerequisites.json', rows)
         return rows
 
     def finish(self, mig):
+        if not self.source_files:
+            raise ValueError('No real raw export namespace was produced')
         for path, digest in self.inputs.items():
             if sha(path) != digest:
                 raise ValueError('Input changed before finalization: ' + path)
@@ -270,6 +283,7 @@ class Preparation:
                       'generated_producers_imported': False, 'coherent_full_header_route_complete': False,
                       'SDK_or_private37_ABI_or_full_kernel_or_hardware_qualified': False}
         write(self.out / 'generated-development.json', descriptor)
+        write(self.out / 'query-inventory.json', self.query_records)
         write(self.out / 'input-bindings.json', self.inputs)
         write(self.out / 'commands.json', self.commands)
         write(self.out / 'preparation-result.json', {'outcome': 'pass', 'commands': len(self.commands),
@@ -298,10 +312,11 @@ def main():
         print(json.dumps({'outcome': 'pass', 'raw_exports': result['raw_export_count'],
                           'descriptor_sha256': sha(p.out / 'generated-development.json'), 'wall_seconds': time.monotonic() - started}))
     except Exception as error:
+        print(type(error).__name__ + ': ' + str(error), file=sys.stderr)
         if p.out.exists():
-            write(p.out / 'commands.json', p.commands)
             write(p.out / 'preparation-result.json', {'outcome': 'fail', 'error': type(error).__name__ + ': ' + str(error),
                                                      'wall_seconds': time.monotonic() - started})
+            write(p.out / 'commands.json', p.commands)
         raise
 
 

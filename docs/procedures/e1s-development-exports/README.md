@@ -1,0 +1,17 @@
+# Native E1S source export namespace
+
+STR011 materializes 976 unique genuine raw export files from the accepted eight-component DEVELOPMENT/ARM64/E1S/iPhoneOS source/configuration context. It preserves 75 generated export rows as pending actual producers. These counts describe declarations and output bytes, not an SDK or complete generated-header route.
+
+The raw namespace and all source/declaration/query hashes are bound by `fixtures/public/e1s-development-exports/generated-development.json`. Its physical root remains in the STR011 worktree's `artifacts/e1s-development-exports/prepare-003/EXPORT_HDRS`; the descriptor also provides copied actual configuration roots. The original STR004 source, STR009 products and every earlier output remain unchanged.
+
+MI recursion follows `EXPINC_SUBDIRS`; MD recursion follows `EXPINC_SUBDIRS_ARM64`. Each visited source Makefile supplies only its corresponding list. Actual generated configuration flags are passed into these queries. The separate generated osfmk Makefile supplies selected `COMP_SUBDIRS` for the MIG prerequisite inventory. Both query-only `BOUND_CHECKS` values produce identical export/MIG selections across 99 directories; this avoids the parse-time compiler probe and does not establish compiler capability or qualify future CFLAGS.
+
+The MIG inventory preserves actual `MIGFLAGS`, `MIGKUFLAGS`, `MIGKSFLAGS`, generic internal/export output lists and source-specific `DEVICE_FILES`. In particular, `osfmk/device` manually generates `device_server.h` and `device_server.c` as internal outputs; its empty generic `MIG_K*` lists do not mean no device producer is needed. No MIG invocation was executed. Identically named internal and exported Mach headers must remain in separate output roots when their real producers run.
+
+All 163 source export names and bodies used by the two actual STR007 native objects are present identically in this full declared namespace. This is byte/source identity evidence; it does not recompile or relabel those old object contexts. STR010 syscall, STR012 version, future MIG/assym/IIG and external TargetConditionals/availability outputs retain their separate exact producer/context requirements. A later six-TU native source-port derivative likewise needs explicit source composition; this task does not mutate or silently rename the STR004 parent.
+
+The actual successful preparation took 4.297 seconds, with `/proc/self/status` VmHWM 25864kB under its unchanged 256MiB address-space cap. All 198 finite read-only Make queries exited0. A separate checker physically verified the namespace and producer inputs and rejected 15 meaningful mutations, including crossed MI/MD recursion, missing exports, changed source/declaration, generated-as-raw claims and filesystem escapes/symlinks. It invoked no Make, compiler or generator.
+
+The first attempt queried the wrong root Makefile and returned zero exports despite its helper self-reporting pass; the experiment is recorded FAIL. The second reached the real namespace but failed metadata serialization under the cap; it remains FAIL. Exact source/partial-output snapshots are preserved. The successful third attempt changes JSON serialization to streaming and retains the same selections and limits.
+
+No compiler/MIG/IIG/target tool, provider link, native startup, physical CPU/RAM/device operation or phone interaction occurred. The 37 private exported ABI requirements remain open.
