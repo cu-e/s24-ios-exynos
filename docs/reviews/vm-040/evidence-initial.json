@@ -1,0 +1,109 @@
+{
+  "QEMU_executed": false,
+  "acceptance_state": "Changes required; no task completion. Original author owns fixes in separate WT; independent recheck plus actual integration/common acceptance remain.",
+  "artifacts": [
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm040-20261106/docs/reviews/vm-040/findings.md",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm040-20261106/docs/reviews/vm-040/initial-artifact-index.json",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm040-20261106/docs/reviews/vm-040/runs/lease-expiry-1/report.json",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm040-20261106/docs/reviews/vm-040/runs/lease-expiry-1/owned-python-record.json",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm040-20261106/docs/reviews/vm-040/runs/fdt-predicates-1/report.json",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm040-20261106/docs/reviews/vm-040/runs/source-controls-1/report.json"
+  ],
+  "branch": "team/rev-vm040-20261106",
+  "commands": [
+    {
+      "argv": [
+        "timeout",
+        "--kill-after=2s",
+        "30s",
+        "python3",
+        "-s",
+        "docs/reviews/vm-040/lease_repro.py"
+      ],
+      "exit_code": 0,
+      "measured_result": "finding_reproduced:true; genuine Python SID3472977 created with expired virtual lease, exit-15, zero survivors; explicit prepare/protocol/root dependency seams only"
+    },
+    {
+      "argv": [
+        "timeout",
+        "--kill-after=2s",
+        "10s",
+        "python3",
+        "-s",
+        "docs/reviews/vm-040/fdt_repro.py"
+      ],
+      "exit_code": 0,
+      "measured_result": "four source/property counterexamples accepted by original FDT contract"
+    },
+    {
+      "argv": [
+        "timeout",
+        "--kill-after=2s",
+        "30s",
+        "python3",
+        "-s",
+        "docs/reviews/vm-040/review_controls.py"
+      ],
+      "exit_code": 0,
+      "measured_result": "76 checks,19 rejections,43 bindings pass; supporting scope only"
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "commit": "a18cc54db319ad45de0702c16bb69b926d08e1e0",
+  "common_checks_executed": false,
+  "compiler_executed": false,
+  "environment": {
+    "LC_ALL": "C",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONNOUSERSITE": "1",
+    "PYTHONUTF8": "1"
+  },
+  "experiment": "REVCOLLECT-001",
+  "guest_executed": false,
+  "hashes": {
+    "fdt_report_sha256": "f45fd093b06e995d92cb29d56504ee1107204f4a92f52b07dcbdc88bdc82aeac",
+    "initial_artifact_index_sha256": "9f4b9737046640a99a518253c07e0d2b8ecb78751d0a6a108e5fc98ab5d213e0",
+    "lease_report_sha256": "e5619b123550415d72dc575839c6823419a239cbf8c2c6010e27445082b2311c",
+    "reviewed_collector_sha256": "82dc4f31e0a43431e49741bc26368ff81c3820a21985a97fef82c11f6f9e6589",
+    "supporting_report_sha256": "4a28e22c196d2ae98f7ce34a3bfcad4289b7a811cf6f4fe5ddce07560279fc9d"
+  },
+  "kind": "host-test",
+  "limitations": [
+    "Actual empty allowlist still refuses all genuine-image runs; full admitted-image branch unmeasured.",
+    "Python process and authored FDT controls do not execute C/shim/QEMU/kernel/PID1.",
+    "Original physical source/tool/capsules remain immutable; no producer fix by reviewer.",
+    "Root/INT002 notified of exact P2 reports; wait minimal corrected freeze before acceptance."
+  ],
+  "origin": "local-host",
+  "outcome": "fail",
+  "owner": "codex-review-kernel-collector-20261106-vm037",
+  "physical_phone_operations": false,
+  "recorded_at": "2026-11-06T05:34:09.885893+00:00",
+  "resources": {
+    "address_space_limit_bytes": 268435456,
+    "external_actual_MemAvailable_admission": [
+      22805889024,
+      22715924480,
+      22753656832
+    ],
+    "external_sample_spacing_seconds": 1,
+    "lease_control_actual_child_exit": -15,
+    "lease_control_actual_controller_VmHWM_bytes": 22163456,
+    "lease_control_owned_survivors": [],
+    "lease_control_real_children": 1,
+    "limitation": "No aggregate RSS or genuine QEMU/kernel measurement claimed.",
+    "supporting_control_actual_controller_VmHWM_bytes": 34168832,
+    "virtual_clock": "Only collect lease timeline injected; three external review child-admission samples are actual."
+  },
+  "schema_version": 1,
+  "summary": "Two independent P2 source-contract findings require correction: lease can expire between final sample and Popen (actual Python-only spawn then cleanup), and paused FDT gate accepts memory/compatible/GIC-span fields that do not match real shim consumers. Supporting76 checks/19 negatives/43 original bindings pass; image allowlist remains empty. No compiler/QEMU/guest/runtime claim.",
+  "task": "REV-037",
+  "worktree": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm040-20261106"
+}
