@@ -1183,25 +1183,56 @@ class CoherentFile:
     def __enter__(self):return self
 
     def __exit__(self, typ, value, traceback):
+        failure, cleanup_errors = None, []
         try:
             if typ is None:self.check()
-        finally:
-            try:
-                for resource in reversed(self.resources):resource.close()
-            finally:self.stream.close()
+        except BaseException as error:failure = error
+        for resource in reversed(self.resources):
+            try:resource.close()
+            except BaseException as error:cleanup_errors.append(error)
+        try:self.stream.close()
+        except BaseException as error:cleanup_errors.append(error)
+        # Never replace a body/identity error with a later cleanup error.
+        original = value if typ is not None else failure
+        if original is not None:
+            for error in cleanup_errors:original.add_note('Inspection cleanup: '+repr(error))
+            if typ is None:raise original
+        elif cleanup_errors:
+            for error in cleanup_errors[1:]:cleanup_errors[0].add_note('Additional cleanup: '+repr(error))
+            raise cleanup_errors[0]
 
 
 class SymbolIndex:
     """Disk-backed exact symbol mapping; fixed SQLite page cache, streaming cursors."""
     def __init__(self):
         self.temporary = tempfile.TemporaryDirectory(prefix='vm022-symbols-')
+        self.cursors = set()
         self.db = sqlite3.connect(str(Path(self.temporary.name)/'symbols.db'))
-        self.db.execute('PRAGMA cache_size=-2048')
-        self.db.execute('PRAGMA temp_store=FILE')
-        self.db.execute('PRAGMA journal_mode=OFF')
-        self.db.execute('PRAGMA synchronous=OFF')
-        self.db.execute('CREATE TABLE symbols(name TEXT PRIMARY KEY, type INTEGER, section INTEGER, value BLOB, undefined INTEGER) WITHOUT ROWID')
+        for statement in ['PRAGMA cache_size=-2048','PRAGMA temp_store=FILE',
+            'PRAGMA journal_mode=OFF','PRAGMA synchronous=OFF',
+            'CREATE TABLE symbols(name TEXT PRIMARY KEY, type INTEGER, section INTEGER, value BLOB, undefined INTEGER) WITHOUT ROWID']:
+            with self.query(statement):pass
         self.count = 0
+
+    def require_open(self):
+        if self.db is None:raise ValueError('Symbol index lifetime ended with its snapshot')
+
+    def finish_cursor(self, cursor):
+        if cursor in self.cursors:
+            try:cursor.close()
+            finally:self.cursors.discard(cursor)
+
+    @contextmanager
+    def query(self, statement, parameters=()):
+        self.require_open()
+        cursor = self.db.execute(statement,parameters)
+        self.cursors.add(cursor)
+        try:yield cursor
+        except BaseException as original:
+            try:self.finish_cursor(cursor)
+            except BaseException as error:original.add_note('Symbol cursor cleanup: '+repr(error))
+            raise
+        else:self.finish_cursor(cursor)
 
     @staticmethod
     def record(row):
@@ -1209,14 +1240,17 @@ class SymbolIndex:
 
     def add(self, name, typ, section, value):
         fields = (typ,section,struct.pack('<Q',value),int((typ & 0x0e) == 0 and value == 0))
-        cursor = self.db.execute('INSERT OR IGNORE INTO symbols VALUES(?,?,?,?,?)',(name,*fields))
-        if cursor.rowcount:self.count += 1
-        elif self[name] != self.record(fields):raise ValueError('Conflicting external symbol definitions')
+        with self.query('INSERT OR IGNORE INTO symbols VALUES(?,?,?,?,?)',(name,*fields)) as cursor:
+            if cursor.rowcount:self.count += 1
+            elif self[name] != self.record(fields):raise ValueError('Conflicting external symbol definitions')
 
-    def finish(self):self.db.commit()
-    def __len__(self):return self.count
+    def finish(self):
+        self.require_open();self.db.commit()
+    def __len__(self):
+        self.require_open();return self.count
     def get(self,name,default=None):
-        row = self.db.execute('SELECT type,section,value,undefined FROM symbols WHERE name=?',(name,)).fetchone()
+        with self.query('SELECT type,section,value,undefined FROM symbols WHERE name=?',(name,)) as cursor:
+            row = cursor.fetchone()
         return default if row is None else self.record(row)
     def __getitem__(self,name):
         value = self.get(name)
@@ -1224,15 +1258,37 @@ class SymbolIndex:
         return value
     def __contains__(self,name):return self.get(name) is not None
     def items(self):
-        for name,typ,section,value,undefined in self.db.execute('SELECT name,type,section,value,undefined FROM symbols ORDER BY name'):
-            yield name,self.record((typ,section,value,undefined))
+        with self.query('SELECT name,type,section,value,undefined FROM symbols ORDER BY name') as cursor:
+            while True:
+                self.require_open()
+                row = cursor.fetchone()
+                if row is None:return
+                name,typ,section,value,undefined = row
+                yield name,self.record((typ,section,value,undefined))
     def values(self):
-        for row in self.db.execute('SELECT type,section,value,undefined FROM symbols'):
-            yield self.record(row)
+        with self.query('SELECT type,section,value,undefined FROM symbols') as cursor:
+            while True:
+                self.require_open()
+                row = cursor.fetchone()
+                if row is None:return
+                yield self.record(row)
     def close(self):
+        errors = []
         if getattr(self,'db',None) is not None:
-            self.db.close();self.db = None
-            self.temporary.cleanup()
+            # Retained Python generators may outlive this context. Finalize
+            # their actual cursors eagerly; sqlite close alone defers the FD.
+            for cursor in tuple(self.cursors):
+                try:self.finish_cursor(cursor)
+                except BaseException as error:errors.append(error)
+            try:self.db.close()
+            except BaseException as error:errors.append(error)
+            finally:
+                self.db = None
+                try:self.temporary.cleanup()
+                except BaseException as error:errors.append(error)
+        if errors:
+            for error in errors[1:]:errors[0].add_note('Additional symbol cleanup: '+repr(error))
+            raise errors[0]
     def __del__(self):self.close()
 
 
@@ -1935,7 +1991,7 @@ def execute_link_stage_reserved(args, common, cancellation):
             if measured['cache'].get(binding['path']) != binding['sha256']:
                 raise ValueError('Original immutable producer object changed')
         validate_tools()
-        report.update(outcome='incomplete',image=dict(path=plan['image'],sha256=image['sha256']),
+        report.update(outcome='inconclusive',image=dict(path=plan['image'],sha256=image['sha256']),
             archive=dict(path=plan['archive'],sha256=members.sha256,members=1083),
             allocator_retention_qualified=False,actual_selected_archive_member_imports_unmeasured=True,
             completion_gate='Closed: genuine relocation-aware allocator retention and source-qualified selected runtime link-map/member/import measurements required',
