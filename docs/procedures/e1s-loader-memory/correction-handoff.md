@@ -9,15 +9,17 @@ are unchanged. Only the preparation checker and correction documentation differ.
 
 The actual first original-compile failure is preserved in
 failure-001-evidence.json and the root raw evidence/log it binds. STRMEM-001 was
-recorded fail; STRMEM-002 was registered planned. No compiler or control has run
-in this correction worktree. The initial evidence-record CLI schema rejection
+recorded fail; STRMEM-002 was registered planned. At that planning boundary no correction compiler or control had run.
+Root subsequently admitted STRMEM-002 once: all six commands passed; see
+evidence.json for actual commands, logs, source/runtime/output hashes and cleanup. The initial evidence-record CLI schema rejection
 is also retained; the conventional wrapper subsequently recorded successfully.
 
 The selected six-command plan and exact resource contract are in
-procedure-002.md. Root received plan cb3b5d9f and checker 57e1aae0; it will admit
-and execute them. Earlier correction plans remain unexecuted and superseded.
-The next step is to inspect root's actual STRMEM-002 evidence without repeating
-commands, then record the result and exact artifact hashes. No task completion,
+procedure-002.md. Root executed plan cb3b5d9f with checker 57e1aae0 once under grant36. Earlier correction plans remain unexecuted and superseded.
+The actual baseline reproduced six defects; patched actual C passed35 controls
+under ASan/UBSan. Both patched files compiled to ELF64 ET_REL/EM_AARCH64 objects.
+All24 input hashes and all4 output hashes match. Next: independent code review
+and root acceptance; do not repeat commands or close the task before acceptance. No task completion,
 ordinary builder application or hardware safety claim follows from preparation.
 
 The original attributed patch contains literal unified-diff whitespace. Preserve
