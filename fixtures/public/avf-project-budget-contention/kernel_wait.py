@@ -63,15 +63,33 @@ def worker(mode, out, lock_path):
                 except OuterDeadline:pass
                 check('successful acquisition preserves earlier outer deadline',len(events)==1 and .25<events[0]-before<.43)
             elif mode.startswith('cancel-'):
+                restoration='restore' in mode
+                expected_alarm=old_handler; cancel_count=[]; injected=[]; original_signal=signal.signal
+                if restoration:
+                    def expected_alarm(signum,frame):raise OuterDeadline()
+                    signal.signal(signal.SIGALRM,expected_alarm);signal.setitimer(signal.ITIMER_REAL,.9)
                 sig=getattr(signal,mode.split('-')[1]);previous=signal.getsignal(sig)
-                def cancel(signum,frame):raise Cancelled()
+                def cancel(signum,frame):cancel_count.append(signum);raise Cancelled()
                 signal.signal(sig,cancel)
                 child=subprocess.Popen([sys.executable,'-c','import time;time.sleep(8)'],cwd='/tmp',start_new_session=True)
                 (out/(mode+'.ready')).write_text(json.dumps({'child_pid':child.pid,'controller_pid':os.getpid()}))
-                try:e.bounded_flock(lock,.5)
-                except Cancelled:pass
-                else:raise ValueError('cancellation lost')
-                check('TERM/INT handler preserved and alarm restored',signal.getsignal(sig)==cancel and signal.getsignal(signal.SIGALRM)==old_handler and signal.getitimer(signal.ITIMER_REAL)==(0.0,0.0))
+                if restoration:
+                    def at_restore(signum,handler):
+                        if signum==signal.SIGALRM and handler is expected_alarm and not injected:
+                            injected.append(time.monotonic());os.kill(os.getpid(),sig)
+                        return original_signal(signum,handler)
+                    e.signal.signal=at_restore
+                try:
+                    try:e.bounded_flock(lock,.5)
+                    except Cancelled:pass
+                    else:raise ValueError('cancellation lost')
+                finally:e.signal.signal=original_signal
+                timer=signal.getitimer(signal.ITIMER_REAL)
+                check('TERM/INT handler preserved and alarm restored',signal.getsignal(sig)==cancel and signal.getsignal(signal.SIGALRM)==expected_alarm and (restoration or timer==(0.0,0.0)))
+                if restoration:
+                    check('second actual cancellation delivered only after restoration',len(injected)==1 and cancel_count==[sig,sig])
+                    check('original exact signal mask restored despite second cancellation',signal.pthread_sigmask(signal.SIG_BLOCK,set())==old_mask)
+                    check('original outer timer remaining deadline retained',.5<timer[0]<.9 and timer[1]==0)
                 signal.signal(sig,previous)
             elif mode=='unsupported':
                 for interval,handler in [(.2,outer),(0,signal.SIG_IGN),(0,signal.SIG_DFL)]:
@@ -116,7 +134,7 @@ def worker(mode, out, lock_path):
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--main',type=Path);parser.add_argument('--out',type=Path,required=True);parser.add_argument('--worker');parser.add_argument('--lock',type=Path);args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--main',type=Path);parser.add_argument('--out',type=Path,required=True);parser.add_argument('--worker');parser.add_argument('--lock',type=Path);parser.add_argument('--restoration-only',action='store_true');args=parser.parse_args()
     if args.worker:return worker(args.worker,args.out,args.lock)
     out=args.out.resolve()
     if not out.is_relative_to(ROOT/'artifacts') or out.exists():raise ValueError('fresh own artifact output required')
@@ -135,6 +153,7 @@ def main():
         if not ready.exists():raise ValueError('holder not ready')
         identity=(lock.stat().st_dev,lock.stat().st_ino)
         modes=['timeout','earlier','later','success','unsupported']+['cancel-'+sig+'-'+str(n) for n in range(3) for sig in ['SIGTERM','SIGINT']]
+        if args.restoration_only:modes=['cancel-'+sig+'-restore-'+str(n) for n in range(3) for sig in ['SIGTERM','SIGINT']]
         # Cancellation names carry round suffix; each worker uses unique paths.
         for mode in modes:
             proc=subprocess.Popen([sys.executable,__file__,'--worker',mode,'--out',str(out),'--lock',str(lock)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True);actors.append(proc)

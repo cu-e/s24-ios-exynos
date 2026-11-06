@@ -62,7 +62,8 @@ def main():
         new_methods = {n.name:n for n in new_nodes['ProjectBudget'].body if isinstance(n,ast.FunctionDef)}
         check('only requested-session lookup and bounded lock acquisition change inside broker class', set(n for n in old_methods if ast.dump(old_methods[n]) != ast.dump(new_methods[n])) == {'sample','transaction'})
         prototype = nodes((args.main/'worktrees/vm-044-ep-fix3-20261106/tools/build/avf_kernel_objects.py').read_text())
-        check('bounded kernel-wait helper matches actually tested prototype AST', ast.dump(prototype['bounded_flock']) == ast.dump(new_nodes['bounded_flock']))
+        expected_helper = ast.parse(ast.unparse(prototype['bounded_flock']).replace('signal.SIG_BLOCK, {signal.SIGALRM})\n        if previous_timer', 'signal.SIG_BLOCK, {signal.SIGALRM, signal.SIGTERM, signal.SIGINT})\n        if previous_timer')).body[0]
+        check('bounded kernel-wait helper differs from tested prototype only by restoration cancellation mask', ast.dump(expected_helper) == ast.dump(new_nodes['bounded_flock']))
         check('all profile/key/recipe/ownership/allocation/finitewait/watchdog guard ASTs unchanged', all(ast.dump(old_nodes[n]) == ast.dump(new_nodes[n]) for n in old_nodes if n not in changed))
         first = out/'outside/ancestor/common'; first.mkdir(parents=True); inside = out/'new-project'; inside.mkdir()
         one = subprocess.Popen([sys.executable, '-c', 'import time;time.sleep(15)'], cwd=first, start_new_session=True)

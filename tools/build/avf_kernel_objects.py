@@ -612,7 +612,9 @@ def bounded_flock(lock, timeout=.5):
         if time.monotonic() >= lock_deadline:
             raise ValueError('Project budget lock acquisition timed out')
     finally:
-        signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGALRM})
+        # Defer repeated cancellation until handler, timer and original mask
+        # are restored; pending TERM/INT then retain their original delivery.
+        signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGALRM, signal.SIGTERM, signal.SIGINT})
         if previous_timer is not None:
             signal.setitimer(signal.ITIMER_REAL, 0)
             # Consume only the replacement alarm while blocked, so it cannot
