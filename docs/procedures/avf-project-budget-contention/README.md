@@ -20,7 +20,13 @@ successful acquisition to transaction return (a conservative held-time bound),
 /proc scans, live-validation time and fsync time. Source files and guards are not
 patched during measurement. Host memory/pressure and swap observations are
 retained; host swap is not attributed causally to this project. Unsafe pressure
-or memory admission defers the test, with no automatic retry.
+or memory admission defers the test, with no automatic retry. The conservative
+host-control-only gate reuses accepted `qemu_host.pressured`: full avg10 >=2 or
+some avg10 >=10, plus three one-second observations of MemAvailable >=4GiB.
+This follows the coordinator instruction to defer observed PSI pressure; the
+resource queue itself does not define a PSI threshold, and production budget
+behavior is not changed by this harness condition. The same gate is checked
+after measurement.
 
 The correction must follow the measured bottleneck, keep the finite0.5-second
 lock guard and every ownership/allocation/snapshot/canonical/deadline/cleanup

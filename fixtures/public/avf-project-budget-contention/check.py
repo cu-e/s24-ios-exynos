@@ -24,7 +24,9 @@ def engine(path):
 
 
 def save(path, value):
-    path.write_text(json.dumps(value, indent=2)+'\n')
+    temporary = path.with_name(path.name+'.next')
+    temporary.write_text(json.dumps(value, indent=2)+'\n')
+    os.replace(temporary, path)
 
 
 def wait_file(path, seconds):
