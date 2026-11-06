@@ -147,13 +147,21 @@ def derive(common, manifest_path, manifest_sha):
                 require(value == '.' or (str(cwd/path) in projections and arg == '-include'), 'Unknown relative native input: '+value)
             elif not path.exists():
                 absent.add(str(path))
-        rows.append(dict(id=identifier, component=component, source=source['path'], source_sha256=source['sha256'], original_argv=original, argv=argv, cwd=str(cwd), object=str(obj), depfile=str(dep), recipe=row['recipe']))
+        rows.append(dict(id=identifier, component=component, namespace_cwd=str(cfg), source=source['path'], source_sha256=source['sha256'], original_argv=original, argv=argv, cwd=str(cwd), object=str(obj), depfile=str(dep), recipe=row['recipe']))
     runtime = common.load_project(HERE/'runtime.json', RUNTIME_SHA)
     inputs[str(HERE/'runtime.json')] = RUNTIME_SHA
     inputs.update(runtime['files'])
     for path,h in inputs.items():
         require(Path(path).resolve(strict=True) == Path(path) and not Path(path).is_symlink() and digest(path) == h, 'Changed/aliased native input: '+path)
-    return dict(schema='e1s-native-component-plan-v1', resource_profile='project-budget-v1', task=manifest['task'], owner=manifest['owner'], experiment=manifest['experiment'], shard=manifest['partition'], manifest={'path':str(manifest_path),'sha256':manifest_sha}, executor_sha256=digest(__file__), out=str(out), whole_seconds=manifest['whole_seconds'], max_jobs=1, max_owned_rss_bytes=512*1024**2, graph=interface['graph'], context=interface['consumer_context'], profile=interface['portable_compiler_profile_selection'], commands=rows, projections=projections, inputs=inputs, absent_inputs=sorted(absent), runtime=runtime, runtime_lookup={cwd:runtime_lookup(runtime,cwd) for cwd in sorted({r['cwd'] for r in rows})}, loader_commands={cwd:[runtime['interpreter'],'--list',str(compiler)] for cwd in sorted({r['cwd'] for r in rows})}, compiled=False)
+    result = dict(schema='e1s-native-component-plan-v1', resource_profile='project-budget-v1', task=manifest['task'], owner=manifest['owner'], experiment=manifest['experiment'], shard=manifest['partition'], manifest={'path':str(manifest_path),'sha256':manifest_sha}, executor_sha256=digest(__file__), out=str(out), whole_seconds=manifest['whole_seconds'], max_jobs=1, max_owned_rss_bytes=512*1024**2, graph=interface['graph'], context=interface['consumer_context'], profile=interface['portable_compiler_profile_selection'], commands=rows, projections=projections, inputs=inputs, absent_inputs=sorted(absent), runtime=runtime, runtime_lookup={cwd:runtime_lookup(runtime,cwd) for cwd in sorted({r['cwd'] for r in rows})}, loader_commands={cwd:[runtime['interpreter'],'--list',str(compiler)] for cwd in sorted({r['cwd'] for r in rows})}, compiled=False)
+    result['namespace'] = native_namespace(common, result)
+    return result
+
+
+def native_namespace(common, plan):
+    rows = [dict(cwd=row['namespace_cwd'], bound_source=row['source'],
+                 next_owned_compile_argv_template=row['argv']) for row in plan['commands']]
+    return common.namespace(rows, plan['inputs'], common.Digests())
 
 
 def runtime_lookup(runtime, cwd):
@@ -173,7 +181,8 @@ def runtime_lookup(runtime, cwd):
     return result
 
 
-def verify(plan):
+def verify(common, plan):
+    require(native_namespace(common, plan) == plan['namespace'], 'Native include namespace/shadow changed')
     for path,h in plan['inputs'].items():
         require(Path(path).resolve(strict=True) == Path(path) and not Path(path).is_symlink() and digest(path) == h, 'Changed/aliased admitted native input: '+path)
     for cwd,lookup in plan['runtime_lookup'].items():
@@ -231,13 +240,13 @@ def execute(common, plan, source_plan, source_sha, approval_path, approval_sha):
             with cancel.cleanup():
                 budget.reserve(); reserved = True
             cancel.check()
-            ownership(common, manifest, True); verify(plan)
+            ownership(common, manifest, True); verify(common, plan)
             require(not out.exists() and not out.is_symlink(), 'Fresh native output required; no resume')
             out.mkdir(parents=True, exist_ok=False)
             write(out/'execution-plan.json', plan); private_inputs(plan, copy=True)
             loaded = set()
             for number,row in enumerate(plan['commands']):
-                cancel.check(); verify(plan); private_inputs(plan)
+                cancel.check(); verify(common, plan); private_inputs(plan)
                 remaining = plan['whole_seconds']-(time.monotonic()-started)
                 require(remaining > 0, 'Whole native worker deadline')
                 for path in [row['object'],row['depfile']]:
@@ -263,7 +272,7 @@ def execute(common, plan, source_plan, source_sha, approval_path, approval_sha):
                     require(row['source'] in deps, 'Compiler MD omitted exact native source')
                     require(all(p in expected and digest(p) == expected[p] for p in deps), 'Unknown/changed actual native MD input')
                     item.update(input_qualification='pass', depfile_sha256=digest(row['depfile']), dependencies={p:expected[p] for p in deps})
-                verify(plan); private_inputs(plan); cancel.check()
+                verify(common, plan); private_inputs(plan); cancel.check()
                 require(record.get('outcome') == 'pass' and record.get('resource_qualification') == 'pass' and item['object_validity'] == 'pass' and item['input_qualification'] == 'pass', 'Stop after failed/deferred native row')
             report['outcome'] = 'pass'
         except BaseException as error:
@@ -296,7 +305,7 @@ def main():
     p.add_argument('--approval', type=Path); p.add_argument('--approval-sha256')
     a = p.parse_args(); common = module(*PINS[0], 'native_common')
     plan = derive(common, common.canonical_output_path(a.manifest), a.manifest_sha256)
-    verify(plan)
+    verify(common, plan)
     if a.mode == 'plan':
         print(json.dumps(plan,indent=2)); return 0
     require(all([a.source_plan,a.source_plan_sha256,a.approval,a.approval_sha256]), 'Exact source-plan and root approval required')
