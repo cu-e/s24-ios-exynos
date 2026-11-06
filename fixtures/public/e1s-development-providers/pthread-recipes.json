@@ -1,0 +1,273 @@
+{
+  "source_packet": {
+    "path": "/home/egor/dev/pet/s24-ios-exynos/artifacts/team-coordination/20261106-team/str018-preparation/prospective-recipes.json",
+    "sha256": "bd9f2ac92d5c401ebee36c96992e10def9660a7b49e438da706861676cd256e8"
+  },
+  "development_flags": {
+    "base_plus_development_defines": [
+      "-DXNU_KERNEL_PRIVATE",
+      "-DMACH_KERNEL_PRIVATE",
+      "-DABSOLUTETIME_SCALAR_TYPE",
+      "-DNEEDS_SCHED_CALL_T",
+      "-D__PTHREAD_EXPOSE_INTERNALS__",
+      "-DMACH_ASSERT",
+      "-DDEBUG"
+    ],
+    "variant": "development",
+    "optimization": "s",
+    "language": "gnu11",
+    "LLVM_LTO": "NO",
+    "candidate_remaps_require_fresh_review": [
+      "-Dpthread_kern=pthread_kext_kern",
+      "-Dcurrent_uthread=pthread_kext_current_uthread"
+    ],
+    "does_not_import_XNU_fullbody_CFLAGS_into_external_kext": true
+  },
+  "commands": [
+    {
+      "id": "pthread-kern_init",
+      "provider": "pthread",
+      "source": {
+        "path": "/home/egor/dev/pet/s24-ios-exynos/references/xnu-kernel-pthread/kern/kern_init.c",
+        "sha256": "9d789729129734e26d7d68f331e3760dc3bf38ebdad8eace2193745af9544c5d"
+      },
+      "recipe_basis": "Genuine kext development gnu11/Os/nonLTO/base+MACH_ASSERT+DEBUG; explicit source-qualified static integration",
+      "cwd": "${FRESH_PROVIDER_OUT}",
+      "argv_template": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-cxx-storage/source-build-session2/clang",
+        "-target",
+        "arm64-apple-ios16.5",
+        "-mkernel",
+        "-nostdinc",
+        "-fno-builtin",
+        "-fno-common",
+        "-Os",
+        "-std=gnu11",
+        "-DKERNEL=1",
+        "-DKERNEL_PRIVATE=1",
+        "-DPRIVATE=1",
+        "-DARM64_BOARD_CONFIG_E1S",
+        "-D__DARWIN_64_BIT_INO_T=1",
+        "-DXNU_TARGET_OS_IOS=1",
+        "-DXNU_NO_TYPE_BUILTINS=0",
+        "-DXNU_KERNEL_PRIVATE",
+        "-DMACH_KERNEL_PRIVATE",
+        "-DABSOLUTETIME_SCALAR_TYPE",
+        "-DNEEDS_SCHED_CALL_T",
+        "-D__PTHREAD_EXPOSE_INTERNALS__",
+        "-DMACH_ASSERT",
+        "-DDEBUG",
+        "-Werror=implicit-function-declaration",
+        "-Werror=incompatible-pointer-types",
+        "-Dpthread_kern=pthread_kext_kern",
+        "-Dcurrent_uthread=pthread_kext_current_uthread",
+        "-I",
+        "${FRESH_PTHREAD_SOURCE}/private",
+        "-I",
+        "${FRESH_PTHREAD_SOURCE}/include",
+        "-I",
+        "${FRESH_PTHREAD_SOURCE}",
+        "-I",
+        "${FRESH_PROVIDER_OUT}/installtree/System/Library/Frameworks/Kernel.framework/Versions/A/PrivateHeaders",
+        "-I",
+        "${FRESH_PROVIDER_OUT}/installtree/System/Library/Frameworks/Kernel.framework/Versions/A/Headers",
+        "-I",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/open-kernel-inputs/typed-pthread-session1/header-tree/src/Libraries/AvailabilityVersions/include",
+        "-I",
+        "${FRESH_PROVIDER_OUT}/public-availability",
+        "-MD",
+        "-MF",
+        "${FRESH_PROVIDER_OUT}/objects/kern_init.d",
+        "-c",
+        "${FRESH_PTHREAD_SOURCE}/kern/kern_init.c",
+        "-o",
+        "${FRESH_PROVIDER_OUT}/objects/kern_init.o"
+      ],
+      "unbound": [
+        "Fresh claimed worktree/output root",
+        "Independently reviewed staged typed-source patch results and two remaps",
+        "Fresh genuine filtered Kernel.framework header products;exact four MIG export inputs now bound"
+      ],
+      "object": "${FRESH_PROVIDER_OUT}/objects/kern_init.o",
+      "depfile": "${FRESH_PROVIDER_OUT}/objects/kern_init.d"
+    },
+    {
+      "id": "pthread-kern_support",
+      "provider": "pthread",
+      "source": {
+        "path": "/home/egor/dev/pet/s24-ios-exynos/references/xnu-kernel-pthread/kern/kern_support.c",
+        "sha256": "fa1a89e7b431f3d73cb2b5d90374fcd6f4e53d9aaac50544499bc40ca4c4311b"
+      },
+      "recipe_basis": "Genuine kext development gnu11/Os/nonLTO/base+MACH_ASSERT+DEBUG; explicit source-qualified static integration",
+      "cwd": "${FRESH_PROVIDER_OUT}",
+      "argv_template": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-cxx-storage/source-build-session2/clang",
+        "-target",
+        "arm64-apple-ios16.5",
+        "-mkernel",
+        "-nostdinc",
+        "-fno-builtin",
+        "-fno-common",
+        "-Os",
+        "-std=gnu11",
+        "-DKERNEL=1",
+        "-DKERNEL_PRIVATE=1",
+        "-DPRIVATE=1",
+        "-DARM64_BOARD_CONFIG_E1S",
+        "-D__DARWIN_64_BIT_INO_T=1",
+        "-DXNU_TARGET_OS_IOS=1",
+        "-DXNU_NO_TYPE_BUILTINS=0",
+        "-DXNU_KERNEL_PRIVATE",
+        "-DMACH_KERNEL_PRIVATE",
+        "-DABSOLUTETIME_SCALAR_TYPE",
+        "-DNEEDS_SCHED_CALL_T",
+        "-D__PTHREAD_EXPOSE_INTERNALS__",
+        "-DMACH_ASSERT",
+        "-DDEBUG",
+        "-Werror=implicit-function-declaration",
+        "-Werror=incompatible-pointer-types",
+        "-Dpthread_kern=pthread_kext_kern",
+        "-Dcurrent_uthread=pthread_kext_current_uthread",
+        "-I",
+        "${FRESH_PTHREAD_SOURCE}/private",
+        "-I",
+        "${FRESH_PTHREAD_SOURCE}/include",
+        "-I",
+        "${FRESH_PTHREAD_SOURCE}",
+        "-I",
+        "${FRESH_PROVIDER_OUT}/installtree/System/Library/Frameworks/Kernel.framework/Versions/A/PrivateHeaders",
+        "-I",
+        "${FRESH_PROVIDER_OUT}/installtree/System/Library/Frameworks/Kernel.framework/Versions/A/Headers",
+        "-I",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/open-kernel-inputs/typed-pthread-session1/header-tree/src/Libraries/AvailabilityVersions/include",
+        "-I",
+        "${FRESH_PROVIDER_OUT}/public-availability",
+        "-MD",
+        "-MF",
+        "${FRESH_PROVIDER_OUT}/objects/kern_support.d",
+        "-c",
+        "${FRESH_PTHREAD_SOURCE}/kern/kern_support.c",
+        "-o",
+        "${FRESH_PROVIDER_OUT}/objects/kern_support.o"
+      ],
+      "unbound": [
+        "Fresh claimed worktree/output root",
+        "Independently reviewed staged typed-source patch results and two remaps",
+        "Fresh genuine filtered Kernel.framework header products;exact four MIG export inputs now bound"
+      ],
+      "object": "${FRESH_PROVIDER_OUT}/objects/kern_support.o",
+      "depfile": "${FRESH_PROVIDER_OUT}/objects/kern_support.d"
+    },
+    {
+      "id": "pthread-kern_synch",
+      "provider": "pthread",
+      "source": {
+        "path": "/home/egor/dev/pet/s24-ios-exynos/references/xnu-kernel-pthread/kern/kern_synch.c",
+        "sha256": "6c0c19fb9d61a3e08e571f1eb1adc326732f70766adfeec4222864dac0be2f76"
+      },
+      "recipe_basis": "Genuine kext development gnu11/Os/nonLTO/base+MACH_ASSERT+DEBUG; explicit source-qualified static integration",
+      "cwd": "${FRESH_PROVIDER_OUT}",
+      "argv_template": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-compiler-cxx-storage/source-build-session2/clang",
+        "-target",
+        "arm64-apple-ios16.5",
+        "-mkernel",
+        "-nostdinc",
+        "-fno-builtin",
+        "-fno-common",
+        "-Os",
+        "-std=gnu11",
+        "-DKERNEL=1",
+        "-DKERNEL_PRIVATE=1",
+        "-DPRIVATE=1",
+        "-DARM64_BOARD_CONFIG_E1S",
+        "-D__DARWIN_64_BIT_INO_T=1",
+        "-DXNU_TARGET_OS_IOS=1",
+        "-DXNU_NO_TYPE_BUILTINS=0",
+        "-DXNU_KERNEL_PRIVATE",
+        "-DMACH_KERNEL_PRIVATE",
+        "-DABSOLUTETIME_SCALAR_TYPE",
+        "-DNEEDS_SCHED_CALL_T",
+        "-D__PTHREAD_EXPOSE_INTERNALS__",
+        "-DMACH_ASSERT",
+        "-DDEBUG",
+        "-Werror=implicit-function-declaration",
+        "-Werror=incompatible-pointer-types",
+        "-Dpthread_kern=pthread_kext_kern",
+        "-Dcurrent_uthread=pthread_kext_current_uthread",
+        "-I",
+        "${FRESH_PTHREAD_SOURCE}/private",
+        "-I",
+        "${FRESH_PTHREAD_SOURCE}/include",
+        "-I",
+        "${FRESH_PTHREAD_SOURCE}",
+        "-I",
+        "${FRESH_PROVIDER_OUT}/installtree/System/Library/Frameworks/Kernel.framework/Versions/A/PrivateHeaders",
+        "-I",
+        "${FRESH_PROVIDER_OUT}/installtree/System/Library/Frameworks/Kernel.framework/Versions/A/Headers",
+        "-I",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/open-kernel-inputs/typed-pthread-session1/header-tree/src/Libraries/AvailabilityVersions/include",
+        "-I",
+        "${FRESH_PROVIDER_OUT}/public-availability",
+        "-MD",
+        "-MF",
+        "${FRESH_PROVIDER_OUT}/objects/kern_synch.d",
+        "-c",
+        "${FRESH_PTHREAD_SOURCE}/kern/kern_synch.c",
+        "-o",
+        "${FRESH_PROVIDER_OUT}/objects/kern_synch.o"
+      ],
+      "unbound": [
+        "Fresh claimed worktree/output root",
+        "Independently reviewed staged typed-source patch results and two remaps",
+        "Fresh genuine filtered Kernel.framework header products;exact four MIG export inputs now bound"
+      ],
+      "object": "${FRESH_PROVIDER_OUT}/objects/kern_synch.o",
+      "depfile": "${FRESH_PROVIDER_OUT}/objects/kern_synch.d"
+    }
+  ],
+  "public_availability_stage": {
+    "source_root": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-014-e1s-native-source-ports-20261106/artifacts/e1s-native-source-ports/derive-001/xnu/EXTERNAL_HEADERS",
+    "files": [
+      "Availability.h",
+      "AvailabilityInternal.h",
+      "AvailabilityMacros.h"
+    ],
+    "output_root": "${FRESH_PROVIDER_OUT}/public-availability",
+    "identity": "Exact public source bytes;not a selected SDK"
+  },
+  "resource_roots": {
+    "compile": {
+      "explicit_resource_dir": null,
+      "nostdinc": true,
+      "qualified_optional_neon_headers_root": "/home/egor/dev/pet/s24-ios-exynos/artifacts/xnu-kernel-resource-headers/generate-session1/resource/lib/clang/17/include",
+      "optional_headers_are_not_inserted_in_argv_without_recipe_need": true,
+      "XNU_before_optional_vector_headers": true
+    },
+    "link_only_not_used_in_four_compiles_or_two_archive_commands": {
+      "resource_dir": "/home/egor/dev/pet/s24-ios-exynos/worktrees/krn-025-20261105/artifacts/xnu-cc-kext/controls-session2/resource-positive",
+      "archive_sha256": "67304a15d82a6213d1ab2c10ff75181eaccc7cba251ed67beb168ad005bebed5",
+      "no_runtime_rebuild_or_link_in_STR018": true
+    }
+  },
+  "native_alias_source_requirements": [
+    {
+      "alias": "_mach_vm_allocate",
+      "provider": "_mach_vm_allocate_external",
+      "source": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-014-e1s-native-source-ports-20261106/artifacts/e1s-native-source-ports/derive-001/xnu/config/Private.exports",
+      "line": 673
+    },
+    {
+      "alias": "_mach_vm_map",
+      "provider": "_mach_vm_map_external",
+      "source": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-014-e1s-native-source-ports-20261106/artifacts/e1s-native-source-ports/derive-001/xnu/config/Private.arm64.exports",
+      "line": 27
+    },
+    {
+      "alias": "_vm_fault",
+      "provider": "_vm_fault_external",
+      "source": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-014-e1s-native-source-ports-20261106/artifacts/e1s-native-source-ports/derive-001/xnu/config/Private.exports",
+      "line": 970
+    }
+  ]
+}
