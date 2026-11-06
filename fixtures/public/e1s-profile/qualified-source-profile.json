@@ -1,0 +1,230 @@
+{
+  "schema": "e1s-source-profile-v1",
+  "machine": "E1S",
+  "arch": "arm64",
+  "board_macro": "ARM64_BOARD_CONFIG_E1S",
+  "source_capacity": {
+    "MAX_CPUS": 10,
+    "MAX_CPU_CLUSTERS": 4,
+    "MAX_CPU_CLUSTER_PHY_ID": 9
+  },
+  "bringup": {
+    "payload_default_cmdline": "debug=0xc serial=3 cpus=1 keepsyms=1",
+    "requested_cpus": 1,
+    "actual_boot_cpus": null,
+    "actual_mpidrs": null,
+    "smp_qualified": false,
+    "donor_smp_table": [
+      [
+        0,
+        0,
+        0,
+        true
+      ],
+      [
+        256,
+        0,
+        1,
+        true
+      ],
+      [
+        512,
+        0,
+        2,
+        true
+      ],
+      [
+        768,
+        0,
+        3,
+        true
+      ],
+      [
+        1024,
+        1,
+        0,
+        false
+      ],
+      [
+        1280,
+        1,
+        1,
+        false
+      ],
+      [
+        1536,
+        1,
+        2,
+        false
+      ],
+      [
+        1792,
+        2,
+        0,
+        false
+      ],
+      [
+        2048,
+        2,
+        1,
+        false
+      ],
+      [
+        2304,
+        3,
+        0,
+        false
+      ]
+    ],
+    "donor_smp_table_is_device_observation": false
+  },
+  "timer": {
+    "source_timebase_hz": 25600000,
+    "source_virtual_timer_intid": 27,
+    "measured_cntfrq_hz": null
+  },
+  "interrupts": {
+    "source_controller": "arm,gic-v3",
+    "source_gicd_base": 270532608,
+    "source_gicd_size": 65536,
+    "source_gicr_base": 270794752,
+    "source_gicr_size": 1310720,
+    "hardware_delivery_qualified": false
+  },
+  "memory": {
+    "physical_window": null,
+    "complete_live_fdt": null,
+    "firmware_carveouts_qualified": false,
+    "selection": "Validated live FDT with nonempty exclusions; no payload fallback",
+    "loader_patch_sha256": "23b31c44ed9dba9c2da2e5b56ccbe97cd67fa41efff3ec032130eabca6718ae1"
+  },
+  "configuration": null,
+  "required_future_inputs": [
+    "Explicit kernel configuration and coherent E1S generated headers/recipes",
+    "E1S-qualified dependency archives; guest BCM2837 products are not substitutes",
+    "Configuration-specific exports:37 selected RELEASE ABI providers remain unresolved; DEVELOPMENT body link is separate",
+    "Live DTB/backing/carve-outs, boot CPU state and safe recovery before hardware use"
+  ],
+  "source_revisions": {
+    "s24-port": "c8860decc62c6d6180e609036d027a2997972420",
+    "apple-xnu": "c54f35ca767986246321eb901baf8f5ff7923f6a"
+  },
+  "patches": [
+    {
+      "name": "xnu/hackios/redwood.patch",
+      "origin": "pinned-upstream",
+      "sha256": "ac3b2b578a6d1d480079557a576bf1bb4155082d4ee2958373c18f5d78b8e89b"
+    },
+    {
+      "name": "xnu/e1s/patches/0001-e1s-machine-config.patch",
+      "origin": "pinned-upstream",
+      "sha256": "ec2fc2a366152851bc7ab0f74dcb733c839699161178e80096f647b76ecd59e1"
+    },
+    {
+      "name": "xnu/e1s/patches/0002-e1s-input.patch",
+      "origin": "pinned-upstream",
+      "sha256": "96c63c4728cc440b50e062fd77f68ff73aa923d8142805f8ca87aa069b8d3236"
+    },
+    {
+      "name": "xnu/e1s/patches/0003-e1s-touch.patch",
+      "origin": "pinned-upstream",
+      "sha256": "e62c65a1eb6e69899fb1cfec6ccf53df52427d0d51bfe148cdd015f40175cf1e"
+    },
+    {
+      "name": "xnu/e1s/patches/0005-e1s-ufs.patch",
+      "origin": "pinned-upstream",
+      "sha256": "0bf2b97da6e5525ce893e3f2bcf99fbb2dd7a3a4a5c6531a9a5cef8030d3f0bb"
+    },
+    {
+      "name": "xnu/e1s/patches/0006-e1s-camera.patch",
+      "origin": "pinned-upstream",
+      "sha256": "636faf6ed859ed88df5deedeaf8f291c856acb785fd3c471c90879db196ebf2a"
+    },
+    {
+      "name": "xnu/e1s/patches/0007-e1s-pmic.patch",
+      "origin": "pinned-upstream",
+      "sha256": "7dd9eb69c4cea5ad451e74a8336803c99f4a4f8bc3552eeee2d20e3f20c7e6f6"
+    },
+    {
+      "name": "xnu/e1s/patches/0008-e1s-battery.patch",
+      "origin": "pinned-upstream",
+      "sha256": "3688752a4a238a3e54208170bbd71bf68ca536771fc5afe6b3bfd8e1b3909ec1"
+    },
+    {
+      "name": "xnu/e1s/patches/0009-e1s-rtc.patch",
+      "origin": "pinned-upstream",
+      "sha256": "be6994a069517fbef10cd54886be1d615d5ecd51acddbbd7f9b392359f647930"
+    },
+    {
+      "name": "xnu/e1s/patches/0010-e1s-display.patch",
+      "origin": "pinned-upstream",
+      "sha256": "8aed03f1544d1b4920dfe702c93b96de603ca2ab555a85c550bec4b2698af033"
+    },
+    {
+      "name": "xnu/e1s/patches/0011-e1s-log.patch",
+      "origin": "pinned-upstream",
+      "sha256": "2aadce3c3885d570bffb3e27085f3d1421e4a50f24c96adb933eeaaf2f14fdc6"
+    },
+    {
+      "name": "xnu/e1s/patches/0012-e1s-boot-marker.patch",
+      "origin": "pinned-upstream",
+      "sha256": "6301c3a4d098ffdb240efe777fe68f64430ec987219907e6a605504eb6b3606f"
+    },
+    {
+      "name": "xnu/e1s/patches/0013-e1s-rootauth.patch",
+      "origin": "pinned-upstream",
+      "sha256": "8012c12f7e9233f6fe6ac815bb5936a7d09ebde3bbf3801e24459b0053240ce0"
+    },
+    {
+      "name": "xnu/e1s/patches/0014-e1s-early-log.patch",
+      "origin": "pinned-upstream",
+      "sha256": "35d9c759774f28c468bdf95755a1b2ef5ef78fbe82945d513d442ee10e224c7e"
+    },
+    {
+      "name": "xnu/e1s/patches/0015-e1s-video-console.patch",
+      "origin": "pinned-upstream",
+      "sha256": "a79ed1443890076f1301e4a0a3273a0f1d481ec6c0b0277cca5437439bc29b5a"
+    },
+    {
+      "name": "patches/display-input/0001-e1s-stm-coordinate-nibbles.patch",
+      "origin": "local-project",
+      "sha256": "705cba452a520ee98fd0ed93d37bbdb22a7f3004513c7c7dc8acdd63d78dd5bf"
+    }
+  ],
+  "pins_sha256": "ea1d3232476779280c8a913d1b65971efa85121cee1e4b89f5777ac91aff33a7",
+  "prepared_sha256": {
+    "config/MASTER.arm64.e1s": "78df309e3d6a4e1632c09ec39b17725fc692a2469adea9f8b1c8fc822b7bc52e",
+    "pexpert/pexpert/arm64/E1S.h": "4455e62abf7c5dac8fe50efe59ff5da3e801b7b853d42a844ac704cefbe91483",
+    "pexpert/pexpert/arm64/board_config.h": "34b9a3b90aa77e2a1a47c3a4354df25a8bfcbfa4f760c045e5940f37f804d1c2",
+    "bsd/dev/e1s_touch.c": "47e9d6d225d3385c2c701fa6bba5febc77443447e43d8160a13f0c4b6db50b86"
+  },
+  "donor_sha256": {
+    "tools/e1s/xnu/mkadt.py": "1645aa3b2726cce353f3ce93fdbd0e51caec2899af5e75ed257120dc4e8ede22",
+    "tools/e1s/xnu/mkpayload.py": "50c043e4033ceea682bd20134b5283c1abec51985d49609a3bce5ea0a4013ed7",
+    "shim/e1s-xnu/gic.c": "c76d7b82ee9305e510fadee1597a7ea4dfc7fcf734f73606af08f59fa5105985",
+    "shim/e1s-xnu/loader.c": "0786d63bfaa81ec93a3632fdfccc23997c36eb846855b411d091ec6adfe37c50",
+    "shim/e1s-xnu/fdt.c": "ec072f30579711801a6a302aa76332bf658e31896e3d87fa8a16d0533f97b945",
+    "shim/e1s-xnu/fdt.h": "c7e08e5346669ebc28a5aa33871ada7dd54881585ee6f361bc597e6153a6fb6f"
+  },
+  "project_sha256": {
+    "patches/display-input/0001-e1s-stm-coordinate-nibbles.patch": "705cba452a520ee98fd0ed93d37bbdb22a7f3004513c7c7dc8acdd63d78dd5bf",
+    "patches/e1s-boot/0001-loader-memory-validation.patch": "23b31c44ed9dba9c2da2e5b56ccbe97cd67fa41efff3ec032130eabca6718ae1",
+    "fixtures/public/e1s-loader-memory/upstream.json": "f0a09bdde5ca4067054db90ff1a4b9a41927c8c318c9b998e47c89e1787723a9",
+    "tools/build/e1s.py": "2b7519e92bef64849325c9bce2abd1b6f582c419921168e7133ef9e95bfd23e3"
+  },
+  "compatible_loader_revision": "57d0a97e35bddac5ad732f08492cdf03f0946cc1",
+  "compatible_loader_evidence": {
+    "source_commit": "6a1c05d4119acd5146d56d7fc9070742584140cd",
+    "evidence_path": "docs/procedures/e1s-loader-memory/evidence.json",
+    "evidence_sha256": "4d011abd3110f30cd64e4858d25825222d1a2861a28cf22a846926f442d1130d",
+    "scope": "Selected loader/FDT/header bytes only; not the later UART/watchdog patch series"
+  },
+  "later_uart_watchdog_patches_selected": false,
+  "kernel_compiled": false,
+  "hardware_executed": false,
+  "source_manifest": {
+    "path": "prepared-source-manifest.json",
+    "files": 5111,
+    "sha256": "f884bf7fa08afdffd2f4ba0840ae44d666f1b9848700aaa8f5f88e4dcbe42ba2"
+  }
+}
