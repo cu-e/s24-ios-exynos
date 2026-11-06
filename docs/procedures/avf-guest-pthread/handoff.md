@@ -190,3 +190,43 @@ that the earlier general 512 MiB cap does not lift the adapter's 256 MiB check.
 No policy/source/plan changes or regeneration were performed. This metadata
 contains unfilled root approval placeholders and grants no actual execution.
 The original source proof and new actual AVFPTH-004 planned state are retained.
+
+## Actual SERIAL22 pthread build
+
+Root issued the separate actual START only after firehose terminated and cleaned
+its owned processes. Original cy launched AVFPTH-004 through the immutable
+600-second launcher, exact physical e62 adapter and SERIAL22 approval. Real
+executor PID/SID was 3563933; tool session 13430 exited 0. No source was changed
+or compiler command retried. The execution output now exists.
+
+Raw `artifacts/avf-guest-pthread/compile-1/evidence.json` SHA256
+`30f1c8f800c36640ee716879d06717d351b87911d5835ad7e8cf50842e244514` records PASS for all eight actual
+processes: four trusted-loader resolutions, three genuine fresh TU compiles and
+one genuine cctools archive. Each exit was 0; every child owned-after set was
+empty and no project-after/budget error occurred. Elapsed 22.581591
+seconds; sampled combined controller/tree peak 159739904 bytes. Actual
+controller /proc HWM was 91754496 bytes. The much larger inherited rusage
+value is explicitly not a current-image measurement.
+
+The actual archive is `compile-1/libpthread_kext.a`, SHA256
+`75953383eecc86d0a3422a3f5d7c4776e841f466cc5419e4063a51c94bdd88fd` (50584 bytes), with exactly
+kern_init.o, kern_support.o and kern_synch.o in that order, matching fresh object
+bytes. Actual depfile counts are 265/328/315 (332 unique dependencies),
+with target/source identity and hashed input closure checked by the accepted
+adapter. kern_synch.o has a real 128-byte `__DATA_CONST,__kalloc_type` section.
+There are 39 external definitions and 65 real external imports, including genuine
+DEVELOPMENT debug obligations. No provider or native-alias resolution is inferred.
+
+`fixtures/public/avf-guest-pthread/built-component.json` pins actual objects,
+depfiles, ordered member hashes, definitions/imports, runtime-resolution records
+and cleanup evidence. `actual-build-evidence.json` is the conventional command
+wrapper for original-owner experiment recording. All original raw plans, units,
+filelists and historical source evidence remain unchanged.
+
+Readonly reservation observation found VM-021 status complete under the exact
+SERIAL22 allocation. ps found no executor or any of its eight child/session
+PIDs. The worker did not modify/release the global root lease. Independent
+product review, integrator acceptance and applicable common checks remain
+required before taskdone. Callback/alias ABI, full metadata semantics, real
+guest provider/full kernel closure, guest boot and native-device results remain
+unqualified. No QEMU, phone operation or main publication occurred here.
