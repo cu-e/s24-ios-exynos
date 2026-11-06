@@ -19,7 +19,7 @@ from types import ModuleType
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[2]
 POLICY = ROOT/'fixtures/public/avf-guest-components/policy.json'
-POLICY_SHA256 = '04105fefc5bf4f903543f42018d5dd9cc6b485b315aa7bf0a5446a4248ae4136'
+POLICY_SHA256 = '748db1c0cc69fdf618fa0167e40ca411629b960377139950c90f34f8f7aa6348'
 GIB = 1024**3
 
 
@@ -163,7 +163,7 @@ def prepare(main, kind):
     commands = validate_commands(kind, unit, source, out)
     if commands[0]['argv'][0] != unit['compiler']['path'] or sha(commands[0]['argv'][0]) != policy['compiler_sha256'] or sha(commands[-1]['argv'][0]) != policy['archiver_sha256']:
         raise ValueError('Pinned real compiler/archiver changed')
-    for key in ['contract', 'review', 'qualification', 'graph', 'resource', 'compiler_descriptor', 'archiver_descriptor', 'supervisor']:
+    for key in ['contract', 'review', 'qualification', 'graph', 'resource', 'compiler_descriptor', 'archiver_descriptor', 'supervisor', 'process_root_acceptance', 'process_publication', 'process_source_review', 'adapter_source_review']:
         pinned(policy, main, key)
     index = helper.normalized_index(pinned_json(policy,main,'index')['files'], main)
     review = pinned_json(policy,main,'source_review')
