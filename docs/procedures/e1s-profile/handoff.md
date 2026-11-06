@@ -30,3 +30,13 @@ while a supported DEVELOPMENT body diagnostic is a separate contract.
 Next after actual config generation: inspect generated headers/Makefiledefines,
 hash every generated product, record E1SCONFIG001 result, then root independent
 review/publication. No full build, common, hardware or phone action is authorized.
+
+Actual CONFIG001 result: root49 ran all3 genuine commands once, all exit0,
+63 generatedfiles verified,142 inputpins unchanged, zero owned survivors.
+config-evidence.json binds rawed95a677 and generated-development.json. The actual
+osfmk mach_assert.h defines MACH_ASSERT=1; libkern/pexpert carry it in their real
+CONFIG_DEFINES. No invented meta_features definitions or flag weakening.
+The earlier planned-only paragraphs above describe the pre-admission boundary.
+Next: root independent publication/common acceptance and originalSR4 closure.
+First native pexpert objects are a separate STR007 child, dependent on STR004;
+prepare a read-only plan while pending, with no compiler before its own grant.
