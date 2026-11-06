@@ -11,17 +11,20 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import sources
+from e1s_profile import source_profile
 
 
 def main():
     root = Path(__file__).resolve().parents[2]
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--run', required=True)
+    p.add_argument('--root', type=Path, help='Read pinned references from this checkout; output remains local')
     args = p.parse_args()
+    source_root = args.root.resolve() if args.root else root
     if not args.run.replace('-', '').replace('_', '').isalnum() or len(args.run) > 80:
         raise ValueError('Use a unique simple run name')
     data = json.loads((root / 'research/sources.json').read_text())['sources']
-    provenance = [sources.verify(root, next(s for s in data if s['id'] == i)) for i in ['s24-port', 'apple-xnu']]
+    provenance = [sources.verify(source_root, next(s for s in data if s['id'] == i)) for i in ['s24-port', 'apple-xnu']]
     # This reviewed correction targets the generated file from one exact E1S
     # series. A later donor pin must receive its own source/regression review.
     if provenance[0]['revision'] != 'c8860decc62c6d6180e609036d027a2997972420':
@@ -33,11 +36,11 @@ def main():
     report = dict(kind='host-test', origin='local-host', outcome='inconclusive', recorded_at=datetime.now(timezone.utc).isoformat(timespec='seconds'), provenance=provenance, commands=[], kernel_compiled=False, device_executed=False)
     try:
         work = out / 'xnu'
-        shutil.copytree(root / 'references/apple-xnu', work, ignore=shutil.ignore_patterns('.git'))
+        shutil.copytree(source_root / 'references/apple-xnu', work, ignore=shutil.ignore_patterns('.git'))
         # A nested directory without its own Git root can make `git apply` use
         # the parent project and skip paths outside its prefix while exiting 0.
         sources.git(work, 'init', '--quiet')
-        donor = root / 'references/s24-port'
+        donor = source_root / 'references/s24-port'
         local_patch = root / 'patches/display-input/0001-e1s-stm-coordinate-nibbles.patch'
         patches = [donor / 'xnu/hackios/redwood.patch', *sorted((donor / 'xnu/e1s/patches').glob('[0-9][0-9][0-9][0-9]-*.patch')), local_patch]
         report['patches'] = []
@@ -55,6 +58,18 @@ def main():
                 shutil.copytree(donor / 'xnu/hackios/files', work, dirs_exist_ok=True)
         required = ['config/MASTER.arm64.e1s', 'pexpert/pexpert/arm64/E1S.h', 'bsd/dev/e1s_touch.c', 'bsd/dev/e1s_ufs.c']
         report['required_files'] = {f: hashlib.sha256((work / f).read_bytes()).hexdigest() for f in required}
+        manifest = {str(f.relative_to(work)): hashlib.sha256(f.read_bytes()).hexdigest()
+                    for f in sorted(work.rglob('*'))
+                    if f.is_file() and '.git' not in f.relative_to(work).parts}
+        manifest_path = out / 'prepared-source-manifest.json'
+        manifest_path.write_text(json.dumps(manifest, indent=2) + '\n')
+        profile = source_profile(root, donor, work, provenance, report['patches'])
+        profile['source_manifest'] = dict(path=manifest_path.name, files=len(manifest),
+                                         sha256=hashlib.sha256(manifest_path.read_bytes()).hexdigest())
+        profile_path = out / 'e1s-profile.json'
+        profile_path.write_text(json.dumps(profile, indent=2) + '\n')
+        report['e1s_profile'] = dict(path=str(profile_path),
+                                   sha256=hashlib.sha256(profile_path.read_bytes()).hexdigest())
         report.update(outcome='pass', summary='Exact open XNU plus embedded HakiOS, all E1S patches and reviewed local STM nibble correction apply; no kernel compiled')
     except Exception as exc:
         report.update(outcome='fail', error=str(exc))
