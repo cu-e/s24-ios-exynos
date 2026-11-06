@@ -40,3 +40,21 @@ python3 fixtures/public/avf-project-budget-contention/check.py \
   --engine /home/egor/dev/pet/s24-ios-exynos/worktrees/vm-039-ej-20261106/tools/build/avf_kernel_objects.py \
   --out artifacts/avf-project-budget-contention/baseline-001
 ```
+
+The registered baseline measured six finite lock timeouts in60 transactions.
+Held-interval median was66.97ms (max108.60ms); the fresh full `/proc` scan consumed
+median53.89ms and82% of total measured held time. Live validation and fsync were
+much smaller. These are actual interval observations, not hard kernel maxima.
+
+The prospective correction keeps that fresh scan inside the same lock. It uses
+strict libc `realpath` for every PID's cwd/executable link to remove Python's
+component-walk overhead. No path, PID, state or canonical result is memoized,
+including within a scan. Every PID's current stat/start/RSS/swap and proc link
+is still read; missing/permission failures remain fail-closed. A raw-target memo
+was explicitly rejected because ancestry substitution could make it stale.
+
+A separate actual CW77 OSKext command exited0 but retained a final project sample
+lock error while AF193 still called it pass. The original capsule and genuine
+object bytes remain unchanged. Prospectively, final sampling exceptions or
+resource violations now produce resource-deferred qualification rather than
+object credit, preserving the successful child exit and its artifacts.

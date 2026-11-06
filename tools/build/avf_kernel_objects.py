@@ -518,6 +518,20 @@ def strict_int(value, low, high, label):
 
 
 def process_table():
+    # Resolve every live proc link afresh. libc performs the same strict path
+    # walk without Python's per-component object/loop overhead; nothing is
+    # memoized across PIDs, scans, or transactions.
+    libc = ctypes.CDLL(None, use_errno=True)
+    realpath = libc.realpath
+    realpath.argtypes = [ctypes.c_char_p, ctypes.c_void_p]
+    realpath.restype = ctypes.c_void_p
+    libc.free.argtypes = [ctypes.c_void_p]
+    def resolved(path):
+        address = realpath(os.fsencode(path), None)
+        if not address:
+            raise OSError(ctypes.get_errno(), 'Strict proc-link resolution failed', str(path))
+        try:return os.fsdecode(ctypes.string_at(address))
+        finally:libc.free(address)
     result = {}
     for entry in Path('/proc').iterdir():
         if not entry.name.isdecimal():
@@ -529,11 +543,11 @@ def process_table():
                                       'state': fields[0], 'rss_bytes': int(fields[21])*resource.getpagesize()}
             result[int(entry.name)]['swap_bytes'] = next((int(line.split()[1])*1024 for line in (entry/'status').read_text().splitlines() if line.startswith('VmSwap:')), 0)
             try:
-                result[int(entry.name)]['cwd'] = str((entry/'cwd').resolve(strict=True))
+                result[int(entry.name)]['cwd'] = resolved(entry/'cwd')
             except (FileNotFoundError, PermissionError):
                 result[int(entry.name)]['cwd'] = None
             try:
-                result[int(entry.name)]['executable'] = (entry/'exe').resolve(strict=True).name
+                result[int(entry.name)]['executable'] = Path(resolved(entry/'exe')).name
             except (FileNotFoundError, PermissionError):
                 result[int(entry.name)]['executable'] = None
         except (FileNotFoundError, ProcessLookupError):
@@ -907,8 +921,13 @@ def run_child(argv, cwd, out, label, supervise, timeout=120, admit=True, budget=
                 try:
                     record['project_after'] = budget.sample()
                     record['host_swap_counter_deltas'] = {key: record['project_after'][key]-admission['project_before'][key] for key in ['pswpin', 'pswpout']}
+                    final_sample = record['project_after']
+                    if final_sample['violations'] or final_sample['project_rss_bytes'] > 6*GIB or (admit and final_sample['MemAvailable_bytes'] < 4*GIB):
+                        record['stop_reason'] = record.get('stop_reason', 'project-admission')
+                        record['project_after_resource_error'] = 'Final project sample violates admitted resource limits'
                 except Exception as error:
                     record['project_after_error'] = repr(error)
+                    record['stop_reason'] = record.get('stop_reason', 'project-admission')
             record.update(after=after, elapsed_seconds=time.monotonic()-started, peak_total_owned_rss_bytes=peak, stdout_sha256=sha(stdout), stderr_sha256=sha(stderr))
     if any(p['state'] != 'Z' for p in after['owned_processes']):
         raise RuntimeError('Owned child survived finite cleanup')
