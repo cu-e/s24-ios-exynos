@@ -154,3 +154,21 @@ nonblocking poll loop with this exact tested bounded helper; canonical/live/stat
 checks and the full fresh locked snapshot remain in their original order. One
 new registered six-monitor observation will measure this operative change. No
 FIFO or future-timeout-elimination guarantee is made.
+
+Final operative source freeze5ce6da6 has SHA
+`f2023bd02bab4400e6a4ca19033c5b78baeb8b57485258afeda9e46891585796`
+in the separate fix4 worktree. The one registered005 observation completed60
+transactions with zero timeouts, maxwait154.23ms, maxheld39.60ms, projectpeak
+220282880B and zero owned survivors.25focused controls pass, including refusal
+before child creation, real dispatch stop, strict fresh pathname substitution
+and final missing/violating sample separation. This is one bounded host-control
+observation, not FIFO/future-load/compiler qualification. No further timing run
+is needed for this freeze.
+
+`kernel-final-evidence.json` binds exact final source/rawcontrols and prototype
+proof. `historical-boundaries.json` binds the original four actual failure
+capsules plus CW77 final-accounting boundary without changing them. Final source
+only needs independent exact-source review, then INT002/root publication/common;
+original EP task closure follows explicit acceptance. Actual compiler execution
+needs a separate root grant and current exactplan/approval/policy pins. VM036
+must adopt a new reviewed helper pin explicitly after acceptance; no live swap.
