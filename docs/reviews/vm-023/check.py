@@ -190,10 +190,10 @@ def inspect(review, main, producer):
         review.sha(path, pin['sha256'])
         paths[key] = path
     index = review.load(main/maintained['artifact_index']['path'], maintained['artifact_index']['sha256'])
-    # Producer index is inspected according to its actual recorded schema.
-    indexed = index['files'] if 'files' in index else index
-    for name, digest in indexed.items():
-        review.sha(main/name, digest)
+    review.check(isinstance(index, list) and len(index) == 29, 'Exact producer artifact index schema/count')
+    for item in index:
+        review.check((main/item['path']).stat().st_size == item['size'], 'Indexed artifact size')
+        review.sha(main/item['path'], item['sha256'])
     final = producer/'artifacts/avf-guest-compiler-runtime/final-0e44b04'
     final_report = review.load(final/'report.json', maintained['sha256'][str((final/'report.json').relative_to(main))])
     expected_members = review.load(paths['members'])
