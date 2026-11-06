@@ -1,0 +1,60 @@
+{
+  "schema": "avf-runtime-driver-forwarding-source-v1",
+  "compiler_revision": "fa9443738c1a18accef4244732ec6d6ee97a8133",
+  "compiler_sha256": "7972eb2820ae25b5bedff1ea954cef9e9a0e4a15c7a8e440628e8b6540fafc82",
+  "source_build_evidence": "CXXST-007",
+  "files": [
+    {
+      "path": "artifacts/xnu-compiler-types/frontend-session1/compiler-source/src/clang/include/clang/Driver/Options.td",
+      "reference_path": "references/xnu-tapi/src/clang/include/clang/Driver/Options.td",
+      "sha256": "c5fe37ba7ac2a5d81bd211cdbf28f28e4776995d8cb2aeddc3d241525827f1e7"
+    },
+    {
+      "path": "artifacts/xnu-compiler-types/frontend-session1/compiler-source/src/clang/lib/Driver/Driver.cpp",
+      "reference_path": "references/xnu-tapi/src/clang/lib/Driver/Driver.cpp",
+      "sha256": "b688bfd156f225b057824a8d3b5fea3fe2ad4d69cf79b118e6a2c06c57634904"
+    },
+    {
+      "path": "artifacts/xnu-compiler-types/frontend-session1/compiler-source/src/clang/lib/Driver/ToolChains/Darwin.cpp",
+      "reference_path": "references/xnu-tapi/src/clang/lib/Driver/ToolChains/Darwin.cpp",
+      "sha256": "d8b2c2de2831065769d5efefcee179f02aa9ddb088fc1d5f18c104bfe919b323"
+    },
+    {
+      "path": "artifacts/xnu-compiler-types/frontend-session1/compiler-source/src/clang/lib/Driver/ToolChains/CommonArgs.cpp",
+      "reference_path": "references/xnu-tapi/src/clang/lib/Driver/ToolChains/CommonArgs.cpp",
+      "sha256": "8640c8ad8b83b3962c902071f3282bd860ffece0e2aa5510dd46184d0754a8e0"
+    },
+    {
+      "path": "artifacts/xnu-compiler-types/frontend-session1/compiler-source/src/llvm/lib/Option/Arg.cpp",
+      "reference_path": "references/xnu-tapi/src/llvm/lib/Option/Arg.cpp",
+      "sha256": "5d10c747974841026e3611e8682d6b50d6b5f58ccd2ddd6f09b281be3185400e"
+    },
+    {
+      "path": "artifacts/xnu-compiler-types/frontend-session1/compiler-source/src/llvm/lib/Option/Option.cpp",
+      "reference_path": "references/xnu-tapi/src/llvm/lib/Option/Option.cpp",
+      "sha256": "52250eda80d890e4e5f83d137a0c6b901b3cb153b7ffa366c638b39ad95bf98c"
+    },
+    {
+      "path": "artifacts/xnu-compiler-types/frontend-session1/compiler-source/src/llvm/include/llvm/Option/Option.h",
+      "reference_path": "references/xnu-tapi/src/llvm/include/llvm/Option/Option.h",
+      "sha256": "2f5492a928d19583b7f25eed8d701faf01bf8752bfea156157888a7a3ad58c8c"
+    }
+  ],
+  "semantics": [
+    "Options.td:864-866 marks -Wl, comma-joined linker input with RenderAsInput;913-915 marks -Xlinker separate linker input with RenderAsInput",
+    "LLVM Option.cpp:123-150 splits comma values omitting empty pieces;151-162 consumes a separate following argument",
+    "LLVM Option.h:152 and Arg.cpp:87-95 render these linker input values without driver option spelling",
+    "Darwin.cpp:767 calls CommonArgs.cpp:255-303 AddLinkerInputs; filenames pass as filenames and linker input args renderAsInput",
+    "Driver.cpp:452-464 rewrites --no-demangle specially; this closed diagnostic subset excludes it",
+    "Options.td:2242-2243 defines native -filelist separate LinkerInput; CU seals exact filelist bytes and expansion",
+    "Darwin.cpp:759-760 emits -o and output filename; the diagnostic projection does not reconstruct the complete linker command"
+  ],
+  "supported_diagnostic_driver_forms": [
+    "-Wl,-map,PATH",
+    "-Wl,-why_load",
+    "-Xlinker -map -Xlinker PATH",
+    "-Xlinker -why_load"
+  ],
+  "derived_scope": "diagnostic-forwarding-only; source-derived operands, never observed/full child argv",
+  "measurement": "source-only, no driver/compiler/linker/tool invocation"
+}

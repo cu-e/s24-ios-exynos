@@ -20,6 +20,7 @@ JSON_LIMIT = 4 * 1024**2
 FILE_LIMIT = 16384
 U64 = 2**64 - 1
 SOURCE_DESCRIPTOR_SHA256 = '25cff42f8e30836e8f36430775731068d634f548890b30806d4ea6ffdf90ee70'
+DRIVER_SOURCE_SHA256 = '609c5e1b81a399d4612940818e6737ef59ae9901603bdf3431e4fdda69831e3d'
 LINEAGE = {
     'linker_revision': '904de2a71d4da6a9b30d2efaf912a10ddc7d9ddb',
     'linker_sha256': 'f3cab070fef2c3fb39687e31bab86193f34ab95215fc4dbc8783f2a4f741563e',
@@ -104,6 +105,110 @@ def qualify_sources(descriptor_snapshot, source_snapshots, linker_snapshot):
             'source_descriptor_sha256': SOURCE_DESCRIPTOR_SHA256,
             'source_file_count': len(required), 'linker_sha256': LINEAGE['linker_sha256'],
             'execution_started': False, 'product_authority': False}
+
+
+def qualify_driver_sources(descriptor_snapshot, source_snapshots, compiler_snapshot):
+    """Qualify pinned driver forwarding text; this never runs the compiler."""
+    require(descriptor_snapshot.digest() == DRIVER_SOURCE_SHA256,
+            'Unqualified driver forwarding source descriptor')
+    descriptor = bounded_json(descriptor_snapshot)
+    require(descriptor.get('schema') == 'avf-runtime-driver-forwarding-source-v1' and
+            descriptor.get('compiler_revision') == 'fa9443738c1a18accef4244732ec6d6ee97a8133' and
+            descriptor.get('compiler_sha256') == LINEAGE['compiler_sha256'],
+            'Driver forwarding source lineage mismatch')
+    required = {row[key]: row['sha256'] for row in descriptor['files']
+                for key in ('path', 'reference_path')}
+    require(set(source_snapshots) == set(required), 'Missing/extra driver source snapshots')
+    for path, digest in required.items():
+        require(source_snapshots[path].digest() == digest, 'Actual/reference driver source changed')
+    require(compiler_snapshot.digest() == LINEAGE['compiler_sha256'], 'Driver compiler bytes changed')
+    return {'schema': 'avf-runtime-driver-source-witness-v1',
+            'source_descriptor_sha256': DRIVER_SOURCE_SHA256,
+            'source_file_count': len(required), 'compiler_sha256': LINEAGE['compiler_sha256'],
+            'execution_started': False, 'product_authority': False}
+
+
+def driver_diagnostic_operands(argv, map_path):
+    """Closed canonical diagnostic forwarding subset, not complete/observed ld argv.
+
+    Options.td, LLVM Option/Arg and Darwin AddLinkerInputs are pinned in the
+    driver source descriptor. Only adjacent canonical forms are admitted, so a
+    filename between separately forwarded tokens cannot become a guessed value.
+    """
+    require(isinstance(argv, list) and 0 < len(argv) <= FILE_LIMIT, 'Invalid driver argv')
+    for value in argv:
+        text(value)
+        require(not value.startswith('@'), 'Response-file driver argv remains unqualified')
+    result, index = [], 1
+    while index < len(argv):
+        value = argv[index]
+        if value.startswith('-Wl,'):
+            operands = [item for item in value[4:].split(',') if item]
+            if '-map' in operands or '-why_load' in operands:
+                require(operands in (['-map', map_path], ['-why_load']),
+                        'Noncanonical/ambiguous diagnostic forwarding')
+                result.extend(operands)
+        elif value == '-Xlinker':
+            require(index + 1 < len(argv), 'Missing separate Xlinker operand')
+            operand = argv[index + 1]
+            if operand == '-map':
+                require(index + 3 < len(argv) and argv[index + 2] == '-Xlinker' and
+                        argv[index + 3] == map_path, 'Nonadjacent/incorrect Xlinker map operand')
+                result.extend(['-map', map_path])
+                index += 2
+            elif operand == '-why_load':
+                result.append('-why_load')
+            index += 1
+        elif value in ('-map', '-why_load', '-whyload'):
+            raise LinkMapError('Unqualified native driver diagnostic spelling')
+        index += 1
+    require(result == diagnostic_options(map_path), 'Missing/duplicate/reordered driver diagnostics')
+    return result
+
+
+def validate_filelists(document, argv, snapshots):
+    """Check CU-sealed filelist bytes and declared ordered expansion, borrowing FDs."""
+    rows = document.get('filelists')
+    require(isinstance(rows, list) and 0 < len(rows) <= 16 and isinstance(snapshots, dict),
+            'Missing bounded coherent filelists')
+    declared, expanded, seen = [], [], set()
+    bindings = []
+    for row in rows:
+        require(isinstance(row, dict), 'Invalid filelist binding')
+        path = text(row.get('path'))
+        require(path not in declared and path in snapshots, 'Missing/duplicate filelist snapshot')
+        declared.append(path)
+        bindings.append(binding(snapshots[path], row))
+        paths = row.get('ordered_object_paths')
+        require(isinstance(paths, list) and 0 < len(paths) <= FILE_LIMIT,
+                'Missing bounded ordered filelist expansion')
+        observed = []
+        for line in lines(snapshots[path]):
+            path_entry = text(line)
+            require(path_entry not in seen and len(observed) < FILE_LIMIT,
+                    'Duplicate/excess filelist object')
+            seen.add(path_entry)
+            observed.append(path_entry)
+        require(paths == observed, 'Sealed filelist expansion differs from actual bytes')
+        expanded.extend(observed)
+        require(len(expanded) <= FILE_LIMIT, 'Excess total filelist objects')
+    require(set(snapshots) == set(declared), 'Unexpected filelist snapshots')
+    operands = []
+    for index, arg in enumerate(argv):
+        if arg == '-filelist':
+            require(index + 1 < len(argv), 'Missing driver filelist operand')
+            operands.append(argv[index + 1])
+        if arg.startswith('-Wl,') and '-filelist' in arg[4:].split(','):
+            raise LinkMapError('Use the source-qualified native driver filelist form')
+    require(operands == declared, 'Actual driver filelist operands differ from sealed expansion')
+    objects = document.get('objects')
+    require(isinstance(objects, list), 'Missing objects for sealed filelist')
+    paths = [text(row.get('path')) for row in objects if isinstance(row, dict)]
+    require(len(paths) == len(objects) and paths[:len(expanded)] == expanded,
+            'Object order differs from actual filelist expansion')
+    require(all(path in argv for path in paths[len(expanded):]),
+            'Additional staged object lacks explicit actual driver operand')
+    return bindings
 
 
 def lines(snapshot):
@@ -192,11 +297,15 @@ def qualified_catalog(archive, catalog_snapshot):
     return catalog
 
 
-def admitted_paths(document, runtime_path, catalog):
+def admitted_paths(document, runtime_path, catalog, *, driver=False):
     require(isinstance(document, dict), 'Object list must be an object')
-    require(document.get('schema') == 'avf-guest-link-object-list-v1' and
+    require(document.get('schema') == ('avf-guest-link-object-list-v2' if driver else
+                                     'avf-guest-link-object-list-v1') and
             document.get('source_only') is False, 'Unsealed/source-only object list')
-    argv = document.get('actual_link_argv')
+    if driver:
+        require(document.get('command_kind') == 'clang-driver' and
+                'actual_link_argv' not in document, 'Driver projection must not claim actual ld argv')
+    argv = document.get('actual_driver_argv' if driver else 'actual_link_argv')
     require(isinstance(argv, list) and 0 < len(argv) <= FILE_LIMIT,
             'Missing bounded actual linker argv')
     for arg in argv:
@@ -235,7 +344,8 @@ def admitted_paths(document, runtime_path, catalog):
         require(path not in archive_rows and path not in allowed and
                 '(' not in path and ')' not in path, 'Duplicate/ambiguous archive path')
         digest = hash_string(row.get('sha256'))
-        require(path in argv, 'Archive is absent from actual linker operands')
+        if not driver:
+            require(path in argv, 'Archive is absent from actual linker operands')
         members = row.get('members')
         require(isinstance(members, list) and 0 < len(members) <= FILE_LIMIT,
                 'Missing bounded archive members')
@@ -273,14 +383,21 @@ def diagnostic_options(map_path):
 
 
 def validate(image_snapshot, image_view, contract, *, map_snapshot,
-             archive_snapshot, object_list_snapshot, catalog_snapshot):
+             archive_snapshot, object_list_snapshot, catalog_snapshot,
+             driver_source_snapshot=None, filelist_snapshots=None):
     """Return bounded observed facts. Even actual facts confer no product authority.
 
     CU must authenticate actual command, source contracts and these same open
     snapshots. A caller-written JSON contract never authenticates execution.
     """
-    require(isinstance(contract, dict) and contract.get('schema') ==
-            'avf-runtime-linkmap-contract-v1', 'Invalid runtime contract')
+    require(isinstance(contract, dict) and contract.get('schema') in
+            ('avf-runtime-linkmap-contract-v1', 'avf-runtime-linkmap-contract-v2'),
+            'Invalid runtime contract')
+    driver = contract['schema'] == 'avf-runtime-linkmap-contract-v2'
+    if driver:
+        require(contract.get('command_kind') == 'clang-driver' and
+                contract.get('selection_scope') == 'all-observed-live-runtime-members',
+                'Driver contract requires complete observed runtime selection')
     origin = contract.get('measurement_origin')
     require(origin in ('actual-link', 'synthetic-control') and
             contract.get('source_only') is False, 'Unmeasured/source-only contract')
@@ -289,24 +406,51 @@ def validate(image_snapshot, image_view, contract, *, map_snapshot,
             'Unqualified map grammar/options descriptor')
     snapshots = {'image': image_snapshot, 'map': map_snapshot, 'archive': archive_snapshot,
                  'object_list': object_list_snapshot, 'catalog': catalog_snapshot}
+    if driver:
+        require(driver_source_snapshot is not None and
+                driver_source_snapshot.digest() == DRIVER_SOURCE_SHA256,
+                'Missing/unqualified driver forwarding source snapshot')
+        snapshots['driver_source'] = driver_source_snapshot
     bindings = {key: binding(value, contract.get('bindings', {}).get(key))
                 for key, value in snapshots.items()}
     require(image_view.get('sha256') == bindings['image']['sha256'] and
             image_view.get('file_size') == image_snapshot.length and
             image_view.get('filetype') == 2, 'Image view binding/type mismatch')
     catalog = qualified_catalog(archive_snapshot, catalog_snapshot)
-    allowed, argv = admitted_paths(bounded_json(object_list_snapshot), str(archive_snapshot.path), catalog)
+    document = bounded_json(object_list_snapshot)
+    allowed, argv = admitted_paths(document, str(archive_snapshot.path), catalog, driver=driver)
+    atom_queries = contract.get('atom_queries', [])
+    require(isinstance(atom_queries, list) and len(atom_queries) <= 512, 'Excess/invalid atom queries')
+    query_index = {}
+    for number, query in enumerate(atom_queries):
+        require(isinstance(query, dict), 'Invalid atom query')
+        key = (text(query.get('object_path')), text(query.get('name')))
+        require(key[0] in allowed and key not in query_index, 'Unknown/duplicate atom query')
+        query_index[key] = number
+    queried_live_atoms = []
     proposed = diagnostic_options(str(map_snapshot.path))
     require(contract.get('diagnostic_argv') == proposed, 'Unqualified diagnostic options')
-    require(argv.count('-map') == 1 and argv.index('-map') + 1 < len(argv) and
-            argv[argv.index('-map') + 1] == str(map_snapshot.path) and
-            argv.count('-why_load') == 1, 'Actual argv lacks exact diagnostic operands')
+    filelist_bindings = []
+    if driver:
+        derived = document.get('derived_linker_operands')
+        require(isinstance(derived, dict) and derived.get('kind') == 'forwarded-driver-operands-only',
+                'Missing explicit source-derived diagnostic projection')
+        require(derived.get('source_proof') == {
+            'path': str(driver_source_snapshot.path), 'sha256': DRIVER_SOURCE_SHA256},
+            'Driver projection source proof mismatch')
+        require(derived.get('argv') == driver_diagnostic_operands(argv, str(map_snapshot.path)),
+                'Declared projection differs from actual driver forwarding')
+        filelist_bindings = validate_filelists(document, argv, filelist_snapshots)
+    else:
+        require(argv.count('-map') == 1 and argv.index('-map') + 1 < len(argv) and
+                argv[argv.index('-map') + 1] == str(map_snapshot.path) and
+                argv.count('-why_load') == 1, 'Actual argv lacks exact diagnostic operands')
     output = text(contract.get('output_path'))
     require(argv.count('-o') == 1 and argv.index('-o') + 1 < len(argv) and
             argv[argv.index('-o') + 1] == output and output == str(image_snapshot.path),
             'Output path/argv mismatch')
-    required = contract.get('required_members')
-    require(isinstance(required, list) and 0 < len(required) <= 287 and
+    required = contract.get('required_members', [] if driver else None)
+    require(isinstance(required, list) and (0 if driver else 1) <= len(required) <= 287 and
             len(set(map(lambda n: integer(n, 286), required))) == len(required),
             'Missing/duplicate/out-of-range required runtime members')
     architecture = contract.get('architecture')
@@ -325,7 +469,7 @@ def validate(image_snapshot, image_view, contract, *, map_snapshot,
     take('# Path: ' + output)
     take('# Arch: ' + architecture)
     take('# Object files:')
-    files, observed_paths, previous = [], set(), {}
+    files, file_paths, observed_paths, previous = [], [], set(), {}
     runtime_ids = {}
     map_path_bytes = 0
     for line in iterator:
@@ -339,6 +483,7 @@ def validate(image_snapshot, image_view, contract, *, map_snapshot,
         require(identity == len(files) and path not in observed_paths,
                 'Duplicate/noncontiguous map file ID/path')
         observed_paths.add(path)
+        file_paths.append(path)
         if identity == 0:
             require(path == 'linker synthesized', 'Missing synthesized file0')
             files.append(None)
@@ -391,6 +536,12 @@ def validate(image_snapshot, image_view, contract, *, map_snapshot,
                 for _, _, base, length in sections), 'Live atom outside mapped section')
             live_rows += 1
         require(identity < len(files), 'Unknown/out-of-range map symbol file ID')
+        query_key = (file_paths[identity], name)
+        if not dead_phase and query_key in query_index:
+            require(len(queried_live_atoms) < 4096, 'Excess queried map atom matches')
+            queried_live_atoms.append({'query_index':query_index[query_key],
+                'object_path':query_key[0], 'file_id':identity, 'name':name,
+                'address':address, 'size':size})
         if identity not in runtime_ids:
             continue
         ordinal = runtime_ids[identity]
@@ -425,13 +576,23 @@ def validate(image_snapshot, image_view, contract, *, map_snapshot,
                          'address': symbol.get('value') if symbol else None})
     for snapshot in snapshots.values():
         snapshot.check()
-    return {'schema': 'avf-runtime-linkmap-witness-v1', 'measurement_origin': origin,
+    if driver:
+        for snapshot in filelist_snapshots.values():
+            snapshot.check()
+    return {'schema': 'avf-runtime-linkmap-witness-v2' if driver else 'avf-runtime-linkmap-witness-v1',
+            'measurement_origin': origin,
             'source_only': False, 'product_authority': False,
             'actual_execution_authenticated': False,
             'qualified_for_actual_selection': False,
             'scope': 'actual-byte-facts-require-controller-authentication' if origin == 'actual-link'
                      else 'synthetic-control-no-actual-selection-credit',
             'lineage': dict(LINEAGE), 'bindings': bindings,
+            'command_kind': 'clang-driver' if driver else 'direct-linker',
+            'derived_linker_operands': document.get('derived_linker_operands') if driver else None,
+            'observed_linker_child_argv_claimed': False,
+            'filelist_bindings': filelist_bindings,
+            'atom_queries': atom_queries, 'queried_live_atoms': queried_live_atoms,
+            'queried_atom_qualification': False,
             'diagnostic_argv': proposed, 'map_file_count': len(files),
             'map_live_atom_count': live_rows, 'map_dead_atom_count': dead_rows,
             'members': [{'ordinal': ordinal, 'name': catalog[ordinal]['name'],
@@ -440,6 +601,12 @@ def validate(image_snapshot, image_view, contract, *, map_snapshot,
                          'dead_atom_count': dead_counts.get(ordinal, 0)}
                         for ordinal in sorted(set(runtime_ids.values()))],
             'required_members': required,
+            'selection_scope': 'all-observed-live-runtime-members' if driver else 'required-members-v1',
+            'selected_live_member_ordinals': selected,
+            'empty_runtime_selection': not selected,
+            'selected_member_symbols': [dict(ordinal=ordinal, name=catalog[ordinal]['name'],
+                sha256=catalog[ordinal]['sha256'], defined=list(catalog[ordinal]['defined']),
+                undefined=list(catalog[ordinal]['undefined'])) for ordinal in selected],
             'selected_symbols': sorted(selected_symbols.values(), key=lambda row: row['name']),
             'selected_member_import_candidates': imported,
             'import_closure_measured': False, 'lto_retention_measured': False}
