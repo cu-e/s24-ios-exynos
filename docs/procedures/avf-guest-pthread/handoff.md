@@ -176,3 +176,17 @@ serial compiler allocation before any execute invocation. No loader, QEMU,
 common check, publication or budget044 repin was performed. All compiled ABI,
 provider/member/dependency/layout/alias and wider kernel acceptance remain
 unmeasured. Task VM-021 remains in progress under the original owner.
+
+## Immutable future actual-request launcher
+
+Root supplied the immutable in-process launcher
+`artifacts/team-coordination/20261106-team/in-process-component-launcher-e62d7592-600.py`,
+SHA256 `abb67ea94a25dfb1da7ff1a49c1c65162516b082408bf72918875b3531cfe872`.
+`derived-af193-future-request.json` records the future argv with that launcher
+inserted before the exact physical adapter target; every adapter flag stays
+unchanged. Whole deadline is 600 seconds, child deadline 120 seconds, one serial
+component and exact combined controller/tree RSS limit 256 MiB. Root clarified
+that the earlier general 512 MiB cap does not lift the adapter's 256 MiB check.
+No policy/source/plan changes or regeneration were performed. This metadata
+contains unfilled root approval placeholders and grants no actual execution.
+The original source proof and new actual AVFPTH-004 planned state are retained.
