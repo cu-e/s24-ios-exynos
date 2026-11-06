@@ -190,3 +190,19 @@ immediately before captured ALRM-handler restoration. Verify both cancellations
 deliver, exact mask/handlers restore, the .9-second outer timer retains its
 remaining deadline, owned children clean up and the helper AST changes only by
 that explicit restoration mask. No original failure or timing report is edited.
+
+Final fix5 source5258e63 SHA
+`bfa8a7ddc2d0d9fa42158c24d9d3906a26348666e82b2fcae181e72763911dc3`
+passed the exact read-only EQ real double-SIGINT restoration repro and30 checks
+in six additional real TERM/INT restoration workers. The original mask/handler
+and .9-second outer timer's remaining deadline survived both signals, both
+cancellations delivered, and owned children cleaned up. A whole-file comparison
+proves only the finally mask/comment differs from preserved f2023. The earlier
+60-transaction observation is retained as evidence of unchanged acquisition;
+it was not repeated. `restoration-final-evidence.json` binds these proofs, the
+reviewer failure and unchanged f2023/005 physical witnesses.
+
+One initial exact-wrapper invocation failed before subject setup because its
+output parent did not exist; the wrapper could not save its driver receipt.
+That setup failure is documented locally, the parent was created, and the actual
+subject control then ran once. No actual failed signal control was discarded.
