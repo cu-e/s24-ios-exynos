@@ -1,0 +1,52 @@
+--- a/osfmk/arm/pmap/pmap.c
++++ b/osfmk/arm/pmap/pmap.c
+@@ -1869,6 +1869,8 @@
+ 	pt_entry_t              *ptep;
+ 	vm_map_address_t vaddr;
+ 	vm_offset_t             paddr;
++	/* VM022: capture this function LR before possible cold outlining. */
++	const uintptr_t diagnostic_lr = (uintptr_t)__builtin_return_address(0);
+ 
+ 	/* not cacheable and not buffered */
+ 	tmplate = pa_to_pte(start)
+@@ -1884,7 +1886,39 @@
+ 	while (paddr < end) {
+ 		ptep = pmap_pte(kernel_pmap, vaddr);
+ 		if (ptep == PT_ENTRY_NULL) {
+-			panic("pmap_map_bd");
++			/* VM022: inspect only existing table entries, never allocate or map. */
++			const pt_attr_t * const attr = pmap_get_pt_attr(kernel_pmap);
++			uint64_t entries[4] = { 0 }, bases[4] = { 0 }, masks[4] = { 0 };
++			unsigned int present = 0;
++
++			if (kernel_pmap->tte != TT_ENTRY_NULL) {
++				for (unsigned int level = pt_attr_root_level(attr);
++				    level <= pt_attr_leaf_level(attr) && level < 4; level++) {
++					tt_entry_t *entry = pmap_ttne(kernel_pmap, level, vaddr);
++					masks[level] = pt_attr_ln_offmask(attr, level);
++					bases[level] = vaddr & ~masks[level];
++					if (entry == TT_ENTRY_NULL) {
++						break;
++					}
++					entries[level] = *entry;
++					present |= 1U << level;
++				}
++			}
++			/* L tuples: raw entry / covered base / inclusive offset mask. */
++			panic("pmap_map_bd diag1 virt=%llx start=%llx end=%llx prot=%x "
++			    "vaddr=%llx paddr=%llx lr=%llx cursor=%llx init=%u phase=%u "
++			    "root=%p rootpa=%llx min=%llx max=%llx levels=%u:%u present=%x "
++			    "L0=%llx/%llx/%llx L1=%llx/%llx/%llx "
++			    "L2=%llx/%llx/%llx L3=%llx/%llx/%llx",
++			    (uint64_t)virt, (uint64_t)start, (uint64_t)end, (unsigned int)prot,
++			    (uint64_t)vaddr, (uint64_t)paddr, (uint64_t)diagnostic_lr,
++			    (uint64_t)virtual_space_start, (unsigned int)pmap_initialized,
++			    (unsigned int)startup_phase, kernel_pmap->tte,
++			    (uint64_t)kernel_pmap->ttep, (uint64_t)kernel_pmap->min,
++			    (uint64_t)kernel_pmap->max, pt_attr_root_level(attr),
++			    pt_attr_leaf_level(attr), present,
++			    entries[0], bases[0], masks[0], entries[1], bases[1], masks[1],
++			    entries[2], bases[2], masks[2], entries[3], bases[3], masks[3]);
+ 		}
+ 		assert(!ARM_PTE_IS_COMPRESSED(*ptep, ptep));
+ 		write_pte_strong(ptep, tmplate);
