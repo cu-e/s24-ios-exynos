@@ -93,3 +93,31 @@ explicit resource-deferred command with child_started=false, not-started child
 execution and inconclusive resources. Main retains this command and stops before
 the next source row. Ordinary object/source validation errors keep their existing
 classification; no failed observation is invented or labeled as a sample.
+
+Handoff (2026-11-06): source stack is3be7c8a,6385cd1,3847923,a132516,
+e4d2b0a,b78b181,0e6678d,3be77dd,fc58f8f. Final source is
+`vm-044-ep-fix2-20261106/tools/build/avf_kernel_objects.py`, SHA
+`e97a5c9e6edf4daae4924bafb9f50f9bbacf90f1257012da54401feebdb2f4f6`.
+`measurement-001.json`, `measurement-002.json`, `measurement-003.json` bind the
+three one-shot measurements and physical AF193/FE093/2bb sources. Timeout counts
+are6,2,1 respectively; no result establishes solved contention. The final failed
+waiter was overtaken15times during its half-second deadline. A fairness remedy
+would require an operative separately reviewed change and a newly registered
+measurement, not another observation selected for zero failures.
+
+`focused-evidence.json` binds24 passing focused controls. It also retains failed
+focused-001 and an exact-hash retrospective source archive. After that failed
+assertion, the fix2 entrypoint was changed before a preservation reminder; its
+original physical path no longer has the failed source. This provenance mistake
+is explicit: the archives were created afterward from the exact committed bytes,
+not captured during the failed run. Raw001 is unchanged. The corrected source,
+control fixture, raw002 and all older physical AF193/FE093/2bb witnesses are now
+preserved. No rerun is used to repair that history.
+
+The prechild refusal checks force genuine finite lock contention before any child
+starts. The dispatch check feeds that actual refusal into main's real row loop
+with two explicitly synthetic source rows and a post-loop namespace stop seam.
+It proves one command/one resource-deferred object record, resources inconclusive
+and no second dispatch. It fabricates no Mach-O object and makes no source or
+namespace qualification claim. Final-sample checks preserve real successful
+Python child bytes while recording incomplete or failed resource qualification.
