@@ -71,12 +71,36 @@ See [new procedure](plan-002-procedure.md) and [receipt](plan-002-result.json).
 Fresh build-002 remains absent and planning RSS unqualified. Same physical
 caller, source and recipe flags remain unchanged.
 
-Next: wait for root wave85 reconciliation and a new exact native allocation
-and execute grant for STR022BUILD-002. Do not duplicate the executor, rerun
-planning or reexecute the five prefix objects. Any actual compilation requires
+Root dispatched002 once in wave88. It remains FAIL: 21 new objects passed
+compiler, MD/input and resource checks; `ipc_notify.o` was not started after
+project-admission lock acquisition timed out. Raw SHA256 is
+`aba8b6d7e2d235950bb190079507605658ac33d455d1ca93dcc27ebcd06ae75a`.
+The [002 physical audit](build-002-physical-audit.json) checked 21 Mach-O
+objects, exact argv and 494 unique actual dependency files; own reservation
+was complete, release error absent and current owned survivors zero.
+[002 failed result](build-002-result.json) leaves outer wrapper exit pending
+root's final aggregate and preserves actual completed child exits. 002 FAIL
+was recorded once through MAIN lab.py, CLI exit 0; later root outer exit belongs in an additive handoff, not a second
+experiment record. Root separately accepted the original five prefix objects;
+the original001 failed parent remains unchanged.
+
+Root authorized one new source-only003 plan for original osfmk-a `[26:160]`,
+134 IDs, excluding actual001 five plus actual002 21. The single export exited
+zero with empty stderr; its plan SHA256 is
+`de79537b317f562fe2442ad215172f83d546156b4e635e9eaba312b7f7266ccd` and
+strict manifest SHA256 is
+`db07027c689d64111fa4ee910830fbc85550c61a381594d61cef55ff9e8ca6a5`.
+See [003 procedure](plan-003-procedure.md) and [receipt](plan-003-result.json).
+Fresh build-003 remains absent, same caller2676/source/flags, planning RSS
+unqualified. No actual134 result or complete160 composition is claimed.
+
+Next: wait for root wave88 reconciliation and a new exact strictly serial
+native allocation and execute grant for STR022BUILD-003. Do not duplicate the
+executor, rerun planning or reexecute the 26 prefix objects. Any actual
+compilation requires
 a separate root allocation: one serial
 compiler, at most 512 MiB combined owned RSS, within the root six-job/six-GiB
 wave. Preserve future failures and fresh actual MD closure. Independent review
-and root publication/common acceptance precede closure. New002 preparation ran
+and root publication/common acceptance precede closure. New003 preparation ran
 the source-only caller once; it created no private projection and invoked no
 loader, compiler, generator, linker, QEMU or device operation.
