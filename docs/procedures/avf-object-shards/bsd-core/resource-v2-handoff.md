@@ -1,0 +1,3 @@
+# VM-010 resource-v2 preparation
+
+Original owner codex-guest-shard-20261106-cp in fresh `worktrees/vm-010-resource-v2-20261106`, branch `team/vm-010-resource-v2-20261106`, base e8ec6cd5. Experiment VM010RESOURCE002 prospective; source-only plan authorized by root final046 acceptance. Exact request/procedure binds EV9929 and EV resource input tuple. Earlier worktrees/receipts preserved. No compiler/approval/allocation/resume/oldkeycredit; source plan next after MAIN metadata/experiment registration. Proposed fresh actualoutput /home/egor/dev/pet/s24-ios-exynos/worktrees/vm-010-resource-v2-20261106/artifacts/avf-object-shards/bsd-core/resource-v2/execute-001.
