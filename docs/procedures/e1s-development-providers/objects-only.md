@@ -9,13 +9,13 @@ Firehose `src/firehose/firehose_buffer.c`, pthread `kern/kern_init.c`,
 No compiler, archive or layout operation has run in this phase. Fresh
 `artifacts/e1s-development-providers/objects-001` is absent.
 
-The exact source plan is `object-plan-002/execution-plan.json`, SHA256
-`4885f964bca7d092e9800619d7e4c79d971e27dcd92517711165656a5c9c7e34`,
+The exact source plan is `object-plan-003/execution-plan.json`, SHA256
+`d673c9a911d80dc88a92812fe2719c423ca04cf77862c9b288dafff210de3e40`,
 under the owned provider artifacts directory. The source capsule is
-`object-plan-002/source-freeze.json`, SHA256
-`c17bb7a74c3b24911940b7a5c5d26d0d67e57ee8ff382fae28e4146529cec854`.
+`object-plan-003/source-freeze.json`, SHA256
+`b97af13bfb55524940c877287513b97a3d85843816b05be095705f14f126a72a`.
 Caller `objects_only.py` SHA256 is
-`69717006805ab7d86e7c794fe205a7371281d339578649f5c9a6cc2956a5acaf`.
+`fe3be233d88b6a8bd8b45d87e4074dca2932c4cc8c6c23ef83e32295fbfd7b61`.
 The tracked source binding is `fixtures/public/e1s-development-providers/object-plan.json`.
 
 Actual header descriptor `generated-headers.json`, SHA256
@@ -55,7 +55,7 @@ timeout 690s watchdog and its owned-session cleanup verification. No hard 600s
 whole-process bound is claimed. Cancellation remains installed through
 reservation release and evidence writing; only this reservation is released.
 
-Before admission and after the six operations,681 source/provenance/tool pins
+Before admission and after the six operations, 682 source/provenance/tool pins
 and all 352 actual header inputs are rehashed. Each actual compiler MD must name
 the declared fresh object and genuine provider source. Its complete transitive
 dependencies are hashed and checked against a source identity catalog: accepted
@@ -65,16 +65,25 @@ blobs. Unknown or changed dependencies fail closed with partials retained. This
 is a prospective identity catalog, not a claim that source planning proved
 the actual compiler closure.
 
-Existing core.stream_archive checks real BSD archive grammar/table of contents
-and exact ordered member names, lengths and payload hashes against the four
-inspected fresh objects. Firehose has one member; pthread has the three named
-objects. Actual object, MD and archive bytes are checked again after the phase.
-No old archive/object is adopted, no auxiliary object enters either archive,
-and no failed operation is automatically retried.
+The pinned accepted `avf_guest_components.py` API e62d7592 first checks exact
+TOC names and full ranlib/string/member-offset grammar. Unknown reserved TOC
+prefixes, misplaced/duplicate TOCs and foreign payload fail. Existing
+core.stream_archive then checks exact ordered member names, lengths and payload
+hashes against the four inspected fresh objects. Both readers must agree on
+ordered payloads and whole-archive digest inside existing core.CoherentFile's
+stable FD/path identity boundary. A genuine leading TOC is mandatory. Firehose
+has one member; pthread has the three named objects. The same existing snapshot
+API surrounds common.macho with FD digests before/after and returned hash
+equality; this strengthens the local fresh private postexit output boundary
+without changing a shared helper. Actual object, MD and archive bytes are
+checked again after the phase. No old archive/object is adopted, no auxiliary
+object enters either archive, and no failed operation is automatically retried.
+The prior0187 caller697/plan4885 remain preserved but are not admission pins.
 
 An object/archive phase pass alone cannot close STR018. The accepted native
 assym receipt supplies measured native-context macro provenance for MAX_CPUS 10, MAX_CPU_CLUSTERS 4
-and MAX_CPU_CLUSTER_PHY_ID 9. Same-context admitted provider/consumer tuple and
+; MAX_CPU_CLUSTER_PHY_ID 9 remains a required source-derived value pending
+actual provider-context evidence. Same-context admitted provider/consumer tuple and
 callback layout evidence, actual definitions/imports and native alias review
 remain required before task closure and integration acceptance. This exact
 six-command plan admits no auxiliary layout/macro compiler operation. Provider
@@ -85,8 +94,8 @@ Future inner argv, requiring independent review and a separate root grant:
 ```sh
 LC_ALL=C PYTHONUTF8=1 PYTHONNOUSERSITE=1 python3 -s \
   fixtures/public/e1s-development-providers/objects_only.py \
-  --source-plan /home/egor/dev/pet/s24-ios-exynos/worktrees/str-018-e1s-development-providers-20261106/artifacts/e1s-development-providers/object-plan-002/execution-plan.json \
-  --source-plan-sha256 4885f964bca7d092e9800619d7e4c79d971e27dcd92517711165656a5c9c7e34 \
+  --source-plan /home/egor/dev/pet/s24-ios-exynos/worktrees/str-018-e1s-development-providers-20261106/artifacts/e1s-development-providers/object-plan-003/execution-plan.json \
+  --source-plan-sha256 d673c9a911d80dc88a92812fe2719c423ca04cf77862c9b288dafff210de3e40 \
   --approval ROOT_APPROVAL_PATH --approval-sha256 ROOT_APPROVAL_SHA256
 ```
 

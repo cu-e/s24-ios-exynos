@@ -14,6 +14,8 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 BASE = HERE / 'header_only.py'
 BASE_SHA = '97d201ce8f6cfee9ca2c222fc11a8fe584eaa08155dbcf8e1c9633ae6e41bad2'
+STRICT_ARCHIVE = Path('/home/egor/dev/pet/s24-ios-exynos/tools/build/avf_guest_components.py')
+STRICT_ARCHIVE_SHA = 'e62d7592fc35cdc3c011eac2ee537bdcfa09e3ab9308cf17d422e0b7f39e29aa'
 IDS = ['compile-firehose', 'pthread-kern_init', 'pthread-kern_support',
        'pthread-kern_synch', 'archive-firehose_kernel', 'archive-pthread_kext']
 
@@ -34,6 +36,16 @@ def load_base():
     spec = importlib.util.spec_from_file_location('str018_header_source_api', BASE)
     module = importlib.util.module_from_spec(spec)
     exec(compile(raw, str(BASE), 'exec'), module.__dict__)
+    return module
+
+
+def load_strict_archive():
+    raw = STRICT_ARCHIVE.read_bytes()
+    require(hashlib.sha256(raw).hexdigest() == STRICT_ARCHIVE_SHA,
+            'Changed accepted strict archive API')
+    spec = importlib.util.spec_from_file_location('str018_strict_archive_api', STRICT_ARCHIVE)
+    module = importlib.util.module_from_spec(spec)
+    exec(compile(raw, str(STRICT_ARCHIVE), 'exec'), module.__dict__)
     return module
 
 
@@ -66,10 +78,13 @@ def main():
     args = ap.parse_args()
     base = load_base()
     common, core = base.module(base.COMMON), base.module(base.CORE)
+    strict_archive = load_strict_archive()
     plan = common.load_project(args.source_plan, args.source_plan_sha256)
     require(plan['schema'] == 'str018-provider-objects-plan-v1'
             and plan['executor_sha256'] == sha(__file__)
             and plan['helper_sha256'] == base.PINS, 'Wrong reviewed object caller/plan')
+    require(plan['strict_archive_API'] == {'path': str(STRICT_ARCHIVE),
+            'sha256': STRICT_ARCHIVE_SHA}, 'Wrong accepted strict archive API binding')
     require(plan['whole_seconds'] == 600 and plan['max_jobs'] == 1
             and plan['max_owned_rss_bytes'] == 512 * 1024**2, 'Wrong serial resource bounds')
     args.main = base.MAIN
@@ -133,7 +148,8 @@ def main():
     require(approval['source_plan_sha256'] == args.source_plan_sha256, 'Root must bind exact object plan')
     budget = common.project_approval(args, approval, executor_path=Path(__file__))
     require(budget.rss_limit == plan['max_owned_rss_bytes'], 'Wrong actual allocation RSS cap')
-    pins = {**plan['source_bindings_sha256'], **header_pins, **base.PINS}
+    pins = {**plan['source_bindings_sha256'], **header_pins, **base.PINS,
+            str(STRICT_ARCHIVE): STRICT_ARCHIVE_SHA}
     report = dict(kind='host-test', origin='local-host', outcome='fail', task=args.task,
                   owner=args.owner, experiment=args.experiment, recorded_at=datetime.now(timezone.utc).isoformat(),
                   source_plan_sha256=args.source_plan_sha256, commands=[], objects=[], archives=[],
@@ -180,7 +196,12 @@ def main():
                 if index < 4:
                     product = plan['objects'][index]
                     regular(product['path']); regular(product['MD'])
-                    object_info = common.macho(product['path'])
+                    with core.CoherentFile(product['path']) as snapshot:
+                        object_digest = snapshot.digest()
+                        object_info = common.macho(product['path'])
+                        snapshot.check()
+                        require(object_info['sha256'] == object_digest == snapshot.digest(),
+                                'Object parse/hash identity changed')
                     require(object_info['cpu_subtype'] == 0, 'Exact ARM64 object subtype required')
                     deps = common.dependencies(product['MD'], product['cwd'], product['path'])
                     require(str(Path(product['source']).resolve()) in deps, 'Actual MD omits provider source')
@@ -207,13 +228,23 @@ def main():
                 else:
                     product = plan['archives'][index - 4]
                     regular(product['path'])
-                    members = core.stream_archive(product['path'])
+                    with core.CoherentFile(product['path']) as snapshot:
+                        strict = strict_archive.archive_members(product['path'], with_metadata=True)
+                        require(strict['toc_name'] in strict_archive.TOC_NAMES,
+                                'Exactly one genuine leading archive TOC required')
+                        members = core.stream_archive(product['path'])
+                        require(strict['sha256'] == members.sha256 == snapshot.digest()
+                                and strict['members'] == [{key: member[key] for key in ['name', 'sha256']}
+                                                          for member in members],
+                                'Strict archive grammar/member snapshot disagreement')
                     fresh = {item['path']: item for item in report['objects']}
                     expected = [{'name': Path(name).name, 'sha256': fresh[name]['sha256'],
                                  'file_size': fresh[name]['file_size']} for name in product['objects']]
                     require(list(members) == expected, 'Actual archive members differ from fresh provider objects')
                     report['archives'].append({**product, 'members': list(members),
-                                               'sha256': members.sha256, 'file_size': members.file_size})
+                                               'sha256': members.sha256, 'file_size': members.file_size,
+                                               'strict_toc_name': strict['toc_name'],
+                                               'strict_snapshot_source_identity': strict['snapshot_source_identity']})
             products = {item['path']: item['sha256'] for item in [*report['objects'], *report['archives']]}
             products.update({item['MD']: item['MD_sha256'] for item in report['objects']})
             for path, expected in {**pins, **dependencies, **products}.items():
