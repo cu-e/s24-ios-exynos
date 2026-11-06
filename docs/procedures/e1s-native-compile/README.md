@@ -1,0 +1,62 @@
+# Native component caller
+
+STR030 provides one small caller for all native DEVELOPMENT/ARM64/E1S body
+partitions. It consumes the exact STR016 graph/context/contract and unchanged
+common9929 project budget plus core9f80 cancellation. Worker owners supply only
+slice manifests; they do not fork the executor. No compiler or target tool has
+executed for this source-review task. Source plans convey no execution grant.
+
+Implementation and exact command interface are being frozen for independent
+review. All old source/config/output witnesses remain immutable. Actual native
+objects, MD closure, resources and cleanup require separately root-admitted
+worker experiments; no SDK/private ABI/kernel/runtime/hardware claim follows.
+
+The shared entrypoint is `fixtures/public/e1s-native-compile/native_compile.py`.
+A slice manifest has exactly `schema` (`e1s-native-slice-v1`), `task`, `owner`,
+`experiment`, `partition`, `object_ids`, `out` and `whole_seconds`. `out` is a
+canonical MAIN-relative path under the original worker worktree's
+`artifacts/e1s-native-compile`; `object_ids` is a contiguous original-order
+subset of one accepted partition. A first-object slice and the complete
+partition use the same caller. No arbitrary command/flag/input override exists.
+
+```
+python3 <frozen-caller> plan --manifest <slice.json> --manifest-sha256 <sha>
+python3 <frozen-caller> execute --manifest <slice.json> --manifest-sha256 <sha> \
+  --source-plan <plan.json> --source-plan-sha256 <sha> \
+  --approval <root-approval.json> --approval-sha256 <sha>
+```
+
+Planning prints JSON and writes no prospective output. Execution requires an
+original active host-test worker task and planned experiment; STR030 itself is
+source-review and cannot execute workers. Root must approve the exact caller,
+plan, native identities and canonical output through the existing project
+allocation. The caller requires six global jobs/6GiB including2GiB light and
+one512MiB serial slot. It uses unchanged helper child deadlines and an approved
+whole bound; the root launcher must provide its existing outer watchdog. The
+caller also checks remaining whole time at each launch. Stable-memory admission
+occurs inside the shared helper and can consume time, so the root outer bound
+is required. There is no hidden in-process timer replacement.
+
+Original argv is retained beside its mechanical native projection. Exact
+component config files are copied into private CWDs; source operands point to
+immutable shared/generated or STR014 body paths. Only context prefix and
+object/MD output operands change. Unknown relative inputs fail rather than
+receive an include fallback. Missing declared SDK directories remain absent.
+No new flags, SDK, generated producer, old object or resume credit is supplied.
+
+`runtime.json` binds the accepted7972 compiler's five ELF dependencies, loader,
+cache/config and aliases. Readelf metadata and an existing host-only loader
+search diagnostic supply the read-only provenance. Every worker source plan
+contains explicit loader commands, search candidate presence/hash snapshots and
+all native input/projection hashes. Actual trusted-loader mapping must match
+under the same budget before a component's first compiler. It conveys no Apple
+SDK/profile equivalence. Combined current/native admission never calls AVF
+preparation or replaces common globals.
+
+Object validity, actual MD/input qualification and resource qualification are
+separate dimensions. An exit0 object can remain physically valid if later
+resource sampling or MD qualification fails; the worker stops and cannot pass.
+Admission/deadline/cancellation, unknown inputs or shadow changes stop dispatch.
+Command observations are retained before cancellation unwinds. Broker release,
+owned terminal sessions and cleanup errors are recorded; original component
+ordering is independent of completion order. No archive/link/tail stage runs.
