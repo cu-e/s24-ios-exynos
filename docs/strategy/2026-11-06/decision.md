@@ -3,8 +3,9 @@
 **Primary route: C, the existing E1S port with minimal coherent repairs.**
 The target is SM-S921B/e1s, Exynos2400. Generic QEMU reproduction is a supporting
 bench, not a prerequisite for all hardware source work. Retain the current
-1080-object guest. Its bounded direct-link diagnostic has now reached the real
-linker and exposed one undefined symbol. Do not finish the broad product controller merely
+1080-object guest. A bounded direct-link diagnostic exposed one undefined
+symbol; a five-guard source repair and two-object incremental rebuild now produce
+a genuine linked Mach-O image. Do not finish the broad product controller merely
 to obtain linker stderr. Stock upstream reproduction is the fallback bench,
 not a second speculative full build.
 
@@ -51,7 +52,7 @@ Use these categories in future results:
 
 | Route | Work remaining / main risk | Choice |
 | --- | --- | --- |
-| A: current guest | Executed: eight Make targets pass; genuine Clang/ld exits1 on only `_iBoot_Stage_2_version` referenced by `SavePanicInfo` in `model_dep.o`. No kernel image. Source guards depend on whether `TARGET_OS_OSX` is defined, with different actual header include contexts between the reference and provider. | The cheap diagnostic was useful. Investigate this precise common-source/environment defect and donor semantics; no dummy symbol, broad controller or automatic relink. |
+| A: current guest | Initial real link exposed only `_iBoot_Stage_2_version`. Five guards now use the genuine internal `XNU_TARGET_OS_OSX` selector. Only two actual TUs were rebuilt; their headers/flags match the originals. A fresh measured link exits0 and produces a genuine ARM64 Mach-O. | Reuse the image for the smallest existing loader/entry/console qualification. No dummy provider, whole-corpus rebuild or general controller was needed. A linked generic image remains separate from E1S and runtime qualification. |
 | B: stock upstream | Ready build/loader/hello/package/runner; coherent SDK/toolchain setup, configuration and resource-compatible UEFI/QEMU reproduction still needed. | Fallback if A shows a broad mismatch or its preparation expands. No parallel full rebuild now. |
 | C: E1S | Minimal source repairs and a real E1S profile, followed by measured board entry/memory/interrupt/console work. Device inputs and authorized recovery are still absent. | Primary hardware lane. Actual implementation has started with STR-002, independent of guest boot. |
 
@@ -65,7 +66,7 @@ GPU/radios. Existing owners and blocked reservations are not reassigned.
 
 | Blocker → result blocked | Ready solution/donor | Concrete missing input or experiment | Independent work now |
 | --- | --- | --- | --- |
-| Current guest not linked → generic boot bench | Existing genuine Make/Clang recipes and measured1080 products. | Actual diagnostic now identifies one boot-version symbol. Verify the selected target-macro semantics, repair only affected genuine code/inputs and measure an incremental rebuild/link if justified. | E1S source work proceeds. |
+| Guest image not yet booted → generic console bench | Existing donor loader/RAM-root/PID1 and newly linked image. | Qualify the actual Mach-O entry/segments and the existing loader's physical layout, payload/RAM-root and console settings; capture the first real bounded serial run only after those inputs are established. Preserve linker warnings for inspection. | E1S source work proceeds. |
 | Coherent E1S kernel inputs → full board kernel build | Existing E1S patches and embedded donor dependency recipes. | KRN-001 retains its original blocked owner: explicit matching SDK/dependency paths are unconfigured. The public-source native alternative also retains KRN-026's37 required provider/ABI gaps; guest-profile exclusions do not resolve them for E1S. Supply/qualify coherent genuine inputs or demonstrate a supported board configuration; do not suppress exports or relabel the guest. | Loader, DTB, console policy and board source work proceed; no takeover of these blocked claims. |
 | Invalid/incomplete memory exclusions → trustworthy E1S handoff | Existing unchanged E1S loader/FDT parser. | STR-002 actual-C regression and minimal patch: reject incomplete reservations/overflow and unqualified fallback; later complete live DTB/carve-outs. | Started now, no QEMU or phone required. |
 | UART/WDT/conduit assumptions → useful first console/halt | Upstream0017–0019 and pinned Samsung DTS/drivers. | Qualify powered accessibility and boot policy; source review of opt-in MMIO, PSCI SMC/HVC,25.6MHz timer and GIC/ADT contracts; later actual EL/IRQ/tick observation. | Narrow source patches/contracts can proceed now. |
@@ -74,10 +75,10 @@ GPU/radios. Existing owners and blocked reservations are not reassigned.
 | No native Xclipse/radio backend → GPU/Wi-Fi/SIM/eSIM | Existing SGPU/CPIF/Wi-Fi donors and project interface work. | Firmware/board ownership and real frontend/ABI/device evidence. Generic Adreno performance is not an Exynos backend. | Keep source work scoped to a concrete blocked subsystem after early boot. |
 | Entry/recovery not verified → any physical boot experiment | Existing device inventory and E1S entry/probe source. | Exact current live DTB/EL/reservations plus an explicitly authorized, reviewable recovery/boot experiment. | Host code, source and image validation remain authorized; no new ADB/root/flash/reboot/MMIO action is authorized here. |
 
-The measured end state is still incomplete: no genuine linked guest image or
-XNU console has been established locally, and no native XNU system has run on
-this S24. The route decision and source repairs must not be reported as that
-result.
+The measured end state is still incomplete: a genuine guest image is linked,
+but no XNU console has been established locally and no native XNU system has
+run on this S24. The route decision and source repairs must not be reported as
+that result.
 
 ## Actual follow-through and preserved observations
 
@@ -91,6 +92,20 @@ The second attempt took25.678seconds, with306159616bytes sampled linker-tree
 RSS. Both raw results, commands, logs and zero-survivor cleanup are retained;
 the exclusive root lease was released. No archive/XNUP/QEMU run followed.
 
+The demonstrated target-selector defect then justified a small common-source
+repair: five Stage2 guards use the internal XNU selector already established by
+the genuine Makefile. Both original compile recipes were retained except for
+source, output and dependency-file operands. Two actual ARM64 objects compiled;
+all other headers/dependencies stayed unchanged and the other1078 products were
+reused. These two products are explicitly source derivatives, not relabeled as
+members of the original canonical manifest. With those exact two substitutions,
+the next bounded link completed with exit0 in9.940seconds. Image SHA256:
+`87496c21f41cdd56c748cb1cfad37dba8712b48a01a204dcbb298c0feac5e8fc`.
+Raw diagnostic SHA256:
+`bed13fd168e43d29ebd4f7792931d9ced4435448195bbe4a78572a3c0e9855ab`.
+No QEMU ran. The missing framework search directory and BSS alignment reduction
+warnings are retained; loader/segment qualification remains next.
+
 Primary implementation STR-002 changes actual donor E1S `loader.c`/`fdt.c`:
 bounded DTB/range parsing, complete-or-reject reservation handling, checked
 endpoints and refusal of the unqualified payload-RAM fallback. This does not
@@ -103,14 +118,24 @@ STRMEM-002 run passed all six genuine commands: six baseline reproductions,
 35 patched controls under ASan/UBSan and two AArch64 freestanding compilations.
 Both output objects have ELF machine183. The measured batch took3.351seconds;
 all owned sessions were empty afterward. This is a host-verified E1S donor
-loader correction; full loader linkage and actual hardware behavior remain
-separate. Raw result SHA256 is
+loader correction. Raw result SHA256 is
 `bc377c3975df286869892be6094c695852e10a0b3d2ca9552cc9d7cf268c4c90`.
 
-The real immediate queue is STR-002 correctness/actual-C verification, followed
-by STR-003's small hook in the existing E1S builder so the reviewed patch is
-actually applied. INT-002 independently reviews the changed C. The original
-STR-001 owner performs a narrow donor lookup for the measured linker defect.
+STR-003 adds14 lines to the existing E1S builder: capture the exact accepted
+patch, check/apply it to the verified donor copy, and record provenance. The
+actual existing Zig0.16.0 builder passed all19 commands, producing both linked
+freestanding probe/loader ELF files, Images and boot packages. All eight product
+hashes and six patched donor bodies were checked. The loader boot-v4 package
+and its tar pass the existing structural verifier. This is still a loader with
+no XNU payload, not a full E1S kernel or a boot on this phone. Actual supervised
+build SHA256: `85747434c0a1aa4f5a29dc4f1e158ca8bc9176a53fe57bff47d23f280ec00267`.
+
+STR-002 is accepted and closed by its original owner. STR-003's tested hook and
+its independent review are being accepted against the new HEAD. The original
+STR-001 audit and narrow donor lookup are complete. The common track's next
+result is image/loader/console qualification; the E1S track's next host result
+is a coherent entry/DTB/console policy, with full kernel inputs still separately
+blocked as recorded above.
 Other native-driver work remains under its existing owners and dependencies;
 there is no eligible unclaimed host task merely to fill agent slots.
 
