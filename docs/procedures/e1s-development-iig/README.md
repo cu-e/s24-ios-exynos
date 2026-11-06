@@ -84,3 +84,42 @@ the prospective output was absent. The preparation receipt is
 The runner verifies fresh generated products and copies the 17 exact source
 headers only after all 17 generators succeed. No parser or compiler executed in
 this preparation. Root76 MIG admission precedes the prospective root77 run.
+
+## Actual root77 result and consumer contract
+
+Root77 executed the frozen runner once under its exact grant. All 17 commands
+returned zero in 25.220405 seconds; 34 fresh generated files and 17 literal
+DriverKit source-header placements matched the 51 recorded hashes. The raw
+`artifacts/e1s-development-iig/generate-001/evidence.json` remains unchanged at
+SHA256 `0ded5584af5cc339d6c7f8bdf3fc747ebe73db0d98e26cb7da749e882d3dd42b`.
+All 6,334 pinned inputs still match. Actual argv/cwd/environment and native flag
+prefixes match the plan; no DEVELOPMENT/KERNEL defines were added to the native
+IIG rule. Each generated header has the expected source-class marker and class
+declaration, and each implementation includes its generated header and defines
+that class's dispatch routine. These are source/provenance checks, not ABI proof.
+
+`fixtures/public/e1s-development-iig/generated-development.json` is the consumer
+descriptor. It binds the accepted STR014 source, STR009 eight-component configs,
+STR011 producer map/raw exports, native flags, explicit portable parser mapping,
+17 fresh header/implementation pairs and 17 separate source-header copies.
+Use its literal physical paths and hashes. Its `generated_header_include_root`
+is the owned `generate-001/EXPORT_HDRS/iokit` directory for `<DriverKit/...>`;
+implementations live under `generate-001/generated/DriverKit`. The STR011 export
+namespace was not modified. Do not infer arbitrary profile compatibility or
+transfer old object credit. Future actual compilation must bind these outputs
+explicitly and remains separately admitted.
+
+All 17 combined diagnostic logs are retained and empty. Per-command sampled
+child-tree RSS peaked at 62,087,168 bytes; recorded controller HWM was 40,615,936
+bytes, a separate observation. The existing 512 MiB combined controller/session
+guard recorded no resource errors. All 17 retained terminal session snapshots
+are empty; root independently scanned them and released its queue allocation.
+This establishes no instantaneous project-wide RSS peak or generated-source
+compile/link, Apple private IIG ABI, SDK completeness, kernel or hardware result.
+
+Conventional evidence is `docs/procedures/e1s-development-iig/evidence.json`.
+A metadata-only initial class matcher rejected the donor's `NATIVE KERNEL`
+qualifier. Its failed matcher and failure receipt remain under the root77
+artifact directory. The corrected readback accepts that actual qualifier;
+no IIG rerun or raw/product mutation occurred. Source/actual independent review,
+publication/common and root acceptance still precede original-owner closure.
