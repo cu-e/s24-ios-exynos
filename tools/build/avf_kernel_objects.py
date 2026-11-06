@@ -869,16 +869,28 @@ def stable_memory(supervise, seconds=45, budget=None):
 
 
 def run_child(argv, cwd, out, label, supervise, timeout=120, admit=True, budget=None):
-    admission = stable_memory(supervise, budget=budget) if admit else {'admitted': True, 'not_compiler': True}
+    admission = None
     rss_limit = budget.rss_limit if budget else 256*1024**2
-    if budget:
-        admission['project_before'] = budget.sample()
-        own = next(work for work in admission['project_before']['workloads'] if work.get('task') == budget.args.task)
-        if any(p['pid'] != budget.identity['pid'] for p in own['processes']):
-            admission['previous_owned_command_still_alive'] = True
-            admission['admitted'] = False
-        if admission['project_before']['MemAvailable_bytes'] < 4*GIB or admission['project_before']['violations'] or admission['project_before']['project_rss_bytes'] > 6*GIB:
-            admission['admitted'] = False
+    try:
+        admission = stable_memory(supervise, budget=budget) if admit else {'admitted': True, 'not_compiler': True}
+        if budget:
+            admission['project_before'] = budget.sample()
+            own = next(work for work in admission['project_before']['workloads'] if work.get('task') == budget.args.task)
+            if any(p['pid'] != budget.identity['pid'] for p in own['processes']):
+                admission['previous_owned_command_still_alive'] = True
+                admission['admitted'] = False
+            if admission['project_before']['MemAvailable_bytes'] < 4*GIB or admission['project_before']['violations'] or admission['project_before']['project_rss_bytes'] > 6*GIB:
+                admission['admitted'] = False
+    except Exception as error:
+        if not budget:
+            raise
+        # A failed admission has no child or complete resource observation.
+        # Keep it as a command record so the caller stops before another row.
+        return {'argv': [str(a) for a in argv], 'cwd': str(cwd), 'started_at': stamp(),
+                'timeout_seconds': timeout, 'rss_budget_bytes': rss_limit, 'admission': admission,
+                'project_admission_error': repr(error), 'stop_reason': 'project-admission',
+                'exit_code': None, 'child_started': False, 'execution_outcome': 'not-started',
+                'resource_qualification': 'inconclusive', 'outcome': 'resource-deferred'}
     record = {'argv': [str(a) for a in argv], 'cwd': str(cwd), 'started_at': stamp(), 'timeout_seconds': timeout, 'rss_budget_bytes': rss_limit, 'admission': admission}
     if not admission['admitted']:
         record.update(exit_code=None, outcome='resource-deferred', child_started=False)

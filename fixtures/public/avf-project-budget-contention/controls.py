@@ -107,6 +107,45 @@ def main():
             check('fresh requested PID start identity retained exactly', single.budget.observed_sessions[str(child.pid)] == start)
         finally:
             e.process_table = original_table; supervise.terminate(child); single.budget.release()
+        prechild_records = []
+        for mode in ['stable-memory', 'project-before']:
+            project = Project(out/('before-'+mode)); sandbox = project.args.out; sandbox.mkdir(parents=True)
+            ready = out/('before-holder-'+mode)
+            holder = subprocess.Popen([sys.executable, '-c', "import fcntl,pathlib,sys,time;f=open(sys.argv[1],'a+');fcntl.flock(f,fcntl.LOCK_EX);pathlib.Path(sys.argv[2]).write_text('ready');time.sleep(1)", project.budget.lock_path, ready], cwd='/tmp')
+            try:
+                deadline = time.monotonic()+2
+                while not ready.exists() and time.monotonic()<deadline:time.sleep(.005)
+                check('actual prechild '+mode+' lock holder acquired', ready.exists())
+                result = e.run_child([sys.executable, '-c', "raise RuntimeError('must never start')"], ROOT, sandbox, 'before-'+mode, supervise, admit=mode=='stable-memory', budget=project.budget)
+                commands.append(result); prechild_records.append(result)
+                check('prechild '+mode+' lock failure is explicit nonpass without child or invented sample', result['outcome']=='resource-deferred' and result['resource_qualification']=='inconclusive' and result['execution_outcome']=='not-started' and result['child_started'] is False and result['exit_code'] is None and 'Project budget lock acquisition timed out' in result['project_admission_error'] and not list(sandbox.glob('*.stdout.txt')) and not result['admission'])
+            finally:holder.wait(timeout=3);project.budget.release()
+        # Exercise main's real dispatch/report loop with the actual rejected
+        # admission record, two synthetic source rows and no object fabrication.
+        # Source/namespace seams are explicitly synthetic; no compiler runs.
+        selected = [{'id':'control-first.o','input_key':'synthetic-first','cwd':str(ROOT),'source':str(TEST),'source_sha256':e.sha(TEST),'recipe_sha256':'synthetic','argv':[sys.executable,'-c',"raise RuntimeError('must never start')"]}, {'id':'control-second.o','input_key':'synthetic-second','cwd':str(ROOT),'source':str(TEST),'source_sha256':e.sha(TEST),'recipe_sha256':'synthetic','argv':[]}]
+        dispatch = out/'dispatch'; dispatch.mkdir(); calls = []
+        originals = {n:getattr(e,n) for n in ['owned_out','approval','bind','run_child','accepted_profile']}; saved_argv=sys.argv
+        class DispatchBudget:
+            rss_limit=e.EXECUTOR_RSS
+            source_plan={'provenance':{},'shard':'synthetic','selected':selected}
+            def reserve(self):pass
+            def release(self):pass
+        def owned(args):args.ownership_binding={'synthetic_dispatch_control':True};return dispatch
+        def approve(args):args.project_budget=DispatchBudget();return {'synthetic_dispatch_control':True}
+        def command(*args,**kwargs):calls.append(args[0]);return prechild_records[0]
+        def after_loop(args):raise ValueError('synthetic post-loop namespace seam; no namespace qualification claimed')
+        try:
+            e.owned_out=owned;e.approval=approve;e.bind=lambda args,out:({'provenance':{},'shard':'synthetic','selected':selected},{},{});e.run_child=command;e.accepted_profile=after_loop
+            (dispatch/'input-bindings.json').write_text('{}')
+            sys.argv=[str(TOOL),'--mode','execute','--main',str(args.main),'--out',str(dispatch),'--shard','synthetic','--owner','synthetic','--task','CONTROL','--experiment','CONTROL']
+            for name in ['manifest','qualification','selectors']:sys.argv.extend(['--'+name,str(TEST),'--'+name+'-sha256',e.sha(TEST)])
+            rc=e.main(); actual=json.loads((dispatch/'evidence.json').read_text())
+            check('main stops after actual first prechild admission refusal and cannot qualify resources', rc!=0 and len(calls)==1 and len(actual['commands'])==1 and len(actual['objects'])==1 and actual['resource_qualification']=='inconclusive' and actual['compiler_started'] is False)
+            check('prechild refusal remains resource-deferred without ordinary validation_error', actual['objects'][0]['outcome']=='resource-deferred' and 'validation_error' not in json.loads(Path(actual['objects'][0]['record']).read_text()))
+        finally:
+            sys.argv=saved_argv
+            for n,value in originals.items():setattr(e,n,value)
         for mode in ['timeout', 'violations', 'aggregate', 'floor']:
             project = Project(out/('after-'+mode)); base_budget = project.budget
             class FinalControl:

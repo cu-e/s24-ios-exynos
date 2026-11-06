@@ -79,3 +79,17 @@ those object facts remain in its sidecar. Resource qualification is explicitly
 inconclusive/failed, further compiler admission stops, and the whole run cannot
 claim PASS or qualify a later eight-job trial. Child exit and output hashes are
 retained. Historical AF193/CW77 records are not rewritten.
+
+The direct-session-stat measurement is retained as another partial improvement:
+1/60 finite timeouts remained, with no surviving owned children. Its immutable
+2bb source and raw capsule remain in fix1. During the failed half-second wait,
+15 other transactions acquired the lock, including five acquisitions by one
+contender. The polling flock does not guarantee fair admission; lower scan cost
+is not a guarantee that contention is eliminated. No favorable retry follows.
+
+A separate fix2 preserves the measured timing code and catches failures during
+stable-memory/project-before admission before child creation. It returns an
+explicit resource-deferred command with child_started=false, not-started child
+execution and inconclusive resources. Main retains this command and stops before
+the next source row. Ordinary object/source validation errors keep their existing
+classification; no failed observation is invented or labeled as a sample.
