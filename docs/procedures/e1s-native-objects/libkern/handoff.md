@@ -138,3 +138,46 @@ allocation with external1890watchdog. No execute until separate root grant,
 no prefix replay/resume/identity borrowing/extra flags. Preserve initialFAIL and
 all old source/actual bytes. plan-002-evidence.json binds exact own source-plan
 receipt; actualMD/object/resource checks and independent acceptance remain later.
+
+
+## Root93 remaining65 PASS; ordered77 product composition
+
+Root alone dispatched STR028BUILD-002 under canonical native-libkern93
+allocation001136a3bc8215d46f74338bf0525c8ecfad022e02293047da155b3c1a14a49a,
+approval84cbbc425a5f8dff7d1dd4d2a015e252a0fdb7b4b35cdc13ba30b6802d29d53b,
+exact007077caller/797csourceplan/2533manifest. WrapperPID1217519/start62402422,
+callerPID1217520/start62402422, start2026-11-06T14:41:51.092998+00:00.
+Root external1890TERM+30watchdog observed exit0 and released its wave; SR28 never
+repeated execution. All65 remaining object/MD/input/resource dimensions PASS,
+caller elapsed310.098971046s. Original failed001/de716 and accepted first12
+remain immutable, never relabelled as wholePASS or replayed.
+
+Raw build-002/evidence.json SHA
+6dbd5079732a874ac14e82d527f92de6fc27beccb1e8b8e5cea21de92265d023;
+registration-ready execution-002-evidence.json SHA
+d5146c35afb863fd41f59f0e2bb4eeefed9f40a9cc60b0f275db6e632ceccc43.
+Root watchdog evidence9e01bd0c6dc1ce0435dfce38b83ed75a60c201fd6fc511181f31a2938831ca93
+records exit0/PASS/owned[]/releasedtrue. OwnreservationCOMPLETE/current exact
+pid/start matches0; all66loader+compiler observations resourcequalified,
+no release_error/owned survivors. New controllerHWM81674240B, peakaggregate
+205578240B, observedproject316616704B. No helper/source/flags/globalnamespace
+mutation, privateheader edit, retries or oldSDK/provider/archive credit.
+
+Read-only audit-002/evidence.json SHA
+7c86b41f470e2ab7c0b0035d06dea2443edefacfcf7a7065a99da9ac4ec287c0
+checks current old/new inputs, namespace/absence/runtime lookup,14old/15new
+privatefiles, pinned actual loader mapping, every actualARM64 object/hash and
+MD/current importedbytes. Genuine14be header appears in actual OSKext MD.
+All77 originalordered IDs compose uniquely from oldaccepted12+new65;659unique
+imports total,636for new65. Audit4.587142272s/currentVmHWM53064KiB/256MiBAS/
+120s, no targettool invoked. Original-owner API check does not replace separate
+actor review. The ordered product map audit-002/products-77.json SHA
+1fbdfadd947aae49c91382275a29c46b74f6e95ce895d663cd373c88deae2898
+retains originalselectionindex/originexperiment/object/MD/source/recipe hashes.
+
+Next original SR28 records actual002PASS once, updates progress and sends exact
+frozen packet to CN/root/INT002 for independent current-byte/object/MD review
+and serialized currentHEADintegration/common/root acceptance. Only explicit
+root acceptance authorizes original-owner completion. No recompile/replan/MD
+regeneration, common/publication/taskclose/link/QEMU while waiting. This is
+77 native objects, not a linked kernel/privateABI/runtime/hardware result.
