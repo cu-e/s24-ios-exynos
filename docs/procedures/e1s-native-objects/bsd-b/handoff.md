@@ -142,3 +142,45 @@ fbcb6d92d0f8b1c4c71c37a3800aa81bd4a808d7f8b1b8f8b38f140df029cac4; derivedvectors
 Futurebuild004 absent/no projection/targettools; sourceRSSunmeasured. Current
 accepted12+pending158 covers original170 exactlyonce, retaining per-attempt
 provenance. Await fresh explicit root actual004 grant; no retry/resume/fixes.
+
+## Root115 actual BUILD004 handoff
+
+Root115 subsequently granted and dispatched exactly one BUILD004 execution;
+the worker only monitored its owned output. The 158 remaining objects passed
+ARM64 Mach-O, actual MD/input closure and resource checks, with 158 compiler
+exits zero and a successful loader. The raw actual capsule is
+`artifacts/e1s-native-compile/bsd-b/build-004/evidence.json` in this worktree,
+SHA `d90202e60819e46037caa8664c81469d3156c1256df0e8b14ee4fcf193ced590`.
+Root's separate final receipt is
+`artifacts/team-coordination/20261106-team/native-bsdb115/evidence.json` in MAIN,
+SHA `11a05c6483df55309ed9405770c76e616bda3928d67daaeaf46a7b57ca17dadd`:
+exit zero, no guard stop, released allocation and zero survivors.
+
+`build-004.md` and conventional `build-004-evidence.json` describe exact source,
+command, resource, preserved warning and cleanup observations. The new typed
+`products-build-004.json` has SHA
+`dec5252a66b838edfb212e8a8644ac77517cd79a0a2757e94229c255adc2c69e`;
+the combined `qualified-objects-170.json` has SHA
+`ad156e9ff1b309c44c0ca0e300c6fa551f6bb1bc5ef3cabd763ea64d2c3ef25e`.
+The exact ordered set is original accepted five from BUILD001, accepted seven
+from BUILD003 and new 158 from BUILD004, with unchanged per-attempt provenance.
+BUILD001/003 stay FAIL; BUILD002 stays PLANNED and unexecuted. No target retry,
+accepted-object recompilation, source/context/native-flag change or worker
+global-queue release occurred.
+
+All 316 new physical object/MD hashes match the saved raw capsule. The 64,722
+actual MD dependency entries remain in that raw evidence. Diagnostics retain
+80,039 literal `warning:` matches, with no compiler errors observed. Controller
+VmHWM was 81,891,328 bytes; maximum sampled owned command-tree RSS was
+194,748,416 bytes. All 159 final session samples were empty. The worker checked
+161 recorded PID/start-tick identities: no live processes or zombies remained.
+Saved cleanup SHA is
+`a543bef93342eda1f82416efe0475988000c71e46a3b2f7a105e4dd6a50952e7`.
+
+The actual `subr_log.o` MD names the private Firehose header with unchanged
+14be hash. `pthread_shims.o` also passed; it does not directly name that private
+header in its MD. Historical header export authority gives no native provider
+archive, private ABI/layout, kernel image, link, runtime or hardware credit.
+Original SR25 records actual STR025BUILD-004 once, then submits the new 158 and
+the exact combined 170-object descriptor to CM/root for independent review.
+Root publication/common acceptance must precede original-owner task closure.
