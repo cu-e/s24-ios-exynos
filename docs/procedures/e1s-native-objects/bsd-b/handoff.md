@@ -76,3 +76,15 @@ ownreservationcomplete and controller1112192/timeout1112191 retired. Worker did
 not release the globalqueue, modify broker/flags/source or rerun targets.
 OriginalSR25 records001 FAIL exactlyonce. Root separately authorized only
 SOURCE PLAN002 for remaining165 contiguousIDs, preserving all001 outputs.
+
+
+After originalSR25 recorded001 FAIL, rootauthorized source-only002. OneCLIexit0
+plan /home/egor/dev/pet/s24-ios-exynos/worktrees/str-025-e1s-native-bsd-b-20261106/artifacts/e1s-native-compile/bsd-b/plan-002/plan.json
+SHAdbaa24587087b99c95f9d4c2c2ff902c3cbba2ddf4ddef1d85dabe85e7bef093; manifest44f24256d17696787017b75c6cde2efc221d7569a1f750f6a4d75d96c30a58be.
+Remaining165 originalorder IDs[175:340], restricted_in_port through subr_sbuf;
+qualified001 first5 excluded explicitly, not silently resumed/recompiled. Original
+argv/source/recipe bytes match001 for every remainingrow; complete170coverage
+is first5+remaining165 exactlyonce. Same2676 physicalcaller. Empty stderr/raw
+exit0 saved; sourceplanRSS unmeasured. Futurebuild002 absent/privateprojection
+notcreated. STR025BUILD-002 preregistered PLANNED, actualexecutionNOTgranted.
+Wait separate root less-concurrent exact allocation after85 reconciliation.
