@@ -1,14 +1,31 @@
 # VM043 final-resource handoff
 
-Original EO owner `codex-guest-platform-profile-20261106-eo`, original VM043
-still in progress. New fresh current-MAIN context
-`worktrees/vm-043-resource-v1-20261106`, branch
-`team/vm-043-resource-v1-20261106`, accepted base e8ec6cd5. Earlier AF193 plan and
-VM018 DONE are preserved, with no old object/key credit or resume.
+Original EO `codex-guest-platform-profile-20261106-eo`, VM043 in progress.
+Fresh current-MAIN worktree `worktrees/vm-043-resource-v1-20261106`, branch
+`team/vm-043-resource-v1-20261106`, accepted base e8ec6cd5. Preparation source
+commit `336b6e3c35c03dbfd54c24ea7dcb2cdc48e0e851`. Context update and unique
+VM043RESOURCEBUILD-001 registration completed before helper use. This actual
+build experiment stays PLANNED; a source plan is not actual compilation.
 
-Prepared exact EV-helper9929 / 80cc-eb2-a237-fdfc request, 13 platform-support
-IDs, explicit project-budget-v1 and fresh source/actual paths. Next register
-VM043RESOURCEBUILD-001 planned and run only the qualified 256MiB/120s source-plan
-supervisor. Root grants no actual compilation or allocation. Send exact plan,
-input bindings, count, keys, outcome/resources/cleanup to root and INT002, then
-await separate actual second-wave allocation. No MAIN publication/common.
+ONE supervised source-only plan PASS exit0, canonical physical9929 helper,
+EV tuple80cc/eb2/a237/fdfc, explicit project-budget-v1. Exact13 selected IDs and
+new profile keys, full namespace6725 files,34 roots,2 preserved absences.
+Plan SHA88eaddbc8378d0d2631b3ab5a4906e5e1ee4e7217e4c6f1fad4f1ce75d2c101e;
+input-bindings SHA295e6edab63199b6ee1bcd245d43ede66dcb1c1429edc599389bc53f10307406.
+Both are under artifacts/avf-object-shards/platform-support/resource-v1/plan-001/
+runner in this WT. Raw runner evidence SHAe0fc97bbfad674d41cd483e9ba2972dc87a2fd4e46470711cc0c23750b9a78e0;
+completion SHA f850f06de9db43f3ca44354dbc2a6f9ce400589901f9ad976117c0ca5c3a191e.
+
+Accepted run_child enforced256MiB aggregate and120s child limit after3 stable
+one-second >=4GiB samples. Child4.984356941s, total6.987164560s, aggregate peak
+201949184B; final owned processes[]/RSS0. Current helper exec-image HWM183263232B;
+wrapper VmHWM19828KiB. Inherited ru_maxrss is separately labelled, not current
+image memory. No compiler/archive/linker/guest/current allocation or old credit.
+
+Future exact argv is in fixture resource-v1/request.json; its fresh actual path
+artifacts/avf-object-shards/platform-support/resource-v1/build-001/runner remains
+absent. Do not run it until a separate root second-wave allocation binds this
+exact plan/hash/output/task/owner/experiment. No resume, arbitrary flags, engine
+edits, common checks or MAIN publication. Preserve prior AF193 plan and VM018
+DONE. INT002/root receive this source-plan receipt for independent assessment;
+actual objects/deps/runtime remain unmeasured for this new profile.
