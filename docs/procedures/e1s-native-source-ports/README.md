@@ -44,3 +44,22 @@ old source-port compile success receives new DEVELOPMENT qualification. Compile
 these six real source bodies only during a separate genuine DEVELOPMENT body
 build. The37 export ABI requirements and native hardware/runtime remain open.
 Independent review/publication/common/root acceptance precede SR14 closure.
+
+E1SNATIVEPORTS-001 actually applied the three patches once. All10 Git operations
+exited0 through existing sources.git; isolated toplevel was verified for each
+patch. Six postimages exactly match the accepted prior-port hashes and all5105
+other files match the base manifest. Original5111 source files, original18 Git
+metadata files and all bound inputs remain byte-identical. Full derived source
+and both manifests/proof are in derive-001; source-context.json binds the usable
+root and expected consumer boundary. Actual elapsed5.458seconds; no compiler,
+generator, linker, Make query, target execution or object reuse occurred.
+
+The conventional evidence preserves raw4ea05b1b/proof821eb152/derivedmanifest
+f85b6990 and all ten actual argv/exitcodes. Existing sources.git exposes stdout
+on success but not its captured stderr; raw empty-stderr fields were unobserved
+placeholders, not measured-empty output. Raw getrusage high-water is retained
+without claiming process-sampled or aggregate RSS/budget qualification.
+No actual result is rerun or altered to change those observation limits.
+
+Independent source/context review and publication/common/root acceptance are
+next. The original SR14 claim remains open until explicit root acceptance.
