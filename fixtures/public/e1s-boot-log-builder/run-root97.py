@@ -6,7 +6,6 @@ Requires separately supplied root grant bound to this adapter and frozen plan.
 """
 import argparse
 from datetime import datetime, timezone
-import fcntl
 import hashlib
 import json
 import os
@@ -73,6 +72,17 @@ def input_bindings(plan):
         need(row==expected,'Changed frozen input '+name);actual[name]=row
     return actual
 
+def root_lease(grant):
+    queue,observed=parsed_json(QUEUE)
+    need(not queue['light_compile'] and not queue['qemu'],'Root lease must remain exclusive')
+    heavy=queue.get('heavy');need(isinstance(heavy,dict),'Active root heavy lease required')
+    for key in ['id','task','owner','experiment','plan_sha256','runner_sha256',
+                'actual_output','max_jobs','max_owned_rss_bytes','whole_seconds']:
+        need(heavy.get(key)==grant[key],'Exact active root lease '+key)
+    expiry=datetime.fromisoformat(grant['expires_at'])
+    need(expiry>datetime.now(timezone.utc),'Unexpired root lease approval')
+    return observed
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root-grant',type=Path,required=True)
@@ -82,7 +92,8 @@ def main():
     need(plan['task']==TASK and plan['owner']==OWNER and plan['experiment']==EXPERIMENT,'Exact task context')
     need([c['id'] for c in plan['commands']]==['source-hook-controls','ordinary-builder'],'Exact planned stages')
     need(len(plan['expected_recorded_run_argv'])==23,'Exact 23 builder commands')
-    grant=bound_json(args.root_grant,args.root_grant_sha256)
+    grant,grant_binding=parsed_json(args.root_grant)
+    need(grant_binding['sha256']==args.root_grant_sha256,'Changed root approval bytes')
     expected=dict(id=LEASE,task=TASK,owner=OWNER,experiment=EXPERIMENT,approved_by='root',approved=True,
         plan_sha256=PLAN_SHA,runner_sha256=self_binding['sha256'],actual_output=str(OUT),
         max_jobs=1,max_owned_rss_bytes=LIMIT,whole_seconds=WHOLE,external_seconds=EXTERNAL)
@@ -104,23 +115,18 @@ def main():
         sample=supervisor.sample();initial.append(sample)
         need(sample['MemAvailable_bytes']>=4*1024**3 and not supervisor.pressured(sample),'Stable root admission')
         if number<2:time.sleep(1)
-    with (MAIN/'state/.integration.lock').open('a') as lock:
-        fcntl.flock(lock,fcntl.LOCK_EX);queue=json.loads(QUEUE.read_text())
-        need(not queue['heavy'] and not queue['light_compile'] and not queue['qemu'],'Exclusive clear queue')
-        need(expiry>datetime.now(timezone.utc),'Root grant expired before reservation')
-        OUT.mkdir(parents=True,exist_ok=False)
-        dump(OUT/'grant.json',grant);dump(OUT/'plan.json',plan)
-        queue['heavy']=dict(grant,recorded_at=supervisor.now(),initial_samples=initial)
-        dump(QUEUE,queue)
+    lease_observation=root_lease(grant)
     started=time.monotonic()
     report=dict(kind='host-test',origin='local-host',outcome='inconclusive',task=TASK,owner=OWNER,
-        experiment=EXPERIMENT,plan_sha256=PLAN_SHA,runner=self_binding,root_grant=binding(args.root_grant),
+        experiment=EXPERIMENT,plan_sha256=PLAN_SHA,runner=self_binding,root_grant=grant_binding,
         controller_pid=os.getpid(),commands=[],input_bindings_before=before_inputs,parsed_output_bindings={},
-        initial_samples=initial,target_executed=False,hardware_execution=False,compiler_started=False,
+        initial_samples=initial,root_lease_observations=[lease_observation],resource_queue_owned_by='root',target_executed=False,hardware_execution=False,compiler_started=False,
         no_native_ownership_or_marker_qualification=True)
-    previous_env=dict(os.environ);pending=[];seen_sessions=set()
+    previous_env=dict(os.environ);pending=[];seen_sessions=set();created=False
     with core.owned_cancellation() as cancel,cancel.cleanup():
         try:
+            OUT.mkdir(parents=True,exist_ok=False);created=True
+            dump(OUT/'grant.json',grant);dump(OUT/'plan.json',plan)
             (OUT/'home').mkdir();(OUT/'tmp').mkdir()
             environment=dict(PATH='/usr/bin:/bin',HOME=str(OUT/'home'),TMPDIR=str(OUT/'tmp'),
                 TMP=str(OUT/'tmp'),TEMP=str(OUT/'tmp'),LANG='C',LC_ALL='C',PYTHONUTF8='1',PYTHONNOUSERSITE='1',
@@ -139,7 +145,8 @@ def main():
             commands=[*plan['commands'],dict(id='artifact-inspection',argv=inspect_argv,
                 cwd=plan['inspector_template']['cwd'],timeout_seconds=120)]
             for command in commands:
-                check();sample=supervisor.sample()
+                check();report['root_lease_observations'].append(root_lease(grant))
+                sample=supervisor.sample()
                 need(sample['MemAvailable_bytes']>=4*1024**3 and not supervisor.pressured(sample),'Resource gate before child')
                 need(core.proc_status().get('VmRSS_bytes',0)<=LIMIT,'Controller RSS gate')
                 if command['id']=='ordinary-builder':report['ordinary_builder_started']=True
@@ -191,18 +198,26 @@ def main():
                 Path(plan['output']['report']),inspect_out] if str(p) not in parsed_paths and p.is_file()]
             report['output_binding_semantics']='Parsed JSON digest/size uses exactly parsed bytes; terminal unparsed files are observations only, with no current-path claim.'
             if survivors:report.update(outcome='fail',error='Owned survivors after finite cleanup')
-            dump(OUT/'evidence.json',report)
-            with (MAIN/'state/.integration.lock').open('a') as lock:
-                fcntl.flock(lock,fcntl.LOCK_EX);queue=json.loads(QUEUE.read_text())
-                need(queue['heavy']['id']==LEASE and queue['heavy']['owner']==OWNER,'Original owned reservation')
-                if not survivors:
-                    queue['heavy']=None
-                    queue['last_heavy_release']=dict(id=LEASE,task=TASK,outcome=report['outcome'],
-                        evidence=str((OUT/'evidence.json').relative_to(MAIN)),evidence_sha256=binding(OUT/'evidence.json')['sha256'],owned_survivors=0)
-                    dump(QUEUE,queue)
-    os.environ.clear();os.environ.update(previous_env)
-    print(json.dumps(dict(outcome=report['outcome'],error=report.get('error'),commands=len(report['commands']),
-        evidence=binding(OUT/'evidence.json'),owned_survivors=len(report['owned_survivors']))))
-    return 0 if report['outcome']=='pass' else 1
+            report['cancellation_signals']=list(cancel.signals)
+            if cancel.signals:report.update(outcome='fail',error='Owned controller cancellation')
+            if created:dump(OUT/'evidence.json',report)
+        os.environ.clear();os.environ.update(previous_env)
+        # Keep the original cancellation handler installed through terminal
+        # publication. A cancellation during postwork/hash/finally is failure.
+        if cancel.signals:
+            report.update(outcome='fail',error='Owned controller cancellation',cancellation_signals=list(cancel.signals))
+            if created:dump(OUT/'evidence.json',report)
+        terminal_binding=binding(OUT/'evidence.json') if created and (OUT/'evidence.json').is_file() else None
+        if list(cancel.signals)!=report['cancellation_signals']:
+            report.update(outcome='fail',error='Owned controller cancellation',cancellation_signals=list(cancel.signals))
+            if created:
+                dump(OUT/'evidence.json',report);terminal_binding=binding(OUT/'evidence.json')
+        print(json.dumps(dict(outcome=report['outcome'],error=report.get('error'),commands=len(report['commands']),
+            evidence=terminal_binding,owned_survivors=len(report['owned_survivors']),
+            cancellation_signals=report['cancellation_signals'],resource_queue_release='root-independent-only')))
+        if cancel.signals:
+            report.update(outcome='fail',error='Owned controller cancellation',cancellation_signals=list(cancel.signals))
+            if created:dump(OUT/'evidence.json',report)
+        return 0 if report['outcome']=='pass' and not cancel.signals else 1
 
 if __name__=='__main__':sys.exit(main())
