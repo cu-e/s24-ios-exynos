@@ -66,7 +66,7 @@ GPU/radios. Existing owners and blocked reservations are not reassigned.
 
 | Blocker → result blocked | Ready solution/donor | Concrete missing input or experiment | Independent work now |
 | --- | --- | --- | --- |
-| Guest image not yet booted → generic console bench | Existing donor loader/RAM-root/PID1 and newly linked image. | Qualify the actual Mach-O entry/segments and the existing loader's physical layout, payload/RAM-root and console settings; capture the first real bounded serial run only after those inputs are established. Preserve linker warnings for inspection. | E1S source work proceeds. |
+| Early `pmap_map_bd` panic → continued generic boot | Genuine linked image, source-built AVF shim and actual validated XNUP. | The first real QEMU run reaches the XNU panic console: `pmap_pte(kernel_pmap, vaddr)` returns NULL in `pmap_map_bd`, at `pmap.c:1887`. Trace the early I/O-map caller and missing PTE/virtual-table bootstrap contract; capture the requested VA/PA before choosing a donor fix. This is a real implementation failure, not an undefined provider. | E1S source work proceeds; no need for another scheduler, archive or packaging framework. |
 | Coherent E1S kernel inputs → full board kernel build | Existing E1S patches and embedded donor dependency recipes. | KRN-001 retains its original blocked owner: explicit matching SDK/dependency paths are unconfigured. The public-source native alternative also retains KRN-026's37 required provider/ABI gaps; guest-profile exclusions do not resolve them for E1S. Supply/qualify coherent genuine inputs or demonstrate a supported board configuration; do not suppress exports or relabel the guest. | Loader, DTB, console policy and board source work proceed; no takeover of these blocked claims. |
 | Invalid/incomplete memory exclusions → trustworthy E1S handoff | Existing unchanged E1S loader/FDT parser. | STR-002 actual-C regression and minimal patch: reject incomplete reservations/overflow and unqualified fallback; later complete live DTB/carve-outs. | Started now, no QEMU or phone required. |
 | UART/WDT/conduit assumptions → useful first console/halt | Upstream0017–0019 and pinned Samsung DTS/drivers. | Qualify powered accessibility and boot policy; source review of opt-in MMIO, PSCI SMC/HVC,25.6MHz timer and GIC/ADT contracts; later actual EL/IRQ/tick observation. | Narrow source patches/contracts can proceed now. |
@@ -75,10 +75,11 @@ GPU/radios. Existing owners and blocked reservations are not reassigned.
 | No native Xclipse/radio backend → GPU/Wi-Fi/SIM/eSIM | Existing SGPU/CPIF/Wi-Fi donors and project interface work. | Firmware/board ownership and real frontend/ABI/device evidence. Generic Adreno performance is not an Exynos backend. | Keep source work scoped to a concrete blocked subsystem after early boot. |
 | Entry/recovery not verified → any physical boot experiment | Existing device inventory and E1S entry/probe source. | Exact current live DTB/EL/reservations plus an explicitly authorized, reviewable recovery/boot experiment. | Host code, source and image validation remain authorized; no new ADB/root/flash/reboot/MMIO action is authorized here. |
 
-The measured end state is still incomplete: a genuine guest image is linked,
-but no XNU console has been established locally and no native XNU system has
-run on this S24. The route decision and source repairs must not be reported as
-that result.
+The measured end state is still incomplete: a genuine guest image is linked
+and the first genuine XNU panic console has run in QEMU. It stops during early
+page-table/I/O mapping, before PID1 or userspace. No native XNU system has run
+on this S24. The route decision and source repairs must not be reported as that
+result.
 
 ## Actual follow-through and preserved observations
 
@@ -103,8 +104,25 @@ the next bounded link completed with exit0 in9.940seconds. Image SHA256:
 `87496c21f41cdd56c748cb1cfad37dba8712b48a01a204dcbb298c0feac5e8fc`.
 Raw diagnostic SHA256:
 `bed13fd168e43d29ebd4f7792931d9ced4435448195bbe4a78572a3c0e9855ab`.
-No QEMU ran. The missing framework search directory and BSS alignment reduction
-warnings are retained; loader/segment qualification remains next.
+The missing framework search directory and BSS alignment reduction warnings
+are retained; actual declared segment alignment and executable entry checks
+passed before the following console experiment.
+
+The existing Scion packer then created a21,881,056-byte XNUP containing the exact
+kernel and command line. Existing XNUP, Mach-O and source-layout parsers passed
+the actual bytes; payload SHA256 is
+`5a734953779031e54606f0ef5dfd347a198775f86b23200c35589ab3711d62d8`.
+One root-leased QEMU run used256MiB guest RAM, one Cortex-A76, GICv3,
+32MiB TCG cache and explicit `console_quiet=0`. After the loader's handoff,
+the genuine kernel printed `panic ... pmap_map_bd @pmap.c:1887` and stopped
+through PSCI SYSTEM_OFF. The host process exited0 in0.536seconds, with no
+survivors. This establishes kernel entry and a kernel panic console, not a
+working boot, successful timer/allocator tests, PID1 or device support.
+The original-owner experiment remains inconclusive for full boot.
+Raw serial/command evidence SHA256:
+`5083bf48c1cd3d1f5563f8cd9acb07ed53d39b20129dee88dd7be8c1ac193a52`.
+The next common task is the missing early PTE mapping; no automatic retry or
+RAM increase was performed.
 
 Primary implementation STR-002 changes actual donor E1S `loader.c`/`fdt.c`:
 bounded DTB/range parsing, complete-or-reject reservation handling, checked
@@ -133,7 +151,7 @@ build SHA256: `85747434c0a1aa4f5a29dc4f1e158ca8bc9176a53fe57bff47d23f280ec00267`
 STR-002 is accepted and closed by its original owner. STR-003's tested hook and
 its independent review are being accepted against the new HEAD. The original
 STR-001 audit and narrow donor lookup are complete. The common track's next
-result is image/loader/console qualification; the E1S track's next host result
+result is resolving the measured early PTE mapping failure; the E1S track's next host result
 is a coherent entry/DTB/console policy, with full kernel inputs still separately
 blocked as recorded above.
 Other native-driver work remains under its existing owners and dependencies;
