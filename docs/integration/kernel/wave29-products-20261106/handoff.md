@@ -1,0 +1,3 @@
+# INT002 actualWave29 disjoint review handoff
+
+Frozen scope docs/integration/kernel/wave29-products-20261106 only. CM independent448 product review PASS; CN owns the other442. See evidence.json and review.md for explicit010metadata-firstfailure/narrowcompletion, no physical replay. Source mapping/source caps/currentprofile/MD/object/resource proofs are pinned separately per task. Root currently controls allocation31 recovery; no publication/common/rootqueue/taskdone by this review. Original CP/CQ remain only producers/closers. Next serialize freshHEAD integration with ready product packets after root allocation terminal and explicit grant. Historical tail/FH/PTH context admission and sourcecore/modules are separate receipts; never silently adopt old product keys.
