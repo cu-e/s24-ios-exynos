@@ -172,3 +172,21 @@ only needs independent exact-source review, then INT002/root publication/common;
 original EP task closure follows explicit acceptance. Actual compiler execution
 needs a separate root grant and current exactplan/approval/policy pins. VM036
 must adopt a new reviewed helper pin explicitly after acceptance; no live swap.
+
+Independent R3 found a real second SIGINT at alarm-handler restoration could
+abort finally, leaving SIGALRM blocked, the replacement handler installed and
+an earlier outer timer disabled. The f2023/fix4 source and005 witnesses stay
+physically unchanged. New fix5 changes only the restoration mask to include
+SIGTERM and SIGINT together with SIGALRM. Their handlers are unchanged, pending
+cancellation is retained, and the exact original mask is restored last after
+the alarm handler and remaining outer timer. Signals remain unblocked during
+the kernel wait. The finite wait/acquisition/critical section is unchanged;
+no duplicate six-monitor workload is justified for this finally-only correction.
+
+Prospectively register006 before narrow controls: run the exact preserved EQ
+restoration repro read-only against the new source, then six actual owned
+workers (three TERM and three INT repetitions) injecting a second real signal
+immediately before captured ALRM-handler restoration. Verify both cancellations
+deliver, exact mask/handlers restore, the .9-second outer timer retains its
+remaining deadline, owned children clean up and the helper AST changes only by
+that explicit restoration mask. No original failure or timing report is edited.
