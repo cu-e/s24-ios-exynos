@@ -6,6 +6,9 @@ The actual target is a genuine ordinary build, never a synthesized valid ELF.
 """
 from __future__ import annotations
 import argparse
+from dataclasses import dataclass
+import os
+import stat
 import hashlib
 import json
 from pathlib import Path
@@ -20,14 +23,41 @@ class Invalid(ValueError): pass
 def need(condition, message):
     if not condition: raise Invalid(message)
 
-def sha(path):
-    with Path(path).open('rb') as f: return hashlib.file_digest(f, 'sha256').hexdigest()
+@dataclass(frozen=True)
+class Snapshot:
+    """Captured content only; never assert a pathname still names these bytes."""
+    path: str
+    body: bytes
 
-def read(path):
-    need(Path(path).is_file(), 'missing artifact')
-    with Path(path).open('rb') as stream: body=stream.read(MAX+1)
-    need(len(body)<=MAX, 'artifact size bound')
-    return body
+    @property
+    def sha256(self): return hashlib.sha256(self.body).hexdigest()
+    @property
+    def size(self): return len(self.body)
+    def binding(self): return dict(path=self.path,sha256=self.sha256,size=self.size)
+
+def capture(path):
+    # One open, bounded immutable bytes; hash, size and parser all use this body.
+    with Path(path).open('rb') as stream:
+        need(stat.S_ISREG(os.fstat(stream.fileno()).st_mode),'regular captured input')
+        body=stream.read(MAX+1)
+    need(len(body)<=MAX,'artifact size bound')
+    return Snapshot(str(path),body)
+
+def streamed_binding(path,limit=MAX):
+    # Unparsed products/tools need no retained allocation. Count the same stream
+    # that is hashed, rather than racing a later pathname stat/reopen.
+    need(isinstance(limit,int) and 0<=limit<=2*1024**3,'streamed size bound')
+    digest=hashlib.sha256();size=0
+    with Path(path).open('rb') as stream:
+        need(stat.S_ISREG(os.fstat(stream.fileno()).st_mode),'regular streamed input')
+        while block:=stream.read(min(1024*1024,limit-size+1)):
+            size+=len(block);need(size<=limit,'streamed size bound');digest.update(block)
+    return dict(path=str(path),sha256=digest.hexdigest(),size=size)
+
+def sha(path): return streamed_binding(path)['sha256']
+
+def bind_expected(actual,expected,message):
+    need(actual['sha256']==expected['sha256'] and actual['size']==expected['size'],message)
 
 class ELF:
     def __init__(self, data, kind):
@@ -211,15 +241,15 @@ def inspect_layout(elf,image,obj,start_source):
 def recorded_vectors(actual,expected):
     need(actual==expected,'unchanged21 plus2 exact command/order vectors')
 
-def product_binding(product,file):
-    need(sha(file)==product['sha256'] and Path(file).stat().st_size==product['size'],'stale artifact binding')
+def product_binding(product,actual):
+    bind_expected(actual,product,'stale artifact binding')
 
-def source_binding(file,digest):
-    need(sha(file)==digest,'source ABI/exclusion/preimage binding '+str(file))
+def source_binding(snapshot,digest):
+    need(snapshot.sha256==digest,'source ABI/exclusion/preimage binding '+snapshot.path)
 
 def verify_build(root,main,plan):
     need(root.resolve()==root and str(root)==plan['output']['root'],'fresh declared build namespace')
-    report=json.loads(read(root/'report.json'))
+    report_snapshot=capture(root/'report.json');report=json.loads(report_snapshot.body)
     need(report['outcome']=='pass' and len(report['commands'])==23,'genuine23-command build report')
     recorded_vectors([r['argv'] for r in report['commands']],plan['expected_recorded_run_argv'])
     need(all(r['exit_code']==0 for r in report['commands']),'all actual builder exits')
@@ -231,35 +261,46 @@ def verify_build(root,main,plan):
         need(sha(main/report[key]['snapshot'])==digest,'actual overlay snapshot '+key)
     expected_products=plan['expected_product_paths']
     need([r['path'] for r in report['products']]==expected_products,'exact genuine eight product paths')
+    snapshots={'report':report_snapshot};products=[]
+    retained={str(root/'loader/loader.elf'):'elf',str(root/'loader/Image'):'image'}
     for product in report['products']:
         file=main/product['path']
-        product_binding(product,file)
-    source_hashes={}
+        if str(file) in retained:
+            snapshot=capture(file);snapshots[retained[str(file)]]=snapshot
+            actual=snapshot.binding()
+        else: actual=streamed_binding(file,product['size'])
+        product_binding(product,actual);products.append(actual)
+    need('elf' in snapshots and 'image' in snapshots,'genuine retained loader products')
+    source_hashes={};retained_sources={'shim/e1s-xnu/start.S':'start','shim/e1s-xnu/loader.c':'loader_source'}
     for relative,digest in plan['expected_post_source_sha256'].items():
-        actual=sha(root/'source'/relative)
-        source_binding(root/'source'/relative,digest)
-        source_hashes[relative]=actual
+        snapshot=capture(root/'source'/relative);source_binding(snapshot,digest)
+        source_hashes[relative]=snapshot.sha256
+        if relative in retained_sources:snapshots[retained_sources[relative]]=snapshot
+    need('start' in snapshots and 'loader_source' in snapshots,'retained actual source witnesses')
+    # The unchanged builder has no object product digest. Capture once and
+    # report that observed binding without pretending it was preauthenticated.
+    snapshots['object']=capture(root/'loader/loader.c.o')
     for binding in plan['input_bindings'].values():
-        need(sha(binding['path'])==binding['sha256'],'changed frozen input '+binding['path'])
-    return report,source_hashes
+        bind_expected(streamed_binding(binding['path'],binding['size']),binding,'changed frozen input '+binding['path'])
+    return report,source_hashes,snapshots,products
 
-def negative_controls(directory,elf,image,obj,start,report,root,main,plan):
+def negative_controls(directory,elf,image,obj,start,report,source_snapshot,products,plan):
     """Only invalid derivatives of the genuine build; never a fabricated valid target."""
     need(not directory.exists(),'fresh negative control directory');directory.mkdir()
     linked=ELF(elf,2);log=linked.symbol('loader_log');section=linked.sections[log['index']]
     records=[]
-    def rejected(name,call,reason,artifact=None):
+    def rejected(name,call,reason,artifact=None,body=None):
         try:call()
         except Invalid as error:
             need(reason in str(error),'wrong rejection reason '+name)
             records.append(dict(id=name,outcome='expected-rejected',reason=str(error),
                                 artifact=str(artifact) if artifact else None,
-                                sha256=sha(artifact) if artifact else None))
+                                sha256=hashlib.sha256(body).hexdigest() if body is not None else None))
         else:raise Invalid('invalid control accepted: '+name)
     def elf_case(name,offset,fmt,value,reason):
         changed=bytearray(elf);struct.pack_into(fmt,changed,offset,value)
         file=directory/(name+'.elf');file.write_bytes(changed)
-        rejected(name,lambda:inspect_layout(changed,image,obj,start),reason,file)
+        rejected(name,lambda:inspect_layout(changed,image,obj,start),reason,file,changed)
     elf_case('wrong-log-size',log['entry_offset']+16,'<Q',LOG_SIZE+4,'target log size')
     elf_case('log-past-payload',log['entry_offset']+8,'<Q',linked.symbol('_payload_start')['value'],'whole log before payload')
     elf_case('readonly-log-section',section['header_offset']+8,'<Q',section['flags']&~1,'writable allocated')
@@ -268,20 +309,21 @@ def negative_controls(directory,elf,image,obj,start,report,root,main,plan):
     elf_case('log-overlaps-stack',log['entry_offset']+8,'<Q',linked.symbol('_stack_top')['value']-16,'log disjoint from stack')
     changed=bytearray(image);struct.pack_into('<Q',changed,16,len(image)+4096)
     file=directory/'header-size-mismatch.Image';file.write_bytes(changed)
-    rejected('header-size-mismatch',lambda:inspect_layout(elf,changed,obj,start),'Image size/header/payload agreement',file)
+    rejected('header-size-mismatch',lambda:inspect_layout(elf,changed,obj,start),'Image size/header/payload agreement',file,changed)
     vectors=[r['argv'] for r in report['commands']]
     changed_vectors=vectors[:5]+vectors[7:]
     rejected('omitted-log-overlay',lambda:recorded_vectors(changed_vectors,plan['expected_recorded_run_argv']),'command/order vectors')
     changed_vectors=list(vectors);changed_vectors[3],changed_vectors[5]=changed_vectors[5],changed_vectors[3]
     rejected('reordered-overlay',lambda:recorded_vectors(changed_vectors,plan['expected_recorded_run_argv']),'command/order vectors')
     product=dict(report['products'][4]);product['sha256']='0'*64
-    rejected('stale-product-binding',lambda:product_binding(product,main/product['path']),'stale artifact binding')
-    body=read(root/'source/shim/e1s-xnu/loader.c')
+    rejected('stale-product-binding',lambda:product_binding(product,products[4]),'stale artifact binding')
+    body=source_snapshot.body
     for name,old,new in [('changed-legacy-exclusion',b'0x91200000UL',b'0x91200010UL'),
                          ('changed-boot-ABI',b'sizeof(struct boot_args) == 736',b'sizeof(struct boot_args) == 744')]:
         need(old in body,'actual control source witness')
-        file=directory/(name+'.c');file.write_bytes(body.replace(old,new,1))
-        rejected(name,lambda:source_binding(file,plan['expected_post_source_sha256']['shim/e1s-xnu/loader.c']),'source ABI/exclusion/preimage binding',file)
+        changed=body.replace(old,new,1);file=directory/(name+'.c');file.write_bytes(changed)
+        snapshot=Snapshot(str(file),changed)
+        rejected(name,lambda:source_binding(snapshot,plan['expected_post_source_sha256']['shim/e1s-xnu/loader.c']),'source ABI/exclusion/preimage binding',file,changed)
     return records
 
 def main():
@@ -296,17 +338,24 @@ def main():
     need(not args.out.exists(),'fresh inspection output required')
     need(not args.out.parent.exists(),'fresh inspection namespace required')
     args.out.parent.mkdir(parents=True)
-    need(sha(args.plan)==args.plan_sha256,'changed source plan')
-    plan=json.loads(read(args.plan));report,sources=verify_build(root,args.main,plan)
-    elf=read(root/'loader/loader.elf');image=read(root/'loader/Image')
-    obj=read(root/'loader/loader.c.o');start=read(root/'source/shim/e1s-xnu/start.S').decode()
+    plan_snapshot=capture(args.plan)
+    need(plan_snapshot.sha256==args.plan_sha256,'changed source plan')
+    plan=json.loads(plan_snapshot.body)
+    report,sources,snapshots,products=verify_build(root,args.main,plan)
+    elf=snapshots['elf'].body;image=snapshots['image'].body
+    obj=snapshots['object'].body;start=snapshots['start'].body.decode()
     result=inspect_layout(elf,image,obj,start)
-    controls=negative_controls(args.out.parent/'negative-controls',elf,image,obj,start,report,root,args.main,plan) if args.controls else []
+    controls=negative_controls(args.out.parent/'negative-controls',elf,image,obj,start,report,
+        snapshots['loader_source'],products,plan) if args.controls else []
     args.out.write_text(json.dumps(dict(kind='host-test',outcome='pass',layout=result,
-        source_report_sha256=sha(root/'report.json'),ELF_sha256=sha(root/'loader/loader.elf'),
-        Image_sha256=sha(root/'loader/Image'),object_sha256=sha(root/'loader/loader.c.o'),
+        source_report_sha256=snapshots['report'].sha256,ELF_sha256=snapshots['elf'].sha256,
+        Image_sha256=snapshots['image'].sha256,object_sha256=snapshots['object'].sha256,
+        plan_sha256=plan_snapshot.sha256,captured_inputs={name:snap.binding() for name,snap in
+            dict(plan=plan_snapshot,**snapshots).items()},captured_product_bindings=products,
+        binding_semantics='Captured content only; no assertion that current pathnames remain unchanged.',
         source_sha256=sources,negative_controls=controls,target_executed=False,
-        limitations=['Artifact layout only; independent review and kernel physical ownership gates remain.']),indent=2)+'\n')
+        limitations=['Artifact layout only; independent review and kernel physical ownership gates remain.',
+            'Object binding is observed captured content; unchanged builder report does not preauthenticate object digest.']),indent=2)+'\n')
     print(json.dumps({'outcome':'pass','target_executed':False,'checked_log_relocations':len(result['checked_log_relocations'])}))
 
 if __name__=='__main__': main()

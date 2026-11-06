@@ -31,3 +31,13 @@ MMIO assumptions; neither artifact is authorized for phone use. Kernel0011/12
 fixed writes/ownership and all mapping/persistence/recovery/native gates stay
 unqualified. Next: independent source review, root resource grant, real build
 plus bounded controls, actual evidence and later common/publication acceptance.
+
+## Additive snapshot correction
+
+Independent source review found the original inspector reopened paths between
+hash verification, parsing and result hashing. The preserved prepare-001 packet
+is superseded for prospective admission by prepare-002/plan.json, SHA
+1df5078c0420dc71b63cd1d0f4c7711c1991ea2a4ebc122b7432a21c2d6b6760.
+See snapshot-correction.md and source-snapshot-evidence.json. Only inspector
+content binding changed; builder/source controls and all 23 vectors remain
+unchanged. No control, compiler, target tool or inspector execution occurred.
