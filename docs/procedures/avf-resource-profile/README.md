@@ -27,3 +27,22 @@ Freeze the exact source, fixture, receipts and passing capsule for EW independen
 review, then INT002/root current-HEAD publication/common. Original EV closure and
 process-pin refresh follow explicit acceptance. No intermediate helper pin is
 adopted by VM036 or other live executors.
+
+Frozen source d0ffda0 SHA
+`9929a7d6f1e748770f54abf3e101350648092027a18c419a242d0348f620f755`
+passed89 controls in the single registered001 batch. Actual oldlegacy23 and
+Firehose23 CLI plans retain exact prior full plan/input-binding bytes except the
+owned output prefix. The matching resource BSD90 source plan validates all90
+recipes and exact APFS243/244 tokens. All protected BFA8 runtime AST and main's
+existing execution/budget body remain unchanged; the new main preflight only
+requires the explicit resource policy before creating the new profile output.
+
+Parent fixture current-image VmHWM240754688B; the resource-plan child+supervisor
+peak217927680B. Host PSI avg10 was0/0 after the batch; all child processes ended
+through owned cleanup. Failed CLI authority/profile cases are expected refusals,
+not compiler attempts. `evidence.json` binds exact source,89-control raw capsule,
+all three immutable plans/bindings and accepted parent/descriptor/helper pins.
+
+Ordered source commits: d0ffda0,eff553c,f456258 (final receipt follows). No test
+repeat or additional corpus/generation work is required. Next: exact EW review,
+serialized root/INT002 current-HEAD common/publication, then original EV closure.
