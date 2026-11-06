@@ -148,8 +148,8 @@ and its tar pass the existing structural verifier. This is still a loader with
 no XNU payload, not a full E1S kernel or a boot on this phone. Actual supervised
 build SHA256: `85747434c0a1aa4f5a29dc4f1e158ca8bc9176a53fe57bff47d23f280ec00267`.
 
-STR-002 is accepted and closed by its original owner. STR-003's tested hook and
-its independent review are being accepted against the new HEAD. The original
+STR-002 and STR-003 are accepted, published with passing common checks and
+closed by their original owners. The original
 STR-001 audit and narrow donor lookup are complete. The common track's next
 result is resolving the measured early PTE mapping failure; the E1S track's next host result
 is a coherent entry/DTB/console policy, with full kernel inputs still separately
