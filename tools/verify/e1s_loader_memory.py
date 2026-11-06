@@ -61,7 +61,14 @@ def prepare(root, main, out, cc, upstream_git):
     for variant in ['original', 'patched']:
         directory = out / variant
         loader = (directory/'shim/e1s-xnu/loader.c').read_text()
-        selected = loader[loader.index('#define MAX_RANGES'):loader.index('uint64_t loader_main(')]
+        # The real selection body references these earlier donor declarations.
+        # Preserve their exact source spelling/value instead of fixture constants.
+        log_macros = [line for line in loader.splitlines(keepends=True)
+                      if line.startswith(('#define LOG_BASE\t', '#define LOG_RESERVE\t'))]
+        if len(log_macros) != 2:
+            raise ValueError('Actual loader log declarations are missing/ambiguous')
+        selected = ''.join(log_macros) + loader[
+            loader.index('#define MAX_RANGES'):loader.index('uint64_t loader_main(')]
         (directory/'selection.inc').write_text(selected)
         shutil.copyfile(root/'fixtures/public/e1s-loader-memory/controls.c', directory/'controls.c')
     patched = (out/'patched/shim/e1s-xnu/loader.c').read_text()
@@ -71,7 +78,14 @@ def prepare(root, main, out, cc, upstream_git):
         raise ValueError('Actual loader must return failure, never use payload RAM fallback')
     if patched.index('if (!fdt_validate(dtb))') > patched.index('log_init();'):
         raise ValueError('Structural validation must precede legacy FDT/MMIO paths')
-    host = ['--target=x86_64-unknown-linux-gnu', '-std=c11', '-O1', '-g',
+    resource = cc.parent.parent / 'lib/clang/18'
+    host_runtimes = [resource/'lib/x86_64-unknown-linux-gnu'/name for name in
+                     ['libclang_rt.asan.a', 'libclang_rt.asan_static.a',
+                      'libclang_rt.asan-preinit.a', 'libclang_rt.ubsan_standalone.a']]
+    if not all(p.is_file() for p in host_runtimes):
+        raise ValueError('Pinned GNU host sanitizer archives are unavailable')
+    host = ['--target=x86_64-unknown-linux-gnu', '-resource-dir='+str(resource),
+            '-std=c11', '-O1', '-g',
             '-fsanitize=address,undefined', '-fno-omit-frame-pointer', '-Wall', '-Wextra', '-Werror']
     flags = ['--target=aarch64-none-elf', '-O2', '-g0', '-ffreestanding', '-fno-builtin',
              '-fno-stack-protector', '-fno-pic', '-fno-zero-initialized-in-bss',
@@ -92,6 +106,7 @@ def prepare(root, main, out, cc, upstream_git):
     inputs = {str(path): sha(path) for path in out.rglob('*') if path.is_file()}
     inputs.update({str(cc): sha(cc), str(patch): sha(patch), str(config_path): sha(config_path),
                    str(Path(__file__).resolve()): sha(__file__)})
+    inputs.update({str(path): sha(path) for path in host_runtimes})
     record = {'schema': 'e1s-loader-memory-focused-plan-v1', 'task': 'STR-002',
               'owner': 'codex-e1s-memory-20261106-sr2', 'phase': 'planned-not-executed',
               'max_jobs': 1, 'max_owned_rss_bytes': 256*1024**2, 'child_timeout_seconds': 120,
