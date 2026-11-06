@@ -48,3 +48,21 @@ and body compilation. Those are separate admitted tasks. It does not close the
 37 exported-symbol provider ABI requirements, produce a complete kernel or
 establish physical SMP/RAM/framebuffer/firmware safety or native runtime.
 Independent review and publication/common/root acceptance precede SR9 closure.
+
+Root67 actual E1SDEVELOPMENTCONFIG-001 PASS: all5 exact doconf commands exited0,
+102 new generated files plus63 adopted STR004 files physically rehashed exact.
+All255 input hashes matched. Complete descriptor generated-development.json
+contains165 files across osfmk46/libkern6/pexpert11/bsd69/iokit11/libsa5/security7/
+san10 and preserves actual per-component flag vectors and effective MACH_ASSERT.
+All components select DEVELOPMENT and CONFIG_PMAP_PPL; BSD/IOKit use actual
+mach_assert.h=1 while libsa/security/san retain the CONFIG_DEFINES flag. Source,
+selected MASTER.arm64.e1s and the exact component output directories were checked.
+Rawc5c196ca, full descriptor and all command/cleanup records are bound by the
+conventional evidence.json. Elapsed6.643s, controller HWM29,278,208 bytes, zero
+owned survivors. No author generator or compiler rerun occurred.
+
+Earlier root65 adapter metadata failure was before any generator and left only
+grant/initial-samples in configuration-001.prechild-root65. Root66 resource
+admission refusal was before output/child; its separate inconclusive receipt is
+preserved. Neither is relabeled as generator failure or overwritten by root67.
+Independent acceptance/publication/common are next; hold originalSR9 closure.
