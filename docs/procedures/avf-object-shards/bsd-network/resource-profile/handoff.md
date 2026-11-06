@@ -40,3 +40,21 @@ No approval, allocation, resume, old key/object credit, flag/source edit, corpus
 research, compiler, guest or device action occurred. Next requires distinct root
 allocation and prospective actual-build experiment; this source PASS does not
 complete VM012. Preserve every earlier WT and wave20 failure without reuse.
+
+## Distinct actual-build experiment prepared
+
+After root requested mechanical intake, NEW AVFNET-005 was registered through
+MAIN and its actual canonical `planned` entry verified, original cq owner,
+timeout1800, created2026-11-06T07:08:47Z. AVFNET-004 remains recorded source-only
+history. Commit `24688c9` freezes actual-request.json SHA
+`c4aea98d5cf11c6dfc6dd2a4944515f2d2a2a328502a6fdac14deddcd74d746d`
+and actual-build.md. Exact engine argv binds9929,80cc/eb2/a237,bsd-network226,
+AVFNET005,plan e6379b47, explicitproject-budget-v1 and absentcompile1 output.
+Root-issued approval suffix and qualified1800 whole-pipeline launcher identity
+are pending; no placeholders are executable authorization. HistoricalAF193
+launcher cannot be used because it pins different executor bytes.
+
+No source-plan rerun or compiler occurred. Next: exact root allocation, immutable
+approval path/hash, compatible qualified launcher and explicit run grant; append
+only those issued arguments, preserve exact launch capsule, then one finite
+pipeline. Root received actual planned ID/procedure/requesthash and absentout.
