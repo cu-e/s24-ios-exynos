@@ -17,6 +17,15 @@ arbitrary compilation or link failures. The hello target compiles the donor's
 static raw-syscall program without libc. These are existing results to reproduce,
 not a new kernel, loader or PID1 implementation by this project.
 
+The available configuration route is `NAME_defconfig` plus fragments, including
+`common_defconfig`, the default `redwood_defconfig`, `virt.config` and `open`.
+`qemu-open` derives arguments from the one-core `configs/defconfig`; the open
+fragment disables phone firmware features. These runtime/configuration choices
+do not establish an E1S kernel machine profile. The actual `xnu-build.sh` still
+selects `ARCH_CONFIGS=ARM64`, `KERNEL_CONFIGS=DEVELOPMENT` and defaults
+`MACHINE_CONFIGS` to `BCM2837` unless `MACHINE` is supplied. Neither a defconfig
+name nor QEMU success supplies Exynos CPU topology or board initialization.
+
 There is a material qualification to the advertised open path. The
 [dependency setup](https://github.com/oosexgang/hakios-xnu-kernel/blob/2631f5d7d4f9d7322aca60991b34ba465dec343b/xnu-deps/setup.sh#L11)
 expects a Theos Linux toolchain and an iPhoneOS16.5 SDK, and obtains matching
