@@ -58,3 +58,48 @@ No source-plan rerun or compiler occurred. Next: exact root allocation, immutabl
 approval path/hash, compatible qualified launcher and explicit run grant; append
 only those issued arguments, preserve exact launch capsule, then one finite
 pipeline. Root received actual planned ID/procedure/requesthash and absentout.
+
+## Actual accepted-resource WAVE29 result
+
+Root explicitly granted one AVFNET-005 execution via allocation
+`guest-kernel-six-resource-wave-20261106-29`, SHA
+`241d5bc25989e2230b2077448a00c5959890c7cb5691ea0e3edb2b027565a661`,
+and VM012 approval SHA
+`a8945dfa8137dd2a384d107208be3d2e0775f453355c7db0aa7bf0c1d9569011`.
+The exact CM intake command uses python3.12, frozen9929 and root's compatible
+in-process1800 launcher SHA
+`11d15f12160d818bc02dc19fc7367aba7185f9f1a25a94b4be6652151b993fa6`.
+Actual argv, grant, source commit and matching planned original-owner experiment
+were retained before launch; no extra supervisor. Source commit was `deace73`.
+
+Pipeline PID85821/startticks59727371/session85801 completed exit0 in
+790.853797803seconds. Genuine engine reports **226/226 object PASS**, all226
+command execution and resource-qualification outcomes PASS, zero fail/deferred
+and zero unattempted IDs. Source-only AVFNET004 remains separate recorded history.
+No resume/retry, old-key/object credit, source/flags/pin change or globalrelease.
+
+Actual `resource-profile-compile1` immutable outputs:
+
+| File | SHA-256 |
+|---|---|
+| evidence.json | `10914074b845272cb10c3a8580be97faa24da9295338f9e7b8d6159bfdb4e053` |
+| execution-plan.json | `99468a1f7d9653747dcc152a3a0f9eff04e6f15aaa971310d426a7f13cdbbb3e` |
+| input-bindings.json | `295e6edab63199b6ee1bcd245d43ede66dcb1c1429edc599389bc53f10307406` |
+
+Genuine engine binds accepted namespacefdfc and exact input/tool/source/recipe/
+configuration provenance. Each object record retains actual Mach-O validation,
+object/dependency hashes, input key and command resource qualification. The
+maintained wave29-result.json fixture references these exact genuine records;
+it implements no second source/compiler engine.
+
+Own reservation was observed `complete`; all recorded PID/start identities and
+pipeline are gone, last command after-ownedprocesses empty/RSS0, and no reservation
+release error. The worker did not release or modify the global queue. Separate
+wave29-invocation1 capsule preserves exact argv/grant/entry, actual exit/elapsed,
+stdout/stderr, own reservation/cleanup snapshot and commit-bound PASS evidence.
+Root received raw terminal hashes and cleanup before this documentation update.
+
+Next: independent review and coordinator acceptance/common-check evidence before
+original-owner task closure. VM012 remains in_progress meanwhile. No new test,
+compile, source-plan rerun, full kernel link/archive, guest, common suite, MAIN
+publication, phone or private Apple ABI qualification was performed here.
