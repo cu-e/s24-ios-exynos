@@ -33,3 +33,29 @@ tools meanwhile. No actual compile experiment is registered by this source-only
 step. Future fresh execution remains separately root-allocated one-job512MiB
 within globalmax6jobs/6GiB; preserve every real failure/MD/object then wait for
 independent review/currentHEADcommon/root acceptance before original closure.
+
+
+Root-authorized final STR030 FIX2 source-plan phase completed ONCE. Frozen
+caller same physical future execute path
+worktrees/str-030-e1s-native-compile-fix2-20261106/fixtures/public/e1s-native-compile/native_compile.py
+SHA2676a8edb31b0136aa7195d37523549d9c77edee7ac140a7f476ebf5064b178f.
+Original source-slice remains immutable; strict8-field slice-001.json SHA
+1a906b4f55f13d3417f1a82ff019ffb8abe5d13a3b72fac68c85e732becd3cd3
+names original STR028/SR28/libkern77/STR028BUILD-001, prospective whole7200.
+Manifest/procedure sourcecommit9d81ff2f96dac826169105dbd58a153e7a2a673b.
+
+Actual source plan plan-001/actual-plan.json SHA
+0e41e3d05bda63e893e078c6ef0fa9b12212bfcadb18cd2ac60ccef7413b0a25,
+located under this WT's artifacts/e1s-native-compile/libkern, outside prospective
+build-001 execution output. Raw stderr empty; raw exit0 and4.335272663s retained
+in plan-001/exit.json. All77 exact IDs checked in the printed plan. Source-plan
+RSS is UNKNOWN/not measured; earlier metadata extraction memory is not reused
+as this plan's measurement. No privateprojection/compiler/loader/Make occurred;
+prospective build-001 remains absent. See plan-001-evidence.json for full pins.
+
+STR028BUILD-001 preregistration CLI0 is PLANNED, never recorded as compilePASS.
+Actual execute waits common84PASS plus separate explicit root ProjectBudget
+allocation/caller-plan-manifest identity/out approval and outer watchdog. Use
+same frozen caller; no fork/flag override/replan/oldobject credit. Independent
+actual MD/object/resource review and root integration/common precede original
+owner closure. This source plan grants no target tool or runtime/ABI claim.
