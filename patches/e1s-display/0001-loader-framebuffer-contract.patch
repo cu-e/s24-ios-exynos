@@ -1,0 +1,447 @@
+From: S24 E1S research project, 2026-11-06
+Subject: [PATCH] Require a complete supported CPU framebuffer contract
+
+Base: c8860decc62c6d6180e609036d027a2997972420 plus immutable STR002 RAM patch23b31c44.
+License: preserve GPL-2.0-only donor notices; authored changes GPL-2.0-only.
+No physical memory mapping, DPU setup or native display operation is qualified.
+
+--- a/shim/e1s-xnu/fdt.c
++++ b/shim/e1s-xnu/fdt.c
+@@ -26,18 +26,6 @@
+ 		if (*s++ != *prefix++)
+ 			return 0;
+ 	return 1;
+-}
+-
+-static int str_has(const char *s, const char *want)
+-{
+-	for (; *s; s++) {
+-		const char *a = s, *b = want;
+-		while (*a && *b && *a == *b)
+-			a++, b++;
+-		if (!*b)
+-			return 1;
+-	}
+-	return 0;
+ }
+ 
+ static uintptr_t align4(uintptr_t a)
+@@ -323,117 +311,109 @@
+ 	return fdt_ranges(fdt, out, max, 1);
+ }
+ 
++/* Only explicitly enabled simplefb under /chosen is supported. Addresses
++ * must already be physical; translated/phandle-backed framebuffers are refused.
++ * Numeric validation does not prove physical ownership or CPU accessibility. */
+ struct fb_candidate {
+ 	uint64_t base, size;
+ 	uint32_t width, height, stride;
+-	int found, score;
++	int found, ambiguous, invalid;
+ };
+ 
+-static void
+-fb_scan_node(const char *name, uint64_t base, uint64_t size, int have_reg,
+-    int simple, uint32_t width, uint32_t height, uint32_t stride,
+-    struct fb_candidate *best)
+-{
+-	int score = 0;
+-
+-	/* Only RAM: the panel's register blocks are below 0x80000000. */
+-	if (!have_reg || base < 0x80000000ULL || base >= 0x100000000ULL ||
+-	    size < 4ULL * 1024 * 1024 || size > 64ULL * 1024 * 1024)
+-		return;
+-	if (simple || str_has(name, "framebuffer"))
+-		score = 4;
+-	else if (str_has(name, "splash") || str_has(name, "fb"))
+-		score = 3;
+-	else if (str_has(name, "display"))
+-		score = 2;
+-	if (score == 0)
+-		return;
+-	if (best->found &&
+-	    (score < best->score || (score == best->score && size > best->size)))
+-		return;
+-	best->found = 1;
+-	best->score = score;
+-	best->base = base;
+-	best->size = size;
+-	best->width = width;
+-	best->height = height;
+-	best->stride = stride;
++static int fb_string(uintptr_t value, uint32_t len, const char *wanted)
++{
++	uint32_t i = 0;
++	while (wanted[i]) {
++		if (i >= len || *(const char *)(value + i) != wanted[i]) return 0;
++		i++;
++	}
++	return len == i + 1 && *(const char *)(value + i) == 0;
++}
++
++static int fb_compatible(uintptr_t value, uint32_t len)
++{
++	uint32_t off = 0;
++	int found = 0;
++	while (off < len) {
++		uint32_t n = 0;
++		while (n < len - off && *(const char *)(value + off + n)) n++;
++		if (!n || n == len - off) return 0;
++		if (fb_string(value + off, n + 1, "simple-framebuffer")) found = 1;
++		off += n + 1;
++	}
++	return found;
+ }
+ 
+ static uintptr_t
+ fb_walk(uintptr_t p, uintptr_t strings, int depth, uint32_t parent_ac,
+-    uint32_t parent_sc, struct fb_candidate *best)
++    uint32_t parent_sc, int path_enabled, int parent_chosen,
++    struct fb_candidate *best)
+ {
+ 	uint32_t tok = be32(p);
+ 	p += 4;
+-	if (tok != FDT_BEGIN_NODE || depth > 12)
+-		return p;
+-
++	if (tok != FDT_BEGIN_NODE || depth > 12) return p;
+ 	const char *name = (const char *)p;
+ 	p = align4(skip_str(p));
+-
+-	uint32_t ac = parent_ac, sc = parent_sc;
+-	uint64_t base = 0, size = 0;
+-	uint32_t width = 0, height = 0, stride = 0;
+-	int have_reg = 0, simple = 0;
++	uint32_t ac = parent_ac, sc = parent_sc, seen = 0;
++	uint32_t width = 0, height = 0, stride = 0, reglen = 0;
+ 	uintptr_t regval = 0;
+-	uint32_t reglen = 0;
+-
++	int simple = 0, format = 0, enabled = 1, bad = 0, children = 0;
+ 	for (;;) {
+-		tok = be32(p);
+-		p += 4;
++		tok = be32(p); p += 4;
+ 		if (tok == FDT_PROP) {
+-			uint32_t len = be32(p), nameoff = be32(p + 4);
++			if (children) best->invalid = 1;
++			uint32_t len = be32(p), off = be32(p + 4), bit = 0;
+ 			uintptr_t val = p + 8;
+-			const char *prop = (const char *)(strings + nameoff);
+-
+-			if (streq(prop, "#address-cells") && len == 4) {
+-				ac = be32(val);
+-			} else if (streq(prop, "#size-cells") && len == 4) {
+-				sc = be32(val);
++			const char *prop = (const char *)(strings + off);
++			if (streq(prop, "#address-cells")) {
++				bit = 1; if (len == 4) ac = be32(val); else bad = 1;
++			} else if (streq(prop, "#size-cells")) {
++				bit = 2; if (len == 4) sc = be32(val); else bad = 1;
+ 			} else if (streq(prop, "reg")) {
+-				regval = val;
+-				reglen = len;
+-			} else if (streq(prop, "width") && len == 4) {
+-				width = be32(val);
+-			} else if (streq(prop, "height") && len == 4) {
+-				height = be32(val);
+-			} else if ((streq(prop, "stride") || streq(prop, "line-size") ||
+-			    streq(prop, "pitch")) && len == 4) {
+-				stride = be32(val);
++				bit = 4; regval = val; reglen = len;
++			} else if (streq(prop, "width")) {
++				bit = 8; if (len == 4) width = be32(val); else bad = 1;
++			} else if (streq(prop, "height")) {
++				bit = 16; if (len == 4) height = be32(val); else bad = 1;
++			} else if (streq(prop, "stride")) {
++				bit = 32; if (len == 4) stride = be32(val); else bad = 1;
+ 			} else if (streq(prop, "compatible")) {
+-				for (uint32_t off = 0; off < len; off++) {
+-					if (str_has((const char *)val + off, "simple-framebuffer")) {
+-						simple = 1;
+-						break;
+-					}
+-					while (off < len && *(const char *)(val + off))
+-						off++;
+-				}
++				bit = 64; simple = fb_compatible(val, len);
++			} else if (streq(prop, "format")) {
++				bit = 128; format = fb_string(val, len, "a8r8g8b8") ||
++				    fb_string(val, len, "x8r8g8b8");
++			} else if (streq(prop, "status")) {
++				bit = 256; enabled = fb_string(val, len, "okay") || fb_string(val, len, "ok");
++			} else if (streq(prop, "memory-region") || (streq(prop, "ranges") && len)) {
++				bad = 1;
+ 			}
++			if (seen & bit) bad = 1;
++			seen |= bit;
+ 			p = align4(val + len);
+ 		} else if (tok == FDT_BEGIN_NODE) {
+-			p = fb_walk(p - 4, strings, depth + 1, ac, sc, best);
+-		} else if (tok == FDT_END_NODE) {
+-			break;
+-		} else if (tok == FDT_NOP) {
+-			continue;
+-		} else {
+-			break;
+-		}
+-	}
+-
+-	if (regval && reglen) {
+-		struct fdt_range r = { 0 };
+-		int count = 0;
+-		decode_reg(regval, reglen, ac, sc, &r, 1, &count);
+-		if (count) {
+-			base = r.base;
+-			size = r.size;
+-			have_reg = 1;
+-		}
+-	}
+-	fb_scan_node(name, base, size, have_reg, simple, width, height, stride, best);
++			children = 1;
++			p = fb_walk(p - 4, strings, depth + 1, ac, sc,
++			    path_enabled && enabled && !bad,
++			    depth == 1 && streq(name, "chosen"), best);
++		} else if (tok == FDT_END_NODE) break;
++		else if (tok != FDT_NOP) break;
++	}
++	if (depth != 2 || !parent_chosen || !path_enabled || !enabled || bad ||
++	    !simple || !format || (seen & 0x1fc) != 0x1fc ||
++	    !width || width > 16384 || !height || height > 16384 ||
++	    (stride & 3) || stride < (uint64_t)width * 4 ||
++	    parent_ac < 1 || parent_ac > 2 || parent_sc < 1 || parent_sc > 2 ||
++	    reglen != 4 * (parent_ac + parent_sc)) return p;
++	struct fdt_range r = { 0 };
++	int count = 0;
++	decode_reg(regval, reglen, parent_ac, parent_sc, &r, 1, &count);
++	if (count != 1 || (r.base & 3) || r.base < 0x80000000ULL ||
++	    r.base >= 0x100000000ULL || !r.size || r.size > 64ULL * 1024 * 1024 ||
++	    r.size > 0x100000000ULL - r.base ||
++	    (uint64_t)stride * height > r.size) return p;
++	if (best->found) { best->ambiguous = 1; return p; }
++	best->found = 1; best->base = r.base; best->size = r.size;
++	best->width = width; best->height = height; best->stride = stride;
+ 	return p;
+ }
+ 
+@@ -441,21 +421,10 @@
+     uint32_t *width, uint32_t *height, uint32_t *stride)
+ {
+ 	struct fb_candidate best = { 0 };
+-
+-	if (!fdt || be32(fdt) != FDT_MAGIC)
+-		return 0;
+-	uintptr_t p = fdt + be32(fdt + 8);
+-	uintptr_t strings = fdt + be32(fdt + 12);
+-	fb_walk(p, strings, 0, 2, 1, &best);
+-	if (!best.found)
+-		return 0;
+-	*base = best.base;
+-	*size = best.size;
+-	if (best.width >= 320 && best.height >= 320) {
+-		*width = best.width;
+-		*height = best.height;
+-	}
+-	if (best.width && best.stride >= best.width * 4)
+-		*stride = best.stride;
++	if (!base || !size || !width || !height || !stride || !fdt_validate(fdt)) return 0;
++	fb_walk(fdt + be32(fdt + 8), fdt + be32(fdt + 12), 0, 2, 1, 1, 0, &best);
++	if (!best.found || best.ambiguous || best.invalid) return 0;
++	*base = best.base; *size = best.size;
++	*width = best.width; *height = best.height; *stride = best.stride;
+ 	return 1;
+ }
+--- a/shim/e1s-xnu/ui.h
++++ b/shim/e1s-xnu/ui.h
+@@ -3,6 +3,8 @@
+ #define E1S_UI_H
+ 
+ #include <stdint.h>
++
++#define E1S_FB_CONTRACT 1
+ 
+ #define UI_TEXT_MAIN  0xffffffffU
+ #define UI_TEXT_DIM   0xff9ca3afU
+@@ -13,6 +15,7 @@
+ 
+ struct ui_fb {
+ 	volatile uint32_t *base;
++	uint64_t size_bytes;
+ 	uint32_t width;
+ 	uint32_t height;
+ 	uint32_t stride;
+@@ -60,6 +63,8 @@
+ 	UI_FAIL
+ };
+ 
++int ui_fb_valid(const struct ui_fb *fb);
++
+ void ui_begin(const struct ui_fb *fb);
+ void ui_set_info(const struct ui_fb *fb, const struct ui_boot_info *info);
+ void ui_set_stage(const struct ui_fb *fb, int stage, int state);
+--- a/shim/e1s-xnu/ui.c
++++ b/shim/e1s-xnu/ui.c
+@@ -42,9 +42,21 @@
+ #define FOOT_LINE_Y   2124
+ #define FOOT_TEXT_Y   2142
+ 
++int ui_fb_valid(const struct ui_fb *fb)
++{
++	if (!fb || !fb->base || ((uintptr_t)fb->base & 3) ||
++	    !fb->width || fb->width > 16384 || !fb->height || fb->height > 16384 ||
++	    fb->stride < fb->width || !fb->size_bytes ||
++	    fb->size_bytes > UINTPTR_MAX - (uintptr_t)fb->base ||
++	    (uint64_t)fb->stride * 4 * fb->height > fb->size_bytes)
++		return 0;
++	return 1;
++}
++
+ static void rect(const struct ui_fb *fb, int x, int y, int w, int h,
+     uint32_t color)
+ {
++	if (!ui_fb_valid(fb)) return;
+ 	if (x < 0) {
+ 		w += x;
+ 		x = 0;
+@@ -272,6 +284,7 @@
+ 
+ void ui_begin(const struct ui_fb *fb)
+ {
++	if (!ui_fb_valid(fb)) return;
+ 	rect(fb, 0, 0, (int)fb->width, (int)fb->height, C_BG);
+ 
+ 	text(fb, MARGIN, HDR_BRAND_Y, "SAMSUNG", UI_TEXT_MUTED, SMALL_SCALE);
+@@ -316,6 +329,7 @@
+ 
+ void ui_set_info(const struct ui_fb *fb, const struct ui_boot_info *info)
+ {
++	if (!ui_fb_valid(fb)) return;
+ 	char b[200];
+ 	char *p;
+ 
+@@ -341,7 +355,7 @@
+ 		p = ui_put_str(p, "  32bpp");
+ 		row_value(fb, BOOT_ROW_Y + 3 * ROW_H, b, UI_TEXT_MAIN);
+ 	} else {
+-		p = ui_put_str(p, "not found - fallback ");
++		p = ui_put_str(p, "CPU framebuffer UI disabled ");
+ 		p = ui_put_hex(p, info->fb_base);
+ 		row_value(fb, BOOT_ROW_Y + 3 * ROW_H, b, UI_TEXT_WARN);
+ 	}
+@@ -383,6 +397,7 @@
+ 
+ void ui_set_stage(const struct ui_fb *fb, int stage, int state)
+ {
++	if (!ui_fb_valid(fb)) return;
+ 	const char *mark;
+ 	uint32_t mark_color;
+ 	uint32_t name_color;
+@@ -426,6 +441,7 @@
+ 
+ void ui_set_progress(const struct ui_fb *fb, int percent, const char *label)
+ {
++	if (!ui_fb_valid(fb)) return;
+ 	char b[8];
+ 	char *p = b;
+ 	int bar_w = (int)fb->width - 2 * MARGIN;
+@@ -454,12 +470,14 @@
+ 
+ void ui_set_status(const struct ui_fb *fb, const char *text, uint32_t color)
+ {
++	if (!ui_fb_valid(fb)) return;
+ 	rect(fb, MARGIN, LOAD_STATUS_Y, (int)fb->width - 2 * MARGIN, 32, C_BG);
+ 	text_n(fb, MARGIN, LOAD_STATUS_Y, text, 61, color, TEXT_SCALE);
+ }
+ 
+ void ui_fail(const struct ui_fb *fb, const char *why)
+ {
++	if (!ui_fb_valid(fb)) return;
+ 	int x = MARGIN;
+ 	int y = LOAD_TITLE_Y - 8;
+ 	int w = (int)fb->width - 2 * MARGIN;
+--- a/shim/e1s-xnu/loader.c
++++ b/shim/e1s-xnu/loader.c
+@@ -5,11 +5,6 @@
+ #include "fdt.h"
+ #include "gic.h"
+ 
+-#define FB_BASE		0xFA200000UL
+-#define FB_SIZE		0x009a4000UL
+-#define FB_W		1080U
+-#define FB_H		2340U
+-#define FB_STRIDE	(FB_W * 4U)
+ #define LOG_BASE	0x91200000UL
+ #define LOG_RESERVE	0x200000UL	/* sec_debug_next: loader log + XNU ring */
+ #define LOG_MAGIC	"E1SXNU01"
+@@ -63,9 +58,9 @@
+ void halt(void) __attribute__((noreturn));
+ 
+ static uint32_t log_pos;
+-static uint64_t fb_base = FB_BASE;
+-static uint64_t fb_size = FB_SIZE;
+-static uint32_t fb_w = FB_W, fb_h = FB_H, fb_stride = FB_STRIDE;
++static uint64_t fb_base;
++static uint64_t fb_size;
++static uint32_t fb_w, fb_h, fb_stride;
+ static struct ui_fb ui;
+ static int ui_ready;
+ 
+@@ -153,19 +148,21 @@
+ 
+ static void fb_flush(void)
+ {
+-	clean((uintptr_t)fb_base, (uintptr_t)fb_base + fb_size);
+-}
+-
+-static void ui_init(void)
+-{
+-	uint32_t stride = fb_stride;
+-
+-	if (stride == 0 || stride < fb_w * 4U)
+-		stride = fb_w * 4U;
++	if (ui_ready)
++		clean((uintptr_t)fb_base, (uintptr_t)fb_base + (uint64_t)fb_stride * fb_h);
++}
++
++static void ui_init(int have_fb)
++{
++	ui_ready = 0;
+ 	ui.base = (volatile uint32_t *)(uintptr_t)fb_base;
+-	ui.width = fb_w;
+-	ui.height = fb_h;
+-	ui.stride = stride / 4U;
++	ui.size_bytes = fb_size;
++	ui.width = fb_w; ui.height = fb_h; ui.stride = fb_stride / 4U;
++	if (!have_fb || (fb_stride & 3) || !ui_fb_valid(&ui)) {
++		ui.base = 0; ui.size_bytes = 0; ui.width = ui.height = ui.stride = 0;
++		fb_base = fb_size = 0; fb_w = fb_h = fb_stride = 0;
++		return;
++	}
+ 	ui_begin(&ui);
+ 	ui_ready = 1;
+ }
+@@ -405,7 +402,9 @@
+ 
+ 	int have_fb = fdt_find_framebuffer(dtb, &fb_base, &fb_size, &fb_w,
+ 	    &fb_h, &fb_stride);
+-	ui_init();
++	ui_init(have_fb);
++	have_fb = ui_ready;
++	if (!have_fb) log_str("CPU framebuffer UI disabled: no supported complete DTB contract\n");
+ 	ui_set_stage(&ui, UI_STAGE_SBOOT, UI_OK);
+ 	ui_set_stage(&ui, UI_STAGE_FB, have_fb ? UI_OK : UI_WARN);
+ 	fb_flush();
+@@ -659,11 +658,11 @@
+ 	ba->memSize = win_size;
+ 	ba->topOfKernelData = ba_pa + PAGE_16K;
+ 	ba->Video.v_baseAddr = fb_base;
+-	ba->Video.v_display = 1;
++	ba->Video.v_display = ui_ready ? 1 : 0;
+ 	ba->Video.v_rowBytes = fb_stride;
+ 	ba->Video.v_width = fb_w;
+ 	ba->Video.v_height = fb_h;
+-	ba->Video.v_depth = 32;
++	ba->Video.v_depth = ui_ready ? 32 : 0;
+ 	ba->deviceTreeP = p->virt_base + (adt_pa - win_base);
+ 	ba->deviceTreeLength = (uint32_t)p->adt_size;
+ 	for (int i = 0; i < BOOT_LINE_LENGTH; i++)
