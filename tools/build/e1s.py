@@ -58,6 +58,16 @@ def build(root, identifier):
               "display_source_patch": {"path": "patches/e1s-display/0001-loader-framebuffer-contract.patch",
                                        "source_task": "STR-005", "source_commit": "12047e095c97170036b7b8229f52ca435c880538",
                                        "expected_sha256": "0689fc94383efec7c83df44629df3b0e3e456cce48b08008e2226bc5189570d9", "applied": False},
+              "boot_log_source_patch": {"path": "patches/e1s-boot-log/0001-loader-owned-diagnostics.patch",
+                                        "source_task": "STR-019", "source_commit": "20fe6376473bd638ec1705e8efd610753bab94fd",
+                                        "host_task": "STR-020", "host_evidence_sha256": "7a401ad85a2183bcfdec36233578c5d374b0d2db3714fc7c6d34055f8b00c836",
+                                        "expected_sha256": "569663074fb7de230b4760a613562841afe311352ed32e78275c55708aa21328", "applied": False,
+                                        "expected_preimages": {
+                                            "shim/e1s-xnu/loader.c": "97c3435e2d58a6ee5036cfb60f87f548249e267bf031da0d2dd7a881f0b79e66",
+                                            "shim/e1s-xnu/ui.c": "ca26273007b60b99b7c46b9a16d0f2b614b55514b1d57174ab149998067333b3"},
+                                        "expected_postimages": {
+                                            "shim/e1s-xnu/loader.c": "5ccbad90459fd90d2ca40b03b0f64bc32919544c2f8b47e90ea6570d0e33cad8",
+                                            "shim/e1s-xnu/ui.c": "ab1537ead796f168e02a7d380aa75ca7907efc12f4dcd4beed7f78746ce5135d"}},
               "kernel_build": "not-run; SDK/dependencies are a separate prerequisite"}
     try:
         version = run(["zig", "version"], root, commands)
@@ -88,6 +98,25 @@ def build(root, identifier):
         run(["git", "apply", "--check", display_snapshot], work, commands)
         run(["git", "apply", display_snapshot], work, commands)
         display_patch["applied"] = True
+        log_patch = report["boot_log_source_patch"]
+        if not patch["applied"] or not display_patch["applied"]:
+            raise RuntimeError("Accepted RAM and framebuffer overlays must precede loader-owned diagnostics")
+        for relative, expected in log_patch["expected_preimages"].items():
+            if hashlib.sha256((work / relative).read_bytes()).hexdigest() != expected:
+                raise RuntimeError("Accepted STR-019 preimage/order changed: " + relative)
+        log_bytes = (root / log_patch["path"]).read_bytes()
+        log_patch["sha256"] = hashlib.sha256(log_bytes).hexdigest()
+        if log_patch["sha256"] != log_patch["expected_sha256"]:
+            raise RuntimeError("Accepted STR-019 loader-owned diagnostics patch identity changed")
+        log_snapshot = directory / "loader-owned-diagnostics.patch"
+        log_snapshot.write_bytes(log_bytes)
+        log_patch.update(snapshot=str(log_snapshot.relative_to(root)), applied_to=str(work.relative_to(root)))
+        run(["git", "apply", "--check", log_snapshot], work, commands)
+        run(["git", "apply", log_snapshot], work, commands)
+        for relative, expected in log_patch["expected_postimages"].items():
+            if hashlib.sha256((work / relative).read_bytes()).hexdigest() != expected:
+                raise RuntimeError("Accepted STR-019 postimage changed: " + relative)
+        log_patch["applied"] = True
         products = []
         for target, files, linker in [("probe", ["shim/e1s/start.S", "shim/e1s/probe.c"], "shim/e1s/loader.ld"),
                                       ("loader", ["shim/e1s-xnu/" + f for f in ["start.S", "loader.c", "ui.c", "adt_patch.c", "gic.c", "fdt.c"]], "shim/e1s-xnu/loader.ld")]:
