@@ -90,6 +90,15 @@ def main():
     if recipe['id'] != 'bsd/subr_log.o' or not recipe['compiler_feature_decision_qualified']:
         raise ValueError('Require the selected current native BSD recipe')
     native = substitute(recipe['selected_compiler_argv'], context['mechanical_prefix_map'])
+    # subr_log.o's two per-file exceptions have no Firehose source authority.
+    # Preserve the earlier common -Wno-sign-conversion and every other token.
+    perfile_start = native.index('-MP') + 1
+    perfile_end = next(i for i in range(perfile_start, len(native))
+                       if native[i].startswith('-I'))
+    foreign = native[perfile_start:perfile_end]
+    if foreign != ['-Wno-cast-align', '-Wno-sign-conversion']:
+        raise ValueError('Unexpected foreign per-file warning context')
+    native = native[:perfile_start] + native[perfile_end:]
     for flag in ['-DDEVELOPMENT', '-DCONFIG_PMAP_PPL', '-DXNU_NO_TYPE_BUILTINS=0',
                  '-Wxnu-typed-allocators', '-nostdinc']:
         if flag not in native:
@@ -206,7 +215,9 @@ def main():
                 'source_and_MD_and_output_redirected': True,
                 'native_prefix_mechanically_maps_to_exact_consumer005': True,
                 'native_CWD_is_exact_BSD_subtree_projection': True,
-                'original_BSD_flags_and_perfile_warning_additions_retained': True,
+                'original_BSD_component_profile_and_common_warning_flags_retained': True,
+                'foreign_subr_log_perfile_exceptions_removed_only': foreign,
+                'foreign_exception_source': 'consumer005 BSD Makefile:916/1224',
                 'foreign_TU_adaptation_requires_independent_review': True,
                 'genuine_Firehose_settings_and_header_roots_added': extra},
             'phase_gates': [
