@@ -144,3 +144,13 @@ TERM/INT cancellation with owned child cleanup.
 Primary API references: [Python fcntl](https://docs.python.org/3.14/library/fcntl.html),
 [Python signals](https://docs.python.org/3.14/library/signal.html),
 [Linux flock](https://man7.org/linux/man-pages/man2/flock.2.html).
+
+Prototype004 passed28 checks in11 actual workers, with an actual .5009-second
+blocked acquisition, .1204-second earlier outer deadline and .6502-second later
+outer deadline at its original wall time. All six cancellation children cleaned
+up and stable inode/handler/timer/mask checks passed. The measured fix3 prototype
+source is physically preserved. In new fix4, transaction replaces only the
+nonblocking poll loop with this exact tested bounded helper; canonical/live/state
+checks and the full fresh locked snapshot remain in their original order. One
+new registered six-monitor observation will measure this operative change. No
+FIFO or future-timeout-elimination guarantee is made.

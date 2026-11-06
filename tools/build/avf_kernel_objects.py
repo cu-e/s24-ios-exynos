@@ -720,15 +720,7 @@ class ProjectBudget:
         canonical_output_path(self.state_path); canonical_output_path(self.lock_path)
         descriptor = os.open(self.lock_path, os.O_RDWR | os.O_CREAT | os.O_APPEND | os.O_NOFOLLOW, 0o600)
         with os.fdopen(descriptor, 'a+') as lock:
-            deadline = time.monotonic()+lock_timeout
-            while True:
-                try:
-                    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                    break
-                except BlockingIOError:
-                    if time.monotonic() >= deadline:
-                        raise ValueError('Project budget lock acquisition timed out')
-                    time.sleep(min(.005, max(0, deadline-time.monotonic())))
+            bounded_flock(lock, lock_timeout)
             self.check_live()
             if (os.fstat(lock.fileno()).st_dev, os.fstat(lock.fileno()).st_ino) != (self.lock_path.stat().st_dev, self.lock_path.stat().st_ino):
                 raise ValueError('Stable project budget lock inode changed')
