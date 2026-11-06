@@ -22,8 +22,14 @@ automatic VM-044 repin or component execution from this source acceptance.
 
 Original cx/VM020 and cy/VM021 were explicitly activated for fresh derived
 source plans under NEW planned actual experiments, preserving immutable units,
-argv/filelists and absent canonical execution roots. Root will grant an actual
-serial ONE-compiler allocation after both plan intakes. No component compiler,
+argv/filelists and absent canonical execution roots. Both intakes now pass21
+focused source/authority comparisons: AVFFH-002 and AVFPTH-004 remain PLANNED,
+plans5221e312/288b255b match the accepted derived bytes. See
+`component-integration-20261106/original-plan-intake.json` for exact paths,
+canonical approval digests, wrapper and future argv templates. Root will grant
+an actual serial ONE-compiler,256MiB controller-plus-tree allocation separately.
+The immutable root launcher supplies a600-second whole deadline and each child
+retains120 seconds. No component compiler,
 archiver, loader-main or guest result exists from grant21. Original DZ's VM036
 remains active until actual intended component criteria are met; original owners
 alone record products and eventually close tasks after explicit acceptance.
@@ -32,6 +38,9 @@ VM022 cu received source-only product/report schema and exact future archive
 membership: Firehose provider.o only, pthread kern_init/support/synch.o exactly.
 All products remain missing until measured and independently accepted. Full
 link/provider/native/private-ABI/FIPS and hardware gates remain separate.
+The separate CTS3 native fortified-memory and NFS ignored-return limitations
+remain open; the selected DES strong-provider result does not transfer to a
+different profile or object graph.
 
 Bounded GPU012 source intake7f33334 passed31 canonical-body/recipe comparisons
 with no concrete authentication/snapshot/session-contract finding. Compilation,
@@ -39,7 +48,8 @@ sanitizers, typed overrides, IOConnect and Xclipse remain unmeasured. Its old
 afc5/two-job proposal needs fresh process/runtime/namespace/resource admission
 before any future root compile lease. It is not a first-console dependency.
 
-Next: intake original cx/cy exact new plans and route root's distinct serial
-allocation. No publication/common or extra compiler may overlap a future root
+Next: route root's distinct serial allocation to the original owner and intake
+actual products/failures, preserving all absent-result boundaries until measured.
+No publication/common or extra compiler may overlap a future root
 wave. Coordinate any later integration using fresh MAIN HEAD and one stable
 shared integration lock; never edit another owner's registry or frozen source.
