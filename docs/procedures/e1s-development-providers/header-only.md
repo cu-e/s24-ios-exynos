@@ -1,8 +1,8 @@
 # STR018 separately admitted native header phase
 
 Original SR18 owner and worktree remain unchanged. Experiment
-`E1SPROVIDERHEADERS-002` covers only the 30 genuine native Make install groups
-and one Firehose header export from corrected provider plan004. The new
+`E1SPROVIDERHEADERS-003` covers only the 30 genuine native Make install groups
+and one Firehose header export from corrected provider plan005. The new
 attempt changes seven requested target strings in two Make groups
 to retain the exact source-defined dot/empty directory segments. All 315
 physical output selections, filter logic, flags and visibility stay unchanged.
@@ -15,11 +15,11 @@ unchanged. That source-only correction removed the custom alarm and added
 monotonic work-boundary checks before any target operation ran.
 
 The exact header plan is
-`artifacts/e1s-development-providers/header-plan-005/execution-plan.json`, SHA256
-`bb21e4781b71ce325785753bfcaf1f3756758cfc8c2c110a99f4f570ca3affdc`.
+`artifacts/e1s-development-providers/header-plan-006/execution-plan.json`, SHA256
+`f776b9ff201d464341a0f20de44560e7a1d315a77bcdac6353e9ddf42187f39b`.
 Adapter `fixtures/public/e1s-development-providers/header_only.py` has SHA256
 `dfab7c3daf099d0da07af84c42a983fb57dd41de2ae061d96921516292b447a7`.
-This is a source freeze for fresh `execute-002`, which is absent. Prior ROOT87
+This is a source freeze for fresh `execute-003`, which is absent. Prior ROOT87
 `execute-001` remains unchanged: first Make command exit 2/resource pass,
 zero headers, no Firehose export, own reservation released and root observed
 zero survivors. Experiment `E1SPROVIDERHEADERS-001` records that actual failure.
@@ -40,6 +40,41 @@ remapping. Exact before/after evidence is
 `artifacts/e1s-development-providers/target-spelling-correction-001/delta.json`,
 SHA256 `cdfb279239cab82001f3185fd0ffeb64ad30d129c1f7e4592a6f3685b9eba45d`.
 There is no new filtering or header retry in this freeze.
+
+ROOT90 then attempted the exact target-spelling correction in `execute-002`.
+The first operation resolved its target but failed exit 2/resource pass because
+standalone `MakeInc_cmd` had no `MKDIR`: Bash tried to execute `./kincmidir`.
+No filtered headers or Firehose export resulted; own reservation released and
+root observed zero survivors. `E1SPROVIDERHEADERS-002` records this actual
+failure once. Capsule002 SHA256 is
+`d9833bfd7453de485b3630c36f0648960c5a6eea930b65664988536a78723ce1`;
+raw002 SHA256 remains
+`bb423444a5fb97e8aecd2549666f950b181caac6e8891b3dc8b83c4772b20096`.
+
+The separate `header-host-commands.mk` retains the immutable STR011 standalone
+query/platform map and binds actual Linux TR/BASH/ECHO/PRINTF/MKDIR/RM/INSTALL
+executables, plus native source-exact ERR and header logging expressions.
+Its SHA256 is `08d2a410d60a948ac3b9f0beafd67404c51db080d934551ef7bc59853ca78f44`.
+`host-command-provenance.json` binds the native MakeInc.cmd assignments, real
+executable paths/argv/hashes, native installfile source and existing historical
+Linux install compatibility; SHA256
+`4f9f13e260f0e3b30a394fa3b0d454a53c092b8e1640a5b82288de50ae99880d`.
+GNU install receives unchanged `-c -m 0444`, previously qualified for this
+header grammar. Native rule/filter/profile/selection semantics are unchanged;
+no old installed header is adopted and no new host tool is built.
+
+All 30 requested native Make recipe expansions passed a bounded read-only
+`--dry-run` query in a separate Landlock-confined diagnostic context (62.5s,
+one child at a time, 256MiB ceiling, 120s source-work budget). All 12 required
+command expressions were nonempty in every group. Four actual MIG prerequisites
+were copied only into that diagnostic context to resolve genuine source rules;
+no recipe, filter, install, compiler or archive ran. Query evidence SHA256 is
+`481de07fd4b8c2cb08bd57ca1201e11d1c1c3bb3561fbbda0f4d6d853de826fb`.
+After fresh-output remapping, the only argv changes are 30 `MakeInc_cmd`
+operands. The existing 653 input bindings are preserved except the owned route
+fixture, with 11 added host/provenance pins. All 315 physical selections,
+32 native flag guards, first31 operation identities and resource bounds remain.
+Fresh execute003 requires independent review and another exact root grant.
 
 The adapter uses existing 9929 `project_approval`, ProjectBudget, run_child and
 the accepted qemu_host supervisor, plus existing 9f80 `owned_cancellation` and
@@ -71,7 +106,7 @@ read-only into genuine Make generated prerequisite cwd paths. No native BSD
 projection, object directory, SDK directory, compiler, archive or layout setup
 is part of this phase. Children have the existing run_child Landlock write
 boundary covering the owned output; native Make source/host inputs remain read
-only. All 653 frozen provider-plan inputs and the exact helper files are checked
+only. All 664 frozen provider-plan inputs and the exact helper files are checked
 before target tools and after the header phase.
 
 Each actual Make exit and combined child/resource/cleanup record is preserved.
@@ -89,7 +124,7 @@ bytes and any new missing/empty boundary must be reviewed before four compiles.
 
 Existing cancellation and budget release validate owned child cleanup. The
 adapter releases only its own reservation; root owns the allocation/global
-lease. Planned raw evidence is `execute-002/evidence.json`; prior raw001 remains
+lease. Planned raw evidence is `execute-003/evidence.json`; prior raw001 and002 remain
 retained. A passing header
 result qualifies only the observed header phase, never provider objects,
 archive contents, ABI, full link/image, runtime or hardware. Original task
@@ -103,7 +138,7 @@ the inner invocation; root supplies and owns the outer watchdog:
 ```sh
 LC_ALL=C PYTHONUTF8=1 PYTHONNOUSERSITE=1 python3 -s \
   fixtures/public/e1s-development-providers/header_only.py \
-  --source-plan /home/egor/dev/pet/s24-ios-exynos/worktrees/str-018-e1s-development-providers-20261106/artifacts/e1s-development-providers/header-plan-005/execution-plan.json \
-  --source-plan-sha256 bb21e4781b71ce325785753bfcaf1f3756758cfc8c2c110a99f4f570ca3affdc \
+  --source-plan /home/egor/dev/pet/s24-ios-exynos/worktrees/str-018-e1s-development-providers-20261106/artifacts/e1s-development-providers/header-plan-006/execution-plan.json \
+  --source-plan-sha256 f776b9ff201d464341a0f20de44560e7a1d315a77bcdac6353e9ddf42187f39b \
   --approval ROOT_APPROVAL_PATH --approval-sha256 ROOT_APPROVAL_SHA256
 ```
