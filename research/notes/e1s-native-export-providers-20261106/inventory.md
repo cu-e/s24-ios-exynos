@@ -61,10 +61,15 @@ the unavailable typed ABI above.
    STR011 generated-producer contracts. STR013's actual compiler probe exited 1
    on unsupported `-fbounds-attributes`; its accepted receipt `01d70064…` selects
    the genuine Make `BOUND_CHECKS=0` branch (CM review `f78e2a94…`). Do not rerun
-   the probe. Its separate assym `-S` attempt failed for the missing mandatory
-   sanitizer ignorelist, so no offsets exist yet. Supply that genuine recipe
-   input, then finish assym and actual STR015 MIG generation under their owners.
-   This missing generation input is distinct from the 37 private providers.
+   the probe. On 2026-11-06 its first assym `-S` attempt (`generate-1`, raw
+   `c9dcbe12…`) failed for the missing mandatory sanitizer ignorelist; that failed
+   evidence remains unchanged. The subsequent root-grant-75 `generate-2` run
+   produced actual assym products with 270 defines: all four commands exited 0,
+   raw evidence `8dda1d1ee22392adf59abe1726944a6579fe39b56d497ac7e36f74e6a45e62c3`.
+   Owner/CM MD review is pending, so consume those products only after their
+   review/acceptance; do not regenerate them or restate the ignorelist as still
+   missing. Finish actual STR015 MIG generation under its owner. These
+   generation/review inputs are distinct from the 37 private providers.
 2. Finish the fresh DEVELOPMENT graph/header/layout closure and actual selected
    IIG outputs. Preserve all component and direct-tail recipes/filelist order,
    sanitizer ignorelist, aliases and symbolsets. Old 982 RELEASE objects and
@@ -88,3 +93,9 @@ Corecrypto table/callback completeness, KATs, private ABI and actual native
 hardware/recovery remain separate. No SDK/Apple binary, compiler, generator,
 linker, device action or common check was used for this inventory. This report
 does not qualify an image, boot or runtime.
+
+Current-state amendment: the assym update above records already produced
+`generate-2` evidence supplied by root after the original inventory freeze.
+`current-state-amendment.json` binds that receipt and the preserved original
+report/capsule. The original 58 source checks and their claims are unchanged;
+no additional test, compiler or generator was run for this amendment.
