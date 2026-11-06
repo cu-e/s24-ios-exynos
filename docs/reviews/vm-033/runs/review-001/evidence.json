@@ -1,0 +1,580 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-06T06:38:16.317435+00:00",
+  "task": "REV-046",
+  "owner": "codex-review-guest-allocator-20261106-fa",
+  "experiment": "REV046ALLOC-001",
+  "argv": [
+    "/usr/bin/python3",
+    "docs/reviews/vm-033/check.py",
+    "--main",
+    "/home/egor/dev/pet/s24-ios-exynos",
+    "--out",
+    "docs/reviews/vm-033/runs/review-001"
+  ],
+  "checks": [
+    {
+      "name": "exact final producer helper",
+      "pass_result": true
+    },
+    {
+      "name": "actual frozen object OSData",
+      "pass_result": true
+    },
+    {
+      "name": "actual frozen source OSData",
+      "pass_result": true
+    },
+    {
+      "name": "actual frozen object kalloc",
+      "pass_result": true
+    },
+    {
+      "name": "actual frozen source kalloc",
+      "pass_result": true
+    },
+    {
+      "name": "independent192-byte payload digest",
+      "pass_result": true
+    },
+    {
+      "name": "six real pointer strings agree with producer",
+      "pass_result": true
+    },
+    {
+      "name": "all six actual inline addends are zero",
+      "pass_result": true
+    },
+    {
+      "name": "independent16 relocations match exact supplement",
+      "pass_result": true
+    },
+    {
+      "name": "missing-metadata-section",
+      "pass_result": true,
+      "actual_rejection": "ValueError('missing/duplicate allocator section')"
+    },
+    {
+      "name": "cleared-live-support",
+      "pass_result": true,
+      "actual_rejection": "ValueError('allocator live_support/alignment changed')"
+    },
+    {
+      "name": "missing-metadata-relocation",
+      "pass_result": true,
+      "actual_rejection": "ValueError('allocator relocation table stripped/changed')"
+    },
+    {
+      "name": "pointer-pcrel",
+      "pass_result": true,
+      "actual_rejection": "ValueError('allocator pointer relocation contract changed')"
+    },
+    {
+      "name": "pointer32",
+      "pass_result": true,
+      "actual_rejection": "ValueError('allocator pointer relocation contract changed')"
+    },
+    {
+      "name": "pointer-subtractor",
+      "pass_result": true,
+      "actual_rejection": "ValueError('allocator pointer relocation contract changed')"
+    },
+    {
+      "name": "pointer-address-outside-section",
+      "pass_result": true,
+      "actual_rejection": "ValueError('relocation exceeds section')"
+    },
+    {
+      "name": "undefined-string-target",
+      "pass_result": true,
+      "actual_rejection": "ValueError('allocator metadata pointer target is undefined')"
+    },
+    {
+      "name": "string-value-outside-section",
+      "pass_result": true,
+      "actual_rejection": "ValueError('allocator string target out of range')"
+    },
+    {
+      "name": "broken-real-addend-pair",
+      "pass_result": true,
+      "actual_rejection": "ValueError('unpaired addend relocation')"
+    },
+    {
+      "name": "missing-consumer-boundary-references",
+      "pass_result": true,
+      "actual_rejection": "ValueError('Independent actual16 boundary references failure')"
+    },
+    {
+      "name": "independent-inline-addend-consumer",
+      "pass_result": true,
+      "actual_rejection": "ValueError('Independent observed allocator name/signature changed')"
+    },
+    {
+      "name": "production-object-hash-gate-on-inline-change",
+      "pass_result": true,
+      "actual_rejection": "ValueError('object changed')"
+    },
+    {
+      "name": "pinned primary wrongcompiler_stderr",
+      "pass_result": true
+    },
+    {
+      "name": "historical real metadata builtin failure retained",
+      "pass_result": true
+    },
+    {
+      "name": "actual wrongcompiler command retains target metadata and no output",
+      "pass_result": true
+    },
+    {
+      "name": "actual distinct stock compiler identity retained",
+      "pass_result": true
+    },
+    {
+      "name": "actual wrong compiler identity gate",
+      "pass_result": true,
+      "actual_rejection": "ValueError('wrong compiler provenance')"
+    },
+    {
+      "name": "initial addend-parser failed history preserved",
+      "pass_result": true
+    },
+    {
+      "name": "pinned primary kalloc_header",
+      "pass_result": true
+    },
+    {
+      "name": "pinned primary loader_header",
+      "pass_result": true
+    },
+    {
+      "name": "pinned primary link_recipe",
+      "pass_result": true
+    },
+    {
+      "name": "pinned primary relocation_header",
+      "pass_result": true
+    },
+    {
+      "name": "source requests live_support regular placement",
+      "pass_result": true
+    },
+    {
+      "name": "public flag and addend definitions match actual bytes",
+      "pass_result": true
+    },
+    {
+      "name": "actual source still enables LTO dead stripping",
+      "pass_result": true
+    }
+  ],
+  "findings": [
+    {
+      "severity": "nonblocking-for-frozen-witness",
+      "subject": "symbolic string resolver ignores inline unsigned-pointer addends",
+      "actual": [
+        {
+          "address": 160,
+          "symbol": "l_.str.3",
+          "section": "__cstring",
+          "string": "12"
+        },
+        {
+          "address": 144,
+          "symbol": "l_.str.2",
+          "section": "__cstring",
+          "string": "site.ExpansionData"
+        },
+        {
+          "address": 96,
+          "symbol": "l_.str.3",
+          "section": "__cstring",
+          "string": "12"
+        },
+        {
+          "address": 80,
+          "symbol": "l_.str.2",
+          "section": "__cstring",
+          "string": "site.ExpansionData"
+        },
+        {
+          "address": 32,
+          "symbol": "l_.str.3",
+          "section": "__cstring",
+          "string": "12"
+        },
+        {
+          "address": 16,
+          "symbol": "l_.str.2",
+          "section": "__cstring",
+          "string": "site.ExpansionData"
+        }
+      ],
+      "limitation": "All six real pinned pointer addends are zero and the production object hash gate rejects the changed copy. Any future generalization must add inline addends or explicitly reject nonzero ones."
+    }
+  ],
+  "compiler_executed": false,
+  "linker_executed": false,
+  "external_section_tool_executed": false,
+  "guest_executed": false,
+  "full_link_retention_qualified": false,
+  "mem_available_admission_bytes": [
+    15604785152,
+    16700260352,
+    16776044544
+  ],
+  "actual_metadata": {
+    "size": 192,
+    "flags": 134217728,
+    "alignment_bytes": 8,
+    "relocations": [
+      {
+        "address": 160,
+        "type": 0,
+        "length": 8,
+        "pcrel": false,
+        "external": true,
+        "index": 23,
+        "at": 64952,
+        "bits": 234881047,
+        "target": "l_.str.3"
+      },
+      {
+        "address": 144,
+        "type": 0,
+        "length": 8,
+        "pcrel": false,
+        "external": true,
+        "index": 22,
+        "at": 64960,
+        "bits": 234881046,
+        "target": "l_.str.2"
+      },
+      {
+        "address": 96,
+        "type": 0,
+        "length": 8,
+        "pcrel": false,
+        "external": true,
+        "index": 23,
+        "at": 64968,
+        "bits": 234881047,
+        "target": "l_.str.3"
+      },
+      {
+        "address": 80,
+        "type": 0,
+        "length": 8,
+        "pcrel": false,
+        "external": true,
+        "index": 22,
+        "at": 64976,
+        "bits": 234881046,
+        "target": "l_.str.2"
+      },
+      {
+        "address": 32,
+        "type": 0,
+        "length": 8,
+        "pcrel": false,
+        "external": true,
+        "index": 23,
+        "at": 64984,
+        "bits": 234881047,
+        "target": "l_.str.3"
+      },
+      {
+        "address": 16,
+        "type": 0,
+        "length": 8,
+        "pcrel": false,
+        "external": true,
+        "index": 22,
+        "at": 64992,
+        "bits": 234881046,
+        "target": "l_.str.2"
+      }
+    ],
+    "resolved": [
+      {
+        "address": 160,
+        "symbol": "l_.str.3",
+        "target_section": "__cstring",
+        "inline_addend": 0,
+        "string": "12"
+      },
+      {
+        "address": 144,
+        "symbol": "l_.str.2",
+        "target_section": "__cstring",
+        "inline_addend": 0,
+        "string": "site.ExpansionData"
+      },
+      {
+        "address": 96,
+        "symbol": "l_.str.3",
+        "target_section": "__cstring",
+        "inline_addend": 0,
+        "string": "12"
+      },
+      {
+        "address": 80,
+        "symbol": "l_.str.2",
+        "target_section": "__cstring",
+        "inline_addend": 0,
+        "string": "site.ExpansionData"
+      },
+      {
+        "address": 32,
+        "symbol": "l_.str.3",
+        "target_section": "__cstring",
+        "inline_addend": 0,
+        "string": "12"
+      },
+      {
+        "address": 16,
+        "symbol": "l_.str.2",
+        "target_section": "__cstring",
+        "inline_addend": 0,
+        "string": "site.ExpansionData"
+      }
+    ]
+  },
+  "actual_consumer_references": [
+    {
+      "section": "__text",
+      "address": 3036,
+      "type": 6,
+      "length": 4,
+      "pcrel": false,
+      "external": true,
+      "index": 324,
+      "at": 204488,
+      "bits": 1811939652,
+      "target": "section$end$__DATA_CONST$__kalloc_type"
+    },
+    {
+      "section": "__text",
+      "address": 3032,
+      "type": 5,
+      "length": 4,
+      "pcrel": true,
+      "external": true,
+      "index": 324,
+      "at": 204496,
+      "bits": 1560281412,
+      "target": "section$end$__DATA_CONST$__kalloc_type"
+    },
+    {
+      "section": "__text",
+      "address": 3028,
+      "type": 6,
+      "length": 4,
+      "pcrel": false,
+      "external": true,
+      "index": 325,
+      "at": 204504,
+      "bits": 1811939653,
+      "target": "section$end$__DATA_CONST$__kalloc_var"
+    },
+    {
+      "section": "__text",
+      "address": 3024,
+      "type": 5,
+      "length": 4,
+      "pcrel": true,
+      "external": true,
+      "index": 325,
+      "at": 204512,
+      "bits": 1560281413,
+      "target": "section$end$__DATA_CONST$__kalloc_var"
+    },
+    {
+      "section": "__text",
+      "address": 3012,
+      "type": 6,
+      "length": 4,
+      "pcrel": false,
+      "external": true,
+      "index": 326,
+      "at": 204520,
+      "bits": 1811939654,
+      "target": "section$start$__DATA_CONST$__kalloc_type"
+    },
+    {
+      "section": "__text",
+      "address": 3008,
+      "type": 5,
+      "length": 4,
+      "pcrel": true,
+      "external": true,
+      "index": 326,
+      "at": 204528,
+      "bits": 1560281414,
+      "target": "section$start$__DATA_CONST$__kalloc_type"
+    },
+    {
+      "section": "__text",
+      "address": 3004,
+      "type": 6,
+      "length": 4,
+      "pcrel": false,
+      "external": true,
+      "index": 327,
+      "at": 204536,
+      "bits": 1811939655,
+      "target": "section$start$__DATA_CONST$__kalloc_var"
+    },
+    {
+      "section": "__text",
+      "address": 3000,
+      "type": 5,
+      "length": 4,
+      "pcrel": true,
+      "external": true,
+      "index": 327,
+      "at": 204544,
+      "bits": 1560281415,
+      "target": "section$start$__DATA_CONST$__kalloc_var"
+    },
+    {
+      "section": "__text",
+      "address": 2968,
+      "type": 6,
+      "length": 4,
+      "pcrel": false,
+      "external": true,
+      "index": 324,
+      "at": 204560,
+      "bits": 1811939652,
+      "target": "section$end$__DATA_CONST$__kalloc_type"
+    },
+    {
+      "section": "__text",
+      "address": 2964,
+      "type": 5,
+      "length": 4,
+      "pcrel": true,
+      "external": true,
+      "index": 324,
+      "at": 204568,
+      "bits": 1560281412,
+      "target": "section$end$__DATA_CONST$__kalloc_type"
+    },
+    {
+      "section": "__text",
+      "address": 2960,
+      "type": 6,
+      "length": 4,
+      "pcrel": false,
+      "external": true,
+      "index": 325,
+      "at": 204576,
+      "bits": 1811939653,
+      "target": "section$end$__DATA_CONST$__kalloc_var"
+    },
+    {
+      "section": "__text",
+      "address": 2956,
+      "type": 5,
+      "length": 4,
+      "pcrel": true,
+      "external": true,
+      "index": 325,
+      "at": 204584,
+      "bits": 1560281413,
+      "target": "section$end$__DATA_CONST$__kalloc_var"
+    },
+    {
+      "section": "__text",
+      "address": 2944,
+      "type": 6,
+      "length": 4,
+      "pcrel": false,
+      "external": true,
+      "index": 326,
+      "at": 204592,
+      "bits": 1811939654,
+      "target": "section$start$__DATA_CONST$__kalloc_type"
+    },
+    {
+      "section": "__text",
+      "address": 2940,
+      "type": 5,
+      "length": 4,
+      "pcrel": true,
+      "external": true,
+      "index": 326,
+      "at": 204600,
+      "bits": 1560281414,
+      "target": "section$start$__DATA_CONST$__kalloc_type"
+    },
+    {
+      "section": "__text",
+      "address": 2936,
+      "type": 6,
+      "length": 4,
+      "pcrel": false,
+      "external": true,
+      "index": 327,
+      "at": 204608,
+      "bits": 1811939655,
+      "target": "section$start$__DATA_CONST$__kalloc_var"
+    },
+    {
+      "section": "__text",
+      "address": 2932,
+      "type": 5,
+      "length": 4,
+      "pcrel": true,
+      "external": true,
+      "index": 327,
+      "at": 204616,
+      "bits": 1560281415,
+      "target": "section$start$__DATA_CONST$__kalloc_var"
+    }
+  ],
+  "object_pins": {
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-008-20261105/artifacts/avf-kernel-headers/commit-141c778-metadata-2/representatives/libkern/OSData.cpo": "0b7b02f0881ce38c08df27ebbb21dee03b251e1a5f8be85af3a18754d5276458",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-008-20261105/artifacts/avf-kernel-headers/allocator-1/representatives/osfmk/kalloc.o": "006623101892d71322813c7f4c90bf24f09501ddf837ed60ae7a4bc3cf71d3c8"
+  },
+  "summary": "Independent real-object byte review confirms192B live-support metadata/six unsigned64 pointers/strings and16 kalloc boundary references; owned corruption and wrongcompiler gates reject. Bounded zero-inline-addend resolver limitation recorded. Final LTO retention/runtime remain unmeasured.",
+  "memory": {
+    "VmHWM": 25300992,
+    "VmRSS": 25300992,
+    "inherited_ru_maxrss_bytes": 1380720640
+  },
+  "elapsed_seconds": 2.066027470980771,
+  "finished_at": "2026-11-06T06:38:18.366100+00:00",
+  "source_sha256": "918fcbe9eb6dbdc52f04c7e37bdf69f79a141e03967629a404df9c64d6b0dabb",
+  "artifact_hashes": {
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/missing-metadata-section.o": "17bd825250b894b1010a200197bf10d9b6c0755324152b2b6b07b2c721980b1c",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/cleared-live-support.o": "1cf5d2cadf2ae0c1df2bd4c7d7a5cd3296d19a98850c5275d511ad97740d3270",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/missing-metadata-relocation.o": "f99162eb7a47624dd1e60b87d9a43ec6164916d398ec2a10675334b0cb35bfb3",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/pointer-pcrel.o": "b0f55d9e9c404a771bdd98b2d2a1990d35c5440c0cd00f73ce8b7df3094df552",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/pointer32.o": "2182e691fe5fb4b60d8c09e0e5faff09bf044fa4364b326d33724cbc8ac3ec32",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/pointer-subtractor.o": "20be6958809e75a66703a3d16604d6425a114698dfbf90033dfdc2f0e0b90fd5",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/pointer-address-outside-section.o": "549515b370bb220fb2edac0fdcf8f9d22f40e8d7bbe1df2aa3fa7bb19015b67e",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/undefined-string-target.o": "b412308c86ff436ddb9076bc7aea2618343238446bdb2e039532e1c3599a171d",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/string-value-outside-section.o": "ebdabaf45184065635e1837cfc8dd8ae6eda87344c8e979fb1f1b4bc0ec8c9c5",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/broken-real-addend-pair.o": "d7dc574ee71e8391567b21205b81e7705f4c236d722c478b417f4f488b567a0c",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/missing-consumer-boundary-references.o": "9bfa3721589afe3e54356d7b4ec12de4c6a4e093130cf85ddbb5bf02e7d341a8",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/nonzero-inline-pointer-addend.o": "fa01fb0a69bfd3c7ae986c0d121e9648678780731ae95ce0f9fc5bb309366bd5"
+  },
+  "artifacts": [
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/missing-metadata-section.o",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/cleared-live-support.o",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/missing-metadata-relocation.o",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/pointer-pcrel.o",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/pointer32.o",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/pointer-subtractor.o",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/pointer-address-outside-section.o",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/undefined-string-target.o",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/string-value-outside-section.o",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/broken-real-addend-pair.o",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/missing-consumer-boundary-references.o",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm033-fa-20261106/docs/reviews/vm-033/runs/review-001/nonzero-inline-pointer-addend.o"
+  ]
+}
