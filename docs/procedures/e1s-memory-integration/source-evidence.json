@@ -1,0 +1,65 @@
+{
+  "kind": "source-review",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-06",
+  "summary": "STR003 source-only handoff:14line existing-builder hook captures exact STR002 patch snapshot/provenance and checks/applies it after donorcopy before targetcompile. Read-only gitapplycheck on owned3file copy succeeds; refs/copy unchanged. Syntax/diff and only-build-function AST delta pass. Builder/compiler not run.",
+  "task": "STR-003",
+  "owner": "codex-e1s-builder-20261106-sr3",
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "apply",
+        "--check",
+        "--verbose",
+        "/home/egor/dev/pet/s24-ios-exynos/patches/e1s-boot/0001-loader-memory-validation.patch"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-003-e1s-builder-20261106/artifacts/e1s-memory-integration/source-check-001/source",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Checking patch artifacts/e1s-memory-integration/source-check-001/source/shim/e1s-xnu/loader.c...\nChecking patch artifacts/e1s-memory-integration/source-check-001/source/shim/e1s-xnu/fdt.c...\nChecking patch artifacts/e1s-memory-integration/source-check-001/source/shim/e1s-xnu/fdt.h...\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "in-memory syntax/AST comparison"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "worktrees/str-003-e1s-builder-20261106/tools/build/e1s.py",
+    "worktrees/str-003-e1s-builder-20261106/artifacts/e1s-memory-integration/source-check-001/evidence.json",
+    "patches/e1s-boot/0001-loader-memory-validation.patch"
+  ],
+  "sha256": {
+    "worktrees/str-003-e1s-builder-20261106/tools/build/e1s.py": "2b7519e92bef64849325c9bce2abd1b6f582c419921168e7133ef9e95bfd23e3",
+    "worktrees/str-003-e1s-builder-20261106/artifacts/e1s-memory-integration/source-check-001/evidence.json": "e4e07a96fa4f0b79943392e0792e9f9d0ea001f5eb386f850e7fa257c7d6fbe7",
+    "patches/e1s-boot/0001-loader-memory-validation.patch": "23b31c44ed9dba9c2da2e5b56ccbe97cd67fa41efff3ec032130eabca6718ae1"
+  },
+  "unchanged_functions": [
+    "run",
+    "load",
+    "main"
+  ],
+  "changed_functions": [
+    "build"
+  ],
+  "compiler_started": false,
+  "builder_invoked": false,
+  "pinned_reference_unchanged": true,
+  "limitations": [
+    "No actual builder success or missing/nonapplicable builder execution control is claimed yet. Root resource admission required before compiler/build.",
+    "Independent source review and currentHEAD publication/common still required; task remains active.",
+    "No hardware boot, safe physical RAM window or phone action."
+  ]
+}

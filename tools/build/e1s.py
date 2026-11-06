@@ -52,6 +52,9 @@ def build(root, identifier):
     report = {"schema_version": 1, "kind": "host-test", "origin": "local-host", "outcome": "inconclusive",
               "recorded_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "source": provenance,
               "commands": commands, "hardware_execution": False, "apple_userland": False,
+              "source_patch": {"path": "patches/e1s-boot/0001-loader-memory-validation.patch",
+                               "source_task": "STR-002", "source_commit": "6a1c05d4119acd5146d56d7fc9070742584140cd",
+                               "expected_sha256": "23b31c44ed9dba9c2da2e5b56ccbe97cd67fa41efff3ec032130eabca6718ae1", "applied": False},
               "kernel_build": "not-run; SDK/dependencies are a separate prerequisite"}
     try:
         version = run(["zig", "version"], root, commands)
@@ -60,6 +63,17 @@ def build(root, identifier):
         report["toolchain"] = {"zig": version, "path": shutil.which("zig")}
         work = directory / "source"
         shutil.copytree(root / "references/s24-port", work, ignore=shutil.ignore_patterns(".git", "out", "out-qemu", "__pycache__"))
+        patch = report["source_patch"]
+        patch_bytes = (root / patch["path"]).read_bytes()
+        patch["sha256"] = hashlib.sha256(patch_bytes).hexdigest()
+        if patch["sha256"] != patch["expected_sha256"]:
+            raise RuntimeError("Accepted STR-002 memory validation patch identity changed")
+        snapshot = directory / "loader-memory-validation.patch"
+        snapshot.write_bytes(patch_bytes)
+        patch.update(snapshot=str(snapshot.relative_to(root)), applied_to=str(work.relative_to(root)))
+        run(["git", "apply", "--check", snapshot], work, commands)
+        run(["git", "apply", snapshot], work, commands)
+        patch["applied"] = True
         products = []
         for target, files, linker in [("probe", ["shim/e1s/start.S", "shim/e1s/probe.c"], "shim/e1s/loader.ld"),
                                       ("loader", ["shim/e1s-xnu/" + f for f in ["start.S", "loader.c", "ui.c", "adt_patch.c", "gic.c", "fdt.c"]], "shim/e1s-xnu/loader.ld")]:
