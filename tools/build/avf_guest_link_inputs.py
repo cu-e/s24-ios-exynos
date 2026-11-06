@@ -1018,8 +1018,12 @@ def execute_tails_reserved(args, common, cancellation):
     try:
         args.out.mkdir(parents=True, exist_ok=False)
         shutil.copyfile(__file__, args.out / 'builder.py')
-        budget.reserve()
-        reserved = True
+        # AF193 persists the entry before setting registered. Deferral must
+        # cover both the transaction and our local ownership flag.
+        with cancellation.cleanup():
+            budget.reserve()
+            reserved = True
+        cancellation.check()
         supervise = common.supervisor(args.main)
         cache = common.Digests()
         for path, digest in expected['input_bindings'].items():

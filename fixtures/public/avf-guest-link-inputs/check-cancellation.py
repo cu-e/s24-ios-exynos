@@ -136,6 +136,32 @@ try:
             if not fired[0]:raise AssertionError('Real post-fstat mutation barrier not reached')
         finally:os.fstat = real_fstat
         changed.unlink()
+    # Actual AF193 reserve method with a local transaction-surface test double.
+    # No ProjectBudget constructor, canonical queue or root grant is fabricated.
+    common = m.accepted_runner(args.main)
+    class ReserveProbe:
+        args = SimpleNamespace(task='VM022-RESERVE-CONTROL')
+        registered = False
+        identity = {'pid':os.getpid()}
+        def snapshot(self,state):return {'violations':[]}
+        def transaction(self,operation):
+            state = {'entries':{}}
+            operation(state)
+            temp = args.out/'local-reservation.tmp'; final = args.out/'local-reservation.json'
+            temp.write_text(json.dumps(state))
+            os.replace(temp,final)
+            os.kill(os.getpid(),signal.SIGTERM)  # real post-replace/pre-registered window
+    probe = ReserveProbe(); reserved = False
+    with m.owned_cancellation() as state:
+        try:
+            with state.cleanup():
+                common.ProjectBudget.reserve(probe)
+                reserved = True
+            state.check()
+        except m.OwnedCancellation:
+            if not probe.registered or not reserved:raise AssertionError('Persisted reservation window interrupted')
+            report['checks'].append('real post-replace cancellation deferred through registered/local ownership flags')
+        else:raise AssertionError('Pending reservation cancellation not propagated')
     report['outcome'] = 'pass'
 except Exception as error:report['error'] = repr(error)
 finally:

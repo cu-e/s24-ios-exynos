@@ -53,10 +53,10 @@ The corrected freeze still requires independent review and a new production
 experiment/root allocation. No review/source-only experiment grants execution.
 
 Final source-only correction: helper SHA256
-`ee637496900b8ac4f57b5a980d6810d8201937e1a1de9c703e17b7d4de9dce27`;
-tail-fix-plan-1 execution-plan SHA256
-`84b0f4d902e502776062092451174c7bf0019bfcfaf83969bfb5e6d9e4a337b5`.
-The previous24 recipe/parser controls pass. Cancellation-controls-2 passes six
+`99d8db30fcfb3c510dadcecf1fb89121ed5062d3af3379442ac2e905c303b060`;
+tail-fix-plan-2 execution-plan SHA256
+`6b01e7c535176ffe41f83aca2bf4eded2a75e9af715e260bf8042232c9ba3569`.
+The previous24 recipe/parser controls pass. Cancellation-controls-3 passes seven
 additional controls, including actual first work/cleanup cancellations and
 repeated signals, a sparse257MiB file, symlink, real post-fstat growth and path
 swap. The read operations were real bounded FD reads; no read mock was used.
@@ -67,3 +67,9 @@ Cancellation-controls-1 remains preserved as a failed harness attempt: its
 repeat-signal window extended beyond the controller's completed handler scope.
 The fixture window was corrected without changing executor bytes. Independent
 REV039 acceptance is still required; no target production ran.
+
+Cancellation is also deferred across the actual reserve transaction and local
+reserved=True assignment, covering AF193's post-persist/pre-registered window;
+pending cancellation is checked immediately afterward before any child. The
+source-only control invokes actual AF193 reserve with an explicitly local
+transaction probe and real os.replace/SIGTERM. No canonical allocation changes.
