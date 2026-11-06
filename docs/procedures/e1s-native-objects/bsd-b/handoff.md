@@ -61,3 +61,18 @@ Proposed whole bound1800s, serial1/512MiB slot only after common84PASS and separ
 root exact ProjectBudget grant with existing outerwatchdog. Do not execute or
 rerun a plan without root direction. Preserve caller physicalpath/pins and all
 source/native/generated/portableprofile boundaries from the original handoff.
+
+
+Actual root-dispatched wave85 attempt STR025BUILD-001 TERMINAL FAIL. Five fresh
+objects (content_filter_crypto,packet_mangler,if_llatbl,nwk_wq,skmem_sysctl) have
+actual compiler exits0,ARM64 object validity/actual MD closure/resource PASS.
+Their hashes/dependency-map summaries are in partial-build-001.json; complete
+actual dependency maps/commands remain in raw build-001/evidence.json
+SHA956586f1794acab1f7bd7e3d08f3cef31cb0015ba38f9e7eb3ad387fcdabfecd. Sixth restricted_in_port compiler neverstarted: projectadmission
+ValueError('Stale executor reservation; root must reconcile survivors').
+No compiler diagnostic error;164 further rows unattempted. Loader passed.
+Caller elapsed49.684439080s,currentcontrollerHWM82071552B; no owned survivors,
+ownreservationcomplete and controller1112192/timeout1112191 retired. Worker did
+not release the globalqueue, modify broker/flags/source or rerun targets.
+OriginalSR25 records001 FAIL exactlyonce. Root separately authorized only
+SOURCE PLAN002 for remaining165 contiguousIDs, preserving all001 outputs.
