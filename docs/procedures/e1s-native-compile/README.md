@@ -95,3 +95,30 @@ C/MIG, generated C++ and support plans. Runtime/cancellation/object/MD behavior
 was not executed. `evidence.json` and the artifact `source-plans-005` summary
 bind exact source/plan/raw bytes and retain all prior inconclusive/fail evidence.
 Independent final review, publication/common and root acceptance remain pending.
+
+## STR033 Firehose header source projection
+
+The new caller admits one fixed `HOST-SOURCE-EXPORT` authority for
+`os/firehose_buffer_private.h`, unchanged2582-byte14be8d31 export of genuine
+libdispatch a641558f/originalb1da2269 under the recorded KERNEL/SPI unifdef flags.
+`firehose-header-authority.json` binds the existing qualified descriptor a553,
+original exporter, exact source/header bytes, SR18 source packet d4a74f98 and
+CM's independent header-only compatibility proof102d1355. Root87 failed before
+creating a new native export; no fresh export is claimed. The filtered header
+has only stdint.h/include-guard dependency selectors, while native preincluded
+types and actual MD/type/layout/provider ABI remain unqualified.
+
+Exactly one fixed header is added to each selected component's existing private
+CWD projection. Shared1334 files and source5111 are unchanged; no-I/flag/source
+rewrite or old object/archive reuse occurs. The source/input index binds all
+header authority bytes. The namespace view retains its immutable lower tree
+and adds an explicit, freshly source-hashed private-header overlay at the actual
+CWD path, binding existing-I. precedence before materialization. The unchanged
+private_inputs inventory verifies the actual copied overlay at execution.
+Other verification/ownership/resource/cancellation/helper behavior is retained.
+
+Only the remaining65 libkern rows[12:] from actual STR028 failure are planned
+here. No compiler, loader, target or cancellation control is executed. Frozen
+2676 and the six existing002 worker plans are not changed. Independent source
+review/publication/common/root acceptance precede adoption and a separate actual
+worker grant. Header-only reuse transfers no SDK, archive, object or ABI result.

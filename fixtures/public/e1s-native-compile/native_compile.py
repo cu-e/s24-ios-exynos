@@ -21,6 +21,7 @@ INTERFACE = MAIN/'worktrees/str-016-e1s-development-body-graph-20261106/fixtures
 PINS = [(COMMON, '9929a7d6f1e748770f54abf3e101350648092027a18c419a242d0348f620f755'),
         (CORE, '9f80e32305ce84e33ab27bcf37d589465a97c2d03c5eb6830fd3540f204400c5'),
         (SUPERVISOR, 'faaa9b707a8bb48b1ee502a2c58c9b876eb7859ad5b0ff6541bae27c20ed9f99')]
+HEADER_AUTHORITY_SHA = '44277ad6057c26f1191212cec89c8d1387b9671ce79f85640dd3c510ca1345b6'
 SOURCE_METADATA_SHA = '44a3b329931630c4447314b0e683db0c0ef571e615c1bb016321424c278b64b8'
 RUNTIME_SHA = '94685ae6c56a3785b8c61c5422fb53bd8750ca92ad9caa76e9bf691bab35d12d'
 INTERFACE_SHA = 'c866f73c539870f87edbbb503de8c6418c0334541801ceb4d5cd56bac6f9a579'
@@ -106,6 +107,9 @@ def derive(common, manifest_path, manifest_sha):
     ids = manifest['object_ids']; ordered = selected[0]['ordered_object_ids']
     require(type(ids) is list and ids and all(type(i) is str for i in ids), 'Explicit nonempty ordered slice required')
     require(ids[0] in ordered and ordered[ordered.index(ids[0]):ordered.index(ids[0])+len(ids)] == ids, 'Slice differs from original ordered partition')
+    authority = bound({'path':str(HERE/'firehose-header-authority.json'), 'sha256':HEADER_AUTHORITY_SHA})
+    require(authority['authority'] == 'HOST-SOURCE-EXPORT' and authority['destination'] == 'os/firehose_buffer_private.h', 'Wrong native private-header authority')
+    inputs.update(authority['inputs'])
     old = graph['component_context_root']; shared = context['context_root']
     require(context['mechanical_prefix_map'] == {old:shared}, 'Wrong native context map')
     def mapped(value):
@@ -153,12 +157,16 @@ def derive(common, manifest_path, manifest_sha):
             elif not path.exists():
                 absent.add(str(path))
         rows.append(dict(id=identifier, component=component, namespace_cwd=str(cfg), source=source['path'], source_sha256=source['sha256'], original_argv=original, argv=argv, cwd=str(cwd), object=str(obj), depfile=str(dep), recipe=row['recipe']))
+    for cwd in {row['cwd'] for row in rows}:
+        target = str(Path(cwd)/authority['destination'])
+        require(target not in projections, 'Private header collides with indexed configuration')
+        projections[target] = {'source':authority['header']['path'], 'sha256':authority['header']['sha256']}
     runtime = common.load_project(HERE/'runtime.json', RUNTIME_SHA)
     inputs[str(HERE/'runtime.json')] = RUNTIME_SHA
     inputs.update(runtime['files'])
     for path,h in inputs.items():
         require(Path(path).resolve(strict=True) == Path(path) and not Path(path).is_symlink() and digest(path) == h, 'Changed/aliased native input: '+path)
-    result = dict(schema='e1s-native-component-plan-v1', resource_profile='project-budget-v1', task=manifest['task'], owner=manifest['owner'], experiment=manifest['experiment'], shard=manifest['partition'], manifest={'path':str(manifest_path),'sha256':manifest_sha}, executor_sha256=digest(__file__), out=str(out), whole_seconds=manifest['whole_seconds'], max_jobs=1, max_owned_rss_bytes=512*1024**2, graph=interface['graph'], context=interface['consumer_context'], profile=interface['portable_compiler_profile_selection'], commands=rows, projections=projections, inputs=inputs, absent_inputs=sorted(absent), runtime=runtime, nonsource_metadata=metadata, runtime_lookup={cwd:runtime_lookup(runtime,cwd) for cwd in sorted({r['cwd'] for r in rows})}, loader_commands={cwd:[runtime['interpreter'],'--list',str(compiler)] for cwd in sorted({r['cwd'] for r in rows})}, compiled=False)
+    result = dict(schema='e1s-native-component-plan-v1', resource_profile='project-budget-v1', task=manifest['task'], owner=manifest['owner'], experiment=manifest['experiment'], shard=manifest['partition'], manifest={'path':str(manifest_path),'sha256':manifest_sha}, executor_sha256=digest(__file__), out=str(out), whole_seconds=manifest['whole_seconds'], max_jobs=1, max_owned_rss_bytes=512*1024**2, graph=interface['graph'], context=interface['consumer_context'], profile=interface['portable_compiler_profile_selection'], commands=rows, projections=projections, inputs=inputs, absent_inputs=sorted(absent), runtime=runtime, header_authority=authority, nonsource_metadata=metadata, runtime_lookup={cwd:runtime_lookup(runtime,cwd) for cwd in sorted({r['cwd'] for r in rows})}, loader_commands={cwd:[runtime['interpreter'],'--list',str(compiler)] for cwd in sorted({r['cwd'] for r in rows})}, compiled=False)
     result['namespace'] = native_namespace(common, result)
     return result
 
@@ -166,7 +174,18 @@ def derive(common, manifest_path, manifest_sha):
 def native_namespace(common, plan):
     rows = [dict(cwd=row['namespace_cwd'], bound_source=row['source'],
                  next_owned_compile_argv_template=row['argv']) for row in plan['commands']]
-    return common.namespace(rows, plan['inputs'], common.Digests())
+    cache = common.Digests()
+    result = common.namespace(rows, plan['inputs'], cache)
+    overlay = {}
+    for cwd in {row['cwd'] for row in plan['commands']}:
+        target = str(Path(cwd)/plan['header_authority']['destination'])
+        item = plan['projections'][target]
+        observed = cache.get(item['source'])
+        require(observed == item['sha256'] == plan['header_authority']['header']['sha256'] and item['source'] == plan['header_authority']['header']['path'], 'Private header authority changed')
+        overlay[target] = {**item, 'observed_sha256':observed, 'authority_sha256':HEADER_AUTHORITY_SHA}
+    result['private_header_projection'] = overlay
+    result['sha256'] = common.canonical({k:v for k,v in result.items() if k != 'sha256'})
+    return result
 
 
 def runtime_lookup(runtime, cwd):
