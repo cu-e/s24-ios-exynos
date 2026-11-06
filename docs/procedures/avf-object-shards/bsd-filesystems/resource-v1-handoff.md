@@ -36,3 +36,36 @@ or compiler authorization exists. Proposed actual output
 when reported. `resource-v1-future-actual.json` binds exact plan/argv with root
 approval placeholders only. Next: root reviews the actual new source plan and
 issues a separate allocation if appropriate. VM-011 remains in_progress.
+
+Root then granted ONE actual grant29 attempt, allocation
+`guest-kernel-six-resource-wave-20261106-29`, SHA256
+`241d5bc25989e2230b2077448a00c5959890c7cb5691ea0e3edb2b027565a661`.
+Approval `vm011-wave29-approval.json` SHA256
+`db39c2d60fe5529b4940f3ebe9d2f3469fdf378f8137ba1a47316eb8d3799323`
+bound original `VM011RESOURCEBUILD-001`, source plan9b5a57d9, fresh output
+`resource-v1/execute-001`, helper9929, one compiler/512 MiB and120 seconds per
+child. The exact CM intake command used Python3.12 and the proven in-process
+1,200-second launcher SHA256
+`64e7d7ec4a7836859618eba39b18158f6a80a70aad603ace98e9c36b5aab8fe2`.
+No extra supervisor, resume, input/flag/header edit or retry was used.
+
+The actual command returned exit0 / PASS: all90 genuine ARM64 object records
+and all90 compiler commands passed. APFS passed with actual dependencies on all
+three matched resources. `vfs_syscalls.o` also passed. Raw final evidence is
+`resource-v1/execute-001/evidence.json`, SHA256
+`65be409f819b29e60547bcd593dc2112395451e38a4baa04290382f7a6051f72`.
+The publication capsule `resource-v1-build-evidence.json` SHA256 is
+`d2657dc556ff47ef54db489ca878d19c3ce0bc6ba12e19b20efae1e34454bc73`.
+
+All90 command after-observations have empty owned-process lists. Controller
+PID86336/start_ticks59729250 ended; own reservation status is `complete`, bound
+in `execute-001/reservation-after.json`. Worker did not release the global queue.
+Peak sampled owned RSS251,195,392 bytes, observed project peak1,262,641,152 bytes,
+current-image HWM178,679,808 bytes. Compiler command window277.129553 seconds
+includes between-command admission gaps and excludes earlier controller setup.
+Inherited launcher ru_maxrss is separate and not a current-image RSS claim.
+
+The granted single run is finished. Next: root/INT002 independent artifact review,
+integration and common checks. Keep VM-011 in_progress until explicitly accepted;
+no further compiler or task completion is authorized. Full kernel/link/guest,
+private Apple ABI, filesystem runtime and S24 device support remain unqualified.
