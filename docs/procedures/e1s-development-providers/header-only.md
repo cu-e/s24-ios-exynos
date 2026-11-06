@@ -19,7 +19,8 @@ The exact header plan is
 `7484ce35fa5c8b8519baf83973eac1d758b63b96f744ac1e5260c1234c48b1d2`.
 Adapter `fixtures/public/e1s-development-providers/header_only.py` has SHA256
 `97d201ce8f6cfee9ca2c222fc11a8fe584eaa08155dbcf8e1c9633ae6e41bad2`.
-This is a source freeze for fresh `execute-004`, which is absent. Prior ROOT87
+This retained source freeze preceded actual ROOT98 `execute-004`. See the
+actual phase receipt below; earlier plans and whole failures remain unchanged. Prior ROOT87
 `execute-001` remains unchanged: first Make command exit 2/resource pass,
 zero headers, no Firehose export, own reservation released and root observed
 zero survivors. Experiment `E1SPROVIDERHEADERS-001` records that actual failure.
@@ -178,3 +179,24 @@ LC_ALL=C PYTHONUTF8=1 PYTHONNOUSERSITE=1 python3 -s \
   --source-plan-sha256 7484ce35fa5c8b8519baf83973eac1d758b63b96f744ac1e5260c1234c48b1d2 \
   --approval ROOT_APPROVAL_PATH --approval-sha256 ROOT_APPROVAL_SHA256
 ```
+
+## Actual004 header-phase receipt
+
+ROOT98 executed this exact header plan and caller. The verified actual header
+descriptor is `fixtures/public/e1s-development-providers/generated-headers.json`,
+SHA256 `07724b361a15671a7a31d5f14daf11b4d892dc732d0f181cfd780c7223c97fbe`.
+Raw004 SHA256 is
+`fdb4d40a27ac4180cf0a90c755ed0c484261f6c619f1dfeffe115d7c5a5b7749`.
+All 315 physical regular nonempty 0444 headers, 32 exact full decoded native
+flag signatures and four exact MIG prerequisites were independently read and
+rehashed. Actual stdout proves 315 native unifdef invocations with 13 platform
+and 13 privacy flags (one public, 314 private), plus the separate genuine
+Firehose export `14be8d31…`. All 665 inputs stayed unchanged; all 31 commands
+passed resource checks, own/root reservations released and root observed zero
+survivors. The actual phase capsule is `pass-record-004/evidence.json`, SHA256
+`d9c31e9644b8cd31fcb76628cc6fe491230864592c3cdf3d8e8af3f370beee2a`.
+
+This qualifies only the observed native header phase. Remaining four genuine
+TUs and two archives require a separate source freeze and root allocation.
+Actual MD, CPU/cluster tuple/layout and archive contents remain required;
+provider ABI, full link/image, runtime and hardware are unqualified.
