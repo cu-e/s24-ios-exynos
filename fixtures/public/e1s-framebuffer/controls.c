@@ -78,9 +78,36 @@ static void init(int have){
 #endif
 }
 static int untouched(const unsigned char *p,size_t n){for(size_t i=0;i<n;i++)if(p[i]!=0x7b)return 0;return 1;}
+#ifdef E1S_FB_CONTRACT
+static uint64_t pixels_hash(const unsigned char *pixels,size_t width,size_t height,size_t stride){
+ uint64_t hash=1469598103934665603ULL;
+ for(size_t y=0;y<height;y++)for(size_t x=0;x<width*4;x++)hash=(hash^pixels[y*stride+x])*1099511628211ULL;
+ return hash;
+}
+static int tall_ui(void){
+ const size_t width=1080,height=2340,stride=4352,extent=stride*height,page=(size_t)sysconf(_SC_PAGESIZE),span=(extent+page-1)&~(page-1);
+ unsigned char *m=mmap(NULL,span+2*page,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
+ if(m==MAP_FAILED||mprotect(m,page,PROT_NONE)||mprotect(m+page+span,page,PROT_NONE))return 20;
+ unsigned char *pixels=m+page+span-extent;memset(m+page,0x7b,span);
+ fb_base=(uintptr_t)pixels;fb_size=extent;fb_w=width;fb_h=height;fb_stride=stride;flushes=0;
+ uint64_t before=pixels_hash(pixels,width,height,stride);init(1);uint64_t after=pixels_hash(pixels,width,height,stride);
+ if(!ui_ready||before==after)return 30;before=after;
+ struct ui_boot_info info={0};info.cmdline="bounded host framebuffer control";ui_set_info(&ui,&info);after=pixels_hash(pixels,width,height,stride);if(before==after)return 31;before=after;
+ ui_set_stage(&ui,UI_STAGE_FB,UI_OK);after=pixels_hash(pixels,width,height,stride);if(before==after)return 32;before=after;
+ ui_set_progress(&ui,73,"padded-stride progress glyphs");after=pixels_hash(pixels,width,height,stride);if(before==after)return 33;before=after;
+ ui_set_status(&ui,"visible bounded status glyphs",UI_TEXT_OK);after=pixels_hash(pixels,width,height,stride);if(before==after)return 34;before=after;
+ ui_fail(&ui,"visible bounded failure glyphs");after=pixels_hash(pixels,width,height,stride);if(before==after)return 35;
+ for(size_t y=0;y<height;y++)if(!untouched(pixels+y*stride+width*4,stride-width*4))return 36;
+ if(!untouched(m+page,(size_t)(pixels-(m+page))))return 37;
+ fb_flush();if(flushes!=1||flush_start!=(uintptr_t)pixels||flush_end!=(uintptr_t)pixels+extent)return 38;
+ if(munmap(m,span+2*page))return 21;
+ return 0;
+}
+#endif
 int main(int argc,char **argv){
  int legacy=argc==2&&!strcmp(argv[1],"--legacy"),checks=0;
  if(legacy){
+#ifndef E1S_FB_CONTRACT
   int cases[]={1,2,3,4,5,6,16};
   for(size_t i=0;i<sizeof cases/sizeof cases[0];i++){uint64_t b=0,z=0;uint32_t w=320,h=320,s=1280;if(find_guarded(cases[i],&b,&z,&w,&h,&s)!=1)return 3;checks++;}
   if(fb_base!=FB_BASE||find_guarded(36,&fb_base,&fb_size,&fb_w,&fb_h,&fb_stride)||fb_base!=FB_BASE)return 15;checks++;
@@ -89,6 +116,9 @@ int main(int argc,char **argv){
   unsigned char *backing=malloc(512);if(!backing)return 20;memset(backing,0x7b,512);fb_base=(uintptr_t)backing;fb_size=16;fb_w=fb_h=8;fb_stride=32;
   init(0);fb_flush();if(!ui_ready||untouched(backing+16,240))return 4;free(backing);
   puts("legacy actual invalid framebuffer acceptance and extent-blind/missing-metadata drawing reproduced");printf("controls=%d\n",checks+1);return 0;
+#else
+  return 2;
+#endif
  }
 #ifdef E1S_FB_CONTRACT
  for(int k=0;k<=36;k++){
@@ -110,6 +140,7 @@ int main(int argc,char **argv){
  memset(pixels,0x7b,extent);struct ui_fb invalid=ui;invalid.size_bytes=16;ui_begin(&invalid);ui_set_info(&invalid,&info);ui_set_stage(&invalid,1,1);ui_set_progress(&invalid,100,"none");ui_set_status(&invalid,"none",0);ui_fail(&invalid,"none");if(!untouched(pixels,extent))return 13;checks++;
  invalid=ui;invalid.width=UINT32_MAX;ui_set_progress(&invalid,100,"none");invalid=ui;invalid.base=(volatile uint32_t *)(UINTPTR_MAX-3);invalid.size_bytes=8;if(ui_fb_valid(&invalid)||!untouched(pixels,extent))return 14;checks++;
  if(munmap(m,2*page))return 21;
+ int tall=tall_ui();if(tall)return tall;checks+=9;
  printf("actual patched FDT/fullUI/loader-init controls PASS=%d\n",checks);return 0;
 #else
  return 2;

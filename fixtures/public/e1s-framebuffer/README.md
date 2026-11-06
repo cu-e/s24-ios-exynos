@@ -20,3 +20,5 @@ actual loader initialization/flush bodies verify headless no-write/no-flush and
 invalid-extent refusal. The host clean() stub records calls only; ARM cache/MMIO
 instructions and full loader_main are never executed. Physical mapping/cache
 preconditions and DPU behavior remain unmeasured.
+
+The corrected fixture also uses an actual1080x2340 renderer with32-byte row padding, leading/trailing PROT_NONE pages, prefix/row canaries and changed-pixel checks after all six UI entrypoints. This reaches glyph/stage/progress/failure coordinates clipped by the retained16x16 case.

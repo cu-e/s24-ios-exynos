@@ -46,13 +46,23 @@ by preparation; root must admit the exact frozen plan. No new executor exists.
 Use RSS-only supervision for sanitizer controls, not a small RLIMIT_AS. Existing
 host runtime archive/tool/input hashes are pinned in the plan. Keep all failures.
 
-Selected source-only preparation is artifacts/e1s-framebuffer/prepare-2/plan.json,
-SHA c8815dad67ba3a520befdbdc108292a701a87d2b7608c313a46839dbcf3347c4,
-with exactly six commands. prepare-1 remains unexecuted and superseded after an
-additional absent-node baseline/control case; neither plan has run a compiler.
-Read-only canonical57d comparisons match all eight donor source/header/font
-blobs (compatible-source-proof.json). Overlay check/apply on owned copies and
-exact post-overlay body hashes succeeded. Python syntax checks passed. Literal
-.patch context lines trigger Git whitespace diagnostics as patch text; source/
-fixture/procedure diff checking excludes that patch representation. No source
-whitespace fix or global Git policy alteration was introduced for those contexts.
+Root51 executed prepare-2 once: baseline compile and nine unsafe-behavior
+controls passed, then patched compilation failed because a legacy-only fixture
+branch referenced the removed FB_BASE macro. Commands after that failure were
+not run. Original12047e0 physical source, prepare-2 and raw9f165f4a remain
+unchanged; failure-001.json binds the actual failure. A separate fix1 worktree
+preprocesses the legacy branch and adds a1080x2340 padded-stride buffer between
+PROT_NONE guard pages. It checks changed logical pixels after actual init,
+info, stage, progress, status and failure calls, unchanged row padding/prefix,
+and the exact flush extent. The original16x16 controls still exercise clipped
+and invalid descriptors. No additional algorithm implementation is substituted.
+
+Selected prospective retry is artifacts/e1s-framebuffer/prepare-3/plan.json,
+SHA136996ea5ad15c387c50db7e1585854d81b7fcb17ca4b4d4ddfb7ca544fa86e1,
+with exactly six commands. STR005FB-002 requires new root admission; no author
+compiler/control execution occurred. The display overlay and RAM parent bytes
+are unchanged. Read-only canonical57d comparisons match all eight donor source/
+header/font blobs (compatible-source-proof.json). Overlay check/apply on owned
+copies and exact post-overlay body hashes succeeded. Literal.patch context
+lines trigger Git whitespace diagnostics as patch text; source/fixture/procedure
+diff checking excludes that patch representation. No global Git policy changed.
