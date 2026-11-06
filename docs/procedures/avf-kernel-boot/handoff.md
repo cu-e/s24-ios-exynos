@@ -1,5 +1,55 @@
 # VM-040 handoff
 
+## Final selected-consumer correction
+
+The final continuation uses `worktrees/vm-040-consumer-20261106`, branch
+`team/vm-040-consumer-20261106`, based on first-correction metadata a2ed73a.
+Both prior physical source worktrees and all capsules remain unchanged. REV-037
+preserved its original and first-correction findings separately; its first
+process recheck was honestly deferred before any spawn due host PSI. That
+deferral was not a producer process failure and was not bypassed here.
+
+The reviewer independently confirmed a residual: root `/` also satisfies a
+one-slash test, although the shim scans root children. A canonical compatible
+list containing both PL011 and ns16550a also selects the shim's priority8250
+path, so merely finding the PL011 token is insufficient. Those cases remain
+in reviewer `runs/correction-fdt-residual-1/report.json`.
+
+Final operative source commit is
+`c8bd677b3280cf3610d2d1aa88dd6386a4e44a86`, collector SHA256
+`233da39b23ea8986e83db6bfdceb8f23c52b0c6ac044f7f1d5f30d451e145c06`.
+It explicitly excludes root from memory-child selection. All compatible lists
+used for selected-consumer checks must terminate; canonical PL011 and GIC
+consumers must be unique. Any exact ns16550a token across nodes rejects the
+selected PL011 route, preserving its real global priority. This is a narrow
+conservative selected-route policy, not a general shim/device-tree emulator.
+No additional parser redesign or image/runtime admission was added.
+
+VMBOOTCOLLECT-004 was prospectively registered. Nine focused pure-FDT cases
+pass: valid child/root-plus-child/exact-token-list positives, plus root-only,
+canonical mixed8250, other-node8250, competing PL011/GIC and unterminated-list
+rejections. No subprocess/process admission was replayed by this producer under
+the reported PSI condition. Current-image VmHWM was29,792KiB under256MiB address
+space. Raw capsule
+`artifacts/avf-kernel-boot/consumer-c8bd677-1/evidence.json` SHA256 is
+`0da4671e19d14bd1df6f853a39425e3aa95c14996ff7bb51783a5530ba0a9d1e`;
+its report SHA256 is
+`3aaad760fe516f7d7e4441cdf75d160e8d5b1de34fbb77de5e6041a56b07ee0d`.
+Maintained copy is `consumer-correction-evidence.json`; canonical evidence
+schema passes. `consumer-validation-c8bd677-1/report.json` verifies unchanged
+original82dc source/raw capsule and first-correction341d source/two capsules.
+
+The independent reviewer subsequently reported PASS29 checks on this exact
+c8bd677/source233da39b freeze, including replayed original/residual FDT cases,
+and actual Python late-expiry/revocation/floor-drop/Stop-during-final-lease
+zero-spawn cases. Its valid Python case spawned exactly once and exited
+naturally without signals/survivors; external resource admission passed.
+The reviewer is binding its final independent capsule. No additional producer
+source change or control run is needed. This remains source/host-control
+acceptance only: no actual image, QEMU FDT, XNU, PID1 or guest result is claimed.
+Task closure still requires accepted integrator publication/common checks and
+explicit original-owner completion authorization.
+
 ## REV-037 correction continuation
 
 The original physical `vm-040-eh-20261106` source/four commits/capsules remain

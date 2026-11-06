@@ -6,6 +6,10 @@ The original19 passing host tests did not detect a pre-spawn lease window or
 invalid source predicates in the authored FDT. See `lease-regression-002.md`
 and `fdt-regression-003.md` for the prospective focused corrections. A corrected
 authored fixture is source-valid host data, not actual QEMU FDT qualification.
+The final root-child/consumer-selection follow-up is separately frozen in
+`worktrees/vm-040-consumer-20261106`; see `consumer-regression-004.md` and the
+leading final-correction section of `handoff.md`. Both earlier physical source
+and evidence freezes remain unchanged.
 
 Owner `codex-guest-collector-20261106-eh`, branch
 `team/vm-040-eh-20261106`, worktree `worktrees/vm-040-eh-20261106`, base
