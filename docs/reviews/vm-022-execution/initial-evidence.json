@@ -1,0 +1,372 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "fail",
+  "task": "REV-039",
+  "owner": "codex-review-link-executor-20261106-er",
+  "experiment": "REVTAIL-001",
+  "recorded_at": "2026-11-06T05:50:51.243169+00:00",
+  "summary": "Frozen four-tail executor review has two blockers: no caller SIGTERM cleanup boundary and unbounded transformed constructor read.78 of80 independent checks pass. No production target tool or guest executed.",
+  "author_commit": "0d68b46a4b7dd3f2de16962fdbb3806843751d82",
+  "source_sha256": "67efebaa055207258235801b9a8b9f85c9271ea68786d443deb99d8a9001bf0f",
+  "plan_sha256": "d67ab9e647c7f468a1cd8b789884c5f97e3ddaa3d0a26e0831e24af66e65d499",
+  "commands": [
+    {
+      "argv": [
+        "timeout",
+        "--signal=INT",
+        "--kill-after=5",
+        "120s",
+        "python3",
+        "-s",
+        "docs/reviews/vm-022-execution/review.py",
+        "--out",
+        "artifacts/rev-vm022-execution/controls-1"
+      ],
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm022-execution-er-20261106",
+      "environment": {
+        "LC_ALL": "C",
+        "PYTHONUTF8": "1",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "exit_code": 1,
+      "elapsed_seconds": 4.672889077977743
+    }
+  ],
+  "current_image_memory": {
+    "VmHWM_bytes": 32550912,
+    "VmRSS_bytes": 31674368
+  },
+  "checks": 80,
+  "findings": [
+    {
+      "name": "constructor rejects oversized transformed file before read",
+      "pass": false,
+      "attempted_unbounded_read_sizes": [
+        269484032
+      ],
+      "observer": "Read observer prevents allocation; real sparse file and actual frozen verifier"
+    },
+    {
+      "name": "SIGTERM controller cleanup leaves no owned child",
+      "pass": false,
+      "controller_exit": -15,
+      "owned_child_identity": {
+        "pid": 3542280,
+        "start_ticks": 59209139
+      },
+      "before_reviewer_cleanup": {
+        "recorded_at": "2026-11-06T05:49:38.318657+00:00",
+        "MemAvailable_bytes": 17344630784,
+        "SwapCached_bytes": 101040128,
+        "SwapTotal_bytes": 30064762880,
+        "SwapFree_bytes": 17746874368,
+        "pressure": {
+          "some": {
+            "avg10": 2.28,
+            "avg60": 0.81,
+            "avg300": 0.53,
+            "total": 1395744811.0
+          },
+          "full": {
+            "avg10": 1.81,
+            "avg60": 0.67,
+            "avg300": 0.42,
+            "total": 1116141602.0
+          }
+        },
+        "owned_tree_rss_bytes": 11595776,
+        "owned_processes": [
+          {
+            "pid": 3542280,
+            "state": "S",
+            "pgrp": 3542280
+          }
+        ]
+      }
+    }
+  ],
+  "artifacts": [
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/changed-plan.json",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGINT/child.json",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGINT/child.samples.jsonl",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGINT/child.stderr.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGINT/child.stdout.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGINT/controller-exception.json",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGINT/stderr.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGINT/stdout.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGTERM/child.json",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGTERM/child.samples.jsonl",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGTERM/child.stderr.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGTERM/child.stdout.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGTERM/stderr.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGTERM/stdout.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/converted.bin",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/input-hashes.json",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/oversized-transformed.bin",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-deadline-groups/child.samples.jsonl",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-deadline-groups/child.stderr.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-deadline-groups/child.stdout.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-deadline-groups/record.json",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-nonzero/child.samples.jsonl",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-nonzero/child.stderr.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-nonzero/child.stdout.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-nonzero/record.json",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-success/child.samples.jsonl",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-success/child.stderr.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-success/child.stdout.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-success/record.json",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-write-escape/child.samples.jsonl",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-write-escape/child.stderr.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-write-escape/child.stdout.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-write-escape/record.json",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/raw.bin",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/report.json",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/review.stderr.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/review.stdout.txt",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/space.d",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/synthetic-main/artifacts/review-allocation.budget.lock",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/synthetic-main/artifacts/review-allocation.json",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/synthetic-main/artifacts/review-allocation.reservations.json",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/synthetic-main/artifacts/review-plan.json",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/synthetic-main/artifacts/team-coordination/20261106-team/resource-queue.json",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/truncated.bin",
+    "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/wrong-cpu.bin"
+  ],
+  "artifact_hashes": [
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/changed-plan.json",
+      "sha256": "e473874bf6376da8dee5b3665807987a8e467d9d098d4d7f6dd1eb4aac2cffcf",
+      "size": 69185
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGINT/child.json",
+      "sha256": "85dd920a0a32e223417515c780550858123ff7c7717ff393290333ab2e523fb6",
+      "size": 7
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGINT/child.samples.jsonl",
+      "sha256": "1afd38eafbe78fe3942d973812f49022a5ab56a43960ff9c387478da5924698a",
+      "size": 1051
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGINT/child.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGINT/child.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGINT/controller-exception.json",
+      "sha256": "805d664a6cfe96fd7c6db2693e112dc9e118c705c9c2b92a3eaa5e8b6b8d5cd8",
+      "size": 41
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGINT/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGINT/stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGTERM/child.json",
+      "sha256": "78c915012ceda96ce73519901dab165e070f9ad3488a97abeb13a1934b769540",
+      "size": 7
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGTERM/child.samples.jsonl",
+      "sha256": "f8b651c3161d0e057d1fd41120bb641504e0fa9b57db2959fbd134d5092ce487",
+      "size": 1051
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGTERM/child.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGTERM/child.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGTERM/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/controller-SIGTERM/stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/converted.bin",
+      "sha256": "cc2c6b01e0a7778ed46918fe0bae856e8339aa682028160e85cb5158c970bcba",
+      "size": 280
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/input-hashes.json",
+      "sha256": "025de5d13b2e38e5262dc9d21460fdeeff0d426a3d9f980554abad8d9f9f6b6d",
+      "size": 5537
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/oversized-transformed.bin",
+      "sha256": "053eadfdec682cf16f3f8704c7609c57868dd75765e08dc5a7491f5d06bcb74d",
+      "size": 269484032
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-deadline-groups/child.samples.jsonl",
+      "sha256": "3e5f84b7bc5f94653a36f2493a624c524000f1f12057f64e2d3e7fa02e8753bc",
+      "size": 3399
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-deadline-groups/child.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-deadline-groups/child.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-deadline-groups/record.json",
+      "sha256": "8bd947e9501787f1d1eba638d9a5ee0c697965c9fd8b2bcb3ecf2d0cf7c25d5a",
+      "size": 2317
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-nonzero/child.samples.jsonl",
+      "sha256": "228c48591391b41e8107c4cc1a3ad5972c59aa37e7e6e59e92fde37178cc75bb",
+      "size": 1042
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-nonzero/child.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-nonzero/child.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-nonzero/record.json",
+      "sha256": "8977434ade6c30b283392df9b48b89cab96353fccf66212d0ad079f556ebb7b1",
+      "size": 2133
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-success/child.samples.jsonl",
+      "sha256": "fdeef27c4db8c837a260ba20f1aaa44e616111d1821a1630b922c985b70dd14f",
+      "size": 1042
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-success/child.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-success/child.stdout.txt",
+      "sha256": "cd52fbab864143f70907faa1f5b50c3df8243bbb48a264640136baf163d61ef8",
+      "size": 22
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-success/record.json",
+      "sha256": "bedca439c33fe7a8a105f4b586d0ee8bd1e52aeb7d6b3ba2c976db83397eecfd",
+      "size": 2143
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-write-escape/child.samples.jsonl",
+      "sha256": "c5cb5d91a2fa18a7ddf7d0e2c51b2dc6f8ccd55b810a17777c68d3df0d5f2e49",
+      "size": 2092
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-write-escape/child.stderr.txt",
+      "sha256": "80447bac4d748ee6ac3a45030c0bf79f21c32bab44dea8b2102bd93328253b31",
+      "size": 1080
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-write-escape/child.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/python-write-escape/record.json",
+      "sha256": "55b1439aa03ae713d752bac26eb0949971b350d54b2488a8823871252a8d3359",
+      "size": 2321
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/raw.bin",
+      "sha256": "3091d0c4cbbacec587529f63d898f2a4b5746210f8e24df0bd5e0229590f42c3",
+      "size": 280
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/report.json",
+      "sha256": "b7414b0085b3566da14133b01e634eda1dfde4de2c17d734b7cc90f547b6b96d",
+      "size": 28121
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/review.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/review.stdout.txt",
+      "sha256": "54a21217ad17fdbab4303c07db56227ec0df45c2c1641f2e9d43a1b4ebf70a6b",
+      "size": 765
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/space.d",
+      "sha256": "8f5e5f20cdfbecbb8fda4fd97b033c04105c57c334516bd94b68e560d2a22e92",
+      "size": 43
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/synthetic-main/artifacts/review-allocation.budget.lock",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/synthetic-main/artifacts/review-allocation.json",
+      "sha256": "b1b1ac20bcf6693643f2912f5289b892ee221a9898eac0aecfef269edac3508c",
+      "size": 915
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/synthetic-main/artifacts/review-allocation.reservations.json",
+      "sha256": "6f42b237e08fbde142dbfeac1204d7175fea482f943703c20f4d3445bb75c37a",
+      "size": 239
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/synthetic-main/artifacts/review-plan.json",
+      "sha256": "7d3b8db176e51e94a96a86cdf7db12b574f1c9c63016ecb1142c3432bbe24efb",
+      "size": 65
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/synthetic-main/artifacts/team-coordination/20261106-team/resource-queue.json",
+      "sha256": "612697304cdbdcf354bec60e1f8bd529fff9c6474ab90fca5295e0b0032fc3a0",
+      "size": 771
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/truncated.bin",
+      "sha256": "dae101685365450470fc3704529fc83035e43c5316013ebfd1fc198e6b302d44",
+      "size": 279
+    },
+    {
+      "path": "worktrees/rev-vm022-execution-er-20261106/artifacts/rev-vm022-execution/controls-1/wrong-cpu.bin",
+      "sha256": "3cc8f06007ef9a101342d7b1b84d3ff1586f7f2051be0dc8885d2a4a38bb6a47",
+      "size": 280
+    }
+  ],
+  "limitations": [
+    "Synthetic source/object/allocation fixtures are parser and policy controls, not kernel qualification.",
+    "Cancellation control ran actual accepted AF193 run_child in a Python-only controller with default signal policy; frozen caller source has no overriding handler. This is an API/caller-boundary counterexample, not measured target production.",
+    "Read observer prevented allocation of a real sparse257MiB transformed fixture.",
+    "No actual tail phase, archive, main link, provider admission, image, XNUP or QEMU was executed.",
+    "Common API reuse does not itself supply a root production allocation.",
+    "The original frozen source and all prior author evidence remain unchanged."
+  ]
+}
