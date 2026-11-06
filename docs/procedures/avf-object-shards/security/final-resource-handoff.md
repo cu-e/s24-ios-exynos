@@ -62,3 +62,9 @@ Root requested recording that actual refusal FAIL, then a distinct
 Both CLI operations succeeded. Source plan ced65ff9 and all selected keys/recipes
 are reused unchanged by explicit root instruction; no replan or worker retry.
 Hold for a separate corrected root31 grant and its exact argv.
+
+Root31 was subsequently granted and executed once under actual BUILD002.
+All 23 security objects passed with real compiler dependencies, empty current
+cleanup and own reservation complete. See `final-resource-build-handoff.md` and
+`final-resource-build-evidence.json` for immutable authorities, raw/conventional
+capsule hashes and the independent CN review gate. Grant30 history stays separate.
