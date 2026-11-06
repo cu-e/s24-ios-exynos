@@ -228,7 +228,9 @@ def execute(common, plan, source_plan, source_sha, approval_path, approval_sha):
     report = dict(kind='host-test', origin='local-host', outcome='fail', recorded_at=common.stamp(), task=plan['task'], owner=plan['owner'], experiment=plan['experiment'], source_plan_sha256=source_sha, executor_sha256=digest(__file__), commands=[], objects=[], full_kernel_qualified=False, hardware_execution=False)
     with core.owned_cancellation() as cancel:
         try:
-            budget.reserve(); reserved = True
+            with cancel.cleanup():
+                budget.reserve(); reserved = True
+            cancel.check()
             ownership(common, manifest, True); verify(plan)
             require(not out.exists() and not out.is_symlink(), 'Fresh native output required; no resume')
             out.mkdir(parents=True, exist_ok=False)
