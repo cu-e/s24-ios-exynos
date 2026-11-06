@@ -55,6 +55,9 @@ def build(root, identifier):
               "source_patch": {"path": "patches/e1s-boot/0001-loader-memory-validation.patch",
                                "source_task": "STR-002", "source_commit": "6a1c05d4119acd5146d56d7fc9070742584140cd",
                                "expected_sha256": "23b31c44ed9dba9c2da2e5b56ccbe97cd67fa41efff3ec032130eabca6718ae1", "applied": False},
+              "display_source_patch": {"path": "patches/e1s-display/0001-loader-framebuffer-contract.patch",
+                                       "source_task": "STR-005", "source_commit": "12047e095c97170036b7b8229f52ca435c880538",
+                                       "expected_sha256": "0689fc94383efec7c83df44629df3b0e3e456cce48b08008e2226bc5189570d9", "applied": False},
               "kernel_build": "not-run; SDK/dependencies are a separate prerequisite"}
     try:
         version = run(["zig", "version"], root, commands)
@@ -74,6 +77,17 @@ def build(root, identifier):
         run(["git", "apply", "--check", snapshot], work, commands)
         run(["git", "apply", snapshot], work, commands)
         patch["applied"] = True
+        display_patch = report["display_source_patch"]
+        display_bytes = (root / display_patch["path"]).read_bytes()
+        display_patch["sha256"] = hashlib.sha256(display_bytes).hexdigest()
+        if display_patch["sha256"] != display_patch["expected_sha256"]:
+            raise RuntimeError("Accepted STR-005 framebuffer contract patch identity changed")
+        display_snapshot = directory / "loader-framebuffer-contract.patch"
+        display_snapshot.write_bytes(display_bytes)
+        display_patch.update(snapshot=str(display_snapshot.relative_to(root)), applied_to=str(work.relative_to(root)))
+        run(["git", "apply", "--check", display_snapshot], work, commands)
+        run(["git", "apply", display_snapshot], work, commands)
+        display_patch["applied"] = True
         products = []
         for target, files, linker in [("probe", ["shim/e1s/start.S", "shim/e1s/probe.c"], "shim/e1s/loader.ld"),
                                       ("loader", ["shim/e1s-xnu/" + f for f in ["start.S", "loader.c", "ui.c", "adt_patch.c", "gic.c", "fdt.c"]], "shim/e1s-xnu/loader.ld")]:
