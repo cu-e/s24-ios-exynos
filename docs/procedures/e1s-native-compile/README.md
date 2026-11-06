@@ -84,3 +84,14 @@ metadata from namespace checking. Every plan carries those exact pins; pre/post
 checks reject changes or new metadata/shadows. The5111 source manifest,1334
 shared files and native flags remain unchanged. Physical initial/FIX1 callers,
 raw source-plan exports and both failed/inconclusive capsules are retained.
+
+Final preregistered NATIVECALLER-SOURCE-003 exported all eight complete native
+partition plans once at fixed caller2676: osfmk160+159, BSD170+170+168,
+iokit102, libkern77 and support36. All eight CLI exits were zero, covering1042
+unique original-order IDs and all component configuration projections; all
+prospective output directories remain absent. The root-approved extension to
+all partitions checked the include namespace concern beyond representative
+C/MIG, generated C++ and support plans. Runtime/cancellation/object/MD behavior
+was not executed. `evidence.json` and the artifact `source-plans-005` summary
+bind exact source/plan/raw bytes and retain all prior inconclusive/fail evidence.
+Independent final review, publication/common and root acceptance remain pending.
