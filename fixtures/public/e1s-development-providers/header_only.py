@@ -6,7 +6,6 @@ import importlib.util
 import json
 from pathlib import Path
 import shlex
-import signal
 import stat
 import sys
 import time
@@ -93,43 +92,51 @@ def main():
                   archive_executed=False, layout_executed=False, resource_profile='project-budget-v1')
     started, reserved = time.monotonic(), False
     with core.owned_cancellation() as cancel:
-        previous_alarm = signal.signal(signal.SIGALRM, cancel.handle)
-        signal.setitimer(signal.ITIMER_REAL, plan['whole_seconds'])
+        def remaining():
+            cancel.check()
+            seconds = plan['whole_seconds'] - (time.monotonic() - started)
+            require(seconds > 0, 'Whole header deadline')
+            return seconds
+
         try:
+            remaining()
             args.out.mkdir(parents=True, exist_ok=False)
             for path, expected in {**source['input_sha256'], **PINS}.items():
-                cancel.check()
+                remaining()
                 require(digest(path) == expected, 'Changed exact input: ' + path)
+            remaining()
             with cancel.cleanup():
                 budget.reserve()
                 reserved = True
             for path in plan['setup_owned_directories']:
+                remaining()
                 path = common.canonical_output_path(path)
                 require(path.is_relative_to(args.out) and 'unavailable-sdk' not in path.parts,
                         'Setup escaped owned header route or fabricated SDK')
                 path.mkdir(parents=True, exist_ok=True)
             for copy in plan['setup_exact_copies']:
-                cancel.check()
+                remaining()
                 require(digest(copy['source']) == copy['sha256'], 'Changed genuine generated prerequisite')
                 dest = common.canonical_output_path(copy['destination'])
                 require(dest.is_relative_to(args.out) and not dest.exists(), 'Owned fresh prerequisite required')
                 dest.write_bytes(Path(copy['source']).read_bytes())
+                remaining()
                 require(digest(dest) == copy['sha256'], 'Prerequisite copy differs')
                 dest.chmod(0o444)
+            remaining()
             supervise = common.supervisor(MAIN)
             for index, row in enumerate(steps):
-                cancel.check()
-                remaining = plan['whole_seconds'] - (time.monotonic() - started)
-                require(remaining > 0, 'Whole header deadline')
+                seconds = remaining()
                 record = core.run_owned_child(common, cancel, row['argv'], Path(row['cwd']), args.out,
                     'header-' + str(index).zfill(3), supervise,
-                    timeout=min(row['timeout_seconds'], remaining), admit=True, budget=budget)
+                    timeout=min(row['timeout_seconds'], seconds), admit=True, budget=budget)
                 record['native_accepted_exit_codes'] = row.get('accepted_exit_codes', [0])
                 report['commands'].append(record)
                 require(record.get('exit_code') in row.get('accepted_exit_codes', [0])
                         and not record.get('stop_reason') and record.get('resource_qualification') == 'pass',
                         'Actual header operation failed: ' + row['id'])
             for row in source['header_expected_rows']:
+                remaining()
                 path = common.canonical_output_path(row['output_template'])
                 require(path.is_relative_to(args.out), 'Header escaped output')
                 if not path.exists():
@@ -142,15 +149,19 @@ def main():
                     'mode': '0444', 'status': 'actual-installed', 'logical_header': row['logical_header'],
                     'visibility': row['visibility'], 'source': row['source'], 'native_kind': row['native_kind']})
             for guard in plan['native_flag_files']:
+                remaining()
                 path = common.canonical_output_path(guard['path'])
                 require(path.is_relative_to(args.out), 'Native flag guard escaped owned output')
                 require(shlex.split(path.read_text()) == guard['expected_argv'], 'Wrong actual native filter flags')
                 report['native_filter_flags'][str(path)] = digest(path)
+            remaining()
             export = common.canonical_output_path(plan['firehose_export'])
             require(export.is_file() and not export.is_symlink() and export.stat().st_size > 0, 'Actual Firehose export missing')
             report['firehose_export'] = {'path': str(export), 'sha256': digest(export), 'bytes': export.stat().st_size}
             for path, expected in source['input_sha256'].items():
+                remaining()
                 require(digest(path) == expected, 'Input changed during headers: ' + path)
+            remaining()
             report['outcome'] = 'pass'
         except Exception as error:
             if isinstance(error, core.OwnedCancellation) and getattr(error, 'command', None) is not None:
@@ -158,8 +169,6 @@ def main():
             report['error'] = repr(error)
         finally:
             with cancel.cleanup():
-                signal.setitimer(signal.ITIMER_REAL, 0)
-                signal.signal(signal.SIGALRM, previous_alarm)
                 try:
                     budget.release() if reserved or budget.registered else None
                     report['own_reservation_released'] = not budget.registered

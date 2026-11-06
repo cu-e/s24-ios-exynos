@@ -5,13 +5,17 @@ Original SR18 owner and worktree remain unchanged. Experiment
 and one Firehose header export from the corrected provider plan003. All first 31
 vectors are identical to independently source-backed plan002; only the later
 Firehose compile has the narrow two-token warning correction. The original
-f298410 commit, plan002 and first header-only draft remain retained.
+f298410 commit, plan002 and prior header-only drafts remain retained.
+Independent review found an alarm ownership/cleanup defect in adapter
+`90e31681…` (commit `b35a666`); plan002 and that source revision remain
+unchanged. This source-only correction removes only the custom alarm and adds
+monotonic work-boundary checks; no target operation ran.
 
 The exact header plan is
-`artifacts/e1s-development-providers/header-plan-002/execution-plan.json`, SHA256
-`2d339bd4eb62b819be9c151df005f4f0d79753ed83da916692edd922a4361d8b`.
+`artifacts/e1s-development-providers/header-plan-003/execution-plan.json`, SHA256
+`82b3e9563ea5a7fd0e0c60835a96eddea7b2e11ba18e488ae9efd47c00bf9225`.
 Adapter `fixtures/public/e1s-development-providers/header_only.py` has SHA256
-`90e31681734e0f2d000ce12f52536829b869262e77d18c2bef90fb1cfecd3608`.
+`dfab7c3daf099d0da07af84c42a983fb57dd41de2ae061d96921516292b447a7`.
 This is a source freeze: no header tool was executed, and `execute-001` is absent.
 
 The adapter uses existing 9929 `project_approval`, ProjectBudget, run_child and
@@ -21,7 +25,11 @@ engine or budget broker. Root approval must bind this exact adapter/header
 plan, original owner, task, experiment, `providers-headers` slot and fresh output.
 One serial slot with 512MiB ceiling, the existing 4GiB memory floor and 600s whole
 deadline are declared; each command retains at most 120s and the remaining whole
-deadline. SIGALRM feeds the existing cancellation state in the same process.
+deadline. Monotonic checks enforce the 600s deadline at each hash, copy,
+directory, product and command boundary. The adapter installs no alarm or
+timer. Existing shared bounded locks retain their own alarm ownership. Finite
+reservation release and evidence cleanup may finish after the work deadline;
+the existing cancellation handlers remain installed through that cleanup.
 No grant, allocation or permission is inferred from these declarations.
 
 Setup is restricted to canonical owned header directories and exactly four
@@ -59,7 +67,7 @@ Future invocation requires explicit root-supplied approval path and digest:
 ```sh
 LC_ALL=C PYTHONUTF8=1 PYTHONNOUSERSITE=1 python3 -s \
   fixtures/public/e1s-development-providers/header_only.py \
-  --source-plan /home/egor/dev/pet/s24-ios-exynos/worktrees/str-018-e1s-development-providers-20261106/artifacts/e1s-development-providers/header-plan-002/execution-plan.json \
-  --source-plan-sha256 2d339bd4eb62b819be9c151df005f4f0d79753ed83da916692edd922a4361d8b \
+  --source-plan /home/egor/dev/pet/s24-ios-exynos/worktrees/str-018-e1s-development-providers-20261106/artifacts/e1s-development-providers/header-plan-003/execution-plan.json \
+  --source-plan-sha256 82b3e9563ea5a7fd0e0c60835a96eddea7b2e11ba18e488ae9efd47c00bf9225 \
   --approval ROOT_APPROVAL_PATH --approval-sha256 ROOT_APPROVAL_SHA256
 ```
