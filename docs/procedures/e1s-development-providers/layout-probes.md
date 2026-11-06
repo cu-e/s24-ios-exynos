@@ -1,16 +1,16 @@
 # Separate auxiliary native layout measurements: source plan only
 
 Original STR018 owner remains `codex-e1s-development-providers-20261106-sr18`.
-`layout-plan.json` binds `layout-plan-002/execution-plan.json` SHA256
-`c2ca4c4ad198b8edc2e231aa8949fee6c2afb4ee401c86e0934496fb3e522f10`
+`layout-plan.json` binds `layout-plan-003/execution-plan.json` SHA256
+`931a7f8bde90b9c348aaa1a7ab6f41abcb10106356d13b4e3e4d21074d35555d`
 and source capsule SHA256
-`3ced912675c14ace9e350027e6e1c2e22bbf3690c07fae0539133f859cdf6d5a`.
+`14b10c1923210888596153d259ee76b2b917c11c1f6e8bd5ac1b356304905d1e`.
 Prospective experiment `E1SPROVIDERLAYOUT-001` is separate from ROOT104 production
 and ROOT111 tool reads. Fresh `layout-probe-001` is absent. No compiler,
 preprocessor, layout probe or target tool has run for this source preparation.
 
-There are exactly two tiny const-only TUs, `layout-provider.c` and
-`layout-consumer.c`. They include genuine shared Firehose headers in the
+There are exactly two tiny const-only TUs in the dedicated two-file
+`layout-source` child: `layout-provider.c` and `layout-consumer.c`. They include genuine shared Firehose headers in the
 provider/native-consumer spelling and prerequisite order, plus genuine selected
 board and mach_assert headers. Provider KERNEL-local switches come from the
 actual source; no layout/type/value fallback is defined. Both arrays use a
@@ -33,8 +33,18 @@ vector. They do not enter the provider vector. Delta source evidence SHA256 is
 
 Existing ROOT104 native-BSD72files and current consumer73private projections
 are fixed read-only inputs; no header/config/MIG/namespace regeneration or fake
-SDK is proposed. The source packet pins7410 inputs and a prospective7418-entry
-MD identity catalog from accepted namespace/producer inputs. This is not actual
+SDK is proposed. The source packet uses the complete7661-entry input/MD identity index,
+including both literal cwd inventories and the dedicated two-file source parent.
+The exact accepted common9929 namespace API ran as source-only preparation,
+binding3274 actual files/16 roots, canonical namespace digest
+`863ae37054150b8822ca532226f71abcfe40f2745e7625187856a8f901efe15c`.
+The namespace JSON SHA256 is
+`2dbf18ab6df80553a66385de1e7025596651caacb08543dfc6c0af847c7283ed`.
+All248 physical donor-root entries are pinned:212 genuine tracked files checked
+against their existing canonical Gitblob identities and36 real .git entries
+limited to non-source namespace inventory authority. Untracked source shadows,
+symlink additions or any namespace changes fail closed. Metadata descriptors
+stay outside the scanned source child, avoiding self-referential plan hashes. This is not actual
 probe dependency closure: each later actual MD must name the exact TU and
 object and every transitive path/hash must be qualified. Unknown/changed input
 fails closed. Existing actual ROOT104315headers/4objects/2archives and ROOT111
@@ -70,3 +80,11 @@ image, runtime, hardware or iOS. No device or QEMU operation is proposed.
 Prior source plan0011b6aae04 and capsule51491ece remain preserved. Plan002
 changes only the MACH_ASSERT comparison policy; both TUs, both commands,
 contexts, pins, record columns and resource bounds are unchanged.
+
+Plan003 preserves both prior plans and the old TUs unchanged. It copies identical
+TU bytes into the dedicated `layout-source` directory, changes only those two
+source operands, and adds complete namespace/index bindings. Source-move delta
+SHA256 `402d6e06f0806dbb18a7a11368ab04b1b1336dcc82e4bbc958b9af554b0952a3`
+composes with the earlier three-position recipe delta; source spelling changes
+introduce no headers, flags or cwd changes. No common compiler, preprocessor,
+ELF-loader or target control ran during namespace preparation.
