@@ -1,0 +1,502 @@
+{
+  "kind": "host-test",
+  "outcome": "pass",
+  "argv": [
+    "/usr/bin/python3",
+    "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/guard-control.py"
+  ],
+  "source_sha256": "fe093f7c62affab911f96b3243eef28c419ddcb8180fbd74d58fc9a7420c70df",
+  "checks": [
+    {
+      "name": "exact corrected helper",
+      "pass": true
+    },
+    {
+      "name": "real PID/start/current RSS and swap observed",
+      "pass": true
+    },
+    {
+      "name": "live queue revocation still rejects",
+      "pass": true,
+      "error": "ValueError('Root resource queue does not hold this exact allocation')"
+    },
+    {
+      "name": "live queue symlink still rejects",
+      "pass": true,
+      "error": "ValueError('Output/worktree ancestry contains a symlink')"
+    },
+    {
+      "name": "fresh known-owned status read failure propagates",
+      "pass": true,
+      "error": "PermissionError('controlled known-owned status read error')"
+    },
+    {
+      "name": "deleted real cwd returns unknown while preserving PID/start",
+      "pass": true
+    },
+    {
+      "name": "actual-final-lock-timeout fails resource qualification with genuine exit/logs retained",
+      "pass": true,
+      "final_error": "ValueError('Project budget lock acquisition timed out')",
+      "final_resource_error": null
+    },
+    {
+      "name": "synthetic-final-violation fails resource qualification with genuine exit/logs retained",
+      "pass": true,
+      "final_error": null,
+      "final_resource_error": "Final project sample violates admitted resource limits"
+    },
+    {
+      "name": "synthetic-final-global-rss fails resource qualification with genuine exit/logs retained",
+      "pass": true,
+      "final_error": null,
+      "final_resource_error": "Final project sample violates admitted resource limits"
+    }
+  ],
+  "commands": [
+    {
+      "scenario": "actual-final-lock-timeout",
+      "record": {
+        "argv": [
+          "/usr/bin/python3",
+          "-c",
+          "print(\"genuine tiny child completed\")"
+        ],
+        "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/runtime/guard-projects/actual-final-lock-timeout",
+        "started_at": "2026-11-06T06:00:46.062223+00:00",
+        "timeout_seconds": 3,
+        "rss_budget_bytes": 536870912,
+        "admission": {
+          "admitted": true,
+          "not_compiler": true,
+          "project_before": {
+            "recorded_at": "2026-11-06T06:00:46.059071+00:00",
+            "project_rss_bytes": 27582464,
+            "violations": [],
+            "light_rss_bytes": 0,
+            "project_processes": [
+              {
+                "pid": 3573487,
+                "start_ticks": 59275887,
+                "ppid": 3572633,
+                "session": 3572614,
+                "state": "R",
+                "rss_bytes": 27582464,
+                "swap_bytes": 0,
+                "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106",
+                "executable": "python3.14"
+              }
+            ],
+            "project_swap_bytes": 0,
+            "workloads": [
+              {
+                "task": "REVIEW-BOUNDARY",
+                "rss_bytes": 27582464,
+                "processes": [
+                  {
+                    "pid": 3573487,
+                    "start_ticks": 59275887,
+                    "ppid": 3572633,
+                    "session": 3572614,
+                    "state": "R",
+                    "rss_bytes": 27582464,
+                    "swap_bytes": 0,
+                    "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106",
+                    "executable": "python3.14"
+                  }
+                ]
+              }
+            ],
+            "MemAvailable_bytes": 17092608000,
+            "SwapCached_bytes": 97419264,
+            "SwapTotal_bytes": 30064762880,
+            "SwapFree_bytes": 16470286336,
+            "pswpin": 48639619,
+            "pswpout": 85451041
+          }
+        },
+        "environment": {
+          "PATH": "/usr/bin:/bin",
+          "HOME": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/runtime/guard-projects/actual-final-lock-timeout/artifacts/execute/home",
+          "TMPDIR": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/runtime/guard-projects/actual-final-lock-timeout/artifacts/execute/tmp",
+          "TMP": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/runtime/guard-projects/actual-final-lock-timeout/artifacts/execute/tmp",
+          "TEMP": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/runtime/guard-projects/actual-final-lock-timeout/artifacts/execute/tmp",
+          "LC_ALL": "C",
+          "LANG": "C",
+          "GIT_NO_LAZY_FETCH": "1",
+          "GIT_OPTIONAL_LOCKS": "0",
+          "GIT_TERMINAL_PROMPT": "0",
+          "PYTHONDONTWRITEBYTECODE": "1"
+        },
+        "owned_session": 3573489,
+        "child_started": true,
+        "peak_project_rss_bytes": 28106752,
+        "peak_project_swap_bytes": 0,
+        "exit_code": 0,
+        "project_after_error": "ValueError('Project budget lock acquisition timed out')",
+        "stop_reason": "project-admission",
+        "after": {
+          "recorded_at": "2026-11-06T06:00:46.148848+00:00",
+          "MemAvailable_bytes": 17089933312,
+          "SwapCached_bytes": 97419264,
+          "SwapTotal_bytes": 30064762880,
+          "SwapFree_bytes": 16470286336,
+          "pressure": {
+            "some": {
+              "avg10": 0.1,
+              "avg60": 0.18,
+              "avg300": 0.23,
+              "total": 1399838736.0
+            },
+            "full": {
+              "avg10": 0.1,
+              "avg60": 0.18,
+              "avg300": 0.19,
+              "total": 1119547503.0
+            }
+          },
+          "owned_tree_rss_bytes": 0,
+          "owned_processes": []
+        },
+        "elapsed_seconds": 0.6127234009909444,
+        "peak_total_owned_rss_bytes": 36777984,
+        "stdout_sha256": "5c16cd4f94102d08476fa8f9eb689011e540cafc992c47b10401674e51473bd2",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "outcome": "resource-deferred"
+      },
+      "synthetic_final_fields": false
+    },
+    {
+      "scenario": "synthetic-final-violation",
+      "record": {
+        "argv": [
+          "/usr/bin/python3",
+          "-c",
+          "print(\"genuine tiny child completed\")"
+        ],
+        "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/runtime/guard-projects/synthetic-final-violation",
+        "started_at": "2026-11-06T06:00:46.835143+00:00",
+        "timeout_seconds": 3,
+        "rss_budget_bytes": 536870912,
+        "admission": {
+          "admitted": true,
+          "not_compiler": true,
+          "project_before": {
+            "recorded_at": "2026-11-06T06:00:46.828492+00:00",
+            "project_rss_bytes": 27963392,
+            "violations": [],
+            "light_rss_bytes": 0,
+            "project_processes": [
+              {
+                "pid": 3573487,
+                "start_ticks": 59275887,
+                "ppid": 3572633,
+                "session": 3572614,
+                "state": "R",
+                "rss_bytes": 27963392,
+                "swap_bytes": 0,
+                "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106",
+                "executable": "python3.14"
+              }
+            ],
+            "project_swap_bytes": 0,
+            "workloads": [
+              {
+                "task": "REVIEW-BOUNDARY",
+                "rss_bytes": 27963392,
+                "processes": [
+                  {
+                    "pid": 3573487,
+                    "start_ticks": 59275887,
+                    "ppid": 3572633,
+                    "session": 3572614,
+                    "state": "R",
+                    "rss_bytes": 27963392,
+                    "swap_bytes": 0,
+                    "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106",
+                    "executable": "python3.14"
+                  }
+                ]
+              }
+            ],
+            "MemAvailable_bytes": 17081974784,
+            "SwapCached_bytes": 97419264,
+            "SwapTotal_bytes": 30064762880,
+            "SwapFree_bytes": 16470290432,
+            "pswpin": 48639620,
+            "pswpout": 85451041
+          }
+        },
+        "environment": {
+          "PATH": "/usr/bin:/bin",
+          "HOME": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/runtime/guard-projects/synthetic-final-violation/artifacts/execute/home",
+          "TMPDIR": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/runtime/guard-projects/synthetic-final-violation/artifacts/execute/tmp",
+          "TMP": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/runtime/guard-projects/synthetic-final-violation/artifacts/execute/tmp",
+          "TEMP": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/runtime/guard-projects/synthetic-final-violation/artifacts/execute/tmp",
+          "LC_ALL": "C",
+          "LANG": "C",
+          "GIT_NO_LAZY_FETCH": "1",
+          "GIT_OPTIONAL_LOCKS": "0",
+          "GIT_TERMINAL_PROMPT": "0",
+          "PYTHONDONTWRITEBYTECODE": "1"
+        },
+        "owned_session": 3573511,
+        "child_started": true,
+        "peak_project_rss_bytes": 28225536,
+        "peak_project_swap_bytes": 0,
+        "exit_code": 0,
+        "project_after": {
+          "recorded_at": "2026-11-06T06:00:47.026370+00:00",
+          "project_rss_bytes": 28246016,
+          "violations": [
+            "controlled-final-violation"
+          ],
+          "light_rss_bytes": 0,
+          "project_processes": [
+            {
+              "pid": 3573487,
+              "start_ticks": 59275887,
+              "ppid": 3572633,
+              "session": 3572614,
+              "state": "R",
+              "rss_bytes": 28246016,
+              "swap_bytes": 0,
+              "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106",
+              "executable": "python3.14"
+            }
+          ],
+          "project_swap_bytes": 0,
+          "workloads": [
+            {
+              "task": "REVIEW-BOUNDARY",
+              "rss_bytes": 28246016,
+              "processes": [
+                {
+                  "pid": 3573487,
+                  "start_ticks": 59275887,
+                  "ppid": 3572633,
+                  "session": 3572614,
+                  "state": "R",
+                  "rss_bytes": 28246016,
+                  "swap_bytes": 0,
+                  "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106",
+                  "executable": "python3.14"
+                }
+              ]
+            }
+          ],
+          "MemAvailable_bytes": 17077149696,
+          "SwapCached_bytes": 97419264,
+          "SwapTotal_bytes": 30064762880,
+          "SwapFree_bytes": 16470290432,
+          "pswpin": 48639620,
+          "pswpout": 85451041
+        },
+        "host_swap_counter_deltas": {
+          "pswpin": 0,
+          "pswpout": 0
+        },
+        "stop_reason": "project-admission",
+        "project_after_resource_error": "Final project sample violates admitted resource limits",
+        "after": {
+          "recorded_at": "2026-11-06T06:00:46.977426+00:00",
+          "MemAvailable_bytes": 17074118656,
+          "SwapCached_bytes": 97419264,
+          "SwapTotal_bytes": 30064762880,
+          "SwapFree_bytes": 16470290432,
+          "pressure": {
+            "some": {
+              "avg10": 0.1,
+              "avg60": 0.18,
+              "avg300": 0.23,
+              "total": 1399838956.0
+            },
+            "full": {
+              "avg10": 0.1,
+              "avg60": 0.18,
+              "avg300": 0.19,
+              "total": 1119547666.0
+            }
+          },
+          "owned_tree_rss_bytes": 0,
+          "owned_processes": []
+        },
+        "elapsed_seconds": 0.19685812800889835,
+        "peak_total_owned_rss_bytes": 37801984,
+        "stdout_sha256": "5c16cd4f94102d08476fa8f9eb689011e540cafc992c47b10401674e51473bd2",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "outcome": "resource-deferred"
+      },
+      "synthetic_final_fields": true
+    },
+    {
+      "scenario": "synthetic-final-global-rss",
+      "record": {
+        "argv": [
+          "/usr/bin/python3",
+          "-c",
+          "print(\"genuine tiny child completed\")"
+        ],
+        "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/runtime/guard-projects/synthetic-final-global-rss",
+        "started_at": "2026-11-06T06:00:47.248079+00:00",
+        "timeout_seconds": 3,
+        "rss_budget_bytes": 536870912,
+        "admission": {
+          "admitted": true,
+          "not_compiler": true,
+          "project_before": {
+            "recorded_at": "2026-11-06T06:00:47.244408+00:00",
+            "project_rss_bytes": 27983872,
+            "violations": [],
+            "light_rss_bytes": 0,
+            "project_processes": [
+              {
+                "pid": 3573487,
+                "start_ticks": 59275887,
+                "ppid": 3572633,
+                "session": 3572614,
+                "state": "R",
+                "rss_bytes": 27983872,
+                "swap_bytes": 0,
+                "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106",
+                "executable": "python3.14"
+              }
+            ],
+            "project_swap_bytes": 0,
+            "workloads": [
+              {
+                "task": "REVIEW-BOUNDARY",
+                "rss_bytes": 27983872,
+                "processes": [
+                  {
+                    "pid": 3573487,
+                    "start_ticks": 59275887,
+                    "ppid": 3572633,
+                    "session": 3572614,
+                    "state": "R",
+                    "rss_bytes": 27983872,
+                    "swap_bytes": 0,
+                    "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106",
+                    "executable": "python3.14"
+                  }
+                ]
+              }
+            ],
+            "MemAvailable_bytes": 17078697984,
+            "SwapCached_bytes": 97419264,
+            "SwapTotal_bytes": 30064762880,
+            "SwapFree_bytes": 16470290432,
+            "pswpin": 48639620,
+            "pswpout": 85451041
+          }
+        },
+        "environment": {
+          "PATH": "/usr/bin:/bin",
+          "HOME": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/runtime/guard-projects/synthetic-final-global-rss/artifacts/execute/home",
+          "TMPDIR": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/runtime/guard-projects/synthetic-final-global-rss/artifacts/execute/tmp",
+          "TMP": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/runtime/guard-projects/synthetic-final-global-rss/artifacts/execute/tmp",
+          "TEMP": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106/docs/reviews/vm-044/runtime/guard-projects/synthetic-final-global-rss/artifacts/execute/tmp",
+          "LC_ALL": "C",
+          "LANG": "C",
+          "GIT_NO_LAZY_FETCH": "1",
+          "GIT_OPTIONAL_LOCKS": "0",
+          "GIT_TERMINAL_PROMPT": "0",
+          "PYTHONDONTWRITEBYTECODE": "1"
+        },
+        "owned_session": 3573578,
+        "child_started": true,
+        "peak_project_rss_bytes": 28246016,
+        "peak_project_swap_bytes": 0,
+        "exit_code": 0,
+        "project_after": {
+          "recorded_at": "2026-11-06T06:00:47.465667+00:00",
+          "project_rss_bytes": 6442450945,
+          "violations": [],
+          "light_rss_bytes": 0,
+          "project_processes": [
+            {
+              "pid": 3573487,
+              "start_ticks": 59275887,
+              "ppid": 3572633,
+              "session": 3572614,
+              "state": "R",
+              "rss_bytes": 28241920,
+              "swap_bytes": 0,
+              "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106",
+              "executable": "python3.14"
+            }
+          ],
+          "project_swap_bytes": 0,
+          "workloads": [
+            {
+              "task": "REVIEW-BOUNDARY",
+              "rss_bytes": 28241920,
+              "processes": [
+                {
+                  "pid": 3573487,
+                  "start_ticks": 59275887,
+                  "ppid": 3572633,
+                  "session": 3572614,
+                  "state": "R",
+                  "rss_bytes": 28241920,
+                  "swap_bytes": 0,
+                  "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm044-eq-20261106",
+                  "executable": "python3.14"
+                }
+              ]
+            }
+          ],
+          "MemAvailable_bytes": 17059446784,
+          "SwapCached_bytes": 97419264,
+          "SwapTotal_bytes": 30064762880,
+          "SwapFree_bytes": 16470290432,
+          "pswpin": 48639620,
+          "pswpout": 85451041
+        },
+        "host_swap_counter_deltas": {
+          "pswpin": 0,
+          "pswpout": 0
+        },
+        "stop_reason": "project-admission",
+        "project_after_resource_error": "Final project sample violates admitted resource limits",
+        "after": {
+          "recorded_at": "2026-11-06T06:00:47.423492+00:00",
+          "MemAvailable_bytes": 17075712000,
+          "SwapCached_bytes": 97419264,
+          "SwapTotal_bytes": 30064762880,
+          "SwapFree_bytes": 16470290432,
+          "pressure": {
+            "some": {
+              "avg10": 0.1,
+              "avg60": 0.18,
+              "avg300": 0.23,
+              "total": 1399839230.0
+            },
+            "full": {
+              "avg10": 0.1,
+              "avg60": 0.18,
+              "avg300": 0.19,
+              "total": 1119547739.0
+            }
+          },
+          "owned_tree_rss_bytes": 0,
+          "owned_processes": []
+        },
+        "elapsed_seconds": 0.2306163830216974,
+        "peak_total_owned_rss_bytes": 37912576,
+        "stdout_sha256": "5c16cd4f94102d08476fa8f9eb689011e540cafc992c47b10401674e51473bd2",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "outcome": "resource-deferred"
+      },
+      "synthetic_final_fields": true
+    }
+  ],
+  "compiler_started": false,
+  "guest_started": false,
+  "elapsed_seconds": 1.7714526279596612,
+  "controller_memory": {
+    "rss_bytes": 28229632,
+    "exec_image_high_water_bytes": 28246016,
+    "inherited_ru_maxrss_bytes": 28246016
+  }
+}
