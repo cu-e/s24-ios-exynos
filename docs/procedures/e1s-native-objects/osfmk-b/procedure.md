@@ -1,9 +1,23 @@
 # STR-023 per-slice execution and acceptance procedure
 
-Current phase: source-bound manifest only. Do not invoke the STR030 caller's
-plan or execute commands until root authorizes the reviewed shared caller.
+Root now authorizes one source-plan invocation from CM final1e5a2ee8 while
+root84 publication/common runs. Frozen physical caller:
+`/home/egor/dev/pet/s24-ios-exynos/worktrees/str-030-e1s-native-compile-fix2-20261106/fixtures/public/e1s-native-compile/native_compile.py`,
+SHA256 `2676a8edb31b0136aa7195d37523549d9c77edee7ac140a7f476ebf5064b178f`.
+Retain this same physical caller path for future separately admitted execution.
+The existing strict eight-field manifest is unchanged, SHA256
+`c33ddfdae12006804557d98a3fd2069a5b2df20dd6328c0ccc22c7d785c3ca65`.
+Preregister STR023BUILD-001 as host-test before the one source-plan command;
+keep it PLANNED until later actual execution. Save raw JSON, stderr, argv and
+actual exit under owned `artifacts/e1s-native-compile/osfmk-b/plan-001`, outside
+the prospective execute-001. Do not create execute-001 or private CWD projection,
+invoke a compiler/loader/Make/generator or fork an executor. Planning RSS remains
+unknown unless actually measured; no resource/execution qualification is inferred.
+Actual execution waits root84 PASS and a separate exact root allocation/grant.
+
+The STR030 caller's execute command remains held until root authorization.
 The only caller is `fixtures/public/e1s-native-compile/native_compile.py` owned
-by STR030/SR30; its current worktree is preparation, not execution authority.
+by STR030/SR30; its source plan is not execution authority.
 No local executor or shared-helper mutation is needed.
 
 After independent STR030 acceptance and root routing, prospectively register
