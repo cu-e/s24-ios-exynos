@@ -1,5 +1,65 @@
 # VM-040 handoff
 
+## REV-037 correction continuation
+
+The original physical `vm-040-eh-20261106` source/four commits/capsules remain
+unchanged. Correction worktree is `worktrees/vm-040-lease-20261106`, branch
+`team/vm-040-lease-20261106`, based on original tip
+`a0b64b31cceb6e4b0d3138628d4fed386d2fe2bc`, with the same original EH owner.
+
+Independent REV-037 measured two P2 defects in the frozen original source:
+an expired lease could spawn during a trailing admission sleep before the first
+post-spawn guard, and the FDT gate accepted a missing memory.device_type,
+prefixed compatible strings and zero GIC extents. The review's source-backed
+Python reproductions and actual owned-process cleanup remain in its worktree
+under `docs/reviews/vm-040/runs/lease-expiry-1` and `fdt-predicates-1`.
+The original19-test pass did not detect these source-contract defects.
+
+Root authorized minimal source fixes and focused host regression controls only.
+Correction source freeze is `4f5fa223a85f510f9515da80c1a1b557a820ca35`, collector
+SHA256 `341d813ca808cfdc9490a692dc4eb1261bf494c1964c19e4f653df130063bdc2`.
+The collector now checks current resource admission, exact lease and Stop
+immediately before Popen and retains post-spawn guards. Three admission samples
+use only two inter-sample sleeps. The selected Linux FDT requires exact root
+memory.device_type/RAM, complete terminated compatible-list tokens and the
+full pinned QEMU GIC spans. Only the new worktree's authored fixture gained
+memory.device_type; the original invalid physical fixture is unchanged.
+
+VMBOOTCOLLECT-002/003 were registered before the focused runs. Lease regression
+has four actual no-spawn rejection cases (late expiry/revocation/memory/Stop),
+plus one real tiny Python spawn exiting0 without signals or survivors. The
+admission-loop boundary is virtual time2 rather than the original trailing3.
+FDT regression has13 source/byte predicate cases: two accepted source-valid
+authored fixtures/lists and11 rejections, including the original frozen fixture.
+One focused real Python peer exercised corrected paused Linux-FDT capture/cont,
+with host-origin shutdown, guest_started=false and zero survivors. No full19
+suite or original failing baseline matrix was repeated. Actual current-image
+VmHWM was27,096KiB for lease controls and29,844KiB for FDT controls, both under
+256MiB address-space limits. Virtual admission seams are explicitly labeled;
+they do not create a root guest lease or an admitted image.
+
+Raw capsules remain under this correction worktree:
+`artifacts/avf-kernel-boot/lease-4f5fa22-1/evidence.json` SHA256
+`af030005d05a00a4f68e6995f78abb624b1f325f512600e5832f52228960f110`, and
+`fdt-4f5fa22-1/evidence.json` SHA256
+`872a33cf0af56a5a7051fc4dc9c175a7b99e9a5ead6a828a6df4eb98700cd16c`.
+Maintained copies are `lease-correction-evidence.json` and
+`fdt-correction-evidence.json`. Canonical read-only lab.evidence schema checks
+pass for both. `correction-validation-4f5fa22-1/report.json` records unchanged
+original collector/evidence/raw-capsule/invalid-fixture hashes and exact reviewer
+finding/reproducer hashes. Nothing in those historical physical witnesses was
+rewritten to make the new checks pass.
+
+The exact combined source/capsules were sent to vm_worker for independent
+REV-037 recheck before further publication. The empty genuine-image allowlist
+remains unchanged. No compiler, QEMU, phone, common checks or MAIN publication
+ran; no actual QEMU FDT, XNU, PID1 or guest-stop qualification is claimed.
+Original EH task remains open until independent acceptance, kernel integrator
+publication and common checks. The following text preserves the original
+source/control handoff as historical context.
+
+## Original source/control handoff
+
 Original owner for this task: `codex-guest-collector-20261106-eh`.
 Worktree `worktrees/vm-040-eh-20261106`, branch `team/vm-040-eh-20261106`,
 base `d596c07d5bbb1ef8f8bca1107a4bbc0c7db7ac42`.
