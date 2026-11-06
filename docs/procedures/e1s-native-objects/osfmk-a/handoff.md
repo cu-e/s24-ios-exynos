@@ -41,11 +41,18 @@ literal rows plus consumer source bindings. The resulting
 [source-slice evidence](source-slice-evidence.json) records these checks and
 the artifact hash. This establishes source selection/provenance only.
 
-Next: wait for root's independently reviewed STR030 minimal native caller
-freeze. Do not duplicate the executor. Only after that release may this owner
-prepare its actual source plan and fresh private CWD/output projection using
-the unchanged accepted generic process helpers and read-only shared context.
-Any actual compilation requires a separate root allocation: one serial
+Root subsequently authorized one source-only plan through the frozen physical
+STR030 caller SHA256 `2676a8edb31b0136aa7195d37523549d9c77edee7ac140a7f476ebf5064b178f`.
+The strict eight-field native manifest and all old source-only witnesses are
+preserved separately. The one export exited zero with empty stderr and plan
+SHA256 `ad5e964ed3fb7ab347f5b50dc35f8fff4393ad5d09b6565bbe7a8e92221be287`.
+See [procedure](plan-001-procedure.md) and [receipt](plan-001-result.json).
+Planning RSS was not measured and remains unqualified. The declared actual
+output and all private projections remain absent.
+
+Next: wait for publication/common84 PASS and root's exact native allocation
+and execute grant for STR022BUILD-001. Do not duplicate the executor or rerun
+planning. Any actual compilation requires a separate root allocation: one serial
 compiler, at most 512 MiB combined owned RSS, within the root six-job/six-GiB
 wave. Preserve future failures and fresh actual MD closure. Independent review
 and root publication/common acceptance precede closure. No compiler, caller,
