@@ -1,0 +1,55 @@
+{
+  "schema": "e1s-boot-log-host-acceptance-v1",
+  "task": "STR-019",
+  "owner": "codex-e1s-boot-log-20261106-sr19",
+  "status": "prospective-not-executed",
+  "maximum_text_bytes": 65280,
+  "execution_requires": "independent review, frozen exact argv/tool/runtime/input pins and separate root admission; existing finite supervisor only",
+  "cases": [
+    {
+      "id": "actual-init",
+      "criterion": "Compile the actual composed declaration/functions, with source-body SHA bindings, and call log_init. Assert magic/header offsets/reserved0/length0/text[0]0; non-header text seeded beforehand need not be erased. No reimplementation of logging algorithm."
+    },
+    {
+      "id": "exact-text",
+      "criterion": "Call actual log_str, log_hex and log_kv for zero,1,UINT64_MAX and mixed text. Compare every output byte against independently specified ASCII, including spaces and newline."
+    },
+    {
+      "id": "saturation",
+      "criterion": "Append deterministic bytes across LOG_MAX-1,LOG_MAX and LOG_MAX+4096 calls. Independently calculate prefix; assert length saturates at0xff00, last in-object byte is NUL, and all further calls preserve the complete record. ASan/UBSan must actually run."
+    },
+    {
+      "id": "corrupt-length",
+      "criterion": "Set actual record length to LOG_MAX+1 and UINT32_MAX in isolated host fixture; actual log_char must make no writes, as confirmed by complete before/after bytes. This is synthetic fault injection, not a corruption recovery promise."
+    },
+    {
+      "id": "reset-lifetime",
+      "criterion": "Saturate, reinitialize, append short text and decode actual length. Verify old tail is not exposed by the original decoder. Pointer/record lifetime ends with valid loader-owned storage; do not claim kernel or reset persistence."
+    },
+    {
+      "id": "independent-decoder",
+      "criterion": "Dump bytes of the actual C record, prefix a deliberately nonzero offset, then use exact pinned upstream read_log.py.extract. Require E1SXNU01, exactlength/text. Record magic-marker absence separately; do not mislabel local record as kernel checkpoints."
+    },
+    {
+      "id": "extent-oracle",
+      "criterion": "Compile actual loader_reserved_size. Compare safe cases against Python arbitrary-precision old reserve plus max(actual image extent), not copied C arithmetic. Cover inline/external/below-image payload, larger actual image, exact boundaries, end<image, payload-add overflow and image+size overflow; invalid cases preserve output sentinel."
+    },
+    {
+      "id": "source-abi-closure",
+      "criterion": "Prove unchanged payload/boot_video/boot_args declarations and assertions, start.S, loader.ld, choose_window, cacheclean and accepted FDT/UI functions. Prove only loader.c and UI diagnostic literal change. This source check does not execute boot ABI."
+    },
+    {
+      "id": "sanitizer-controls",
+      "criterion": "Separately compile a genuine deliberate host OOB control using the same qualified ASan/UBSan runtime; require actual expected sanitizer failure and finite cleanup, retaining all stderr/exits. No success merely because a sanitizer flag exists."
+    },
+    {
+      "id": "future-target-layout",
+      "criterion": "Only after separate root budget: genuine AArch64 loader object/link using unchanged real upstream start/linker/dependencies; inspect actual .data.bootlog allocation/size/alignment and its extent before _payload_start, ordinary header size/payload placement and relocation reachability. No fake provider, SDK or device claim."
+    }
+  ],
+  "boundaries": [
+    "No fixed physical mapping or MMIO on host or phone.",
+    "No framebuffer infrastructure rerun for a string-only UI change.",
+    "Host controls do not establish native image, writable image mappings, persistence, kernel checkpoints, Android restoration or phone safety."
+  ]
+}

@@ -1,0 +1,178 @@
+From: S24 E1S research project, 2026-11-06
+Subject: [PATCH PROPOSAL] Keep early loader diagnostics inside its loaded image
+
+Base: RNDMBG/iOS-On-S24 c8860decc62c6d6180e609036d027a2997972420
+Compatible source:57d0a97e35bddac5ad732f08492cdf03f0946cc1
+Apply after RAM23b31c44 and framebuffer0689fc94 overlays in this project.
+License: GPL-2.0-only; upstream SPDX notices preserved; authored changes GPL-2.0-only.
+Source-only proposal: no compiler, mapping, persistence or hardware qualification.
+Kernel0011/0012 fixed diagnostic writes remain an independent native gate.
+
+--- a/shim/e1s-xnu/loader.c
++++ b/shim/e1s-xnu/loader.c
+@@ -5,14 +5,11 @@
+ #include "fdt.h"
+ #include "gic.h"
+ 
+-#define LOG_BASE	0x91200000UL
++#define LOG_BASE	0x91200000UL	/* legacy XNU exclusion only, not a log destination */
+ #define LOG_RESERVE	0x200000UL	/* sec_debug_next: loader log + XNU ring */
+ #define LOG_MAGIC	"E1SXNU01"
+ #define LOG_HEADER	16U
+ #define LOG_MAX		0xff00U
+-
+-#define MARK_BASE	0x912ff000UL
+-#define MARK_MAGIC	"E1SMARK1"
+ 
+ #define BOOT_LINE_LENGTH 608
+ #define PAGE_16K	0x4000UL
+@@ -57,40 +54,40 @@
+ extern uintptr_t payload_addr(void);
+ void halt(void) __attribute__((noreturn));
+ 
+-static uint32_t log_pos;
++/* CPU-local loader diagnostic record. No physical address or persistence ABI.
++ * Explicit .data storage is part of the loaded image even before BSS clearing. */
++struct loader_log_record {
++	char magic[8];
++	uint32_t length, reserved;
++	char text[LOG_MAX + 1U];
++};
++_Static_assert(__builtin_offsetof(struct loader_log_record, length) == 8, "log length");
++_Static_assert(__builtin_offsetof(struct loader_log_record, text) == LOG_HEADER, "log header");
++static volatile struct loader_log_record loader_log
++    __attribute__((section(".data.bootlog"), aligned(16))) = { .magic = LOG_MAGIC };
+ static uint64_t fb_base;
+ static uint64_t fb_size;
+ static uint32_t fb_w, fb_h, fb_stride;
+ static struct ui_fb ui;
+ static int ui_ready;
+ 
+-static inline void wr32(uintptr_t a, uint32_t v)
+-{
+-	*(volatile uint32_t *)a = v;
+-}
+-
+-static inline void wr64(uintptr_t a, uint64_t v)
+-{
+-	*(volatile uint64_t *)a = v;
+-}
+-
+ static void log_init(void)
+ {
+-	volatile char *p = (volatile char *)LOG_BASE;
+ 	for (int i = 0; i < 8; i++)
+-		p[i] = LOG_MAGIC[i];
+-	wr32(LOG_BASE + 8, 0);
+-	wr32(LOG_BASE + 12, 0);
+-	*(volatile char *)(LOG_BASE + LOG_HEADER) = 0;
+-	log_pos = 0;
++		loader_log.magic[i] = LOG_MAGIC[i];
++	loader_log.length = 0;
++	loader_log.reserved = 0;
++	loader_log.text[0] = 0;
+ }
+ 
+ static void log_char(char c)
+ {
+-	if (log_pos >= LOG_MAX)
++	uint32_t pos = loader_log.length;
++	if (pos >= LOG_MAX)
+ 		return;
+-	*(volatile char *)(LOG_BASE + LOG_HEADER + log_pos++) = c;
+-	wr32(LOG_BASE + 8, log_pos);
++	loader_log.text[pos] = c;
++	loader_log.text[pos + 1U] = 0;
++	loader_log.length = pos + 1U;
+ }
+ 
+ static void log_str(const char *s)
+@@ -134,16 +131,6 @@
+ 	for (uintptr_t p = start & ~(line - 1); p < end; p += line)
+ 		__asm__ volatile("dc civac, %0" : : "r"(p) : "memory");
+ 	__asm__ volatile("dsb sy" ::: "memory");
+-}
+-
+-static void boot_mark_init(void)
+-{
+-	volatile char *p = (volatile char *)MARK_BASE;
+-
+-	for (int i = 0; i < 8; i++)
+-		p[i] = MARK_MAGIC[i];
+-	wr64(MARK_BASE + 8, 0);
+-	clean(MARK_BASE, MARK_BASE + 64);
+ }
+ 
+ static void fb_flush(void)
+@@ -329,6 +316,30 @@
+ 		return;
+ 	*best_base = end - size;
+ 	*best_size = size;
++}
++
++/* Preserve the existing payload reserve, expanding it only to include the
++ * actual linker-defined loader end. Numeric exclusion is not physical ownership. */
++static int
++loader_reserved_size(uintptr_t image, uintptr_t end, uintptr_t payload,
++    uint64_t *out)
++{
++	const uint64_t reserve = 32UL << 20;
++	uint64_t size = 0x40000 + reserve;
++	if (end < image)
++		return 0;
++	if (payload > image) {
++		uint64_t offset = payload - image;
++		if (offset > UINT64_MAX - reserve)
++			return 0;
++		size = offset + reserve;
++	}
++	if ((uint64_t)(end - image) > size)
++		size = end - image;
++	if (size > UINT64_MAX - image)
++		return 0;
++	*out = size;
++	return 1;
+ }
+ 
+ static int
+@@ -395,7 +406,6 @@
+ 	if (!fdt_validate(dtb))
+ 		return 0;
+ 	log_init();
+-	boot_mark_init();
+ 	log_str("S24XNU LOADER (experimental e1s)\n");
+ 	log_str("Galaxy S24 SM-S921B e1s\n");
+ 	log_str("Exynos 2400 S5E9945 10-core\n");
+@@ -477,9 +487,10 @@
+ 	uint64_t win_base = 0;
+ 	uint64_t win_size = 0;
+ 	uintptr_t loader_image = (uintptr_t)_head;
+-	uint64_t loader_size = 0x40000 + (32UL << 20);
+-	if ((uintptr_t)p > loader_image)
+-		loader_size = ((uintptr_t)p - loader_image) + (32UL << 20);
++	uint64_t loader_size;
++	if (!loader_reserved_size(loader_image, payload_addr(), (uintptr_t)p,
++	    &loader_size))
++		return fail("invalid loader image exclusion");
+ 	if (!choose_window(dtb, loader_image, loader_size,
+ 	    fb_base, fb_size, &win_base, &win_size)) {
+ 		ui_set_stage(&ui, UI_STAGE_RAM, UI_FAIL);
+@@ -691,7 +702,7 @@
+ 		log_char(xnu_cmdline[i]);
+ 	log_kv("\nhold", (uint64_t)hold);
+ 	log_str("\nJUMP TO XNU\n");
+-	clean(LOG_BASE, LOG_BASE + LOG_HEADER + log_pos);
++	/* CPU-local log needs no fixed-address flush or kernel handoff. */
+ 
+ 	hold_seconds(hold);
+ 	return entry_pa;
+--- a/shim/e1s-xnu/ui.c
++++ b/shim/e1s-xnu/ui.c
+@@ -486,6 +486,6 @@
+ 	rect(fb, x, y, w, 4, UI_TEXT_ERR);
+ 	text(fb, x, y + 20, "BOOT FAILED", UI_TEXT_ERR, TEXT_SCALE);
+ 	text_n(fb, x, y + 64, why, 58, UI_TEXT_MAIN, TEXT_SCALE);
+-	text(fb, x, y + 108, "halted - see the 0x91200000 log",
++	text(fb, x, y + 108, "halted - diagnostics retained in loader image",
+ 	    UI_TEXT_DIM, TEXT_SCALE);
+ }
