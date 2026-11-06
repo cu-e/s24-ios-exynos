@@ -80,6 +80,8 @@ def main():
             ('native-map',['clang','-map',map_name,'-Wl,-why_load']),
             ('native-why',['clang','-Wl,-map,'+map_name,'-why_load']),
             ('response-file',['clang','@unmeasured.rsp','-Wl,-map,'+map_name,'-Wl,-why_load']),
+            ('end-of-options',['clang','--','-Wl,-map,'+map_name,'-Wl,-why_load']),
+            ('nonlinker-forwarding',['clang','-Xclang','-Wl,-map,'+map_name,'-Wl,-why_load']),
             ('xlinker-missing-value',['clang','-Xlinker']),
             ('xlinker-nonadjacent',['clang','-Xlinker','-map','unmeasured.o','-Xlinker',map_name,'-Wl,-why_load']),
             ('xlinker-wrong-path',['clang','-Xlinker','-map','-Xlinker','forged','-Wl,-why_load']),

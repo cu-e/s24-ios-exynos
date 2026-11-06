@@ -44,6 +44,11 @@ forms are `-Wl,-map,PATH` and `-Wl,-why_load`; consecutive canonical Xlinker
 equivalents are also supported. Ambiguous/reordered/duplicate/nonadjacent map
 forwarding, response files and native unqualified diagnostic spellings refuse.
 No alias/export/provider-selection flags are changed.
+This is not a complete Clang option-table interpreter: CU authenticates the
+unchanged genuine125a base recipe and appends the two diagnostic options after
+its complete existing operands. End-of-options and non-linker forwarding are
+outside this closed recipe and refused. The witness explicitly states controller
+ownership of driver recipe authentication; no arbitrary driver JSON gains it.
 
 CU seals `filelists:[{path,sha256,ordered_object_paths}]` and exact ordered
 `objects:[{id,path,sha256}]`; archives retain exact role/path/hash/member rows.

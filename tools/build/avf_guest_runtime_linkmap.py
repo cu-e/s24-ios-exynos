@@ -139,6 +139,8 @@ def driver_diagnostic_operands(argv, map_path):
     for value in argv:
         text(value)
         require(not value.startswith('@'), 'Response-file driver argv remains unqualified')
+        require(value not in ('--', '-Xclang', '-Xassembler', '-Xpreprocessor'),
+                'End-of-options/non-linker forwarding remains outside the qualified recipe')
     result, index = [], 1
     while index < len(argv):
         value = argv[index]
@@ -590,6 +592,7 @@ def validate(image_snapshot, image_view, contract, *, map_snapshot,
             'command_kind': 'clang-driver' if driver else 'direct-linker',
             'derived_linker_operands': document.get('derived_linker_operands') if driver else None,
             'observed_linker_child_argv_claimed': False,
+            'driver_recipe_authentication_owned_by_controller': True,
             'filelist_bindings': filelist_bindings,
             'atom_queries': atom_queries, 'queried_live_atoms': queried_live_atoms,
             'queried_atom_qualification': False,
