@@ -14,3 +14,7 @@ LOG_PFX_LEN_ADJ = $(LOG_PFX_LEN)
 LOG = $(PRINTF) "$2%$4s$(Color0) $3%s$(Color0)\n" "$1"
 _LOG_HOST = $(call LOG,$1,$(ColorH),$(ColorF),$(LOG_PFX_LEN))
 LOG_INSTALLHDR = $(call _LOG_HOST,INSTALLHDR)
+# Exact native platform token universe for PLATFORM_UNIFDEF; not SDK availability.
+SUPPORTED_EMBEDDED_PLATFORMS := iPhoneOS iPhoneOSNano tvOS AppleTVOS WatchOS BridgeOS
+SUPPORTED_SIMULATOR_PLATFORMS := iPhoneSimulator iPhoneNanoSimulator tvSimulator AppleTVSimulator WatchSimulator
+SUPPORTED_PLATFORMS := MacOSX DriverKit $(SUPPORTED_SIMULATOR_PLATFORMS) $(SUPPORTED_EMBEDDED_PLATFORMS)

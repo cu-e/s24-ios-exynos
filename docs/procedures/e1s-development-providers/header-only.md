@@ -1,8 +1,8 @@
 # STR018 separately admitted native header phase
 
 Original SR18 owner and worktree remain unchanged. Experiment
-`E1SPROVIDERHEADERS-003` covers only the 30 genuine native Make install groups
-and one Firehose header export from corrected provider plan005. The new
+`E1SPROVIDERHEADERS-004` covers only the 30 genuine native Make install groups
+and one Firehose header export from corrected provider plan006. The new
 attempt changes seven requested target strings in two Make groups
 to retain the exact source-defined dot/empty directory segments. All 315
 physical output selections, filter logic, flags and visibility stay unchanged.
@@ -15,11 +15,11 @@ unchanged. That source-only correction removed the custom alarm and added
 monotonic work-boundary checks before any target operation ran.
 
 The exact header plan is
-`artifacts/e1s-development-providers/header-plan-006/execution-plan.json`, SHA256
-`f776b9ff201d464341a0f20de44560e7a1d315a77bcdac6353e9ddf42187f39b`.
+`artifacts/e1s-development-providers/header-plan-007/execution-plan.json`, SHA256
+`7484ce35fa5c8b8519baf83973eac1d758b63b96f744ac1e5260c1234c48b1d2`.
 Adapter `fixtures/public/e1s-development-providers/header_only.py` has SHA256
-`dfab7c3daf099d0da07af84c42a983fb57dd41de2ae061d96921516292b447a7`.
-This is a source freeze for fresh `execute-003`, which is absent. Prior ROOT87
+`97d201ce8f6cfee9ca2c222fc11a8fe584eaa08155dbcf8e1c9633ae6e41bad2`.
+This is a source freeze for fresh `execute-004`, which is absent. Prior ROOT87
 `execute-001` remains unchanged: first Make command exit 2/resource pass,
 zero headers, no Firehose export, own reservation released and root observed
 zero survivors. Experiment `E1SPROVIDERHEADERS-001` records that actual failure.
@@ -54,7 +54,8 @@ raw002 SHA256 remains
 The separate `header-host-commands.mk` retains the immutable STR011 standalone
 query/platform map and binds actual Linux TR/BASH/ECHO/PRINTF/MKDIR/RM/INSTALL
 executables, plus native source-exact ERR and header logging expressions.
-Its SHA256 is `08d2a410d60a948ac3b9f0beafd67404c51db080d934551ef7bc59853ca78f44`.
+That retained first map had SHA256
+`08d2a410d60a948ac3b9f0beafd67404c51db080d934551ef7bc59853ca78f44`.
 `host-command-provenance.json` binds the native MakeInc.cmd assignments, real
 executable paths/argv/hashes, native installfile source and existing historical
 Linux install compatibility; SHA256
@@ -74,7 +75,42 @@ After fresh-output remapping, the only argv changes are 30 `MakeInc_cmd`
 operands. The existing 653 input bindings are preserved except the owned route
 fixture, with 11 added host/provenance pins. All 315 physical selections,
 32 native flag guards, first31 operation identities and resource bounds remain.
-Fresh execute003 requires independent review and another exact root grant.
+That source acceptance preceded ROOT94 attempt003; its whole failure is
+retained below. Fresh execute004 requires a new review and exact root grant.
+
+ROOT94 completed 30 Make operations at exit 0 and the genuine Firehose export
+at exit 1, all 31 resource passes. All 315 nonempty regular 0444 headers, four
+hash-identical MIG prerequisites and the actual `14be8d31…` Firehose export were
+observed. Nevertheless whole attempt003 is FAIL: every native signature lacked
+13 expected platform selectors, and the old guard read native terminal NUL as
+an extra argv token. All 664 inputs stayed unchanged; own/root reservations
+released and root observed zero survivors. These 315 bytes are not qualified
+under the intended native filtering. Failure capsule SHA256 is
+`1446e3060185ba1d5ed6144270d96629afebd3153258f82107b0d038352d87a5`,
+with detailed verification `failure-record-003/verification.json`.
+
+The corrected map appends the three exact native MakeInc.cmd assignments at
+lines 250/251/254: complete embedded, simulator and combined supported-platform
+vectors. MakeInc.def1061 then derives the intended 13 platform filters. This
+states a source-defined filter token universe, never SDK availability. Current
+map SHA256 is `bd8be06ebc2cd10924a7d2ee9b2195bde4c07cae9dcabdc154f468b45b48f91c`;
+current provenance SHA256 is
+`6ed54569fdc21aabd1a71fbffaf8639301da344988079e4a376af215f542c2d1`.
+
+Native SETUP/replacecontents counts and writes a final NUL after its newline.
+The narrow caller decoder requires that exact single-NUL storage grammar and
+canonical space-joined argv, then compares the full expected argv unchanged.
+No generic trimming or missing-flag tolerance is introduced. Read-only decoding
+of all 32 real003 signatures still rejects their missing 13 platform flags.
+The new source query expands all 315 intended native unifdef invocations with
+13 platform plus 13 privacy flags (one public, 314 private) in all 30 groups.
+Query evidence SHA256 is
+`889e87318dd74fcd8d7f9bee6fb249cd508a4a27ffe480fd3247791ad26b8af9`.
+This is prospective source evidence; actual004 Make/unifdef argv, 32 signatures
+and fresh bytes must be independently verified after a future admitted run.
+No actual004 filtering, compiler, archive or layout operation has run. All 37
+command vectors and 315 selections are unchanged after fresh-output remapping;
+only the map/provenance/route inputs and native signature decoder changed.
 
 The adapter uses existing 9929 `project_approval`, ProjectBudget, run_child and
 the accepted qemu_host supervisor, plus existing 9f80 `owned_cancellation` and
@@ -106,7 +142,7 @@ read-only into genuine Make generated prerequisite cwd paths. No native BSD
 projection, object directory, SDK directory, compiler, archive or layout setup
 is part of this phase. Children have the existing run_child Landlock write
 boundary covering the owned output; native Make source/host inputs remain read
-only. All 664 frozen provider-plan inputs and the exact helper files are checked
+only. All 665 frozen provider-plan inputs and the exact helper files are checked
 before target tools and after the header phase.
 
 Each actual Make exit and combined child/resource/cleanup record is preserved.
@@ -124,7 +160,7 @@ bytes and any new missing/empty boundary must be reviewed before four compiles.
 
 Existing cancellation and budget release validate owned child cleanup. The
 adapter releases only its own reservation; root owns the allocation/global
-lease. Planned raw evidence is `execute-003/evidence.json`; prior raw001 and002 remain
+lease. Planned raw evidence is `execute-004/evidence.json`; prior raw001/002/003 remain
 retained. A passing header
 result qualifies only the observed header phase, never provider objects,
 archive contents, ABI, full link/image, runtime or hardware. Original task
@@ -138,7 +174,7 @@ the inner invocation; root supplies and owns the outer watchdog:
 ```sh
 LC_ALL=C PYTHONUTF8=1 PYTHONNOUSERSITE=1 python3 -s \
   fixtures/public/e1s-development-providers/header_only.py \
-  --source-plan /home/egor/dev/pet/s24-ios-exynos/worktrees/str-018-e1s-development-providers-20261106/artifacts/e1s-development-providers/header-plan-006/execution-plan.json \
-  --source-plan-sha256 f776b9ff201d464341a0f20de44560e7a1d315a77bcdac6353e9ddf42187f39b \
+  --source-plan /home/egor/dev/pet/s24-ios-exynos/worktrees/str-018-e1s-development-providers-20261106/artifacts/e1s-development-providers/header-plan-007/execution-plan.json \
+  --source-plan-sha256 7484ce35fa5c8b8519baf83973eac1d758b63b96f744ac1e5260c1234c48b1d2 \
   --approval ROOT_APPROVAL_PATH --approval-sha256 ROOT_APPROVAL_SHA256
 ```

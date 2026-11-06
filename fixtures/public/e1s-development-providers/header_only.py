@@ -43,6 +43,17 @@ def write(path, value):
     path.write_text(json.dumps(value, indent=2) + '\n')
 
 
+def native_flag_argv(path):
+    # Native SETUP/replacecontents writes argv joined by spaces, newline, NUL.
+    raw = path.read_bytes()
+    require(raw.endswith(b'\n\x00') and raw.count(b'\x00') == 1,
+            'Wrong native filter signature storage')
+    text = raw[:-1].decode('utf-8')
+    argv = shlex.split(text)
+    require(text == ' '.join(argv) + '\n', 'Noncanonical native filter signature')
+    return argv
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--source-plan', type=Path, required=True)
@@ -88,7 +99,7 @@ def main():
     report = dict(kind='host-test', origin='local-host', outcome='fail', task=args.task,
                   owner=args.owner, experiment=args.experiment, shard=args.shard,
                   recorded_at=datetime.now(timezone.utc).isoformat(), source_plan_sha256=args.source_plan_sha256,
-                  commands=[], headers=[], native_filter_flags={}, compiler_started=False,
+                  commands=[], headers=[], native_filter_flags={}, native_filter_argv={}, compiler_started=False,
                   archive_executed=False, layout_executed=False, resource_profile='project-budget-v1')
     started, reserved = time.monotonic(), False
     with core.owned_cancellation() as cancel:
@@ -152,8 +163,10 @@ def main():
                 remaining()
                 path = common.canonical_output_path(guard['path'])
                 require(path.is_relative_to(args.out), 'Native flag guard escaped owned output')
-                require(shlex.split(path.read_text()) == guard['expected_argv'], 'Wrong actual native filter flags')
+                argv = native_flag_argv(path)
+                require(argv == guard['expected_argv'], 'Wrong actual native filter flags')
                 report['native_filter_flags'][str(path)] = digest(path)
+                report['native_filter_argv'][str(path)] = argv
             remaining()
             export = common.canonical_output_path(plan['firehose_export'])
             require(export.is_file() and not export.is_symlink() and export.stat().st_size > 0, 'Actual Firehose export missing')
