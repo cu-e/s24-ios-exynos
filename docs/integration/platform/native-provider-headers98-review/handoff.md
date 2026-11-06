@@ -1,0 +1,9 @@
+# CN native provider headers98 handoff
+
+INT003 original CN owner, separate `int-platform-20261106` worktree; only `docs/integration/platform/native-provider-headers98-review` changed. Root/CM own serialized publication and allocations. Original SR18 owns STR018 and its pending four compiles/two archives.
+
+Verdict: accept actual004 315 selected native filtered headers, 32 complete source-derived newline/NUL signatures, 315 actual full 26-flag invocations, four hash-identical export-mode MIG copies and separate Firehose14be. All 31 command/resource/cleanup facts and 665 current inputs match. Earlier001–003 remain wholly failed/unqualified. No provider object/archive/layout/ABI/full link/runtime/hardware credit follows.
+
+Exact source freeze29c11a6983f11a64a587a65f03cf182b03703ee4, descriptor07724b36, rawfdb4d40a, header plan7484ce35, caller97d201ce, root98receipt0213a5ef. Independent actual evidence `artifacts/native-provider-headers98-review/actual-002/evidence.json` SHA `157ac82be08d44d1a8ca250b42498703d1f1284aa8d3a3bd990d729897fc47e3`;315-product index `860f9d88a0d1aaa9f27cd151ea922e2b47d6050e8dd05794bd659b0a548ebdaa`. Source patch map `artifacts/native-provider-headers98-review/source-map.json` SHA `f39d4f1604564e9444aaa7f971a13d5f07fed827d4b361570c2d53dc73d9b22f` gives eight exact producer commits/scopes/binary patch hashes; later object-phase0187 is excluded.
+
+The initial independent reader's direct-token assumption failed on genuine wildcard-selected IOInterrupts.h; exact source and failure remain in actual001. The correction proves the original wildcard/default-private install rule rather than changing source or output. See review.md and evidence.json for actual command exits, RSS, signatures and producer boundaries. Do not rerun filtering or the accepted product inspections. Candidate may include exact source chain plus review; original STR018 remains open until separate intended provider results and root integration acceptance.
