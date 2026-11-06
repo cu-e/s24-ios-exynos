@@ -52,7 +52,7 @@ Independent review and publication/common/root acceptance precede SR9 closure.
 Root67 actual E1SDEVELOPMENTCONFIG-001 PASS: all5 exact doconf commands exited0,
 102 new generated files plus63 adopted STR004 files physically rehashed exact.
 All255 input hashes matched. Complete descriptor generated-development.json
-contains165 files across osfmk46/libkern6/pexpert11/bsd69/iokit11/libsa5/security7/
+contains165 files across osfmk44/libkern14/pexpert5/bsd69/iokit11/libsa5/security7/
 san10 and preserves actual per-component flag vectors and effective MACH_ASSERT.
 All components select DEVELOPMENT and CONFIG_PMAP_PPL; BSD/IOKit use actual
 mach_assert.h=1 while libsa/security/san retain the CONFIG_DEFINES flag. Source,
