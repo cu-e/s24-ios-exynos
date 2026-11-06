@@ -1,0 +1,174 @@
+{
+  "kind": "source-review",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-06T09:44:35.609964+00:00",
+  "task": "INT-002",
+  "owner": "codex-integrator-kernel-20261106-cm",
+  "summary": "Accept tiny STR003 pinned patch hook plus actual fully linked and packaged freestanding probe/loader scope; no XNU or hardware execution",
+  "producer_source_commit": "45522ff0156d2683a9978d1612e52e2f092dde4c",
+  "producer_final_docs": "6f6512ac428ab22ce063fc63e88f76538241ad92",
+  "assessment": [
+    "The14 added lines snapshot/hash-check the exact accepted23b31 patch, run git apply --check then apply against the isolated copied donor tree, and set applied=true only after success. The existing sources.verify gate,run helper,CLI and compiler/link/package argv generation are unchanged. Patch mismatch or check/apply failure reaches existing fail report before any target compiler.",
+    "Actual report has19 successful commands: check/apply indices1/2 precede all8 target compile indices3/4/9..14. Actual staged6 selected bodies match accepted patched donor pins;10 other actually used source/linker/packager bodies match pinned c886. Eight recorded product hashes/sizes are exact.",
+    "Both linked executables are ELF64 ET_EXEC EM_AARCH64183; both Android packages have their original format magic and each tar contains the exact corresponding boot.img bytes. This is format/build identity validation, not Samsung compatibility or bootability.",
+    "Root39 outer command matches frozen one-command plan, passes with no resource error/owned survivors, and binds report+outputs. The existing internal commands do not record cwd individually; the unchanged run callsites specify donor copy for patching and MAIN for compiler/packaging. This review does not invent missing timing/cwd fields or re-execute commands.",
+    "No blocking finding in this small hook. Physical safe RAM,S-Boot ownership,loader handoff and hardware execution remain unqualified; kernel_build stays explicitly not-run. No new compiler or tests were run for this independent review."
+  ],
+  "non_build_function_AST_unchanged": true,
+  "actual_commands": 19,
+  "actual_compile_indices": [
+    3,
+    4,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+  ],
+  "prepared_source_bindings": [
+    {
+      "path": "shim/e1s-xnu/loader.c",
+      "sha256": "5231f80f630b04d7faab51cb7b8feddeeadb9cb07514b806d6d2e5c962455c6f"
+    },
+    {
+      "path": "shim/e1s-xnu/fdt.c",
+      "sha256": "cce31dc1e49434c0b392120dbb190ce40928791a1a156fb15a3443844b56ff1a"
+    },
+    {
+      "path": "shim/e1s-xnu/fdt.h",
+      "sha256": "c754f08a04d76968567e6c2ee2d1d91130e6abed6ba8429979b5cb9b04eb78dc"
+    },
+    {
+      "path": "shim/e1s-xnu/ui.h",
+      "sha256": "3cd9082c78cd654aa916c6ddcc2688568d46089cdcc27991f24ce0fc03c1e9bc"
+    },
+    {
+      "path": "shim/e1s-xnu/adt_patch.h",
+      "sha256": "8c9bd6fc32e58b134a2f62567cac3c3e7d2c0254846c331813103529992f0ecf"
+    },
+    {
+      "path": "shim/e1s-xnu/gic.h",
+      "sha256": "386eaa0208d331f074fba1b6538b3fc26d47ec50fe71afc65daa5b0131f390a7"
+    },
+    {
+      "path": "shim/e1s/start.S",
+      "sha256": "dc6db84de738d1cb20474f7873e29cfb4c4c9db6b2947ec665dddbd27cdb9140"
+    },
+    {
+      "path": "shim/e1s/probe.c",
+      "sha256": "5288a67e420afc9cd13234f605e252df84c97e9e64a969eda155a2e98642a006"
+    },
+    {
+      "path": "shim/e1s/loader.ld",
+      "sha256": "31db7bd566cdf4f15873449f698c2bee93179fc7207dc142e7a930d8de3fff0b"
+    },
+    {
+      "path": "shim/e1s-xnu/start.S",
+      "sha256": "787649bf31bb47f168eed8f72031b694d614e25a58da955fbe91112fe930f01f"
+    },
+    {
+      "path": "shim/e1s-xnu/ui.c",
+      "sha256": "08cfea1c688d0740616f59d30c11cd9fbcfa2a88f2e86231bb5d57915a984b4f"
+    },
+    {
+      "path": "shim/e1s-xnu/adt_patch.c",
+      "sha256": "415bf5c0cbb99dfa74f0ecaf1338a85ffc1a1e371ef5f27b9a39b52eba63166e"
+    },
+    {
+      "path": "shim/e1s-xnu/gic.c",
+      "sha256": "c76d7b82ee9305e510fadee1597a7ea4dfc7fcf734f73606af08f59fa5105985"
+    },
+    {
+      "path": "shim/e1s-xnu/loader.ld",
+      "sha256": "bb4adea1c0b692644531d6c5dddd350a5c71617e6a56229e46f76425cafe33b3"
+    },
+    {
+      "path": "tools/e1s/fix_image.py",
+      "sha256": "d4c530e68267a42aecad4c5931268546e2c8cf049c848837e0e36b285e87fe39"
+    },
+    {
+      "path": "tools/e1s/mkboot.py",
+      "sha256": "313201296222ca2bad700f9e8cf90307f862ab49e9240a9b4be631b647e6290f"
+    }
+  ],
+  "products": [
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/probe/probe.elf",
+      "size": 164472,
+      "sha256": "976b229a86349554d829db7cdbfa60dec6de1f1de2fe95c6986a389c5128be33"
+    },
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/probe/Image",
+      "size": 97104,
+      "sha256": "7588c09b590bc9fb1c1c418df486fff81ad923ce2ada3129e94146ee6cb48a2d"
+    },
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/probe/boot.img",
+      "size": 102416,
+      "sha256": "7a267eedb50243446af1f96a770b0e4707496e1499c4a25503e1fcb3f8023169"
+    },
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/probe/boot.img.tar",
+      "size": 112640,
+      "sha256": "c3085d823c61cc5b4f276fb66c91786d4a89e0a039421de8016cf9ae078141f8"
+    },
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/loader/loader.elf",
+      "size": 201872,
+      "sha256": "bc9e645697881782f37280bfac012b9e255c390b1889d0a40c6631a49f828560"
+    },
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/loader/Image",
+      "size": 135168,
+      "sha256": "55e98e92095990de5b29b474045ee5070d29d65c3cb5043dba4119529c126ad8"
+    },
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/loader/boot.img",
+      "size": 139280,
+      "sha256": "821e645d6853a0c547c0228b682026886a0a0fe8852ad25aedafd2c2b0643df4"
+    },
+    {
+      "path": "artifacts/e1s-build/str003-memory-20261106-001/loader/boot.img.tar",
+      "size": 143360,
+      "sha256": "c09de64146fe3bf0ee51a1e48fcebdb75e6765529e7dc3052b47a570868a3ed3"
+    }
+  ],
+  "format_checks": [
+    {
+      "target": "probe",
+      "ELF_type": "ET_EXEC",
+      "machine": 183,
+      "entry": "0x800",
+      "package": "Android magic; tar has exact single boot.img bytes"
+    },
+    {
+      "target": "loader",
+      "ELF_type": "ET_EXEC",
+      "machine": 183,
+      "entry": "0x800",
+      "package": "Android magic; tar has exact single boot.img bytes"
+    }
+  ],
+  "root_owned_survivors": [],
+  "reviewer_executed_compiler_or_test": false,
+  "unresolved_blocking_findings": [],
+  "hardware_or_XNU_runtime_qualified": false,
+  "artifacts": [
+    "artifacts/team-coordination/20261106-team/strategy-reassessment-20261106/builder-build-001/evidence.json",
+    "artifacts/e1s-build/str003-memory-20261106-001/report.json",
+    "worktrees/str-003-e1s-builder-20261106/tools/build/e1s.py",
+    "worktrees/str-003-e1s-builder-20261106/docs/procedures/e1s-memory-integration/build-plan-001.json",
+    "worktrees/str-003-e1s-builder-20261106/docs/procedures/e1s-memory-integration/build-evidence.json",
+    "artifacts/e1s-build/str003-memory-20261106-001/loader-memory-validation.patch"
+  ],
+  "sha256": {
+    "artifacts/team-coordination/20261106-team/strategy-reassessment-20261106/builder-build-001/evidence.json": "85747434c0a1aa4f5a29dc4f1e158ca8bc9176a53fe57bff47d23f280ec00267",
+    "artifacts/e1s-build/str003-memory-20261106-001/report.json": "191465bece0dafb800ae3f8ba2764189d077d3a7baed9d05908bd1a71d12dcd6",
+    "worktrees/str-003-e1s-builder-20261106/tools/build/e1s.py": "2b7519e92bef64849325c9bce2abd1b6f582c419921168e7133ef9e95bfd23e3",
+    "worktrees/str-003-e1s-builder-20261106/docs/procedures/e1s-memory-integration/build-plan-001.json": "5f2517f46ac70ce4b7eec70f234c71a7853efd41aa2bc6d2d4d8273a4828cb25",
+    "worktrees/str-003-e1s-builder-20261106/docs/procedures/e1s-memory-integration/build-evidence.json": "692e7b0ecc0ce000f0d9c6bc8f5190b12b4f70d6aeae0c9ac7e0cb405d1fd1f7",
+    "artifacts/e1s-build/str003-memory-20261106-001/loader-memory-validation.patch": "23b31c44ed9dba9c2da2e5b56ccbe97cd67fa41efff3ec032130eabca6718ae1"
+  }
+}
