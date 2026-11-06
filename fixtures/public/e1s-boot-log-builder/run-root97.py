@@ -50,9 +50,13 @@ def binding(path,limit=LIMIT):
 
 def dump(path,value):path.write_text(json.dumps(value,indent=2)+'\n')
 
+def parsed_json(path):
+    body=captured(path)
+    return json.loads(body),dict(path=str(path),sha256=hashlib.sha256(body).hexdigest(),size=len(body))
+
 def bound_json(path,digest):
-    body=captured(path);need(hashlib.sha256(body).hexdigest()==digest,'Changed bound JSON '+str(path))
-    return json.loads(body)
+    value,observed=parsed_json(path)
+    need(observed['sha256']==digest,'Changed bound JSON '+str(path));return value
 
 def load_helper(name):
     path,digest=HELPERS[name];body=captured(path)
@@ -111,7 +115,7 @@ def main():
     started=time.monotonic()
     report=dict(kind='host-test',origin='local-host',outcome='inconclusive',task=TASK,owner=OWNER,
         experiment=EXPERIMENT,plan_sha256=PLAN_SHA,runner=self_binding,root_grant=binding(args.root_grant),
-        controller_pid=os.getpid(),commands=[],input_bindings_before=before_inputs,
+        controller_pid=os.getpid(),commands=[],input_bindings_before=before_inputs,parsed_output_bindings={},
         initial_samples=initial,target_executed=False,hardware_execution=False,compiler_started=False,
         no_native_ownership_or_marker_qualification=True)
     previous_env=dict(os.environ);pending=[];seen_sessions=set()
@@ -150,20 +154,23 @@ def main():
                 record['assessment']='normal-command-pass'
                 record['combined_log']=binding(OUT/(command['id']+'.log'))
                 if command['id']=='source-hook-controls':
-                    controls=json.loads(captured(source_out/'evidence.json'))
+                    controls,observed=parsed_json(source_out/'evidence.json')
+                    report['parsed_output_bindings']['source_controls']=observed
                     need(controls['outcome']=='pass' and controls['source_controls']==8,'Eight actual source controls')
                     need(controls['target_or_compiler_executed'] is False,'No compiler in source controls')
                 elif command['id']=='ordinary-builder':
-                    build=json.loads(captured(Path(plan['output']['report'])))
+                    build,observed=parsed_json(Path(plan['output']['report']))
+                    report['parsed_output_bindings']['builder_report']=observed
                     need(build['outcome']=='pass' and len(build['commands'])==23,'Actual genuine ordinary builder')
                     need([c['argv'] for c in build['commands']]==plan['expected_recorded_run_argv'],'Actual old21 plus2 vectors')
                     report['completed_recorded_builder_commands']=len(build['commands'])
                     report['completed_compile_commands']=sum(c['argv'][:2]==['zig','cc'] and '-c' in c['argv'] for c in build['commands'])
                     report['compiler_started']=report['completed_compile_commands']>0
-                    report['post_build_observed']=dict(report=binding(Path(plan['output']['report'])),
+                    report['post_build_observed']=dict(report=observed,
                         object=binding(Path(plan['output']['root'])/'loader/loader.c.o'))
                 else:
-                    inspection=json.loads(captured(inspect_out))
+                    inspection,observed=parsed_json(inspect_out)
+                    report['parsed_output_bindings']['inspection']=observed
                     need(inspection['outcome']=='pass' and len(inspection['negative_controls'])==12,'Actual layout and12 negative controls')
                     need(inspection['target_executed'] is False,'No target execution')
                     for name in ['report','object']:
@@ -178,8 +185,11 @@ def main():
             survivors=[p for s in report['terminal_sessions'] for p in s['owned_processes'] if p['state']!='Z']
             report['owned_survivors']=survivors;report['elapsed_seconds']=time.monotonic()-started
             report['controller_status']=core.proc_status()
-            report['output_bindings']=[binding(p) for p in [source_out/'evidence.json',
-                Path(plan['output']['report']),inspect_out] if p.is_file()]
+            report['output_bindings']=list(report['parsed_output_bindings'].values())
+            parsed_paths={row['path'] for row in report['output_bindings']}
+            report['terminal_unparsed_output_bindings']=[binding(p) for p in [source_out/'evidence.json',
+                Path(plan['output']['report']),inspect_out] if str(p) not in parsed_paths and p.is_file()]
+            report['output_binding_semantics']='Parsed JSON digest/size uses exactly parsed bytes; terminal unparsed files are observations only, with no current-path claim.'
             if survivors:report.update(outcome='fail',error='Owned survivors after finite cleanup')
             dump(OUT/'evidence.json',report)
             with (MAIN/'state/.integration.lock').open('a') as lock:
