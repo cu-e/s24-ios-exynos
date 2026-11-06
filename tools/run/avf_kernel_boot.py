@@ -206,16 +206,19 @@ def fdt_contract(props, layout, package):
     require(props[('/', '#address-cells')] == struct.pack('>I', 2) and
             props[('/', '#size-cells')] == struct.pack('>I', 2), 'FDT root cell widths')
     memory = [node for (node, name), value in props.items()
-              if node.count('/') == 1 and name == 'device_type' and value == b'memory\0']
+              if node != '/' and node.count('/') == 1 and name == 'device_type' and value == b'memory\0']
     require(len(memory) == 1 and props.get((memory[0], 'reg')) ==
             struct.pack('>QQ', 0x40000000, 256 << 20), 'FDT memory device_type or RAM span differs')
     require(props[('/psci', 'method')] == b'hvc\0', 'FDT PSCI must be HVC')
     require(props[('/pl011@9000000', 'reg')] == struct.pack('>QQ', 0x09000000, 0x1000), 'FDT PL011 mapping')
-    def compatible(node, expected):
-        raw = props[(node, 'compatible')]
-        return raw.endswith(b'\0') and expected in raw[:-1].split(b'\0')
-    require(compatible('/pl011@9000000', b'arm,pl011'), 'FDT PL011 compatible token')
-    require(compatible('/intc@8000000', b'arm,gic-v3'), 'FDT GICv3 compatible token')
+    compatible_rows = [(node, raw) for (node, name), raw in props.items() if name == 'compatible']
+    require(all(isinstance(raw, bytes) and raw.endswith(b'\0') for _, raw in compatible_rows),
+            'FDT compatible selection requires terminated token lists')
+    def matching_nodes(expected):
+        return [node for node, raw in compatible_rows if expected in raw[:-1].split(b'\0')]
+    require(matching_nodes(b'arm,pl011') == ['/pl011@9000000']
+            and not matching_nodes(b'ns16550a'), 'FDT UART consumer must be unambiguous canonical PL011')
+    require(matching_nodes(b'arm,gic-v3') == ['/intc@8000000'], 'FDT GICv3 consumer must be canonical and unique')
     require(struct.unpack('>4Q', props[('/intc@8000000', 'reg')]) ==
             (0x08000000, 0x10000, 0x080a0000, 0xf60000), 'FDT GIC register spans differ from pinned QEMU')
     timer = struct.unpack('>12I', props[('/timer', 'interrupts')])

@@ -176,11 +176,54 @@ def fdt_cases(main, out, c):
     return report
 
 
+def consumer_cases(main, out, c):
+    controls = load(ROOT / 'fixtures/public/avf-kernel-boot/controls.py', 'consumer_fixture')
+    raw = controls.fdt_bytes(); (out / 'authored-child-memory.dtb').write_bytes(raw)
+    props = c.fdt(raw); layout = {'payload_base': 0x48000000}; package = {'size': 64}
+    cases = []
+    def probe(name, current, expected):
+        row = {'case': name, 'expected_acceptance': expected,
+               'properties': {node + ':' + key: value.hex() for (node, key), value in current.items()}}
+        try:
+            row['result'] = c.fdt_contract(current, layout, package); row['accepted'] = True
+        except (ValueError, KeyError, struct.error) as error:
+            row.update(accepted=False, error=str(error))
+        cases.append(row); assert row['accepted'] is expected, row
+    probe('source-valid-authored-child', props, True)
+    root_only = dict(props); root_only.pop(('/memory@40000000', 'device_type'))
+    root_only[('/', 'device_type')] = b'memory\0'
+    root_only[('/', 'reg')] = props[('/memory@40000000', 'reg')]
+    probe('root-only-memory-is-not-a-child', root_only, False)
+    root_and_child = dict(props); root_and_child[('/', 'device_type')] = b'memory\0'
+    root_and_child[('/', 'reg')] = props[('/memory@40000000', 'reg')]
+    probe('root-property-does-not-hide-valid-child', root_and_child, True)
+    current = dict(props); current[('/pl011@9000000', 'compatible')] = b'arm,pl011\0ns16550a\0'
+    probe('canonical-node-prioritizes-8250', current, False)
+    current = dict(props); current[('/uart@3f8', 'compatible')] = b'ns16550a\0'
+    current[('/uart@3f8', 'reg')] = struct.pack('>QQ', 0x3f8, 8)
+    probe('other-node-prioritizes-8250', current, False)
+    current = dict(props); current[('/pl011@9100000', 'compatible')] = b'arm,pl011\0'
+    current[('/pl011@9100000', 'reg')] = struct.pack('>QQ', 0x9100000, 0x1000)
+    probe('competing-PL011-node', current, False)
+    current = dict(props); current[('/intc@8100000', 'compatible')] = b'arm,gic-v3\0'
+    current[('/intc@8100000', 'reg')] = struct.pack('>4Q', 0x8100000, 0x10000, 0x81a0000, 0xf60000)
+    probe('competing-GIC-node', current, False)
+    current = dict(props); current[('/uart@3f8', 'compatible')] = b'ns16550a'
+    probe('unterminated-competing-compatible', current, False)
+    current = dict(props); current[('/pl011@9000000', 'compatible')] = b'vendor,uart\0arm,pl011\0arm,primecell\0'
+    probe('valid-exact-PL011-token-list', current, True)
+    reviewer = main / 'worktrees/rev-vm040-20261106/docs/reviews/vm-040/runs/correction-fdt-residual-1/report.json'
+    report = {'cases': cases, 'reviewer_finding': {'path': str(reviewer), 'sha256': c.digest(reviewer)},
+              'child_process_started': False, 'actual_QEMU_FDT_qualified': False}
+    c.write_json(out / 'report.json', report)
+    return report
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--main', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
-    parser.add_argument('--phase', choices=('lease', 'fdt'), required=True)
+    parser.add_argument('--phase', choices=('lease', 'fdt', 'consumer'), required=True)
     parser.add_argument('--commit', required=True)
     args = parser.parse_args(); main_root = args.main.resolve()
     resource.setrlimit(resource.RLIMIT_AS, (256 << 20, 256 << 20))
@@ -192,8 +235,10 @@ def main():
             reports = [lease_case(main_root, out, case) for case in
                        ('late-expiry', 'late-revocation', 'late-memory-drop', 'late-Stop', 'valid-Python')]
             c.write_json(out / 'report.json', {'cases': reports, 'outcome': 'pass'})
-        else:
+        elif args.phase == 'fdt':
             fdt_cases(main_root, out, c)
+        else:
+            consumer_cases(main_root, out, c)
         outcome = 'pass'
     except BaseException:
         (out / 'failure.txt').write_text(traceback.format_exc())
@@ -208,7 +253,8 @@ def main():
     evidence = {'kind': 'host-test', 'origin': 'local-host', 'outcome': outcome, 'recorded_at': stamp,
         'summary': 'Focused REV-037 ' + args.phase + ' correction host controls; no compiler/QEMU/guest.',
         'task': 'VM-040', 'owner': c.OWNER, 'commit': args.commit,
-        'experiment': 'VMBOOTCOLLECT-002' if args.phase == 'lease' else 'VMBOOTCOLLECT-003',
+        'experiment': {'lease': 'VMBOOTCOLLECT-002', 'fdt': 'VMBOOTCOLLECT-003',
+                       'consumer': 'VMBOOTCOLLECT-004'}[args.phase],
         'commands': commands, 'artifacts': [relative(p) for p in files],
         'artifact_sha256': {relative(p): c.digest(p) for p in files},
         'source_sha256': {relative(path): c.digest(path) for path in
