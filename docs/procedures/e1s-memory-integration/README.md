@@ -35,3 +35,13 @@ frozen existing builder with --root /home/egor/dev/pet/s24-ios-exynos and a new
 snapshot SHA23b31, check/apply commands before every targetcompile and actual
 loader/probe product results. Keep failures and all historical unpatched build
 outputs. Root controls full build/compiler admission; this author has not run it.
+
+Root requested one planned measurement STR003BUILD-001. build-plan-001.json
+contains exactly one invocation of the frozen45522ff candidate builder, --root
+MAIN and fresh --run str003-memory-20261106-001. It pins actual /usr/bin/python3,
+/usr/bin/zig, /usr/bin/git, candidate builder/sources.py, MAIN sources.py, patch
+and source registry; PATH is explicitly /usr/bin:/bin. Root's proposed budget is
+2GiB aggregate RSS, one serial builder,600-second whole deadline and the existing
+120-second child timeouts. This is a request, not an active lease or execution
+grant. The author only registers the plan; root must admit and supervise it.
+Probe+loader qualification remains distinct from an XNU kernel or physical boot.
