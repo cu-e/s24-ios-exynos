@@ -100,3 +100,11 @@ monitoring. Independent review must precede admission. Current actual results
 and retained failures belong in `current-evidence.json`; compilation, host runtime,
 guest, native Xclipse and phone acceptance must stay separate. Main publication
 and common checks are exclusively the permanent integrator's responsibility.
+
+The subsequent executable phase admission/launcher preparation is described in
+[admission-contract.md](admission-contract.md) and
+[admission-experiment.md](admission-experiment.md). It preserves this source
+freeze in a separate worktree. Native and host-sanitizer phases are distinct;
+both refuse with no final accepted VM044/046 binding. Python-only process
+controls establish bounded cancellation of recorded fixture sessions, not
+compiler/sanitizer admission or GPU runtime.
