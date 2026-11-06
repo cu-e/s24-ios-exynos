@@ -1,0 +1,13 @@
+# Actual native BSD syscall sources
+
+Root71 ran the exact six-command registered plan once: unifdef raw0, then table/names/systrace/header/proto raw0. All expected files exist, sessions ended, owned survivors0; elapsed0.964s, controller HWM36,556,800 bytes. No compiler or guest execution. The original source/plan/query evidence and accepted native config remain unchanged.
+
+Consume `fixtures/public/e1s-development-syscalls/generated-development.json`: its physical `generated_include_root` provides sys/syscall.h and sys/sysproto.h; its three `generated_c_sources` are separate translation units. Do not rewrite old BCM/RELEASE consumer contexts or substitute source/generated header roots. The descriptor binds sourceprofile0028ef30b4a, manifestf884bf7f, full8config6b0ac2c8, all115 native BSD flags, genuine source/tool pins, plan4eb1f5bb and actual raw76bc4dca.
+
+Empty native SEED_DEFINES leaves selected master byte-identical to both original and actual unifdef stdout. There are665 rows including conditional alternatives,556 distinct slots0..555. Table/names row identity and all138 source directives are preserved (table adds genuine U32 wrappers); sysproto has two copies, systrace three. Actual systrace argument switch has449 non-placeholder cases according to the script's explicit nosys/enosys omission rule. Header has451 numeric SYS macros including SYS_MAXSYSCALL556; source selects the first alternative for header declarations. These are source observations, not an active compiled syscall count or ABI proof.
+
+GNU awk emitted three warnings per makesyscalls invocation, preserved in every separate stderr: \* becomes plain* in a bracket class; \( and \) become ordinary parentheses in printf casts. Source line581 still detects literal*; actual chflags char* becomes user_addr_t and its trace argument a uint64_t cast. Source lines674/681 emit normal function casts in the actual table. No source/tool change or warning suppression was applied. Compiler correctness remains unmeasured.
+
+Owner inspection review-2 passed117 bounded read/hash/structural checks, including all57 input pins, six exact argv/cwd/exits,12 separate stream hashes, six products, final-session cleanup and conditional/pointer witnesses. The review-1 failed assertion is preserved: it incorrectly expected systrace placeholder cases; actual generation did not fail. No generator replay occurred. Review HWM18,690,048 bytes.
+
+BOUND_CHECKS query-only isolation does not qualify compiler features or supply future CFLAGS. Independent review/publication/common and original-owner closure remain pending; native compiler, link, image and runtime work require separate admission.
