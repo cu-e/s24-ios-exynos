@@ -1,0 +1,265 @@
+{
+  "kind": "source-review",
+  "origin": "upstream",
+  "outcome": "pass",
+  "recorded_at": "2026-11-06T08:07:07.934406+00:00",
+  "summary": "Scion current8bee is111commits ahead but generic AVFshim/QEMUrunners/package/hello/libmini/buildwrappers are byte-identical to a6; recommend one existing-input link diagnostic before whole-source transition. EFI modularization/profile changes require coherent source/dependency adoption; currenthello retains x1 defect and ios27 is unimplemented. Source-only audit, no target/device claim.",
+  "task": "STR-001",
+  "owner": "codex-strategy-scion-20261106-sr1",
+  "experiment": "STRSCION-001",
+  "commit": "e06432f9fc753b6777f3aad77895c150357f7490",
+  "base_main_commit": "951f23336c1521c8ee94828e26fc98bfcf1e8411",
+  "review_worktree": "worktrees/str-001-scion-20261106",
+  "review_branch": "team/str-001-scion-20261106",
+  "source_only": true,
+  "current_revision": "8bee16f38f6e34751d2867a8945577edc7cd30c7",
+  "pinned_revision": "a6f4bc38aa244359cd365c976244a88c9d6b3304",
+  "official_current_repository": "https://github.com/Scion-Project/scion-kernel",
+  "current_ref_artifact": "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current-refs.txt",
+  "full_tree_counts": {
+    "pinned_entries": 1130,
+    "current_entries": 1330,
+    "both_truncated": false
+  },
+  "comparison_file_cap_corrected": true,
+  "source_bindings_sha256": "0b2860be0a5c0a8ebcc7587a8713574dbf866fbc499eb5430e31839e9a5a1a76",
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "ls-remote",
+        "https://github.com/Scion-Project/scion-kernel.git",
+        "HEAD",
+        "refs/heads/main"
+      ],
+      "exit_code": 0,
+      "environment": {
+        "GIT_NO_LAZY_FETCH": "1",
+        "GIT_OPTIONAL_LOCKS": "0",
+        "GIT_TERMINAL_PROMPT": "0"
+      },
+      "stdout": "artifacts/strategy-scion/current-refs.txt"
+    },
+    {
+      "operation": "curl official exact compare and both recursiveGitTrees",
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "per_request_timeout_seconds": 30
+    },
+    {
+      "operation": "Bounded urllib source text acquisition; each accepted file checked against official exactGitBlob SHA1 and SHA256",
+      "driver_exit_code": 0,
+      "initial_requests": 26,
+      "initial_failures": 5,
+      "retained_logs": [
+        "source-fetch.json",
+        "source-retry.json",
+        "local-fallback.json"
+      ],
+      "per_request_timeout_seconds": 15,
+      "max_response_bytes": 2097152
+    },
+    {
+      "operation": "Scoped Git whitespace check",
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "reuse": {
+    "avf/shim/": {
+      "paths": 11,
+      "unchanged": true
+    },
+    "qemu/": {
+      "paths": 12,
+      "unchanged": true
+    },
+    "userland/libmini/": {
+      "paths": 3,
+      "unchanged": true
+    },
+    "avf/qemu-avf.sh": {
+      "old": "8175253ca4c82e8b6355c58f909fa110ccde07ae",
+      "new": "8175253ca4c82e8b6355c58f909fa110ccde07ae",
+      "unchanged": true
+    },
+    "avf/run-probe.sh": {
+      "old": "93c96793b239293f952e262a3d9611dc4a4d11cf",
+      "new": "93c96793b239293f952e262a3d9611dc4a4d11cf",
+      "unchanged": true
+    },
+    "xnuloader/mkpayload.py": {
+      "old": "3709a4d537b34245a368ff83d4aebf0626a73eee",
+      "new": "3709a4d537b34245a368ff83d4aebf0626a73eee",
+      "unchanged": true
+    },
+    "userland/src/hello.c": {
+      "old": "79e3305822e3995a373be1bff86f4459acc4a185",
+      "new": "79e3305822e3995a373be1bff86f4459acc4a185",
+      "unchanged": true
+    },
+    "xnu-env.sh": {
+      "old": "8e9028596eb30b994beb1841ca5b40daabe75f5b",
+      "new": "8e9028596eb30b994beb1841ca5b40daabe75f5b",
+      "unchanged": true
+    },
+    "xnu-build.sh": {
+      "old": "5964a9b7b2ea707ef35d4b10c2085dd7fc4373e4",
+      "new": "5964a9b7b2ea707ef35d4b10c2085dd7fc4373e4",
+      "unchanged": true
+    },
+    "xnuloader/build.sh": {
+      "old": "a71e6e0cddc3b195064bf4a4c15a5a5e84c74550",
+      "new": "a71e6e0cddc3b195064bf4a4c15a5a5e84c74550",
+      "unchanged": true
+    },
+    "e1s_exynos2400_paths": []
+  },
+  "useful_upstream_changes": [
+    "EFI loader split58194b031b11c18f2d39970caa77e87fc56c7201; medium source/include/UEFI transition, unchanged AVFshim.",
+    "OSprofile60f155a3a8665671f564943dbb94a90209921570; ios16.5 retainsc54f XNU; ios27 notimplemented/arm64e/newXNU/noADT.",
+    "SoC support status/table organization and userlandBT/selftest changes do not supply an E1S driver or fix existing generic hello."
+  ],
+  "decision": "Prefer one bounded direct-link diagnostic using matching preserved1080+tails/providers and exact pinned template before a whole upstream rebuild; native E1S source contracts proceed independently under CN.",
+  "next_diagnostic": {
+    "action": "One actual current-input direct link only, under root grant",
+    "recipe_source": "worktrees/vm-022-20261106/artifacts/avf-guest-link-inputs/preparation-4/prepared-link-inputs.json",
+    "recipe_key": "next_owned_link_argv_template",
+    "observations": [
+      "real exit",
+      "stderr and unresolved symbols",
+      "actual MachO entry if output exists"
+    ],
+    "not_executed_by_this_task": true
+  },
+  "blocked_unknowns": [
+    "S24 firmware custom-AVF permission/hypervisor eligibility; no phone access used.",
+    "Current tree has no named e1s/exynos2400 path; no whole-device compatibility inferred.",
+    "Actual currentinput completeness/adoption is owned by root/CM; absentrequiredinput blocks only that diagnostic.",
+    "New currentplatform.h text remained unavailable; no content claim relies on it."
+  ],
+  "failure_preservation": {
+    "web_api_open": {
+      "url": "https://api.github.com/repos/Scion-Project/scion-kernel/commits/main",
+      "outcome": "fail",
+      "error": "Web tool Internal Error / URL not accessible; no claim based on this response"
+    },
+    "source_fetch_log": "source-fetch.json",
+    "canonical_retry_log": "source-retry.json",
+    "local_fallback_log": "local-fallback.json",
+    "raw_mismatch_detail": "Two raw fetches failed Git blob equality; their rejection records survive, but rejected response bytes were not captured. No cause is inferred. Canonical blob API or exact verified immutable donor copies supplied the necessary bytes.",
+    "still_unavailable": "New xnuloader/platform.h bytes not used; complete-tree identity only."
+  },
+  "sourcepins_changed": false,
+  "pinned_checkout_or_shared_refs_changed": false,
+  "full_builds_or_target_tools_run": 0,
+  "new_executor_or_planner_created": false,
+  "phone_actions": 0,
+  "common_checks": 0,
+  "artifact_hashes": {
+    "artifacts/strategy-scion/compare.json": "120c9592971b0257be2ce794efc21369e95a9fedddcd9105386be004dbec76bb",
+    "artifacts/strategy-scion/compare.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/strategy-scion/current/Makefile": "a89a80c1b2ca56c761e6ff712f1a82602ccf8332865098bd9de194a0b013610f",
+    "artifacts/strategy-scion/current/avf/qemu-avf.sh": "96f39ba2830af68ff968962d7f80e1c3602cfe30dd290a48de4c9ea7cab6f2ff",
+    "artifacts/strategy-scion/current/avf/run-probe.sh": "c9ad2761e3f57c52c2b439313a8df8c057d379a5fda0d75e549d89adb3196ee2",
+    "artifacts/strategy-scion/current/avf/shim/avfboot.c": "2957f3c8b17009b1d96191f6ccb782e90b135e7dc22208df2e3045b69d5f2c75",
+    "artifacts/strategy-scion/current/avf/shim/build.sh": "8c4db4bcfa769bc4f6f1b720383b1300eb662bb74ef8dbeaf2136dabd46939e3",
+    "artifacts/strategy-scion/current/docs/modular-kernel.md": "1ddd4c555e89e67d7793db860fb46051d184aa34642222da7cd989b823947ef8",
+    "artifacts/strategy-scion/current/docs/soc-support.md": "a8e1aecd6439fa4f0d2b9570db5bdff0c763eb26287ed845e9d5103f303626e0",
+    "artifacts/strategy-scion/current/profiles/ios-16.5.conf": "6502fdb465744f5c7a3f9ac045118c2193fe537659cd92c03853bcaa9fabc1b6",
+    "artifacts/strategy-scion/current/profiles/ios-27.conf": "e351fa7319d781f75fa3750356b0a4ef433f4c1a40e739c10009129b0bc1f96b",
+    "artifacts/strategy-scion/current/qemu/run.sh": "c2554d44c4e4b2567045913df10f22640e0854f1e12bb2067d418c7842399fdc",
+    "artifacts/strategy-scion/current/userland/build.sh": "3d2c33a97e0c0482de77f2298d7009a081bb3044d54ce8ff889773dfd3708d14",
+    "artifacts/strategy-scion/current/userland/libmini/mini.c": "4aafe4461e79a503336fc149c263d96fef7d5e9d28eaf7375ce968f838c4aa68",
+    "artifacts/strategy-scion/current/userland/libmini/start.S": "75024af4f60a89ff82269a7076be303bcb50779f9f1d4ef504231bcf4ea1012c",
+    "artifacts/strategy-scion/current/userland/src/hello.c": "f3c07a5e6a3f43e985b154178e8c3eaa7d36e03f62e409de1ddc14a4c0761e7a",
+    "artifacts/strategy-scion/current/userland/src/init.c": "d86cb18549409a30062c93419f86e6b0739b6d6712ba5147949c150455f71289",
+    "artifacts/strategy-scion/current/xnu/apply.sh": "17bfed0db4542391831a7e6421df674775bef1a058524bf6af2337a25018ba74",
+    "artifacts/strategy-scion/current/xnu-build.sh": "dbf9789cc31c079d2df61e9df9ac589aa7ba448f3d031e1b04d00f69250a6768",
+    "artifacts/strategy-scion/current/xnuloader/build.sh": "ed7bfb40973488611ee4cd80e07bf17b9004e2f7857c65caff33541e7fd84c77",
+    "artifacts/strategy-scion/current/xnuloader/loader.c": "4172f8e419f55d77865cf5c15587670ae5ce2dda4478de9844ca9794b9c81b91",
+    "artifacts/strategy-scion/current/xnuloader/mkpayload.py": "936d9f0ddb3215b34026f348146e750fb19a11888423e1fd58ded94589510518",
+    "artifacts/strategy-scion/current/xnuloader/platforms/qemu_virt.c": "3cd3b25c1da33760d9f1068f95f9d9893839d2809a97c5d7cb71b6468acfaaf4",
+    "artifacts/strategy-scion/current-avf_run-probe.sh-blob.json": "7e308a32b0decf92a26bb976d44b589939dd1bd3e3675498d0427cacdad401ae",
+    "artifacts/strategy-scion/current-docs_modular-kernel.md-blob.json": "f2ba0e6f8285cb8f61c9eea8025ed3671d0e68036ee01d98df32b9548c5be208",
+    "artifacts/strategy-scion/current-refs.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/strategy-scion/current-refs.txt": "cda6604c882bb91da3feae1b10597e0cd3dc4334ab3ab5d72609a17eaa862c55",
+    "artifacts/strategy-scion/current-tree.json": "77a3c01b10104c61bb0ff887fd4795827ec69c391fd7375ef8ace241ee124038",
+    "artifacts/strategy-scion/current-tree.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/strategy-scion/failure-notes.json": "70160debad493353788aa7c73f60f84c8a589fda012dd45a2b1e417643ed1f9f",
+    "artifacts/strategy-scion/local-fallback.json": "69b0153b589a35299c077aab1723a6e15b10ad9703e05b0765b796cdd5ea5cbb",
+    "artifacts/strategy-scion/pinned/userland/build.sh": "b8e430a0039e3070c231964f9d8646942150a7f64f906bbd2c3533f669983356",
+    "artifacts/strategy-scion/pinned/userland/src/init.c": "3a6bc2fc887b914421710b2102f066ca5b4a8f11aca9b7e8c387787702f23ce7",
+    "artifacts/strategy-scion/pinned/xnu/apply.sh": "d938f56b7e35eae058abc9cf2469b8e92c9fe60250783bce4d8d1c44a6d1eb1a",
+    "artifacts/strategy-scion/pinned/xnuloader/loader.c": "c2a0e683a37b87a0c3d438dc7b275d5b19beaa25074b2854e56bf98f6f29e7e3",
+    "artifacts/strategy-scion/pinned-tree.json": "11e143c161f1e15afeabe01fe2d044e5356285d4b0893a9e4103ab81a1f6a8d0",
+    "artifacts/strategy-scion/pinned-tree.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/strategy-scion/reuse-bindings.json": "4bb0eb107fb48b53fd21084cf19475004837fdfcdd0593b215661c13b67f66a2",
+    "artifacts/strategy-scion/selected-tree-changes.json": "871cec2e63129eb5fa3c04e80dd1ec43c6ddf97ad8a79a83fb48457923dcc2ae",
+    "artifacts/strategy-scion/source-fetch.json": "0a0abbaba00db411ef58eef32423392c7649b63f7001942f5208d4b181d700d9",
+    "artifacts/strategy-scion/source-retry.json": "3461b20e4644c024e14f6eac45482e24835766f9f29f30c30911babe7ee75da9"
+  },
+  "review_hashes": {
+    "docs/strategy/2026-11-06/scion/handoff.md": "af28517ed6b0de26138d0f0026572be94f7165d646ff10326d686adce812ed6f",
+    "docs/strategy/2026-11-06/scion/procedure.md": "03a4d72c106f1c0e48bd3fdae2b518cd521695edd4675c2c196f51a1b981d02c",
+    "docs/strategy/2026-11-06/scion/report.md": "14b909a154ca34c8ed8c4aaa1b9a1e18902c3ab84ec2bcb4b1c641db98c10829",
+    "docs/strategy/2026-11-06/scion/source-bindings.json": "0b2860be0a5c0a8ebcc7587a8713574dbf866fbc499eb5430e31839e9a5a1a76"
+  },
+  "artifacts": [
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/compare.json",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/compare.stderr",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/Makefile",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/avf/qemu-avf.sh",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/avf/run-probe.sh",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/avf/shim/avfboot.c",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/avf/shim/build.sh",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/docs/modular-kernel.md",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/docs/soc-support.md",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/profiles/ios-16.5.conf",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/profiles/ios-27.conf",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/qemu/run.sh",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/userland/build.sh",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/userland/libmini/mini.c",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/userland/libmini/start.S",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/userland/src/hello.c",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/userland/src/init.c",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/xnu/apply.sh",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/xnu-build.sh",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/xnuloader/build.sh",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/xnuloader/loader.c",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/xnuloader/mkpayload.py",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current/xnuloader/platforms/qemu_virt.c",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current-avf_run-probe.sh-blob.json",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current-docs_modular-kernel.md-blob.json",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current-refs.stderr",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current-refs.txt",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current-tree.json",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/current-tree.stderr",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/failure-notes.json",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/local-fallback.json",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/pinned/userland/build.sh",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/pinned/userland/src/init.c",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/pinned/xnu/apply.sh",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/pinned/xnuloader/loader.c",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/pinned-tree.json",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/pinned-tree.stderr",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/reuse-bindings.json",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/selected-tree-changes.json",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/source-fetch.json",
+    "worktrees/str-001-scion-20261106/artifacts/strategy-scion/source-retry.json"
+  ],
+  "limitations": [
+    "Read source and recipes only; official claimed Pixel/S9 runtime is not independently reproduced.",
+    "Generic QEMU/AVF reproduction, local ABI/environment fixes and actual E1S adaptation/device proof remain distinct.",
+    "Do not mix source/header/library/userland ABI versions or silently requalify old object keys.",
+    "CM audits infrastructure, CN E1S, root HakiOS and final project-wide route; no duplicate surveys here."
+  ]
+}
