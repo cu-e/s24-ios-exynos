@@ -14,10 +14,12 @@ import platform
 import re
 import resource
 import shutil
+import signal
 import struct
 import subprocess
 import sys
 import time
+import threading
 
 sys.dont_write_bytecode = True
 PIN = 'afc5cd206965de7e36a0aa17c4eb86a1f305689f386ccb22c55bd983567dd1dd'
@@ -572,6 +574,56 @@ def owned_processes(identity, sessions, table):
         if expanded == members:
             return [table[p] for p in sorted(members) if table[p]['state'] != 'Z']
         members = expanded
+
+
+def bounded_flock(lock, timeout=.5):
+    """Wait in the kernel, with a raising alarm and preserved outer deadline."""
+    if type(timeout) not in (int, float) or not 0 < timeout <= .5:
+        raise ValueError('Project budget lock wait must be finite and at most .5 seconds')
+    if threading.current_thread() is not threading.main_thread() or threading.active_count() != 1 or len(os.listdir('/proc/self/task')) != 1:
+        raise ValueError('Bounded project lock requires a single main-thread interpreter')
+    mask = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGALRM})
+    previous_handler = None; previous_timer = None; outer_fired = False; replacement_installed = False
+    started = time.monotonic(); outer_deadline = None
+    try:
+        if signal.SIGALRM in mask or signal.SIGALRM in signal.sigpending():
+            raise ValueError('Bounded project lock cannot replace blocked/pending SIGALRM')
+        previous_handler = signal.getsignal(signal.SIGALRM)
+        previous_timer = signal.setitimer(signal.ITIMER_REAL, 0)
+        if signal.SIGALRM in signal.sigpending():
+            raise ValueError('Outer alarm became pending before project lock acquisition')
+        remaining, interval = previous_timer
+        if interval or (remaining and not callable(previous_handler)):
+            raise ValueError('Bounded project lock requires a callable one-shot outer alarm')
+        outer_deadline = started+remaining if remaining else None
+        lock_deadline = started+timeout
+        def expired(signum, frame):
+            nonlocal outer_fired
+            if outer_deadline is not None and outer_deadline <= lock_deadline:
+                outer_fired = True
+                previous_handler(signum, frame)
+                raise ValueError('Earlier outer alarm returned during project lock acquisition')
+            raise ValueError('Project budget lock acquisition timed out')
+        signal.signal(signal.SIGALRM, expired)
+        replacement_installed = True
+        signal.setitimer(signal.ITIMER_REAL, max(.000001, min(lock_deadline, outer_deadline or lock_deadline)-time.monotonic()))
+        signal.pthread_sigmask(signal.SIG_SETMASK, mask)
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        if time.monotonic() >= lock_deadline:
+            raise ValueError('Project budget lock acquisition timed out')
+    finally:
+        signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGALRM})
+        if previous_timer is not None:
+            signal.setitimer(signal.ITIMER_REAL, 0)
+            # Consume only the replacement alarm while blocked, so it cannot
+            # escape into the restored handler after acquisition/cancellation.
+            if replacement_installed and signal.SIGALRM in signal.sigpending():
+                signal.sigtimedwait({signal.SIGALRM}, 0)
+            signal.signal(signal.SIGALRM, previous_handler)
+            remaining, interval = previous_timer
+            restored = max(.000001, started+remaining-time.monotonic()) if remaining and not outer_fired else 0
+            signal.setitimer(signal.ITIMER_REAL, restored, interval)
+        signal.pthread_sigmask(signal.SIG_SETMASK, mask)
 
 
 class ProjectBudget:
