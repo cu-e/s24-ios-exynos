@@ -13,3 +13,12 @@ Both plan and future argv explicitly select project-budget-v1. Actual execute
 output must remain absent. No compiler, resume, old object credit, allocation,
 archive/linker/QEMU, source changes or common/publication are authorized.
 Preserve old VM042 sourceplan and all VM015/VM047 work unchanged.
+
+## Grant30 refusal and prospective recovery
+
+The once-only VM042FINALBUILD-001 actual invocation refused the noncanonical
+root allocation path before reservation or compiler start. Preserve execute-001
+and record FAIL. Root authorized registering VM042FINALBUILD-002 with fresh
+execute-002 and unchanged accepted sourceplan44c2; do not replan or run compiler
+before separate root31 grant. Same reviewed EV9929 and1200s launcher, child120s
+and512MiB; no helper/source/flag/cap change or old object credit.
