@@ -12,8 +12,8 @@ unchanged. This source-only correction removes only the custom alarm and adds
 monotonic work-boundary checks; no target operation ran.
 
 The exact header plan is
-`artifacts/e1s-development-providers/header-plan-003/execution-plan.json`, SHA256
-`82b3e9563ea5a7fd0e0c60835a96eddea7b2e11ba18e488ae9efd47c00bf9225`.
+`artifacts/e1s-development-providers/header-plan-004/execution-plan.json`, SHA256
+`2e673a4abb9e9aa0acab322fd369e33623edef090f9a3a37ce0d5931e53570a3`.
 Adapter `fixtures/public/e1s-development-providers/header_only.py` has SHA256
 `dfab7c3daf099d0da07af84c42a983fb57dd41de2ae061d96921516292b447a7`.
 This is a source freeze: no header tool was executed, and `execute-001` is absent.
@@ -23,13 +23,23 @@ the accepted qemu_host supervisor, plus existing 9f80 `owned_cancellation` and
 `run_owned_child`. It implements no process launcher, monitor, signal cleanup
 engine or budget broker. Root approval must bind this exact adapter/header
 plan, original owner, task, experiment, `providers-headers` slot and fresh output.
-One serial slot with 512MiB ceiling, the existing 4GiB memory floor and 600s whole
-deadline are declared; each command retains at most 120s and the remaining whole
-deadline. Monotonic checks enforce the 600s deadline at each hash, copy,
-directory, product and command boundary. The adapter installs no alarm or
-timer. Existing shared bounded locks retain their own alarm ownership. Finite
-reservation release and evidence cleanup may finish after the work deadline;
-the existing cancellation handlers remain installed through that cleanup.
+One serial slot with 512MiB ceiling and the existing 4GiB memory floor remain
+unchanged. The adapter's `whole_seconds=600` is a dispatch/work-boundary budget,
+not a hard whole-process limit. Monotonic checks run at each hash, copy,
+directory, product and command boundary. Each shared child receives a timeout
+of `min(120s, remaining work budget)`. The pinned common helper first performs
+stable-memory admission for up to 45s, before starting that child timeout clock.
+A final admitted command may therefore finish up to 45s after the 600s work
+boundary (645s admitted work), followed by finite owned reservation release and
+evidence cleanup. No subsequent work is dispatched after the boundary.
+
+Root must supply the external GNU `timeout` watchdog at 690s before admission,
+with root-owned cleanup verification. The adapter does not install or enforce
+that outer watchdog, and its declaration is not a grant. The adapter installs
+no alarm or timer; existing shared bounded locks retain their own alarm
+ownership. Existing cancellation handlers remain installed through finite
+owned cleanup. Header-plan003/82b3 and adapter dfab receipts remain retained;
+this revision changes only source deadline documentation and plan metadata.
 No grant, allocation or permission is inferred from these declarations.
 
 Setup is restricted to canonical owned header directories and exactly four
@@ -62,12 +72,14 @@ archive contents, ABI, full link/image, runtime or hardware. Original task
 completion remains gated on later actual provider results and independent/root
 integration acceptance.
 
-Future invocation requires explicit root-supplied approval path and digest:
+Future invocation requires the root-owned external GNU `timeout` 690s watchdog
+and explicit root-supplied approval path and digest. The adapter argv below is
+the inner invocation; root supplies and owns the outer watchdog:
 
 ```sh
 LC_ALL=C PYTHONUTF8=1 PYTHONNOUSERSITE=1 python3 -s \
   fixtures/public/e1s-development-providers/header_only.py \
-  --source-plan /home/egor/dev/pet/s24-ios-exynos/worktrees/str-018-e1s-development-providers-20261106/artifacts/e1s-development-providers/header-plan-003/execution-plan.json \
-  --source-plan-sha256 82b3e9563ea5a7fd0e0c60835a96eddea7b2e11ba18e488ae9efd47c00bf9225 \
+  --source-plan /home/egor/dev/pet/s24-ios-exynos/worktrees/str-018-e1s-development-providers-20261106/artifacts/e1s-development-providers/header-plan-004/execution-plan.json \
+  --source-plan-sha256 2e673a4abb9e9aa0acab322fd369e33623edef090f9a3a37ce0d5931e53570a3 \
   --approval ROOT_APPROVAL_PATH --approval-sha256 ROOT_APPROVAL_SHA256
 ```
