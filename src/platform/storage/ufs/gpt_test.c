@@ -187,8 +187,8 @@ static void test_lba_rules(void)
     build(4096); put64(H + 48, LUN_BLOCKS - 1 - 4); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
     build(4096); put64(H + 48, LUN_BLOCKS - 2); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS); /* no backup array at all */
     /* A larger array needs all its blocks, rounded up: 129 entries take 33 of 512 or 5 of 4K. */
-    build(512); use_count(129); put64(H + 40, 34); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
-    build(512); use_count(129); put64(H + 40, 35); seal(); CHECK_EQ(find("boot"), UFS_GPT_OK);
+    build(512); use_count(129); put64(H + 40, 34); put64(H + 48, LUN_BLOCKS - 1 - 34); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(512); use_count(129); put64(H + 40, 35); put64(H + 48, LUN_BLOCKS - 1 - 34); seal(); CHECK_EQ(find("boot"), UFS_GPT_OK);
     build(4096); use_count(129); put64(H + 40, 6); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
     build(4096); use_count(129); put64(H + 40, 7); seal(); CHECK_EQ(find("boot"), UFS_GPT_OK);
     build(4096); use_count(129); put64(H + 48, LUN_BLOCKS - 1 - 5); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
