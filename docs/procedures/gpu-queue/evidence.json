@@ -1,0 +1,88 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-09T22:33:52+00:00",
+  "summary": "Bounded per-ring queues and counter-based retirement between hardware signals and the backend core, tested against a fake sink and the real GPU-013 core. Nothing ran on a GPU.",
+  "task": "GPU-015",
+  "owner": "claude-gpu-timeline-20261110-g15",
+  "commit": "36e9f07e28facf36dc3fe821e47e77e78d70d779",
+  "results": {
+    "tests_asan_ubsan": 46,
+    "tests_tsan": 46,
+    "mutants_run": 130,
+    "mutant_survivors": 0,
+    "equivalent_mutants_not_run": 2,
+    "arm64_undefined_symbols": []
+  },
+  "commands": [
+    {
+      "cwd": "worktrees/gpu-015-timeline-20261110/",
+      "argv": [
+        "python3",
+        "-I",
+        "src/platform/gpu/native/queue/check.py",
+        "--run",
+        "check-001"
+      ],
+      "exit_code": 0,
+      "result": "Superseded by review fixes."
+    },
+    {
+      "cwd": "worktrees/gpu-015-timeline-20261110/",
+      "argv": [
+        "python3",
+        "-I",
+        "src/platform/gpu/native/queue/check.py",
+        "--run",
+        "check-002"
+      ],
+      "exit_code": 0,
+      "result": "Superseded by second-round fixes."
+    },
+    {
+      "cwd": "worktrees/gpu-015-timeline-20261110/",
+      "argv": [
+        "python3",
+        "-I",
+        "src/platform/gpu/native/queue/check.py",
+        "--run",
+        "check-003"
+      ],
+      "exit_code": 0,
+      "result": "worktrees/gpu-015-timeline-20261110/artifacts/gpu-queue/check-003/evidence.json"
+    }
+  ],
+  "sha256": {
+    "sgpu_abi.h": "363bb88f12b9474dd03201bcac6d88e18a269723499f46f56ca06fdd7cddb5b2",
+    "sgpu_abi.c": "e1cf79e584798006213a9420dffbd0d6748bf0d9fed07ebd3a8c35765537c945",
+    "sgpu_backend.h": "3b406cc4156a67236d6e5bd7ba1b79ae9768906be4be540bfe6deeded1225834",
+    "sgpu_backend.c": "b256a67dc88b706f332b069cdca15fcd71ab9e2ac16bdcf48d6d696267323098",
+    "test_backend.c": "31c6934eedaded01608321e7a6a8f8e2898498746e5ecd3ea7e6b2fbd309a622",
+    "sgpu_timeline.h": "df3cc4d55d6e44fa20b0407eb2ac007d9a644a0c51106cdd3c6037cd4a970b07",
+    "sgpu_timeline.c": "838f4071e81503c23765678072dadf05258acaecba0b47345a031ebaa96379ed",
+    "test_timeline.c": "08bacfc9cf1b7519e30128076bead7080b5aeb150c194b618d4d231618dd4048",
+    "check.py": "5a8b72b40e2a719d6d9e417c3ab16a1e0ad33a1b1aea4f41d55322cc1f5fc96c"
+  },
+  "artifact_sha256": {
+    "worktrees/gpu-015-timeline-20261110/artifacts/gpu-queue/check-003/evidence.json": "5e20a989e0b442e2e669e75895ff512d321ec4b21a4262840a1147e0b11b8a5b"
+  },
+  "artifacts": [
+    "worktrees/gpu-015-timeline-20261110/artifacts/gpu-queue/check-003/evidence.json",
+    "worktrees/gpu-015-timeline-20261110/src/platform/gpu/native/queue/sgpu_timeline.c",
+    "worktrees/gpu-015-timeline-20261110/src/platform/gpu/native/queue/sgpu_timeline.h"
+  ],
+  "device_io": false,
+  "gpu_executed": false,
+  "apple_sdk_used": false,
+  "xnu_build": false,
+  "hardware_constants_invented": false,
+  "limitations": [
+    "No sgpu_tl_hw or sgpu_be_ops implementation for real hardware exists. Hardware behaviour is modeled by a software fake.",
+    "In-order per-ring completion is an assumption stated in the header and cannot be verified here.",
+    "Carrying core quarantine to the timeline depends on a future sgpu_be_ops layer calling sgpu_timeline_note_fault; only the tlb_flush path is exercised, by a fake.",
+    "A faulted timeline never restarts. Recovery needs a real reset path, which is not implemented.",
+    "The ARM64 object was compiled with host clang in freestanding mode, not with the kernel flags. This is not an XNU build. GPU-007 stays open and depends on KRN-001."
+  ],
+  "review": "A same-session subagent reviewed the design from source and reported 5 defects (2 high); all were fixed in 328a571. Its second pass over that diff confirmed closure and reported 2 low items, fixed in 36e9f07, which was not reviewed again. Neither pass is independent of this session."
+}
