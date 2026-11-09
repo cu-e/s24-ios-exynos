@@ -57,11 +57,12 @@ def main():
     try:
         if not created:
             raise RuntimeError('Could not create the RAM directory; su may be denied or the directory exists')
-        code, text, err = su(f'cat > {HELPER}', stdin=binary)
+        code, text, err = su(f'cat > {HELPER}.in', stdin=binary)
         report['steps']['deliver'] = dict(exit_code=code, stderr=err[:200])
         if code:
             raise RuntimeError('Helper delivery failed')
-        code, text, err = su(f'chmod 700 {HELPER} && sha256sum {HELPER}')
+        # Execute a copy: the delivering writer can still hold the first file open (ETXTBSY).
+        code, text, err = su(f'cp {HELPER}.in {HELPER} && rm {HELPER}.in && chmod 700 {HELPER} && sha256sum {HELPER}')
         remote = text.split()[0] if text else ''
         report['steps']['hash'] = dict(exit_code=code, matches=remote == local)
         if code or remote != local:
