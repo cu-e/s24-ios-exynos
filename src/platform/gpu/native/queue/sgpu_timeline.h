@@ -8,8 +8,10 @@
  * Rules:
  *  - Fixed tables only. A full job table refuses work before any hardware effect.
  *    config.depth bounds only the work running on a ring. Queued work is bounded by the
- *    job table, and a job lives no longer than its pending fence, so the core's per-client
- *    fence quotas decide who may queue; one client cannot fill a ring against another.
+ *    job table. Until a fault, a job lives no longer than its pending fence, so the core's
+ *    per-client fence quotas decide who may queue, and one live client cannot fill a ring
+ *    against another live client. A closed client's zombies are outside that guarantee,
+ *    as they are in the core.
  *  - Each ring starts jobs in submission order. A job starts only once every sequence
  *    it waits for has finished, so a blocked head also holds back the jobs behind it.
  *  - Sequences strictly increase and waits refer only to earlier ones, so the oldest
@@ -17,11 +19,16 @@
  *    the hardware finished it; the sink is told afterwards, in order.
  *  - Hardware is assumed to complete each ring's jobs in the order they started, so one
  *    counter value retires everything up to it. Nothing here can verify that assumption.
- *  - The completion counter is read under the timeline lock, so concurrent observers
- *    cannot present a stale value, and is checked before it is believed. A value above the
+ *  - The completion counter is read under the timeline lock and only while its ring has
+ *    running work: an idle ring may be power-gated and nothing can have finished on it.
+ *    Concurrent observers therefore cannot present a stale value, provided read_counter
+ *    returns the current one; a memory-backed counter needs a coherent read. The value is
+ *    checked before it is believed. A value above the
  *    configured width, or further ahead than the work actually running on that ring,
  *    faults the device and retires nothing. A regression appears as a huge forward
  *    distance and is caught by the same check.
+ *  - A ring whose head is overdue at a tick gets one last look at its counter, so work
+ *    that finished just before its deadline is retired rather than timed out.
  *  - Once faulted, the counter is ignored and no work starts. Running work is released
  *    only by sgpu_timeline_quiesced, which the caller may call only with proof that
  *    all DMA and queues have stopped. A timeline that has faulted never restarts:
@@ -88,7 +95,7 @@ struct sgpu_tl_config {
 };
 
 struct sgpu_tl_stats {
-    uint64_t started, completed, spurious_observations, ignored_after_fault, bad_counters;
+    uint64_t started, completed, idle_observations, spurious_observations, ignored_after_fault, bad_counters;
     uint64_t timeouts, start_failures, unknown_retirements, quiesce_rejected;
 };
 

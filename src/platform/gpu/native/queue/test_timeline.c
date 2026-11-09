@@ -13,7 +13,7 @@ struct event { int kind; uint64_t value; };
 
 struct harness {
     int locked, threaded, fail_start, retire_status, quiesced_status;
-    unsigned start_calls, event_count;
+    unsigned start_calls, event_count, read_calls;
     uint64_t now, counter[SGPU_TL_MAX_RINGS];
     struct started started[EVENTS];
     struct event events[EVENTS];
@@ -72,6 +72,7 @@ static uint64_t h_read_counter(void *hw, uint32_t ring)
 {
     (void)hw;
     h_held();
+    ++H.read_calls;
     if (H.threaded) return atomic_load(&H.latest_counter);
     return H.counter[ring];
 }
@@ -311,19 +312,23 @@ static void test_tl_bad_counters(void)
     /* A regression looks like a huge forward distance. */
     tl_setup(1, 4, 32);
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
+    CHECK_EQ(sub(0, 2, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     CHECK_EQ(obs(0, 0), SGPU_TL_BAD_COUNTER);
     bad_counter_faulted(1);
 
-    /* Nothing running means any change is impossible. */
+    /* An idle ring's counter is not read, so garbage from a power-gated ring cannot fault. */
     tl_setup(1, 4, 32);
-    CHECK_EQ(obs(0, 1), SGPU_TL_BAD_COUNTER);
-    bad_counter_faulted(0);
+    CHECK_EQ(obs(0, 77), SGPU_TL_OK);
+    CHECK_EQ(H.read_calls, 0);
+    CHECK_EQ(H.event_count, 0);
+    CHECK_EQ(stats().idle_observations, 1);
 }
 
 static void test_tl_spurious_observation(void)
 {
     tl_setup(1, 4, 32);
+    CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(obs(0, 0), SGPU_TL_OK);
     CHECK_EQ(stats().spurious_observations, 1);
     CHECK_EQ(H.event_count, 0);
@@ -647,6 +652,52 @@ static void test_tl_timeout_clock_and_rings(void)
     CHECK_EQ(sgpu_timeline_tick(TL), SGPU_TL_OK);
     H.now = 6000;
     CHECK_EQ(sgpu_timeline_tick(TL), SGPU_TL_TIMED_OUT);
+}
+
+static void test_tl_tick_takes_a_last_look(void)
+{
+    tl_setup(1, 4, 32);
+    CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
+    CHECK_EQ(sub(0, 2, NULL, 0), SGPU_TL_OK);
+    /* The head finished just before its deadline; nobody has observed that yet. */
+    H.counter[0] = 1;
+    H.now = 6000;
+    CHECK_EQ(sgpu_timeline_tick(TL), SGPU_TL_OK);
+    CHECK_EQ(H.event_count, 1);
+    event_is(0, EV_RETIRE, 1);
+    CHECK_EQ(stats().timeouts, 0);
+    /* The next head has a fresh deadline and can still time out. */
+    H.now = 6999;
+    CHECK_EQ(sgpu_timeline_tick(TL), SGPU_TL_OK);
+    H.now = 7000;
+    CHECK_EQ(sgpu_timeline_tick(TL), SGPU_TL_TIMED_OUT);
+    event_is(1, EV_FAULT, SGPU_BE_REASON_FAULT);
+}
+
+static void test_tl_tick_reads_only_overdue_rings(void)
+{
+    tl_setup(2, 4, 32);
+    H.counter[0] = 999;
+    CHECK_EQ(sub(1, 1, NULL, 0), SGPU_TL_OK);
+    H.now = 5500;
+    CHECK_EQ(sgpu_timeline_tick(TL), SGPU_TL_OK);
+    CHECK_EQ(H.read_calls, 0);
+    H.now = 6000;
+    CHECK_EQ(sgpu_timeline_tick(TL), SGPU_TL_TIMED_OUT);
+    CHECK_EQ(H.read_calls, 1);
+}
+
+static void test_tl_tick_refuses_garbage(void)
+{
+    tl_setup(1, 4, 32);
+    CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
+    H.counter[0] = 77;
+    H.now = 6000;
+    CHECK_EQ(sgpu_timeline_tick(TL), SGPU_TL_BAD_COUNTER);
+    CHECK_EQ(stats().bad_counters, 1);
+    CHECK_EQ(stats().timeouts, 0);
+    CHECK_EQ(H.event_count, 1);
+    event_is(0, EV_FAULT, SGPU_BE_REASON_FAULT);
 }
 
 static void test_tl_fault_reasons(void)
@@ -985,7 +1036,7 @@ int main(void)
         test_tl_nothing_retires_after_fault, test_tl_wait_same_ring, test_tl_wait_across_rings, test_tl_all_waits_required, test_tl_wait_on_waiting_job,
         test_tl_freed_wait_slot_reused, test_tl_waiting_queue_wraps, test_tl_blocked_head_holds_followers, test_tl_wait_on_gone_or_reporting_job, test_tl_wait_table_capacity, test_tl_depth_limits, test_tl_job_table_exhausted,
         test_tl_submit_checks, test_tl_own_start_failure, test_tl_queued_start_failure_faults, test_tl_queued_failure_stops_other_rings, test_tl_timeout_measures_head,
-        test_tl_timeout_uses_first_start, test_tl_timeout_after_idle, test_tl_timeout_clock_and_rings, test_tl_fault_reasons, test_tl_note_fault_defers_the_sink, test_tl_quiesced_needs_fault,
+        test_tl_timeout_uses_first_start, test_tl_timeout_after_idle, test_tl_timeout_clock_and_rings, test_tl_tick_takes_a_last_look, test_tl_tick_reads_only_overdue_rings, test_tl_tick_refuses_garbage, test_tl_fault_reasons, test_tl_note_fault_defers_the_sink, test_tl_quiesced_needs_fault,
         test_tl_delivery_order, test_tl_nested_observation_keeps_order, test_tl_unknown_retirement_counted, test_core_retires_through_timeline, test_core_one_client_cannot_fill_a_ring, test_core_quarantine_reaches_timeline,
         test_core_bad_counter_then_quiesce, test_core_timeout_then_quiesce, test_core_threaded
     };

@@ -240,42 +240,55 @@ static void deliver(struct sgpu_timeline *tl)
     tl->hw.unlock(tl->hw_context);
 }
 
+/* Reads the counter and retires what it proves finished. Called with the lock held. */
+static int observe_locked(struct sgpu_timeline *tl, uint32_t ring)
+{
+    struct tl_ring *r = &tl->rings[ring];
+    uint64_t counter, distance, i;
+    if (!r->running_count) {
+        ++tl->stats.idle_observations;
+        return SGPU_TL_OK;
+    }
+    counter = tl->hw.read_counter(tl->hw_context, ring);
+    distance = (counter - r->last_counter) & tl->mask;
+    if ((counter & ~tl->mask) || distance > r->running_count) {
+        ++tl->stats.bad_counters;
+        mark_faulted(tl, SGPU_BE_REASON_FAULT);
+        return SGPU_TL_BAD_COUNTER;
+    }
+    if (!distance) {
+        ++tl->stats.spurious_observations;
+        return SGPU_TL_OK;
+    }
+    for (i = 0; i < distance; ++i) {
+        uint32_t slot = pop_running(r);
+        tl->jobs[slot].state = JOB_DONE;
+        tl->report[(tl->report_head + tl->report_count) % SGPU_TL_MAX_JOBS] = (uint16_t)slot;
+        ++tl->report_count;
+        ++tl->stats.completed;
+    }
+    r->last_counter = counter;
+    r->head_since = tl->hw.now_ns(tl->hw_context);
+    pump(tl);
+    return tl->faulted ? SGPU_TL_START_FAILED : SGPU_TL_OK;
+}
+
 int sgpu_timeline_observe(struct sgpu_timeline *tl, uint32_t ring)
 {
-    int status = SGPU_TL_OK;
+    int status = SGPU_TL_STOPPED;
     if (ring >= tl->config.rings) return SGPU_TL_ARGUMENT;
     tl->hw.lock(tl->hw_context);
-    if (tl->faulted) {
-        ++tl->stats.ignored_after_fault;
-        status = SGPU_TL_STOPPED;
-    } else {
-        struct tl_ring *r = &tl->rings[ring];
-        uint64_t counter = tl->hw.read_counter(tl->hw_context, ring);
-        uint64_t distance = (counter - r->last_counter) & tl->mask;
-        if ((counter & ~tl->mask) || distance > r->running_count) {
-            ++tl->stats.bad_counters;
-            mark_faulted(tl, SGPU_BE_REASON_FAULT);
-            status = SGPU_TL_BAD_COUNTER;
-        } else if (!distance) {
-            ++tl->stats.spurious_observations;
-        } else {
-            uint64_t i;
-            for (i = 0; i < distance; ++i) {
-                uint32_t slot = pop_running(r);
-                tl->jobs[slot].state = JOB_DONE;
-                tl->report[(tl->report_head + tl->report_count) % SGPU_TL_MAX_JOBS] = (uint16_t)slot;
-                ++tl->report_count;
-                ++tl->stats.completed;
-            }
-            r->last_counter = counter;
-            r->head_since = tl->hw.now_ns(tl->hw_context);
-            pump(tl);
-            if (tl->faulted) status = SGPU_TL_START_FAILED;
-        }
-    }
+    if (tl->faulted) ++tl->stats.ignored_after_fault;
+    else status = observe_locked(tl, ring);
     tl->hw.unlock(tl->hw_context);
     deliver(tl);
     return status;
+}
+
+/* The clock must not go backwards; if it appears to, no time has passed. */
+static int overdue(const struct sgpu_timeline *tl, const struct tl_ring *r, uint64_t now)
+{
+    return r->running_count && now > r->head_since && now - r->head_since >= tl->config.job_timeout_ns;
 }
 
 int sgpu_timeline_tick(struct sgpu_timeline *tl)
@@ -289,8 +302,11 @@ int sgpu_timeline_tick(struct sgpu_timeline *tl)
         uint32_t i;
         for (i = 0; i < tl->config.rings; ++i) {
             const struct tl_ring *r = &tl->rings[i];
-            /* The clock must not go backwards; if it appears to, no time has passed. */
-            if (r->running_count && now > r->head_since && now - r->head_since >= tl->config.job_timeout_ns) {
+            if (!overdue(tl, r, now)) continue;
+            /* One last look: the head may have finished with its observation still on the way. */
+            status = observe_locked(tl, i);
+            if (status != SGPU_TL_OK) break;
+            if (overdue(tl, r, now)) {
                 ++tl->stats.timeouts;
                 mark_faulted(tl, SGPU_BE_REASON_FAULT);
                 status = SGPU_TL_TIMED_OUT;
