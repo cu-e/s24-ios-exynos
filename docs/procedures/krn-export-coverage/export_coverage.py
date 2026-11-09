@@ -19,7 +19,7 @@ MAIN = Path('/home/egor/dev/pet/s24-ios-exynos')
 XNU = MAIN/'artifacts/xnu-prepare/e1s-dependency-source-session1/xnu'
 NM = MAIN/'artifacts/xnu-macho-tools/macho-session4/prefix/bin/aarch64-apple-darwin-nm'
 KERNEL = MAIN/'worktrees/str-041-e1s-native-link-image-20261110/artifacts/e1s-native-link/link-001/kernel/kernel.unstripped'
-ASSESSMENT = MAIN/'worktrees/krn-026-20261105/fixtures/public/kernel-export-gaps/assessment.json'
+KRN026_INPUTS = MAIN/'worktrees/krn-026-20261105/fixtures/public/kernel-export-gaps/inputs.json'
 COMPONENTS = ['BSDKernel', 'IOKit', 'Libkern', 'Mach', 'MACFramework', 'Unsupported', 'Private']
 PASSES = {'without-private': 'Private', 'without-unsupported': 'Unsupported'}
 
@@ -143,19 +143,18 @@ def main():
         report['passes'][name] = dict(export_entries=total, missing_names=sum(len(v) for v in missing.values()), missing=missing)
     report['all_missing'] = {k: sorted(v) for k, v in sorted(union.items())}
     report['all_missing_count'] = len(union)
-    assessment = json.loads(ASSESSMENT.read_text())
-    required = assessment.get('required_exports')
-    report['krn026_required_exports_shape'] = type(required).__name__
-    def names(value):
+    def strings(value):
         if isinstance(value, str):
             yield value
         elif isinstance(value, list):
             for item in value:
-                yield from names(item)
+                yield from strings(item)
         elif isinstance(value, dict):
-            for item in value.values():
-                yield from names(item)
-    known = {n for n in names(required) if n.startswith('_')}
+            for key, item in value.items():
+                yield key
+                yield from strings(item)
+    known = {n for n in strings(json.loads(KRN026_INPUTS.read_text())) if re.fullmatch(r'_[A-Za-z0-9_]+', n)}
+    report['krn026_inputs_sha256'] = sha(KRN026_INPUTS)
     report['krn026_names'] = len(known)
     report['missing_and_in_krn026'] = sorted(set(union) & known)
     report['missing_not_in_krn026'] = sorted(set(union) - known)
