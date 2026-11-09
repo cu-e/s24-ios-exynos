@@ -38,7 +38,7 @@ This confirms that value on this phone, through the driver's own report.
 
 - Whether any frame renders. Nothing was submitted to the GPU, so GPU-003 is **not** satisfied: its
   frame results, temperature and Stop test all require running the probe APK.
-- The decoded raw driver version and the GLES string differ in the minor number (24.3.9 against 24.1.265).
+- The decoded raw driver version and the GLES string differ (24.3.9 against 24.1.265).
   The cause is unknown, and the driver may not use VK_MAKE_VERSION.
 - Anything about the kernel `sgpu` interface. This is the vendor's user-space driver answering.
   It says nothing about native bring-up under XNU.
