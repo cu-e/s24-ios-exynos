@@ -1,0 +1,101 @@
+{
+  "kind": "android-userland",
+  "origin": "local-device",
+  "outcome": "pass",
+  "recorded_at": "2026-11-09T21:49:37+00:00",
+  "summary": "As root, /dev/kvm opens and KVM_GET_API_VERSION returns 12. No VM was created and no other KVM ioctl was issued.",
+  "task": "VM-050",
+  "owner": "claude-root-kvm-api-20261110-k50",
+  "commit": "6bd03a29e2efc61242bcd27f4a08229dff4bf324",
+  "device_inventory": "devices/local-2026-11-10-session1.json",
+  "findings": {
+    "opened": true,
+    "api_version": 12,
+    "vm_created": false,
+    "other_kvm_ioctls": false,
+    "reboot_observed": false,
+    "helper_removed": true
+  },
+  "commands": [
+    {
+      "argv": [
+        "aarch64-linux-android35-clang",
+        "-static",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "docs/procedures/vm-050/kvm_api.c",
+        "-o",
+        "artifacts/vm-050/build-001/kvm_api"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/vm-050/run.py",
+        "--run",
+        "session-001",
+        "--helper",
+        "artifacts/vm-050/build-001/kvm_api"
+      ],
+      "exit_code": 1,
+      "result": "ETXTBSY: the helper did not execute and /dev/kvm was not opened."
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/vm-050/run.py",
+        "--run",
+        "session-002",
+        "--helper",
+        "artifacts/vm-050/build-001/kvm_api"
+      ],
+      "exit_code": 1,
+      "result": "Hash gate stopped an incomplete delivery: the helper did not execute and /dev/kvm was not opened."
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/vm-050/run.py",
+        "--run",
+        "session-003",
+        "--helper",
+        "artifacts/vm-050/build-001/kvm_api"
+      ],
+      "exit_code": 0,
+      "result": "artifacts/vm-050/session-003/report.json"
+    }
+  ],
+  "sha256": {
+    "docs/procedures/vm-050/kvm_api.c": "7cc2450c314d794e1793cecfdb4ce80a243a7ed2f1371b3735700e0c7ff868ef",
+    "docs/procedures/vm-050/run.py": "51a25a68d1a3d9895b2b5357c5af8dc9ca3e34556b0daca5c6905c8096e41d6a"
+  },
+  "artifact_sha256": {
+    "artifacts/vm-050/session-003/report.json": "ec04d1f4fae00f89f4921ab50f05590e67568c475155fcba1ced1b9caf58dc32",
+    "artifacts/vm-050/build-001/kvm_api": "c2d95e93a9c78bfaf06206f2cf1fff675b64b72fd8e9163b7a4762f2686ea04f"
+  },
+  "artifacts": [
+    "artifacts/vm-050/session-001/report.json",
+    "artifacts/vm-050/session-002/report.json",
+    "artifacts/vm-050/session-003/report.json",
+    "worktrees/vm-050-root-kvm-api-20261110/research/notes/virtualization/VM-050-root-kvm-api.md"
+  ],
+  "su_used": true,
+  "device_disk_written": false,
+  "ram_helper_used": true,
+  "reboot": false,
+  "partition_access": false,
+  "serial_recorded": false,
+  "authorization": "On 2026-11-10 the owner chose the option covering, through su, opening /dev/kvm and querying the API version, with no VM created and no disk write. The helper lived only in the /dev tmpfs directory /dev/s24-vm050 and was removed after each of the three runs. su was used only for managing that directory and running the helper.",
+  "limitations": [
+    "VM creation is untested; this does not show that a guest can run.",
+    "KVM_CHECK_EXTENSION and KVM_GET_VCPU_MMAP_SIZE were deliberately not called; VM-049 is blocked on owner approval for them.",
+    "Run one and two delivered the helper but did not execute it."
+  ],
+  "review": "Acceptance assessed by the executing agent in the same session against report.json. No independent reviewer."
+}
