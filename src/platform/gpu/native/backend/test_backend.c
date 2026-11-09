@@ -6,6 +6,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include "sgpu_backend.h"
 #include <pthread.h>
+#include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,7 +39,7 @@ struct fake {
 static _Alignas(16) uint8_t storage[1u << 21];
 static struct fake F;
 static struct sgpu_backend *const BE = (struct sgpu_backend *)storage;
-static uint64_t request_id = 1;
+static _Atomic uint64_t request_id = 1;
 
 static void fake_held(void) { if (!F.threaded) CHECK(F.locked); }
 
@@ -241,7 +242,7 @@ static void header(uint8_t *wire, uint32_t opcode, size_t total)
     sgpu_put16(wire + 6, SGPU_ABI_MINOR);
     sgpu_put32(wire + 8, opcode);
     sgpu_put32(wire + 12, (uint32_t)total);
-    sgpu_put64(wire + 16, request_id++);
+    sgpu_put64(wire + 16, atomic_fetch_add(&request_id, 1));
 }
 
 static uint32_t call_raw(uint32_t client, const uint8_t *wire, size_t n, uint8_t *out)
