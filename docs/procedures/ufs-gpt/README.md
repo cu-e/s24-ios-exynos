@@ -25,8 +25,8 @@ The whole table is validated before any lookup, so a damaged entry fails a looku
 name. Each negative test recomputes both CRCs, so the rule under test rejects the table rather than
 a checksum mismatch.
 
-`userdata` is refused as policy. Android userdata is file-based encrypted, and reading it from XNU
-is not assumed possible. Refusal does not mean other partitions are safe or readable.
+`userdata` is refused as policy. It is treated as encrypted, and reading it from XNU is not assumed
+possible. Its encryption on this device has not been measured here. Refusal does not mean other partitions are safe or readable.
 
 ## What this does not establish
 
