@@ -1,0 +1,62 @@
+--- accepted/native_compile.py
++++ str-039/native_compile.py
+@@ -1,3 +1,6 @@
+ #!/usr/bin/env python3
+-"""Derive or execute one exact native DEVELOPMENT component slice; no shell recipes."""
++"""Derive or execute one exact native DEVELOPMENT component slice; no shell recipes.
++
++STR-039 copy of accepted caller 2676a8ed with one checked APFS resource-operand rebind.
++"""
+ import argparse
+@@ -24,4 +27,14 @@
+ SOURCE_METADATA_SHA = '44a3b329931630c4447314b0e683db0c0ef571e615c1bb016321424c278b64b8'
+-RUNTIME_SHA = '94685ae6c56a3785b8c61c5422fb53bd8750ca92ad9caa76e9bf691bab35d12d'
++# STR-039 repin: only /etc/ld.so.cache differs from accepted 94685ae6 (host dnf ldconfig, 2026-11-09).
++RUNTIME_SHA = '5c537fde9d2bfa1f57504540cb9abedbadc4c583ba287069e8f6c48c7b97e539'
+ INTERFACE_SHA = 'c866f73c539870f87edbbb503de8c6418c0334541801ceb4d5cd56bac6f9a579'
++# STR-039: the only delta from accepted caller 2676a8ed. One genuine APFS
++# -idirafter operand recorded before compiler relocation is rebound to the
++# KRN-015/RHDR-002 matched source-built Clang 17.0.6 resource headers.
++RESOURCE_OBJECT = 'bsd/apfs_deflate.o'
++RESOURCE_ABSENT = str(MAIN/'artifacts/xnu-compiler-cxx-storage/lib/clang/17/include')
++RESOURCE_ROOT = MAIN/'artifacts/xnu-kernel-resource-headers/generate-session1/resource/lib/clang/17/include'
++RESOURCE_HEADERS = {'arm_neon.h': '7e347643c485383098196804b863a01d3ece143d434b83ef8439c2f8bb2fbc0f',
++                    'arm_bf16.h': '87f7bc1cb7aa53a85347bd4e1855cccd45599408bb106e66515519c1033a6a3d',
++                    'arm_acle.h': 'd16df987c4de19c6cc30bb8bad0674268d96762f41e3c4dfcf6d216b1c63b3e5'}
+ 
+@@ -51,2 +64,29 @@
+         stream.write('\n')
++
++
++def resource_inputs(root=RESOURCE_ROOT, headers=RESOURCE_HEADERS):
++    """Exact matched resource root: three regular files, nothing else, no aliases."""
++    root = Path(root)
++    require(root.is_dir() and not root.is_symlink() and root.resolve(strict=True) == root, 'Qualified resource root must be a canonical directory')
++    require(sorted(p.name for p in root.iterdir()) == sorted(headers), 'Resource root has missing or shadowing entries')
++    result = {}
++    for name, expected in headers.items():
++        path = root/name
++        require(path.is_file() and not path.is_symlink() and digest(path) == expected, 'Changed resource header: '+name)
++        result[str(path)] = expected
++    return result
++
++
++def rebind_resource(identifier, argv, absent=RESOURCE_ABSENT, root=RESOURCE_ROOT, selected=RESOURCE_OBJECT):
++    """Return argv with only the selected genuine APFS resource operand replaced."""
++    uses = [n for n, value in enumerate(argv) if value == '-idirafter']
++    mentions = [n for n, value in enumerate(argv) if absent in value]
++    if identifier != selected:
++        require(not uses and not mentions, 'Unexpected resource operand outside selected APFS object: '+identifier)
++        return list(argv)
++    require(len(uses) == 1 and uses[0]+1 < len(argv) and argv[uses[0]+1] == absent and mentions == [uses[0]+1], 'Selected APFS object lacks its exact genuine resource operand')
++    require(not Path(absent).exists() and not Path(absent).is_symlink(), 'Historical resource root unexpectedly exists')
++    result = list(argv)
++    result[uses[0]+1] = str(root)
++    return result
+ 
+@@ -126,2 +166,5 @@
+         original = shlex.split(steps['1']); argv = [mapped(a) for a in original]
++        argv = rebind_resource(identifier, argv)
++        if identifier == RESOURCE_OBJECT:
++            inputs.update(resource_inputs()); absent.add(RESOURCE_ABSENT)
+         require(argv[0] == str(compiler) and '-c' in argv and '-DXNU_NO_TYPE_BUILTINS=0' in argv, 'Wrong exact native compiler/profile')

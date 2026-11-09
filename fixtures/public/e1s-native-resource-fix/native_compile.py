@@ -166,7 +166,7 @@ def derive(common, manifest_path, manifest_sha):
         original = shlex.split(steps['1']); argv = [mapped(a) for a in original]
         argv = rebind_resource(identifier, argv)
         if identifier == RESOURCE_OBJECT:
-            inputs.update(resource_inputs())
+            inputs.update(resource_inputs()); absent.add(RESOURCE_ABSENT)
         require(argv[0] == str(compiler) and '-c' in argv and '-DXNU_NO_TYPE_BUILTINS=0' in argv, 'Wrong exact native compiler/profile')
         require(not any(a in [';', '&&', '|', '>', '<', '>>'] for a in argv), 'Shell recipe rejected')
         source = context['selected_source_bindings'][identifier]

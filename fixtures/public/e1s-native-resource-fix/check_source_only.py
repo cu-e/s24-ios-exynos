@@ -63,11 +63,11 @@ def check_delta(checks):
     new = (HERE/'native_compile.py').read_text().splitlines()
     changes = [op for op in difflib.SequenceMatcher(a=old, b=new, autojunk=False).get_opcodes() if op[0] != 'equal']
     summary = [dict(tag=t, old=old[a:b], new_lines=d-c) for t, a, b, c, d in changes]
+    patch = ''.join(difflib.unified_diff([l+'\n' for l in old], [l+'\n' for l in new], 'accepted/native_compile.py', 'str-039/native_compile.py', n=1))
+    checks.expect('delta-equals-committed-patch', patch == (HERE/'source-delta.patch').read_text(), len(patch))
     replaced = [old[a:b] for t, a, b, _, _ in changes if t == 'replace']
-    checks.expect('delta-shape-docstring-runtime-pin-and-insertions',
-                  [t for t, *_ in changes].count('replace') == 2 and len(changes) >= 4
-                  and all(len(lines) == 1 for lines in replaced)
-                  and replaced[0][0].startswith('"""Derive') and replaced[1][0].startswith('RUNTIME_SHA = ')
+    checks.expect('delta-replaces-only-docstring-and-runtime-pin',
+                  [len(r) for r in replaced] == [1, 1] and replaced[0][0].startswith('"""Derive') and replaced[1][0].startswith('RUNTIME_SHA = ')
                   and all(t in ['replace', 'insert'] for t, *_ in changes), summary)
     checks.expect('same-byte:source-metadata.json', sha(HERE/'source-metadata.json') == sha(ACCEPTED.parent/'source-metadata.json'))
     accepted_runtime = json.loads((ACCEPTED.parent/'runtime.json').read_text())
@@ -172,9 +172,39 @@ def check_plan(checks, plan_path, caller):
     for header in caller.RESOURCE_HEADERS:
         matches = [p for p in files if Path(p).name == header]
         checks.expect('single-namespace-match:'+header, matches == [str(caller.RESOURCE_ROOT/header)], matches)
-    checks.expect('old-root-not-input', not any(caller.RESOURCE_ABSENT in p for p in plan['inputs']) and caller.RESOURCE_ABSENT not in plan['absent_inputs'])
+    checks.expect('old-root-not-input-but-kept-absent', not any(caller.RESOURCE_ABSENT in p for p in plan['inputs']) and caller.RESOURCE_ABSENT in plan['absent_inputs'])
     stdint = [p for p in files if p.endswith('/stdint.h')]
     checks.expect('resource-root-has-no-stdint', not any(p.startswith(str(caller.RESOURCE_ROOT)) for p in stdint) and any(p.endswith('EXTERNAL_HEADERS/stdint.h') for p in stdint), stdint)
+
+
+def check_execution_guards(checks, plan_path, caller):
+    """Drive the real verify/namespace path that runs before and after every compile."""
+    common = caller.module(*caller.PINS[0], 'resource_check_common')
+    plan = json.loads(Path(plan_path).read_text())
+    caller.verify(common, plan)
+    checks.expect('verify-accepts-real-plan', True)
+    headers = {str(caller.RESOURCE_ROOT/name): digest for name, digest in caller.RESOURCE_HEADERS.items()}
+    changed = json.loads(json.dumps(plan)); changed['inputs'][str(caller.RESOURCE_ROOT/'arm_neon.h')] = '0'*64
+    checks.rejects('verify-rejects-changed-header-pin', 'namespace', caller.verify, common, changed)
+    missing = json.loads(json.dumps(plan)); del missing['inputs'][str(caller.RESOURCE_ROOT/'arm_bf16.h')]
+    checks.rejects('verify-rejects-unindexed-header', 'namespace', caller.verify, common, missing)
+    with tempfile.TemporaryDirectory(dir=str(MAIN/'artifacts')) as scratch:
+        base = Path(scratch).resolve()
+        appeared = json.loads(json.dumps(plan)); appeared['absent_inputs'] = [str(base)]
+        checks.rejects('verify-rejects-materialized-absent-root', 'Unqualified input appeared', caller.verify, common, appeared)
+        root = base/'resource'; root.mkdir()
+        for header in caller.RESOURCE_HEADERS:
+            shutil.copyfile(caller.RESOURCE_ROOT/header, root/header)
+        index = {str(root/name): digest for name, digest in caller.RESOURCE_HEADERS.items()}
+        cwd = base/'cwd'; cwd.mkdir(); source = base/'source'; source.mkdir(); (source/'a.c').write_text('')
+        index[str(source/'a.c')] = sha(source/'a.c')
+        rows = [dict(cwd=str(cwd), bound_source=str(source/'a.c'), next_owned_compile_argv_template=['clang', '-idirafter', str(root)])]
+        checks.expect('namespace-accepts-exact-root', sorted(common.namespace(rows, index, common.Digests())['files']) == sorted(index))
+        (root/'stdint.h').write_text('/* shadow */\n')
+        checks.rejects('namespace-rejects-shadow-header', 'newly shadowing', common.namespace, rows, index, common.Digests())
+        (root/'stdint.h').unlink(); (root/'arm_acle.h').unlink()
+        checks.rejects('namespace-rejects-missing-header', 'Missing qualified', common.namespace, rows, index, common.Digests())
+    checks.expect('resource-headers-in-admitted-plan', all(plan['inputs'].get(p) == d for p, d in headers.items()))
 
 
 def main():
@@ -191,6 +221,7 @@ def main():
     check_graph(checks, caller)
     if args.plan:
         check_plan(checks, args.plan, caller)
+        check_execution_guards(checks, args.plan, caller)
     report = dict(kind='source-review', origin='local-host', outcome='pass', target_tools_executed=False,
                   caller_sha256=sha(HERE/'native_compile.py'), accepted_caller_sha256=ACCEPTED_SHA,
                   delta=delta, checks=checks.rows, check_count=len(checks.rows))
