@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 import re
 import subprocess
+import time
 
 MAIN = Path('/home/egor/dev/pet/s24-ios-exynos')
 RAM = '/dev/s24-vm050'
@@ -61,6 +62,14 @@ def main():
         report['steps']['deliver'] = dict(exit_code=code, stderr=err[:200])
         if code:
             raise RuntimeError('Helper delivery failed')
+        # adb exec-in can return before the device-side writer finishes, so wait for the full file.
+        for _ in range(20):
+            code, text, err = su(f'sha256sum {HELPER}.in')
+            if code == 0 and text.split()[:1] == [local]:
+                break
+            time.sleep(0.5)
+        else:
+            raise RuntimeError('Delivered helper never reached the expected hash')
         # Execute a copy: the delivering writer can still hold the first file open (ETXTBSY).
         code, text, err = su(f'cp {HELPER}.in {HELPER} && rm {HELPER}.in && chmod 700 {HELPER} && sha256sum {HELPER}')
         remote = text.split()[0] if text else ''
