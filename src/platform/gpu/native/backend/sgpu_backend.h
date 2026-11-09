@@ -58,7 +58,9 @@ struct sgpu_be_ib { uint64_t va; uint32_t bytes, flags; };
  *
  * submit must not start the work until every sequence in wait_sequences has retired.
  * Work must therefore retire after what it waits for. Lifetime references do not rely
- * on that order; hazard tracking does. A nonzero return must mean nothing was queued,
+ * on that order; hazard tracking does. If a wait retires with a nonzero reason the
+ * dependent work should not run, and the core reports it as failed with that reason
+ * even if the hardware retires it cleanly. A nonzero return must mean nothing was queued,
  * because the next submit reuses the sequence. An implementation that cannot tell
  * must return zero and later retire the sequence with a nonzero reason.
  */

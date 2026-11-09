@@ -44,7 +44,9 @@ struct be_use { uint32_t bo, access; };
 struct be_fence {
     uint32_t live, generation, client, context;
     uint32_t state, reason, waiters, use_count;
+    uint32_t wait_count, inherited;
     uint64_t sequence;
+    uint64_t waits[SGPU_MAX_DEPS];
     struct be_use uses[SGPU_MAX_USES];
 };
 
@@ -214,9 +216,24 @@ static void reap_zombies(struct sgpu_backend *be)
     }
 }
 
+/* Work ordered after a failure ran on bad input, whatever the hardware reports for
+ * it. This is the in-flight form of SUBMIT refusing an errored dependency. Each
+ * dependent passes the failure on when it retires in turn. */
+static void taint_dependents(struct sgpu_backend *be, uint64_t sequence, uint32_t reason)
+{
+    uint32_t i, w;
+    for (i = 0; i < SGPU_BE_MAX_FENCES; ++i) {
+        struct be_fence *d = &be->fences[i];
+        if (!d->live || d->state != FENCE_PENDING || d->inherited) continue;
+        for (w = 0; w < d->wait_count; ++w) if (d->waits[w] == sequence) d->inherited = reason;
+    }
+}
+
 static void retire_fence(struct sgpu_backend *be, struct be_fence *f, uint32_t reason)
 {
     uint32_t i;
+    if (!reason) reason = f->inherited;
+    if (reason) taint_dependents(be, f->sequence, reason);
     for (i = 0; i < f->use_count; ++i) {
         struct be_bo *b = &be->bos[f->uses[i].bo];
         uint32_t self = (uint32_t)(f - be->fences) + 1, r;
@@ -555,6 +572,9 @@ static uint32_t do_submit(struct sgpu_backend *be, uint32_t client, const uint8_
     ++owner->charged.fences;
     f->live = 1; f->client = client; f->context = context_slot; f->state = FENCE_PENDING; f->reason = 0;
     f->waiters = 0; f->use_count = use_count; f->sequence = sequence;
+    f->inherited = 0;
+    f->wait_count = wait_count;
+    for (i = 0; i < wait_count; ++i) f->waits[i] = wait_sequences[i];
     ++c->pending;
     for (i = 0; i < use_count; ++i) {
         struct be_bo *b = &be->bos[bo_slots[i]];

@@ -936,6 +936,64 @@ static void test_retirement_during_wait_and_errors(void)
     CHECK_EQ(submit_one(f.client, f.context, f.bo, SGPU_READ, &errored, 1, NULL, NULL), SGPU_BAD_FIELD);
 }
 
+static void check_fence(uint32_t client, uint64_t fence, uint32_t expected_state, uint32_t expected_reason)
+{
+    uint32_t state, reason;
+    CHECK_EQ(wait_fence(client, fence, 0, &state, &reason), SGPU_OK);
+    CHECK_EQ(state, expected_state);
+    CHECK_EQ(reason, expected_reason);
+}
+
+static void test_failure_reaches_dependents_in_flight(void)
+{
+    struct fixture f;
+    uint64_t other, w1, w2, w3, v1, v2, a1, a2, s1, s2, s3, sv1, sv2, sa1, sa2;
+    uint32_t reopened;
+    setup(4096, KB(256), KB(32));
+    f = make_fixture(VA);
+    CHECK_EQ(alloc_bo(f.client, KB(16), RW, &other, NULL), SGPU_OK);
+    CHECK_EQ(gpu_map(f.client, f.context, other, VA + KB(64), 0, KB(16), RW), SGPU_OK);
+
+    /* A chain on one BO, and an unrelated pair ordered on each other on a second BO. */
+    CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, NULL, 0, &w1, &s1), SGPU_OK);
+    CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, &w1, 1, &w2, &s2), SGPU_OK);
+    CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, &w2, 1, &w3, &s3), SGPU_OK);
+    CHECK_EQ(submit_one(f.client, f.context, other, RW, NULL, 0, &v1, &sv1), SGPU_OK);
+    CHECK_EQ(submit_one(f.client, f.context, other, RW, &v1, 1, &v2, &sv2), SGPU_OK);
+
+    /* Clean retirement reported by hardware does not hide the failure, at any depth. */
+    CHECK_EQ(sgpu_backend_retire(BE, s1, 77), 0);
+    CHECK_EQ(sgpu_backend_retire(BE, s2, 0), 0);
+    CHECK_EQ(sgpu_backend_retire(BE, s3, 0), 0);
+    check_fence(f.client, w2, SGPU_RETIRED_ERROR, 77);
+    check_fence(f.client, w3, SGPU_RETIRED_ERROR, 77);
+
+    /* Work ordered on something else is untouched. */
+    CHECK_EQ(sgpu_backend_retire(BE, sv1, 0), 0);
+    CHECK_EQ(sgpu_backend_retire(BE, sv2, 0), 0);
+    check_fence(f.client, v2, SGPU_RETIRED, 0);
+
+    /* The hardware's own reason wins over an inherited one. */
+    CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, NULL, 0, &a1, &sa1), SGPU_OK);
+    CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, &a1, 1, &a2, &sa2), SGPU_OK);
+    CHECK_EQ(sgpu_backend_retire(BE, sa1, 5), 0);
+    CHECK_EQ(sgpu_backend_retire(BE, sa2, 9), 0);
+    check_fence(f.client, a2, SGPU_RETIRED_ERROR, 9);
+
+    /* A reused slot does not keep the failure of the fence that held it. */
+    sgpu_backend_client_close(BE, f.client);
+    reopened = open_client();
+    f.client = reopened;
+    CHECK_EQ(create_context(f.client, &f.context), SGPU_OK);
+    CHECK_EQ(alloc_bo(f.client, KB(16), RW, &f.bo, NULL), SGPU_OK);
+    CHECK_EQ(gpu_map(f.client, f.context, f.bo, VA, 0, KB(16), RW), SGPU_OK);
+    CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, NULL, 0, &w1, &s1), SGPU_OK);
+    CHECK_EQ(sgpu_backend_retire(BE, s1, 0), 0);
+    CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, NULL, 0, &w2, &s2), SGPU_OK);
+    CHECK_EQ(sgpu_backend_retire(BE, s2, 0), 0);
+    check_fence(f.client, w2, SGPU_RETIRED, 0);
+}
+
 static void test_spurious_retirement_is_ignored(void)
 {
     struct fixture f;
@@ -1591,7 +1649,7 @@ int main(void)
         test_cpu_map_rules, test_gpu_map_rules, test_cache_transitions, test_submit_is_atomic, test_ib_translation_and_coverage,
         test_cpu_mapping_frozen_in_flight, test_mappings_do_not_cross_contexts,
         test_write_hazards, test_reader_limit, test_two_reader_lifetime, test_wait_timeout_does_not_retire,
-        test_retirement_during_wait_and_errors, test_spurious_retirement_is_ignored, test_stop_blocks_new_work_only,
+        test_retirement_during_wait_and_errors, test_failure_reaches_dependents_in_flight, test_spurious_retirement_is_ignored, test_stop_blocks_new_work_only,
         test_fault_quarantine_and_quiesce, test_client_close_with_work_in_flight, test_client_close_during_fault_waits_for_quiesce,
         test_injected_hardware_failures, test_reap_stops_at_its_own_unmap_failure, test_client_budget_is_separate_from_device_budget,
         test_closed_client_charges_stay_with_its_identity, test_per_client_object_quotas,
