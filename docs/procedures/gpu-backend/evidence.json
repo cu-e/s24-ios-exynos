@@ -1,0 +1,126 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-09T21:06:37+00:00",
+  "summary": "Portable Xclipse backend core behind the sgpu_abi.c dispatcher, tested against a software fake under ASan/UBSan and TSan with mutation testing, and compiled as an ARM64 Mach-O object with the native kernel argv. No GPU, device, QEMU or real ops implementation was involved.",
+  "task": "GPU-013",
+  "owner": "claude-gpu-backend-20261110-g13",
+  "commit": "f4ed03567d1b9862c039702c909ce671dd0c66bd",
+  "tests": {
+    "asan_ubsan": {
+      "outcome": "pass",
+      "tests": 37
+    },
+    "tsan": {
+      "outcome": "pass",
+      "tests": 37
+    }
+  },
+  "mutation_count": 138,
+  "mutation_survivors": [],
+  "equivalent_mutants_not_run": [
+    {
+      "rule": "free checks pending alone",
+      "reason": "Pending work requires a GPU mapping at submit and GPU unmap is refused in flight, so pending implies gpu_maps > 0. Covered by the combined mutant above."
+    },
+    {
+      "rule": "IB offset >= mapping offset",
+      "reason": "A smaller offset wraps the unsigned subtraction past any possible mapping size, which is at most 128 MiB, so the following clause already rejects it."
+    }
+  ],
+  "arm64_objects": {
+    "sgpu_backend": {
+      "sha256": "81363478ab9ab1ce7316316f25cf0365929aedb96acabc53bd4221679016d48f",
+      "arm64_macho_object": true,
+      "undefined_symbols": [
+        "___stack_chk_fail",
+        "___stack_chk_guard",
+        "_sgpu_get32",
+        "_sgpu_get64",
+        "_sgpu_put32",
+        "_sgpu_put64"
+      ]
+    },
+    "sgpu_abi": {
+      "sha256": "6cba9771e8a1ff2c73fb8899f3000197883170c2b0bc872beb1bbd799f02884d",
+      "arm64_macho_object": true,
+      "undefined_symbols": [
+        "___stack_chk_fail",
+        "___stack_chk_guard"
+      ]
+    }
+  },
+  "compiler_sha256": "7972eb2820ae25b5bedff1ea954cef9e9a0e4a15c7a8e440628e8b6540fafc82",
+  "recipe_role": "bsd/apfs_deflate.o",
+  "commands": [
+    {
+      "cwd": "worktrees/gpu-013-backend-core-20261110/",
+      "argv": [
+        "python3",
+        "src/platform/gpu/native/backend/check.py",
+        "--run",
+        "check-006"
+      ],
+      "exit_code": 0,
+      "result": "worktrees/gpu-013-backend-core-20261110/artifacts/gpu-backend/check-006/evidence.json"
+    },
+    {
+      "cwd": "worktrees/gpu-013-backend-core-20261110/",
+      "argv": [
+        "python3",
+        "fixtures/public/gpu-backend/compile_arm64.py",
+        "--run",
+        "arm64-003"
+      ],
+      "exit_code": 0,
+      "result": "worktrees/gpu-013-backend-core-20261110/artifacts/gpu-backend/arm64-003/evidence.json"
+    }
+  ],
+  "sha256": {
+    "src/platform/gpu/native/backend/sgpu_backend.c": "b256a67dc88b706f332b069cdca15fcd71ab9e2ac16bdcf48d6d696267323098",
+    "src/platform/gpu/native/backend/sgpu_backend.h": "3b406cc4156a67236d6e5bd7ba1b79ae9768906be4be540bfe6deeded1225834",
+    "src/platform/gpu/native/backend/test_backend.c": "31c6934eedaded01608321e7a6a8f8e2898498746e5ecd3ea7e6b2fbd309a622",
+    "src/platform/gpu/native/backend/check.py": "ba9897b7f59db6bd0288659156933cf4286ed58ab6a0377aef711a25302c8eb8",
+    "fixtures/public/gpu-backend/compile_arm64.py": "ddd233e9985b4894b4c38161f23d637a9cbcb9bd3722db7fdbd2479e6333da73",
+    "src/platform/gpu/abi/sgpu_abi.c": "e1cf79e584798006213a9420dffbd0d6748bf0d9fed07ebd3a8c35765537c945",
+    "src/platform/gpu/abi/sgpu_abi.h": "363bb88f12b9474dd03201bcac6d88e18a269723499f46f56ca06fdd7cddb5b2"
+  },
+  "artifact_sha256": {
+    "worktrees/gpu-013-backend-core-20261110/artifacts/gpu-backend/check-006/evidence.json": "236243473e4703eacd67a0efc036b1097506fb23d6ca5a278b7621d8e18aab70",
+    "worktrees/gpu-013-backend-core-20261110/artifacts/gpu-backend/arm64-003/evidence.json": "f26dbf6b599e3c4192cd4f8cfc100a3e8314e6376479adfe9f7adcf67872aa54",
+    "worktrees/gpu-013-backend-core-20261110/artifacts/gpu-backend/arm64-003/sgpu_backend.o": "81363478ab9ab1ce7316316f25cf0365929aedb96acabc53bd4221679016d48f",
+    "worktrees/gpu-013-backend-core-20261110/artifacts/gpu-backend/arm64-003/sgpu_abi.o": "6cba9771e8a1ff2c73fb8899f3000197883170c2b0bc872beb1bbd799f02884d"
+  },
+  "artifacts": [
+    "worktrees/gpu-013-backend-core-20261110/artifacts/gpu-backend/check-006/evidence.json",
+    "worktrees/gpu-013-backend-core-20261110/artifacts/gpu-backend/arm64-003/evidence.json",
+    "worktrees/gpu-013-backend-core-20261110/docs/procedures/gpu-backend/README.md",
+    "worktrees/gpu-013-backend-core-20261110/src/platform/gpu/native/backend/sgpu_backend.c",
+    "worktrees/gpu-013-backend-core-20261110/src/platform/gpu/native/backend/test_backend.c"
+  ],
+  "gpu_executed": false,
+  "device_io": false,
+  "mmio": false,
+  "target_code_executed": false,
+  "apple_sdk_used": false,
+  "profile_verified_for_real_hardware": false,
+  "lease": {
+    "id": "gpu-013-arm64-compile-20261110-claude",
+    "kind": "light_compile",
+    "note": "Self-issued by the Claude session acting as coordinator under the owner directive of 2026-11-10, not by the Codex root coordinator."
+  },
+  "review": {
+    "first": "Source-only review of the core by a same-session subagent. Found 7 defects and 2 ops-contract gaps that the mutation suite could not detect; fixed in 223f172 and 673b637.",
+    "second": "Same subagent, source-only, on diff 2fade54..673b637. Found no new lifetime or memory-safety defect and 2 low-severity issues, fixed in f4ed035.",
+    "not_reviewed": "Commit f4ed035 (in-flight failure propagation and the narrowed isolation claim) has tests and mutants but was not re-reviewed. Neither review was independent of this session."
+  },
+  "limitations": [
+    "Passing says the object-lifetime rules hold against a software fake. It says nothing about any GPU, register behaviour, firmware or Metal.",
+    "No implementation of sgpu_be_ops for real hardware exists, and nothing sets profile_verified for real hardware. GPU-007, GPU-008 and GPU-012 remain open.",
+    "The ARM64 objects were compiled and inspected, never executed or linked into the kernel.",
+    "IB contents are not validated; retirement order and the failed-submit contract are trusted from the future hardware path.",
+    "The byte budget isolates clients only if the trusted configuration divides it; only table quotas are a hard guarantee.",
+    "The waiter-blocks-eviction path has no direct test. See Known limits in docs/procedures/gpu-backend/README.md."
+  ]
+}
