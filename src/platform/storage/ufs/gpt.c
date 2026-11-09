@@ -3,6 +3,7 @@
 
 #define REVISION UINT32_C(0x00010000)
 #define NAME_OFFSET 56u
+#define MIN_ARRAY_BYTES 16384u /* UEFI minimum; an exact multiple of both allowed block sizes. */
 
 static uint32_t get32(const uint8_t *p)
 {
@@ -75,7 +76,7 @@ static int same_text(const char *a, size_t a_length, const char *b, size_t b_len
 
 static uint32_t validate_header(const uint8_t *h, size_t bytes, const struct ufs_gpt_disk *disk, size_t entries_bytes)
 {
-    uint64_t alternate, first_usable, last_usable, entries_lba, array_blocks, array_bytes;
+    uint64_t alternate, first_usable, last_usable, entries_lba, array_blocks, array_bytes, reserved;
     uint32_t count, size;
     if (bytes != disk->block_bytes) return UFS_GPT_ARGUMENT;
     if (h[0] != 'E' || h[1] != 'F' || h[2] != 'I' || h[3] != ' ' || h[4] != 'P' || h[5] != 'A' || h[6] != 'R' || h[7] != 'T') return UFS_GPT_SIGNATURE;
@@ -86,7 +87,7 @@ static uint32_t validate_header(const uint8_t *h, size_t bytes, const struct ufs
     alternate = get64(h + 32); first_usable = get64(h + 40); last_usable = get64(h + 48);
     entries_lba = get64(h + 72); count = get32(h + 80); size = get32(h + 84);
     if (get64(h + 24) != 1) return UFS_GPT_BOUNDS;
-    if (alternate >= disk->lun_blocks) return UFS_GPT_BOUNDS;
+    if (alternate != disk->lun_blocks - 1) return UFS_GPT_BOUNDS;
     if (first_usable > last_usable || last_usable >= alternate) return UFS_GPT_BOUNDS;
     if (entries_lba < 2 || entries_lba >= first_usable) return UFS_GPT_BOUNDS;
 
@@ -94,8 +95,11 @@ static uint32_t validate_header(const uint8_t *h, size_t bytes, const struct ufs
     array_bytes = (uint64_t)count * size;
     if (entries_bytes != array_bytes) return UFS_GPT_ARGUMENT;
     array_blocks = array_bytes / disk->block_bytes + (array_bytes % disk->block_bytes != 0);
-    /* entries_lba < first_usable above, so this subtraction cannot wrap. */
-    if (array_blocks > first_usable - entries_lba) return UFS_GPT_BOUNDS;
+    reserved = MIN_ARRAY_BYTES / disk->block_bytes;
+    if (array_blocks > reserved) reserved = array_blocks;
+    /* The orderings above mean neither subtraction can wrap. */
+    if (reserved > first_usable - entries_lba) return UFS_GPT_BOUNDS;
+    if (reserved > alternate - last_usable - 1) return UFS_GPT_BOUNDS;
     return UFS_GPT_OK;
 }
 

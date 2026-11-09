@@ -2,7 +2,14 @@
  *
  * The caller supplies bytes it already holds. A passing table shows those bytes
  * are a self-consistent GPT, not that they came from a particular device: the
- * caller must still qualify the source. The backup GPT is not examined.
+ * caller must still qualify the source. The backup GPT and protective MBR are not
+ * examined, although the header must place the backup on this LUN's last block.
+ *
+ * header and entries must not change during the call: pass a kernel-owned copy, never
+ * a buffer the device can still write by DMA. Fields are read more than once.
+ *
+ * The returned extent belongs to the LUN the bytes came from. Nothing here binds it
+ * to that LUN, so the caller must not apply it to another.
  */
 #ifndef S24_UFS_GPT_H
 #define S24_UFS_GPT_H
@@ -25,7 +32,9 @@ extern "C" {
 uint32_t ufs_gpt_crc32(const uint8_t *, size_t);
 /* header is exactly one block (LBA 1); entries is exactly the declared array.
  * The whole table is validated before any lookup. out is zeroed on failure.
- * Android userdata is always refused: it is not assumed to be readable. */
+ * A request for the name userdata is refused in any letter case: it is not assumed
+ * to be readable. This checks the requested name only, so it cannot identify Android
+ * data that a disk labels with some other name. */
 uint32_t ufs_gpt_find(const uint8_t *header, size_t header_bytes, const uint8_t *entries, size_t entries_bytes,
     const struct ufs_gpt_disk *disk, const char *name, struct ufs_gpt_extent *out);
 #ifdef __cplusplus
