@@ -1,0 +1,77 @@
+{
+  "kind": "android-userland",
+  "origin": "local-device",
+  "outcome": "pass",
+  "recorded_at": "2026-11-09T21:47:40+00:00",
+  "summary": "Six boot-chain partitions were read through su and copied to the host outside Git. Device-side and host-side SHA-256 and sizes match, and the host files were re-hashed from disk afterwards.",
+  "task": "DEV-003",
+  "owner": "claude-boot-copies-20261110-b3",
+  "commit": "138d1d212aa3f784b1cf71f2753344edc9e30076",
+  "device_inventory": "devices/local-2026-11-10-session1.json",
+  "commands": [
+    {
+      "cwd": "worktrees/dev-003-boot-copies-20261110/",
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/dev-003/copy_partitions.py",
+        "--run",
+        "2026-11-10-session1"
+      ],
+      "exit_code": 0,
+      "result": "artifacts/device-backup/2026-11-10-session1/manifest.json"
+    }
+  ],
+  "partitions": {
+    "boot": {
+      "bytes": 67108864,
+      "sha256": "a05a3c3b1085ecf9dc7522079a28d196732e0fd6384068aa6f964b71c29a86ab"
+    },
+    "init_boot": {
+      "bytes": 16777216,
+      "sha256": "480181ac8480bc2abd22909bbd0dc2669136d7194a6a50d59cda1c0ee7422b8e"
+    },
+    "vendor_boot": {
+      "bytes": 67108864,
+      "sha256": "7d028e3398a1f3fdf1bd3bb5b990af1b8cfb078930f6e8aec53d289717739129"
+    },
+    "dtbo": {
+      "bytes": 8388608,
+      "sha256": "2afdb40b4be82e2158e863df926a12b2394a6b2361c711e0aa47acc8043f3f9d"
+    },
+    "vbmeta": {
+      "bytes": 65536,
+      "sha256": "063ebf5a98d9584e879e4649ba8033eb8c142ef47e2560533d44d0f135e858e5"
+    },
+    "recovery": {
+      "bytes": 100663296,
+      "sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67"
+    }
+  },
+  "sha256": {
+    "docs/procedures/dev-003/copy_partitions.py": "e7aeabedc7cc0116c944d0ae7e1ad4af017b2b813bb9a1fb8fdbe9e4a0353835"
+  },
+  "artifact_sha256": {
+    "artifacts/device-backup/2026-11-10-session1/manifest.json": "88b265b5b47d98ade3d5b6bf37ea83fd68143a5992449b74629bba3b8be7496b"
+  },
+  "artifacts": [
+    "artifacts/device-backup/2026-11-10-session1/manifest.json",
+    "worktrees/dev-003-boot-copies-20261110/docs/procedures/dev-003/copy_partitions.py"
+  ],
+  "su_used": true,
+  "device_state_changed": false,
+  "device_written": false,
+  "reboot": false,
+  "userdata_read": false,
+  "efs_read": false,
+  "serial_recorded": false,
+  "images_in_git": false,
+  "authorization": "On 2026-11-10 the owner chose the option covering read-only su copies of boot, init_boot, vendor_boot, dtbo, vbmeta and recovery to the host with hashes, outside Git, with userdata and efs untouched, after requiring that no data be erased. The same su session also read ro.build.version.incremental and each partition size. Nothing else was authorized or done under this task.",
+  "limitations": [
+    "A copy is not a tested restore. No restore path was exercised.",
+    "These copies do not cover user data; userdata was deliberately not read.",
+    "The registry and DEV-001 record a reported-unlocked but property-locked bootloader; this task does not settle that discrepancy.",
+    "NAT-001 remains with its existing owner and was not changed."
+  ],
+  "review": "Acceptance assessed by the executing agent in the same session: fixed allowlist in the tool, sizes and hashes in the manifest, host files re-hashed independently. No independent reviewer."
+}
