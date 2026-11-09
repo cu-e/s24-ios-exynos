@@ -37,7 +37,7 @@ MUTATIONS = [
     ('alignment raised to CPU page', 'if (alignment < be->config.cpu_vm_page) alignment = be->config.cpu_vm_page;', ''),
     ('failed backing not charged', 'if (be->ops.backing_alloc(be->hw, backing, alignment, &token)) return SGPU_BACKEND_ERROR;', 'if (be->ops.backing_alloc(be->hw, backing, alignment, &token)) { be->budget_used += backing; return SGPU_BACKEND_ERROR; }'),
     ('budget released on free', 'be->budget_used -= b->backing;', ''),
-    ('free blocked while in flight', 'if (b->pending || b->cpu_maps || b->gpu_maps) return SGPU_LIMIT;', 'if (b->cpu_maps || b->gpu_maps) return SGPU_LIMIT;'),
+    ('free blocked while in flight or GPU mapped', 'if (b->pending || b->cpu_maps || b->gpu_maps) return SGPU_LIMIT;', 'if (b->cpu_maps) return SGPU_LIMIT;'),
     ('free blocked by GPU mapping', 'if (b->pending || b->cpu_maps || b->gpu_maps) return SGPU_LIMIT;', 'if (b->pending || b->cpu_maps) return SGPU_LIMIT;'),
     ('free blocked by CPU mapping', 'if (b->pending || b->cpu_maps || b->gpu_maps) return SGPU_LIMIT;', 'if (b->pending || b->gpu_maps) return SGPU_LIMIT;'),
     ('context destroy blocked when referenced', 'if (c->pending || c->gpu_maps) return SGPU_LIMIT;', ''),
@@ -75,7 +75,6 @@ MUTATIONS = [
     ('use access bounded by mapping', 'm->bo == (uint32_t)(b - be->bos) && (m->access & access) == access;', 'm->bo == (uint32_t)(b - be->bos);'),
     ('mapping checked per context', 'mapped = m->live && m->context == context_slot && ', 'mapped = m->live && '),
     ('IB needs covering map', 'if (!map) return SGPU_BAD_FIELD;', 'if (!map) map = &be->gpu_maps[0];'),
-    ('IB range covered, start', 'offset >= m->offset\n            && bytes <= m->bytes', '1\n            && bytes <= m->bytes'),
     ('IB range covered, end', '&& bytes <= m->bytes && offset - m->offset <= m->bytes - bytes) return m;', ') return m;'),
     ('IB covering map per context', 'if (m->live && m->context == context && m->bo == bo && (m->access', 'if (m->live && m->bo == bo && (m->access'),
     ('IB address translated', 'hw_ibs[i].va = map->va + (offset - map->offset);', 'hw_ibs[i].va = map->va + offset;'),
@@ -117,6 +116,14 @@ MUTATIONS = [
     ('init rejects zero VA', '|| !config->va_start || !config->va_bytes', '|| !config->va_bytes'),
     ('init rejects unverified values', '} else if (config->budget_bytes || config->max_alloc_bytes', '} else if (0 && config->max_alloc_bytes'),
     ('query hides values when unverified', 'if (be->config.profile_verified) {\n        sgpu_put64(r->payload + 8', 'if (1) {\n        sgpu_put64(r->payload + 8'),
+]
+
+
+# Single-clause mutants that cannot change behaviour, so running them proves nothing.
+# Each clause stays in the code as explicit intent. Reported, never counted as killed.
+EQUIVALENT = [
+    ('free checks pending alone', 'Pending work requires a GPU mapping at submit and GPU unmap is refused in flight, so pending implies gpu_maps > 0. Covered by the combined mutant above.'),
+    ('IB offset >= mapping offset', 'A smaller offset wraps the unsigned subtraction past any possible mapping size, which is at most 128 MiB, so the following clause already rejects it.'),
 ]
 
 
@@ -199,6 +206,7 @@ def main():
             report['mutations'].append(result)
         shutil.rmtree(out/'mutant', ignore_errors=True)
         report['mutation_count'] = len(MUTATIONS)
+        report['equivalent_mutants_not_run'] = [dict(rule=rule, reason=reason) for rule, reason in EQUIVALENT]
         report['mutation_survivors'] = survivors
         report['outcome'] = 'fail' if survivors else 'pass'
     except Exception as error:

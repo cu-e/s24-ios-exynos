@@ -741,6 +741,61 @@ static void test_ib_translation_and_coverage(void)
     (void)read_only_map;
 }
 
+static void test_cpu_mapping_frozen_in_flight(void)
+{
+    struct fixture f;
+    uint64_t sequence, mapping;
+    setup(4096, KB(256), KB(32));
+    f = make_fixture(VA);
+
+    /* A read mapping made while idle stays clean, so work can start with it live. */
+    CHECK_EQ(cpu_map(f.client, f.bo, 0, KB(16), SGPU_READ, &mapping), SGPU_OK);
+    CHECK_EQ(submit_one(f.client, f.context, f.bo, SGPU_READ, NULL, 0, NULL, &sequence), SGPU_OK);
+    CHECK_EQ(handle_op(f.client, SGPU_CPU_UNMAP, mapping), SGPU_LIMIT);
+    CHECK_EQ(F.cpu_unmap_calls, 0);
+    CHECK_EQ(sgpu_backend_retire(BE, sequence, 0), 0);
+    CHECK_EQ(handle_op(f.client, SGPU_CPU_UNMAP, mapping), SGPU_OK);
+
+    /* No new CPU mapping appears while the GPU owns the buffer either. */
+    CHECK_EQ(submit_one(f.client, f.context, f.bo, SGPU_READ, NULL, 0, NULL, &sequence), SGPU_OK);
+    CHECK_EQ(cpu_map(f.client, f.bo, 0, KB(16), SGPU_READ, NULL), SGPU_LIMIT);
+    CHECK_EQ(F.cpu_map_calls, 1);
+    CHECK_EQ(sgpu_backend_retire(BE, sequence, 0), 0);
+    CHECK_EQ(cpu_map(f.client, f.bo, 0, KB(16), SGPU_READ, NULL), SGPU_OK);
+}
+
+static void test_mappings_do_not_cross_contexts(void)
+{
+    struct fixture f;
+    uint64_t second, data;
+    struct ib ib;
+    struct use uses[2];
+    setup(4096, KB(256), KB(32));
+    f = make_fixture(VA); /* f.bo is mapped only in f.context. */
+    CHECK_EQ(create_context(f.client, &second), SGPU_OK);
+    CHECK_EQ(alloc_bo(f.client, KB(8), RW, &data, NULL), SGPU_OK);
+    CHECK_EQ(gpu_map(f.client, second, data, VA + KB(64), 0, KB(8), RW), SGPU_OK);
+
+    /* A valid IB does not excuse a use that is unmapped in the submitting context. */
+    ib.bo = data; ib.offset = 0; ib.bytes = 16;
+    uses[0].bo = data; uses[0].access = SGPU_READ;
+    uses[1].bo = f.bo; uses[1].access = SGPU_READ;
+    CHECK_EQ(submit(f.client, second, &ib, 1, uses, 2, NULL, 0, NULL, NULL), SGPU_BAD_FIELD);
+    CHECK_EQ(F.submit_calls, 0);
+
+    /* Mapped in both contexts, but only the first covers these IB bytes. */
+    CHECK_EQ(gpu_map(f.client, second, f.bo, VA + KB(128), KB(8), KB(8), SGPU_READ), SGPU_OK);
+    ib.bo = f.bo;
+    uses[0].bo = f.bo;
+    CHECK_EQ(submit(f.client, second, &ib, 1, uses, 1, NULL, 0, NULL, NULL), SGPU_BAD_FIELD);
+    CHECK_EQ(F.submit_calls, 0);
+
+    /* The bytes it does cover translate through its own mapping. */
+    ib.offset = KB(8);
+    CHECK_EQ(submit(f.client, second, &ib, 1, uses, 1, NULL, 0, NULL, NULL), SGPU_OK);
+    CHECK_EQ(F.last_ibs[0].va, VA + KB(128));
+}
+
 static void test_write_hazards(void)
 {
     struct fixture f;
@@ -1280,6 +1335,7 @@ int main(void)
         test_unverified_refuses_all_but_query, test_init_rejects_bad_profiles, test_verified_query_passes_reply_validation,
         test_page_accounting_and_budget, test_foreign_stale_and_confused_handles, test_free_and_destroy_need_no_references,
         test_cpu_map_rules, test_gpu_map_rules, test_cache_transitions, test_submit_is_atomic, test_ib_translation_and_coverage,
+        test_cpu_mapping_frozen_in_flight, test_mappings_do_not_cross_contexts,
         test_write_hazards, test_reader_limit, test_two_reader_lifetime, test_wait_timeout_does_not_retire,
         test_retirement_during_wait_and_errors, test_spurious_retirement_is_ignored, test_stop_blocks_new_work_only,
         test_fault_quarantine_and_quiesce, test_client_close_with_work_in_flight, test_client_close_during_fault_waits_for_quiesce,
