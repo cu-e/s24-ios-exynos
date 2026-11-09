@@ -9,9 +9,10 @@
  * config.profile_verified != 0. No code in this tree sets it for real hardware;
  * doing so requires a validated firmware and chip profile.
  *
- * After CACHE TO_GPU clears cpu_dirty, a client can still write through a live
- * CPU mapping. That is a data race on its own pinned buffer, not a lifetime or
- * isolation failure, and the core cannot observe it.
+ * After a whole-buffer CACHE TO_GPU clears cpu_dirty, a client can still write
+ * through a live CPU mapping of a data BO. That is a data race on its own pinned
+ * buffer, not a lifetime or isolation failure, and the core cannot observe it. A
+ * BO with a writable CPU mapping cannot hold an IB.
  */
 #ifndef S24_SGPU_BACKEND_H
 #define S24_SGPU_BACKEND_H
@@ -29,6 +30,15 @@ extern "C" {
 #define SGPU_BE_MAX_FENCES 512u
 #define SGPU_BE_MAX_READERS 8u
 
+/* Each table divided across every client slot, so that one live client cannot
+ * exhaust a table another live client needs. A closed client's zombies are outside
+ * this guarantee: they stay until the hardware stops using them. */
+#define SGPU_BE_CLIENT_MAX_BOS (SGPU_BE_MAX_BOS / SGPU_BE_MAX_CLIENTS)
+#define SGPU_BE_CLIENT_MAX_CONTEXTS (SGPU_BE_MAX_CONTEXTS / SGPU_BE_MAX_CLIENTS)
+#define SGPU_BE_CLIENT_MAX_CPU_MAPS (SGPU_BE_MAX_CPU_MAPS / SGPU_BE_MAX_CLIENTS)
+#define SGPU_BE_CLIENT_MAX_GPU_MAPS (SGPU_BE_MAX_GPU_MAPS / SGPU_BE_MAX_CLIENTS)
+#define SGPU_BE_CLIENT_MAX_FENCES (SGPU_BE_MAX_FENCES / SGPU_BE_MAX_CLIENTS)
+
 /* Reasons reported by trusted hardware paths. Zero means clean retirement. */
 enum sgpu_be_reason { SGPU_BE_REASON_NONE = 0, SGPU_BE_REASON_FAULT = 1, SGPU_BE_REASON_QUIESCED = 2 };
 
@@ -40,8 +50,17 @@ struct sgpu_be_ib { uint64_t va; uint32_t bytes, flags; };
  * and must atomically release it while blocked, reacquiring before return, as
  * IOLockSleepDeadline does. It may return early; callers recheck their condition.
  *
- * backing_alloc must return pinned, zeroed backing. vm_map/vm_unmap/tlb_flush
- * failures are treated as hardware failures and the affected range stays retained.
+ * backing_alloc must return pinned, zeroed backing.
+ *
+ * A failed vm_map must leave nothing mapped. Once vm_map has succeeded, a failed
+ * tlb_flush, and any failed vm_unmap, retains the range and quarantines the device.
+ * vm_unmap must be idempotent, because a range whose flush failed is unmapped again.
+ *
+ * submit must not start the work until every sequence in wait_sequences has retired.
+ * Work must therefore retire after what it waits for. Lifetime references do not rely
+ * on that order; hazard tracking does. A nonzero return must mean nothing was queued,
+ * because the next submit reuses the sequence. An implementation that cannot tell
+ * must return zero and later retire the sequence with a nonzero reason.
  */
 struct sgpu_be_ops {
     void (*lock)(void *hw);
@@ -59,11 +78,12 @@ struct sgpu_be_ops {
     int (*vm_unmap)(void *hw, uint32_t hw_context, uint64_t va, uint64_t bytes);
     int (*tlb_flush)(void *hw, uint32_t hw_context, uint64_t va, uint64_t bytes);
     int (*cache_sync)(void *hw, uint64_t token, uint64_t offset, uint64_t bytes, uint32_t direction);
-    int (*submit)(void *hw, uint32_t hw_context, const struct sgpu_be_ib *ibs, uint32_t count, uint64_t sequence);
+    int (*submit)(void *hw, uint32_t hw_context, const struct sgpu_be_ib *ibs, uint32_t count, const uint64_t *wait_sequences, uint32_t wait_count, uint64_t sequence);
 };
 
 struct sgpu_be_config {
-    uint64_t budget_bytes, max_alloc_bytes, va_start, va_bytes, epoch;
+    /* max_alloc_bytes <= client_budget_bytes <= budget_bytes. QUERY reports the client budget. */
+    uint64_t budget_bytes, client_budget_bytes, max_alloc_bytes, va_start, va_bytes, epoch;
     uint32_t cpu_hardware_page, cpu_vm_page, profile_verified, reserved;
 };
 

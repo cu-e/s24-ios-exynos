@@ -26,8 +26,9 @@ struct fake {
     unsigned alloc_calls, free_calls, cpu_map_calls, cpu_unmap_calls, context_create_calls, context_destroy_calls;
     unsigned vm_map_calls, vm_unmap_calls, tlb_calls, cache_calls, submit_calls, wake_calls;
     uint64_t next_token, now, last_alloc_bytes, last_alloc_alignment, last_sequence;
-    uint32_t next_context, last_count, last_context;
+    uint32_t next_context, last_count, last_context, last_wait_count;
     struct sgpu_be_ib last_ibs[SGPU_MAX_IBS];
+    uint64_t last_waits[SGPU_MAX_DEPS];
     int locked, threaded;
     uint64_t retire_on_wait; /* Nonzero: the first wait observes this retirement. */
     uint32_t retire_reason;
@@ -171,7 +172,7 @@ static int op_cache(void *hw, uint64_t token, uint64_t offset, uint64_t bytes, u
     ++F.cache_calls;
     return F.fail_cache ? -1 : 0;
 }
-static int op_submit(void *hw, uint32_t context, const struct sgpu_be_ib *ibs, uint32_t count, uint64_t sequence)
+static int op_submit(void *hw, uint32_t context, const struct sgpu_be_ib *ibs, uint32_t count, const uint64_t *waits, uint32_t wait_count, uint64_t sequence)
 {
     uint32_t i;
     (void)hw;
@@ -181,7 +182,9 @@ static int op_submit(void *hw, uint32_t context, const struct sgpu_be_ib *ibs, u
     F.last_context = context;
     F.last_count = count;
     F.last_sequence = sequence;
+    F.last_wait_count = wait_count;
     for (i = 0; i < count; ++i) F.last_ibs[i] = ibs[i];
+    for (i = 0; i < wait_count; ++i) F.last_waits[i] = waits[i];
     return 0;
 }
 
@@ -194,7 +197,7 @@ static struct sgpu_be_config config_verified(uint32_t page, uint64_t budget, uin
 {
     struct sgpu_be_config c;
     memset(&c, 0, sizeof c);
-    c.budget_bytes = budget; c.max_alloc_bytes = max_alloc; c.va_start = VA; c.va_bytes = UINT64_C(1) << 32;
+    c.budget_bytes = budget; c.client_budget_bytes = budget; c.max_alloc_bytes = max_alloc; c.va_start = VA; c.va_bytes = UINT64_C(1) << 32;
     c.epoch = 7; c.cpu_hardware_page = page; c.cpu_vm_page = page; c.profile_verified = 1;
     return c;
 }
@@ -422,6 +425,8 @@ static void test_unverified_refuses_all_but_query(void)
     c.budget_bytes = KB(16);
     reset_fake();
     CHECK_EQ(sgpu_backend_init(BE, &c, &OPS, &F), SGPU_BAD_FIELD);
+    c.budget_bytes = 0; c.client_budget_bytes = KB(16);
+    CHECK_EQ(sgpu_backend_init(BE, &c, &OPS, &F), SGPU_BAD_FIELD);
 }
 
 static void test_init_rejects_bad_profiles(void)
@@ -432,6 +437,8 @@ static void test_init_rejects_bad_profiles(void)
     c = good; c.cpu_vm_page = 8192; CHECK_EQ(sgpu_backend_init(BE, &c, &OPS, &F), SGPU_BAD_FIELD);
     c = good; c.cpu_hardware_page = 0; CHECK_EQ(sgpu_backend_init(BE, &c, &OPS, &F), SGPU_BAD_FIELD);
     c = good; c.max_alloc_bytes = KB(128); CHECK_EQ(sgpu_backend_init(BE, &c, &OPS, &F), SGPU_BAD_FIELD);
+    c = good; c.client_budget_bytes = KB(128); CHECK_EQ(sgpu_backend_init(BE, &c, &OPS, &F), SGPU_BAD_FIELD);
+    c = good; c.client_budget_bytes = KB(8); CHECK_EQ(sgpu_backend_init(BE, &c, &OPS, &F), SGPU_BAD_FIELD);
     c = good; c.va_start = VA + 1; CHECK_EQ(sgpu_backend_init(BE, &c, &OPS, &F), SGPU_BAD_FIELD);
     c = good; c.va_start = 0; CHECK_EQ(sgpu_backend_init(BE, &c, &OPS, &F), SGPU_BAD_FIELD);
     c = good; c.va_start = UINT64_MAX - 4095; c.va_bytes = KB(8); CHECK_EQ(sgpu_backend_init(BE, &c, &OPS, &F), SGPU_BAD_FIELD);
@@ -630,19 +637,32 @@ static void test_gpu_map_rules(void)
     CHECK_EQ(sgpu_backend_retire(BE, sequence, 0), 0);
 }
 
+/* IB in ib_bo, data use on f.bo: for tests that hold a writable CPU view of f.bo. */
+static uint32_t submit_data(struct fixture f, uint64_t ib_bo, uint32_t access, uint64_t *fence, uint64_t *sequence)
+{
+    struct ib i;
+    struct use u[2];
+    i.bo = ib_bo; i.offset = 0; i.bytes = 16;
+    u[0].bo = ib_bo; u[0].access = SGPU_READ;
+    u[1].bo = f.bo; u[1].access = access;
+    return submit(f.client, f.context, &i, 1, u, 2, NULL, 0, fence, sequence);
+}
+
 static void test_cache_transitions(void)
 {
     struct fixture f;
-    uint64_t mapping, fence, sequence;
+    uint64_t mapping, ib_bo, fence, sequence;
     setup(4096, KB(256), KB(32));
     f = make_fixture(VA);
+    CHECK_EQ(alloc_bo(f.client, KB(4), RW, &ib_bo, NULL), SGPU_OK);
+    CHECK_EQ(gpu_map(f.client, f.context, ib_bo, VA + KB(64), 0, KB(4), SGPU_READ), SGPU_OK);
 
     CHECK_EQ(cache_op(f.client, f.bo, 0, KB(4), SGPU_TO_GPU), SGPU_LIMIT); /* needs a CPU mapping */
     CHECK_EQ(cpu_map(f.client, f.bo, 0, KB(16), RW, &mapping), SGPU_OK);
     CHECK_EQ(cache_op(f.client, f.bo, KB(16), KB(4), SGPU_TO_GPU), SGPU_BAD_FIELD);
 
     /* A writable CPU mapping is dirty until cleaned. */
-    CHECK_EQ(submit_one(f.client, f.context, f.bo, SGPU_READ, NULL, 0, NULL, NULL), SGPU_BAD_FIELD);
+    CHECK_EQ(submit_data(f, ib_bo, SGPU_READ, NULL, NULL), SGPU_BAD_FIELD);
     CHECK_EQ(F.submit_calls, 0);
     CHECK_EQ(cache_op(f.client, f.bo, 0, KB(4), SGPU_TO_CPU), SGPU_BAD_FIELD); /* conflicts with cpu_dirty */
 
@@ -650,15 +670,30 @@ static void test_cache_transitions(void)
     F.fail_cache = 1;
     CHECK_EQ(cache_op(f.client, f.bo, 0, KB(16), SGPU_TO_GPU), SGPU_BACKEND_ERROR);
     F.fail_cache = 0;
-    CHECK_EQ(submit_one(f.client, f.context, f.bo, SGPU_READ, NULL, 0, NULL, NULL), SGPU_BAD_FIELD);
+    CHECK_EQ(submit_data(f, ib_bo, SGPU_READ, NULL, NULL), SGPU_BAD_FIELD);
+
+    /* A partial sync reaches the cache but cannot clean the whole buffer. */
+    CHECK_EQ(cache_op(f.client, f.bo, 0, KB(4), SGPU_TO_GPU), SGPU_OK);
+    CHECK_EQ(submit_data(f, ib_bo, SGPU_READ, NULL, NULL), SGPU_BAD_FIELD);
 
     CHECK_EQ(cache_op(f.client, f.bo, 0, KB(16), SGPU_TO_GPU), SGPU_OK);
-    CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, NULL, 0, &fence, &sequence), SGPU_OK);
+    /* Clean, but still writable from the CPU, so it may not hold an IB. */
+    CHECK_EQ(submit_one(f.client, f.context, f.bo, SGPU_READ, NULL, 0, NULL, NULL), SGPU_BAD_FIELD);
+    CHECK_EQ(submit_data(f, ib_bo, RW, &fence, &sequence), SGPU_OK);
     CHECK_EQ(cache_op(f.client, f.bo, 0, KB(16), SGPU_TO_CPU), SGPU_LIMIT); /* in flight */
     CHECK_EQ(sgpu_backend_retire(BE, sequence, 0), 0);
 
     /* A GPU write leaves stale CPU caches until invalidated. */
     CHECK_EQ(cache_op(f.client, f.bo, 0, KB(16), SGPU_TO_GPU), SGPU_BAD_FIELD);
+    CHECK_EQ(handle_op(f.client, SGPU_CPU_UNMAP, mapping), SGPU_OK);
+
+    /* Unmapping removes the writable view, so the BO may hold an IB again. */
+    CHECK_EQ(submit_one(f.client, f.context, f.bo, SGPU_READ, NULL, 0, NULL, &sequence), SGPU_OK);
+    CHECK_EQ(sgpu_backend_retire(BE, sequence, 0), 0);
+
+    CHECK_EQ(cpu_map(f.client, f.bo, 0, KB(16), RW, NULL), SGPU_BAD_FIELD);
+    CHECK_EQ(cpu_map(f.client, f.bo, 0, KB(16), SGPU_READ, &mapping), SGPU_OK);
+    CHECK_EQ(cache_op(f.client, f.bo, 0, KB(4), SGPU_TO_CPU), SGPU_OK); /* partial: the rest stays stale */
     CHECK_EQ(handle_op(f.client, SGPU_CPU_UNMAP, mapping), SGPU_OK);
     CHECK_EQ(cpu_map(f.client, f.bo, 0, KB(16), RW, NULL), SGPU_BAD_FIELD);
     CHECK_EQ(cpu_map(f.client, f.bo, 0, KB(16), SGPU_READ, &mapping), SGPU_OK);
@@ -804,19 +839,27 @@ static void test_write_hazards(void)
     f = make_fixture(VA);
 
     CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, NULL, 0, &w1, &s1), SGPU_OK);
+    CHECK_EQ(F.last_wait_count, 0);
     CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, NULL, 0, NULL, NULL), SGPU_BAD_FIELD); /* write after write */
     CHECK_EQ(submit_one(f.client, f.context, f.bo, SGPU_READ, NULL, 0, NULL, NULL), SGPU_BAD_FIELD); /* read after write */
     CHECK_EQ(F.submit_calls, 1);
 
     CHECK_EQ(submit_one(f.client, f.context, f.bo, SGPU_READ, &w1, 1, &r1, &s2), SGPU_OK);
+    CHECK_EQ(F.last_wait_count, 1); /* The hardware has to honour the order. */
+    CHECK_EQ(F.last_waits[0], s1);
     CHECK_EQ(sgpu_backend_retire(BE, s1, 0), 0);
-    CHECK_EQ(submit_one(f.client, f.context, f.bo, SGPU_READ, NULL, 0, &r2, &s3), SGPU_OK); /* readers may overlap */
+    /* Readers may overlap, and a retired dependency leaves nothing to wait for. */
+    CHECK_EQ(submit_one(f.client, f.context, f.bo, SGPU_READ, &w1, 1, &r2, &s3), SGPU_OK);
+    CHECK_EQ(F.last_wait_count, 0);
 
     CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, NULL, 0, NULL, NULL), SGPU_BAD_FIELD); /* write after reads */
     CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, &r1, 1, NULL, NULL), SGPU_BAD_FIELD);  /* one reader uncovered */
     deps[0] = r1; deps[1] = r2;
     CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, deps, 2, &w2, NULL), SGPU_OK);
     CHECK(w2 != 0);
+    CHECK_EQ(F.last_wait_count, 2);
+    CHECK_EQ(F.last_waits[0], s2);
+    CHECK_EQ(F.last_waits[1], s3);
 }
 
 static void test_reader_limit(void)
@@ -963,14 +1006,14 @@ static void test_fault_quarantine_and_quiesce(void)
 
     /* Quarantine retains everything; waiting neither retires nor releases. */
     CHECK_EQ(wait_fence(f.client, fence1, 1000, NULL, NULL), SGPU_TIMEOUT);
-    CHECK_EQ(free_bo(f.client, f.bo), SGPU_LIMIT);
+    CHECK_EQ(free_bo(f.client, f.bo), SGPU_STOPPED);
     CHECK_EQ(F.free_calls, 0);
 
     /* A genuine retirement still counts while faulted. */
     CHECK_EQ(sgpu_backend_retire(BE, s1, 0), 0);
     CHECK_EQ(wait_fence(f.client, fence1, 0, &state, &reason), SGPU_OK);
     CHECK_EQ(state, SGPU_RETIRED);
-    CHECK_EQ(gpu_unmap(f.client, f.context, VA, KB(16)), SGPU_LIMIT); /* second fence pending */
+    CHECK_EQ(gpu_unmap(f.client, f.context, VA, KB(16)), SGPU_STOPPED);
 
     CHECK_EQ(sgpu_backend_quiesced(BE), 0);
     CHECK_EQ(wait_fence(f.client, fence2, 0, &state, &reason), SGPU_OK);
@@ -1030,6 +1073,21 @@ static void test_client_close_during_fault_waits_for_quiesce(void)
     CHECK_EQ(F.context_destroy_calls, 1);
 }
 
+/* After a hardware failure nothing is released until quiescence, and the mapping outlasts it. */
+static void check_retained_until_quiesced(const struct fixture *f, uint64_t bo, uint64_t va, uint64_t bytes)
+{
+    unsigned frees = F.free_calls;
+    CHECK_EQ(free_bo(f->client, bo), SGPU_STOPPED);
+    CHECK_EQ(gpu_unmap(f->client, f->context, va, bytes), SGPU_STOPPED);
+    CHECK_EQ(handle_op(f->client, SGPU_CONTEXT_DESTROY, f->context), SGPU_STOPPED);
+    CHECK_EQ(alloc_bo(f->client, KB(4), RW, NULL, NULL), SGPU_STOPPED);
+    CHECK_EQ(F.free_calls, frees);
+    CHECK_EQ(sgpu_backend_quiesced(BE), 0);
+    CHECK_EQ(free_bo(f->client, bo), SGPU_LIMIT);
+    CHECK_EQ(gpu_unmap(f->client, f->context, va, bytes), SGPU_OK);
+    CHECK_EQ(free_bo(f->client, bo), SGPU_OK);
+}
+
 static void test_injected_hardware_failures(void)
 {
     struct fixture f;
@@ -1049,24 +1107,16 @@ static void test_injected_hardware_failures(void)
     F.fail_vm_map = 0;
     CHECK_EQ(free_bo(f.client, bo), SGPU_OK); /* nothing retained */
 
-    /* TLB failure after mapping: PTEs are removed again and nothing is retained. */
+    /* TLB failure after mapping: a running job may hold the translation, so no unwind. */
     CHECK_EQ(alloc_bo(f.client, KB(4), RW, &bo, NULL), SGPU_OK);
     F.fail_tlb = 1;
     {
         unsigned unmaps = F.vm_unmap_calls;
         CHECK_EQ(gpu_map(f.client, f.context, bo, VA + KB(64), 0, KB(4), RW), SGPU_BACKEND_ERROR);
-        CHECK_EQ(F.vm_unmap_calls, unmaps + 1);
+        CHECK_EQ(F.vm_unmap_calls, unmaps);
     }
     F.fail_tlb = 0;
-    CHECK_EQ(free_bo(f.client, bo), SGPU_OK);
-
-    /* If the unwind also fails the range stays retained and the device stops. */
-    CHECK_EQ(alloc_bo(f.client, KB(4), RW, &bo, NULL), SGPU_OK);
-    F.fail_tlb = 1; F.fail_vm_unmap = 1;
-    CHECK_EQ(gpu_map(f.client, f.context, bo, VA + KB(64), 0, KB(4), RW), SGPU_BACKEND_ERROR);
-    F.fail_tlb = 0; F.fail_vm_unmap = 0;
-    CHECK_EQ(free_bo(f.client, bo), SGPU_LIMIT);
-    CHECK_EQ(alloc_bo(f.client, KB(4), RW, NULL, NULL), SGPU_STOPPED);
+    check_retained_until_quiesced(&f, bo, VA + KB(64), KB(4));
 
     /* A failed unmap retains the mapping and stops new work. */
     setup(4096, KB(256), KB(32));
@@ -1074,8 +1124,7 @@ static void test_injected_hardware_failures(void)
     F.fail_vm_unmap = 1;
     CHECK_EQ(gpu_unmap(f.client, f.context, VA, KB(16)), SGPU_BACKEND_ERROR);
     F.fail_vm_unmap = 0;
-    CHECK_EQ(free_bo(f.client, f.bo), SGPU_LIMIT);
-    CHECK_EQ(alloc_bo(f.client, KB(4), RW, NULL, NULL), SGPU_STOPPED);
+    check_retained_until_quiesced(&f, f.bo, VA, KB(16));
 
     /* A failed TLB flush on unmap is treated the same way. */
     setup(4096, KB(256), KB(32));
@@ -1083,7 +1132,114 @@ static void test_injected_hardware_failures(void)
     F.fail_tlb = 1;
     CHECK_EQ(gpu_unmap(f.client, f.context, VA, KB(16)), SGPU_BACKEND_ERROR);
     F.fail_tlb = 0;
-    CHECK_EQ(free_bo(f.client, f.bo), SGPU_LIMIT);
+    check_retained_until_quiesced(&f, f.bo, VA, KB(16));
+}
+
+static void test_reap_stops_at_its_own_unmap_failure(void)
+{
+    struct fixture f;
+    uint64_t second, unmapped;
+    setup(4096, KB(256), KB(32));
+    f = make_fixture(VA);
+    CHECK_EQ(alloc_bo(f.client, KB(4), RW, &second, NULL), SGPU_OK);
+    CHECK_EQ(gpu_map(f.client, f.context, second, VA + KB(64), 0, KB(4), RW), SGPU_OK);
+    CHECK_EQ(alloc_bo(f.client, KB(4), RW, &unmapped, NULL), SGPU_OK);
+
+    /* The first failed unmap quarantines the device, so nothing after it is released. */
+    F.fail_vm_unmap = 1;
+    sgpu_backend_client_close(BE, f.client);
+    CHECK_EQ(F.vm_unmap_calls, 1);
+    CHECK_EQ(F.free_calls, 0);
+    CHECK_EQ(F.context_destroy_calls, 0);
+
+    /* Once DMA is proven stopped, what can be released is, and what cannot be unmapped stays. */
+    CHECK_EQ(sgpu_backend_quiesced(BE), 0);
+    CHECK_EQ(F.vm_unmap_calls, 3);
+    CHECK_EQ(F.free_calls, 1);
+    CHECK_EQ(F.context_destroy_calls, 0);
+}
+
+static void test_client_budget_is_separate_from_device_budget(void)
+{
+    struct sgpu_be_config c = config_verified(4096, KB(64), KB(16));
+    uint8_t out[88];
+    uint64_t first;
+    uint32_t a, b, d;
+    c.client_budget_bytes = KB(32);
+    setup_with(&c);
+    a = open_client(); b = open_client(); d = open_client();
+
+    CHECK_EQ(query(a, 0, out), SGPU_OK);
+    CHECK_EQ(sgpu_get64(out + 16), KB(32)); /* A client is told its own budget. */
+    CHECK_EQ(alloc_bo(a, KB(16), RW, &first, NULL), SGPU_OK);
+    CHECK_EQ(alloc_bo(a, KB(16), RW, NULL, NULL), SGPU_OK);
+    CHECK_EQ(alloc_bo(a, KB(4), RW, NULL, NULL), SGPU_LIMIT);
+
+    /* One client at its limit leaves others theirs, up to the device total. */
+    CHECK_EQ(alloc_bo(b, KB(16), RW, NULL, NULL), SGPU_OK);
+    CHECK_EQ(alloc_bo(b, KB(16), RW, NULL, NULL), SGPU_OK);
+    CHECK_EQ(alloc_bo(d, KB(4), RW, NULL, NULL), SGPU_LIMIT);
+
+    CHECK_EQ(free_bo(a, first), SGPU_OK);
+    CHECK_EQ(alloc_bo(a, KB(16), RW, NULL, NULL), SGPU_OK);
+}
+
+static void test_closed_client_charges_stay_with_its_identity(void)
+{
+    struct sgpu_be_config c = config_verified(4096, KB(256), KB(32));
+    struct fixture f;
+    uint64_t sequence;
+    uint32_t reopened;
+    c.client_budget_bytes = KB(32);
+    setup_with(&c);
+    f = make_fixture(VA);
+    CHECK_EQ(alloc_bo(f.client, KB(16), RW, NULL, NULL), SGPU_OK);
+    CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, NULL, 0, NULL, &sequence), SGPU_OK);
+    sgpu_backend_client_close(BE, f.client);
+
+    /* The same slot under a new identity starts empty despite the retained BO. */
+    reopened = open_client();
+    CHECK_EQ(reopened & 0xFFFFu, f.client & 0xFFFFu);
+    CHECK_EQ(alloc_bo(reopened, KB(32), RW, NULL, NULL), SGPU_OK);
+    CHECK_EQ(alloc_bo(reopened, KB(4), RW, NULL, NULL), SGPU_LIMIT);
+
+    /* Releasing the old identity's BO credits the device, not the successor. */
+    CHECK_EQ(sgpu_backend_retire(BE, sequence, 0), 0);
+    CHECK_EQ(alloc_bo(reopened, KB(4), RW, NULL, NULL), SGPU_LIMIT);
+}
+
+static void test_per_client_object_quotas(void)
+{
+    static uint64_t bos[SGPU_BE_CLIENT_MAX_BOS];
+    uint64_t contexts[SGPU_BE_CLIENT_MAX_CONTEXTS], maps[SGPU_BE_CLIENT_MAX_CPU_MAPS];
+    uint32_t a, b;
+    unsigned i;
+    setup(4096, KB(1024), KB(32));
+    a = open_client();
+    b = open_client();
+
+    for (i = 0; i < SGPU_BE_CLIENT_MAX_BOS; ++i) CHECK_EQ(alloc_bo(a, KB(4), RW, &bos[i], NULL), SGPU_OK);
+    CHECK_EQ(alloc_bo(a, KB(4), RW, NULL, NULL), SGPU_LIMIT);
+    CHECK_EQ(alloc_bo(b, KB(4), RW, NULL, NULL), SGPU_OK);
+    CHECK_EQ(free_bo(a, bos[SGPU_BE_CLIENT_MAX_BOS - 1]), SGPU_OK);
+    CHECK_EQ(alloc_bo(a, KB(4), RW, &bos[SGPU_BE_CLIENT_MAX_BOS - 1], NULL), SGPU_OK);
+
+    for (i = 0; i < SGPU_BE_CLIENT_MAX_CONTEXTS; ++i) CHECK_EQ(create_context(a, &contexts[i]), SGPU_OK);
+    CHECK_EQ(create_context(a, NULL), SGPU_LIMIT);
+    CHECK_EQ(create_context(b, NULL), SGPU_OK);
+    CHECK_EQ(handle_op(a, SGPU_CONTEXT_DESTROY, contexts[1]), SGPU_OK);
+    CHECK_EQ(create_context(a, &contexts[1]), SGPU_OK);
+
+    for (i = 0; i < SGPU_BE_CLIENT_MAX_CPU_MAPS; ++i) CHECK_EQ(cpu_map(a, bos[i], 0, KB(4), SGPU_READ, &maps[i]), SGPU_OK);
+    CHECK_EQ(cpu_map(a, bos[SGPU_BE_CLIENT_MAX_CPU_MAPS], 0, KB(4), SGPU_READ, NULL), SGPU_LIMIT);
+    CHECK_EQ(handle_op(a, SGPU_CPU_UNMAP, maps[0]), SGPU_OK);
+    CHECK_EQ(cpu_map(a, bos[SGPU_BE_CLIENT_MAX_CPU_MAPS], 0, KB(4), SGPU_READ, NULL), SGPU_OK);
+
+    /* One BO can back many mappings, so the map quota is reachable on its own. */
+    for (i = 0; i < SGPU_BE_CLIENT_MAX_GPU_MAPS; ++i) CHECK_EQ(gpu_map(a, contexts[0], bos[0], VA + i * KB(4), 0, KB(4), SGPU_READ), SGPU_OK);
+    CHECK_EQ(gpu_map(a, contexts[0], bos[0], VA + KB(4) * SGPU_BE_CLIENT_MAX_GPU_MAPS, 0, KB(4), SGPU_READ), SGPU_LIMIT);
+    CHECK_EQ(gpu_unmap(a, contexts[0], VA, KB(4)), SGPU_OK);
+    CHECK_EQ(gpu_map(a, contexts[0], bos[0], VA, 0, KB(4), SGPU_READ), SGPU_OK);
 }
 
 static void test_malformed_requests_never_reach_the_backend(void)
@@ -1143,9 +1299,9 @@ static void test_malformed_requests_never_reach_the_backend(void)
     CHECK_EQ(hw_effects(), before);
 }
 
-static void test_fence_table_exhaustion_and_eviction(void)
+static void test_fence_quota_and_eviction(void)
 {
-    static uint64_t fences[SGPU_BE_MAX_FENCES], sequences[SGPU_BE_MAX_FENCES];
+    uint64_t fences[SGPU_BE_CLIENT_MAX_FENCES], sequences[SGPU_BE_CLIENT_MAX_FENCES];
     struct fixture f;
     uint64_t next, evicted_check;
     unsigned i, before;
@@ -1153,15 +1309,15 @@ static void test_fence_table_exhaustion_and_eviction(void)
     f = make_fixture(VA);
 
     /* Each write orders on the previous one, so all stay pending on one BO. */
-    for (i = 0; i < SGPU_BE_MAX_FENCES; ++i) {
+    for (i = 0; i < SGPU_BE_CLIENT_MAX_FENCES; ++i) {
         uint64_t *dep = i ? &fences[i - 1] : NULL;
         CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, dep, i ? 1 : 0, &fences[i], &sequences[i]), SGPU_OK);
     }
     before = F.submit_calls;
-    CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, &fences[SGPU_BE_MAX_FENCES - 1], 1, NULL, NULL), SGPU_LIMIT);
+    CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, &fences[SGPU_BE_CLIENT_MAX_FENCES - 1], 1, NULL, NULL), SGPU_LIMIT);
     CHECK_EQ(F.submit_calls, before);
 
-    for (i = 0; i < SGPU_BE_MAX_FENCES; ++i) CHECK_EQ(sgpu_backend_retire(BE, sequences[i], 0), 0);
+    for (i = 0; i < SGPU_BE_CLIENT_MAX_FENCES; ++i) CHECK_EQ(sgpu_backend_retire(BE, sequences[i], 0), 0);
 
     /* A rejected submit must not evict a retired fence. */
     F.fail_submit = 1;
@@ -1175,6 +1331,71 @@ static void test_fence_table_exhaustion_and_eviction(void)
     CHECK_EQ(wait_fence(f.client, fences[1], 0, NULL, NULL), SGPU_OK);
     evicted_check = next;
     CHECK(evicted_check != fences[0]);
+}
+
+/* Leaves count retired fences for a client, oldest first in fences. */
+static void fill_retired(const struct fixture *f, uint64_t *fences, unsigned count)
+{
+    unsigned i;
+    for (i = 0; i < count; ++i) {
+        uint64_t sequence;
+        CHECK_EQ(submit_one(f->client, f->context, f->bo, RW, NULL, 0, &fences[i], &sequence), SGPU_OK);
+        CHECK_EQ(sgpu_backend_retire(BE, sequence, 0), 0);
+    }
+}
+
+/* All clients at quota fills the table, so only eviction can make room. */
+static void test_fence_eviction_stays_within_the_client(void)
+{
+    static struct fixture all[SGPU_BE_MAX_CLIENTS];
+    static uint64_t fences[SGPU_BE_MAX_CLIENTS][SGPU_BE_CLIENT_MAX_FENCES];
+    const unsigned last = SGPU_BE_MAX_CLIENTS - 1;
+    uint64_t next;
+    unsigned c;
+    setup(4096, KB(256), KB(32));
+    for (c = 0; c < SGPU_BE_MAX_CLIENTS; ++c) {
+        all[c] = make_fixture(VA);
+        fill_retired(&all[c], fences[c], SGPU_BE_CLIENT_MAX_FENCES);
+    }
+    CHECK_EQ(submit_one(all[last].client, all[last].context, all[last].bo, RW, NULL, 0, &next, NULL), SGPU_OK);
+    CHECK_EQ(wait_fence(all[last].client, fences[last][0], 0, NULL, NULL), SGPU_BAD_FIELD);
+    CHECK_EQ(wait_fence(all[0].client, fences[0][0], 0, NULL, NULL), SGPU_OK); /* Older, but not this client's. */
+}
+
+/* Fences a closed client left behind can be reused, but not to exceed a quota. */
+static void test_closed_client_fences_are_reusable_within_quota(void)
+{
+    static struct fixture all[SGPU_BE_MAX_CLIENTS];
+    static uint64_t fences[SGPU_BE_MAX_CLIENTS][SGPU_BE_CLIENT_MAX_FENCES], sequences[SGPU_BE_CLIENT_MAX_FENCES];
+    static uint64_t newcomer[SGPU_BE_CLIENT_MAX_FENCES];
+    struct fixture e;
+    uint64_t next;
+    unsigned c, i;
+    setup(4096, KB(256), KB(32));
+
+    /* The first client's work is still running when it closes. */
+    all[0] = make_fixture(VA);
+    for (i = 0; i < SGPU_BE_CLIENT_MAX_FENCES; ++i) {
+        uint64_t *dep = i ? &fences[0][i - 1] : NULL;
+        CHECK_EQ(submit_one(all[0].client, all[0].context, all[0].bo, RW, dep, i ? 1 : 0, &fences[0][i], &sequences[i]), SGPU_OK);
+    }
+
+    /* The last client stops one short, leaving exactly one free table slot. */
+    for (c = 1; c < SGPU_BE_MAX_CLIENTS; ++c) {
+        all[c] = make_fixture(VA);
+        fill_retired(&all[c], fences[c], c == SGPU_BE_MAX_CLIENTS - 1 ? SGPU_BE_CLIENT_MAX_FENCES - 1 : SGPU_BE_CLIENT_MAX_FENCES);
+    }
+    sgpu_backend_client_close(BE, all[0].client);
+    for (i = 0; i < SGPU_BE_CLIENT_MAX_FENCES; ++i) CHECK_EQ(sgpu_backend_retire(BE, sequences[i], 0), 0);
+
+    /* One free slot, then the closed client's fences: one of them is left over. */
+    e = make_fixture(VA);
+    fill_retired(&e, newcomer, SGPU_BE_CLIENT_MAX_FENCES);
+
+    /* At quota the newcomer replaces its own oldest, even with an older dead fence available. */
+    CHECK_EQ(submit_one(e.client, e.context, e.bo, RW, NULL, 0, &next, NULL), SGPU_OK);
+    CHECK_EQ(wait_fence(e.client, newcomer[0], 0, NULL, NULL), SGPU_BAD_FIELD);
+    CHECK_EQ(wait_fence(e.client, newcomer[1], 0, NULL, NULL), SGPU_OK);
 }
 
 static void test_client_limit_and_generation_retirement(void)
@@ -1339,7 +1560,10 @@ int main(void)
         test_write_hazards, test_reader_limit, test_two_reader_lifetime, test_wait_timeout_does_not_retire,
         test_retirement_during_wait_and_errors, test_spurious_retirement_is_ignored, test_stop_blocks_new_work_only,
         test_fault_quarantine_and_quiesce, test_client_close_with_work_in_flight, test_client_close_during_fault_waits_for_quiesce,
-        test_injected_hardware_failures, test_malformed_requests_never_reach_the_backend, test_fence_table_exhaustion_and_eviction,
+        test_injected_hardware_failures, test_reap_stops_at_its_own_unmap_failure, test_client_budget_is_separate_from_device_budget,
+        test_closed_client_charges_stay_with_its_identity, test_per_client_object_quotas,
+        test_malformed_requests_never_reach_the_backend, test_fence_quota_and_eviction,
+        test_fence_eviction_stays_within_the_client, test_closed_client_fences_are_reusable_within_quota,
         test_client_limit_and_generation_retirement, test_threaded_wait_wakeups, test_threaded_concurrent_clients
     };
     size_t i, count = sizeof tests / sizeof tests[0];
