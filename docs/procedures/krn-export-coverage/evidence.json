@@ -1,0 +1,93 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-09T22:12:59+00:00",
+  "summary": "The measurement completed. Of the two check_all_exports passes, the pass without Private lists no missing names and the pass without Unsupported lists 37, exactly the names KRN-026 records. A pass here means the measurement ran, not that the exports are satisfied.",
+  "task": "KRN-040",
+  "owner": "claude-export-coverage-20261110-k40",
+  "commit": "1fc9593a357db1ce67bb45913511c06462a3d4ab",
+  "findings": {
+    "imported_symbols": 22749,
+    "passes": {
+      "without-private": {
+        "export_entries": 4254,
+        "missing_names": 0
+      },
+      "without-unsupported": {
+        "export_entries": 5412,
+        "missing_names": 37
+      }
+    },
+    "missing_total": 37,
+    "missing_groups": {
+      "IOUnifiedAddressTranslator": 17,
+      "pmap_iommu": 7,
+      "DART/SART/UAT/NVMe PPL": 11,
+      "pmap queries": 2
+    },
+    "missing_files": [
+      "Private.arm64.exports",
+      "Private.exports"
+    ],
+    "same_as_krn026": true
+  },
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/krn-export-coverage/export_coverage.py",
+        "--run",
+        "cover-001"
+      ],
+      "exit_code": 1,
+      "result": "Self-test assertion error; no report."
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/krn-export-coverage/export_coverage.py",
+        "--run",
+        "cover-002"
+      ],
+      "exit_code": 0,
+      "result": "Superseded: compared names against a field that holds only a count, so the overlap was vacuous."
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/krn-export-coverage/export_coverage.py",
+        "--run",
+        "cover-003"
+      ],
+      "exit_code": 0,
+      "result": "artifacts/krn-export-coverage/cover-003/report.json"
+    }
+  ],
+  "sha256": {
+    "docs/procedures/krn-export-coverage/export_coverage.py": "c62acfa316c1f96878f61c4836c58c4d0abafce275d0b2a580cccdf274276672",
+    "kernel.unstripped": "4c9536d89b6ad61e49e8cc45e82820f00df4343c478d14685009ad504313595f",
+    "nm": "8d63c922a0e87812fa92f9cee466f15adbe65ab069fb451550f6626a913d4008",
+    "krn026_inputs": "078f5dc1c3e99bbce9f0c678f4dd4a9660e87407b03aed2db27439983ac4b70d"
+  },
+  "artifact_sha256": {
+    "artifacts/krn-export-coverage/cover-003/report.json": "bd31d6c964cc23e73a5a3ec7248c533b1dbdccf3de6b9199618527645626ddb7"
+  },
+  "artifacts": [
+    "artifacts/krn-export-coverage/cover-003/report.json",
+    "worktrees/krn-040-export-coverage-20261110/docs/procedures/krn-export-coverage/export_coverage.py"
+  ],
+  "genuine_check_all_exports": false,
+  "kernel_booted": false,
+  "krn026_changed": false,
+  "limitations": [
+    "This re-implements the membership rule from kextsymboltool.c. It is not the genuine tool or a genuine check_all_exports result.",
+    "The genuine check would probably fail on these 37 names; that was not run.",
+    "The rule was read from source and covered by a small self-test only; the tool itself was not executed for comparison.",
+    "The kernel has not booted. Exports being present would not show that they work."
+  ],
+  "review": "Acceptance assessed by the executing agent in the same session. No independent reviewer."
+}
