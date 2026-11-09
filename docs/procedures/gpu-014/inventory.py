@@ -33,6 +33,7 @@ def shell(command, serial, timeout=45):
 
 
 def version(value):
+    value = int(value)  # vkjson prints large integers in floating-point form
     return f'{value >> 22 & 0x7f}.{value >> 12 & 0x3ff}.{value & 0xfff}'
 
 
@@ -47,7 +48,7 @@ def summarize(data):
         limits = props.get('limits', {})
         devices.append(dict(
             name=props.get('deviceName'), api_version=version(props.get('apiVersion', 0)), driver_version_raw=props.get('driverVersion'),
-            vendor_id=hex(props.get('vendorID', 0)), device_id=hex(props.get('deviceID', 0)), device_type=props.get('deviceType'),
+            vendor_id=hex(int(props.get('vendorID', 0))), device_id=hex(int(props.get('deviceID', 0))), device_type=props.get('deviceType'),
             limits={k: limits.get(k) for k in ['maxImageDimension2D', 'maxPushConstantsSize', 'maxBoundDescriptorSets', 'maxComputeSharedMemorySize', 'maxMemoryAllocationCount', 'timestampPeriod'] if k in limits},
             queues=device.get('queues'), memory_heaps=device.get('memory', {}).get('memoryHeaps'), memory_types=len(device.get('memory', {}).get('memoryTypes', [])),
             device_extensions=extension_names(device.get('extensions', [])), device_layers=len(device.get('layers', []))))
