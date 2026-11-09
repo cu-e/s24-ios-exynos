@@ -46,13 +46,14 @@ static uint32_t header_crc(const uint8_t *h)
     return ~crc;
 }
 
-/* Lower-cased ASCII name, or 0 when the entry has a non-ASCII unit or no terminator. */
+/* One byte per unit, or 0 for an empty name or any unit above 0xFF. Requested names are
+ * ASCII only, so a byte above 0x7F here can never match. Unused entries are all zero. */
 static size_t entry_name(const uint8_t *entry, char *out)
 {
     size_t i;
     for (i = 0; i < UFS_GPT_NAME_CHARS; ++i) {
         const uint8_t *unit = entry + NAME_OFFSET + 2u * i;
-        if (unit[1] || unit[0] > 0x7Fu) return 0;
+        if (unit[1]) return 0;
         if (!unit[0]) return i;
         out[i] = (char)unit[0];
     }
@@ -85,7 +86,7 @@ static uint32_t validate_header(const uint8_t *h, size_t bytes, const struct ufs
     alternate = get64(h + 32); first_usable = get64(h + 40); last_usable = get64(h + 48);
     entries_lba = get64(h + 72); count = get32(h + 80); size = get32(h + 84);
     if (get64(h + 24) != 1) return UFS_GPT_BOUNDS;
-    if (alternate >= disk->lun_blocks || alternate <= 1) return UFS_GPT_BOUNDS;
+    if (alternate >= disk->lun_blocks) return UFS_GPT_BOUNDS;
     if (first_usable > last_usable || last_usable >= alternate) return UFS_GPT_BOUNDS;
     if (entries_lba < 2 || entries_lba >= first_usable) return UFS_GPT_BOUNDS;
 
@@ -113,7 +114,7 @@ static uint32_t validate_entries(const uint8_t *h, const uint8_t *entries)
         if (first > last || first < first_usable || last > last_usable) return UFS_GPT_BOUNDS;
         for (j = 0; j < i; ++j) {
             const uint8_t *o = entries + (size_t)j * UFS_GPT_ENTRY_BYTES;
-            if (!all_zero(o, 16) && first <= get64(o + 40) && get64(o + 32) <= last) return UFS_GPT_OVERLAP;
+            if (first <= get64(o + 40) && get64(o + 32) <= last) return UFS_GPT_OVERLAP;
         }
     }
     return UFS_GPT_OK;
@@ -148,7 +149,6 @@ uint32_t ufs_gpt_find(const uint8_t *header, size_t header_bytes, const uint8_t 
     for (i = 0; i < count; ++i) {
         const uint8_t *e = entries + (size_t)i * UFS_GPT_ENTRY_BYTES;
         size_t length;
-        if (all_zero(e, 16)) continue;
         length = entry_name(e, candidate);
         if (length && same_text(candidate, length, name, wanted, 0)) {
             ++matches;

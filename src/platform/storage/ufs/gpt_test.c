@@ -20,11 +20,12 @@
 static uint8_t H[MAX_BLOCK], E[ENTRIES * UFS_GPT_ENTRY_BYTES];
 static struct ufs_gpt_disk D;
 static struct ufs_gpt_extent X;
+static uint32_t entry_count = ENTRIES;
 
 static void put32(uint8_t *p, uint32_t v) { p[0] = (uint8_t)v; p[1] = (uint8_t)(v >> 8); p[2] = (uint8_t)(v >> 16); p[3] = (uint8_t)(v >> 24); }
 static void put64(uint8_t *p, uint64_t v) { put32(p, (uint32_t)v); put32(p + 4, (uint32_t)(v >> 32)); }
 
-static void seal_entries(void) { put32(H + 88, ufs_gpt_crc32(E, sizeof E)); }
+static void seal_entries(void) { put32(H + 88, ufs_gpt_crc32(E, (size_t)entry_count * UFS_GPT_ENTRY_BYTES)); }
 
 static void seal(void)
 {
@@ -48,6 +49,7 @@ static void entry(unsigned index, const char *name, uint64_t first, uint64_t las
 static void build(uint32_t block)
 {
     memset(H, 0, sizeof H); memset(E, 0, sizeof E);
+    entry_count = ENTRIES;
     D.block_bytes = block; D.lun_blocks = LUN_BLOCKS;
     memcpy(H, "EFI PART", 8);
     put32(H + 8, 0x00010000); put32(H + 12, UFS_GPT_HEADER_BYTES);
@@ -60,7 +62,7 @@ static void build(uint32_t block)
     seal();
 }
 
-static uint32_t find(const char *name) { return ufs_gpt_find(H, D.block_bytes, E, sizeof E, &D, name, &X); }
+static uint32_t find(const char *name) { return ufs_gpt_find(H, D.block_bytes, E, (size_t)entry_count * UFS_GPT_ENTRY_BYTES, &D, name, &X); }
 
 static void test_crc_vector(void)
 {
@@ -159,7 +161,8 @@ static void test_lba_rules(void)
     build(4096); put64(H + 24, 2); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
     build(4096); put64(H + 32, LUN_BLOCKS); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
     build(4096); put64(H + 32, 1); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
-    build(4096); put64(H + 40, LAST_USABLE + 1); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    /* An empty table, so no partition can fail first and hide the inverted range. */
+    build(4096); memset(E, 0, sizeof E); put64(H + 40, LAST_USABLE + 1); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
     build(4096); put64(H + 48, LUN_BLOCKS - 1); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS); /* reaches the backup */
     build(4096); put64(H + 72, 1); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
     build(4096); put64(H + 72, FIRST_USABLE); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
@@ -167,6 +170,9 @@ static void test_lba_rules(void)
     build(4096); put64(H + 72, FIRST_USABLE - 1); seal(); CHECK_EQ(find("boot"), UFS_GPT_OK);
     build(512); put64(H + 72, FIRST_USABLE - 3); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS); /* needs 4 blocks */
     build(512); put64(H + 72, FIRST_USABLE - 4); seal(); CHECK_EQ(find("boot"), UFS_GPT_OK);
+    /* A partly used last block still occupies the whole block: 15 entries need 4 of 512 bytes. */
+    build(512); entry_count = 15; put32(H + 80, 15); put64(H + 72, FIRST_USABLE - 3); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(512); entry_count = 15; put32(H + 80, 15); put64(H + 72, FIRST_USABLE - 4); seal(); CHECK_EQ(find("boot"), UFS_GPT_OK);
     /* Values near UINT64_MAX fail without wrapping. */
     build(4096); put64(H + 48, UINT64_MAX); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
     build(4096); put64(H + 72, UINT64_MAX); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
@@ -191,7 +197,7 @@ static void test_partition_rules(void)
     /* Overlap: inside, straddling each end, and identical. */
     build(4096); entry(3, "inner", 150, 160); seal(); CHECK_EQ(find("boot"), UFS_GPT_OVERLAP);
     build(4096); entry(3, "left", 50, 100); seal(); CHECK_EQ(find("boot"), UFS_GPT_OVERLAP);
-    build(4096); entry(3, "right", 199, 210); seal(); CHECK_EQ(find("boot"), UFS_GPT_OVERLAP);
+    build(4096); entry(3, "right", 199, 199); seal(); CHECK_EQ(find("boot"), UFS_GPT_OVERLAP); /* shares only boot's last block */
     build(4096); entry(3, "same", 100, 199); seal(); CHECK_EQ(find("boot"), UFS_GPT_OVERLAP);
     /* Touching ranges are not overlap. */
     build(4096); entry(3, "after", 300, 310); entry(4, "before", 40, 99); seal(); CHECK_EQ(find("after"), UFS_GPT_OK); CHECK_EQ(find("before"), UFS_GPT_OK);
