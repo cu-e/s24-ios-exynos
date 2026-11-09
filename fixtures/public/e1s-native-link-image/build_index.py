@@ -50,11 +50,11 @@ def bind(path):
     return {'path': str(path), 'sha256': sha(path)}
 
 
-def row_65(item, component, authority, review):
+def row_65(item, component, authority):
     return dict(id=item['id'], component=component, object={'path': item['object'], 'sha256': item['object_sha256']},
                 depfile={'path': item['depfile'], 'sha256': item['depfile_sha256']}, source=item['source'], recipe=item['recipe'],
                 actual_tuple_authority={**authority, 'format': 'list-of-independent-actual-products', 'row_id': item['id']},
-                independent_review=review, actual_argv_sha256=canonical(item['actual_argv']), actual_cwd=item['actual_cwd'],
+                actual_argv_sha256=canonical(item['actual_argv']), actual_cwd=item['actual_cwd'],
                 actual_MD_map_sha256=canonical(item['actual_MD_dependencies']), actual_MD_dependency_count=len(item['actual_MD_dependencies']),
                 actual_object_input_resource_qualification='pass')
 
@@ -84,9 +84,8 @@ def main():
 
     products = json.loads(PRODUCTS65.read_text())
     origins = json.loads(ORIGINS170.read_text())
-    review = bind(ORIGINS170)
     authority65 = bind(PRODUCTS65)
-    rows65 = [row_65(item, component[item['id']], authority65, review) for item in products]
+    rows65 = [row_65(item, component[item['id']], authority65) for item in products]
 
     evidence = json.loads(EVIDENCE61.read_text())
     plan = json.loads(PLAN61.read_text())
@@ -118,8 +117,11 @@ def main():
                  limits=['Join of 916 accepted INT-002 rows and 126 BSD-a rows; every object and depfile re-hashed and parsed as ARM64 Mach-O here.', 'No link, private37 ABI, runtime, physical ownership or hardware qualification.'])
     path = args.out/'native-complete-1042-index.json'
     path.write_text(json.dumps(index, indent=1)+'\n')
+    written = {row['id']: row for row in json.loads(path.read_text())['rows']}
+    parent_unchanged = all(written[row['id']] == row for row in base['rows'])
+    require(parent_unchanged and len(base['rows']) == 916, 'Parent rows changed')
     record = dict(schema='e1s-native-link-input-requalification-v1', outcome='pass', index=bind(path), rows=len(merged), physically_requalified=verified,
-                  added_from=dict(str024_build005=len(rows65), str040=len(rows61)), parent_index_rows_unchanged=True,
+                  added_from=dict(str024_build005=len(rows65), str040=len(rows61)), parent_index_rows_unchanged=parent_unchanged,
                   target_tools_executed=False)
     (args.out/'requalification.json').write_text(json.dumps(record, indent=2)+'\n')
     print(json.dumps(dict(outcome='pass', rows=len(merged), requalified=verified, index_sha256=record['index']['sha256'])))
