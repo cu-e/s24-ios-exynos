@@ -1398,6 +1398,39 @@ static void test_closed_client_fences_are_reusable_within_quota(void)
     CHECK_EQ(wait_fence(e.client, newcomer[1], 0, NULL, NULL), SGPU_OK);
 }
 
+/* Replacing an own fence is not growth: below quota, the client must keep its full share. */
+static void test_replacing_own_fence_keeps_the_quota(void)
+{
+    static struct fixture all[SGPU_BE_MAX_CLIENTS];
+    static uint64_t filler[SGPU_BE_CLIENT_MAX_FENCES], dead[SGPU_BE_CLIENT_MAX_FENCES], sequences[SGPU_BE_CLIENT_MAX_FENCES];
+    static uint64_t own[SGPU_BE_CLIENT_MAX_FENCES + 1];
+    struct fixture a, d, late;
+    unsigned c, i;
+    setup(4096, KB(256), KB(32));
+
+    a = make_fixture(VA);
+    fill_retired(&a, own, 1); /* The oldest fence in the table. */
+
+    d = make_fixture(VA);
+    for (i = 0; i < SGPU_BE_CLIENT_MAX_FENCES; ++i) {
+        uint64_t *dep = i ? &dead[i - 1] : NULL;
+        CHECK_EQ(submit_one(d.client, d.context, d.bo, RW, dep, i ? 1 : 0, &dead[i], &sequences[i]), SGPU_OK);
+    }
+    for (c = 2; c < SGPU_BE_MAX_CLIENTS; ++c) {
+        all[c] = make_fixture(VA);
+        fill_retired(&all[c], filler, SGPU_BE_CLIENT_MAX_FENCES);
+    }
+    sgpu_backend_client_close(BE, d.client);
+    for (i = 0; i < SGPU_BE_CLIENT_MAX_FENCES; ++i) CHECK_EQ(sgpu_backend_retire(BE, sequences[i], 0), 0);
+    late = make_fixture(VA);
+    fill_retired(&late, filler, SGPU_BE_CLIENT_MAX_FENCES - 1); /* The table is now exactly full. */
+
+    /* The first submit replaces own[0]; the rest take the closed client's older fences. */
+    fill_retired(&a, &own[1], SGPU_BE_CLIENT_MAX_FENCES);
+    CHECK_EQ(wait_fence(a.client, own[0], 0, NULL, NULL), SGPU_BAD_FIELD);
+    CHECK_EQ(wait_fence(a.client, own[1], 0, NULL, NULL), SGPU_OK);
+}
+
 static void test_client_limit_and_generation_retirement(void)
 {
     uint32_t clients[SGPU_BE_MAX_CLIENTS], extra = 0, first, last = 0;
@@ -1564,6 +1597,7 @@ int main(void)
         test_closed_client_charges_stay_with_its_identity, test_per_client_object_quotas,
         test_malformed_requests_never_reach_the_backend, test_fence_quota_and_eviction,
         test_fence_eviction_stays_within_the_client, test_closed_client_fences_are_reusable_within_quota,
+        test_replacing_own_fence_keeps_the_quota,
         test_client_limit_and_generation_retirement, test_threaded_wait_wakeups, test_threaded_concurrent_clients
     };
     size_t i, count = sizeof tests / sizeof tests[0];
