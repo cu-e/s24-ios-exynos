@@ -14,7 +14,7 @@ struct event { int kind; uint64_t value; };
 struct harness {
     int locked, threaded, fail_start, retire_status, quiesced_status;
     unsigned start_calls, event_count;
-    uint64_t now;
+    uint64_t now, counter[SGPU_TL_MAX_RINGS];
     struct started started[EVENTS];
     struct event events[EVENTS];
     void (*on_retire)(uint64_t);
@@ -68,7 +68,14 @@ static int h_start(void *hw, uint32_t ring, uint32_t context, const struct sgpu_
     ++H.start_calls;
     return 0;
 }
-static const struct sgpu_tl_hw HW = { h_lock, h_unlock, h_now, h_start };
+static uint64_t h_read_counter(void *hw, uint32_t ring)
+{
+    (void)hw;
+    h_held();
+    if (H.threaded) return atomic_load(&H.latest_counter);
+    return H.counter[ring];
+}
+static const struct sgpu_tl_hw HW = { h_lock, h_unlock, h_now, h_start, h_read_counter };
 
 static void record(int kind, uint64_t value)
 {
@@ -106,6 +113,7 @@ static void tl_with(const struct sgpu_tl_config *c)
 }
 static void tl_setup(uint32_t rings, uint32_t depth, uint32_t bits) { struct sgpu_tl_config c = cfg(rings, depth, bits); tl_with(&c); }
 static int sub(uint32_t ring, uint64_t sequence, const uint64_t *waits, uint32_t n) { return sgpu_timeline_submit(TL, ring, 7, &IB, 1, waits, n, sequence); }
+static int obs(uint32_t ring, uint64_t value) { H.counter[ring % SGPU_TL_MAX_RINGS] = value; return sgpu_timeline_observe(TL, ring); }
 static struct sgpu_tl_stats stats(void) { struct sgpu_tl_stats s; sgpu_timeline_stats(TL, &s); return s; }
 static void event_is(unsigned i, int kind, uint64_t value) { CHECK(i < H.event_count); CHECK_EQ(H.events[i].kind, kind); CHECK_EQ(H.events[i].value, value); }
 
@@ -122,6 +130,7 @@ static void test_tl_init(void)
     hw = HW; hw.unlock = NULL; BAD(&good, &hw, &SINK);
     hw = HW; hw.now_ns = NULL; BAD(&good, &hw, &SINK);
     hw = HW; hw.start = NULL; BAD(&good, &hw, &SINK);
+    hw = HW; hw.read_counter = NULL; BAD(&good, &hw, &SINK);
     sink = SINK; sink.retire = NULL; BAD(&good, &HW, &sink);
     sink = SINK; sink.fault = NULL; BAD(&good, &HW, &sink);
     sink = SINK; sink.quiesced = NULL; BAD(&good, &HW, &sink);
@@ -152,7 +161,7 @@ static void test_tl_start_and_retire(void)
     CHECK_EQ(H.started[0].counter, 1);
     CHECK_EQ(H.started[0].ibs[1].va, 0x2000);
     CHECK_EQ(H.event_count, 0);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     CHECK_EQ(H.event_count, 1);
     event_is(0, EV_RETIRE, 11);
     CHECK_EQ(stats().started, 1);
@@ -167,7 +176,7 @@ static void test_tl_ibs_copied(void)
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sgpu_timeline_submit(TL, 0, 3, ibs, 1, waits, 1, 2), SGPU_TL_OK);
     ibs[0].va = 0xBAD0; waits[0] = 99;
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 2);
     CHECK_EQ(H.started[1].ibs[0].va, 0x7000);
     CHECK_EQ(H.started[1].context, 3);
@@ -185,12 +194,12 @@ static void test_tl_counters_from_initial(void)
     CHECK_EQ(H.started[1].counter, 43);
     CHECK_EQ(H.started[2].counter, 501);
     CHECK_EQ(H.started[2].ring, 1);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 42), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 42), SGPU_TL_OK);
     CHECK_EQ(H.event_count, 1);
     event_is(0, EV_RETIRE, 1);
-    CHECK_EQ(sgpu_timeline_observe(TL, 1, 501), SGPU_TL_OK);
+    CHECK_EQ(obs(1, 501), SGPU_TL_OK);
     event_is(1, EV_RETIRE, 3);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 43), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 43), SGPU_TL_OK);
     event_is(2, EV_RETIRE, 2);
 }
 
@@ -200,11 +209,11 @@ static void test_tl_batch_retires_in_order(void)
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sub(0, 2, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sub(0, 3, NULL, 0), SGPU_TL_OK);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 2), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 2), SGPU_TL_OK);
     CHECK_EQ(H.event_count, 2);
     event_is(0, EV_RETIRE, 1);
     event_is(1, EV_RETIRE, 2);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 3), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 3), SGPU_TL_OK);
     event_is(2, EV_RETIRE, 3);
     CHECK_EQ(stats().completed, 3);
 }
@@ -215,7 +224,7 @@ static void test_tl_ring_indices_wrap(void)
     tl_setup(1, 4, 32);
     for (i = 1; i <= 2u * SGPU_TL_MAX_DEPTH + 10u; ++i) {
         CHECK_EQ(sub(0, i, NULL, 0), SGPU_TL_OK);
-        CHECK_EQ(sgpu_timeline_observe(TL, 0, i), SGPU_TL_OK);
+        CHECK_EQ(obs(0, i), SGPU_TL_OK);
         CHECK_EQ(H.event_count, 1);
         event_is(0, EV_RETIRE, i);
         H.event_count = 0;
@@ -231,7 +240,7 @@ static void test_tl_report_queue_wraps(void)
     for (round = 0; round < 6; ++round) {
         for (i = 0; i < 150; ++i) CHECK_EQ(sub(0, ++sequence, NULL, 0), SGPU_TL_OK);
         H.event_count = 0;
-        CHECK_EQ(sgpu_timeline_observe(TL, 0, sequence), SGPU_TL_OK);
+        CHECK_EQ(obs(0, sequence), SGPU_TL_OK);
         CHECK_EQ(H.event_count, 150);
         for (i = 0; i < 150; ++i) event_is(i, EV_RETIRE, sequence - 149 + i);
     }
@@ -246,9 +255,9 @@ static void test_tl_wrap_32(void)
     CHECK_EQ(sub(0, 2, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(H.started[0].counter, 0);
     CHECK_EQ(H.started[1].counter, 1);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 0), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 0), SGPU_TL_OK);
     event_is(0, EV_RETIRE, 1);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     event_is(1, EV_RETIRE, 2);
 }
 
@@ -260,13 +269,13 @@ static void test_tl_counter_64(void)
     tl_with(&c);
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(H.started[0].counter, start + 1);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, start + 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, start + 1), SGPU_TL_OK);
     event_is(0, EV_RETIRE, 1);
     c.initial_counter[0] = UINT64_MAX;
     tl_with(&c);
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(H.started[0].counter, 0);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 0), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 0), SGPU_TL_OK);
     event_is(0, EV_RETIRE, 1);
 }
 
@@ -282,43 +291,43 @@ static void test_tl_bad_counters(void)
     /* Upper bits set are impossible for a 32-bit counter, even when the low bits look right. */
     tl_setup(1, 4, 32);
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, (UINT64_C(1) << 32) | 1u), SGPU_TL_BAD_COUNTER);
+    CHECK_EQ(obs(0, (UINT64_C(1) << 32) | 1u), SGPU_TL_BAD_COUNTER);
     bad_counter_faulted(0);
 
     /* Further ahead than what is running. */
     tl_setup(1, 4, 32);
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sub(0, 2, NULL, 0), SGPU_TL_OK);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 3), SGPU_TL_BAD_COUNTER);
+    CHECK_EQ(obs(0, 3), SGPU_TL_BAD_COUNTER);
     bad_counter_faulted(0);
 
     /* Exactly what is running is accepted. */
     tl_setup(1, 4, 32);
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sub(0, 2, NULL, 0), SGPU_TL_OK);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 2), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 2), SGPU_TL_OK);
     CHECK_EQ(stats().bad_counters, 0);
 
     /* A regression looks like a huge forward distance. */
     tl_setup(1, 4, 32);
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 0), SGPU_TL_BAD_COUNTER);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 0), SGPU_TL_BAD_COUNTER);
     bad_counter_faulted(1);
 
     /* Nothing running means any change is impossible. */
     tl_setup(1, 4, 32);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_BAD_COUNTER);
+    CHECK_EQ(obs(0, 1), SGPU_TL_BAD_COUNTER);
     bad_counter_faulted(0);
 }
 
 static void test_tl_spurious_observation(void)
 {
     tl_setup(1, 4, 32);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 0), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 0), SGPU_TL_OK);
     CHECK_EQ(stats().spurious_observations, 1);
     CHECK_EQ(H.event_count, 0);
-    CHECK_EQ(sgpu_timeline_observe(TL, 5, 0), SGPU_TL_ARGUMENT);
+    CHECK_EQ(obs(5, 0), SGPU_TL_ARGUMENT);
 }
 
 static void test_tl_nothing_retires_after_fault(void)
@@ -328,7 +337,7 @@ static void test_tl_nothing_retires_after_fault(void)
     CHECK_EQ(sgpu_timeline_fault(TL, 2), SGPU_TL_OK);
     CHECK_EQ(H.event_count, 1);
     event_is(0, EV_FAULT, 2);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_STOPPED);
+    CHECK_EQ(obs(0, 1), SGPU_TL_STOPPED);
     CHECK_EQ(H.event_count, 1);
     CHECK_EQ(stats().ignored_after_fault, 1);
     CHECK_EQ(sub(0, 2, NULL, 0), SGPU_TL_STOPPED);
@@ -342,10 +351,10 @@ static void test_tl_wait_same_ring(void)
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sub(0, 2, waits, 1), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 1);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 2);
     CHECK_EQ(H.started[1].counter, 2);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 2), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 2), SGPU_TL_OK);
     event_is(0, EV_RETIRE, 1);
     event_is(1, EV_RETIRE, 2);
 }
@@ -357,7 +366,7 @@ static void test_tl_wait_across_rings(void)
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sub(1, 2, waits, 1), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 1);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 2);
     CHECK_EQ(H.started[1].ring, 1);
     CHECK_EQ(H.started[1].counter, 1);
@@ -371,9 +380,9 @@ static void test_tl_all_waits_required(void)
     CHECK_EQ(sub(1, 2, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sub(0, 3, waits, 2), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 2);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 2);
-    CHECK_EQ(sgpu_timeline_observe(TL, 1, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(1, 1), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 3);
 }
 
@@ -385,10 +394,10 @@ static void test_tl_wait_on_waiting_job(void)
     CHECK_EQ(sub(1, 2, first, 1), SGPU_TL_OK);
     CHECK_EQ(sub(0, 3, second, 1), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 1);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 2);
     CHECK_EQ(H.started[1].ring, 1);
-    CHECK_EQ(sgpu_timeline_observe(TL, 1, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(1, 1), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 3);
     CHECK_EQ(H.started[2].ring, 0);
 }
@@ -400,11 +409,11 @@ static void test_tl_freed_wait_slot_reused(void)
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sub(1, 2, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sub(2, 3, waits, 2), SGPU_TL_OK);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     /* The new job takes the slot of finished job 1; job 3 must not wait for it. */
     CHECK_EQ(sub(0, 4, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 3);
-    CHECK_EQ(sgpu_timeline_observe(TL, 1, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(1, 1), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 4);
     CHECK_EQ(H.started[3].ring, 2);
 }
@@ -422,9 +431,9 @@ static void test_tl_waiting_queue_wraps(void)
         H.event_count = 0;
         for (i = 0; i < 150; ++i) CHECK_EQ(sub(0, ++sequence, waits, 1), SGPU_TL_OK);
         CHECK_EQ(H.start_calls, 0);
-        CHECK_EQ(sgpu_timeline_observe(TL, 1, round + 1u), SGPU_TL_OK);
+        CHECK_EQ(obs(1, round + 1u), SGPU_TL_OK);
         CHECK_EQ(H.start_calls, 150);
-        CHECK_EQ(sgpu_timeline_observe(TL, 0, sequence - round - 1u), SGPU_TL_OK);
+        CHECK_EQ(obs(0, sequence - round - 1u), SGPU_TL_OK);
         CHECK_EQ(H.event_count, 151);
         for (i = 0; i < 150; ++i) event_is(i + 1u, EV_RETIRE, gate + 1u + i);
     }
@@ -438,7 +447,7 @@ static void test_tl_blocked_head_holds_followers(void)
     CHECK_EQ(sub(1, 2, waits, 1), SGPU_TL_OK);
     CHECK_EQ(sub(1, 3, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 1);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 3);
     CHECK_EQ(H.started[1].counter, 1);
     CHECK_EQ(H.started[2].counter, 2);
@@ -464,9 +473,9 @@ static void test_tl_wait_on_gone_or_reporting_job(void)
     /* Finished and being reported: must not hold the new job back. */
     H.on_retire = submit_waiting_on_retired;
     submitted_from_hook = 51;
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 2);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 2), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 2), SGPU_TL_OK);
     event_is(1, EV_RETIRE, 51);
 }
 
@@ -478,9 +487,9 @@ static void test_tl_wait_table_capacity(void)
     for (i = 0; i < SGPU_MAX_DEPS; ++i) { waits[i] = i + 1u; CHECK_EQ(sub(0, i + 1u, NULL, 0), SGPU_TL_OK); }
     CHECK_EQ(sub(0, SGPU_MAX_DEPS + 1u, waits, SGPU_MAX_DEPS), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, SGPU_MAX_DEPS);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, SGPU_MAX_DEPS - 1u), SGPU_TL_OK);
+    CHECK_EQ(obs(0, SGPU_MAX_DEPS - 1u), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, SGPU_MAX_DEPS);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, SGPU_MAX_DEPS), SGPU_TL_OK);
+    CHECK_EQ(obs(0, SGPU_MAX_DEPS), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, SGPU_MAX_DEPS + 1u);
 }
 
@@ -490,15 +499,14 @@ static void test_tl_depth_limits(void)
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sub(0, 2, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 2);
+    /* Depth bounds only running work; queued work is bounded by the job table. */
     CHECK_EQ(sub(0, 3, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sub(0, 4, NULL, 0), SGPU_TL_OK);
+    CHECK_EQ(sub(0, 5, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 2);
-    CHECK_EQ(sub(0, 5, NULL, 0), SGPU_TL_FULL);
-    CHECK_EQ(H.start_calls, 2);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     CHECK_EQ(H.start_calls, 3);
     CHECK_EQ(H.started[2].counter, 3);
-    CHECK_EQ(sub(0, 5, NULL, 0), SGPU_TL_OK);
 }
 
 static void test_tl_job_table_exhausted(void)
@@ -511,7 +519,7 @@ static void test_tl_job_table_exhausted(void)
     CHECK_EQ(sub(1, ++sequence, NULL, 0), SGPU_TL_FULL);
     CHECK_EQ(H.start_calls, SGPU_TL_MAX_DEPTH);
     /* A rejected sequence is not consumed. */
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     CHECK_EQ(sub(1, sequence, NULL, 0), SGPU_TL_OK);
 }
 
@@ -552,7 +560,7 @@ static void test_tl_own_start_failure(void)
     H.fail_start = 0;
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(H.started[0].counter, 1);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     event_is(0, EV_RETIRE, 1);
 }
 
@@ -563,7 +571,7 @@ static void test_tl_queued_start_failure_faults(void)
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sub(0, 2, waits, 1), SGPU_TL_OK);
     H.fail_start = 1;
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_START_FAILED);
     CHECK_EQ(H.event_count, 2);
     event_is(0, EV_RETIRE, 1);
     event_is(1, EV_FAULT, SGPU_BE_REASON_FAULT);
@@ -579,7 +587,7 @@ static void test_tl_queued_failure_stops_other_rings(void)
     CHECK_EQ(sub(0, 2, waits, 1), SGPU_TL_OK);
     CHECK_EQ(sub(1, 3, waits, 1), SGPU_TL_OK);
     H.fail_start = 1;
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_START_FAILED);
     H.fail_start = 0;
     CHECK_EQ(stats().start_failures, 1);
     CHECK_EQ(H.start_calls, 1);
@@ -595,7 +603,7 @@ static void test_tl_timeout_measures_head(void)
     CHECK_EQ(sgpu_timeline_tick(TL), SGPU_TL_OK);
     /* The second start must not have pushed back the head's deadline. */
     H.now = 5950;
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     H.now = 6949;
     CHECK_EQ(sgpu_timeline_tick(TL), SGPU_TL_OK);
     H.now = 6950;
@@ -623,7 +631,7 @@ static void test_tl_timeout_after_idle(void)
     tl_setup(1, 4, 32);
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     H.now = 5100;
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     H.now = 100000;
     CHECK_EQ(sgpu_timeline_tick(TL), SGPU_TL_OK);
     CHECK_EQ(sub(0, 2, NULL, 0), SGPU_TL_OK);
@@ -650,6 +658,32 @@ static void test_tl_fault_reasons(void)
     CHECK_EQ(H.event_count, 1);
     tl_setup(1, 4, 32);
     CHECK_EQ(sgpu_timeline_fault(TL, 2), SGPU_TL_OK);
+    event_is(0, EV_FAULT, 2);
+}
+
+static void test_tl_note_fault_defers_the_sink(void)
+{
+    uint64_t waits[1] = { 1 };
+    tl_setup(1, 4, 32);
+    CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
+    CHECK_EQ(sub(0, 2, waits, 1), SGPU_TL_OK);
+    CHECK_EQ(sgpu_timeline_note_fault(TL, 0), SGPU_TL_OK);
+    /* Callable under the backend lock, so it must not reach the sink. */
+    CHECK_EQ(H.event_count, 0);
+    /* Queued work must not start on a device already known to have failed. */
+    CHECK_EQ(obs(0, 1), SGPU_TL_STOPPED);
+    CHECK_EQ(H.start_calls, 1);
+    CHECK_EQ(H.event_count, 1);
+    event_is(0, EV_FAULT, SGPU_BE_REASON_FAULT);
+    CHECK_EQ(sgpu_timeline_quiesced(TL), SGPU_TL_OK);
+    event_is(1, EV_QUIESCED, 0);
+    /* A timer alone also delivers it, and the first reason is kept. */
+    tl_setup(1, 4, 32);
+    CHECK_EQ(sgpu_timeline_note_fault(TL, 2), SGPU_TL_OK);
+    CHECK_EQ(sgpu_timeline_note_fault(TL, 1), SGPU_TL_OK);
+    CHECK_EQ(H.event_count, 0);
+    CHECK_EQ(sgpu_timeline_tick(TL), SGPU_TL_STOPPED);
+    CHECK_EQ(H.event_count, 1);
     event_is(0, EV_FAULT, 2);
 }
 
@@ -688,7 +722,7 @@ static void test_tl_delivery_order(void)
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sub(0, 2, NULL, 0), SGPU_TL_OK);
     H.on_retire = fault_and_quiesce_from_hook;
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 2), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 2), SGPU_TL_OK);
     CHECK_EQ(H.event_count, 4);
     event_is(0, EV_RETIRE, 1);
     event_is(1, EV_RETIRE, 2);
@@ -700,7 +734,7 @@ static void observe_second_from_hook(uint64_t sequence)
 {
     (void)sequence;
     H.on_retire = NULL;
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 2), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 2), SGPU_TL_OK);
     /* A nested observation queues behind the active reporter. */
     CHECK_EQ(H.event_count, 1);
 }
@@ -712,7 +746,7 @@ static void test_tl_nested_observation_keeps_order(void)
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sub(0, 2, waits, 1), SGPU_TL_OK);
     H.on_retire = observe_second_from_hook;
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     CHECK_EQ(H.event_count, 2);
     event_is(0, EV_RETIRE, 1);
     event_is(1, EV_RETIRE, 2);
@@ -724,7 +758,7 @@ static void test_tl_unknown_retirement_counted(void)
     H.retire_status = -1;
     CHECK_EQ(sub(0, 1, NULL, 0), SGPU_TL_OK);
     CHECK_EQ(sub(0, 2, NULL, 0), SGPU_TL_OK);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 2), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 2), SGPU_TL_OK);
     CHECK_EQ(stats().unknown_retirements, 2);
     CHECK_EQ(H.event_count, 2);
 }
@@ -774,31 +808,74 @@ static void test_core_retires_through_timeline(void)
     CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, &a, 1, &b, &sb), SGPU_OK);
     CHECK_EQ(H.start_calls, 1);
     CHECK_EQ(wait_fence(f.client, a, 0, NULL, NULL), SGPU_TIMEOUT);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 1), SGPU_TL_OK);
     fence_is(f, a, SGPU_RETIRED, 0);
     CHECK_EQ(H.start_calls, 2);
     CHECK_EQ(wait_fence(f.client, b, 0, NULL, NULL), SGPU_TIMEOUT);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 2), SGPU_TL_OK);
+    CHECK_EQ(obs(0, 2), SGPU_TL_OK);
     fence_is(f, b, SGPU_RETIRED, 0);
     CHECK_EQ(stats().unknown_retirements, 0);
 }
 
-static void test_core_full_queue_is_refused(void)
+static void test_core_one_client_cannot_fill_a_ring(void)
 {
-    struct fixture f;
-    uint64_t a, b, c, s;
+    struct fixture a, b;
+    uint64_t previous = 0, fence, s;
+    unsigned i;
     reset_fake();
     reset_h();
     core_init(1, 1000000);
+    a = make_fixture(VA);
+    b = make_fixture(VA + (UINT64_C(1) << 24));
+    for (i = 0; i < SGPU_BE_CLIENT_MAX_FENCES; ++i) {
+        CHECK_EQ(submit_one(a.client, a.context, a.bo, RW, i ? &previous : NULL, i ? 1 : 0, &fence, &s), SGPU_OK);
+        previous = fence;
+    }
+    /* The core's quota stops the first client; the ring still takes the second. */
+    CHECK_EQ(submit_one(a.client, a.context, a.bo, RW, &previous, 1, NULL, NULL), SGPU_LIMIT);
+    CHECK_EQ(submit_one(b.client, b.context, b.bo, RW, NULL, 0, &fence, &s), SGPU_OK);
+    CHECK_EQ(H.start_calls, 1);
+}
+
+static int be_tlb(void *hw, uint32_t context, uint64_t va, uint64_t bytes)
+{
+    (void)va; (void)bytes; (void)context; (void)hw;
+    fake_held();
+    ++F.tlb_calls;
+    if (!F.fail_tlb) return 0;
+    /* What a real sgpu_be_ops layer must do: it holds the backend lock here. */
+    CHECK_EQ(sgpu_timeline_note_fault(TL, SGPU_BE_REASON_FAULT), SGPU_TL_OK);
+    return -1;
+}
+
+static void test_core_quarantine_reaches_timeline(void)
+{
+    struct sgpu_be_ops ops = OPS;
+    struct sgpu_be_config c = config_verified(4096, KB(1024), KB(32));
+    struct sgpu_tl_config t = cfg(1, 4, 32);
+    struct fixture f;
+    uint64_t a, b, idle, s;
+    reset_fake();
+    reset_h();
+    ops.submit = be_submit;
+    ops.tlb_flush = be_tlb;
+    CHECK_EQ(sgpu_backend_init(BE, &c, &ops, &F), SGPU_OK);
+    CHECK_EQ(sgpu_timeline_init(TL, &t, &HW, &H, &CORE_SINK), SGPU_TL_OK);
     f = make_fixture(VA);
+    CHECK_EQ(alloc_bo(f.client, KB(4), RW, &idle, NULL), SGPU_OK);
     CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, NULL, 0, &a, &s), SGPU_OK);
     CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, &a, 1, &b, &s), SGPU_OK);
-    CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, &b, 1, &c, &s), SGPU_BACKEND_ERROR);
     CHECK_EQ(H.start_calls, 1);
-    /* The refused sequence is reused by the next accepted submit. */
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 1), SGPU_TL_OK);
-    CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, &b, 1, &c, &s), SGPU_OK);
-    CHECK_EQ(s, 3);
+    F.fail_tlb = 1;
+    CHECK_EQ(gpu_map(f.client, f.context, idle, VA + KB(64), 0, KB(4), SGPU_READ), SGPU_BACKEND_ERROR);
+    F.fail_tlb = 0;
+    /* Without the fault note this would start b on a quarantined device. */
+    CHECK_EQ(obs(0, 1), SGPU_TL_STOPPED);
+    CHECK_EQ(H.start_calls, 1);
+    CHECK_EQ(sgpu_timeline_quiesced(TL), SGPU_TL_OK);
+    CHECK_EQ(stats().quiesce_rejected, 0);
+    fence_is(f, a, SGPU_RETIRED_ERROR, SGPU_BE_REASON_QUIESCED);
+    fence_is(f, b, SGPU_RETIRED_ERROR, SGPU_BE_REASON_QUIESCED);
 }
 
 static void test_core_bad_counter_then_quiesce(void)
@@ -811,7 +888,7 @@ static void test_core_bad_counter_then_quiesce(void)
     f = make_fixture(VA);
     CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, NULL, 0, &a, &s), SGPU_OK);
     CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, &a, 1, &b, &s), SGPU_OK);
-    CHECK_EQ(sgpu_timeline_observe(TL, 0, 99), SGPU_TL_BAD_COUNTER);
+    CHECK_EQ(obs(0, 99), SGPU_TL_BAD_COUNTER);
     /* Nothing retired: the fence stays pending and references stay held. */
     CHECK_EQ(wait_fence(f.client, a, 1000, NULL, NULL), SGPU_TIMEOUT);
     CHECK_EQ(submit_one(f.client, f.context, f.bo, RW, &b, 1, NULL, NULL), SGPU_STOPPED);
@@ -839,6 +916,7 @@ static void test_core_timeout_then_quiesce(void)
 }
 
 #define TL_THREADS 3
+#define TL_OBSERVERS 2 /* Two observers: a stale counter would fault the device. */
 #define TL_ROUNDS 300
 
 static void *tl_submitter(void *opaque)
@@ -862,7 +940,7 @@ static void *tl_observer(void *opaque)
 {
     (void)opaque;
     while (!atomic_load(&H.stop)) {
-        CHECK_EQ(sgpu_timeline_observe(TL, 0, atomic_load(&H.latest_counter)), SGPU_TL_OK);
+        CHECK_EQ(sgpu_timeline_observe(TL, 0), SGPU_TL_OK);
         CHECK_EQ(sgpu_timeline_tick(TL), SGPU_TL_OK);
     }
     return NULL;
@@ -871,7 +949,7 @@ static void *tl_observer(void *opaque)
 static void test_core_threaded(void)
 {
     struct fixture fixtures[TL_THREADS];
-    pthread_t submitters[TL_THREADS], observer;
+    pthread_t submitters[TL_THREADS], observers[TL_OBSERVERS];
     pthread_condattr_t attr;
     unsigned i;
     reset_fake();
@@ -886,11 +964,11 @@ static void test_core_threaded(void)
     pthread_condattr_destroy(&attr);
     core_init(8, UINT64_MAX);
     for (i = 0; i < TL_THREADS; ++i) fixtures[i] = make_fixture(VA + (uint64_t)i * (UINT64_C(1) << 24));
-    CHECK_EQ(pthread_create(&observer, NULL, tl_observer, NULL), 0);
+    for (i = 0; i < TL_OBSERVERS; ++i) CHECK_EQ(pthread_create(&observers[i], NULL, tl_observer, NULL), 0);
     for (i = 0; i < TL_THREADS; ++i) CHECK_EQ(pthread_create(&submitters[i], NULL, tl_submitter, &fixtures[i]), 0);
     for (i = 0; i < TL_THREADS; ++i) pthread_join(submitters[i], NULL);
     atomic_store(&H.stop, 1);
-    pthread_join(observer, NULL);
+    for (i = 0; i < TL_OBSERVERS; ++i) pthread_join(observers[i], NULL);
     CHECK_EQ(stats().completed, TL_THREADS * TL_ROUNDS);
     CHECK_EQ(stats().unknown_retirements, 0);
     CHECK_EQ(stats().bad_counters, 0);
@@ -907,8 +985,8 @@ int main(void)
         test_tl_nothing_retires_after_fault, test_tl_wait_same_ring, test_tl_wait_across_rings, test_tl_all_waits_required, test_tl_wait_on_waiting_job,
         test_tl_freed_wait_slot_reused, test_tl_waiting_queue_wraps, test_tl_blocked_head_holds_followers, test_tl_wait_on_gone_or_reporting_job, test_tl_wait_table_capacity, test_tl_depth_limits, test_tl_job_table_exhausted,
         test_tl_submit_checks, test_tl_own_start_failure, test_tl_queued_start_failure_faults, test_tl_queued_failure_stops_other_rings, test_tl_timeout_measures_head,
-        test_tl_timeout_uses_first_start, test_tl_timeout_after_idle, test_tl_timeout_clock_and_rings, test_tl_fault_reasons, test_tl_quiesced_needs_fault,
-        test_tl_delivery_order, test_tl_nested_observation_keeps_order, test_tl_unknown_retirement_counted, test_core_retires_through_timeline, test_core_full_queue_is_refused,
+        test_tl_timeout_uses_first_start, test_tl_timeout_after_idle, test_tl_timeout_clock_and_rings, test_tl_fault_reasons, test_tl_note_fault_defers_the_sink, test_tl_quiesced_needs_fault,
+        test_tl_delivery_order, test_tl_nested_observation_keeps_order, test_tl_unknown_retirement_counted, test_core_retires_through_timeline, test_core_one_client_cannot_fill_a_ring, test_core_quarantine_reaches_timeline,
         test_core_bad_counter_then_quiesce, test_core_timeout_then_quiesce, test_core_threaded
     };
     size_t i;

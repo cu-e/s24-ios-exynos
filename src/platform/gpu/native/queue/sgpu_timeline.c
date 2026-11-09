@@ -13,7 +13,7 @@ struct tl_job {
 };
 
 struct tl_ring {
-    uint16_t waiting[SGPU_TL_MAX_DEPTH], running[SGPU_TL_MAX_DEPTH];
+    uint16_t waiting[SGPU_TL_MAX_JOBS], running[SGPU_TL_MAX_DEPTH];
     uint32_t waiting_head, waiting_count, running_head, running_count;
     uint64_t last_counter, head_since;
 };
@@ -44,7 +44,7 @@ int sgpu_timeline_init(struct sgpu_timeline *tl, const struct sgpu_tl_config *co
     uint64_t mask;
     uint32_t i;
     if (!tl || !config || !hw || !sink) return SGPU_TL_ARGUMENT;
-    if (!hw->lock || !hw->unlock || !hw->now_ns || !hw->start) return SGPU_TL_ARGUMENT;
+    if (!hw->lock || !hw->unlock || !hw->now_ns || !hw->start || !hw->read_counter) return SGPU_TL_ARGUMENT;
     if (!sink->retire || !sink->fault || !sink->quiesced) return SGPU_TL_ARGUMENT;
     if (!config->rings || config->rings > SGPU_TL_MAX_RINGS) return SGPU_TL_ARGUMENT;
     if (!config->depth || config->depth > SGPU_TL_MAX_DEPTH) return SGPU_TL_ARGUMENT;
@@ -90,7 +90,7 @@ static int job_blocked(const struct sgpu_timeline *tl, const struct tl_job *j)
 static uint32_t pop_waiting(struct tl_ring *r)
 {
     uint32_t slot = r->waiting[r->waiting_head];
-    r->waiting_head = (r->waiting_head + 1u) % SGPU_TL_MAX_DEPTH;
+    r->waiting_head = (r->waiting_head + 1u) % SGPU_TL_MAX_JOBS;
     --r->waiting_count;
     return slot;
 }
@@ -156,7 +156,6 @@ static int submit_locked(struct sgpu_timeline *tl, uint32_t ring, uint32_t hw_co
     if (tl->faulted) return SGPU_TL_STOPPED;
     if (sequence <= tl->last_sequence) return SGPU_TL_ARGUMENT;
     for (i = 0; i < wait_count; ++i) if (waits[i] >= sequence) return SGPU_TL_ARGUMENT;
-    if (r->waiting_count >= tl->config.depth) return SGPU_TL_FULL;
     slot = free_slot(tl);
     if (slot == NO_JOB) return SGPU_TL_FULL;
     j = &tl->jobs[slot];
@@ -175,7 +174,7 @@ static int submit_locked(struct sgpu_timeline *tl, uint32_t ring, uint32_t hw_co
     j->count = count;
     j->wait_count = kept;
     j->state = JOB_ACTIVE;
-    r->waiting[(r->waiting_head + r->waiting_count) % SGPU_TL_MAX_DEPTH] = (uint16_t)slot;
+    r->waiting[(r->waiting_head + r->waiting_count) % SGPU_TL_MAX_JOBS] = (uint16_t)slot;
     ++r->waiting_count;
     /* Only a new head can start here; anything already queued is held by a condition this
      * call does not change. A refusal therefore always concerns this job. */
@@ -241,7 +240,7 @@ static void deliver(struct sgpu_timeline *tl)
     tl->hw.unlock(tl->hw_context);
 }
 
-int sgpu_timeline_observe(struct sgpu_timeline *tl, uint32_t ring, uint64_t counter)
+int sgpu_timeline_observe(struct sgpu_timeline *tl, uint32_t ring)
 {
     int status = SGPU_TL_OK;
     if (ring >= tl->config.rings) return SGPU_TL_ARGUMENT;
@@ -251,6 +250,7 @@ int sgpu_timeline_observe(struct sgpu_timeline *tl, uint32_t ring, uint64_t coun
         status = SGPU_TL_STOPPED;
     } else {
         struct tl_ring *r = &tl->rings[ring];
+        uint64_t counter = tl->hw.read_counter(tl->hw_context, ring);
         uint64_t distance = (counter - r->last_counter) & tl->mask;
         if ((counter & ~tl->mask) || distance > r->running_count) {
             ++tl->stats.bad_counters;
@@ -270,6 +270,7 @@ int sgpu_timeline_observe(struct sgpu_timeline *tl, uint32_t ring, uint64_t coun
             r->last_counter = counter;
             r->head_since = tl->hw.now_ns(tl->hw_context);
             pump(tl);
+            if (tl->faulted) status = SGPU_TL_START_FAILED;
         }
     }
     tl->hw.unlock(tl->hw_context);
@@ -302,11 +303,17 @@ int sgpu_timeline_tick(struct sgpu_timeline *tl)
     return status;
 }
 
-int sgpu_timeline_fault(struct sgpu_timeline *tl, uint32_t reason)
+int sgpu_timeline_note_fault(struct sgpu_timeline *tl, uint32_t reason)
 {
     tl->hw.lock(tl->hw_context);
     mark_faulted(tl, reason ? reason : (uint32_t)SGPU_BE_REASON_FAULT);
     tl->hw.unlock(tl->hw_context);
+    return SGPU_TL_OK;
+}
+
+int sgpu_timeline_fault(struct sgpu_timeline *tl, uint32_t reason)
+{
+    (void)sgpu_timeline_note_fault(tl, reason);
     deliver(tl);
     return SGPU_TL_OK;
 }
