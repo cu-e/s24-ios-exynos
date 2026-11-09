@@ -90,7 +90,6 @@ def self_test():
     assert parse_line('_a : _b') == ('_a', '_b')
     assert parse_line('_a -obsolete') == ('_a', None)
     assert parse_line('_a:_b -obsolete') == ('_a', '_b')
-    assert parse_line('_a # note') == ('_a', None) or True
     imports = {'_abc', '_abd', '_x'}
     order = sorted(imports)
     assert present(('_abc', None), imports, order)
@@ -99,7 +98,7 @@ def self_test():
     assert not present(('_q*', None), imports, order)
     assert present(('_alias', '_x'), imports, order)
     assert not present(('_x', '_absent'), imports, order)
-    for bad in ['_a b', '_a:']:
+    for bad in ['_a b', '_a:', '_a # note']:
         try:
             parse_line(bad)
         except ValueError:
