@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T06:55:48+00:00",
+  "updated_at": "2026-11-10T06:57:41+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -10986,7 +10986,7 @@
       "id": "VM-053",
       "title": "Add SCFB display streaming, virtio-mmio multitouch input and a viewer APK to s24vmm (host-tested)",
       "status": "in_progress",
-      "owner": "claude-vm-display-20261110-v53",
+      "owner": "claude-takeover-20261110-6c8f",
       "priority": 80,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -11013,10 +11013,19 @@
         "Run host tests and record evidence."
       ],
       "started_at": "2026-11-10T04:41:50+00:00",
-      "last_heartbeat": "2026-11-10T04:41:50+00:00",
-      "updated_at": "2026-11-10T04:41:50+00:00",
+      "last_heartbeat": "2026-11-10T06:57:22+00:00",
+      "updated_at": "2026-11-10T06:57:22+00:00",
       "branch": "team/vm-053-display-input-20261110",
-      "worktree": "worktrees/vm-053-display-input-20261110"
+      "worktree": "worktrees/vm-053-display-input-20261110",
+      "ownership_history": [
+        {
+          "from": "claude-vm-display-20261110-v53",
+          "to": "claude-takeover-20261110-6c8f",
+          "reason": "Owner session 1bd73f06 (Claude) is stopped: its subagents were killed at 2026-11-10T05:50:43Z, and no process other than the new owner has a cwd in this project. Transfer to preserve and assess the unfinished work.",
+          "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
+          "at": "2026-11-10T06:57:22+00:00"
+        }
+      ]
     },
     {
       "id": "GPU-016",
@@ -11066,7 +11075,7 @@
       "id": "VM-054",
       "title": "Boot the source-built XNU guest to PID 1 on the S24 under s24vmm",
       "status": "in_progress",
-      "owner": "claude-xnu-s24-20261110-v54",
+      "owner": "claude-takeover-20261110-6c8f",
       "priority": 90,
       "scope": "android-app",
       "evidence_kind": "android-userland",
@@ -11092,12 +11101,21 @@
         "Record and clean up"
       ],
       "started_at": "2026-11-10T04:47:57+00:00",
-      "last_heartbeat": "2026-11-10T05:12:22+00:00",
-      "updated_at": "2026-11-10T05:12:22+00:00",
+      "last_heartbeat": "2026-11-10T06:57:41+00:00",
+      "updated_at": "2026-11-10T06:57:41+00:00",
       "branch": "team/vm-054-xnu-guest-s24-20261110",
       "worktree": "worktrees/vm-054-xnu-guest-s24-20261110",
       "progress_note": "Sessions 002-004 + fp-probe (2026-11-10): first exception is EC=0x07 FP trap at _cpu_data_init (fmov d0,xzr, ELR 0xfffffff0074950b4) although XNU's only CPACR_EL1 write (common_start) sets 0x300000 and CPACR reads 0x300000 at the breakpoint; the later SP1 recursion/address-size faults are fallout. fp_probe.S shows KVM FP is correct on A520/A720/X4 (FPEN=11 runs, FPEN=00 traps 0x1fe00000 to the guest, survives a 2 s spin). Tools: s24vmm --break (KVM_SET_GUEST_DEBUG, 6 HW BPs) and exit-time stage-1 walk/memory dump (VM-053 commits 92ae109, 8a8f77b, 01a93cc). Paused by owner: priority moved to native boot research.",
-      "next_step": "Find why the FP trap reaches the guest with FPEN=11 (compare guest state at common_start vs cpu_data_init with --break; check CPTR/pKVM FP ownership); fp_probe.S uncommitted in the worktree."
+      "next_step": "Find why the FP trap reaches the guest with FPEN=11 (compare guest state at common_start vs cpu_data_init with --break; check CPTR/pKVM FP ownership); fp_probe.S uncommitted in the worktree.",
+      "ownership_history": [
+        {
+          "from": "claude-xnu-s24-20261110-v54",
+          "to": "claude-takeover-20261110-6c8f",
+          "reason": "Owner session 1bd73f06 (Claude) is stopped: its subagents were killed at 2026-11-10T05:50:43Z, and no process other than the new owner has a cwd in this project. Transfer to preserve and assess the unfinished work.",
+          "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
+          "at": "2026-11-10T06:57:41+00:00"
+        }
+      ]
     },
     {
       "id": "NAT-005",
@@ -52277,6 +52295,40 @@
           "owner": "claude-takeover-20261110-6c8f",
           "last_heartbeat": "2026-11-10T06:53:44+00:00",
           "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:57:22+00:00",
+      "action": "task.transfer:VM-053",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "VM-053",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 80,
+          "last_heartbeat": "2026-11-10T06:57:22+00:00",
+          "branch": "team/vm-053-display-input-20261110",
+          "worktree": "worktrees/vm-053-display-input-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:57:41+00:00",
+      "action": "task.transfer:VM-054",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "VM-054",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 90,
+          "progress_note": "Sessions 002-004 + fp-probe (2026-11-10): first exception is EC=0x07 FP trap at _cpu_data_init (fmov d0,xzr, ELR 0xfffffff0074950b4) although XNU's only CPACR_EL1 write (common_start) sets 0x300000 and CPACR reads 0x300000 at the breakpoint; the later SP1 recursion/address-size faults are fallout. fp_probe.S shows KVM FP is correct on A520/A720/X4 (FPEN=11 runs, FPEN=00 traps 0x1fe00000 to the guest, survives a 2 s spin). Tools: s24vmm --break (KVM_SET_GUEST_DEBUG, 6 HW BPs) and exit-time stage-1 walk/memory dump (VM-053 commits 92ae109, 8a8f77b, 01a93cc). Paused by owner: priority moved to native boot research.",
+          "next_step": "Find why the FP trap reaches the guest with FPEN=11 (compare guest state at common_start vs cpu_data_init with --break; check CPTR/pKVM FP ownership); fp_probe.S uncommitted in the worktree.",
+          "last_heartbeat": "2026-11-10T06:57:41+00:00",
+          "branch": "team/vm-054-xnu-guest-s24-20261110",
+          "worktree": "worktrees/vm-054-xnu-guest-s24-20261110"
         }
       ]
     }
