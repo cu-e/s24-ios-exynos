@@ -62,6 +62,8 @@ Only the recorded owner may update, heartbeat, block, resume, release or complet
 
 The only takeover is `task transfer ID --from-owner OLD --owner NEW --reason R --decision docs/decisions/FILE [--handoff PATH]`. It requires an owner decision record (currently 0002 and 0003, for any finished or stopped executor: Codex, Claude or their subagents), an active or blocked task held by OLD and a concrete reason. Check first that no live process works on the task. It keeps files, branch and results, appends `ownership_history` and leaves status unchanged. There is still no automatic expiry.
 
+Completed work returns to an owner only with `task reopen ID --owner NEW --reason R --decision docs/decisions/FILE [--handoff PATH]`. It needs an owner decision record (0006 was the first) and fails while a completed task depends on ID. The old owner, evidence path, evidence hash and finish time move into `reopen_history`, and the task becomes `in_progress` under NEW. Files are not reverted.
+
 Scope flags change only with `project permit --scope S --value true|false --decision docs/decisions/FILE --owner NAME`, which records the decision path in `project.permission_decisions` and in the event. The flag mirrors the owner's written decision; it never grants anything by itself.
 
 ## File reservations and parallel work

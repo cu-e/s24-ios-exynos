@@ -136,6 +136,40 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(moved["ownership_history"][-1]["from"], "old")
         self.assertEqual(self.cli("task", "heartbeat", "HOST-001", "--owner", "old").returncode, 2)
 
+    def test_reopen_returns_done_work_and_keeps_old_evidence(self):
+        path = self.decision()
+        self.assertEqual(self.cli("task", "claim", "HOST-001", "--owner", "old").returncode, 0)
+        evidence = self.evidence()
+        self.assertEqual(self.cli("task", "done", "HOST-001", "--owner", "old", "--evidence", evidence).returncode, 0)
+        before = (self.root / "state/lab.json").read_bytes()
+        for args in [("HOST-002", "--decision", path),                      # not completed
+                     ("HOST-001", "--decision", "docs/procedure.md"),       # not a decision record
+                     ("HOST-001", "--decision", path, "--handoff", "docs/none.md")]:
+            result = self.cli("task", "reopen", args[0], "--owner", "new", "--reason", "contradicted", *args[1:])
+            self.assertEqual(result.returncode, 2, args)
+        self.assertEqual((self.root / "state/lab.json").read_bytes(), before)
+        result = self.cli("task", "reopen", "HOST-001", "--owner", "new", "--reason", "contradicted", "--decision", path)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        state = json.loads((self.root / "state/lab.json").read_text())
+        reopened = next(t for t in state["tasks"] if t["id"] == "HOST-001")
+        self.assertEqual((reopened["status"], reopened["owner"]), ("in_progress", "new"))
+        self.assertNotIn("evidence", reopened)
+        history = reopened["reopen_history"][-1]
+        self.assertEqual((history["from_owner"], history["evidence"], history["decision"]), ("old", evidence, path))
+        self.assertEqual(history["evidence_sha256"], lab.evidence_hash(self.root, evidence))
+        self.assertEqual(self.cli("task", "heartbeat", "HOST-001", "--owner", "old").returncode, 2)
+        self.assertEqual(self.cli("task", "done", "HOST-001", "--owner", "new", "--evidence", evidence).returncode, 0)
+
+    def test_reopen_refuses_when_completed_work_depends_on_it(self):
+        path = self.decision()
+        evidence = self.evidence()
+        for identifier in ["HOST-001", "HOST-002"]:
+            self.assertEqual(self.cli("task", "claim", identifier, "--owner", "a").returncode, 0)
+            self.assertEqual(self.cli("task", "done", identifier, "--owner", "a", "--evidence", evidence).returncode, 0)
+        result = self.cli("task", "reopen", "HOST-001", "--owner", "b", "--reason", "contradicted", "--decision", path)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("HOST-002", result.stderr)
+
     def narrow_fixture(self):
         self.state["tasks"][0]["paths"] = ["tools/a.py"]
         broad = task("HOST-003")

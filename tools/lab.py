@@ -556,7 +556,7 @@ def parser():
     take.add_argument("--worktree")
     show = task.add_parser("show")
     show.add_argument("id")
-    for name in ["claim", "release", "block", "resume", "done", "update", "heartbeat", "prioritize", "transfer", "narrow"]:
+    for name in ["claim", "release", "block", "resume", "done", "update", "heartbeat", "prioritize", "transfer", "narrow", "reopen"]:
         q = task.add_parser(name)
         q.add_argument("id")
         q.add_argument("--owner", required=True)
@@ -577,6 +577,10 @@ def parser():
         if name == "narrow":
             q.add_argument("--paths", nargs="+", required=True)
             q.add_argument("--reason", required=True)
+        if name == "reopen":
+            q.add_argument("--reason", required=True)
+            q.add_argument("--decision", required=True)
+            q.add_argument("--handoff")
         if name == "transfer":
             q.add_argument("--from-owner", required=True)
             q.add_argument("--reason", required=True)
@@ -705,6 +709,29 @@ def main(argv=None):
                     task.setdefault("ownership_history", []).append(
                         {"from": args.from_owner, "to": args.owner, "reason": args.reason, "decision": decision, "at": now()})
                     task.update(owner=args.owner, updated_at=now(), last_heartbeat=now())
+                elif args.operation == "reopen":
+                    # An owner decision returns completed work to an owner; the old evidence stays on record.
+                    decision = decision_record(root, args.decision)
+                    if task["status"] != "done":
+                        raise LabError("Only completed work can be reopened")
+                    if not args.reason.strip():
+                        raise LabError("Reopening needs a concrete reason")
+                    if not permitted(state, task["scope"]):
+                        raise LabError("Execution scope is not authorized")
+                    dependents = [t["id"] for t in state["tasks"] if task["id"] in t["depends_on"] and t["status"] == "done"]
+                    if dependents:
+                        raise LabError(f"Completed tasks depend on {task['id']}: {', '.join(dependents)}")
+                    if args.handoff is not None:
+                        if not within(root, args.handoff).exists():
+                            raise LabError("The reopen handoff must be an existing project path")
+                        task["handoff"] = args.handoff
+                    task.setdefault("reopen_history", []).append(
+                        {"from_owner": task.get("owner"), "evidence": task.get("evidence"),
+                         "evidence_sha256": task.get("evidence_sha256"), "finished_at": task.get("finished_at"),
+                         "reason": args.reason, "decision": decision, "by": args.owner, "at": now()})
+                    for key in ["evidence", "evidence_sha256", "finished_at"]:
+                        task.pop(key, None)
+                    task.update(status="in_progress", owner=args.owner, started_at=now(), updated_at=now(), last_heartbeat=now())
                 elif args.operation == "prioritize":
                     if task["status"] != "pending":
                         raise LabError("Only pending work can be reprioritized")
