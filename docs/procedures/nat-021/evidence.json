@@ -1,0 +1,171 @@
+{
+  "recorded_at": "2026-11-10T11:42:23.162016+00:00",
+  "kind": "native-device",
+  "origin": "local-device-observation",
+  "outcome": "inconclusive",
+  "commit": "13bf477a53e880b8236874b8811e8ab8d371b8a8",
+  "summary": "One exact candidate recovery write/full matching readback and one requested native reboot. Owner saw Samsung logo and restart; USB SEC_UPLOAD appeared109.683949s after reboot command. No native CPU-stage or exception log captured. Fresh Download Mode stock-only Odin restoration passed full Android/readback assessment. No further native attempt.",
+  "candidate_sha256": "b5ff3bf7e4d6bcd36cc518fbc4ab0daaaf8a1985056a65708f60b51f4f9a6a49",
+  "stock_sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+  "write_targets": [
+    "RECOVERY"
+  ],
+  "native_recovery_reboots": 1,
+  "stock_restore_assessment": "pass",
+  "android_boot_completed": true,
+  "user_state": "RUNNING_UNLOCKED",
+  "pstore_files": [],
+  "xnu_execution_confirmed": false,
+  "watchdog_interval_measured": false,
+  "native_console_received": false,
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/nat-021/session.py",
+        "--out",
+        "artifacts/nat-021/attempt-001",
+        "--execute"
+      ],
+      "exit_code": 2,
+      "reason": "Toybox rejected nocreat before output open; full stock hash unchanged."
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/nat-021/session.py",
+        "--out",
+        "artifacts/nat-021/attempt-002",
+        "--execute"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+        "-I",
+        "docs/procedures/nat-013/restore_stock.py",
+        "restore",
+        "--bus",
+        "5",
+        "--address",
+        "29",
+        "--out",
+        "artifacts/nat-021/stock-restore-001"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "docs/procedures/nat-012/check_android.py",
+        "artifacts/nat-021/android-after-stock-001.json"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+        "-I",
+        "docs/procedures/nat-013/restore_stock.py",
+        "assess",
+        "--report",
+        "artifacts/nat-021/stock-restore-001/report.json",
+        "--readback",
+        "artifacts/nat-021/android-after-stock-001.json"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/nat-021/test_session.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "tests": 7
+    },
+    {
+      "argv": [
+        "make",
+        "check"
+      ],
+      "exit_code": 0,
+      "tests": 214
+    }
+  ],
+  "artifacts": [
+    "artifacts/nat-021/attempt-001/report.json",
+    "artifacts/nat-021/attempt-002/report.json",
+    "artifacts/nat-021/preopen-rejection-assessment.json",
+    "artifacts/nat-021/dd-rejection-audit-001/report.json",
+    "artifacts/nat-021/stop-and-stock-qualification.json",
+    "artifacts/nat-021/boot-log-assessment-001.json",
+    "artifacts/nat-021/host-kernel-usb-001.json",
+    "artifacts/nat-021/stock-restore-001/report.json",
+    "artifacts/nat-021/stock-restore-command-001.log",
+    "artifacts/nat-021/stock-restore-assessment-001.json",
+    "artifacts/nat-021/android-after-stock-001.json",
+    "artifacts/nat-021/post-restore-diagnostics-001.json",
+    "artifacts/nat-021/host-fault-controls-002.log",
+    "artifacts/nat-021/make-check.log",
+    "artifacts/nat-021/usb-attempt-001/000000.json",
+    "artifacts/nat-021/usb-attempt-001/000001.json",
+    "artifacts/nat-021/usb-attempt-001/000002.json",
+    "artifacts/nat-021/usb-attempt-001/000003.json",
+    "artifacts/nat-021/usb-attempt-001/000004.json",
+    "artifacts/nat-021/usb-attempt-001/complete.json",
+    "artifacts/nat-021/usb-attempt-002/000000.json",
+    "artifacts/nat-021/usb-attempt-002/000001.json",
+    "artifacts/nat-021/usb-attempt-002/000002.json",
+    "artifacts/nat-021/usb-attempt-002/000003.json",
+    "artifacts/nat-021/usb-attempt-002/000004.json",
+    "artifacts/nat-021/usb-attempt-002/000005.json",
+    "artifacts/nat-021/usb-attempt-002/complete.json",
+    "docs/procedures/nat-021/README.md",
+    "docs/procedures/nat-021/session.py",
+    "docs/procedures/nat-021/test_session.py"
+  ],
+  "sha256": {
+    "artifacts/nat-021/attempt-001/report.json": "ead3654f0f15d81d73801590171f9d6d96016521aa8b4403ea6c9f05ae878959",
+    "artifacts/nat-021/attempt-002/report.json": "142bf3d2dca896f78e1c0065af8c8826181ef5a87bed95af386999c9d2a66fb2",
+    "artifacts/nat-021/preopen-rejection-assessment.json": "409aec888a62421b3b62c188175d6e8223aa8bdfaa169710b64aa54aa22f6be4",
+    "artifacts/nat-021/dd-rejection-audit-001/report.json": "902e7afda2d281dfc761de0759cd4d5e53786d378478d0a1e858dbd8f66e70ad",
+    "artifacts/nat-021/stop-and-stock-qualification.json": "1cc01f060e96bfbdf9407cd56b6864f3d6d6dc376acc012310f47c5ed4d0672e",
+    "artifacts/nat-021/boot-log-assessment-001.json": "9ab94e0ab34bd7b9f7a93392c8b045a1817066619abbf2df9e22cc281756f307",
+    "artifacts/nat-021/host-kernel-usb-001.json": "b666e95f7eaa96e7b6f756101ddfd4464cd5c385c9ac7f46f8d0293ad57c4ed8",
+    "artifacts/nat-021/stock-restore-001/report.json": "7b06df55f14d3bf29a5886b79cf701212e857d913a2050631adde0b070c299f7",
+    "artifacts/nat-021/stock-restore-command-001.log": "9dc8bd160c29f3ee2737f24220227ec229179ae075c9fe7977b73d4d98ed6651",
+    "artifacts/nat-021/stock-restore-assessment-001.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+    "artifacts/nat-021/android-after-stock-001.json": "d12298ef49535c83ebd0313e04175aa34ee2e4758ab7d09627128b4721f28e52",
+    "artifacts/nat-021/post-restore-diagnostics-001.json": "76a90a843aee67b2841dd458faaf300e56a003a0697baa5e59d318d5916d76c3",
+    "artifacts/nat-021/host-fault-controls-002.log": "94e34763b2cea53c1320263662f21991c79bbad2d9c100a64ca898212d842c9a",
+    "artifacts/nat-021/make-check.log": "a8a933bb4a702c57e12894ac990e050f2c97d4840b5639effd8df0eb5450f067",
+    "artifacts/nat-021/usb-attempt-001/000000.json": "9ed26a3c9d80b9750c94e04d98788ff7836e47d8407b0123772ef6b1e57f7559",
+    "artifacts/nat-021/usb-attempt-001/000001.json": "1948d6c569d5e4250372a38e7538590ecdbcffef62fad2f69fb89eb9b0b6bdeb",
+    "artifacts/nat-021/usb-attempt-001/000002.json": "c0212bee9e95c7c3d0df5a9d3981091463975127200c8758e2f1c71c1a0962a9",
+    "artifacts/nat-021/usb-attempt-001/000003.json": "0330055467b1f5108b8e6715b6d88bbbcd063a77c2ffdcec1d2ced2d43e3eac2",
+    "artifacts/nat-021/usb-attempt-001/000004.json": "dab4095631543ab6d23a4f87afb39f0377df28d087647c6c92adb60b7f6ef7a0",
+    "artifacts/nat-021/usb-attempt-001/complete.json": "2ab395c186488d8f4eebac540f1f1a9bf1dab18b58ff06b441a36e288a70d3fc",
+    "artifacts/nat-021/usb-attempt-002/000000.json": "68b4beaff09311c852fe016492a82f8a43664b6aebe1e9e6fd12badd286db43f",
+    "artifacts/nat-021/usb-attempt-002/000001.json": "a39af032ec0f757efe32aa50639b11c300ff50a2a85d9a05f7aa53003c3e3527",
+    "artifacts/nat-021/usb-attempt-002/000002.json": "0f608a1ed22d542b7583087708a6e93b8d267e07ee49e30c078d84b27a3719b6",
+    "artifacts/nat-021/usb-attempt-002/000003.json": "ff471927b90c4e6aa7cbdba974ab2ae833479a51633bef8c39e9d4edb7f85b70",
+    "artifacts/nat-021/usb-attempt-002/000004.json": "bb9edc7bbd2ce472326a60f2ff857c2ce1e3e577415e3c3990250e8d873040ed",
+    "artifacts/nat-021/usb-attempt-002/000005.json": "b2161757386f68954c58bc59523a5b64440b0e935b8a4af4e96524b355afe733",
+    "artifacts/nat-021/usb-attempt-002/complete.json": "f1298153c760462f8b9a5ba7893df483dc45cd614d59135f8a442c3a300bd735",
+    "docs/procedures/nat-021/README.md": "ab7ead2eff71cefea742371fda6cb34f94a72f11de0397f9618853cbc98d2a88",
+    "docs/procedures/nat-021/session.py": "93a07c6aa7d62fd7dbcb0d0b8c5974851cf593eb5391d918fa24e0f44d2a6f8b",
+    "docs/procedures/nat-021/test_session.py": "60a6bf2c4bacd7c654032d7b4d584870e52dc0c6f4b14594763ea56c4e375a1e"
+  },
+  "limitations": [
+    "Host USB events do not identify native execution stage.",
+    "Source argument83 and nominal clock do not measure actual timer start/expiry.",
+    "RAM logs have no qualified reset retention or host read path; pstore is empty.",
+    "Stock recovery and Android/user-environment availability are verified; personal contents were not read.",
+    "Task remains unresolved for native diagnosis; NAT-017 channel and a new specific owner decision are required before another native attempt."
+  ]
+}
