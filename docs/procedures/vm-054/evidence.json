@@ -1,0 +1,369 @@
+{
+ "kind": "android-userland",
+ "origin": "local-device",
+ "outcome": "pass",
+ "task": "VM-054",
+ "owner": "claude-takeover-20261110-6c8f",
+ "recorded_at": "2026-11-10T08:34:37+00:00",
+ "device_inventory": "devices/local-2026-11-10-session1.json",
+ "device_check": {
+  "model": "SM-S921B",
+  "build_incremental": "S921BXXS9BYH3",
+  "checked_at": "2026-11-10T08:44Z",
+  "serial_recorded": false
+ },
+ "summary": "Under decision 0002, s24vmm (VM-055 --fp-on, 1 vCPU, 1 GiB) ran from tmpfs as root on the S24 with VM-002's avfboot Image and XNUP payload (xnu-8796.121.2 DEVELOPMENT BCM2837 with the owned PID 1). The console showed the Darwin banner and \"VM002: pid=1 ostype=Darwin owned-entry=v2\", and the guest ended by PSCI SYSTEM_OFF 0.29-0.67 s after start on X4 (twice), A720 and A520. A control without --fp-on hung until the 20 s timeout, as in sessions 002-004. Root cause: XNU common_start writes CPACR_EL1 with no ISB after it, and the fp-sync probe shows that an FP instruction after such a write traps on these cores. Every run removed its RAM directory, left no VMM process and did not reboot the phone. This is an XNU guest under Android KVM, not native XNU on Exynos hardware and not Apple launchd.",
+ "branch": "team/vm-054-xnu-guest-s24-20261110",
+ "vmm_commit": "368e146",
+ "transfer": {
+  "from_owner": "claude-xnu-s24-20261110-v54",
+  "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md"
+ },
+ "authorization": "docs/decisions/0002-owner-autonomy-grant-2026-11-10.md (root diagnostics, bounded KVM test VMs)",
+ "runs": {
+  "session-005-fpon": {
+   "command": "cd /dev/s24-vm054 && timeout 75 /dev/s24-vm054/vmm --timeout 60 \"--image\" \"/dev/s24-vm054/image\" \"--initrd\" \"/dev/s24-vm054/initrd\" \"--mem\" \"1024\" \"--cpus\" \"1\" \"--pin\" \"9\" \"--fp-on\" > /dev/s24-vm054/stdout 2> /dev/s24-vm054/stderr; echo $?",
+   "fp_on": 1,
+   "end_cause": "psci-system-off",
+   "vmm_seconds": 0.288,
+   "wall_seconds": 0.616,
+   "exits": 15033,
+   "mmio_exits": 15032,
+   "unknown_mmio": 0,
+   "console_bytes": 7509,
+   "darwin_banner": true,
+   "pid1_line": true,
+   "psci_off_line": true,
+   "ram_directory_removed": true,
+   "vmm_gone": true,
+   "uptime": {
+    "before": 431001.55,
+    "after": 431003.93,
+    "no_reboot": true
+   },
+   "delivered": {
+    "vmm": {
+     "bytes": 2181328,
+     "sha256": "e343626df33db5ecdc1c1a8b863d8d5d606a32e035756f839de2c53589ec93a3"
+    },
+    "image": {
+     "bytes": 35176,
+     "sha256": "7b731000d9ce5155519f3db9de9bd5067d7503744cef8f90454cdeb008cb90f9"
+    },
+    "initrd": {
+     "bytes": 16557208,
+     "sha256": "bfb623b9770649ecf950b928e0eee4aa85eb1d66292fbb060fc11c70a298f26c"
+    }
+   }
+  },
+  "session-006-control": {
+   "command": "cd /dev/s24-vm054 && timeout 35 /dev/s24-vm054/vmm --timeout 20 \"--image\" \"/dev/s24-vm054/image\" \"--initrd\" \"/dev/s24-vm054/initrd\" \"--mem\" \"1024\" \"--cpus\" \"1\" \"--pin\" \"9\" > /dev/s24-vm054/stdout 2> /dev/s24-vm054/stderr; echo $?",
+   "fp_on": 0,
+   "end_cause": "timeout",
+   "vmm_seconds": 20.507,
+   "wall_seconds": 20.773,
+   "exits": 1613,
+   "mmio_exits": 1613,
+   "unknown_mmio": 0,
+   "console_bytes": 804,
+   "darwin_banner": false,
+   "pid1_line": false,
+   "psci_off_line": false,
+   "ram_directory_removed": true,
+   "vmm_gone": true,
+   "uptime": {
+    "before": 431027.64,
+    "after": 431050.24,
+    "no_reboot": true
+   },
+   "delivered": {
+    "vmm": {
+     "bytes": 2181328,
+     "sha256": "e343626df33db5ecdc1c1a8b863d8d5d606a32e035756f839de2c53589ec93a3"
+    },
+    "image": {
+     "bytes": 35176,
+     "sha256": "7b731000d9ce5155519f3db9de9bd5067d7503744cef8f90454cdeb008cb90f9"
+    },
+    "initrd": {
+     "bytes": 16557208,
+     "sha256": "bfb623b9770649ecf950b928e0eee4aa85eb1d66292fbb060fc11c70a298f26c"
+    }
+   }
+  },
+  "session-007-fpon": {
+   "command": "cd /dev/s24-vm054 && timeout 75 /dev/s24-vm054/vmm --timeout 60 \"--image\" \"/dev/s24-vm054/image\" \"--initrd\" \"/dev/s24-vm054/initrd\" \"--mem\" \"1024\" \"--cpus\" \"1\" \"--pin\" \"9\" \"--fp-on\" > /dev/s24-vm054/stdout 2> /dev/s24-vm054/stderr; echo $?",
+   "fp_on": 1,
+   "end_cause": "psci-system-off",
+   "vmm_seconds": 0.3,
+   "wall_seconds": 0.613,
+   "exits": 15039,
+   "mmio_exits": 15038,
+   "unknown_mmio": 0,
+   "console_bytes": 7512,
+   "darwin_banner": true,
+   "pid1_line": true,
+   "psci_off_line": true,
+   "ram_directory_removed": true,
+   "vmm_gone": true,
+   "uptime": {
+    "before": 431050.37,
+    "after": 431053.4,
+    "no_reboot": true
+   },
+   "delivered": {
+    "vmm": {
+     "bytes": 2181328,
+     "sha256": "e343626df33db5ecdc1c1a8b863d8d5d606a32e035756f839de2c53589ec93a3"
+    },
+    "image": {
+     "bytes": 35176,
+     "sha256": "7b731000d9ce5155519f3db9de9bd5067d7503744cef8f90454cdeb008cb90f9"
+    },
+    "initrd": {
+     "bytes": 16557208,
+     "sha256": "bfb623b9770649ecf950b928e0eee4aa85eb1d66292fbb060fc11c70a298f26c"
+    }
+   }
+  },
+  "session-008-fpon-cpu4": {
+   "command": "cd /dev/s24-vm054 && timeout 75 /dev/s24-vm054/vmm --timeout 60 \"--image\" \"/dev/s24-vm054/image\" \"--initrd\" \"/dev/s24-vm054/initrd\" \"--mem\" \"1024\" \"--cpus\" \"1\" \"--pin\" \"4\" \"--fp-on\" > /dev/s24-vm054/stdout 2> /dev/s24-vm054/stderr; echo $?",
+   "fp_on": 1,
+   "end_cause": "psci-system-off",
+   "vmm_seconds": 0.349,
+   "wall_seconds": 0.665,
+   "exits": 15034,
+   "mmio_exits": 15033,
+   "unknown_mmio": 0,
+   "console_bytes": 7509,
+   "darwin_banner": true,
+   "pid1_line": true,
+   "psci_off_line": true,
+   "ram_directory_removed": true,
+   "vmm_gone": true,
+   "uptime": {
+    "before": 431053.53,
+    "after": 431056.0,
+    "no_reboot": true
+   },
+   "delivered": {
+    "vmm": {
+     "bytes": 2181328,
+     "sha256": "e343626df33db5ecdc1c1a8b863d8d5d606a32e035756f839de2c53589ec93a3"
+    },
+    "image": {
+     "bytes": 35176,
+     "sha256": "7b731000d9ce5155519f3db9de9bd5067d7503744cef8f90454cdeb008cb90f9"
+    },
+    "initrd": {
+     "bytes": 16557208,
+     "sha256": "bfb623b9770649ecf950b928e0eee4aa85eb1d66292fbb060fc11c70a298f26c"
+    }
+   }
+  },
+  "session-009-fpon-cpu0": {
+   "command": "cd /dev/s24-vm054 && timeout 75 /dev/s24-vm054/vmm --timeout 60 \"--image\" \"/dev/s24-vm054/image\" \"--initrd\" \"/dev/s24-vm054/initrd\" \"--mem\" \"1024\" \"--cpus\" \"1\" \"--pin\" \"0\" \"--fp-on\" > /dev/s24-vm054/stdout 2> /dev/s24-vm054/stderr; echo $?",
+   "fp_on": 1,
+   "end_cause": "psci-system-off",
+   "vmm_seconds": 0.67,
+   "wall_seconds": 1.0,
+   "exits": 15044,
+   "mmio_exits": 15043,
+   "unknown_mmio": 0,
+   "console_bytes": 7513,
+   "darwin_banner": true,
+   "pid1_line": true,
+   "psci_off_line": true,
+   "ram_directory_removed": true,
+   "vmm_gone": true,
+   "uptime": {
+    "before": 431056.14,
+    "after": 431059.05,
+    "no_reboot": true
+   },
+   "delivered": {
+    "vmm": {
+     "bytes": 2181328,
+     "sha256": "e343626df33db5ecdc1c1a8b863d8d5d606a32e035756f839de2c53589ec93a3"
+    },
+    "image": {
+     "bytes": 35176,
+     "sha256": "7b731000d9ce5155519f3db9de9bd5067d7503744cef8f90454cdeb008cb90f9"
+    },
+    "initrd": {
+     "bytes": 16557208,
+     "sha256": "bfb623b9770649ecf950b928e0eee4aa85eb1d66292fbb060fc11c70a298f26c"
+    }
+   }
+  }
+ },
+ "probe": {
+  "source": "docs/procedures/vm-054/fp_sync_probe.S",
+  "image_sha256": "fadefbf30b414cc91ffd993a25c5fe24e74e6ed07b615c91b8ca8c757dc171ed",
+  "consoles": {
+   "0": "Q\nEA 000000001fe00000 0000000080000080\nA t1\nB t1\nED 000000001fe00000 000000008000011c\nD t2\nS t2\n",
+   "4": "Q\nEA 000000001fe00000 0000000080000080\nA t1\nB t1\nD t1\nS t1\n",
+   "9": "Q\nEA 000000001fe00000 0000000080000080\nA t1\nB t1\nED 000000001fe00000 000000008000011c\nD t2\nS t2\n"
+  }
+ },
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/vm-054/run.py",
+    "--run",
+    "fp-sync-cpu9"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/vm-054/run.py",
+    "--run",
+    "fp-sync-cpu4"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/vm-054/run.py",
+    "--run",
+    "fp-sync-cpu0"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/vm-054/run.py",
+    "--run",
+    "session-005-fpon"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/vm-054/run.py",
+    "--run",
+    "session-006-control"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/vm-054/run.py",
+    "--run",
+    "session-007-fpon"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/vm-054/run.py",
+    "--run",
+    "session-008-fpon-cpu4"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/vm-054/run.py",
+    "--run",
+    "session-009-fpon-cpu0"
+   ],
+   "exit_code": 0
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/vm-054/README.md",
+  "docs/procedures/vm-054/run.py",
+  "docs/procedures/vm-054/fp_sync_probe.S",
+  "docs/procedures/vm-054/fp_probe.S",
+  "research/notes/virtualization/VM-054-xnu-guest-s24.md",
+  "devices/local-2026-11-10-session1.json",
+  "artifacts/vm-055/check-007/s24vmm",
+  "artifacts/vm-002-guest-20261110/guest/Image",
+  "artifacts/vm-002-guest-20261110/guest/payload.bin",
+  "artifacts/vm-054/fp-sync-build-001/fp_sync_probe.bin",
+  "artifacts/vm-054/session-005-fpon/report.json",
+  "artifacts/vm-054/session-005-fpon/stdout.txt",
+  "artifacts/vm-054/session-005-fpon/stderr.txt",
+  "artifacts/vm-054/session-006-control/report.json",
+  "artifacts/vm-054/session-006-control/stdout.txt",
+  "artifacts/vm-054/session-006-control/stderr.txt",
+  "artifacts/vm-054/session-007-fpon/report.json",
+  "artifacts/vm-054/session-007-fpon/stdout.txt",
+  "artifacts/vm-054/session-007-fpon/stderr.txt",
+  "artifacts/vm-054/session-008-fpon-cpu4/report.json",
+  "artifacts/vm-054/session-008-fpon-cpu4/stdout.txt",
+  "artifacts/vm-054/session-008-fpon-cpu4/stderr.txt",
+  "artifacts/vm-054/session-009-fpon-cpu0/report.json",
+  "artifacts/vm-054/session-009-fpon-cpu0/stdout.txt",
+  "artifacts/vm-054/session-009-fpon-cpu0/stderr.txt",
+  "artifacts/vm-054/fp-sync-cpu0/report.json",
+  "artifacts/vm-054/fp-sync-cpu0/stdout.txt",
+  "artifacts/vm-054/fp-sync-cpu0/stderr.txt",
+  "artifacts/vm-054/fp-sync-cpu4/report.json",
+  "artifacts/vm-054/fp-sync-cpu4/stdout.txt",
+  "artifacts/vm-054/fp-sync-cpu4/stderr.txt",
+  "artifacts/vm-054/fp-sync-cpu9/report.json",
+  "artifacts/vm-054/fp-sync-cpu9/stdout.txt",
+  "artifacts/vm-054/fp-sync-cpu9/stderr.txt"
+ ],
+ "sha256": {
+  "docs/procedures/vm-054/README.md": "92e5183ced8b40bd03bd59075184880ee0f50424102f71a8da5f288e2ae5bacf",
+  "docs/procedures/vm-054/run.py": "c412a85997138471be643fd8ff7b09d107c612d3f568eec7ac341fdfea01b42f",
+  "docs/procedures/vm-054/fp_sync_probe.S": "8d7121cfbb90ae6f409da9ee4a9806418e3c2dcfad122fdd65b4a10434fa9e75",
+  "docs/procedures/vm-054/fp_probe.S": "7d26c3faa90579c91dd0ba1c56cbc125db5bb1ed78bc9fcd0bba346fda80055e",
+  "research/notes/virtualization/VM-054-xnu-guest-s24.md": "8fa146b28b3a7fe892ee00d96420f5c759ab7e9623986959320f874f8fb9c0ce",
+  "devices/local-2026-11-10-session1.json": "806acc9919a7f84172d93a224f9d5cbea6c9997f329efb0134fed2d577c8a37e",
+  "artifacts/vm-055/check-007/s24vmm": "e343626df33db5ecdc1c1a8b863d8d5d606a32e035756f839de2c53589ec93a3",
+  "artifacts/vm-002-guest-20261110/guest/Image": "7b731000d9ce5155519f3db9de9bd5067d7503744cef8f90454cdeb008cb90f9",
+  "artifacts/vm-002-guest-20261110/guest/payload.bin": "bfb623b9770649ecf950b928e0eee4aa85eb1d66292fbb060fc11c70a298f26c",
+  "artifacts/vm-054/fp-sync-build-001/fp_sync_probe.bin": "fadefbf30b414cc91ffd993a25c5fe24e74e6ed07b615c91b8ca8c757dc171ed",
+  "artifacts/vm-054/session-005-fpon/report.json": "1a762f2bc46383ed80970297a0557cf7d0f75e40a0ab95a2fdc9a92f0c379add",
+  "artifacts/vm-054/session-005-fpon/stdout.txt": "a8be0168fff3a5fbe578ced3e2691e0bd977686b1a1a55d9cee9fbd39d513c93",
+  "artifacts/vm-054/session-005-fpon/stderr.txt": "ed23c40f6d0e00efbed9360f2e0075bf05c4db89caaa22ee293b3dd87082cbaa",
+  "artifacts/vm-054/session-006-control/report.json": "8abd2179953a0e8f35badcc0f12ebebfa99e6aed9ed2fe9e61ddbf3aee8731df",
+  "artifacts/vm-054/session-006-control/stdout.txt": "2edeb0a6f1dd8ae8972140ea1346013dfe39a78813c51208317fc79db0869273",
+  "artifacts/vm-054/session-006-control/stderr.txt": "4ccd577832290ece5c46b27bd9959d7f8ad35fc89c711f069db29648dfbf36fc",
+  "artifacts/vm-054/session-007-fpon/report.json": "697516ea8a19abe2afd0efd58918b08badc449851fc77d89be01f74e8bd6ce03",
+  "artifacts/vm-054/session-007-fpon/stdout.txt": "5790d36c7f6077364f52118a7d3d02e6c885751a9b3389d78e62fb8e87c45ce8",
+  "artifacts/vm-054/session-007-fpon/stderr.txt": "5ad7f1f16bdf546d5122ae9fe86f9f2db34269081d35d098eac77f46b65834ad",
+  "artifacts/vm-054/session-008-fpon-cpu4/report.json": "7c0bfce23f64e957a7e0ba609b2c168baca35fae56bec87d61d648d5a88d6591",
+  "artifacts/vm-054/session-008-fpon-cpu4/stdout.txt": "6d7f44a33d846ce5f2b896c1c69ee143bf04cf21fcaeeca117136f58d507dd4f",
+  "artifacts/vm-054/session-008-fpon-cpu4/stderr.txt": "9e6349295d590acf66102eff3dfa720e68001cd087c154d35a15dcf8da569213",
+  "artifacts/vm-054/session-009-fpon-cpu0/report.json": "cb7f58bfc69be6026314b935654a73616a7052d2da5cb48bc09c429e0509a6c4",
+  "artifacts/vm-054/session-009-fpon-cpu0/stdout.txt": "10f9c64504f4a756dfae86edf376ef151bb37072a804b4997bc162f6fe8e85ec",
+  "artifacts/vm-054/session-009-fpon-cpu0/stderr.txt": "b7fe61dfdf850704190143bc04b7d9c6587657af08ea49874acb1d39e5adbb3a",
+  "artifacts/vm-054/fp-sync-cpu0/report.json": "b2fab8bac4c3734b661d72eed974813623feb581a29b2e4be9748d7d64864441",
+  "artifacts/vm-054/fp-sync-cpu0/stdout.txt": "49b2161eb01db7acf5f93ba6c85df045c99ff85b5f8f2fca9554e5fbb541fcbd",
+  "artifacts/vm-054/fp-sync-cpu0/stderr.txt": "b1bd5ab6a0669d0abea264bbd771503609fda7bb4416b8d8e1f7d789fcbaa63c",
+  "artifacts/vm-054/fp-sync-cpu4/report.json": "9f93c8264b227a0de7f1fc8179d25ea42fa7060f70b31662e4acfb6d4e018676",
+  "artifacts/vm-054/fp-sync-cpu4/stdout.txt": "33d2d68b9fb8b3793ace9f289f933ac238f53356a34b8d03f452a933cf428e44",
+  "artifacts/vm-054/fp-sync-cpu4/stderr.txt": "3899c1c7189bdaa647dbc6089743bbd411f5447d89c824a39eb5b80c99b5abba",
+  "artifacts/vm-054/fp-sync-cpu9/report.json": "623522a3345c77ddb96cfc0c514b5cf087510610962a357b0e5dd2f4f59c08b9",
+  "artifacts/vm-054/fp-sync-cpu9/stdout.txt": "49b2161eb01db7acf5f93ba6c85df045c99ff85b5f8f2fca9554e5fbb541fcbd",
+  "artifacts/vm-054/fp-sync-cpu9/stderr.txt": "bfe7cf98252d7ae8053d146a3ebbb2b8fd5ef775ad7d32c17e4cdd96bfa0e77c"
+ },
+ "persistent_writes": false,
+ "limitations": [
+  "1 vCPU only: PSCI CPU_ON secondaries are reset by KVM and would hit the same trap.",
+  "No --scfb or --input in these runs, so the VM-053 display and touch paths were not exercised on the device.",
+  "The fix is in the VMM boot state (firmware-like), not in XNU; XNU still lacks the ISB."
+ ]
+}
