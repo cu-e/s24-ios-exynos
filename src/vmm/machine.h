@@ -41,6 +41,13 @@ size_t vmm_build_fdt(const struct vmm_layout *l, uint8_t *out, size_t out_len);
 /* Reads the arm64 Image header: returns the size to reserve (max of file and image_size), 0 if invalid. */
 uint64_t vmm_image_extent(const uint8_t *image, size_t len);
 
+/* Stage-1 translation of guest virtual address va through the guest's own tables in RAM (VMSAv8-64
+ * long descriptors, 4K/16K/64K granule, 48-bit output, no LPA2): bit 55 selects TTBR1. Returns 0 and
+ * *pa, 1..4 for a translation fault at level 0..3, -1 for an unusable TCR or an address outside the
+ * configured range, -2 when a table lies outside RAM. Used only for post-mortem diagnostics. */
+int vmm_walk(const uint8_t *ram, uint64_t ram_base, uint64_t ram_size, uint64_t tcr, uint64_t ttbr0, uint64_t ttbr1,
+             uint64_t va, uint64_t *pa);
+
 /* 8250/16550 subset: polled transmit, a small receive queue, LSR/IIR/MSR answers a driver expects. */
 struct vmm_uart {
     uint8_t ier, lcr, mcr, scr, dll, dlm;

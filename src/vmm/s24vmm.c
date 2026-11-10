@@ -359,6 +359,37 @@ static void dump_regs(int fd) {
         fprintf(stderr, ",\"x%d\":\"0x%llx\"", r, (unsigned long long)get_reg(fd, CORE_REG(regs.regs[r])));
 }
 
+/* Guest memory around addresses taken from the registers, translated through the guest's own stage-1
+ * tables (identity when SCTLR_EL1.M is clear). Code addresses show 32 bytes before and after; data
+ * addresses (stack, saved-state candidates) show 0x140 bytes from the address. */
+static void dump_mem(int fd) {
+    static const struct { const char *name; uint64_t id; int code; } where[] = {
+        {"pc", CORE_REG(regs.pc), 1}, {"elr_el1", CORE_REG(elr_el1), 1}, {"x30", CORE_REG(regs.regs[30]), 1},
+        {"sp_el1", CORE_REG(sp_el1), 0}, {"sp_el0", CORE_REG(regs.sp), 0}, {"far_el1", SYS_REG(3, 0, 6, 0, 0), 0},
+        {"x0", CORE_REG(regs.regs[0]), 0}, {"x19", CORE_REG(regs.regs[19]), 0}, {"x21", CORE_REG(regs.regs[21]), 0},
+        {"x29", CORE_REG(regs.regs[29]), 0},
+    };
+    uint64_t sctlr = get_reg(fd, SYS_REG(3, 0, 1, 0, 0)), tcr = get_reg(fd, SYS_REG(3, 0, 2, 0, 2));
+    uint64_t ttbr0 = get_reg(fd, SYS_REG(3, 0, 2, 0, 0)), ttbr1 = get_reg(fd, SYS_REG(3, 0, 2, 0, 1));
+    for (size_t k = 0; k < sizeof where / sizeof where[0]; k++) {
+        uint64_t va = get_reg(fd, where[k].id);
+        uint64_t start = where[k].code ? (va & ~0xfull) - 32 : va & ~0xfull;
+        unsigned len = where[k].code ? 80 : 0x140;
+        fprintf(stderr, "%s\"%s\":{\"va\":\"0x%llx\",\"from\":\"0x%llx\"", k ? "," : "", where[k].name, (unsigned long long)va,
+                (unsigned long long)start);
+        uint64_t pa = 0;
+        int fault = (sctlr & 1) ? vmm_walk(g.ram, VMM_RAM_BASE, g.layout.ram_size, tcr, ttbr0, ttbr1, start, &pa) : (pa = start, 0);
+        fprintf(stderr, ",\"walk\":%d,\"pa\":\"0x%llx\",\"bytes\":\"", fault, (unsigned long long)pa);
+        for (unsigned i = 0; !fault && i < len; i++) {
+            uint64_t a = start + i, p = 0;
+            int f = (sctlr & 1) ? vmm_walk(g.ram, VMM_RAM_BASE, g.layout.ram_size, tcr, ttbr0, ttbr1, a, &p) : (p = a, 0);
+            if (f || p < VMM_RAM_BASE || p >= VMM_RAM_BASE + g.layout.ram_size) break;
+            fprintf(stderr, "%02x", g.ram[p - VMM_RAM_BASE]);
+        }
+        fprintf(stderr, "\"}");
+    }
+}
+
 static void gic_attr(uint32_t group, uint64_t attr, void *addr, const char *what) {
     struct kvm_device_attr a = {.group = group, .attr = attr, .addr = (uint64_t)(uintptr_t)addr};
     if (ioctl(g.gic, KVM_SET_DEVICE_ATTR, &a) < 0) die(what);
@@ -528,6 +559,8 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%s{\"exits\":%llu,\"mmio\":%llu,\"last_reason\":%d,\"pc\":%llu,\"regs\":{", i ? "," : "", (unsigned long long)v->exits,
                 (unsigned long long)v->mmio, v->last_reason, (unsigned long long)get_reg(v->fd, CORE_REG(regs.pc)));
         dump_regs(v->fd);
+        fprintf(stderr, "},\"memory\":{");
+        dump_mem(v->fd);
         fprintf(stderr, "}}");
     }
     fprintf(stderr, "]}\n");
