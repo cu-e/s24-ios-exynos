@@ -1,0 +1,99 @@
+{
+ "kind": "host-test",
+ "also": [
+  "source-review"
+ ],
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-10T21:07:48+00:00",
+ "commit": "9d18380 (HEAD when recorded; the files listed below are committed afterwards together with this record)",
+ "tree_state": "NAT-033 files uncommitted when recorded; committed with this record",
+ "owner": "claude-nat033-20261111-simd",
+ "summary": "Host only: nothing was built for, flashed to, run on or read from the phone, and no decision was requested. The 16 SIMD/FP instruction forms in the direct-call closure of cpu_data_init and PE_init_platform(0, boot_args) were implemented in a subclass of the NAT-030 interpreter (kstart_sim.py and after5.py unchanged, hashes equal to the NAT-032 record) and each of the 86 distinct instruction words was compared with Unicorn on random and edge inputs (x registers, SP, Q registers, a 128 KiB buffer, PC); a deliberately wrong cmhi makes the comparison fail while the correct one passes. With them the real payload kernel runs in the model from the entry to the C checkpoint 11 stop (reference, slot[2] = 11: 9411 steps) and, after a stop at assembly checkpoint 5 and the NAT-032 resume (slot[2] = 11, MMU-off branch to site5 - 28, x0..x3 and x9..x11 clobbered): 9433 steps, arriving with identical x registers, vector registers, system registers and RAM and no taint violation. Arrival at the stub: x0 = loader_log PA 0x9e1f90a00, x1 = 0, x2 = 2, x3 = 11, MMU on, TTBR0 = loader_jump's private table 0x9e2279000, TTBR1 0x9e15af000, VBAR 0xfffffff007437000, SCTLR 0x3454593d, CPACR 0x300000 (written by the kernel before any SIMD instruction), loader_return_entered = 1, loader_log length 0. The executed path is 67 function entries, 23 distinct functions, no panic function, no ml_io_map/pmap_map/psci/redwood call and (the model raises external-abort for any PA outside the RAM window) no MMIO access; 39 SIMD instructions ran; five not naturally aligned accesses (2 vector, 3 ldr x in memmove) all hit Normal write-back pages with SCTLR.A = 0. The model has no caches, TLB, exceptions or timers and builds boot_args and the ADT as loader.c does; behaviour of the S24 past assembly checkpoint 5 remains unknown.",
+ "acceptance": {
+  "1_simd_forms": "docs/procedures/nat-033/simd.py (SimdSim); test_nat033.py Forms (form list re-derived from the payload bytes, every word implemented, abs/saddl/dup-element fail loudly) and AgainstUnicorn (86 words x 3 random trials + edge values) plus ControlSimd (negative control). NAT-030/032 files unchanged: kstart_sim.py and after5.py hashes below equal the NAT-032 record.",
+  "2_run_to_checkpoint_11": "artifacts/nat-033/c11.json and test_nat033.py ToCheckpoint11: both runs arrive at the stub; registers, vector registers, system registers, RAM identical; the write sequences differ by exactly the macro's sctlr 0x..3c write and the replayed 0x..3d write. No unmodelled or faulting instruction on the path.",
+  "3_executed_path": "README 'Established' 3-6 and c11.json (function list in order, 15 system-register writes with PCs, SIMD instructions with words, unaligned accesses with page attribute, loader_log length 0). No MMIO access and no panic call in the model; the panic-path MMIO is still not analysed.",
+  "4_no_image": "No image built, flashed or run; NAT-034 (host-tested image) and decision 0017 are proposed in the README with requirements."
+ },
+ "established": [
+  "In the NAT-030 model plus the SIMD forms, the payload kernel reaches C checkpoint 11 from the entry and, equally, from a stop at assembly checkpoint 5 with the NAT-032 resume, in identical state",
+  "The SIMD semantics of the 16 forms on the path agree with Unicorn on 86 words (random and edge inputs)",
+  "On the modelled path the kernel itself sets CPACR_EL1.FPEN = 3 before any SIMD instruction and touches no PA outside the RAM window"
+ ],
+ "not_established": [
+  "Any behaviour of the S24 past assembly checkpoint 5",
+  "Cache/TLB/exception behaviour, coherence of the resume sequence, the boot_args/ADT content the real loader passes",
+  "Whether the stub, its stack and loader_log lie inside loader_jump's private 2 MiB block",
+  "The cause of the SCTLR bit 5/7 difference seen in run 008; the panic-path MMIO"
+ ],
+ "commands": [
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-033/test_nat033.py"
+   ],
+   "exit_code": 0,
+   "note": "14 tests OK with capstone and unicorn (scratch virtualenv outside the repository)",
+   "log": "artifacts/nat-033/logs/test-capstone.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-033/test_nat033.py"
+   ],
+   "exit_code": 0,
+   "note": "no capstone/unicorn: all 14 skipped",
+   "log": "artifacts/nat-033/logs/test-system.log"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-033/c11.py",
+    "--out",
+    "artifacts/nat-033/c11.json"
+   ],
+   "exit_code": 0,
+   "note": "reference and resumed runs to the checkpoint 11 stop",
+   "log": "artifacts/nat-033/logs/c11-run.log"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "214 repository tests OK (does not run docs/procedures tests)",
+   "log": "artifacts/nat-033/logs/make-check.log"
+  }
+ ],
+ "sha256": {
+  "docs/procedures/nat-033/simd.py": "ef6f55a3f414fe15be4efecc4f595885fe724d593674173da9f5481853a1dfdb",
+  "docs/procedures/nat-033/c11.py": "d795b1d2dab42be82879ff7f7d0725c41e575e2e51478189ed3a8d5a36b3c675",
+  "docs/procedures/nat-033/test_nat033.py": "e12175cc208231bb4833c4882b1bf8985159ba1e96044196c44b6581d66bfdeb",
+  "docs/procedures/nat-033/README.md": "277d401180f7c61848efc73cbf159adb78683815742b69f483cb29d670503003",
+  "artifacts/nat-033/c11.json": "a25220fa1b60329e73697507f49c601c10eb5ad8ae907e1b8aba2132ff24993c",
+  "artifacts/nat-033/logs/test-capstone.log": "1469918e98ae01374ad113eaa2a17d04eb49d4742f8210c32b2064d0a23aa8b1",
+  "artifacts/nat-033/logs/test-system.log": "797618e2138b099ff6a05267994d7d5c3684d10f56edc6cd251017d4a74d8066",
+  "artifacts/nat-033/logs/c11-run.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-033/logs/make-check.log": "171dfd2d579da2bc5ca76cc74509b8c6b06ef06963115e17ccd7725a37d4fa9e",
+  "artifacts/nat-020/build-003/payload.bin": "071bc632f7af0a6aa9b11a679c1d5a951ee80943be11669326949d0725caf544",
+  "docs/procedures/nat-030/kstart_sim.py": "05a946740f5bb91e21c1daec546e1d9061b848729f7cedb13cca905a2714567a",
+  "docs/procedures/nat-032/after5.py": "35d98932f2c5911fe0d86887ce4f142d7128212b48c8ae0d447d4aa99e2bd3f4"
+ },
+ "artifacts": [
+  "artifacts/nat-033/c11.json",
+  "artifacts/nat-033/task.json",
+  "artifacts/nat-033/logs/test-capstone.log",
+  "artifacts/nat-033/logs/test-system.log",
+  "artifacts/nat-033/logs/c11-run.log",
+  "artifacts/nat-033/logs/make-check.log",
+  "docs/procedures/nat-033/README.md",
+  "docs/procedures/nat-033/simd.py",
+  "docs/procedures/nat-033/c11.py",
+  "docs/procedures/nat-033/test_nat033.py"
+ ]
+}

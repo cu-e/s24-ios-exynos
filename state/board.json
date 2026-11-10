@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T20:51:23+00:00",
-  "ledger_updated_at": "2026-11-10T20:51:14+00:00",
-  "registry_sha256": "8b2676b452d04ab4f885655033dd18b65d7b9833da306230109007a4b1c24287",
+  "generated_at": "2026-11-10T21:08:25+00:00",
+  "ledger_updated_at": "2026-11-10T21:08:10+00:00",
+  "registry_sha256": "7f8089c8c6664107eedc2689e981e0e0842071bf90c020a3cfe19b489484cc02",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [],
@@ -169,6 +169,7 @@
       "NAT-030",
       "NAT-031",
       "NAT-032",
+      "NAT-033",
       "KRN-006",
       "KRN-014",
       "KRN-015",
@@ -5065,6 +5066,48 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-032.md"
+    },
+    {
+      "id": "NAT-033",
+      "status": "done",
+      "owner": "claude-nat033-20261111-simd",
+      "title": "Run the real payload kernel in the NAT-030 model from the NAT-032 resume at asm checkpoint 5 to C checkpoint 11 (SIMD forms of the cp10-cp11 path added and checked against Unicorn; host-test; nothing run on the phone)",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 98,
+      "depends_on": [
+        "NAT-032"
+      ],
+      "paths": [
+        "docs/procedures/nat-033",
+        "artifacts/nat-033"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "The SIMD instruction forms that the kernel executes between C checkpoint 10 and C checkpoint 11 (cpu_data_init, PE_init_platform(0, boot_args) and what they call) are implemented in a subclass of the NAT-030 interpreter (nat-030 files unchanged) and every implemented form is checked against Unicorn on randomized register and memory inputs; forms outside that list still fail loudly.",
+        "With them, the model runs the real kernel from the entry with a stop at asm checkpoint 5, the NAT-032 resume (slot[2] = 11, MMU-off branch to site5 - 28) and a C stop at checkpoint 11: either the C stop at 11 arrives (state at the arrival: registers, SCTLR/TCR/TTBR0/TTBR1/VBAR, the private block, loader_log length) or the first unmodelled or faulting instruction is named. The resumed run is compared with the uninterrupted run (slot[2] = 11 from the start) in registers, system registers and RAM at the arrival.",
+        "The path is reported as executed (function list in order, system registers written, memory outside the window touched, loader_log contents/length), not only as statically reachable; any MMIO-range access or panic call on it is a finding.",
+        "No image is built for the phone, flashed or run here; if the host run supports an image, it is proposed as a separate task with an image-specific owner decision."
+      ],
+      "steps": [
+        "List the SIMD forms on the path and implement them with Unicorn cross-checks",
+        "Run the resume to C checkpoint 11 and compare with the uninterrupted run",
+        "Report the executed path and the arrival state; update the NAT-032 unknowns",
+        "Write README and evidence"
+      ],
+      "started_at": "2026-11-10T20:57:45+00:00",
+      "last_heartbeat": "2026-11-10T21:07:54+00:00",
+      "updated_at": "2026-11-10T21:08:10+00:00",
+      "progress_note": "Host-test done: SIMD forms (16) cross-checked vs Unicorn on 86 words; model reaches C checkpoint 11 from entry and from the NAT-032 resume with identical state; README/evidence written",
+      "next_step": "task done after make status; then NAT-034 proposal needs its own task and decision 0017",
+      "evidence": "docs/procedures/nat-033/evidence.json",
+      "evidence_sha256": "35724759e41a4bd638940979224b645c2be4760afa036d89086a8d63b4cce8a4",
+      "finished_at": "2026-11-10T21:08:10+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-033.md"
     },
     {
       "id": "KRN-006",
@@ -14385,65 +14428,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-10T16:11:04+00:00",
-      "action": "task.update:NAT-027",
-      "owner": "claude-nat022-20261110-diag",
-      "tasks": [
-        {
-          "id": "NAT-027",
-          "status": "in_progress",
-          "owner": "claude-nat022-20261110-diag",
-          "priority": 98,
-          "progress_note": "Run 005 recorded; fix built, host-verified, packaged, driver gated; evidence-nat027.json written",
-          "next_step": "Mark done; then ask the owner for decision 0014 (image-specific single run of loader-diag-trig-hold-adt8-aln)",
-          "last_heartbeat": "2026-11-10T16:11:04+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T16:19:25+00:00",
-      "action": "task.done:NAT-027",
-      "owner": "claude-nat022-20261110-diag",
-      "tasks": [
-        {
-          "id": "NAT-027",
-          "status": "done",
-          "owner": "claude-nat022-20261110-diag",
-          "priority": 98,
-          "progress_note": "Run 005 recorded; fix built, host-verified, packaged, driver gated; evidence-nat027.json written",
-          "next_step": "Mark done; then ask the owner for decision 0014 (image-specific single run of loader-diag-trig-hold-adt8-aln)",
-          "last_heartbeat": "2026-11-10T16:11:04+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T16:43:49+00:00",
-      "action": "task.add:NAT-028",
-      "owner": "claude-nat028-20261110-xnuentry",
-      "tasks": [
-        {
-          "id": "NAT-028",
-          "status": "pending",
-          "owner": null,
-          "priority": 98
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T16:44:09+00:00",
-      "action": "task.claim:NAT-028",
-      "owner": "claude-nat028-20261110-xnuentry",
-      "tasks": [
-        {
-          "id": "NAT-028",
-          "status": "in_progress",
-          "owner": "claude-nat028-20261110-xnuentry",
-          "priority": 98,
-          "last_heartbeat": "2026-11-10T16:44:09+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-10T17:01:30+00:00",
       "action": "task.update:NAT-028",
       "owner": "claude-nat028-20261110-xnuentry",
@@ -14677,11 +14661,70 @@
           "last_heartbeat": "2026-11-10T20:50:38+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T20:57:36+00:00",
+      "action": "task.add:NAT-033",
+      "owner": "claude-nat033-20261111-simd",
+      "tasks": [
+        {
+          "id": "NAT-033",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T20:57:45+00:00",
+      "action": "task.claim:NAT-033",
+      "owner": "claude-nat033-20261111-simd",
+      "tasks": [
+        {
+          "id": "NAT-033",
+          "status": "in_progress",
+          "owner": "claude-nat033-20261111-simd",
+          "priority": 98,
+          "last_heartbeat": "2026-11-10T20:57:45+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T21:07:54+00:00",
+      "action": "task.update:NAT-033",
+      "owner": "claude-nat033-20261111-simd",
+      "tasks": [
+        {
+          "id": "NAT-033",
+          "status": "in_progress",
+          "owner": "claude-nat033-20261111-simd",
+          "priority": 98,
+          "progress_note": "Host-test done: SIMD forms (16) cross-checked vs Unicorn on 86 words; model reaches C checkpoint 11 from entry and from the NAT-032 resume with identical state; README/evidence written",
+          "next_step": "task done after make status; then NAT-034 proposal needs its own task and decision 0017",
+          "last_heartbeat": "2026-11-10T21:07:54+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T21:08:10+00:00",
+      "action": "task.done:NAT-033",
+      "owner": "claude-nat033-20261111-simd",
+      "tasks": [
+        {
+          "id": "NAT-033",
+          "status": "done",
+          "owner": "claude-nat033-20261111-simd",
+          "priority": 98,
+          "progress_note": "Host-test done: SIMD forms (16) cross-checked vs Unicorn on 86 words; model reaches C checkpoint 11 from entry and from the NAT-032 resume with identical state; README/evidence written",
+          "next_step": "task done after make status; then NAT-034 proposal needs its own task and decision 0017",
+          "last_heartbeat": "2026-11-10T21:07:54+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "b19a258f3adf2d846a95a9440e4b4297dab39d91ef37fc0e3065c20a8eb34a2c",
-    "BOARD.md": "8097401590c1be40e33d18fdb12f89ac5bcc036601e4fb590a68dc7ba70fee7c",
+    "STATUS.md": "df1c090f24688a8be04936cffef766d21b49e58e1c21e192a9f90052dfbc437d",
+    "BOARD.md": "3dafbb0ceacdc24dce97b16f598447ddd966bae074810a36148ac7f720504db8",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -14789,6 +14832,7 @@
     "planning/tasks/NAT-030.md": "af82535557c35993d34b88b2b1728c97c25884f78d95d40d4657f66eb13a7bc3",
     "planning/tasks/NAT-031.md": "c6448051d086e0db4de11f11c1182d0f1f9f4f4176a58f95fbb788b064f6c2b1",
     "planning/tasks/NAT-032.md": "00815c12e6fbf296ddd41b0d1475e35e18eb211254e4ed0d6e2f9bdb2fb7632e",
+    "planning/tasks/NAT-033.md": "d0bb7900f60f042c1041f2227a5a090ae752976884f42f383976903cc78d1479",
     "planning/tasks/KRN-006.md": "17787b37e62d7cb230c248532450af8108a583aca6b6e955cee29637f8e981a1",
     "planning/tasks/KRN-014.md": "373bcf06587ce0b77bbacdfa023baa6c9b888953717dafa33267ff49a60ea753",
     "planning/tasks/KRN-015.md": "28783b6b5313987331209c84d30f10ddeab6ee7f41bf6bf1d963790545460926",
