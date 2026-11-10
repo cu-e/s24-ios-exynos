@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "task": "UI-007",
+  "owner": "claude-takeover-20261110-6c8f",
+  "authored_by": "claude-display-scanout-20261110-u7 (stopped session 1bd73f06); transferred under docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
+  "recorded_at": "2026-11-10T06:11:10+00:00",
+  "authorization": "docs/decisions/0002-owner-autonomy-grant-2026-11-10.md (item 1, host work)",
+  "summary": "Read-only freestanding s5e9945 DECON0/DPP boot-window reader with every register offset and bit field cited from pinned Samsung source (checked line by line at s24-linux and s24-bsp-reference), MMIO bases from the NAT-005 runtime FDT, and ASan/UBSan host tests on a guard-page read-only simulated register file encoded with Samsung's own macro bodies. Review fixed one test defect (page-rounded 0x9A4000 taken as the exact frame size) and two validation gaps (block mode, colormap window stacked above the frame). Nothing ran on the phone.",
+  "commit": {
+    "branch": "team/ui-007-decon-boot-window-20261110",
+    "preserved_wip": "ab3aad7",
+    "reviewed_fix": "ccc2236",
+    "merge_into_main": "c3cf4ed"
+  },
+  "sources": {
+    "s24-linux": "417484173abc2c4fa93e738ea82ad9f2e84911b1",
+    "s24-bsp-reference": "f85e53cfa5497ead5d78821efbac84e51f37a4e1",
+    "note": "Local checkouts are blob:none partial clones; no blob is missing under drivers/gpu/drm/samsung, drivers/video, init or arch/arm64/boot/dts/exynos (three unrelated symlink blobs missing elsewhere)."
+  },
+  "device_io": {
+    "performed": false,
+    "note": "No ADB, no su, no MMIO. The runtime FDT is the private NAT-005 copy already on the host."
+  },
+  "host_commands": [
+    {"argv": ["python3", "-m", "unittest", "tests.test_native_boot_window"], "cwd": "worktrees/ui-007-decon-boot-window-20261110", "revision": "ab3aad7", "exit_code": 1, "tests": 22, "result": "1 failure: test_validation_rejections expected SIZE for 0x9A3FFC, which holds the 0x9A3F80-byte frame (test defect)"},
+    {"argv": ["python3", "-I", "src/native/display/dpu_dt_facts.py", "devices/e1s-fdt/2026-11-10/runtime.dtb", "--json", "<scratchpad>/dpu-dt-facts.regen.json"], "exit_code": 0, "result": "byte-identical to docs/procedures/ui-007/dpu-dt-facts.json; blob SHA-256 matches NAT-005"},
+    {"argv": ["python3", "-m", "unittest", "tests.test_native_boot_window"], "cwd": "worktrees/ui-007-decon-boot-window-20261110", "revision": "working tree before ccc2236", "exit_code": 0, "tests": 22},
+    {"argv": ["mutation check: six single-point mutations of e1s_boot_window.c, suite run per mutant, source restored and compared"], "exit_code": 0, "result": "6/6 killed: no-block-check, no-covered-check, pitch-from-crop-width, end-exclusive, skip-shadow, chmap-shift-wrong"},
+    {"argv": ["python3", "-m", "unittest", "discover", "-s", "tests"], "cwd": "worktrees/ui-007-decon-boot-window-20261110", "revision": "ccc2236", "exit_code": 0, "tests": 197, "skipped": 3, "note": "skips need references/ absent in the worktree"},
+    {"argv": ["make", "check"], "cwd": ".", "revision": "c3cf4ed", "exit_code": 0, "tests": 201, "skipped": 0}
+  ],
+  "toolchain": {
+    "host_clang": "/home/egor/.local/bin/clang -> Android NDK 27.1.12297006 clang 18.0.2",
+    "llvm_nm": "Android NDK 28.2.13676358 llvm-nm",
+    "flags_target": "--target=aarch64-none-elf -std=c11 -O2 -ffreestanding -nostdlib -fno-pic -mgeneral-regs-only -mstrict-align -fno-stack-protector -Wall -Wextra -Werror -Wpedantic"
+  },
+  "acceptance": [
+    {"criterion": "cal_rt DECON window enable/channel map and DPP/DMA base, pitch, format and size offsets cited file:line from s24-linux and s24-bsp-reference; s3cfb.bootloaderfb consumption cited", "met": true, "where": "src/native/display/register_facts.json; research/notes/native/UI-007-decon-boot-window.md; test_facts_match_pinned_s24_linux_source, test_dpu_facts_identical_in_bsp_reference"},
+    {"criterion": "DPP/DMA MMIO bases from the NAT-005 runtime FDT, sanitized", "met": true, "where": "docs/procedures/ui-007/dpu-dt-facts.json; test_default_layout_matches_runtime_fdt_facts, test_committed_dt_facts_regenerate_from_local_blob"},
+    {"criterion": "freestanding read-only C module returning {enabled, base, stride, format, width, height}, validating base/size, compiling for aarch64 freestanding with loader flags", "met": true, "where": "src/native/display/e1s_boot_window.{h,c}; test_freestanding_aarch64_build_with_loader_flags"},
+    {"criterion": "clang ASan/UBSan host tests on a simulated register file encoded from cited definitions, with rejection cases", "met": true, "where": "tests/test_native_boot_window.py (22 tests) and the mutation check above"},
+    {"criterion": "report separates cited, measured and unverified facts; no device I/O", "met": true, "where": "research/notes/native/UI-007-decon-boot-window.md"}
+  ],
+  "artifacts": [
+    "src/native/display/e1s_boot_window.c",
+    "src/native/display/e1s_boot_window.h",
+    "src/native/display/sim_harness.c",
+    "src/native/display/regfacts.py",
+    "src/native/display/register_facts.json",
+    "src/native/display/dpu_dt_facts.py",
+    "tests/test_native_boot_window.py",
+    "docs/procedures/ui-007/dpu-dt-facts.json",
+    "research/notes/native/UI-007-decon-boot-window.md"
+  ],
+  "sha256": {
+    "src/native/display/e1s_boot_window.c": "b17bebf2c765eb55c6c0215922604948e1785e4dd936511f5b4cded4a3905d22",
+    "src/native/display/e1s_boot_window.h": "2cc5b4b9d56c261e162252b4c4f582f97cca1c10a7f092e86f46857ef99c0d01",
+    "src/native/display/sim_harness.c": "a4ff41713ce70ab4788c7cfb8869d0f301e0b35d7ea28fc3a28f9f3579d188db",
+    "src/native/display/regfacts.py": "c5b313f61aaccb7ca80151a0c2a6758e69eb5ce8b58628a8322ffc14496326db",
+    "src/native/display/register_facts.json": "c2bc1a052a03d930f337d8185ff6f5623a32145b0b663547059f8efeb9bc7927",
+    "src/native/display/dpu_dt_facts.py": "15ac55a3603ee45a6c8134c99a688323cc6fe7f4a1bf59d97a7399b406572667",
+    "tests/test_native_boot_window.py": "c80ffadd0f25d488962bf64ea8aee4ca1602458cea169f511ebbe45906d2f54b",
+    "docs/procedures/ui-007/dpu-dt-facts.json": "6a7231e9cef75f0bf780af9574e149974ee64afa3f4b78c310aa35bd7b9e579a",
+    "research/notes/native/UI-007-decon-boot-window.md": "2538a2fa526a03c293ec7dbd3d7110cf950ddf7533343dc12661ca626a51a047",
+    "devices/e1s-fdt/2026-11-10/runtime.dtb (private, not in Git)": "95fa811abca3f5f8889705add485f94c4490c57a853bded10539d4631bef46c3"
+  },
+  "limits": [
+    "Host-test and source-review only: the reader has not run on the S24 and no register value of this phone was read.",
+    "Runtime FDT facts are from a normal Android boot; RECOVERY-boot state is not observed.",
+    "Power/clock state of DECON0/DPP/SysMMU at loader time, actual window/format/stride, SysMMU bypass, shadow agreement on an idle command-mode panel and pitch derivation without DMA_STRIDE_SEL remain native-run questions.",
+    "No hardware GPU or display output is claimed."
+  ]
+}
