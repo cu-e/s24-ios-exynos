@@ -1,0 +1,23 @@
+{
+  "id": "ODIN-001",
+  "title": "Fix the pinned odin4 for e1s restore: proven wire sequence, strict PIT, one session per Download Mode entry, no resend, staged completion",
+  "status": "pending",
+  "owner": null,
+  "priority": 92,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": ["NAT-013"],
+  "paths": ["patches/odin4-e1s", "docs/procedures/odin4-e1s", "artifacts/odin4-e1s"],
+  "sources": [],
+  "acceptance": [
+    "Keep local changes as numbered patches against odin4 338fde4569ee3b0743098714199361835f96015b with license (Apache-2.0), attribution and an explanation per change; leave references/odin4-nat008 at its pinned tree.",
+    "Remove every unproven wire behaviour for S921BXXS9BYH3: no 0x64/1 before or after BeginSession, BeginSession version 4, no ZLP or empty transfers, no automatic resend of commands or data, exact PIT chunk lengths, total bytes equal to member payload sizes; keep the original strict PIT checks.",
+    "Enforce one Odin session per USB enumeration across runs and refuse while another process holds the device node; report upload acknowledgement, session end, reboot and the still-required Android readback as separate stages, never as overall success.",
+    "Host-test the patched odin4 through its real code path against a fake libusb that models the recorded S-Boot behaviour: the wire sequence for the stock recovery tar must equal NAT-012 restore-003, a second session in one entry must be refused, and the upstream test suite must still pass. No phone I/O."
+  ],
+  "steps": [
+    "Write the patch set and build it reproducibly from a clean export of the pinned tree",
+    "Add a fake-libusb harness and wire-equivalence, session-ledger and PIT-chunk tests",
+    "Document supported use and limits; save evidence"
+  ]
+}

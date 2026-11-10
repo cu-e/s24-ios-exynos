@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T11:08:31+00:00",
-  "ledger_updated_at": "2026-11-10T11:08:07+00:00",
-  "registry_sha256": "083c511cba15293ceddf317149f8fd5c9e4bad14cb38986eb7beb986c7fd53eb",
+  "generated_at": "2026-11-10T11:45:37+00:00",
+  "ledger_updated_at": "2026-11-10T11:45:18+00:00",
+  "registry_sha256": "f4633689611762c78a4508788db22ad1bb0a1fbcfb255f08da979de099957e39",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [],
@@ -10,10 +10,12 @@
     "blocked": [
       "INT-002",
       "INT-003",
+      "NAT-021",
       "KRN-008",
       "KRN-026",
       "KRN-003",
       "KRN-004",
+      "ODIN-001",
       "KRN-034",
       "NAT-009",
       "KRN-001",
@@ -130,6 +132,8 @@
       "STR-041",
       "INT-004",
       "NAT-012",
+      "NAT-019",
+      "NAT-020",
       "KRN-010",
       "KRN-012",
       "KRN-013",
@@ -3290,6 +3294,135 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-012.md"
+    },
+    {
+      "id": "NAT-019",
+      "title": "Preflight requested 120-second RECOVERY experiment against watchdog range, log transport and data-preservation gates",
+      "status": "done",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 100,
+      "depends_on": [
+        "NAT-018"
+      ],
+      "paths": [
+        "docs/procedures/nat-019",
+        "artifacts/nat-019",
+        "docs/decisions/0007-requested-120s-recovery-experiment-2026-11-10.md"
+      ],
+      "sources": [
+        "s24-linux",
+        "s24-bsp-reference",
+        "s24-port"
+      ],
+      "acceptance": [
+        "Exercise the real watchdog range logic on host register fixtures and show whether 120 seconds is representable without any device operation.",
+        "Record requested single RECOVERY-only experiment authorization, distinguish host recorder from a qualified native channel, and retain all storage-preservation/return prerequisites.",
+        "Emit a reproducible preflight decision that rejects unsupported timeout or unqualified logging before image assembly, upload or reboot; record actual device state without personal content."
+      ],
+      "steps": [
+        "Record owner request and inspect applicable saved source/evidence",
+        "Run host watchdog range and candidate-readiness checks",
+        "Prepare a candidate only if all prerequisites pass; otherwise retain exact blockers and no-write evidence"
+      ],
+      "owner": "codex-120s-preflight-20261110-r5",
+      "started_at": "2026-11-10T11:12:23+00:00",
+      "last_heartbeat": "2026-11-10T11:12:23+00:00",
+      "updated_at": "2026-11-10T11:22:30+00:00",
+      "evidence": "docs/procedures/nat-019/evidence.json",
+      "evidence_sha256": "10e55686b9b4831ca7e388aec2ab369b6d27b9542be245fad351a40fc8f47238",
+      "finished_at": "2026-11-10T11:22:30+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-019.md"
+    },
+    {
+      "id": "NAT-020",
+      "title": "Prepare an 83-second RECOVERY diagnostic candidate with storage denied and explicit log coverage",
+      "status": "done",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 100,
+      "depends_on": [
+        "NAT-018",
+        "NAT-019"
+      ],
+      "paths": [
+        "docs/procedures/nat-020",
+        "artifacts/nat-020",
+        "docs/decisions/0008-single-83s-recovery-diagnostic-2026-11-10.md"
+      ],
+      "sources": [
+        "s24-port",
+        "s24-linux",
+        "s24-bsp-reference"
+      ],
+      "acceptance": [
+        "Build a separate 96MiB candidate with actual83s watchdog settings and accepted MMU/full-window checks.",
+        "Deny native UFS probe/root/command paths in the derived linked kernel, verify actual instructions and configure RAM-root/no-write boot arguments.",
+        "Add bounded RAM stage/fault/drop diagnostics and separate host USB observation; state clearly that native console delivery and reset retention are unqualified.",
+        "Validate source/binary identities, RECOVERY layout, all C relocations, original restore path and exact single-attempt plan before any phone write."
+      ],
+      "steps": [
+        "Derive a guarded diagnostic kernel and loader from pinned existing artifacts",
+        "Build and independently verify exact candidate, preserving prior artifacts",
+        "Record hashes, coverage limits and stock-only fallback for one owner-requested attempt"
+      ],
+      "owner": "codex-83s-candidate-20261110-r6",
+      "started_at": "2026-11-10T11:23:15+00:00",
+      "last_heartbeat": "2026-11-10T11:23:15+00:00",
+      "updated_at": "2026-11-10T11:31:00+00:00",
+      "evidence": "docs/procedures/nat-020/evidence.json",
+      "evidence_sha256": "44b05e84f37ec8ba5ec8f5974fe145f4b776feb5625b92fdafd42c29e80a6424",
+      "finished_at": "2026-11-10T11:31:00+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-020.md"
+    },
+    {
+      "id": "NAT-021",
+      "title": "Measure one owner-requested83s RECOVERY diagnostic and restore original RECOVERY",
+      "status": "blocked",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 100,
+      "depends_on": [
+        "NAT-020"
+      ],
+      "paths": [
+        "docs/procedures/nat-021",
+        "artifacts/nat-021"
+      ],
+      "sources": [
+        "s24-port",
+        "s24-linux"
+      ],
+      "acceptance": [
+        "Use only the exact owner-requested candidate once; full write readback before the single recovery reboot.",
+        "Preserve separate actual host observations and explicitly leave unobserved native CPU stages inconclusive.",
+        "Restore original RECOVERY and verify boot-completed Android, full stock hash and minimal user environment; never write another partition or select a data reset."
+      ],
+      "steps": [
+        "Record exact image, bounded attended run and stock-only fallback",
+        "Perform one RECOVERY write/readback and one requested recovery reboot",
+        "Observe until stop condition; restore stock and assess actual Android outcome"
+      ],
+      "owner": "codex-83s-session-20261110-r7",
+      "started_at": "2026-11-10T11:32:06+00:00",
+      "last_heartbeat": "2026-11-10T11:44:52+00:00",
+      "updated_at": "2026-11-10T11:44:52+00:00",
+      "progress_note": "Native diagnosis inconclusive: Samsung/Knox logo only, restart, SEC_UPLOAD109.684s after recovery reboot; no native console. Fresh single-session stock restore and full RECOVERY hash passed; Android boot_completed1, user0 RUNNING_UNLOCKED, pstore empty. Seven fault controls and214 project checks passed. Native scope flag returned false; no native retry.",
+      "next_step": "Do not rerun. Missing real early-log channel/retention (NAT-017) and image-specific new owner decision before any further native work; original RECOVERY is restored and Android verified.",
+      "handoff": "docs/procedures/nat-021/README.md",
+      "branch": "main",
+      "worktree": "/home/egor/dev/pet/s24-ios-exynos",
+      "blocked_reason": "One authorized native session is consumed and its CPU stage remains inconclusive: no independently received early log or reset-retained RAM readout. Stock RECOVERY/full Android return passed. Need a real NAT-017 channel/canary and a new image-specific owner decision before further native diagnosis; no automatic retry.",
+      "column": "blocked",
+      "reasons": [
+        "One authorized native session is consumed and its CPU stage remains inconclusive: no independently received early log or reset-retained RAM readout. Stock RECOVERY/full Android return passed. Need a real NAT-017 channel/canary and a new image-specific owner decision before further native diagnosis; no automatic retry."
+      ],
+      "card_path": "planning/tasks/NAT-021.md",
+      "report_health": "recent"
     },
     {
       "id": "KRN-008",
@@ -7306,6 +7439,45 @@
       "card_path": "planning/tasks/SEN-001.md"
     },
     {
+      "id": "ODIN-001",
+      "title": "Fix the pinned odin4 for e1s restore: proven wire sequence, strict PIT, one session per Download Mode entry, no resend, staged completion",
+      "status": "blocked",
+      "owner": "claude-takeover-20261110-6c8f",
+      "priority": 92,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-013"
+      ],
+      "paths": [
+        "patches/odin4-e1s",
+        "docs/procedures/odin4-e1s",
+        "artifacts/odin4-e1s"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Keep local changes as numbered patches against odin4 338fde4569ee3b0743098714199361835f96015b with license (Apache-2.0), attribution and an explanation per change; leave references/odin4-nat008 at its pinned tree.",
+        "Remove every unproven wire behaviour for S921BXXS9BYH3: no 0x64/1 before or after BeginSession, BeginSession version 4, no ZLP or empty transfers, no automatic resend of commands or data, exact PIT chunk lengths, total bytes equal to member payload sizes; keep the original strict PIT checks.",
+        "Enforce one Odin session per USB enumeration across runs and refuse while another process holds the device node; report upload acknowledgement, session end, reboot and the still-required Android readback as separate stages, never as overall success.",
+        "Host-test the patched odin4 through its real code path against a fake libusb that models the recorded S-Boot behaviour: the wire sequence for the stock recovery tar must equal NAT-012 restore-003, a second session in one entry must be refused, and the upstream test suite must still pass. No phone I/O."
+      ],
+      "steps": [
+        "Write the patch set and build it reproducibly from a clean export of the pinned tree",
+        "Add a fake-libusb harness and wire-equivalence, session-ledger and PIT-chunk tests",
+        "Document supported use and limits; save evidence"
+      ],
+      "started_at": "2026-11-10T11:39:05+00:00",
+      "last_heartbeat": "2026-11-10T11:45:18+00:00",
+      "updated_at": "2026-11-10T11:45:18+00:00",
+      "blocked_reason": "Stopped by the safety classifier at about 11:44Z on 2026-11-10 while writing the fake-libusb host test harness; not retried, reworded or delegated. Done: three local patches against odin4 338fde45 in artifacts/odin4-e1s/work (1fdfc82 wire sequence, 8030309 PIT chunks/no resend/payload total/pre-validation, e543114 session ledger/node check/staged report); built; upstream 47 tests pass; binary artifacts/odin4-e1s/odin4 (untested against any device or fake). Not done: wire-equivalence harness, patch export to patches/odin4-e1s, docs, evidence. The patched odin4 is not qualified; the NAT-013 tool stays the supported restore path. Resume only on an explicit owner instruction after support review.",
+      "column": "blocked",
+      "reasons": [
+        "Stopped by the safety classifier at about 11:44Z on 2026-11-10 while writing the fake-libusb host test harness; not retried, reworded or delegated. Done: three local patches against odin4 338fde45 in artifacts/odin4-e1s/work (1fdfc82 wire sequence, 8030309 PIT chunks/no resend/payload total/pre-validation, e543114 session ledger/node check/staged report); built; upstream 47 tests pass; binary artifacts/odin4-e1s/odin4 (untested against any device or fake). Not done: wire-equivalence harness, patch export to patches/odin4-e1s, docs, evidence. The patched odin4 is not qualified; the NAT-013 tool stays the supported restore path. Resume only on an explicit owner instruction after support review."
+      ],
+      "card_path": "planning/tasks/ODIN-001.md",
+      "report_health": "recent"
+    },
+    {
       "id": "NAT-013",
       "title": "Harden stock restore tooling against ended-session resume and premature success reporting",
       "scope": "host",
@@ -8683,7 +8855,7 @@
         "Stopped by the safety classifier at about 10:36Z on 2026-11-10 during the S-Boot static review for this task (second stop on the NAT-008..011 line). Per the owner's rule it is not retried, reworded or delegated. Done so far under decision 0006: reopened; Antigravity edits preserved (a6c97b8) and reverted to d46915a (359189c). Resume only on an explicit owner instruction after support review."
       ],
       "card_path": "planning/tasks/NAT-009.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "KRN-035",
@@ -12707,7 +12879,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -12746,7 +12918,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, NAT-009"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -13618,10 +13790,21 @@
         "worktree": null
       },
       {
+        "id": "ODIN-001",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-10T11:45:18+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": null,
+        "worktree": null
+      },
+      {
         "id": "NAT-009",
         "status": "blocked",
         "last_heartbeat": "2026-11-10T10:39:49+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.",
         "next_step": "Obtain applicable S-Boot contract or separately authorized NAT-004 hardware recovery evidence; retain pre-flash gate",
         "handoff": "docs/procedures/nat-009/README.md",
@@ -13684,6 +13867,19 @@
         "worktree": null
       }
     ],
+    "codex-83s-session-20261110-r7": [
+      {
+        "id": "NAT-021",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-10T11:44:52+00:00",
+        "report_health": "recent",
+        "progress_note": "Native diagnosis inconclusive: Samsung/Knox logo only, restart, SEC_UPLOAD109.684s after recovery reboot; no native console. Fresh single-session stock restore and full RECOVERY hash passed; Android boot_completed1, user0 RUNNING_UNLOCKED, pstore empty. Seven fault controls and214 project checks passed. Native scope flag returned false; no native retry.",
+        "next_step": "Do not rerun. Missing real early-log channel/retention (NAT-017) and image-specific new owner decision before any further native work; original RECOVERY is restored and Android verified.",
+        "handoff": "docs/procedures/nat-021/README.md",
+        "branch": "main",
+        "worktree": "/home/egor/dev/pet/s24-ios-exynos"
+      }
+    ],
     "codex-team-export-gaps-20261105-ba": [
       {
         "id": "KRN-026",
@@ -13739,26 +13935,177 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-10T10:17:26+00:00",
-      "action": "task.done:NAT-012",
-      "owner": "codex-stock-rescue-20261110-r2",
+      "at": "2026-11-10T11:12:04+00:00",
+      "action": "task.add:NAT-019",
+      "owner": "codex-120s-preflight-20261110-r5",
       "tasks": [
         {
-          "id": "NAT-012",
-          "status": "done",
-          "owner": "codex-stock-rescue-20261110-r2",
-          "priority": 100,
-          "progress_note": "Stock-only fresh-session restore passed exit0 with EndSession/reboot results0. Android boot_completed=1; root full RECOVERY hash matches original; user0 RUNNING_UNLOCKED and services/data directory metadata available. No personal contents read.",
-          "next_step": "Close with final evidence, disable temporary native permit; retain NAT-013 transport and NAT-014 saved-evidence review follow-ups without XNU attempts",
-          "last_heartbeat": "2026-11-10T10:17:18+00:00",
-          "handoff": "docs/procedures/nat-012/handoff.md"
+          "id": "NAT-019",
+          "status": "pending",
+          "priority": 100
         }
       ]
     },
     {
-      "at": "2026-11-10T10:17:36+00:00",
+      "at": "2026-11-10T11:12:23+00:00",
+      "action": "task.claim:NAT-019",
+      "owner": "codex-120s-preflight-20261110-r5",
+      "tasks": [
+        {
+          "id": "NAT-019",
+          "status": "in_progress",
+          "owner": "codex-120s-preflight-20261110-r5",
+          "priority": 100,
+          "last_heartbeat": "2026-11-10T11:12:23+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T11:22:30+00:00",
+      "action": "task.done:NAT-019",
+      "owner": "codex-120s-preflight-20261110-r5",
+      "tasks": [
+        {
+          "id": "NAT-019",
+          "status": "done",
+          "owner": "codex-120s-preflight-20261110-r5",
+          "priority": 100,
+          "last_heartbeat": "2026-11-10T11:12:23+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T11:22:49+00:00",
+      "action": "task.add:NAT-020",
+      "owner": "codex-83s-candidate-20261110-r6",
+      "tasks": [
+        {
+          "id": "NAT-020",
+          "status": "pending",
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T11:23:15+00:00",
+      "action": "task.claim:NAT-020",
+      "owner": "codex-83s-candidate-20261110-r6",
+      "tasks": [
+        {
+          "id": "NAT-020",
+          "status": "in_progress",
+          "owner": "codex-83s-candidate-20261110-r6",
+          "priority": 100,
+          "last_heartbeat": "2026-11-10T11:23:15+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T11:31:00+00:00",
+      "action": "task.done:NAT-020",
+      "owner": "codex-83s-candidate-20261110-r6",
+      "tasks": [
+        {
+          "id": "NAT-020",
+          "status": "done",
+          "owner": "codex-83s-candidate-20261110-r6",
+          "priority": 100,
+          "last_heartbeat": "2026-11-10T11:23:15+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T11:31:13+00:00",
+      "action": "task.add:NAT-021",
+      "owner": "codex-83s-session-20261110-r7",
+      "tasks": [
+        {
+          "id": "NAT-021",
+          "status": "pending",
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T11:31:36+00:00",
       "action": "project.permit:native",
-      "owner": "codex-stock-rescue-20261110-r2",
+      "owner": "codex-83s-session-20261110-r7",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-10T11:32:06+00:00",
+      "action": "task.claim:NAT-021",
+      "owner": "codex-83s-session-20261110-r7",
+      "tasks": [
+        {
+          "id": "NAT-021",
+          "status": "in_progress",
+          "owner": "codex-83s-session-20261110-r7",
+          "priority": 100,
+          "last_heartbeat": "2026-11-10T11:32:06+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T11:34:41+00:00",
+      "action": "experiment.plan:NAT021-83S-001",
+      "owner": "codex-83s-session-20261110-r7"
+    },
+    {
+      "at": "2026-11-10T11:36:48+00:00",
+      "action": "task.update:NAT-021",
+      "owner": "codex-83s-session-20261110-r7",
+      "tasks": [
+        {
+          "id": "NAT-021",
+          "status": "in_progress",
+          "owner": "codex-83s-session-20261110-r7",
+          "priority": 100,
+          "progress_note": "Candidate96MiB written via bounded ADB/root to validated sda18; full readback b5ff3bf7 matches. One recovery reboot requested11:35:58.923789Z; exit0. Native CPU stages unobserved. Prior preparation rejected nocreat before open, stock hash unchanged; original reports retained. No Odin session and no other partition write.",
+          "next_step": "Observe until11:39:21.923789Z or earlier stop condition; owner screen observation pending; restore stock RECOVERY and verify Android. Do not retry native.",
+          "last_heartbeat": "2026-11-10T11:36:48+00:00",
+          "branch": "main",
+          "worktree": "/home/egor/dev/pet/s24-ios-exynos",
+          "handoff": "docs/procedures/nat-021/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T11:38:46+00:00",
+      "action": "task.add:ODIN-001",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "ODIN-001",
+          "status": "pending",
+          "owner": null,
+          "priority": 92
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T11:39:05+00:00",
+      "action": "task.claim:ODIN-001",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "ODIN-001",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 92,
+          "last_heartbeat": "2026-11-10T11:39:05+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T11:41:10+00:00",
+      "action": "project.permit:native",
+      "owner": "codex-83s-session-20261110-r7",
       "permissions": {
         "host": true,
         "android-readonly": true,
@@ -13767,278 +14114,90 @@
       }
     },
     {
-      "at": "2026-11-10T10:19:47+00:00",
-      "action": "task.claim:NAT-013",
-      "owner": "claude-takeover-20261110-6c8f",
+      "at": "2026-11-10T11:42:53+00:00",
+      "action": "task.update:NAT-021",
+      "owner": "codex-83s-session-20261110-r7",
       "tasks": [
         {
-          "id": "NAT-013",
+          "id": "NAT-021",
           "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 91,
-          "last_heartbeat": "2026-11-10T10:19:47+00:00"
+          "owner": "codex-83s-session-20261110-r7",
+          "priority": 100,
+          "progress_note": "Native diagnosis inconclusive: Samsung/Knox logo only, restart, SEC_UPLOAD109.684s after recovery reboot; no native console. Fresh single-session stock restore and full RECOVERY hash passed; Android boot_completed1, user0 RUNNING_UNLOCKED, pstore empty. Seven fault controls and214 project checks passed. Native scope flag returned false; no native retry.",
+          "next_step": "Do not rerun. Missing real early-log channel/retention (NAT-017) and image-specific new owner decision before any further native work; original RECOVERY is restored and Android verified.",
+          "last_heartbeat": "2026-11-10T11:42:53+00:00",
+          "branch": "main",
+          "worktree": "/home/egor/dev/pet/s24-ios-exynos",
+          "handoff": "docs/procedures/nat-021/README.md"
         }
       ]
     },
     {
-      "at": "2026-11-10T10:19:56+00:00",
-      "action": "task.claim:NAT-014",
+      "at": "2026-11-10T11:43:16+00:00",
+      "action": "project.permit:native",
+      "owner": "codex-83s-session-20261110-r7",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-10T11:44:01+00:00",
+      "action": "experiment.record:NAT021-83S-001",
+      "owner": "codex-83s-session-20261110-r7"
+    },
+    {
+      "at": "2026-11-10T11:44:33+00:00",
+      "action": "project.permit:native",
+      "owner": "codex-83s-session-20261110-r7",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
+    },
+    {
+      "at": "2026-11-10T11:44:52+00:00",
+      "action": "task.block:NAT-021",
+      "owner": "codex-83s-session-20261110-r7",
+      "tasks": [
+        {
+          "id": "NAT-021",
+          "status": "blocked",
+          "owner": "codex-83s-session-20261110-r7",
+          "priority": 100,
+          "progress_note": "Native diagnosis inconclusive: Samsung/Knox logo only, restart, SEC_UPLOAD109.684s after recovery reboot; no native console. Fresh single-session stock restore and full RECOVERY hash passed; Android boot_completed1, user0 RUNNING_UNLOCKED, pstore empty. Seven fault controls and214 project checks passed. Native scope flag returned false; no native retry.",
+          "next_step": "Do not rerun. Missing real early-log channel/retention (NAT-017) and image-specific new owner decision before any further native work; original RECOVERY is restored and Android verified.",
+          "blocked_reason": "One authorized native session is consumed and its CPU stage remains inconclusive: no independently received early log or reset-retained RAM readout. Stock RECOVERY/full Android return passed. Need a real NAT-017 channel/canary and a new image-specific owner decision before further native diagnosis; no automatic retry.",
+          "last_heartbeat": "2026-11-10T11:44:52+00:00",
+          "branch": "main",
+          "worktree": "/home/egor/dev/pet/s24-ios-exynos",
+          "handoff": "docs/procedures/nat-021/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T11:45:18+00:00",
+      "action": "task.block:ODIN-001",
       "owner": "claude-takeover-20261110-6c8f",
       "tasks": [
         {
-          "id": "NAT-014",
-          "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 89,
-          "last_heartbeat": "2026-11-10T10:19:56+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T10:31:02+00:00",
-      "action": "task.done:NAT-013",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "NAT-013",
-          "status": "done",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 91,
-          "last_heartbeat": "2026-11-10T10:19:47+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T10:31:10+00:00",
-      "action": "task.done:NAT-014",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "NAT-014",
-          "status": "done",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 89,
-          "last_heartbeat": "2026-11-10T10:19:56+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T10:32:43+00:00",
-      "action": "task.add:NAT-015",
-      "owner": "codex-earlylogs-20261110-r3",
-      "tasks": [
-        {
-          "id": "NAT-015",
-          "status": "pending",
-          "priority": 96
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T10:33:03+00:00",
-      "action": "task.claim:NAT-015",
-      "owner": "codex-earlylogs-20261110-r3",
-      "tasks": [
-        {
-          "id": "NAT-015",
-          "status": "in_progress",
-          "owner": "codex-earlylogs-20261110-r3",
-          "priority": 96,
-          "last_heartbeat": "2026-11-10T10:33:03+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T10:35:43+00:00",
-      "action": "task.done:NAT-015",
-      "owner": "codex-earlylogs-20261110-r3",
-      "tasks": [
-        {
-          "id": "NAT-015",
-          "status": "done",
-          "owner": "codex-earlylogs-20261110-r3",
-          "priority": 96,
-          "last_heartbeat": "2026-11-10T10:33:03+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T10:35:49+00:00",
-      "action": "task.reopen:NAT-009",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "NAT-009",
-          "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 88,
-          "progress_note": "Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.",
-          "next_step": "Obtain applicable S-Boot contract or separately authorized NAT-004 hardware recovery evidence; retain pre-flash gate",
-          "last_heartbeat": "2026-11-10T10:35:49+00:00",
-          "handoff": "docs/procedures/nat-009/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T10:35:55+00:00",
-      "action": "task.add:NAT-016",
-      "owner": "codex-earlylogs-20261110-r3",
-      "tasks": [
-        {
-          "id": "NAT-016",
-          "status": "pending",
-          "priority": 96
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T10:36:03+00:00",
-      "action": "task.claim:NAT-016",
-      "owner": "codex-earlylogs-20261110-r3",
-      "tasks": [
-        {
-          "id": "NAT-016",
-          "status": "in_progress",
-          "owner": "codex-earlylogs-20261110-r3",
-          "priority": 96,
-          "last_heartbeat": "2026-11-10T10:36:03+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T10:36:14+00:00",
-      "action": "task.add:NAT-017",
-      "owner": "codex-earlylogs-20261110-r3",
-      "tasks": [
-        {
-          "id": "NAT-017",
-          "status": "pending",
-          "priority": 97
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T10:39:49+00:00",
-      "action": "task.block:NAT-009",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "NAT-009",
+          "id": "ODIN-001",
           "status": "blocked",
           "owner": "claude-takeover-20261110-6c8f",
-          "priority": 88,
-          "progress_note": "Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.",
-          "next_step": "Obtain applicable S-Boot contract or separately authorized NAT-004 hardware recovery evidence; retain pre-flash gate",
-          "blocked_reason": "Stopped by the safety classifier at about 10:36Z on 2026-11-10 during the S-Boot static review for this task (second stop on the NAT-008..011 line). Per the owner's rule it is not retried, reworded or delegated. Done so far under decision 0006: reopened; Antigravity edits preserved (a6c97b8) and reverted to d46915a (359189c). Resume only on an explicit owner instruction after support review.",
-          "last_heartbeat": "2026-11-10T10:39:49+00:00",
-          "handoff": "docs/procedures/nat-009/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T10:43:30+00:00",
-      "action": "task.update:NAT-016",
-      "owner": "codex-earlylogs-20261110-r3",
-      "tasks": [
-        {
-          "id": "NAT-016",
-          "status": "in_progress",
-          "owner": "codex-earlylogs-20261110-r3",
-          "priority": 96,
-          "progress_note": "Append-only host archive implemented. 9 real pipe/process controls pass, including fragmented/repeated boots, malformed streams, SIGKILL and 80 boots under 32 FDs. make check passed 210 tests. No phone operation or qualified native channel.",
-          "next_step": "Close host implementation with evidence; NAT-017 must establish board-specific early transport and reset retention before any native experiment",
-          "last_heartbeat": "2026-11-10T10:43:30+00:00",
-          "branch": "main",
-          "worktree": "/home/egor/dev/pet/s24-ios-exynos",
-          "handoff": "docs/procedures/nat-016/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T10:44:21+00:00",
-      "action": "task.done:NAT-016",
-      "owner": "codex-earlylogs-20261110-r3",
-      "tasks": [
-        {
-          "id": "NAT-016",
-          "status": "done",
-          "owner": "codex-earlylogs-20261110-r3",
-          "priority": 96,
-          "progress_note": "Append-only host archive implemented. 9 real pipe/process controls pass, including fragmented/repeated boots, malformed streams, SIGKILL and 80 boots under 32 FDs. make check passed 210 tests. No phone operation or qualified native channel.",
-          "next_step": "Close host implementation with evidence; NAT-017 must establish board-specific early transport and reset retention before any native experiment",
-          "last_heartbeat": "2026-11-10T10:43:30+00:00",
-          "branch": "main",
-          "worktree": "/home/egor/dev/pet/s24-ios-exynos",
-          "handoff": "docs/procedures/nat-016/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T11:04:31+00:00",
-      "action": "task.add:NAT-018",
-      "owner": "codex-nat006-main-20261110-r4",
-      "tasks": [
-        {
-          "id": "NAT-018",
-          "status": "pending",
-          "priority": 96
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T11:04:46+00:00",
-      "action": "task.claim:NAT-018",
-      "owner": "codex-nat006-main-20261110-r4",
-      "tasks": [
-        {
-          "id": "NAT-018",
-          "status": "in_progress",
-          "owner": "codex-nat006-main-20261110-r4",
-          "priority": 96,
-          "last_heartbeat": "2026-11-10T11:04:46+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T11:07:45+00:00",
-      "action": "task.update:NAT-018",
-      "owner": "codex-nat006-main-20261110-r4",
-      "tasks": [
-        {
-          "id": "NAT-018",
-          "status": "in_progress",
-          "owner": "codex-nat006-main-20261110-r4",
-          "priority": 96,
-          "progress_note": "Integrated nine-file NAT-006 final tree into main via squash. Executable source/evidence preserved; handoff serials redacted with historical-status annotation. 4 recovery tests, 20 saved-image verifier checks and make check 214 tests passed; no phone I/O.",
-          "next_step": "Complete host integration with evidence and refresh generated views",
-          "last_heartbeat": "2026-11-10T11:07:45+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/nat-018/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T11:08:07+00:00",
-      "action": "task.done:NAT-018",
-      "owner": "codex-nat006-main-20261110-r4",
-      "tasks": [
-        {
-          "id": "NAT-018",
-          "status": "done",
-          "owner": "codex-nat006-main-20261110-r4",
-          "priority": 96,
-          "progress_note": "Integrated nine-file NAT-006 final tree into main via squash. Executable source/evidence preserved; handoff serials redacted with historical-status annotation. 4 recovery tests, 20 saved-image verifier checks and make check 214 tests passed; no phone I/O.",
-          "next_step": "Complete host integration with evidence and refresh generated views",
-          "last_heartbeat": "2026-11-10T11:07:45+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/nat-018/README.md"
+          "priority": 92,
+          "blocked_reason": "Stopped by the safety classifier at about 11:44Z on 2026-11-10 while writing the fake-libusb host test harness; not retried, reworded or delegated. Done: three local patches against odin4 338fde45 in artifacts/odin4-e1s/work (1fdfc82 wire sequence, 8030309 PIT chunks/no resend/payload total/pre-validation, e543114 session ledger/node check/staged report); built; upstream 47 tests pass; binary artifacts/odin4-e1s/odin4 (untested against any device or fake). Not done: wire-equivalence harness, patch export to patches/odin4-e1s, docs, evidence. The patched odin4 is not qualified; the NAT-013 tool stays the supported restore path. Resume only on an explicit owner instruction after support review.",
+          "last_heartbeat": "2026-11-10T11:45:18+00:00"
         }
       ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "e26bc4e122423bae68121c08a1c320747e5b8acd49c2695029b305f39fd18b52",
-    "BOARD.md": "875cda6dd6a9a23f832aad16a7ddfb8733fe13eed901d7d542929a53fbb199d3",
+    "STATUS.md": "3b283ab530b3ed9889ded355f3ebd4b6339b5a27a372515a7ff828117b146e2b",
+    "BOARD.md": "7586c86905aa3fe41447d3cb34fee96b5866420a646a4a6b9816d69c7b38753c",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -14106,6 +14265,9 @@
     "planning/tasks/STR-041.md": "5b6244f3181be38d4d3c8c5a4ee185002710bdbc6330d000ae89d04ff445895e",
     "planning/tasks/INT-004.md": "94c25405934320a5e7ca438b9e97c15ffec7af85e013c381d3a1f4bf4ce37613",
     "planning/tasks/NAT-012.md": "44f380d81edae43e3bfdb68296d982fed468e7e3aa5454344fa7f7cf74a6628a",
+    "planning/tasks/NAT-019.md": "922b0a944ac818080d564b7683b33642061ff56b7f56be8c4c5917fee47c7c4e",
+    "planning/tasks/NAT-020.md": "4dc149965a1d7d7494c2080d935bbf02ec643da68bd5d274d03c2b6b58b8d98d",
+    "planning/tasks/NAT-021.md": "a2e454391eb4d56d8e9428c1850216f53055392aff932d913c764488842fa71b",
     "planning/tasks/KRN-008.md": "36d33f795d9569f340f53a5e0a909dc8efcdc5024c9133ccd614a6de5af22894",
     "planning/tasks/KRN-010.md": "4f479284d71242353a2a95508bac0b5304468c6ee44704b7561bc32cee8e1832",
     "planning/tasks/KRN-012.md": "5639fd265337eacb414447c0f5aa26bb2ad600fead5ca21572bcdb2b96f7b4e8",
@@ -14194,6 +14356,7 @@
     "planning/tasks/ESIM-001.md": "4ff5511bf1b91ec562d46b9fa0fdbc4dc3ffd12af187060e75777f8fcde71bb6",
     "planning/tasks/VM-004.md": "e60d0c34c4cbc0e4c68b4a74b97657a569fe4a12f25e16efc01dcaa45ccc2b15",
     "planning/tasks/SEN-001.md": "3c54f6f748160ba9c5b4c4f27f41576ddb90a5c2f73f0243805e189091695d2d",
+    "planning/tasks/ODIN-001.md": "d574e4a430c92e0fe3f178f7e0cc83be8c7e2383308ffa13fa90574819c23b4c",
     "planning/tasks/NAT-013.md": "b211a32160f7a1711f4cdfb1218280216622baf34bd7fdfcfdf7b259ce4b12a9",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
@@ -14224,7 +14387,7 @@
     "planning/tasks/NAT-011.md": "13d5b59a05e410c27749dd20732dbe9312dda69ca349e32845cd4b144be9aaa3",
     "planning/tasks/NAT-014.md": "8ab44f96da942083ed04d834447e25cd58e8ddda08c83b2f1ca4e44327720c71",
     "planning/tasks/KRN-034.md": "216955769016c966a7b2ed1191501a2967d901d5371a7e1ec31f2230896ac5cc",
-    "planning/tasks/NAT-009.md": "dc319e19e45a842314f8e16fbd31b61b2e823c2b921c769db25e9ccdaa9b7936",
+    "planning/tasks/NAT-009.md": "7fcd0c6655888c3515a10871a2f5a8f5c0455ef3e61c149f65b42f7ebd9d5f3b",
     "planning/tasks/KRN-035.md": "73d3fdfa9f6c3f1f76fe0f244208e46b40bf7343bf78e2f78223ea9c1c7a98a7",
     "planning/tasks/KRN-036.md": "43b1fb9c66ca2aa223235ea38bf2e400888380c3822a4aca35e67b96cd532020",
     "planning/tasks/KRN-001.md": "554587c78270501a0d958373741a231572c7bb821291875740611622113b3242",
@@ -14314,8 +14477,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "9341029ff34cc3aec9ddc62b5cb4e42d17116107b8ff3c6c52ceddbf52ea2ab3",
-    "planning/tasks/DRV-003.md": "6881042802bf82a300861ba4c840590f86cb99cdb5dd226e89bce81b823f5c13",
+    "planning/tasks/NAT-003.md": "1fb347d1ef1be0ab49f2b0eac0ebdd8f04ee5b772f0f0c5dcec4ecc691b0a7b1",
+    "planning/tasks/DRV-003.md": "2441ae0f13e91e3d4e322df4cb71f0d4eae6fb2f54017dcb2234af8b4aaae598",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",
