@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T12:06:53+00:00",
+  "updated_at": "2026-11-10T13:31:30+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -12477,6 +12477,41 @@
       "evidence": "docs/procedures/nat-022/evidence.json",
       "evidence_sha256": "5b72e54958eded5d33a1ae36714893dd889d4552bd22b7be4aa15a722fab2a3e",
       "finished_at": "2026-11-10T12:06:53+00:00"
+    },
+    {
+      "id": "NAT-023",
+      "title": "Pin the DECON0 command-mode frame-trigger registers and host-test a canary-trig variant of the NAT-022 canary",
+      "status": "done",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "NAT-022"
+      ],
+      "paths": [
+        "docs/procedures/nat-022",
+        "artifacts/nat-022"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "The DECON0 trigger registers (TRIG_CON, SHD_REG_UP_REQ, GLOBAL_CON, FRAME_COUNT) and the vendor driver's command-mode frame sequence are recorded with file, line and the pinned BSP SHA, plus the DT trig_mode/op_mode facts, in a source-review note.",
+        "A canary-trig image is built reproducibly; the plain and fault canaries stay byte-identical to the ones already built. The kick performs no MMIO before the first framebuffer marker, writes only TRIG_CON and SHD_REG_UP_REQ, and writes nothing when DECON is off, in video mode, with the MMU on, or after a faulted kick; host tests assert these properties and the decoder reads the register report back.",
+        "Nothing is flashed or run on the phone: the MMIO writes are outside decision 0009, so an image-specific decision request with the exact SHA-256, the writes, risks and recovery is prepared for the owner."
+      ],
+      "steps": [
+        "Read the pinned BSP DECON trigger sequence and DT facts",
+        "Implement the MK_TRIG kick, decoder fields and host tests",
+        "Build and package canary-trig; prepare the decision request"
+      ],
+      "owner": "claude-nat022-20261110-diag",
+      "started_at": "2026-11-10T12:29:17+00:00",
+      "last_heartbeat": "2026-11-10T12:29:17+00:00",
+      "updated_at": "2026-11-10T13:31:30+00:00",
+      "evidence": "docs/procedures/nat-022/evidence-nat023.json",
+      "evidence_sha256": "7d092864275dc39f4f0650c165ec99e83cd7bfba39223ef6396cbdc2ebdf1f69",
+      "finished_at": "2026-11-10T13:31:30+00:00"
     }
   ],
   "experiments": [
@@ -55763,6 +55798,46 @@
           "owner": "claude-nat022-20261110-diag",
           "priority": 97,
           "last_heartbeat": "2026-11-10T11:58:09+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T12:28:58+00:00",
+      "action": "task.add:NAT-023",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-023",
+          "status": "pending",
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T12:29:17+00:00",
+      "action": "task.claim:NAT-023",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-023",
+          "status": "in_progress",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 97,
+          "last_heartbeat": "2026-11-10T12:29:17+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T13:31:30+00:00",
+      "action": "task.done:NAT-023",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-023",
+          "status": "done",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 97,
+          "last_heartbeat": "2026-11-10T12:29:17+00:00"
         }
       ]
     }

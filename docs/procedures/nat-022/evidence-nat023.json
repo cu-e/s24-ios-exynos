@@ -1,0 +1,76 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-10T13:31:17.718976+00:00",
+ "commit": "a09781a8af406dc6f51ae43fe1cc5f70b6cdcd5c",
+ "summary": "Acceptance 1: docs/procedures/nat-022/decon-trigger-facts.md records TRIG_CON, SHD_REG_UP_REQ, GLOBAL_CON and FRAME_COUNT with file/line from the pinned BSP f85e53cfa5497ead5d78821efbac84e51f37a4e1, the vendor command-mode frame sequence, and the DT facts (DECON0 op_mode 1, trig_mode 0; DECON1 trig_mode 1). Acceptance 2: canary-trig builds reproducibly (a second build into build-repro gave identical SHA-256 for all four images); canary-plain 7bc1b01d… and canary-fault 38a4feba… are byte-identical to build-001; host tests (test_nat022.py, 19 pass: Host, Trigger, VideoDecode, Aarch64Build) assert no MMIO before the first marker, only the four contract registers touched and only TRIG_CON/SHD_REG_UP_REQ written, nothing written when DECON is off, in video mode, with the MMU on or after a faulted kick, and the independent decoder reads the register report back. make check passed (214 tests; it does not include test_nat022.py, which was run directly). Acceptance 3 held when the host work was committed (0a603a4): nothing had been flashed or run and an image-specific decision request with SHA-256, writes, risks and recovery was put to the owner. That is superseded by later events recorded separately and not covered by this host-test evidence: the owner accepted it as decision 0010, one native run was made, and the owner's recording was decoded (docs/procedures/nat-022/native-attempt-002-evidence.json, native-device observation, outcome pass for 'one independent decoded marker'; cause of visibility, stride, exception path and XNU not established).",
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "docs/procedures/nat-022/test_nat022.py"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/build.py",
+    "--out",
+    "artifacts/nat-022/build-repro",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-022/decon-trigger-facts.md",
+  "docs/procedures/nat-022/README.md",
+  "docs/procedures/nat-022/build.py",
+  "docs/procedures/nat-022/decode.py",
+  "docs/procedures/nat-022/decode_video.py",
+  "docs/procedures/nat-022/test_nat022.py",
+  "docs/procedures/nat-022/session_trig.py",
+  "docs/procedures/nat-022/src/marker.h",
+  "docs/procedures/nat-022/src/markerlib.c",
+  "docs/procedures/nat-022/src/host_mk.c",
+  "docs/decisions/0010-nat022-canary-trig-single-run-2026-11-10.md",
+  "artifacts/nat-022/build-002/build.json",
+  "artifacts/nat-022/build-repro/build.json",
+  "artifacts/nat-022/build-002/canary-trig/Image",
+  "artifacts/nat-022/package-002/package.json",
+  "artifacts/nat-022/make-check-video.log",
+  "docs/procedures/nat-022/native-attempt-002-evidence.json"
+ ],
+ "sha256": {
+  "docs/procedures/nat-022/decon-trigger-facts.md": "971edfabc999d1c01dac5649390754ae49c2007717d72b373e12b2f90aee4ca3",
+  "docs/procedures/nat-022/README.md": "5881debe1acbe41714b798955bf40a86d84852e67cbe16a3890d266de6d5e5be",
+  "docs/procedures/nat-022/build.py": "3a0c182cdf0123caf30cac3da6ae2859ef9cde0c5cf3eb06397f0ae4e3436b75",
+  "docs/procedures/nat-022/decode.py": "c96639dca58434d3656e0c1f72f64379bac8a1e8314edb6be2501fdc9c618f92",
+  "docs/procedures/nat-022/decode_video.py": "bb3f0ae45ae2a29e5b51fcc60d7ed1334bc8900e68ec55d8d1c3694a26f7fc1f",
+  "docs/procedures/nat-022/test_nat022.py": "3c48c72dfc86d3ca8ef2984057879aff5142207d91abd64b61db7c26223fff37",
+  "docs/procedures/nat-022/session_trig.py": "f371e2c5b8ba8830a9a129a5e2e1f55060f560a82333188be01a0b53d93588e3",
+  "docs/procedures/nat-022/src/marker.h": "ea48609bf8eb80ad8a8abd8cc31032db0dc5b4f38ae5da69fa817bcf2d859c55",
+  "docs/procedures/nat-022/src/markerlib.c": "96ead42d9e1a3fee53be68d4b60b9f1a938c8ade8cdd61a2cca7b37b9b9ad2f7",
+  "docs/procedures/nat-022/src/host_mk.c": "40bf4c8d0a26e1c59037507896fd5405c0e085a1b00f1cc8508ae262d155ebca",
+  "docs/decisions/0010-nat022-canary-trig-single-run-2026-11-10.md": "6d50e0bc93e064d67d4691678e73b122bc1565c9fa0fd1f0e9076e7a995ec2a6",
+  "artifacts/nat-022/build-002/build.json": "97cfd82ec7cfde93a14c8adfd91ce4c15707d4a4a6ad8cfbce8a5a6c3737bad1",
+  "artifacts/nat-022/build-repro/build.json": "2b8201fe6a1b8c03a37bc38876755d1e53e98e2d32a091fc7280ecc93b394215",
+  "artifacts/nat-022/build-002/canary-trig/Image": "572ebd0f33a03a7d07f663267301f97661f4e3f0051e0d9e8c3597b06385f89b",
+  "artifacts/nat-022/package-002/package.json": "a186922be6c18866dc1b69ee2b5e51173d3fb7fbe8f0ec897f095e8b070ad66d",
+  "artifacts/nat-022/make-check-video.log": "4051e456667da7e86d141d28c573d7d6cd0de3aec2339e1c4523004f3c91e16a",
+  "docs/procedures/nat-022/native-attempt-002-evidence.json": "e64fab11a4dca80a46cfeead8dd9a06b4c8edbb90f15ed005c339ee1debbc345"
+ }
+}

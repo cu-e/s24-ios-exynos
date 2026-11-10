@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T12:07:27+00:00",
-  "ledger_updated_at": "2026-11-10T12:06:53+00:00",
-  "registry_sha256": "ff37750a761d6acb0b418509ba8cc36bd7c1a712c6aacdb1945fac69b1be6b9e",
+  "generated_at": "2026-11-10T13:31:50+00:00",
+  "ledger_updated_at": "2026-11-10T13:31:30+00:00",
+  "registry_sha256": "f32d89e69125ceaebbe58e01ba8ecc23ec405c97ef4dcf77490d2b4802362cf5",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [],
@@ -172,6 +172,7 @@
       "REV-015",
       "VM-007",
       "NAT-022",
+      "NAT-023",
       "KRN-005",
       "REV-004",
       "REV-011",
@@ -3423,7 +3424,7 @@
         "One authorized native session is consumed and its CPU stage remains inconclusive: no independently received early log or reset-retained RAM readout. Stock RECOVERY/full Android return passed. Need a real NAT-017 channel/canary and a new image-specific owner decision before further native diagnosis; no automatic retry."
       ],
       "card_path": "planning/tasks/NAT-021.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "KRN-008",
@@ -5233,6 +5234,44 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-022.md"
+    },
+    {
+      "id": "NAT-023",
+      "title": "Pin the DECON0 command-mode frame-trigger registers and host-test a canary-trig variant of the NAT-022 canary",
+      "status": "done",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "NAT-022"
+      ],
+      "paths": [
+        "docs/procedures/nat-022",
+        "artifacts/nat-022"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "The DECON0 trigger registers (TRIG_CON, SHD_REG_UP_REQ, GLOBAL_CON, FRAME_COUNT) and the vendor driver's command-mode frame sequence are recorded with file, line and the pinned BSP SHA, plus the DT trig_mode/op_mode facts, in a source-review note.",
+        "A canary-trig image is built reproducibly; the plain and fault canaries stay byte-identical to the ones already built. The kick performs no MMIO before the first framebuffer marker, writes only TRIG_CON and SHD_REG_UP_REQ, and writes nothing when DECON is off, in video mode, with the MMU on, or after a faulted kick; host tests assert these properties and the decoder reads the register report back.",
+        "Nothing is flashed or run on the phone: the MMIO writes are outside decision 0009, so an image-specific decision request with the exact SHA-256, the writes, risks and recovery is prepared for the owner."
+      ],
+      "steps": [
+        "Read the pinned BSP DECON trigger sequence and DT facts",
+        "Implement the MK_TRIG kick, decoder fields and host tests",
+        "Build and package canary-trig; prepare the decision request"
+      ],
+      "owner": "claude-nat022-20261110-diag",
+      "started_at": "2026-11-10T12:29:17+00:00",
+      "last_heartbeat": "2026-11-10T12:29:17+00:00",
+      "updated_at": "2026-11-10T13:31:30+00:00",
+      "evidence": "docs/procedures/nat-022/evidence-nat023.json",
+      "evidence_sha256": "7d092864275dc39f4f0650c165ec99e83cd7bfba39223ef6396cbdc2ebdf1f69",
+      "finished_at": "2026-11-10T13:31:30+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-023.md"
     },
     {
       "id": "KRN-005",
@@ -7517,7 +7556,7 @@
         "Stopped by the safety classifier at about 11:44Z on 2026-11-10 while writing the fake-libusb host test harness; not retried, reworded or delegated. Done: three local patches against odin4 338fde45 in artifacts/odin4-e1s/work (1fdfc82 wire sequence, 8030309 PIT chunks/no resend/payload total/pre-validation, e543114 session ledger/node check/staged report); built; upstream 47 tests pass; binary artifacts/odin4-e1s/odin4 (untested against any device or fake). Not done: wire-equivalence harness, patch export to patches/odin4-e1s, docs, evidence. The patched odin4 is not qualified; the NAT-013 tool stays the supported restore path. Resume only on an explicit owner instruction after support review."
       ],
       "card_path": "planning/tasks/ODIN-001.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "NAT-013",
@@ -13835,7 +13874,7 @@
         "id": "ODIN-001",
         "status": "blocked",
         "last_heartbeat": "2026-11-10T11:45:18+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": null,
         "next_step": null,
         "handoff": null,
@@ -13914,7 +13953,7 @@
         "id": "NAT-021",
         "status": "blocked",
         "last_heartbeat": "2026-11-10T11:44:52+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "Native diagnosis inconclusive: Samsung/Knox logo only, restart, SEC_UPLOAD109.684s after recovery reboot; no native console. Fresh single-session stock restore and full RECOVERY hash passed; Android boot_completed1, user0 RUNNING_UNLOCKED, pstore empty. Seven fault controls and214 project checks passed. Native scope flag returned false; no native retry.",
         "next_step": "Do not rerun. Missing real early-log channel/retention (NAT-017) and image-specific new owner decision before any further native work; original RECOVERY is restored and Android verified.",
         "handoff": "docs/procedures/nat-021/README.md",
@@ -13976,46 +14015,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-10T11:22:49+00:00",
-      "action": "task.add:NAT-020",
-      "owner": "codex-83s-candidate-20261110-r6",
-      "tasks": [
-        {
-          "id": "NAT-020",
-          "status": "pending",
-          "priority": 100
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T11:23:15+00:00",
-      "action": "task.claim:NAT-020",
-      "owner": "codex-83s-candidate-20261110-r6",
-      "tasks": [
-        {
-          "id": "NAT-020",
-          "status": "in_progress",
-          "owner": "codex-83s-candidate-20261110-r6",
-          "priority": 100,
-          "last_heartbeat": "2026-11-10T11:23:15+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T11:31:00+00:00",
-      "action": "task.done:NAT-020",
-      "owner": "codex-83s-candidate-20261110-r6",
-      "tasks": [
-        {
-          "id": "NAT-020",
-          "status": "done",
-          "owner": "codex-83s-candidate-20261110-r6",
-          "priority": 100,
-          "last_heartbeat": "2026-11-10T11:23:15+00:00"
-        }
-      ]
-    },
     {
       "at": "2026-11-10T11:31:13+00:00",
       "action": "task.add:NAT-021",
@@ -14235,11 +14234,51 @@
           "last_heartbeat": "2026-11-10T11:58:09+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T12:28:58+00:00",
+      "action": "task.add:NAT-023",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-023",
+          "status": "pending",
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T12:29:17+00:00",
+      "action": "task.claim:NAT-023",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-023",
+          "status": "in_progress",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 97,
+          "last_heartbeat": "2026-11-10T12:29:17+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T13:31:30+00:00",
+      "action": "task.done:NAT-023",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-023",
+          "status": "done",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 97,
+          "last_heartbeat": "2026-11-10T12:29:17+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "5d88f9a05722624f1593278deffaa7d3ce14d0e5c879a0241c012c8e1eed86c7",
-    "BOARD.md": "de4402eb7e65be67067348ef243939a08dd01ac77ad30a596a732e5224553dfc",
+    "STATUS.md": "2e17a07d5e3e9fc2c9a46018f4efd90e3c84574d3da7241c07f0cac69df7a2b1",
+    "BOARD.md": "b61e9b11c3e6a872c21f8caf04ae2fdcadb93efe158d3b137ff285d49ba25457",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -14309,7 +14348,7 @@
     "planning/tasks/NAT-012.md": "44f380d81edae43e3bfdb68296d982fed468e7e3aa5454344fa7f7cf74a6628a",
     "planning/tasks/NAT-019.md": "922b0a944ac818080d564b7683b33642061ff56b7f56be8c4c5917fee47c7c4e",
     "planning/tasks/NAT-020.md": "4dc149965a1d7d7494c2080d935bbf02ec643da68bd5d274d03c2b6b58b8d98d",
-    "planning/tasks/NAT-021.md": "a2e454391eb4d56d8e9428c1850216f53055392aff932d913c764488842fa71b",
+    "planning/tasks/NAT-021.md": "dd6a2c8962c68fbf0ce51b40fcb390f6c48e1ff19cd0001c72e68bff5286fe39",
     "planning/tasks/KRN-008.md": "36d33f795d9569f340f53a5e0a909dc8efcdc5024c9133ccd614a6de5af22894",
     "planning/tasks/KRN-010.md": "4f479284d71242353a2a95508bac0b5304468c6ee44704b7561bc32cee8e1832",
     "planning/tasks/KRN-012.md": "5639fd265337eacb414447c0f5aa26bb2ad600fead5ca21572bcdb2b96f7b4e8",
@@ -14351,6 +14390,7 @@
     "planning/tasks/VM-007.md": "cc3b0371dde27da4854d9f1f989289328970ae84f3c9c4429fda2bcdd403761f",
     "planning/tasks/NAT-017.md": "44ba4989437a4baf7399488bbf4f0dbf893079dfcc00500dfa86a2f0686be690",
     "planning/tasks/NAT-022.md": "92b1dcb59f1830629d3d1e59defeec92fe3e49eb2df1eff97d0c8d6e35eadeb9",
+    "planning/tasks/NAT-023.md": "1018e390c7aa0cdda8fd59e72ec44b2a5cd0131199bb7f13a769fc9825e73bae",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/REV-004.md": "8c7b273845208b121b2d6d1f05038b627689d3f97b766a765a91cdf23082bdb1",
     "planning/tasks/REV-011.md": "5ea2857fe5caca100edd1f7f53667f0b2a27de4b576000ecd14e2a55f1e7d51b",
@@ -14399,7 +14439,7 @@
     "planning/tasks/ESIM-001.md": "4ff5511bf1b91ec562d46b9fa0fdbc4dc3ffd12af187060e75777f8fcde71bb6",
     "planning/tasks/VM-004.md": "e60d0c34c4cbc0e4c68b4a74b97657a569fe4a12f25e16efc01dcaa45ccc2b15",
     "planning/tasks/SEN-001.md": "3c54f6f748160ba9c5b4c4f27f41576ddb90a5c2f73f0243805e189091695d2d",
-    "planning/tasks/ODIN-001.md": "d574e4a430c92e0fe3f178f7e0cc83be8c7e2383308ffa13fa90574819c23b4c",
+    "planning/tasks/ODIN-001.md": "ac0ee966c510177f407059b9a1c47e89df084a5b1c873bb7eea122547f1d4f0a",
     "planning/tasks/NAT-013.md": "b211a32160f7a1711f4cdfb1218280216622baf34bd7fdfcfdf7b259ce4b12a9",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",

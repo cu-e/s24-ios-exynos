@@ -13,7 +13,7 @@
 | Dependencies | NAT-013 |
 | started_at | 2026-11-10T11:39:05+00:00 |
 | last_heartbeat | 2026-11-10T11:45:18+00:00 |
-| report_health | recent |
+| report_health | stale |
 
 ## Readiness
 
