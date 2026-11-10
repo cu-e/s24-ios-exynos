@@ -645,13 +645,14 @@ class Build(unittest.TestCase):
 
     def test_the_stub_the_stack_and_the_log_fit_one_2_mib_block_at_both_measured_s_boot_bases(self):
         """A recorded fact about this link, not a proof about the phone: S-Boot started the earlier images at 0x800a0000 (the ADT images) and
-        0x801a0000 (the canary of run 003); the base varies with the image and the NAT-034 base is not known in advance. loader_jump maps one
+        0x801a0000 (the canary of run 003); the base varies with the image. Native run 009 (decision 0017) then measured this very image at
+        0x80180000 (the reported stub PA 0x80191d30 minus the stub's offset 0x11d30), so the three bases seen so far are tested. loader_jump maps one
         2 MiB block 1:1 around the stub; at either base the stub, the stack, loader_log and the end of the loader (the payload copy starts at
         _end) lie in one aligned 2 MiB block. The prologue clears SCTLR_EL1.M and C first anyway, so this is margin, not the mechanism."""
         s = NM_SIZES(self.elf())
         offs = {n: s[n][0] for n in ("nat034_stub", "_stack_top", "loader_log", "_end")}
         self.assertLess(offs["_end"], 0x40000, offs)
-        for base in (0x800a0000, 0x801a0000):
+        for base in (0x800a0000, 0x80180000, 0x801a0000):
             blocks = {n: (base + o) >> 21 for n, o in offs.items()}
             self.assertEqual(len(set(blocks.values())), 1, (hex(base), {n: hex(base + o) for n, o in offs.items()}))
             self.assertEqual((base + offs["_end"] - 1) >> 21, blocks["nat034_stub"], hex(base))      # the last byte of the loader too

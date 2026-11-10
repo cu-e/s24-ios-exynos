@@ -986,7 +986,7 @@ One avoidable mistake is recorded: the first `restore_stock.py` call used the sy
 
 The recording and decoded frames stay local under `artifacts/nat-031/video-attempt-008/` (the video shows the owner's room and is not committed).
 
-## loader-diag-xnu-ckpt2: resume the kernel at checkpoint 5 and stop at its first C checkpoint (NAT-034; host-built 2026-11-11, **not run**, waiting for an image-specific owner decision 0017)
+## loader-diag-xnu-ckpt2: resume the kernel at checkpoint 5 and stop at its first C checkpoint (NAT-034; host-built 2026-11-11, run once under decision 0017, see Native result 009; the text below is the pre-run design and expectation)
 
 Evidence category: **host-test** for everything in this section. Nothing was flashed to, run on or read from the phone; the phone is in normal Android with stock RECOVERY.
 
@@ -1032,7 +1032,7 @@ end at about 35 s, `x0/x1/x5/TTBR0` have been on screen once by ~52 s, the syste
 * `test_support/mutate_nat034.py`: 26 mutations of `ckpt2.h`, `ckpt2.c`, `ckpt2_stub.S` and `markerlib.c` (wrong resume word, `slot[2]` not 11, expectation not advanced, mask bit, wrong stub register, prologue polarity, a frame showing the wrong register, ...) plus a text check of the cache-maintenance order; all 26 are caught
   (`artifacts/nat-034/logs/mutation-002.log`; the first run had two survivors, a missing test for the reason compared at 5 and for `x1`'s two halves, both closed by tests that fail on the mutant).
 * The build: every earlier image and payload is byte-identical to the NAT-031 build records; `loader.c` differs from the NAT-031 ckpt image's only by the `#include` and the install call; `nat034_*` has no SIMD instruction; `scan_unaligned.py` finds 0 misaligned accesses; only this image references
-  `nat034_stub`/`mk_ckpt2_hold`; at both S-Boot bases seen so far (`0x800a0000`, `0x801a0000`) the stub, the stack top, `loader_log` and the end of the loader lie in one 2 MiB block (a recorded fact, not the mechanism: the prologue clears the MMU first).
+  `nat034_stub`/`mk_ckpt2_hold`; at both S-Boot bases seen before the run (`0x800a0000`, `0x801a0000`) the stub, the stack top, `loader_log` and the end of the loader lie in one 2 MiB block (a recorded fact, not the mechanism: the prologue clears the MMU first); run 009 measured a third base, `0x80180000`, and the test now covers it too.
   Two builds and two packages from the same tree agree byte for byte.
 * The gated driver `session_xnu_ckpt2.py` stops before any `adb` call in every mode while `docs/decisions/0017-nat034-loader-diag-xnu-ckpt2-single-run-2026-11-11.md` does not exist (a fake `adb`: 0 invocations).
 * The NAT-031 tests were adapted for the extension, not weakened: `mk_ckpt_hold` is now also in the ckpt2 image (it serves every stop before C checkpoint 11) and the `MK_ST_CKPT` count applies to the NAT-031 part of `markerlib.c`.
@@ -1055,3 +1055,44 @@ Android, apps, settings, accounts and user data are not touched.
 
 Hashes: loader `Image` `c27e1c66c381976edb32af89bc5574142ead55b115206b917793dece31d9f16e` (229376 bytes), `Image.payload` `27d5c0075d28bde69ee8a172d2cc34f4c3b98957d562ae1e7b70e914c8684a77` (21784160 bytes), RECOVERY
 (`artifacts/nat-034/package-001/recovery.img`, 19634 pages differ from stock) `56f06e2582a4692f3f40d0d1ef3fb46633799fd9bc107e963d38731150961f59`; stock RECOVERY `96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67`.
+
+## Native result 009, 2026-11-11 (decision 0017): the kernel's own C code ran to its first C checkpoint
+
+`loader-diag-xnu-ckpt2` (loader `Image` `c27e1c66…`, `Image.payload` `27d5c0075…`, RECOVERY image `56f06e25…`, source commit `6c992d7`, decision commit `c7a72da`) was written to
+RECOVERY with a matching full readback and booted once (`adb reboot recovery` at 2026-11-10T21:43:47.9Z, which is 02:43 on 2026-11-11 local time). The owner filmed the screen
+(91.2 s, 720×1280) and handed over the video without a description. Stock RECOVERY was restored with one NAT-013 session after a physical Download Mode entry (device 71,
+21:46:36Z–21:46:39Z); Android was back (`check_android` pass at 21:47:24Z), the full hash equals stock (`96620b8b…`), `assess` passes. Record:
+`native-attempt-009-evidence.json` (outcome `pass` for the decision-0017 expectation; nothing beyond C checkpoint 11 is claimed).
+
+`decode_video.py` (`--y0 10`, four windows) decoded 767 CRC-valid frames (CKPT 276, STAGE 220, CKPT2 126, REG 109, BOOTID 24, ENTRY 12), merged in `decoded-timeline.json`:
+
+| Time (s) | Frame | Decoded | Meaning |
+| --- | --- | --- | --- |
+| 5.7–6.8 | ENTRY | `0x8900` | the loader's own entry state (as runs 002, 007, 008) |
+| 7.0–25.6 | STAGE idx0 | `0x20`, `0x21`, `0x30`–`0x34` | loader_main, framebuffer, memory window, zero, copy, ADT, clean |
+| 25.7–26.8 | STAGE idx0 | `0x40` | `PRE_JUMP`, then the jump to the kernel's own entry |
+| 27.3–40.7 | CKPT idx0 / idx1 | `0x0201`/`0x2`, `0x0202`/`0x6`, `0x0203`/`0xe`, `0x0204`/`0x1e`, `0x0205`/`0x3e` | checkpoints 1..5 in order; after each the stub resumed the kernel, **including checkpoint 5** (new) |
+| 40.9–43.3 | STAGE idx0 / idx1 | `0x51`, `0x09ff` | inside the return stub; mask bits 0–8 and 11 reached, no FAIL, no xnu-entry stub |
+| 43.4–46.0 | CKPT idx0 / idx1 / idx10 | `0x020b`, `0x083e`, 6 | the held report: `x2 = 2`, `x3 = 11` (C checkpoint 11); arrivals 1..5 and 11; six arrivals |
+| 47.2–60.8 | CKPT2 idx0..10 | `x0 = 0x9e1f90a00`, `x1 = 0`, `x5 = 0x80191d30`, `TTBR0_EL1 = 0x9e2279000` | the new frames |
+| 60.9–70.7 | CKPT idx2..9 | SCTLR `0x3454599d`, TTBR1 `0x0009e15af000`, VBAR lo16 `0x7000`, TCR lo32 `0xa51a251a` | the usual register block |
+| 70.9–87.0 | BOOTID, STAGE, REG | `0xce1e`/`0x4b92`, `0x51`, GLOBAL_CON `0x0133`, TRIG_CON `0x3062`→`0x3063`, frame count 3674→3823, 46 kicks | boot identifier, DECON0 block |
+| 87.0–89.7 | second held report | same values | repeats to the 83 s watchdog (last CRC-valid frame 89.7 s = ENTRY + 84 s) |
+
+`decode.describe` on the merged timeline agrees: arrivals seen = checkpoints 1–5 and "C checkpoint 11 (NAT-034)", mask `0x83e`. No CKPT arrival with mask bit 8 (early-exception report), 9 (`x2 = 0`) or 10 (unexpected arrival), no FAIL frame, no exception frame.
+
+**Established (observation of this S24, one run):**
+
+* The resume at assembly checkpoint 5 worked on hardware: after the MMU-off branch to `site5 - 28` the kernel's own MMU-enable block ran again, the kernel read `slot[2] = 11` (the `dc civac; dsb; str; dsb; dc civac; dsb` order was sufficient in this run) and did not stop at checkpoint 5 again.
+* The kernel's own C code, `arm_init`, `cpu_data_init` and `PE_init_platform`, ran to `loader_checkpoint(11)` on the phone: the first C-level XNU execution on this device. `loader_log_len` is 0 (`x1 = 0`): the kernel wrote no log text before that point.
+* The arrival state equals the NAT-033 model in every value the report carries: `x0` (the kernel's log buffer, `0x9e1f90a00`), `x1`, `x2`/`x3`, `TTBR0_EL1` (`loader_jump`'s private table `0x9e2279000`), TTBR1, TCR lo32 and VBAR lo16. SCTLR_EL1 differs from the model only in bits 5 and 7 (`0x3454599d` vs `0x3454593d`), the same two bits as in run 008. M is set at arrival: the stop was entered with the MMU on, as modelled.
+  (`x1 = 0` rests on 12 low-half frames and only 2 CRC-valid high-half frames; the decode gaps lost the third high-half frame.)
+* The return stub works from a C checkpoint on hardware: `loader_jump` entered it through its private TTBR0 with the MMU on, and it drew the full report, the DECON0 block and a second round up to the watchdog. Whether the prologue's MMU-off was needed cannot be told: the stub, the stack and the log share one 2 MiB block at the measured base.
+* No exception report, no panic/return report, no FAIL frame. The panic path (`loader_return`, `psci_smp_stop_others`, `redwood_*_quiesce`), the hazard disclosed in decision 0017, was not exercised.
+* S-Boot started this loader at `0x80180000` (`x5 = 0x80191d30` is the stub; its offset in the loader is `0x11d30`): a third measured base after `0x800a0000` and `0x801a0000`. The stub, stack top `0x801a30b0`, `loader_log` `0x801a7100` and the end `0x801b8000` lie in one 2 MiB block here as well.
+
+**Not established:** anything the kernel does after C checkpoint 11 (the stop is final; the other 22 C checkpoints, `kernel_bootstrap`, the scheduler, drivers, interrupts, timers and the GPU are not reached or not observed); any kernel log text (there is none, and no transport independent of a camera exists yet); whether the cache-maintenance order is minimal or correct in general; the cause of the SCTLR bits 5/7 difference; `boot_args` and the ADT as the kernel read them, beyond the fact that `PE_init_platform` returned. The result does not say that XNU boots.
+
+**Recorded mistake:** the first restore call used the first Download Mode device (device 70) without checking `lsusb -v` iProduct (the rule in the NAT-013 notes: the session must run on "SAMSUNG USB", not "SEC_UPLOAD"). It failed in `handshaking` with USB Errno 5 before any transfer (outcome `aborted-before-write`; nothing was written), and a second Download Mode entry (device 71, iProduct "SAMSUNG USB") restored stock. Who put the phone in Download Mode at +120 s is not established.
+
+The recording and decoded frames stay local under `artifacts/nat-034/video-attempt-001/` (the video shows the owner's room and is not committed).
