@@ -1,0 +1,18 @@
+{
+  "id": "VM-055",
+  "title": "s24vmm: optional FP-enabled boot vCPU (CPACR_EL1.FPEN=0b11 at reset) for guests that enable FP without an ISB",
+  "status": "pending",
+  "owner": null,
+  "priority": 90,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": ["VM-053"],
+  "paths": ["src/vmm/s24vmm.c", "docs/procedures/vm-055"],
+  "acceptance": [
+    "A --fp-on option sets CPACR_EL1 = 0x300000 on the boot vCPU with KVM_SET_ONE_REG before its first KVM_RUN and records it in the start event. Without the option, behaviour is unchanged.",
+    "The reason is recorded with its measurement: XNU common_start (osfmk/arm64/start.s:762-763) writes CPACR_EL1 without an ISB, and the VM-054 probe fp-sync-cpu0/4/9 shows that an FP instruction after an unsynchronized FPEN write still traps on the S24 cores.",
+    "check.py passes (ASan/UBSan, TSan, warning-free static NDK build). The limit is stated: PSCI CPU_ON secondaries are reset by KVM and do not get this state."
+  ],
+  "sources": ["apple-xnu"],
+  "steps": ["Add the option", "Run check.py", "Record evidence"]
+}

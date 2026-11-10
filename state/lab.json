@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T08:23:18+00:00",
+  "updated_at": "2026-11-10T08:29:58+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -11805,6 +11805,42 @@
       "evidence": "docs/procedures/ril-root-capture/evidence.json",
       "evidence_sha256": "da5609b16e5a5dbd47c9ac2170ab022771bb755242fd5ec286a872d2a2ded4ac",
       "finished_at": "2026-11-10T07:46:27+00:00"
+    },
+    {
+      "id": "VM-055",
+      "title": "s24vmm: optional FP-enabled boot vCPU (CPACR_EL1.FPEN=0b11 at reset) for guests that enable FP without an ISB",
+      "status": "in_progress",
+      "owner": "claude-takeover-20261110-6c8f",
+      "priority": 90,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "VM-053"
+      ],
+      "paths": [
+        "src/vmm/s24vmm.c",
+        "docs/procedures/vm-055"
+      ],
+      "acceptance": [
+        "A --fp-on option sets CPACR_EL1 = 0x300000 on the boot vCPU with KVM_SET_ONE_REG before its first KVM_RUN and records it in the start event. Without the option, behaviour is unchanged.",
+        "The reason is recorded with its measurement: XNU common_start (osfmk/arm64/start.s:762-763) writes CPACR_EL1 without an ISB, and the VM-054 probe fp-sync-cpu0/4/9 shows that an FP instruction after an unsynchronized FPEN write still traps on the S24 cores.",
+        "check.py passes (ASan/UBSan, TSan, warning-free static NDK build). The limit is stated: PSCI CPU_ON secondaries are reset by KVM and do not get this state."
+      ],
+      "sources": [
+        "apple-xnu"
+      ],
+      "steps": [
+        "Add the option",
+        "Run check.py",
+        "Record evidence"
+      ],
+      "started_at": "2026-11-10T08:29:39+00:00",
+      "last_heartbeat": "2026-11-10T08:29:58+00:00",
+      "updated_at": "2026-11-10T08:29:58+00:00",
+      "progress_note": "Claimed 2026-11-10T08:3xZ after the VM-054 fp-sync probe confirmed the unsynchronized CPACR write trap on cpu0/4/9.",
+      "next_step": "Add --fp-on to s24vmm and run check.py",
+      "branch": "team/vm-055-fp-reset-20261110",
+      "worktree": "worktrees/vm-055-fp-reset-20261110"
     }
   ],
   "experiments": [
@@ -53821,6 +53857,51 @@
           "last_heartbeat": "2026-11-10T06:57:22+00:00",
           "branch": "team/vm-053-display-input-20261110",
           "worktree": "worktrees/vm-053-display-input-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T08:29:19+00:00",
+      "action": "task.add:VM-055",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "VM-055",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T08:29:39+00:00",
+      "action": "task.claim:VM-055",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "VM-055",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 90,
+          "last_heartbeat": "2026-11-10T08:29:39+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T08:29:58+00:00",
+      "action": "task.update:VM-055",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "VM-055",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 90,
+          "progress_note": "Claimed 2026-11-10T08:3xZ after the VM-054 fp-sync probe confirmed the unsynchronized CPACR write trap on cpu0/4/9.",
+          "next_step": "Add --fp-on to s24vmm and run check.py",
+          "last_heartbeat": "2026-11-10T08:29:58+00:00",
+          "branch": "team/vm-055-fp-reset-20261110",
+          "worktree": "worktrees/vm-055-fp-reset-20261110"
         }
       ]
     }
