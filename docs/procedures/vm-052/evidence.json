@@ -1,0 +1,261 @@
+{
+  "kind": "android-userland",
+  "origin": "local-device",
+  "outcome": "pass",
+  "recorded_at": "2026-11-10T05:00:00+00:00",
+  "summary": "s24vmm (static NDK, root, tmpfs) boots avfboot from the pinned scion-avf source on the S24: avfboot parses the FDT and powers off by PSCI; the VMM timeout stops 2 and 10 spinning vCPUs at about 5.2 s. Host tests: 191 checks pass under ASan/UBSan.",
+  "task": "VM-052",
+  "owner": "claude-s24vmm-20261110-v52",
+  "commit": "60282f409dcac460924989282954b63101d43462",
+  "device_inventory": "devices/local-2026-11-10-session1.json",
+  "authorization": "docs/decisions/0002-owner-autonomy-grant-2026-11-10.md",
+  "sources": {
+    "scion-avf": "a6f4bc38aa244359cd365c976244a88c9d6b3304 (references/hakios-scion-full, avf/shim compiled; no upstream script executed)"
+  },
+  "runs": {
+    "session-001": {
+      "outcome": "pass",
+      "end_cause": "psci-system-off",
+      "vmm": {
+        "adb_exit": 0,
+        "vmm_exit": "0",
+        "wall_seconds": 0.17,
+        "stderr": ""
+      },
+      "vmm_gone": true,
+      "cleanup": {
+        "exit_code": 0,
+        "absent": true
+      },
+      "no_reboot": true,
+      "delivered": {
+        "vmm": {
+          "bytes": 2160720,
+          "sha256": "79bedb2aed06c99a9dd75d472108fc017c1e778308a9fb7f959b34297b170588"
+        },
+        "image": {
+          "bytes": 35368,
+          "sha256": "283f6740424011959ebe03e71ce910a81bbfa3b7ba31c6395ab6f8aab77eaf87"
+        }
+      }
+    },
+    "session-002": {
+      "outcome": "fail",
+      "end_cause": null,
+      "vmm": {
+        "adb_exit": 0,
+        "vmm_exit": "134",
+        "wall_seconds": 5.141,
+        "stderr": ""
+      },
+      "vmm_gone": true,
+      "cleanup": {
+        "exit_code": 0,
+        "absent": true
+      },
+      "no_reboot": true,
+      "delivered": {
+        "vmm": {
+          "bytes": 2160720,
+          "sha256": "79bedb2aed06c99a9dd75d472108fc017c1e778308a9fb7f959b34297b170588"
+        },
+        "image": {
+          "bytes": 64,
+          "sha256": "94aa8166068d894571e972ed1ef8e82a981fab14d6395792da08aa62167f86e4"
+        }
+      }
+    },
+    "session-003": {
+      "outcome": "pass",
+      "end_cause": "psci-system-off",
+      "vmm": {
+        "adb_exit": 0,
+        "vmm_exit": "0",
+        "wall_seconds": 0.151,
+        "stderr": ""
+      },
+      "vmm_gone": true,
+      "cleanup": {
+        "exit_code": 0,
+        "absent": true
+      },
+      "no_reboot": true,
+      "delivered": {
+        "vmm": {
+          "bytes": 2161104,
+          "sha256": "cc1210a58a2b54c8baa3125f5dc20ab220df7af04a26e633d052439fb4654089"
+        },
+        "image": {
+          "bytes": 35368,
+          "sha256": "283f6740424011959ebe03e71ce910a81bbfa3b7ba31c6395ab6f8aab77eaf87"
+        }
+      }
+    },
+    "session-004": {
+      "outcome": "pass",
+      "end_cause": "timeout",
+      "vmm": {
+        "adb_exit": 0,
+        "vmm_exit": "1",
+        "wall_seconds": 5.273,
+        "stderr": ""
+      },
+      "vmm_gone": true,
+      "cleanup": {
+        "exit_code": 0,
+        "absent": true
+      },
+      "no_reboot": true,
+      "delivered": {
+        "vmm": {
+          "bytes": 2161104,
+          "sha256": "cc1210a58a2b54c8baa3125f5dc20ab220df7af04a26e633d052439fb4654089"
+        },
+        "image": {
+          "bytes": 64,
+          "sha256": "94aa8166068d894571e972ed1ef8e82a981fab14d6395792da08aa62167f86e4"
+        }
+      }
+    },
+    "session-005": {
+      "outcome": "pass",
+      "end_cause": "timeout",
+      "vmm": {
+        "adb_exit": 0,
+        "vmm_exit": "1",
+        "wall_seconds": 5.327,
+        "stderr": ""
+      },
+      "vmm_gone": true,
+      "cleanup": {
+        "exit_code": 0,
+        "absent": true
+      },
+      "no_reboot": true,
+      "delivered": {
+        "vmm": {
+          "bytes": 2161104,
+          "sha256": "cc1210a58a2b54c8baa3125f5dc20ab220df7af04a26e633d052439fb4654089"
+        },
+        "image": {
+          "bytes": 64,
+          "sha256": "94aa8166068d894571e972ed1ef8e82a981fab14d6395792da08aa62167f86e4"
+        }
+      }
+    }
+  },
+  "host_check": {
+    "checks": 191,
+    "failures": 0
+  },
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "src/vmm/check.py",
+        "--run",
+        "check-001"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "docs/procedures/vm-052/run.py",
+        "--run",
+        "session-001",
+        "..."
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "docs/procedures/vm-052/run.py",
+        "--run",
+        "session-002",
+        "..."
+      ],
+      "exit_code": 1
+    },
+    {
+      "argv": [
+        "python3",
+        "docs/procedures/vm-052/run.py",
+        "--run",
+        "session-003",
+        "..."
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "docs/procedures/vm-052/run.py",
+        "--run",
+        "session-004",
+        "..."
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "docs/procedures/vm-052/run.py",
+        "--run",
+        "session-005",
+        "..."
+      ],
+      "exit_code": 0
+    }
+  ],
+  "sha256": {
+    "artifacts/vm-052/check-001/check.json": "d1ffd8a61e22af2dbf04927391614509e5e67595556a0418b21c2575a3e0a287",
+    "artifacts/vm-052/build-002/s24vmm": "cc1210a58a2b54c8baa3125f5dc20ab220df7af04a26e633d052439fb4654089",
+    "artifacts/vm-052/build-001/avfboot/Image": "283f6740424011959ebe03e71ce910a81bbfa3b7ba31c6395ab6f8aab77eaf87",
+    "artifacts/vm-052/build-001/spin.Image": "94aa8166068d894571e972ed1ef8e82a981fab14d6395792da08aa62167f86e4",
+    "artifacts/vm-052/session-001/report.json": "dd308d8f1f5a7be5b6e5ffce639341b08b309fa20475b23e6ef3278d404d0d92",
+    "artifacts/vm-052/session-001/stdout.txt": "f7bb45cc0aff6c09e5527afff938e26847879365c919395aaaff98ac143f459e",
+    "artifacts/vm-052/session-001/stderr.txt": "9d1d6a28fa7d8881add51c7617d0d7ed9ee21c37a04e34b68c358b51e2b16c79",
+    "artifacts/vm-052/session-002/report.json": "6e3b361f4a5ef61458ba8b3acea7d2b5840b019be5f2656f472009d91d8fc572",
+    "artifacts/vm-052/session-002/stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/vm-052/session-002/stderr.txt": "305829d3ebf1de7ee128f9c647b645f626f035212fc129b986dcbd47059ee5ff",
+    "artifacts/vm-052/session-003/report.json": "9caf3c331063a6d2a263bbdd371cd4137a520b1347e53f017dbf3e81f153f211",
+    "artifacts/vm-052/session-003/stdout.txt": "f7bb45cc0aff6c09e5527afff938e26847879365c919395aaaff98ac143f459e",
+    "artifacts/vm-052/session-003/stderr.txt": "0a2c68e86c7ab9f1b0ae6ddbed5b03e6b9987bdbb2fc7a18ee012ea4bc0e6552",
+    "artifacts/vm-052/session-004/report.json": "c87e758fd66112c7a7514ebee42370758f378330b3a8b4cfb3b29bcfe47c24fc",
+    "artifacts/vm-052/session-004/stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/vm-052/session-004/stderr.txt": "5abab33e68e537af9aae224dadf42dd8671d4e9ad5d66ff6f7442c2a2d185628",
+    "artifacts/vm-052/session-005/report.json": "1a017178e45cd310941f205e5c4794712ec973ff5723192be0fbcb1b6186500e",
+    "artifacts/vm-052/session-005/stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/vm-052/session-005/stderr.txt": "3325b4f3c1bb3c5159321e4fdf4105155ffd9b4cf4c5e3e8d4d2b629e2e6774a"
+  },
+  "artifacts": [
+    "artifacts/vm-052/check-001/check.json",
+    "artifacts/vm-052/build-002/s24vmm",
+    "artifacts/vm-052/build-001/avfboot/Image",
+    "artifacts/vm-052/build-001/spin.Image",
+    "artifacts/vm-052/session-001/report.json",
+    "artifacts/vm-052/session-001/stdout.txt",
+    "artifacts/vm-052/session-001/stderr.txt",
+    "artifacts/vm-052/session-002/report.json",
+    "artifacts/vm-052/session-002/stdout.txt",
+    "artifacts/vm-052/session-002/stderr.txt",
+    "artifacts/vm-052/session-003/report.json",
+    "artifacts/vm-052/session-003/stdout.txt",
+    "artifacts/vm-052/session-003/stderr.txt",
+    "artifacts/vm-052/session-004/report.json",
+    "artifacts/vm-052/session-004/stdout.txt",
+    "artifacts/vm-052/session-004/stderr.txt",
+    "artifacts/vm-052/session-005/report.json",
+    "artifacts/vm-052/session-005/stdout.txt",
+    "artifacts/vm-052/session-005/stderr.txt",
+    "worktrees/vm-052-s24vmm-20261110/research/notes/virtualization/VM-052-s24vmm.md"
+  ],
+  "limits": [
+    "No XNU payload yet; avfboot stops at the missing initrd by design.",
+    "No interrupts are raised by the emulated devices; no virtio, display or input.",
+    "Session 002 failed (bionic pthread_kill abort) and is kept; build-002 fixed it.",
+    "The device serial is not recorded."
+  ]
+}
