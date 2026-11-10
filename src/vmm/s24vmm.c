@@ -8,8 +8,12 @@
  *
  * Usage: s24vmm --image PATH [--initrd PATH] [--mem MiB] [--cpus N] [--params STR]
  *               [--timeout SEC] [--pin CPU,CPU,...] [--console PATH]
- *               [--scfb WxH] [--input] [--display-port PORT]
+ *               [--scfb WxH] [--input] [--display-port PORT] [--fp-on]
  *
+ * --fp-on starts the boot vCPU with CPACR_EL1.FPEN = 0b11 (FP/SIMD enabled), as firmware leaves it
+ * before an OS starts. XNU's common_start writes CPACR_EL1 with no ISB after it and then uses FP;
+ * on the S24 cores an FP instruction after such an unsynchronized write still traps on the old value
+ * (VM-054 probe fp-sync). Secondaries started with PSCI CPU_ON are reset by KVM and do not get it.
  * --scfb reserves a Scion shared framebuffer below the FDT and passes scfb.addr/size/w/h to avfboot;
  * --input adds a virtio-mmio virtio-input multi-touch device at 0x0a000000 (SPI 16) and virtio_input=1.
  * With either, a display thread serves frames and accepts touches on 127.0.0.1:PORT (default 5824).
@@ -409,12 +413,13 @@ static void gic_attr(uint32_t group, uint64_t attr, void *addr, const char *what
 int main(int argc, char **argv) {
     const char *image_path = NULL, *initrd_path = NULL, *params = "", *console_path = NULL, *pin = NULL;
     unsigned long mem_mib = 1024, timeout = 60, cpus = 1, scfb_w = 0, scfb_h = 0, port = 5824;
-    int input = 0;
+    int input = 0, fp_on = 0;
     uint64_t breaks[4];
     unsigned nbreaks = 0;
     for (int i = 1; i < argc; i += 2) {
         const char *a = argv[i], *v = i + 1 < argc ? argv[i + 1] : NULL;
         if (!strcmp(a, "--input")) { input = 1; i--; continue; }
+        if (!strcmp(a, "--fp-on")) { fp_on = 1; i--; continue; }
         if (!v) { fprintf(stderr, "missing value for %s\n", a); return 2; }
         if (!strcmp(a, "--image")) image_path = v;
         else if (!strcmp(a, "--initrd")) initrd_path = v;
@@ -514,6 +519,7 @@ int main(int argc, char **argv) {
     gic_attr(KVM_DEV_ARM_VGIC_GRP_CTRL, KVM_DEV_ARM_VGIC_CTRL_INIT, NULL, "vgic init");
     set_reg(g.vcpus[0].fd, CORE_REG(regs.pc), g.layout.image_addr, "set pc");
     set_reg(g.vcpus[0].fd, CORE_REG(regs.regs[0]), g.layout.fdt_addr, "set x0");
+    if (fp_on) set_reg(g.vcpus[0].fd, ARM64_SYS_REG(3, 0, 1, 0, 2), 0x300000, "set cpacr_el1"); /* FPEN = 0b11 */
     if (pin) {
         const char *p = pin;
         for (uint32_t i = 0; i < g.layout.cpus && *p; i++) {
@@ -537,10 +543,10 @@ int main(int argc, char **argv) {
     sa.sa_handler = on_kick;
     sigemptyset(&sa.sa_mask);
     if (sigaction(SIGUSR1, &sa, NULL) < 0) die("sigaction");
-    fprintf(stderr, "{\"s24vmm\":\"start\",\"ram\":%llu,\"cpus\":%u,\"image\":[%llu,%llu],\"initrd\":[%llu,%llu],\"fdt\":[%llu,%zu],\"gicr\":%llu,\"params\":\"%s\"}\n",
+    fprintf(stderr, "{\"s24vmm\":\"start\",\"ram\":%llu,\"cpus\":%u,\"image\":[%llu,%llu],\"initrd\":[%llu,%llu],\"fdt\":[%llu,%zu],\"gicr\":%llu,\"params\":\"%s\",\"fp_on\":%d}\n",
             (unsigned long long)g.layout.ram_size, g.layout.cpus, (unsigned long long)g.layout.image_addr, (unsigned long long)g.layout.image_size,
             (unsigned long long)g.layout.initrd_addr, (unsigned long long)initrd_len, (unsigned long long)g.layout.fdt_addr, fdt_len,
-            (unsigned long long)g.layout.gicr_base, g.layout.bootargs);
+            (unsigned long long)g.layout.gicr_base, g.layout.bootargs, fp_on);
 
     struct timespec t0, t1;
     clock_gettime(CLOCK_MONOTONIC, &t0);
