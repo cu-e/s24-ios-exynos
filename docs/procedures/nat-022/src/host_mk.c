@@ -112,6 +112,22 @@ int main(int argc, char **argv)
 		mk_stage(MK_ST_LOADER_ZERO);
 		mk_hold(MK_ST_LOADER_FAIL, mk_hash16(argv[6]));
 	}
+#if defined(MK_XNU_ENTRY) && MK_XNU_ENTRY
+	if (argc >= 6 && !strcmp(argv[1], "xnuentry")) {
+		/* xnuentry MAXDRAWS OUTFILE GLOBAL_CON TRIG_CON [full]: only what the stub's marker routine draws
+		 * (mk_xnu_report with fixed register values), or, with "full", after the loader's stage markers. */
+		maxdraws = atoi(argv[2]); outfile = argv[3];
+		fake_gc = (uint32_t)strtoul(argv[4], 0, 0); fake_tc = (uint32_t)strtoul(argv[5], 0, 0);
+		mk_host_fb = calloc(1, MK_BANDS * MK_BAND_BYTES);
+		if (argc >= 7 && !strcmp(argv[6], "full")) {
+			mk_entry_frame(8, 0x30d00800, 0x30d00800);
+			mk_stage(MK_ST_LOADER_MAIN); mk_stage(MK_ST_LOADER_FB); mk_stage(MK_ST_LOADER_MEM);
+			mk_stage(MK_ST_LOADER_ZERO); mk_stage(MK_ST_LOADER_COPY); mk_stage(MK_ST_LOADER_ADT);
+			mk_stage(MK_ST_LOADER_CLEAN); mk_stage(MK_ST_PRE_JUMP);
+		}
+		mk_xnu_report(0x00000009e07b74a8ULL, 0x00000009e0a2fa00ULL, 4, 0x30d00800, 0x30d00800);
+	}
+#endif
 	if (argc == 3 && !strcmp(argv[1], "hash16")) { printf("%04x\n", mk_hash16(argv[2])); return 0; }
 	if (argc >= 6 && !strcmp(argv[1], "ldexc")) {
 		/* ldexc MAXDRAWS OUTFILE GLOBAL_CON TRIG_CON: loader exception loop after four stages. */

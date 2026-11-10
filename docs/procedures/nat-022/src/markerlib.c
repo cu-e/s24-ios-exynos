@@ -42,6 +42,12 @@ static inline void mk_clean(uint64_t a, uint64_t n)
 #define MK_LOADER 0
 #endif
 
+/* NAT-028 (loader-diag-xnu-entry): reports from the stub at the XNU kernel copy's entry. Compiled
+ * out of every earlier image, which stay byte-identical. */
+#ifndef MK_XNU_ENTRY
+#define MK_XNU_ENTRY 0
+#endif
+
 /* The fault images BRK after this many full report rounds (one round is 15 frames, ~18 s, in the
  * canary-trig loop). The default keeps canary-fault byte-identical. canary-trig-fault uses 0: the
  * two recordings so far show the display ending ~60 s after the first marker, so a BRK after
@@ -176,6 +182,9 @@ static uint32_t ld_bit(uint32_t stage)
 	case MK_ST_LOADER_CLEAN: return 7;
 	case MK_ST_PRE_JUMP: return 8;
 	case MK_ST_LOADER_FAIL: return 9;
+#if MK_XNU_ENTRY
+	case MK_ST_XNU_ENTRY: return 10;
+#endif
 	default: return 15;
 	}
 }
@@ -337,6 +346,45 @@ __attribute__((noinline, noreturn)) void mk_hold(uint32_t stage, uint32_t code)
 		show_kick_report(&prev, &ld_k);
 	}
 }
+#endif
+
+#if MK_LOADER && MK_XNU_ENTRY
+/* Shown from the stub at the kernel copy's entry: the stage, then which stages were reached, the
+ * state at that point (EL, MMU/cache/I bits), the stub's own PC, x0 as the jump left it, BOOTID. */
+__attribute__((noinline, noreturn)) void
+mk_xnu_report(uint64_t pc, uint64_t x0, uint64_t cel, uint64_t cur, uint64_t e1)
+{
+	uint64_t id = mk_cnt();
+	uint32_t prev = mk_frame(MK_STAGE, 0, MK_ST_XNU_ENTRY);
+	ld_mask |= 1u << ld_bit(MK_ST_XNU_ENTRY);
+	mk_draw(prev, 0, 1);
+#if MK_TRIG
+	mk_kick(&ld_k);
+#endif
+	mk_wait_tenths(MK_DWELL_TENTHS);
+	for (;;) {
+		show(&prev, mk_frame(MK_STAGE, 1, ld_mask), &ld_k);
+		show(&prev, mk_frame(MK_ENTRY, 0, entry_data(cel, cur, e1)), &ld_k);
+		for (uint32_t i = 0; i < 4; i++) show(&prev, mk_frame(MK_XNU, i, (uint32_t)(pc >> (48 - 16 * i))), &ld_k);
+		for (uint32_t i = 0; i < 4; i++) show(&prev, mk_frame(MK_XNU, 4 + i, (uint32_t)(x0 >> (48 - 16 * i))), &ld_k);
+		show(&prev, mk_frame(MK_BOOTID, 0, (uint32_t)id), &ld_k);
+		show(&prev, mk_frame(MK_BOOTID, 1, (uint32_t)(id >> 16)), &ld_k);
+		show(&prev, mk_frame(MK_STAGE, 0, MK_ST_XNU_ENTRY), &ld_k);
+		show_kick_report(&prev, &ld_k);
+	}
+}
+
+#if !MK_HOST
+__attribute__((noinline, noreturn)) void mk_xnu_entry_hold(uint64_t pc, uint64_t x0)
+{
+	uint64_t cel, cur, e1;
+	__asm__ volatile("mrs %0, CurrentEL" : "=r"(cel));
+	__asm__ volatile("mrs %0, sctlr_el1" : "=r"(e1));
+	cur = e1;
+	if (cel == 8) __asm__ volatile("mrs %0, sctlr_el2" : "=r"(cur));
+	mk_xnu_report(pc, x0, cel, cur, e1);
+}
+#endif
 #endif
 
 static inline int overlaps(uint64_t a0, uint64_t a1)

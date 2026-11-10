@@ -16,6 +16,13 @@ variant NEVER executes the payload.
 --adt-aligned (NAT-027): additionally rewrites adt_patch.c so that every 64-bit ADT property access is
 two aligned 32-bit accesses (run 005 took an alignment fault in adt_set_dram: the loader runs with the
 MMU off and ADT values are only 4-byte aligned). Anchored on the base adt_patch.c hash.
+
+--xnu-entry (NAT-028, requires --trig-hold): turns the PRE_JUMP hold into a real jump whose target is
+a stub the loader installs over the first words of the kernel copy's entry point (xnu_entry.c,
+xnu_stub.S). The stub only calls mk_xnu_entry_hold(), which draws STAGE 0x50 and holds; the kernel's
+own first instruction is overwritten and never executed. The installer runs before the full-window
+cache clean so the clean covers the patched words, and fails (marker, no jump) unless the words it
+overwrites are NOP padding inside the file-backed part of the entry's segment.
 """
 from pathlib import Path
 import hashlib, sys
@@ -28,7 +35,8 @@ def once(s, old, new):
     assert s.count(old) == 1, 'anchor mismatch: ' + old[:80]
     return s.replace(old, new, 1)
 
-def main(root, trig_hold=False, adt_aligned=False):
+def main(root, trig_hold=False, adt_aligned=False, xnu_entry=False):
+    assert not xnu_entry or trig_hold, '--xnu-entry requires --trig-hold'
     src = Path(root) / 'shim/e1s-xnu'
     p = src / 'start.S'
     assert hashlib.sha256(p.read_bytes()).hexdigest() == START_SHA, 'start.S base changed'
@@ -156,6 +164,26 @@ static struct ui_fb ui;''')
                  '\tNAT022_HOLD(MK_ST_PRE_JUMP, 0); /* loader-diag-trig: never jump */\n')
         s = once(s, '''	if (fb_base == MK_FB_BASE && fb_size >= MK_BANDS * MK_BAND_BYTES)
 		mk_exception_loop((uint32_t)slot, esr, elr, far);''', '''	mk_exception_loop((uint32_t)slot, esr, elr, far);''')
+    if xnu_entry:
+        # _stack_top is a local label of start.S; the stub's stack literal needs its address.
+        sp = src / 'start.S'
+        t = once(sp.read_text(), '_stack_top:\n\t.space 0x4000\n', '\t.globl _stack_top\n_stack_top:\n\t.space 0x4000\n')
+        sp.write_text(t)
+        s = once(s, '#include "marker.h"\n', '#include "marker.h"\n#include "xnu_entry.h"\n')
+        s = once(s, '\tNAT022_HOLD(MK_ST_PRE_JUMP, 0); /* loader-diag-trig: never jump */\n',
+                 '\t/* loader-diag-xnu-entry: no hold here; start.S jumps and the installed stub reports from the entry */\n')
+        s = once(s, '\tNAT022_STAGE(MK_ST_LOADER_CLEAN);\n', '''\t{
+\t\textern char _stack_top[];
+\t\tuint32_t stub_orig0 = 0;
+\t\tuint64_t stub_room = nat028_entry_room(&p->segs[0], p->nsegs, p->entry_va);
+
+\t\tif (nat028_install_stub(entry_pa, stub_room, (uint64_t)(uintptr_t)_stack_top,
+\t\t    (uint64_t)(uintptr_t)mk_xnu_entry_hold, &stub_orig0))
+\t\t\treturn fail("XNU entry stub install failed");
+\t\tlog_kv("\\nentry_word_orig", stub_orig0);
+\t}
+\tNAT022_STAGE(MK_ST_LOADER_CLEAN);
+''')
     p.write_text(s)
     if adt_aligned:
         patch_adt_aligned(src)
@@ -196,4 +224,4 @@ static int rd32(uintptr_t base, uint64_t size, uint32_t off, uint32_t *v)''')
     p.write_text(s)
 
 if __name__ == '__main__':
-    main(sys.argv[1], '--trig-hold' in sys.argv[2:], '--adt-aligned' in sys.argv[2:])
+    main(sys.argv[1], '--trig-hold' in sys.argv[2:], '--adt-aligned' in sys.argv[2:], '--xnu-entry' in sys.argv[2:])

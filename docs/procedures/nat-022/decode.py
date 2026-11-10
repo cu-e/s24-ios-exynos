@@ -14,7 +14,7 @@ import argparse, json, struct, sys
 BAND_BYTES = 0x40000
 PAYLOAD_BITS = 32
 BANDS = 2 + PAYLOAD_BITS
-KINDS = {1: "ENTRY", 2: "BOOTID", 3: "STAGE", 4: "ESR", 5: "ELR", 6: "FAR", 7: "SLOT", 8: "CHECK", 9: "REG"}
+KINDS = {1: "ENTRY", 2: "BOOTID", 3: "STAGE", 4: "ESR", 5: "ELR", 6: "FAR", 7: "SLOT", 8: "CHECK", 9: "REG", 10: "XNU"}
 KICK_STATUS = {0: "no kick", 1: "sent: global update + HW-trigger unmask", 2: "sent: global update + SW trigger",
                3: "skipped: DECON not enabled", 4: "skipped: video mode", 5: "skipped: MMU on",
                6: "skipped: earlier kick faulted"}
@@ -95,7 +95,7 @@ def decode_rows(rows, strides):
 
 # loader-diag-trig: bit n of the STAGE idx1 mask = the loader reached this stage (drawn by mk_stage).
 MASK_BITS = ["entry", "loader_main", "fb selected", "memory window", "RAM zeroed", "segments copied",
-             "ADT built", "window clean started", "pre-jump", "fail"]
+             "ADT built", "window clean started", "pre-jump", "fail", "xnu entry stub (NAT-028)"]
 
 def fnv16(msg: str) -> int:
     """Independent implementation of mk_hash16: FNV-1a/32 folded to 16 bits."""
@@ -130,6 +130,13 @@ def describe(frames):
             acc.setdefault(k, {})[f["idx"]] = f["data"]
         elif k == "REG":
             acc.setdefault("REG", {})[f["idx"]] = f["data"]
+        elif k == "XNU":
+            acc.setdefault("XNU", {})[f["idx"]] = f["data"]
+    x = acc.get("XNU", {})
+    if set(x) >= {0, 1, 2, 3}:
+        out["xnu_stub_pc"] = "0x%016x" % bits_to_word_n([x[i] for i in range(4)])
+    if set(x) >= {4, 5, 6, 7}:
+        out["xnu_stub_x0"] = "0x%016x" % bits_to_word_n([x[i] for i in range(4, 8)])
     if "bootid" in acc and set(acc["bootid"]) >= {0, 1}:
         out["boot_id_cntvct32"] = acc["bootid"][1] << 16 | acc["bootid"][0]
     r = acc.get("REG", {})

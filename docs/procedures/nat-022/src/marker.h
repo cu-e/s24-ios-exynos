@@ -29,7 +29,8 @@ enum mk_kind {
 	MK_FAR = 6,
 	MK_SLOT = 7,	/* vector slot 0..15 */
 	MK_CHECK = 8,	/* canary self-checks: stack word, call depth */
-	MK_REG = 9	/* canary-trig only: DECON0 kick report, idx = enum mk_reg_idx */
+	MK_REG = 9,	/* canary-trig only: DECON0 kick report, idx = enum mk_reg_idx */
+	MK_XNU = 10	/* NAT-028 only: idx 0..3 = stub PC bits 63:48 .. 15:0, idx 4..7 = x0 at the stub the same way */
 };
 
 /* DECON0 kick report (canary-trig). Values are what the code read, not inferences. */
@@ -82,7 +83,7 @@ enum mk_stage {
 	MK_ST_LOADER_CLEAN = 0x34,	/* about to clean the whole XNU window (can be slow) */
 	MK_ST_LOADER_FAIL = 0x3f,	/* fail(): data of STAGE idx 2 is mk_hash16(message) */
 	MK_ST_PRE_JUMP = 0x40,	/* loader finished; jump pending. NOT proof of kernel entry */
-	MK_ST_XNU_ENTRY = 0x50	/* reserved: only a marker executed inside XNU's first instructions may use it */
+	MK_ST_XNU_ENTRY = 0x50	/* only mk_xnu_report, reached through the stub at the kernel entry, may use it */
 };
 
 static inline uint32_t mk_crc8(uint32_t v24)
@@ -123,6 +124,10 @@ void mk_stage(uint32_t stage);
  * mk_hold() never returns: it repeats STAGE idx0 = stage, STAGE idx1 = reached-stage mask,
  * STAGE idx2 = code, BOOTID and the DECON0 report. mk_hash16 folds FNV-1a/32 of a message. */
 void mk_hold(uint32_t stage, uint32_t code) __attribute__((noreturn));
+/* NAT-028 (MK_LOADER=1 and MK_XNU_ENTRY=1 only): called by the stub placed at the kernel copy's entry.
+ * Never returns. mk_xnu_report is the part a host can run: it takes the register values as arguments. */
+void mk_xnu_report(uint64_t pc, uint64_t x0, uint64_t cel, uint64_t cur, uint64_t e1) __attribute__((noreturn));
+void mk_xnu_entry_hold(uint64_t pc, uint64_t x0) __attribute__((noreturn));
 uint32_t mk_hash16(const char *msg);
 
 void mk_canary_loop(uint64_t currentel, uint64_t sctlr_cur, uint64_t sctlr_el1, uint32_t stack_ok, int fault);

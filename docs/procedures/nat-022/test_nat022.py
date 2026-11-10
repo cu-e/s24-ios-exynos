@@ -584,6 +584,295 @@ class ScanUnaligned(unittest.TestCase):
         self.assertEqual(skip, got[1:])                                  # words in a `$d` range are not decoded
 
 
+class XnuEntryMarker(unittest.TestCase):
+    """NAT-028: what the stub's marker routine (mk_xnu_report) draws. The real markerlib.c built with
+    MK_XNU_ENTRY=1 against the fake DECON0; frames are read back with the independent decoder."""
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.exe = Path(cls.tmp.name) / "host_mk_xnu"
+        subprocess.run(["cc", "-O1", "-Wall", "-Wextra", "-Werror", "-DMK_HOST=1", "-DMK_TRIG=1", "-DMK_LOADER=1", "-DMK_XNU_ENTRY=1",
+                        f"-I{HERE/'src'}", str(HERE / "src/markerlib.c"), str(HERE / "src/host_mk.c"), "-o", str(cls.exe)], check=True)
+        cls.plain = Path(cls.tmp.name) / "host_mk_ld"
+        subprocess.run(["cc", "-O1", "-Wall", "-Wextra", "-Werror", "-DMK_HOST=1", "-DMK_TRIG=1", "-DMK_LOADER=1",
+                        f"-I{HERE/'src'}", str(HERE / "src/markerlib.c"), str(HERE / "src/host_mk.c"), "-o", str(cls.plain)], check=True)
+
+    def go(self, n, *extra):
+        p = subprocess.run([str(self.exe), "xnuentry", str(n), str(Path(self.tmp.name) / "x.bin"), "0x113", "0x3063", *extra],
+                           capture_output=True, text=True)
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        ev = [l.split() for l in p.stdout.splitlines()]
+        return ev, [dec.parse_frame(int(e[1], 16)) for e in ev if e[0] == "DRAW"]
+
+    def test_stub_report_carries_stage_state_pc_and_x0(self):
+        ev, frames = self.go(60)
+        self.assertTrue(all(frames))
+        d = dec.describe(frames)
+        self.assertEqual(frames[0]["kind"], 3); self.assertEqual(frames[0]["data"], 0x50)       # the first frame is the stage
+        self.assertEqual(d["xnu_stub_pc"], "0x00000009e07b74a8")
+        self.assertEqual(d["xnu_stub_x0"], "0x00000009e0a2fa00")
+        self.assertEqual(d["entry"], {"el": 1, "cur": {"M": 0, "C": 0, "I": 0}, "el1": {"M": 0, "C": 0, "I": 0}})
+        self.assertEqual(d["stage_mask"], 0b100_0000_0001)                  # only entry (by flow) and the xnu stub stage
+        self.assertEqual(d["stages_reached"], ["entry", "xnu entry stub (NAT-028)"])
+        self.assertIn("boot_id_cntvct32", d); self.assertTrue(d["decon"]["kick_status"].startswith("sent"))
+
+    def test_after_the_loader_stages_the_mask_adds_the_stub_bit_and_keeps_pre_jump_separate(self):
+        ev, frames = self.go(80, "full")
+        d = dec.describe(frames)
+        self.assertEqual(d["stage_mask"], 0x1ff | 1 << 10)
+        names = [dec.STAGES[f["data"]] for f in frames if f["kind"] == 3 and f["idx"] == 0]
+        self.assertEqual(names[7], "pre-jump (NOT proof of kernel entry)")
+        self.assertEqual(names[8], "inside XNU entry stub")
+        self.assertNotIn("inside XNU entry stub", names[:8])
+
+    def test_the_report_loop_never_returns_and_kicks_after_every_draw(self):
+        ev, frames = self.go(120)
+        self.assertEqual(len(frames), 120)
+        loop = {(f["kind"], f["idx"]) for f in frames[-25:]}
+        self.assertTrue({(3, 0), (3, 1), (1, 0), (10, 0), (10, 3), (10, 4), (10, 7), (2, 0), (2, 1), (9, 0), (9, 9)} <= loop, loop)
+        draws = [i for i, e in enumerate(ev) if e[0] == "DRAW"]
+        for a, b in zip(draws, draws[1:]):
+            seg = ev[a + 1:b]
+            self.assertTrue(seg and seg[0][:2] == ["RD", "20"], seg)
+            self.assertTrue({e[1] for e in seg if e[0] == "WR"} <= {"30", "50"})
+
+    def test_only_the_xnu_entry_build_can_report_stage_0x50(self):
+        syms = subprocess.run(["nm", str(self.plain)], capture_output=True, text=True, check=True).stdout
+        self.assertNotIn("mk_xnu_report", syms)
+        syms = subprocess.run(["nm", str(self.exe)], capture_output=True, text=True, check=True).stdout
+        self.assertIn("mk_xnu_report", syms)
+        src = (HERE / "src/markerlib.c").read_text()
+        self.assertEqual(src.count("mk_frame(MK_STAGE, 0, MK_ST_XNU_ENTRY)"), 2)    # the report's first frame and its loop frame
+        self.assertEqual(src.count("MK_ST_XNU_ENTRY"), 4)                  # those two, the mask update and the ld_bit case
+        before = src[:src.index("#if MK_LOADER && MK_XNU_ENTRY")]
+        self.assertEqual(before.count("MK_ST_XNU_ENTRY"), 1)               # only the guarded ld_bit case precedes the block
+        self.assertIn("#if MK_XNU_ENTRY\n\tcase MK_ST_XNU_ENTRY", before)
+
+
+def elf_section(data, name):
+    """Minimal ELF64 little-endian section reader (the object holds only the stub's .text)."""
+    import struct
+    shoff = struct.unpack_from("<Q", data, 0x28)[0]
+    shentsize, shnum, shstrndx = struct.unpack_from("<HHH", data, 0x3a)
+    secs = [struct.unpack_from("<IIQQQQ", data, shoff + i * shentsize) for i in range(shnum)]
+    stroff = secs[shstrndx][4]
+    for no, _typ, _fl, _addr, off, size in secs:
+        n = data[stroff + no:data.index(b"\0", stroff + no)].decode()
+        if n == name:
+            return data[off:off + size]
+    raise KeyError(name)
+
+def sext(v, bits):
+    return v - (1 << bits) if v >> (bits - 1) else v
+
+def decode_stub_word(w, pc):
+    """Field-level decoder for exactly the AArch64 forms the stub may use. Anything else raises."""
+    if w & 0xffe0ffe0 == 0xaa0003e0:                                        # ORR Xd, XZR, Xm  (MOV)
+        return ("mov", w & 31, (w >> 16) & 31)
+    if w & 0x9f000000 == 0x10000000:                                        # ADR
+        imm = sext(((w >> 5) & 0x7ffff) << 2 | (w >> 29) & 3, 21)
+        return ("adr", w & 31, pc + imm)
+    if w & 0xff000000 == 0x58000000:                                        # LDR Xt, literal
+        return ("ldr_lit", w & 31, pc + 4 * sext((w >> 5) & 0x7ffff, 19))
+    if w & 0xff800000 == 0x91000000:                                        # ADD Xd|SP, Xn|SP, #imm12 {, LSL #12}
+        return ("add_imm", w & 31, (w >> 5) & 31, ((w >> 10) & 0xfff) << (12 if (w >> 22) & 1 else 0))
+    if w & 0xfffffc1f == 0xd61f0000:                                        # BR Xn
+        return ("br", (w >> 5) & 31)
+    raise ValueError("form not allowed in the stub: %08x" % w)
+
+def run_stub(mem, base, x0_in, limit=16):
+    """Interpret decoded stub words found in mem (bytes mapped at base) until BR. Returns (regs, target, reads, writes)."""
+    import struct
+    regs = {i: 0 for i in range(32)}; regs[0] = x0_in; sp = None; reads = []; writes = set(); pc = base
+    for _ in range(limit):
+        w = struct.unpack_from("<I", mem, pc - base)[0]
+        ins = decode_stub_word(w, pc)
+        if ins[0] == "mov":
+            regs[ins[1]] = regs[ins[2]]; writes.add(ins[1])
+        elif ins[0] == "adr":
+            regs[ins[1]] = ins[2]; writes.add(ins[1])
+        elif ins[0] == "ldr_lit":
+            reads.append(ins[2]); regs[ins[1]] = struct.unpack_from("<Q", mem, ins[2] - base)[0]; writes.add(ins[1])
+        elif ins[0] == "add_imm":
+            assert ins[1] == 31 and ins[3] == 0, ins                       # only `mov sp, xN`
+            sp = regs[ins[2]] + ins[3]; writes.add("sp")
+        else:
+            return regs, regs[ins[1]], sp, reads, writes
+        pc += 4
+    raise AssertionError("no BR within %d instructions" % limit)
+
+def assemble_stub(tmp):
+    """The stub template exactly as the assembler emits it (.text of xnu_stub.S assembled for aarch64)."""
+    subprocess.run(["zig", "cc", "-target", "aarch64-freestanding", "-c", str(HERE / "src/xnu_stub.S"), "-o", str(tmp / "stub.o")], check=True)
+    return elf_section((tmp / "stub.o").read_bytes(), ".text")
+
+class XnuEntryStub(unittest.TestCase):
+    """NAT-028: the stub template, the installer and the real kernel entry bytes. Host evidence only."""
+    SRC = HERE / "src"
+
+    @classmethod
+    def setUpClass(cls):
+        import ctypes, shutil, struct
+        cls.ct = ctypes
+        cls.root = HERE.parents[2]
+        cls.tmp = tempfile.TemporaryDirectory()
+        t = Path(cls.tmp.name)
+        # The real installer, with gcc's alignment trap: any misaligned access in it kills the process.
+        subprocess.run(["cc", "-O1", "-Wall", "-Wextra", "-Werror", "-DNAT028_HOST", "-fsanitize=alignment",
+                        "-fsanitize-undefined-trap-on-error", "-shared", "-fPIC", f"-I{cls.SRC}", str(cls.SRC / "xnu_entry.c"),
+                        "-o", str(t / "nat028.so")], check=True)
+        cls.lib = ctypes.CDLL(str(t / "nat028.so"))
+        cls.lib.nat028_install_stub_tmpl.argtypes = [ctypes.c_size_t, ctypes.c_uint64, ctypes.POINTER(ctypes.c_uint32), ctypes.c_uint32,
+                                                      ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint64, ctypes.c_uint64,
+                                                      ctypes.POINTER(ctypes.c_uint32)]
+        cls.lib.nat028_install_stub_tmpl.restype = ctypes.c_int
+        cls.lib.nat028_entry_room.argtypes = [ctypes.c_void_p, ctypes.c_uint32, ctypes.c_uint64]
+        cls.lib.nat028_entry_room.restype = ctypes.c_uint64
+        cls.template = None
+        if shutil.which("zig"):
+            cls.template = assemble_stub(t)
+        pb = cls.root / "artifacts/nat-020/build-003/payload.bin"
+        cls.payload = pb.read_bytes() if pb.exists() else None
+
+    def need(self):
+        if self.template is None or self.payload is None:
+            self.skipTest("zig or the NAT-020 build-003 payload is missing")
+
+    def header(self):
+        import struct
+        p = self.payload
+        magic, ver, nsegs = struct.unpack_from("<8sII", p, 0)
+        virt, entry, adt_off, adt_size, kend, phys, msize = struct.unpack_from("<7Q", p, 16)
+        segs = [struct.unpack_from("<4Q", p, 16 + 56 + 608 + 32 * i) for i in range(nsegs)]
+        self.assertEqual(magic, b"SWEETXNU")
+        return dict(virt=virt, entry=entry, nsegs=nsegs, segs=segs, kend=kend, adt_size=adt_size, raw=p[16 + 56 + 608:16 + 56 + 608 + 32 * nsegs])
+
+    def entry_bytes(self, extra=0x1000):
+        """(header, file offset of the entry word, the segment's file-backed bytes from the entry on)."""
+        h = self.header()
+        for va, vs, fo, fs in h["segs"]:
+            if va <= h["entry"] < va + fs:
+                off = fo + h["entry"] - va
+                return h, off, self.payload[off:fo + fs]
+        self.fail("entry outside every file-backed segment range")
+
+    def buf(self, data, pad=64):
+        """ctypes buffer holding `data` at an 8-aligned address with `pad` guard bytes of 0xA5 each side."""
+        ct = self.ct
+        raw = (ct.c_uint8 * (len(data) + 2 * pad + 16))()
+        base = (ct.addressof(raw) + pad + 7) & ~7
+        ct.memmove(base - pad, bytes([0xA5]) * pad, pad); ct.memmove(base, bytes(data), len(data))
+        ct.memmove(base + len(data), bytes([0xA5]) * pad, pad)
+        return raw, base
+
+    def install(self, base, room, sp=0x80000000_00020490, fn=0x80000000_0000ef90, tmpl=None, sp_off=0x18, fn_off=0x20):
+        t = tmpl if tmpl is not None else self.template
+        words = (self.ct.c_uint32 * (len(t) // 4)).from_buffer_copy(t)
+        orig = self.ct.c_uint32(0xdeadbeef)
+        rc = self.lib.nat028_install_stub_tmpl(base, room, words, len(t) // 4, sp_off, fn_off, sp, fn, self.ct.byref(orig))
+        return rc, orig.value
+
+    def test_entry_facts_come_from_the_payload_header_and_the_padding_is_there(self):
+        import struct
+        self.need()
+        h, off, seg = self.entry_bytes()
+        w0 = struct.unpack_from("<I", seg, 0)[0]
+        self.assertEqual(w0 >> 26, 0b000101, "the kernel's first word is an unconditional B")
+        nops = 0
+        while struct.unpack_from("<I", seg, 4 + 4 * nops)[0] == 0xd503201f:
+            nops += 1
+        self.assertGreaterEqual(4 + 4 * nops, 0x28 - 4)
+        self.assertEqual(self.template.__len__(), 0x28)
+        room = len(seg)
+        raw = (self.ct.c_uint8 * len(h["raw"])).from_buffer_copy(h["raw"])
+        self.assertEqual(self.lib.nat028_entry_room(self.ct.addressof(raw), h["nsegs"], h["entry"]), room)
+        self.assertEqual(self.lib.nat028_entry_room(self.ct.addressof(raw), h["nsegs"], h["virt"] - 1), 0)     # below every segment
+        self.assertEqual(self.lib.nat028_entry_room(self.ct.addressof(raw), h["nsegs"], h["kend"]), 0)        # at kernel_end: none
+        self.assertEqual((h["entry"] - h["virt"]) % 8, 0)               # entry PA is 8-aligned whenever the window base is 16 KiB aligned
+
+    def test_installer_changes_only_the_stub_words_of_the_real_entry(self):
+        import struct
+        self.need()
+        h, off, seg = self.entry_bytes()
+        data = bytes(seg[:0x1000])
+        raw, base = self.buf(data)
+        before = bytes(raw)
+        rc, orig = self.install(base, len(seg))
+        self.assertEqual(rc, 0)
+        self.assertEqual(orig, struct.unpack_from("<I", data, 0)[0])        # the replaced word is the kernel's own first word
+        after = bytes(raw)
+        changed = [i for i in range(len(before)) if before[i] != after[i]]
+        lo = base - self.ct.addressof(raw)
+        self.assertTrue(changed and min(changed) >= lo and max(changed) < lo + 0x28, "writes stay inside the 40-byte stub")
+        out = after[lo:lo + 0x28]
+        self.assertEqual(out[:0x18], self.template[:0x18])
+        self.assertEqual(struct.unpack_from("<QQ", out, 0x18), (0x80000000_00020490, 0x80000000_0000ef90))
+        self.assertEqual(after[lo + 0x28:lo + len(data)], data[0x28:])      # the rest of the segment bytes untouched
+        self.assertEqual(after[:lo], before[:lo]); self.assertEqual(after[lo + len(data):], before[lo + len(data):])   # guards intact
+
+    def test_the_installed_stub_run_by_a_decoder_based_interpreter(self):
+        self.need()
+        h, off, seg = self.entry_bytes()
+        raw, base = self.buf(seg[:0x1000])
+        self.assertEqual(self.install(base, len(seg))[0], 0)
+        lo = base - self.ct.addressof(raw)
+        mem = bytes(raw)[lo:lo + 0x1000]
+        pa = 0x9_e07b_74a8                                                   # any 8-aligned simulated physical address
+        incoming = 0x0000_0009_e0a2_fa00
+        regs, target, sp, reads, writes = run_stub(mem, pa, incoming)
+        self.assertEqual(regs[0], pa)                                        # x0 = the stub's own PC
+        self.assertEqual(regs[1], incoming)                                  # x1 = x0 as the jump left it
+        self.assertEqual(sp, 0x80000000_00020490)                            # sp = the loader's stack top literal
+        self.assertEqual(target, 0x80000000_0000ef90)                        # control leaves only through the fn literal
+        self.assertEqual(sorted(reads), [pa + 0x18, pa + 0x20])              # data accesses: its own two literals
+        self.assertEqual(writes, {0, 1, 16, "sp"})                           # nothing else is modified
+        self.assertTrue(all(r % 8 == 0 for r in reads))
+        for i in range(0, 0x18, 4):                                          # no instruction but BR transfers control
+            self.assertNotEqual(decode_stub_word(__import__("struct").unpack_from("<I", mem, i)[0], pa + i)[0], "b")
+
+    def test_capstone_agrees_with_the_hand_decoder(self):
+        self.need()
+        try:
+            import capstone
+        except ImportError:
+            self.skipTest("capstone not installed")
+        base = 0x1000
+        md = capstone.Cs(capstone.CS_ARCH_ARM64, capstone.CS_MODE_ARM)
+        got = [(i.mnemonic, i.op_str) for i in md.disasm(self.template[:0x18], base)]
+        self.assertEqual(got, [("mov", "x1, x0"), ("adr", "x0, #0x1000"), ("ldr", "x16, #0x1018"), ("mov", "sp, x16"),
+                               ("ldr", "x16, #0x1020"), ("br", "x16")])
+
+    def test_installer_refuses_and_leaves_the_bytes_alone(self):
+        import struct
+        self.need()
+        h, off, seg = self.entry_bytes()
+        data = bytes(seg[:0x100])
+        def refused(expect, mutate=None, room=0x100, shift=0, **kw):
+            d = bytearray(data)
+            if mutate: mutate(d)
+            raw, base = self.buf(d)
+            before = bytes(raw)
+            rc, orig = self.install(base + shift, room, **kw)
+            self.assertEqual((rc, bytes(raw)), (expect, before))
+            self.assertEqual(orig, 0xdeadbeef)                              # *orig0 is not set on a refusal
+        refused(1, shift=4)                                                  # entry only 4-aligned
+        refused(2, room=0x27)                                                # one byte too little file-backed room
+        refused(3, mutate=lambda d: d.__setitem__(slice(0x14, 0x18), struct.pack("<I", 0xd61f0000)))   # real code in the span
+        refused(3, mutate=lambda d: d.__setitem__(slice(0x24, 0x28), struct.pack("<I", 0)))            # last word not a NOP
+        refused(4, sp_off=0x1c)                                              # literal slot not 8-aligned
+        refused(4, fn_off=0x28)                                              # literal slot outside the template
+        refused(4, sp_off=0x20)                                              # both literals in the same slot
+        ok_raw, ok_base = self.buf(data)
+        self.assertEqual(self.install(ok_base, 0x28)[0], 0)                  # exactly 0x28 bytes of room is enough
+
+    def test_a_word_zero_that_is_not_a_branch_is_still_replaced_but_only_words_after_it_must_be_nops(self):
+        import struct
+        self.need()
+        h, off, seg = self.entry_bytes()
+        d = bytearray(seg[:0x100]); d[0:4] = struct.pack("<I", 0xd503201f)
+        raw, base = self.buf(d)
+        self.assertEqual(self.install(base, 0x100), (0, 0xd503201f))
+
 class Aarch64Build(unittest.TestCase):
     def test_images_build_with_arm64_header(self):
         import shutil
@@ -646,6 +935,45 @@ class Aarch64Build(unittest.TestCase):
             self.assertEqual(ipa[sz:], b[off:])                # same SWEETXNU payload as the run-005 image
             aln_c = (out / "loader-diag-trig-hold-adt8-aln/source/shim/e1s-xnu/loader.c").read_text()
             self.assertEqual(aln_c, src_c)                     # loader.c is the run-005 one; only adt_patch.c differs
+            # NAT-028: loader-diag-xnu-entry = the -aln image plus the stub installed at the kernel copy's entry.
+            import difflib, re
+            xd = out / "loader-diag-xnu-entry"
+            self.assertNotIn("loader-diag-xnu-entry", old)                    # a new image: no earlier record to compare with
+            xs = (xd / "source/shim/e1s-xnu/loader.c").read_text()
+            diff = [l for l in difflib.unified_diff(aln_c.splitlines(), xs.splitlines(), lineterm="", n=0) if l[:1] in "+-" and l[:3] not in ("+++", "---")]
+            self.assertEqual([l for l in diff if l[0] == "-"], ["-\tNAT022_HOLD(MK_ST_PRE_JUMP, 0); /* loader-diag-trig: never jump */"])
+            added = [l[1:] for l in diff if l[0] == "+"]
+            self.assertEqual(added[0], '#include "xnu_entry.h"')
+            self.assertEqual(len(added), 12, added)                           # include, comment, and the 10-line install block
+            self.assertEqual(xs.count("nat028_install_stub("), 1)
+            self.assertNotIn("NAT022_HOLD(MK_ST_PRE_JUMP", xs)               # no hold: the loader returns the entry to start.S
+            self.assertEqual(xs.count("MK_ST_XNU_ENTRY"), 0)                  # stage 0x50 is never drawn by the loader proper
+            i_inst, i_clean_stage, i_clean, i_ret = (xs.index(x) for x in ("nat028_install_stub(", "NAT022_STAGE(MK_ST_LOADER_CLEAN)",
+                                                                           "clean(win_base, mem_end);", "return entry_pa;"))
+            self.assertLess(i_inst, i_clean_stage); self.assertLess(i_clean_stage, i_clean); self.assertLess(i_clean, i_ret)
+            self.assertLess(xs.index("uintptr_t entry_pa ="), i_inst)         # installed after the entry check
+            self.assertLess(xs.index('fail("entry outside kernel")'), i_inst)
+            astart = (out / "loader-diag-trig-hold-adt8-aln/source/shim/e1s-xnu/start.S").read_text()
+            xstart = (xd / "source/shim/e1s-xnu/start.S").read_text()
+            sd = [l for l in difflib.unified_diff(astart.splitlines(), xstart.splitlines(), lineterm="", n=0) if l[:1] in "+-" and l[:3] not in ("+++", "---")]
+            self.assertEqual(sd, ["+\t.globl _stack_top"])                    # start.S only exports the stack label
+            for f in ("adt_patch.c", "ui.c", "fdt.c", "gic.c", "guard.c", "s5e9945.c"):
+                self.assertEqual((xd / "source/shim/e1s-xnu" / f).read_bytes(), (out / "loader-diag-trig-hold-adt8-aln/source/shim/e1s-xnu" / f).read_bytes(), f)
+            ipx = (out / ip["loader-diag-xnu-entry"]["path"]).read_bytes()
+            szx = (xd / "Image").stat().st_size
+            self.assertEqual(ipx[szx:], b[off:])                              # the SWEETXNU payload is the same bytes: the kernel copy source is unchanged
+            rc, lines = scan("loader-diag-xnu-entry")
+            self.assertEqual((rc, lines), (0, ["total 0"]))
+            syms = subprocess.run(["nm", "-n", str(xd / "loader.elf")], capture_output=True, text=True, check=True).stdout
+            addr = {l.split()[2]: int(l.split()[0], 16) for l in syms.splitlines() if len(l.split()) == 3}
+            self.assertEqual(addr["nat028_stub_begin"] % 8, 0)
+            self.assertEqual(addr["nat028_stub_end"] - addr["nat028_stub_begin"], 0x28)
+            self.assertEqual(addr["nat028_lit_sp"] - addr["nat028_stub_begin"], 0x18)
+            self.assertEqual(addr["nat028_lit_fn"] - addr["nat028_stub_begin"], 0x20)
+            self.assertEqual(addr["_stack_top"] % 16, 0)
+            img = (xd / "Image").read_bytes()
+            self.assertEqual(img[addr["nat028_stub_begin"]:addr["nat028_stub_begin"] + 0x18], assemble_stub(Path(t))[:0x18])
+            self.assertEqual(img[addr["nat028_lit_sp"]:addr["nat028_stub_end"]], bytes(16))     # literal slots are empty until the loader fills them
 
 if __name__ == "__main__":
     unittest.main()

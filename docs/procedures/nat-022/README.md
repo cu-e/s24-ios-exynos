@@ -75,6 +75,10 @@ behaves as intended on silicon: no AArch64 emulator is available on this host.
    the Mach-O entry of the kernel copy, preserving the displaced instructions, so
    a `MK_ST_XNU_ENTRY` frame can only be drawn by code inside XNU. Needs the
    entry symbol/offset from the existing kernel and a patch with a base hash.
+   (NAT-028 builds the first half of this, host-tested and not run: the stub at the
+   entry that draws the frame and holds, without replaying the displaced instruction.
+   See "loader-diag-xnu-entry" below. Replaying it and continuing into XNU is a later,
+   separate step.)
 4. On exception, the frames above give ESR, ELR and FAR to map to an
    instruction/address through the kernel symbols.
 
@@ -726,3 +730,100 @@ idx7 = idx8 = `0x0da0` and no decoded TRIG_CON-after; it is listed as seen and n
 
 The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-006/` (the video shows the owner's
 room and is not committed).
+
+## loader-diag-xnu-entry: a jump whose only target code is our marker stub at the kernel copy's entry (NAT-028; host-built, not run, no decision yet)
+
+Goal step 4 asks for a marker *inside* XNU's entry: a pre-jump message is not proof of kernel entry. This image is
+the first half of that. After the loader has built everything exactly as in run 006 it **jumps** (start.S's existing
+`br x16`) to the entry point of the kernel copy, but the first ten words there (40 bytes) are the NAT-028 stub, not
+the kernel's own instructions. The stub calls `mk_xnu_entry_hold`, which draws STAGE `0x50` and holds. What this
+can and cannot show is stated precisely, because the word "XNU" is easy to over-read:
+
+* It can show that the loader's handoff path (cache clean, MMU/cache/I-cache state, `ic iallu`, `br`) lands at the
+  physical address `window base + (entry_va - virt_base)` of the copied kernel, that the patched words are fetched
+  from there, that our stack literal and function literal work from there, and what `x0` the jump leaves.
+* It does **not** execute any XNU instruction: the kernel's own first word (`b #0xfffffff00743e05c`, replaced) is
+  never run and the 725 NOP words after it that carry the stub are not kernel code. Calling the result "XNU booted" or
+  "XNU entered and ran" would be wrong. It is "control reached the kernel copy's entry address and ran only our stub".
+* Replaying the displaced word and continuing into XNU (the second half of the NAT-023 idea) is not built and needs its
+  own decision.
+
+### Entry facts (from the payload header, not from the loader's log)
+
+`artifacts/nat-020/build-003/payload.bin` (the same SWEETXNU payload every loader image carries; `payload.adt8.bin` differs
+only in `adt_size`): `virt_base 0xfffffff004000000`, `entry_va 0xfffffff00743b4a8` (segment 2, vmaddr
+`0xfffffff007284000`, file offset `0x2803f0`, so payload offset `0x437898`), `kernel_end 0xfffffff008974000`. The entry word is
+`14000aed` = `b #0xfffffff00743e05c`; **725 NOP words (2900 bytes, `d503201f`) follow** before the next real instruction
+(`b #0xfffffff00743c788` at +0xb58). The entry is 8-byte aligned and sits `0x343b4a8` above the window base, so its physical address is
+8-byte aligned whenever the loader's window base is 16 KiB aligned. `boot_args` sits at window base + `0x4978000` (host checks of every
+earlier image say the same), so **if the stub runs, the decoded PC and `x0` must satisfy `x0 - PC = 0x153cb58`**, and `PC - 0x343b4a8` is
+the RAM window base the loader chose (implied ≈ `0x9dd3fc000` from run 006, never read directly so far).
+
+### The stub (`src/xnu_stub.S`, 40 bytes, position independent)
+
+| offset | instruction | meaning |
+| --- | --- | --- |
+| +0x00 | `mov x1, x0` | incoming `x0` (the loader's `boot_args` PA) becomes argument 1 |
+| +0x04 | `adr x0, .Lstub0` | argument 0 = the stub's own PC |
+| +0x08 | `ldr x16, [+0x18]` | stack top literal |
+| +0x0c | `mov sp, x16` | the loader's own `_stack_top` (loader data, outside the XNU window) |
+| +0x10 | `ldr x16, [+0x20]` | `mk_xnu_entry_hold` literal |
+| +0x14 | `br x16` | never returns |
+| +0x18/+0x20 | two `.quad` | filled by the loader after the copy; written as aligned 32-bit halves |
+
+`src/xnu_entry.c` installs it. It refuses (returns nonzero, writes nothing, the loader then holds a FAIL marker and
+never jumps) when the entry is not 8-byte aligned, when fewer than 40 file-backed bytes remain in the entry's segment,
+or when any word it would overwrite after word 0 is not a NOP, so it can only ever replace the entry word plus
+padding. It runs before the full-window cache clean (`clean(win_base, mem_end)` covers the patched words). The vector
+table, exception stack and `boot_args` are untouched, so a fault inside the stub is still reported by the loader's
+exception loop (ELR in the kernel window identifies it).
+
+### What the marker shows (`mk_xnu_report`, kind `10` = `XNU`, mask bit 10)
+
+STAGE `0x50` first, then a loop of: STAGE idx1 (reached mask: `0x05ff` = ENTRY..PRE_JUMP plus bit 10), ENTRY (EL, M/C/I read
+inside the stub), XNU idx0..3 = the stub PC (bits 63:48 .. 15:0), XNU idx4..7 = `x0` as the jump left it, BOOTID, STAGE idx0, DECON0
+report. Frames are 1.2 s each, 24 per loop (~29 s); in run 006 the loader reached PRE_JUMP at about 19 s of the recording and the
+display lasted until 83 s, so about two loops are expected to be readable. `decode.py` assembles `xnu_stub_pc` and `xnu_stub_x0`.
+Only `mk_xnu_report` (compiled only with `MK_XNU_ENTRY=1`) draws `0x50`; `loader.c` never names it.
+
+### Host checks (all host-test evidence; none shows anything about the phone)
+
+* Every earlier image (`canary-*`, `loader-diag`, `loader-diag-trig-hold`, `-adt8`, `-adt8-aln`, loaders and payloads) is byte-identical
+  to build-006: all new code is behind new macros or new files.
+* `loader.c` of the new image differs from the `-aln` source by exactly: one `#include`, one comment replacing the `NAT022_HOLD(MK_ST_PRE_JUMP, 0)`
+  line, and the 10-line installer block before the CLEAN marker; `start.S` differs by one `.globl _stack_top`; the SWEETXNU payload bytes equal the
+  `-aln` image's; `scan_unaligned.py` finds 0 unaligned accesses; `check_payload.py` (header, RAM window, ADT room, alignment trap) passes.
+* The stub bytes (from the assembler, with the entry label local so the object bytes are final) are decoded by an independent field-level
+  decoder and by capstone; a decoder-driven interpreter runs the *installed* stub on the real entry bytes and confirms `x0 = PC`, `x1 =` incoming `x0`,
+  `sp` and the branch target are the literals, the only data reads are its own two literals, and only `x0, x1, x16, sp` change. (First attempt of this
+  check caught a real mistake: with a global label the object kept a relocation, so the template bytes were not final; the label is now local.)
+* The real installer, compiled with gcc's alignment trap, is run on the real kernel entry bytes: only the 40 stub bytes change, the replaced word is the
+  kernel's `b`, every refusal case (misaligned, 0x27 bytes of room, real code in the span, bad literal slots) leaves the bytes untouched. Mutation
+  checks: swapping `sp` for another register, dropping the NOP check and a misaligned literal store each make a test fail or the trap fire.
+* The marker routine is run by the host harness against a fake DECON0 (frame decode, mask, loop, a kick after every draw); a build without `MK_XNU_ENTRY` has no
+  `mk_xnu_report` symbol.
+
+### What each result would mean
+
+| observation | meaning |
+| --- | --- |
+| STAGE `0x40` (pre-jump), then STAGE `0x50` with PC = base + `0x343b4a8`, `x0 - PC = 0x153cb58`, EL1, M/C/I = 0 | the handoff reached the kernel copy's entry and ran our stub from there; `x0` is the `boot_args` pointer. Still no XNU instruction executed. |
+| STAGE `0x50` but PC or `x0` differ from the above | the stub ran at an unexpected address or the jump disturbed `x0`: analyse the numbers, do not call it a pass |
+| EXC record (STAGE `0x1f`, ELR in the window) | the fetch at the entry or the stub faulted: ESR/ELR/FAR identify it (instruction abort at the entry = the clean or fetch assumption is wrong) |
+| last frame PRE_JUMP, then dark/no change | the jump or stub failed without a report; inconclusive, no retry loop |
+| FAIL (`0x3f`) code = hash of `XNU entry stub install failed` | the installer refused; nothing was jumped to |
+
+### Risks and recovery (compared with decision 0014)
+
+The device access is that of decisions 0013/0014 plus one new thing: after the cache clean the loader executes `br x16` into the kernel copy's entry.
+The code that runs there is the 40-byte stub followed by the loader's own `mk_xnu_entry_hold`; the kernel is not entered and nothing in the
+kernel copy runs. New hazards: the instruction fetch from the window (never done so far), `ic iallu` and the SCTLR write in start.S's handoff path (they write
+the same M/C/I values the loader already runs with), and the loader's stack reused by the stub. Recovery is unchanged: the 83 s watchdog, then RECOVERY is restored
+from the pinned stock image (one NAT-013 session if the phone is in Download Mode, `session_xnu.py --restore` if Android returns); only RECOVERY is written;
+Android, apps, settings, accounts and user data are not touched.
+
+Hashes: loader `Image` `6cb6b1a03a008a40de6ebe5e823e773000b0a3e4899f9263f06adf4a41b2bcc3` (217088 bytes), `Image.payload`
+`d4c391624ad8d50ce4c629d905a7a8fa88da142118ec2ff6a548bbeef9658f27` (21771872 bytes), RECOVERY (`artifacts/nat-022/package-008/recovery.img`)
+`4353546c4494c2aad12eaf3b0188478f4157ee5e4e3658fd253387b80416d06a`; build-008 and its reproduction agree. The session driver is
+`session_xnu.py`; it is gated on `docs/decisions/0015-nat022-loader-diag-xnu-entry-single-run-2026-11-10.md`, which does not exist: with the file missing it stops
+before any `adb` call (checked: 0 commands, no write). It has not been run against the phone.
