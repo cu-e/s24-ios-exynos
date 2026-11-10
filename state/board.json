@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T06:51:25+00:00",
-  "ledger_updated_at": "2026-11-10T06:51:06+00:00",
-  "registry_sha256": "ce3fae7d092117313be41382755bca585201c91d738ad88d58ddc656b9b368f3",
+  "generated_at": "2026-11-10T06:54:44+00:00",
+  "ledger_updated_at": "2026-11-10T06:53:44+00:00",
+  "registry_sha256": "e5465fc2915884327b7e3dec89e6364ab1ae60eceb6859691bfaa494d8d11578",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -28,7 +28,8 @@
       "VM-032",
       "VM-033",
       "VM-053",
-      "GPU-012"
+      "GPU-012",
+      "GPU-003"
     ],
     "blocked": [
       "KRN-026",
@@ -55,9 +56,7 @@
       "UI-003",
       "UI-004",
       "UI-005",
-      "GPU-003",
       "GPU-005",
-      "DRV-002",
       "NAT-002"
     ],
     "gated": [
@@ -298,6 +297,7 @@
       "GPU-001",
       "GPU-002",
       "GPU-004",
+      "DRV-002",
       "NAT-001",
       "DEV-002",
       "DOC-001",
@@ -11485,8 +11485,8 @@
     {
       "id": "GPU-003",
       "title": "Measure stock Vulkan on the S24 inside Android",
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "claude-takeover-20261110-6c8f",
       "scope": "android-app",
       "evidence_kind": "android-userland",
       "depends_on": [
@@ -11495,9 +11495,7 @@
         "TST-002"
       ],
       "paths": [
-        "artifacts/",
-        "research/notes/",
-        "devices/"
+        "research/notes/GPU-003-stock-vulkan-review.md"
       ],
       "acceptance": [
         "Dated inventory and the APK hash are available.",
@@ -11513,12 +11511,30 @@
         "Run short tests using the stock driver, without a stress loop.",
         "Establish a baseline before changing drivers."
       ],
-      "column": "waiting",
-      "reasons": [
-        "Paths reserved by: KRN-003, VM-054"
+      "path_history": [
+        {
+          "from": [
+            "artifacts/",
+            "research/notes/",
+            "devices/"
+          ],
+          "to": [
+            "research/notes/GPU-003-stock-vulkan-review.md"
+          ],
+          "reason": "The measurement was delivered by child GPU-016; only the independent review note remains, and research/notes/ overlapped KRN-003 and VM-054",
+          "owner": "claude-takeover-20261110-6c8f",
+          "at": "2026-11-10T06:53:25+00:00"
+        }
       ],
+      "updated_at": "2026-11-10T06:53:44+00:00",
+      "started_at": "2026-11-10T06:53:44+00:00",
+      "last_heartbeat": "2026-11-10T06:53:44+00:00",
+      "branch": "main",
+      "column": "in_progress",
+      "reasons": [],
       "priority": 50,
-      "card_path": "planning/tasks/GPU-003.md"
+      "card_path": "planning/tasks/GPU-003.md",
+      "report_health": "recent"
     },
     {
       "id": "GPU-004",
@@ -11599,7 +11615,7 @@
       "column": "waiting",
       "reasons": [
         "Dependencies: GPU-003",
-        "Paths reserved by: KRN-003, VM-054"
+        "Paths reserved by: GPU-003, KRN-003, VM-054"
       ],
       "priority": 50,
       "card_path": "planning/tasks/GPU-005.md"
@@ -11607,8 +11623,8 @@
     {
       "id": "DRV-002",
       "title": "Validate the read-only UFS/MCQ contract on the host",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "claude-takeover-20261110-6c8f",
       "scope": "host",
       "evidence_kind": "host-test",
       "depends_on": [
@@ -11616,10 +11632,7 @@
         "BLD-001"
       ],
       "paths": [
-        "src/xnu/",
-        "patches/e1s/",
-        "tests/",
-        "fixtures/public/"
+        "tests/test_ufs_contract.py"
       ],
       "acceptance": [
         "Checks cover DMA/GPT/LUN boundaries, timeouts and rejection of write commands.",
@@ -11636,10 +11649,31 @@
         "Model completion failures and incomplete responses.",
         "Describe the RAM root for an initial boot."
       ],
-      "column": "waiting",
-      "reasons": [
-        "Paths reserved by: KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, STR-024, NAT-006"
+      "path_history": [
+        {
+          "from": [
+            "src/xnu/",
+            "patches/e1s/",
+            "tests/",
+            "fixtures/public/"
+          ],
+          "to": [
+            "tests/test_ufs_contract.py"
+          ],
+          "reason": "DRV-007 delivered the remaining work in tests/test_ufs_contract.py; the broad tests/ reservation overlapped NAT-006",
+          "owner": "claude-takeover-20261110-6c8f",
+          "at": "2026-11-10T06:51:51+00:00"
+        }
       ],
+      "updated_at": "2026-11-10T06:52:56+00:00",
+      "started_at": "2026-11-10T06:52:10+00:00",
+      "last_heartbeat": "2026-11-10T06:52:10+00:00",
+      "branch": "main",
+      "evidence": "docs/procedures/drv-002/drv-002-evidence.json",
+      "evidence_sha256": "f91ea9d51249b7f3326cb72e5a8e91058470ff1001d14dc797221f391eebab52",
+      "finished_at": "2026-11-10T06:52:56+00:00",
+      "column": "done",
+      "reasons": [],
       "priority": 50,
       "card_path": "planning/tasks/DRV-002.md"
     },
@@ -11730,7 +11764,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Paths reserved by: KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, STR-024, VM-053, VM-054, NAT-006"
+        "Paths reserved by: GPU-003, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, STR-024, VM-053, VM-054, NAT-006"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-002.md"
@@ -11774,7 +11808,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-002, NAT-004, KRN-001",
-        "Paths reserved by: KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, STR-024, VM-053, VM-054, NAT-006"
+        "Paths reserved by: GPU-003, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, STR-024, VM-053, VM-054, NAT-006"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -11812,8 +11846,8 @@
       "column": "gated",
       "reasons": [
         "Scope not authorized: native",
-        "Dependencies: NAT-003, DRV-002",
-        "Paths reserved by: KRN-003, VM-054"
+        "Dependencies: NAT-003",
+        "Paths reserved by: GPU-003, KRN-003, VM-054"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -12787,6 +12821,17 @@
         "handoff": null,
         "branch": "team/nat-006-recovery-image-20261110",
         "worktree": "worktrees/nat-006-recovery-image-20261110"
+      },
+      {
+        "id": "GPU-003",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-10T06:53:44+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": "main",
+        "worktree": null
       }
     ],
     "codex-guest-exec-20261106-cw": [
@@ -12971,86 +13016,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-10T05:28:37+00:00",
-      "action": "task.claim:NAT-007",
-      "owner": "claude-native-watchdog-20261110-n7",
-      "tasks": [
-        {
-          "id": "NAT-007",
-          "status": "in_progress",
-          "owner": "claude-native-watchdog-20261110-n7",
-          "priority": 90,
-          "last_heartbeat": "2026-11-10T05:28:37+00:00",
-          "branch": "team/nat-007-watchdog-20261110",
-          "worktree": "worktrees/nat-007-watchdog-20261110"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T05:28:43+00:00",
-      "action": "task.add:UI-007",
-      "owner": "claude-display-scanout-20261110-u7",
-      "tasks": [
-        {
-          "id": "UI-007",
-          "status": "pending",
-          "owner": null,
-          "priority": 90
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T05:28:55+00:00",
-      "action": "task.claim:UI-007",
-      "owner": "claude-display-scanout-20261110-u7",
-      "tasks": [
-        {
-          "id": "UI-007",
-          "status": "in_progress",
-          "owner": "claude-display-scanout-20261110-u7",
-          "priority": 90,
-          "last_heartbeat": "2026-11-10T05:28:55+00:00",
-          "branch": "team/ui-007-decon-boot-window-20261110",
-          "worktree": "worktrees/ui-007-decon-boot-window-20261110"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T05:40:47+00:00",
-      "action": "task.update:NAT-007",
-      "owner": "claude-native-watchdog-20261110-n7",
-      "tasks": [
-        {
-          "id": "NAT-007",
-          "status": "in_progress",
-          "owner": "claude-native-watchdog-20261110-n7",
-          "priority": 90,
-          "progress_note": "Source review started (pinned SHAs verified, driver files identical at both pins). Implementation and note were not produced in this session; no files written in the worktree.",
-          "next_step": "Caller/owner to decide how to proceed with this task",
-          "last_heartbeat": "2026-11-10T05:40:47+00:00",
-          "branch": "team/nat-007-watchdog-20261110",
-          "worktree": "worktrees/nat-007-watchdog-20261110"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T05:41:06+00:00",
-      "action": "task.release:NAT-007",
-      "owner": "claude-native-watchdog-20261110-n7",
-      "tasks": [
-        {
-          "id": "NAT-007",
-          "status": "pending",
-          "owner": null,
-          "priority": 90,
-          "progress_note": "Source review started (pinned SHAs verified, driver files identical at both pins). Implementation and note were not produced in this session; no files written in the worktree.",
-          "next_step": "Caller/owner to decide how to proceed with this task",
-          "branch": "team/nat-007-watchdog-20261110",
-          "worktree": "worktrees/nat-007-watchdog-20261110"
-        }
-      ]
-    },
     {
       "at": "2026-11-10T05:57:15+00:00",
       "action": "task.transfer:UI-007",
@@ -13285,11 +13250,83 @@
           "branch": "main"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T06:51:51+00:00",
+      "action": "task.narrow:DRV-002",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "DRV-002",
+          "status": "pending",
+          "owner": null,
+          "paths": [
+            "tests/test_ufs_contract.py"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:52:10+00:00",
+      "action": "task.claim:DRV-002",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "DRV-002",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "last_heartbeat": "2026-11-10T06:52:10+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:52:56+00:00",
+      "action": "task.done:DRV-002",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "DRV-002",
+          "status": "done",
+          "owner": "claude-takeover-20261110-6c8f",
+          "last_heartbeat": "2026-11-10T06:52:10+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:53:25+00:00",
+      "action": "task.narrow:GPU-003",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "GPU-003",
+          "status": "pending",
+          "owner": null,
+          "paths": [
+            "research/notes/GPU-003-stock-vulkan-review.md"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:53:44+00:00",
+      "action": "task.claim:GPU-003",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "GPU-003",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "last_heartbeat": "2026-11-10T06:53:44+00:00",
+          "branch": "main"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "ddb94e2172199728e9cdf98fd6c822c1adb57aeebde3639ec362d59565e32754",
-    "BOARD.md": "caf4fa08761705e9e0979402a65ac2bba9bd74c09c5ec2413edd975da82a2b2a",
+    "STATUS.md": "561340910fa827030c1ab49902d10924117961796401ad97ee5949c53769629b",
+    "BOARD.md": "6f1d2b0e9e934d630616297c56cc48f76af7c93e5843d7812c17c9406a1b0956",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -13545,14 +13582,14 @@
     "planning/tasks/TST-001.md": "3142333fb7f8007775cb83ea67cb783be49b72664aaf32849d2449a19b36585b",
     "planning/tasks/GPU-001.md": "54d110d5d5bd67afb776017c7220e3e6ca7a1ffcad9289a3af35f2a7b5a992fa",
     "planning/tasks/GPU-002.md": "ed6a2e320b8b805c8d6ec97f1537439282c02f999c4a7542c95e2e31e7b76eca",
-    "planning/tasks/GPU-003.md": "2cba45953da7b90db6c380321d336d40c96a12be1bf2061c8680c26cd478e169",
+    "planning/tasks/GPU-003.md": "a1868c04ad71d1da6475c819360c8071338a8da16d646825659ebd10220bd356",
     "planning/tasks/GPU-004.md": "4f7b914361a5ff47439410c701bd907e3a3020383d4b33c91ce59b5fbdab2579",
-    "planning/tasks/GPU-005.md": "5d2baa28f83fda2bc35359e1dc53e12d6579ee0a514647d13c7da8b52842389c",
-    "planning/tasks/DRV-002.md": "8df8c94cdf254302f14cd5e0fdf2083030cbb44caf75a7712a4239d302e6e2b2",
+    "planning/tasks/GPU-005.md": "7c2a2eee9a1cf977961c3942c50e52ee8bd095176d062797019ecea64e487a6d",
+    "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
-    "planning/tasks/NAT-002.md": "e81eb2837f67a43ff5046ba4f8cfc328d3efa4c33592b327745e80cc8cd9eb16",
-    "planning/tasks/NAT-003.md": "779a50a4a2fdc79f93985a570c7f5e5c2023f2ca9bbe33823bb1da6ac6467bf3",
-    "planning/tasks/DRV-003.md": "53677d414706443b0e6475e507323df999626bd43fd1d0304a84f8c84c70ac2a",
+    "planning/tasks/NAT-002.md": "c923e1ee2a7f8aadb4379ed8810c2a1485b6e3eebe1d8f9090f861c1a15a6e53",
+    "planning/tasks/NAT-003.md": "cdf1be750ece920e3856622c239b2dcdb63532ef158e4499510d48314fbedf8e",
+    "planning/tasks/DRV-003.md": "cf3f9bffc0231b6556bc43981f167100bea06a24c71a7b3811a5c5c6cf6cbcae",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",

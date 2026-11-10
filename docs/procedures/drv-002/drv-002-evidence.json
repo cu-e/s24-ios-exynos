@@ -1,0 +1,22 @@
+{
+  "schema_version": 1, "kind": "host-test", "origin": "local-host", "outcome": "pass",
+  "task": "DRV-002", "owner": "claude-takeover-20261110-6c8f", "recorded_at": "2026-11-10T06:52:44+00:00",
+  "authorization": "docs/decisions/0002-owner-autonomy-grant-2026-11-10.md (item 1, host work)",
+  "summary": "Read-only UFS/MCQ host contract validated by the DRV-004 admission boundary, DRV-005/DRV-006 GPT extent admission and the DRV-007 make-check integration with exact-status boundary checks. Criteria assessed by the DRV-002 owner against docs/procedures/drv-002/README.md.",
+  "commit": "aa64f9d",
+  "inputs": {
+    "DRV-004": "artifacts/ufs-host/coordinator-integration-session1/evidence.json",
+    "DRV-005": "worktrees/drv-005-ufs-gpt-20261110/docs/procedures/ufs-gpt/evidence.json",
+    "DRV-006": "worktrees/drv-006-ufs-gpt-hardening-20261110/docs/procedures/ufs-gpt/hardening/evidence.json",
+    "DRV-007": "docs/procedures/drv-002/evidence.json",
+    "map": "docs/procedures/drv-002/README.md"
+  },
+  "host_commands": [{"argv": ["python3", "-m", "unittest", "tests.test_ufs_contract"], "exit_code": 0, "tests": 4}],
+  "acceptance": [
+    {"criterion": "Checks cover DMA/GPT/LUN boundaries, timeouts and rejection of write commands.", "met": true, "where": "tests/test_ufs_contract.py (exact statuses, GPT suite, source-qualified check); fixture.c; gpt_test.c"},
+    {"criterion": "Reading encrypted Android userdata is not assumed possible.", "met": true, "where": "gpt.c refuses userdata (test_userdata_refused); check.py userdata_decryption_qualified=false"},
+    {"criterion": "Hardware PHY/IOMMU/MCQ compatibility is not claimed without measurements.", "met": true, "where": "check.py evidence: device_executed, native_qualified, BYH3_qualified, DMA_coherency_qualified all false"}
+  ],
+  "artifacts": ["docs/procedures/drv-002/README.md", "docs/procedures/drv-002/evidence.json", "tests/test_ufs_contract.py"],
+  "limits": ["Host-test only; no UFS hardware behaviour on Exynos 2400 is established; the phone's real GPT was not examined."]
+}

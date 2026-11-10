@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T06:51:06+00:00",
+  "updated_at": "2026-11-10T06:53:44+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -347,8 +347,8 @@
     {
       "id": "GPU-003",
       "title": "Measure stock Vulkan on the S24 inside Android",
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "claude-takeover-20261110-6c8f",
       "scope": "android-app",
       "evidence_kind": "android-userland",
       "depends_on": [
@@ -357,9 +357,7 @@
         "TST-002"
       ],
       "paths": [
-        "artifacts/",
-        "research/notes/",
-        "devices/"
+        "research/notes/GPU-003-stock-vulkan-review.md"
       ],
       "acceptance": [
         "Dated inventory and the APK hash are available.",
@@ -374,7 +372,26 @@
         "Proceed only after app installation is separately authorized and TST-002 qualifies the exact current APK; rebuild/requalify changed compiled inputs.",
         "Run short tests using the stock driver, without a stress loop.",
         "Establish a baseline before changing drivers."
-      ]
+      ],
+      "path_history": [
+        {
+          "from": [
+            "artifacts/",
+            "research/notes/",
+            "devices/"
+          ],
+          "to": [
+            "research/notes/GPU-003-stock-vulkan-review.md"
+          ],
+          "reason": "The measurement was delivered by child GPU-016; only the independent review note remains, and research/notes/ overlapped KRN-003 and VM-054",
+          "owner": "claude-takeover-20261110-6c8f",
+          "at": "2026-11-10T06:53:25+00:00"
+        }
+      ],
+      "updated_at": "2026-11-10T06:53:44+00:00",
+      "started_at": "2026-11-10T06:53:44+00:00",
+      "last_heartbeat": "2026-11-10T06:53:44+00:00",
+      "branch": "main"
     },
     {
       "id": "GPU-004",
@@ -496,8 +513,8 @@
     {
       "id": "DRV-002",
       "title": "Validate the read-only UFS/MCQ contract on the host",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "claude-takeover-20261110-6c8f",
       "scope": "host",
       "evidence_kind": "host-test",
       "depends_on": [
@@ -505,10 +522,7 @@
         "BLD-001"
       ],
       "paths": [
-        "src/xnu/",
-        "patches/e1s/",
-        "tests/",
-        "fixtures/public/"
+        "tests/test_ufs_contract.py"
       ],
       "acceptance": [
         "Checks cover DMA/GPT/LUN boundaries, timeouts and rejection of write commands.",
@@ -524,7 +538,30 @@
         "Validate a minimal command allowlist.",
         "Model completion failures and incomplete responses.",
         "Describe the RAM root for an initial boot."
-      ]
+      ],
+      "path_history": [
+        {
+          "from": [
+            "src/xnu/",
+            "patches/e1s/",
+            "tests/",
+            "fixtures/public/"
+          ],
+          "to": [
+            "tests/test_ufs_contract.py"
+          ],
+          "reason": "DRV-007 delivered the remaining work in tests/test_ufs_contract.py; the broad tests/ reservation overlapped NAT-006",
+          "owner": "claude-takeover-20261110-6c8f",
+          "at": "2026-11-10T06:51:51+00:00"
+        }
+      ],
+      "updated_at": "2026-11-10T06:52:56+00:00",
+      "started_at": "2026-11-10T06:52:10+00:00",
+      "last_heartbeat": "2026-11-10T06:52:10+00:00",
+      "branch": "main",
+      "evidence": "docs/procedures/drv-002/drv-002-evidence.json",
+      "evidence_sha256": "f91ea9d51249b7f3326cb72e5a8e91058470ff1001d14dc797221f391eebab52",
+      "finished_at": "2026-11-10T06:52:56+00:00"
     },
     {
       "id": "NAT-001",
@@ -52150,6 +52187,78 @@
           "owner": "claude-takeover-20261110-6c8f",
           "priority": 70,
           "last_heartbeat": "2026-11-10T06:48:32+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:51:51+00:00",
+      "action": "task.narrow:DRV-002",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "DRV-002",
+          "status": "pending",
+          "owner": null,
+          "paths": [
+            "tests/test_ufs_contract.py"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:52:10+00:00",
+      "action": "task.claim:DRV-002",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "DRV-002",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "last_heartbeat": "2026-11-10T06:52:10+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:52:56+00:00",
+      "action": "task.done:DRV-002",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "DRV-002",
+          "status": "done",
+          "owner": "claude-takeover-20261110-6c8f",
+          "last_heartbeat": "2026-11-10T06:52:10+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:53:25+00:00",
+      "action": "task.narrow:GPU-003",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "GPU-003",
+          "status": "pending",
+          "owner": null,
+          "paths": [
+            "research/notes/GPU-003-stock-vulkan-review.md"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:53:44+00:00",
+      "action": "task.claim:GPU-003",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "GPU-003",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "last_heartbeat": "2026-11-10T06:53:44+00:00",
           "branch": "main"
         }
       ]

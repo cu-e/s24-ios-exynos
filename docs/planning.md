@@ -72,8 +72,8 @@ A planner may shrink the reservation of a pending, unowned task whose broad hist
 
 ```sh
 python3 tools/lab.py task narrow DRV-002 --owner planner-session \
-  --paths docs/procedures/drv-002 tests/test_ufs_contract.py \
-  --reason 'Only these paths remain open; tests/ overlapped another reservation'
+  --paths tests/test_ufs_contract.py \
+  --reason 'Only this test remains in scope; tests/ overlapped another reservation'
 ```
 
 Each new path must equal or lie inside one of the task's current paths; widening, duplicates and an unchanged set are rejected. The old and new paths go to the task's `path_history` and to the event. Narrowing never assigns an owner and never applies to claimed or blocked work.
