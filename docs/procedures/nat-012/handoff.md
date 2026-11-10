@@ -150,3 +150,10 @@ NAT-014 (saved-evidence review of boot-loop return assumptions, no native test).
 NAT-008/009/010 host completion must not be presented as proven XNU execution or
 working watchdog return on hardware. Existing NAT-011 is a proposal, not a proven
 fix; the current owner explicitly prohibits new XNU attempts.
+
+Final host validation: `make check` completed exit0 at
+2026-11-10T10:16:49.009765Z, 208 tests passed. Command/provenance and complete
+output are in final-host-checks/ under the private run directory. The separate
+three restricted-transport guard tests also passed after the lifecycle correction.
+Device experiment003 is recorded against evidence.json; experiments001/002
+retain their failed outcomes. Evidence is immutable after registry recording.

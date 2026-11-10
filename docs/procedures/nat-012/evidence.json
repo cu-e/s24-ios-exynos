@@ -1,0 +1,225 @@
+{
+  "kind": "native-device",
+  "origin": "local-device",
+  "outcome": "pass",
+  "recorded_at": "2026-11-10T10:16:59.811685+00:00",
+  "summary": "Original 96MiB RECOVERY restored in one fresh Download Mode session; full root partition SHA-256 matches backup. Android SM-S921B/e1s S921BXXS9BYH3 reports boot_completed=1, boot animation stopped and user0 RUNNING_UNLOCKED; package/activity services and user-data directories available.",
+  "device_inventory": "devices/local-2026-11-10-session1.json",
+  "commit": "054c0e8e760018e13ab3fd91a6a19de69149e7b3",
+  "authorization": "docs/decisions/0005-stock-recovery-rescue-2026-11-10.md",
+  "commands": [
+    {
+      "argv": [
+        "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+        "docs/procedures/nat-012/restore_stock.py",
+        "--bus",
+        "5",
+        "--address",
+        "24",
+        "--out",
+        "artifacts/recovery-rescue-20261110-01/restore-003"
+      ],
+      "started_at": "2026-11-10T10:13:32.647158+00:00",
+      "pid": 4115311,
+      "exit_code": 0,
+      "finished_at": "2026-11-10T10:13:36.068790+00:00"
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "getprop",
+        "sys.boot_completed"
+      ],
+      "exit_code": 0,
+      "stdout": "1",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "getprop",
+        "ro.product.model"
+      ],
+      "exit_code": 0,
+      "stdout": "SM-S921B",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "getprop",
+        "ro.product.device"
+      ],
+      "exit_code": 0,
+      "stdout": "e1s",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "getprop",
+        "ro.build.PDA"
+      ],
+      "exit_code": 0,
+      "stdout": "S921BXXS9BYH3",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "getprop",
+        "sys.boot_completed"
+      ],
+      "exit_code": 0,
+      "stdout": "1",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "getprop",
+        "init.svc.bootanim"
+      ],
+      "exit_code": 0,
+      "stdout": "stopped",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "am",
+        "get-current-user"
+      ],
+      "exit_code": 0,
+      "stdout": "0",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "if test -d /data/user/0 && test -d /data/app; then echo user_data_directories_present; else echo unavailable; fi"
+      ],
+      "exit_code": 0,
+      "stdout": "user_data_directories_present",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "su -c 'sha256sum /dev/block/by-name/recovery'"
+      ],
+      "exit_code": 0,
+      "stdout": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67  /dev/block/by-name/recovery",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "am",
+        "get-started-user-state",
+        "0"
+      ],
+      "exit_code": 0,
+      "stdout": "RUNNING_UNLOCKED",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "service",
+        "check",
+        "package"
+      ],
+      "exit_code": 0,
+      "stdout": "Service package: found",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "service",
+        "check",
+        "activity"
+      ],
+      "exit_code": 0,
+      "stdout": "Service activity: found",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "getprop",
+        "sys.boot_completed"
+      ],
+      "exit_code": 0,
+      "stdout": "1",
+      "stderr": ""
+    }
+  ],
+  "artifacts": [
+    "artifacts/recovery-rescue-20261110-01/stock-archive-check.json",
+    "artifacts/recovery-rescue-20261110-01/pit-validation.json",
+    "artifacts/recovery-rescue-20261110-01/stock-flash-003/command.json",
+    "artifacts/recovery-rescue-20261110-01/stock-flash-003/output.log",
+    "artifacts/recovery-rescue-20261110-01/restore-003/trace.json",
+    "artifacts/recovery-rescue-20261110-01/android-check-003.json",
+    "artifacts/recovery-rescue-20261110-01/user-session-check.json",
+    "artifacts/recovery-rescue-20261110-01/session-lifecycle-analysis.json",
+    "artifacts/recovery-rescue-20261110-01/session-lifecycle-disassembly.txt",
+    "docs/procedures/nat-012/restore_stock.py"
+  ],
+  "sha256": {
+    "artifacts/recovery-rescue-20261110-01/stock-archive-check.json": "7acd81eb48e24cecfb4ac055af009944a3319e5ec7969315642906686b22bf32",
+    "artifacts/recovery-rescue-20261110-01/pit-validation.json": "d7eaff85743d7b9bdffa2bf7ec3ead671e049db5de0bb8a3334bbbb27804d2e8",
+    "artifacts/recovery-rescue-20261110-01/stock-flash-003/command.json": "e664f64dffee6c8d175e3f4e9cb5b68106075b97121a4337d59e35138974df0f",
+    "artifacts/recovery-rescue-20261110-01/stock-flash-003/output.log": "d347e30d17edd77eb0ba8d58665942d62539daa228d9f8d1fbcc8d62a2f4ae4e",
+    "artifacts/recovery-rescue-20261110-01/restore-003/trace.json": "a8585b59319a0b64c12a5a3e6b7a5ea3ba0047649e405e3e78c025557eb1f88f",
+    "artifacts/recovery-rescue-20261110-01/android-check-003.json": "190ebc7ac8e5b0b7466b26f26893936f8651455cb71ba0bb8bb16b9a9135240e",
+    "artifacts/recovery-rescue-20261110-01/user-session-check.json": "a9fb5225b7443a371ff6720f1f4cc51f5a2da41e673f7f672411fef0b3e5d91c",
+    "artifacts/recovery-rescue-20261110-01/session-lifecycle-analysis.json": "98811cfd375b7d09cc1555a16d47f039453809dc481f4005f38bf84a06139532",
+    "artifacts/recovery-rescue-20261110-01/session-lifecycle-disassembly.txt": "700eb813114d9541c6b9636411690a3f065597c3dfdc3f717a970d96a3ccee78",
+    "docs/procedures/nat-012/restore_stock.py": "ae732f69b145cd75493e5ebbfd11233cf7d29e01e89b2b56bbd76d2186a730ef",
+    "devices/recovery/backups/2026-11-10/recovery.img": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+    "artifacts/nat-006/build-002/restore/recovery-stock-odin.tar": "2787aa3e07d1f09d5f2c808166e0640719f111a618105ceed1ef67ea721fe84e"
+  },
+  "target": {
+    "name": "RECOVERY",
+    "binary_type": 0,
+    "device_type": 8,
+    "identifier": 18,
+    "start_block": 75152,
+    "block_count": 24576,
+    "block_size": 4096,
+    "total_bytes": 100663296,
+    "sequence_bytes": [
+      31457280,
+      31457280,
+      31457280,
+      6291456
+    ]
+  },
+  "assessment": [
+    "Tar has exactly one regular recovery.img matching stock image; actual on-device PIT uniquely selects UFS8/id18 and exact 96MiB capacity.",
+    "All transfer replies, EndSession and normal reboot results were zero. Full partition readback in Android, not uploader exit status, establishes restored bytes.",
+    "Two earlier ended-session-resume attempts failed; source lifecycle analysis and successful fresh-session restoration support stopped async workers as their cause.",
+    "No non-RECOVERY partition write, erase, format, PIT upload, repartition, EFS or reset-data command was sent. No new XNU attempt was performed."
+  ],
+  "limitations": [
+    "User-environment availability checked through unlock state, services and directory metadata only. No personal content or individual application audit.",
+    "This rescue does not validate the experimental loader, XNU execution, watchdog return contract or general-purpose modified Odin4 transport.",
+    "NAT-013 and NAT-014 retain remaining tooling and boot-loop review work; no further native execution is authorized."
+  ]
+}
