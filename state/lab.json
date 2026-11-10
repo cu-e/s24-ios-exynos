@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T21:40:23+00:00",
+  "updated_at": "2026-11-10T22:35:57+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -12924,6 +12924,72 @@
       "evidence": "docs/procedures/nat-022/evidence-nat034.json",
       "evidence_sha256": "a84ff1c25f0b9ddf324a70d54808c5e1905b8c6cce8baa9ca9749dc32f3a5c98",
       "finished_at": "2026-11-10T21:40:23+00:00"
+    },
+    {
+      "id": "NAT-035",
+      "title": "Analyse and host-model how the NAT-022 stub can return from a C checkpoint into the kernel (resumable C checkpoints), starting from the run-009 arrival state; no image, no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [
+        "NAT-034"
+      ],
+      "paths": [
+        "docs/procedures/nat-035",
+        "artifacts/nat-035"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "Source-review of loader_checkpoint, loader_jump and the C stop's callers in the payload kernel: exactly which state loader_jump changes (loader_return_entered, TCR_EL1, TTBR0_EL1, TLB, DAIF, GIC quiesce, x29/x30/SP and the callee-saved registers) and where each original value can be recovered from, with symbol/offset evidence from the payload and the run-009 hardware values (x0, x1, x5, TTBR0, TTBR1, TCR, VBAR) as anchors.",
+        "A host model (reusing the NAT-030/033 interpreter) runs the real payload from cp5 to C checkpoint 11 as in NAT-033, then resumes the kernel at the C stop with a candidate resume sequence (restore of the changed state, return to the caller) and shows the final machine state equals an uninterrupted run to the next C checkpoint that the model can reach (or states precisely where the model's coverage ends: SIMD, devices, exceptions), with negative controls (each omitted restoration breaks the run).",
+        "A written design of the resume sequence, the next candidate stop, the on-screen report it needs, the hazards that apply (panic path MMIO, anything the model does not cover) and a statement of what would need an image-specific owner decision. Nothing is built into a RECOVERY image, flashed, run or jumped to on the phone."
+      ],
+      "steps": [
+        "Disassemble loader_checkpoint/loader_jump and list the state they change",
+        "Model resume at the C stop and compare against the uninterrupted run",
+        "Identify the next stops (C checkpoints after 11) and what the model can and cannot reach",
+        "Document the design and the decision question"
+      ],
+      "status": "done",
+      "owner": "claude-nat035-20261111-cresume",
+      "started_at": "2026-11-10T21:56:28+00:00",
+      "last_heartbeat": "2026-11-10T21:56:28+00:00",
+      "updated_at": "2026-11-10T22:35:57+00:00",
+      "evidence": "docs/procedures/nat-035/evidence.json",
+      "evidence_sha256": "e8613310ec985d4a0e70502f9b654bf1f4dd67af76700c3156c0cf21b18547f9",
+      "finished_at": "2026-11-10T22:35:57+00:00"
+    },
+    {
+      "id": "NAT-036",
+      "title": "Host work for the next NAT-022 image: loader fix for the ADT boot-CPU reg (MPIDR & 0xffff), resumable C-checkpoint return stub with a selectable stop list, host tests against the NAT-035 model; no image run, no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "depends_on": [
+        "NAT-035"
+      ],
+      "paths": [
+        "docs/procedures/nat-036",
+        "artifacts/nat-036"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "The loader source change for finding NAT-035 4(b) is a small patch with a base SHA and explanation: adt_set_boot_cpu_mpidr receives gi.mpidr & 0xffff. A host test (reusing NAT-035 loader_inputs/cresume) shows the kernel's ml_get_cpu_number_local finds the boot CPU with the patched ADT and not with the loader as built.",
+        "A resumable return stub (aarch64 source, compiled with the project's toolchain) implementing the NAT-035 section 2 sequence for a selectable list of C checkpoints: saves SP/x18/x19..x28/SCTLR, MMU off for the report and the flag/slot stores with dc civac, restores, TLB flush, kernel TTBR0 through _set_mmu_ttb, return through the loader_jump early-return epilogue. The compiled stub runs in the NAT-030/033/035 model against the real payload and the chain equals an uninterrupted run, with the NAT-035 negative controls applied to the compiled stub's own steps where possible.",
+        "A short per-stop report fitting the display budget (stops times about 2.7 s per pass against the 83 s watchdog, or a documented reduction), the new image's exact stop list, hashes, a hazard list (panic path, DAIF, TLB, caches) and the text of the image-specific owner decision question (decision 0018). Nothing is flashed, run or jumped to on the phone; the decision is not requested inside this task."
+      ],
+      "steps": [
+        "Patch the ADT boot-CPU reg in the loader source and test it in the model",
+        "Write the resumable C stub and its host tests against the NAT-035 model",
+        "Pick the stop list and the report that fit the display budget",
+        "Package a candidate image on the host (hashes only) and write the decision question"
+      ],
+      "status": "pending",
+      "owner": null
     }
   ],
   "experiments": [
@@ -56810,6 +56876,60 @@
           "progress_note": "Host work finished: image loader-diag-xnu-ckpt2 built (reproducible x3), 31 tests + 26 mutants pass, driver gated; owner accepted one native run in decision 0017. No phone action taken.",
           "next_step": "Native run under decision 0017 as a separate task (NAT-035), then NAT-013 restore + Android check",
           "last_heartbeat": "2026-11-10T21:40:13+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T21:56:13+00:00",
+      "action": "task.add:NAT-035",
+      "owner": "claude-nat035-20261111-cresume",
+      "tasks": [
+        {
+          "id": "NAT-035",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T21:56:28+00:00",
+      "action": "task.claim:NAT-035",
+      "owner": "claude-nat035-20261111-cresume",
+      "tasks": [
+        {
+          "id": "NAT-035",
+          "status": "in_progress",
+          "owner": "claude-nat035-20261111-cresume",
+          "priority": 96,
+          "last_heartbeat": "2026-11-10T21:56:28+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T22:34:56+00:00",
+      "action": "task.add:NAT-036",
+      "owner": "claude-nat035-20261111-cresume",
+      "tasks": [
+        {
+          "id": "NAT-036",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T22:35:57+00:00",
+      "action": "task.done:NAT-035",
+      "owner": "claude-nat035-20261111-cresume",
+      "tasks": [
+        {
+          "id": "NAT-035",
+          "status": "done",
+          "owner": "claude-nat035-20261111-cresume",
+          "priority": 96,
+          "last_heartbeat": "2026-11-10T21:56:28+00:00"
         }
       ]
     }

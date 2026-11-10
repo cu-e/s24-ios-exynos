@@ -1,11 +1,13 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T21:40:55+00:00",
-  "ledger_updated_at": "2026-11-10T21:40:23+00:00",
-  "registry_sha256": "f74a8d96b45cdb9f2271cabae3a8366fd2e9dcfd7855777b6061d794a3531f7a",
+  "generated_at": "2026-11-10T22:36:06+00:00",
+  "ledger_updated_at": "2026-11-10T22:35:57+00:00",
+  "registry_sha256": "57639a4011e14bfc193dff25adb27a437f6492b24592449a4450d4ae3ec83ec4",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
-    "ready": [],
+    "ready": [
+      "NAT-036"
+    ],
     "in_progress": [],
     "blocked": [
       "INT-002",
@@ -193,6 +195,7 @@
       "NAT-015",
       "NAT-016",
       "NAT-018",
+      "NAT-035",
       "USB-001",
       "RES-008",
       "KRN-002",
@@ -6118,6 +6121,45 @@
       "card_path": "planning/tasks/NAT-018.md"
     },
     {
+      "id": "NAT-035",
+      "title": "Analyse and host-model how the NAT-022 stub can return from a C checkpoint into the kernel (resumable C checkpoints), starting from the run-009 arrival state; no image, no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [
+        "NAT-034"
+      ],
+      "paths": [
+        "docs/procedures/nat-035",
+        "artifacts/nat-035"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "Source-review of loader_checkpoint, loader_jump and the C stop's callers in the payload kernel: exactly which state loader_jump changes (loader_return_entered, TCR_EL1, TTBR0_EL1, TLB, DAIF, GIC quiesce, x29/x30/SP and the callee-saved registers) and where each original value can be recovered from, with symbol/offset evidence from the payload and the run-009 hardware values (x0, x1, x5, TTBR0, TTBR1, TCR, VBAR) as anchors.",
+        "A host model (reusing the NAT-030/033 interpreter) runs the real payload from cp5 to C checkpoint 11 as in NAT-033, then resumes the kernel at the C stop with a candidate resume sequence (restore of the changed state, return to the caller) and shows the final machine state equals an uninterrupted run to the next C checkpoint that the model can reach (or states precisely where the model's coverage ends: SIMD, devices, exceptions), with negative controls (each omitted restoration breaks the run).",
+        "A written design of the resume sequence, the next candidate stop, the on-screen report it needs, the hazards that apply (panic path MMIO, anything the model does not cover) and a statement of what would need an image-specific owner decision. Nothing is built into a RECOVERY image, flashed, run or jumped to on the phone."
+      ],
+      "steps": [
+        "Disassemble loader_checkpoint/loader_jump and list the state they change",
+        "Model resume at the C stop and compare against the uninterrupted run",
+        "Identify the next stops (C checkpoints after 11) and what the model can and cannot reach",
+        "Document the design and the decision question"
+      ],
+      "status": "done",
+      "owner": "claude-nat035-20261111-cresume",
+      "started_at": "2026-11-10T21:56:28+00:00",
+      "last_heartbeat": "2026-11-10T21:56:28+00:00",
+      "updated_at": "2026-11-10T22:35:57+00:00",
+      "evidence": "docs/procedures/nat-035/evidence.json",
+      "evidence_sha256": "e8613310ec985d4a0e70502f9b654bf1f4dd67af76700c3156c0cf21b18547f9",
+      "finished_at": "2026-11-10T22:35:57+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-035.md"
+    },
+    {
       "id": "USB-001",
       "title": "Implement host-buildable native USB and block-transport adapters",
       "status": "done",
@@ -7586,6 +7628,39 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-006.md"
+    },
+    {
+      "id": "NAT-036",
+      "title": "Host work for the next NAT-022 image: loader fix for the ADT boot-CPU reg (MPIDR & 0xffff), resumable C-checkpoint return stub with a selectable stop list, host tests against the NAT-035 model; no image run, no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "depends_on": [
+        "NAT-035"
+      ],
+      "paths": [
+        "docs/procedures/nat-036",
+        "artifacts/nat-036"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "The loader source change for finding NAT-035 4(b) is a small patch with a base SHA and explanation: adt_set_boot_cpu_mpidr receives gi.mpidr & 0xffff. A host test (reusing NAT-035 loader_inputs/cresume) shows the kernel's ml_get_cpu_number_local finds the boot CPU with the patched ADT and not with the loader as built.",
+        "A resumable return stub (aarch64 source, compiled with the project's toolchain) implementing the NAT-035 section 2 sequence for a selectable list of C checkpoints: saves SP/x18/x19..x28/SCTLR, MMU off for the report and the flag/slot stores with dc civac, restores, TLB flush, kernel TTBR0 through _set_mmu_ttb, return through the loader_jump early-return epilogue. The compiled stub runs in the NAT-030/033/035 model against the real payload and the chain equals an uninterrupted run, with the NAT-035 negative controls applied to the compiled stub's own steps where possible.",
+        "A short per-stop report fitting the display budget (stops times about 2.7 s per pass against the 83 s watchdog, or a documented reduction), the new image's exact stop list, hashes, a hazard list (panic path, DAIF, TLB, caches) and the text of the image-specific owner decision question (decision 0018). Nothing is flashed, run or jumped to on the phone; the decision is not requested inside this task."
+      ],
+      "steps": [
+        "Patch the ADT boot-CPU reg in the loader source and test it in the model",
+        "Write the resumable C stub and its host tests against the NAT-035 model",
+        "Pick the stop list and the report that fit the display budget",
+        "Package a candidate image on the host (hashes only) and write the decision question"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-036.md"
     },
     {
       "id": "DRV-001",
@@ -14472,60 +14547,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-10T18:11:51+00:00",
-      "action": "task.done:NAT-029",
-      "owner": "claude-nat029-20261110-krnret",
-      "tasks": [
-        {
-          "id": "NAT-029",
-          "status": "done",
-          "owner": "claude-nat029-20261110-krnret",
-          "priority": 98,
-          "last_heartbeat": "2026-11-10T17:49:06+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T18:12:59+00:00",
-      "action": "task.add:NAT-030",
-      "owner": "claude-nat029-20261110-krnret",
-      "tasks": [
-        {
-          "id": "NAT-030",
-          "status": "pending",
-          "owner": null,
-          "priority": 98
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T18:13:19+00:00",
-      "action": "task.add:NAT-031",
-      "owner": "claude-nat029-20261110-krnret",
-      "tasks": [
-        {
-          "id": "NAT-031",
-          "status": "pending",
-          "owner": null,
-          "priority": 98
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T18:13:39+00:00",
-      "action": "task.claim:NAT-030",
-      "owner": "claude-nat029-20261110-krnret",
-      "tasks": [
-        {
-          "id": "NAT-030",
-          "status": "in_progress",
-          "owner": "claude-nat029-20261110-krnret",
-          "priority": 98,
-          "last_heartbeat": "2026-11-10T18:13:39+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-10T19:15:11+00:00",
       "action": "task.done:NAT-030",
       "owner": "claude-nat029-20261110-krnret",
@@ -14764,11 +14785,65 @@
           "last_heartbeat": "2026-11-10T21:40:13+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T21:56:13+00:00",
+      "action": "task.add:NAT-035",
+      "owner": "claude-nat035-20261111-cresume",
+      "tasks": [
+        {
+          "id": "NAT-035",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T21:56:28+00:00",
+      "action": "task.claim:NAT-035",
+      "owner": "claude-nat035-20261111-cresume",
+      "tasks": [
+        {
+          "id": "NAT-035",
+          "status": "in_progress",
+          "owner": "claude-nat035-20261111-cresume",
+          "priority": 96,
+          "last_heartbeat": "2026-11-10T21:56:28+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T22:34:56+00:00",
+      "action": "task.add:NAT-036",
+      "owner": "claude-nat035-20261111-cresume",
+      "tasks": [
+        {
+          "id": "NAT-036",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T22:35:57+00:00",
+      "action": "task.done:NAT-035",
+      "owner": "claude-nat035-20261111-cresume",
+      "tasks": [
+        {
+          "id": "NAT-035",
+          "status": "done",
+          "owner": "claude-nat035-20261111-cresume",
+          "priority": 96,
+          "last_heartbeat": "2026-11-10T21:56:28+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "d5fbe9b3ea1716ea0ef42b64a43d949fb98941d994c91773afcce740c6d7acf2",
-    "BOARD.md": "fb469f91a292575350f10cfbb759c340a585aa59ad49a0e788fc37c4c236bc5d",
+    "STATUS.md": "26e05e07fdedbe855cff7d75d0b4f20a5cf0b0cab3188373773901f16d25b21c",
+    "BOARD.md": "9430e17bfb9f684b782df33c8aa433d40cc95e026f464b17268be80e1b303acc",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -14901,6 +14976,7 @@
     "planning/tasks/NAT-015.md": "d3da9cca6b7204c40dc5da311ee0db2d14b789dccfff79164de319a5fda88da5",
     "planning/tasks/NAT-016.md": "350b04ef3ef0a663ab06e442d39f7032f39f6cbf1d31690badef2340a5448d37",
     "planning/tasks/NAT-018.md": "99ed6f18b19d229ab18943b58d41e54e62b137950c525a3c408119e479c590cb",
+    "planning/tasks/NAT-035.md": "df46e6b02ce966e9cdef479dca3452834653951b87029bc481cb00ffcaa27113",
     "planning/tasks/USB-001.md": "19299959cb09f2aa3b00ffa299face5e25f485c75dfcc2e5f1879b39d435471a",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
@@ -14931,6 +15007,7 @@
     "planning/tasks/GPU-013.md": "2822d1f3c75ccfe1ecabdbd106a766f2e6508e7a5022664db9dd3ff3022e92d7",
     "planning/tasks/NAT-005.md": "b078a916eab662fb839780a4d34f4ce047cd47c6c35fe60a6ea80764b7ce4041",
     "planning/tasks/NAT-006.md": "7b394e6d001a2743cb7d5c27b05d2d9fd66e3f5b2bfe6f20c9904a50535b5759",
+    "planning/tasks/NAT-036.md": "160382b932f91cf2c19212e5d593ec2e51015dc231a62323979060971ccd6a97",
     "planning/tasks/DRV-001.md": "eaac786b5ca6d0640d7a9bea43bf42424662189e0f9f44baaa6b6ad049f10f17",
     "planning/tasks/KRN-023.md": "a95e56ff9ef7bfa3ff55cf11a48d0bba892cc95ab504b367bc3e9d4490ecdd51",
     "planning/tasks/REV-012.md": "99bf82028acd252050bbe595c74c47d22013dfccb4d261b32b98825471ce86ea",

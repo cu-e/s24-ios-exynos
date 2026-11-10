@@ -68,6 +68,14 @@ checkpoint (11) work in the model, and what does the stub see when it arrives th
   `VBAR_EL1`; their panic path (`loader_return` → `psci_smp_stop_others`, `redwood_*_quiesce`) is not analysed.
 - **Boot arguments and device tree.** The model builds `boot_args` and the ADT as `loader.c` (NAT-022) does, with
   the `boot_args` base measured in run 007. What the loader actually passes on the phone was not read back.
+  **Correction (NAT-035, 2026-11-11):** that sentence was overstated. The NAT-030 `Sim` wrote only the memory fields of
+  `boot_args` (`deviceTreeLength` `0x4000`, no `Video`, no `CommandLine`) and never wrote the ADT bytes: the ADT region
+  was zero, so every SecureDT lookup failed in the model, `pe_arm_get_soc_base_phys` returned 0 and `pe_identify_machine`
+  returned early. The checkpoint-11 arrival state listed here is unchanged when the real inputs are used (NAT-035
+  `loader_inputs.py`: the loader's patched ADT, `deviceTreeLength` 13960, `Video`, `CommandLine`; the same `x0`..`x3`,
+  `TTBR0/1`, `TCR`, `VBAR` as run 009 measured), but a model run that continues past checkpoint 11 with the zero ADT
+  is not meaningful (NAT-035 saw a `brk #0x1206` UBSan trap in `wfe_timeout_configure` that only the zero ADT caused).
+  See `docs/procedures/nat-035/README.md`.
 - **The stub's physical placement.** The model's stub stand-in `0x9e2e00000` lies inside the RAM window; the real
   loader is near `0x801a0000`, outside the kernel's TTBR0 identity range. Whether the stub, its stack and `loader_log`
   lie inside `loader_jump`'s private 2 MiB block is **not** established (the block is Normal write-back, MAIR byte 0).

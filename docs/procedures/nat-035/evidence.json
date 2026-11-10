@@ -1,0 +1,168 @@
+{
+ "kind": "host-test",
+ "also": [
+  "source-review"
+ ],
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-10T22:35:45+00:00",
+ "commit": "6cd1227 (HEAD when recorded; the files listed below are committed afterwards together with this record)",
+ "tree_state": "NAT-035 files uncommitted when recorded; committed with this record",
+ "owner": "claude-nat035-20261111-cresume",
+ "summary": "Host only: nothing was built into an image, flashed, run on or read from the phone, and no decision was requested (0018 is not asked). The NAT-030/033 model was found to lack the loader's inputs (zero ADT, no Video/CommandLine, deviceTreeLength 0x4000); loader_inputs.py builds them as loader.c does and the model's checkpoint-11 arrival still equals the run-009 hardware values. A resume of the payload kernel from a C-checkpoint stop was specified (cresume.c_resume) and run in the model: a chain cp5 -> 11, 30-35, 12, 40-44, 13-16 (17 stops) ends in the same kernel state (entry state, registers, RAM) as an uninterrupted run, with no read of a clobbered register; each omitted primitive is detected. The model also showed that the loader as built writes the whole MPIDR_EL1 into the boot CPU's ADT reg, which the kernel's ml_get_cpu_number_local never matches (MPIDR & 0xffff), so a run past checkpoint 15 reaches the kernel's assertion panic in cpu_init; the masked value passes.",
+ "acceptance": {
+  "1_source_review": "docs/procedures/nat-035/README.md section 1 (state changed by loader_jump and where each original value comes back from, with the run-009 anchors) and test_nat035.py Bytes (the gadget _set_mmu_ttb, the loader_jump early-return epilogue, the complete list of TTBR0 writers and call sites, all read from the payload bytes) and Anchor (arrival equals the hardware values in native-attempt-009-evidence.json).",
+  "2_model_resume": "cresume.py c_resume/chain/reference/compare_entry; test_nat035.py Resume (15 stops up to checkpoint 14 equal an uninterrupted run, zero RAM difference, zero taint violations) and NegativeControls (flag, slot, sp, callee-saved, x18, ttbr0, ttbr0_private each detected); evidence_runs.py masked (17 stops to checkpoint 16, artifacts/nat-035/runs.json). Coverage ends at checkpoint 16: the model has no 'cnt v0.8b' (sched_update_pset_load_average) before checkpoint 17, and assumes cntkctl_el1, the counter, daif, ccsidr_el1, clidr_el1, id_aa64dfr0_el1.",
+  "3_design_and_decision": "README.md sections 2 and 'What this means for the next step' and 'What is not established': the resume sequence, the stop order, the report shape, the hazards (panic path, DAIF, TLB/caches, TTBR0 after arm_vm_init, display budget), and the decision-0018 question (not asked). Follow-up host task NAT-036 registered."
+ },
+ "established": [
+  "In the model the kernel reaches C checkpoint 11 with the loader's ADT and boot_args at the values run 009 measured for x0..x3, TTBR0 (private), TTBR1, TCR and VBAR (SCTLR differs in bits 5 and 7 only, as before)",
+  "loader_jump changes only TTBR0_EL1, the loader_return_entered flag, x0..x3 and the x29/x30 frame in the model; x18, x19..x28, SP, TCR, SCTLR, TTBR1, VBAR, MAIR and DAIF are unchanged at the stop",
+  "The resume (stub-owned save of SP/x18/x19..x28/SCTLR, flag clear and slot[2] by PA, restore, kernel TTBR0 through _set_mmu_ttb, return through the loader_jump early-return epilogue) gives the kernel back in the state of an uninterrupted run over 17 consecutive stops up to checkpoint 16",
+  "Each primitive is needed: flag and slot (no further stop), SP (fault), x19..x28 and x18 (state differs; the kernel reads poison), TTBR0 (state differs; not observable otherwise through checkpoint 16)",
+  "TTBR0_EL1 is written only by _set_mmu_ttb (callers common_start, arm_vm_init, pmap_switch_internal, pmap_clear_user_ttb, pmap_clear_user_ttb_internal) and _loader_jump; between the start code and arm_vm_init+0xc18 it is constant",
+  "loader.c writes the whole 32-bit MPIDR_EL1 into the boot CPU's ADT reg; the kernel's ml_get_cpu_number_local compares phys_id with MPIDR_EL1 & 0xffff; in the model the lookup fails into machine_routines.c:1335 (cpu_id <= ml_get_max_cpu_number()) inside cpu_init after checkpoint 15, and succeeds with the masked value",
+  "The NAT-033 README claim that the model builds boot_args and the ADT as loader.c does was overstated; a correction note was added"
+ ],
+ "not_established": [
+  "Any behaviour of the S24 past C checkpoint 11; whether a compiled stub resumes the kernel on the phone",
+  "Cache, TLB (stale private-table entries after the TTBR0 restore), exception and timer behaviour; DAIF is not restored by any primitive and the model's DAIF is one boolean",
+  "The real boot CPU MPIDR_EL1, the counter, cntkctl_el1 and the ID registers (assumed in the model); that bit 31 of MPIDR_EL1 is RES1 was not re-read in the Arm ARM",
+  "Stops after arm_vm_init (TTBR0 changes there; the model does not reach checkpoint 17)",
+  "The panic path (PE_panic_hook, loader_return, psci_smp_stop_others, redwood_*_quiesce) and its MMIO; the display and watchdog budget for 17 stops"
+ ],
+ "commands": [
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-035/test_nat035.py"
+   ],
+   "exit_code": 0,
+   "note": "23 tests OK with capstone (scratch virtualenv outside the repository)",
+   "log": "artifacts/nat-035/logs/test-capstone.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-035/test_nat035.py"
+   ],
+   "exit_code": 0,
+   "note": "no capstone: all 23 skipped",
+   "log": "artifacts/nat-035/logs/test-system.log"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-035/evidence_runs.py"
+   ],
+   "exit_code": 0,
+   "note": "as_built (first _Assert at step 1,044,051) and masked (17 stops, entry state/RAM equal to the uninterrupted run, 0 violations)",
+   "log": "artifacts/nat-035/logs/evidence-runs.log",
+   "result": "artifacts/nat-035/runs.json"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "214 tests OK",
+   "log": "artifacts/nat-035/logs/make-check.log"
+  }
+ ],
+ "results": {
+  "as_built": {
+   "adt_reg": "0x80000000",
+   "mpidr_el1": "0x80000000",
+   "mpidr_low16": "0x0",
+   "stop15_steps": 1041586,
+   "topology_num_cpus": 1,
+   "topology_phys_ids": [
+    "0x80000000"
+   ],
+   "first_assert": {
+    "file": "machine_routines.c",
+    "line": 1335,
+    "expr": "cpu_id <= (unsigned int)ml_get_max_cpu_number()",
+    "steps": 1044051,
+    "recent": [
+     "_cpu_init",
+     "_do_mvfpid",
+     "_machine_do_mvfpid",
+     "_cpu_init",
+     "_do_cacheid",
+     "_ml_get_topology_info",
+     "_do_cacheid",
+     "_ml_get_cpu_number_local",
+     "_ml_get_cpu_number_local.cold.1",
+     "_Assert"
+    ]
+   }
+  },
+  "masked": {
+   "chain": [
+    11,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    12,
+    40,
+    41,
+    42,
+    43,
+    44,
+    13,
+    14,
+    15,
+    16
+   ],
+   "kernel_ttbr0_from_cp5_stop": "0x9e15ae000",
+   "reference_steps": 1053360,
+   "chain_steps": 1084182,
+   "entry_strict_diff": {},
+   "stop_reg_diff": [],
+   "ram_diff_runs": 0,
+   "taint_violations": 0,
+   "daif_masked_at_every_entry": true,
+   "assumed_reads": [
+    "ccsidr_el1",
+    "clidr_el1",
+    "cntkctl_el1",
+    "cntvct_el0",
+    "daif",
+    "id_aa64dfr0_el1"
+   ]
+  }
+ },
+ "sha256": {
+  "docs/procedures/nat-035/loader_inputs.py": "fde19f3824894d2b5e4e7859749345712086b7c6f06f54dd66c3cfb13fc68439",
+  "docs/procedures/nat-035/cresume.py": "9a4b82abaf1665056e0e8e739da4ad16dca1dd3a21284b8624ba44ed2f5a8a6b",
+  "docs/procedures/nat-035/test_nat035.py": "99640f9fe683fc4e2bd3f2c75d3e72ed42f641fd595bac2b75f26f945ff4ec75",
+  "docs/procedures/nat-035/evidence_runs.py": "6ece58a9c398dcdff7e07379d78af331b37f3239be59cc788355f62a3be40704",
+  "docs/procedures/nat-035/README.md": "bc8733bfee54ce43144461f04d0ee96487c6c7074be218cb580abbe67f29b2f9",
+  "docs/procedures/nat-033/README.md": "e934c9d49304d54969edc313b05e19a646824ea32978a8bc67a14620019e6ed4",
+  "artifacts/nat-035/runs.json": "4d61f273b4accc25c573908630b16bb043ef96c336e17253e19da56ec44e98b5",
+  "artifacts/nat-034/build-001/loader-diag-xnu-ckpt2/payload.adt8.bin": "2f3d0a55d58a2828321e9bfa9a610eeef3523ee50c560e3056d1a6df3c9019e1"
+ },
+ "artifacts": [
+  "artifacts/nat-035/runs.json",
+  "artifacts/nat-035/task.json",
+  "artifacts/nat-036/task.json",
+  "artifacts/nat-035/logs/test-capstone.log",
+  "artifacts/nat-035/logs/test-system.log",
+  "artifacts/nat-035/logs/evidence-runs.log",
+  "artifacts/nat-035/logs/make-check.log",
+  "docs/procedures/nat-035/loader_inputs.py",
+  "docs/procedures/nat-035/cresume.py",
+  "docs/procedures/nat-035/test_nat035.py",
+  "docs/procedures/nat-035/evidence_runs.py",
+  "docs/procedures/nat-035/README.md",
+  "docs/procedures/nat-033/README.md"
+ ]
+}
