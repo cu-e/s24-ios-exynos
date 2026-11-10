@@ -17,7 +17,10 @@
 #define FIRST_USABLE 34u
 #define LAST_USABLE (LUN_BLOCKS - 34u)
 
-static uint8_t H[MAX_BLOCK], E[ENTRIES * UFS_GPT_ENTRY_BYTES];
+#define TABLE_BYTES ((size_t)ENTRIES * UFS_GPT_ENTRY_BYTES)
+#define HIGH UINT64_C(0x100000000)
+
+static uint8_t H[MAX_BLOCK], E[UFS_GPT_MAX_ENTRIES * UFS_GPT_ENTRY_BYTES];
 static struct ufs_gpt_disk D;
 static struct ufs_gpt_extent X;
 static uint32_t entry_count = ENTRIES;
@@ -62,6 +65,8 @@ static void build(uint32_t block)
     seal();
 }
 
+static void use_count(uint32_t count) { entry_count = count; put32(H + 80, count); }
+
 static uint32_t find(const char *name) { return ufs_gpt_find(H, D.block_bytes, E, (size_t)entry_count * UFS_GPT_ENTRY_BYTES, &D, name, &X); }
 
 static void test_crc_vector(void)
@@ -104,14 +109,14 @@ static void test_arguments(void)
     char long_name[UFS_GPT_NAME_CHARS + 2];
     struct ufs_gpt_disk bad;
     build(4096);
-    CHECK_EQ(ufs_gpt_find(NULL, 4096, E, sizeof E, &D, "boot", &X), UFS_GPT_ARGUMENT);
-    CHECK_EQ(ufs_gpt_find(H, 4096, NULL, sizeof E, &D, "boot", &X), UFS_GPT_ARGUMENT);
-    CHECK_EQ(ufs_gpt_find(H, 4096, E, sizeof E, NULL, "boot", &X), UFS_GPT_ARGUMENT);
-    CHECK_EQ(ufs_gpt_find(H, 4096, E, sizeof E, &D, NULL, &X), UFS_GPT_ARGUMENT);
-    CHECK_EQ(ufs_gpt_find(H, 4096, E, sizeof E, &D, "boot", NULL), UFS_GPT_ARGUMENT);
-    CHECK_EQ(ufs_gpt_find(H, 4095, E, sizeof E, &D, "boot", &X), UFS_GPT_ARGUMENT);
-    CHECK_EQ(ufs_gpt_find(H, 4096, E, sizeof E - 1, &D, "boot", &X), UFS_GPT_ARGUMENT);
-    CHECK_EQ(ufs_gpt_find(H, 4096, E, sizeof E + 128, &D, "boot", &X), UFS_GPT_ARGUMENT);
+    CHECK_EQ(ufs_gpt_find(NULL, 4096, E, TABLE_BYTES, &D, "boot", &X), UFS_GPT_ARGUMENT);
+    CHECK_EQ(ufs_gpt_find(H, 4096, NULL, TABLE_BYTES, &D, "boot", &X), UFS_GPT_ARGUMENT);
+    CHECK_EQ(ufs_gpt_find(H, 4096, E, TABLE_BYTES, NULL, "boot", &X), UFS_GPT_ARGUMENT);
+    CHECK_EQ(ufs_gpt_find(H, 4096, E, TABLE_BYTES, &D, NULL, &X), UFS_GPT_ARGUMENT);
+    CHECK_EQ(ufs_gpt_find(H, 4096, E, TABLE_BYTES, &D, "boot", NULL), UFS_GPT_ARGUMENT);
+    CHECK_EQ(ufs_gpt_find(H, 4095, E, TABLE_BYTES, &D, "boot", &X), UFS_GPT_ARGUMENT);
+    CHECK_EQ(ufs_gpt_find(H, 4096, E, TABLE_BYTES - 1, &D, "boot", &X), UFS_GPT_ARGUMENT);
+    CHECK_EQ(ufs_gpt_find(H, 4096, E, TABLE_BYTES + 128, &D, "boot", &X), UFS_GPT_ARGUMENT);
     CHECK_EQ(find(""), UFS_GPT_ARGUMENT);
     CHECK_EQ(find("caf\xC3\xA9"), UFS_GPT_ARGUMENT);
     memset(long_name, 'a', sizeof long_name - 1); long_name[sizeof long_name - 1] = 0;
@@ -119,9 +124,9 @@ static void test_arguments(void)
     long_name[UFS_GPT_NAME_CHARS] = 0; /* 36 characters is the longest legal name. */
     CHECK_EQ(find(long_name), UFS_GPT_NOT_FOUND);
     bad = D; bad.block_bytes = 2048;
-    CHECK_EQ(ufs_gpt_find(H, 2048, E, sizeof E, &bad, "boot", &X), UFS_GPT_ARGUMENT);
+    CHECK_EQ(ufs_gpt_find(H, 2048, E, TABLE_BYTES, &bad, "boot", &X), UFS_GPT_ARGUMENT);
     bad = D; bad.lun_blocks = 0;
-    CHECK_EQ(ufs_gpt_find(H, 4096, E, sizeof E, &bad, "boot", &X), UFS_GPT_ARGUMENT);
+    CHECK_EQ(ufs_gpt_find(H, 4096, E, TABLE_BYTES, &bad, "boot", &X), UFS_GPT_ARGUMENT);
 }
 
 static void test_failure_zeroes_output(void)
@@ -139,7 +144,9 @@ static void test_header_rules(void)
     unsigned i;
     for (i = 0; i < 8; ++i) { build(4096); H[i] ^= 1; seal(); CHECK_EQ(find("boot"), UFS_GPT_SIGNATURE); }
     build(4096); put32(H + 8, 0x00010001); seal(); CHECK_EQ(find("boot"), UFS_GPT_HEADER);
+    build(4096); put32(H + 8, 0x0000FFFF); seal(); CHECK_EQ(find("boot"), UFS_GPT_HEADER);
     build(4096); put32(H + 12, 96); seal(); CHECK_EQ(find("boot"), UFS_GPT_HEADER);
+    build(4096); put32(H + 12, 91); seal(); CHECK_EQ(find("boot"), UFS_GPT_HEADER);
     build(4096); put32(H + 20, 1); seal(); CHECK_EQ(find("boot"), UFS_GPT_HEADER);
     build(4096); H[92] = 1; seal(); CHECK_EQ(find("boot"), UFS_GPT_HEADER);
     build(4096); H[4095] = 1; seal(); CHECK_EQ(find("boot"), UFS_GPT_HEADER);
@@ -153,12 +160,13 @@ static void test_crc_rules(void)
     build(4096); H[16] ^= 1; CHECK_EQ(find("boot"), UFS_GPT_CRC);
     build(4096); H[40] ^= 1; CHECK_EQ(find("boot"), UFS_GPT_CRC); /* field changed, CRC not resealed */
     build(4096); E[0] ^= 1; CHECK_EQ(find("boot"), UFS_GPT_CRC);
-    build(4096); E[sizeof E - 1] ^= 1; CHECK_EQ(find("boot"), UFS_GPT_CRC);
+    build(4096); E[TABLE_BYTES - 1] ^= 1; CHECK_EQ(find("boot"), UFS_GPT_CRC);
 }
 
 static void test_lba_rules(void)
 {
     build(4096); put64(H + 24, 2); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(4096); put64(H + 24, 0); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
     build(4096); put64(H + 32, LUN_BLOCKS); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
     build(4096); put64(H + 32, 1); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
     /* An empty table, so no partition can fail first and hide the inverted range. */
@@ -166,13 +174,27 @@ static void test_lba_rules(void)
     build(4096); put64(H + 48, LUN_BLOCKS - 1); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS); /* reaches the backup */
     build(4096); put64(H + 72, 1); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
     build(4096); put64(H + 72, FIRST_USABLE); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
-    /* The array must end before the usable area. 16 entries take one 4K block. */
-    build(4096); put64(H + 72, FIRST_USABLE - 1); seal(); CHECK_EQ(find("boot"), UFS_GPT_OK);
-    build(512); put64(H + 72, FIRST_USABLE - 3); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS); /* needs 4 blocks */
-    build(512); put64(H + 72, FIRST_USABLE - 4); seal(); CHECK_EQ(find("boot"), UFS_GPT_OK);
-    /* A partly used last block still occupies the whole block: 15 entries need 4 of 512 bytes. */
-    build(512); entry_count = 15; put32(H + 80, 15); put64(H + 72, FIRST_USABLE - 3); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
-    build(512); entry_count = 15; put32(H + 80, 15); put64(H + 72, FIRST_USABLE - 4); seal(); CHECK_EQ(find("boot"), UFS_GPT_OK);
+    /* The backup header is on the last block of this LUN, not merely inside it:
+     * a valid table from a smaller LUN must not be accepted here. */
+    build(4096); entry(1, "userdata", 1000, 4000); put64(H + 32, 5000); put64(H + 48, 4990); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(4096); put64(H + 32, LUN_BLOCKS - 2); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    /* 16 KiB is reserved on each side even for a small array: 4 blocks of 4K, 32 of 512. */
+    build(4096); put64(H + 72, FIRST_USABLE - 4); seal(); CHECK_EQ(find("boot"), UFS_GPT_OK);
+    build(4096); put64(H + 72, FIRST_USABLE - 3); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(512); put64(H + 72, FIRST_USABLE - 32); seal(); CHECK_EQ(find("boot"), UFS_GPT_OK);
+    build(512); put64(H + 72, FIRST_USABLE - 31); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(4096); put64(H + 48, LUN_BLOCKS - 1 - 5); seal(); CHECK_EQ(find("boot"), UFS_GPT_OK);
+    build(4096); put64(H + 48, LUN_BLOCKS - 1 - 4); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(4096); put64(H + 48, LUN_BLOCKS - 2); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS); /* no backup array at all */
+    /* A larger array needs all its blocks, rounded up: 129 entries take 33 of 512 or 5 of 4K. */
+    build(512); use_count(129); put64(H + 40, 34); put64(H + 48, LUN_BLOCKS - 1 - 34); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(512); use_count(129); put64(H + 40, 35); put64(H + 48, LUN_BLOCKS - 1 - 34); seal(); CHECK_EQ(find("boot"), UFS_GPT_OK);
+    build(4096); use_count(129); put64(H + 40, 6); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(4096); use_count(129); put64(H + 40, 7); seal(); CHECK_EQ(find("boot"), UFS_GPT_OK);
+    build(4096); use_count(129); put64(H + 48, LUN_BLOCKS - 1 - 5); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(4096); use_count(129); put64(H + 48, LUN_BLOCKS - 1 - 6); seal(); CHECK_EQ(find("boot"), UFS_GPT_OK);
+    /* A usable range of exactly one block is legal. */
+    build(4096); memset(E, 0, sizeof E); entry(0, "only", LAST_USABLE, LAST_USABLE); put64(H + 40, LAST_USABLE); seal(); CHECK_EQ(find("only"), UFS_GPT_OK);
     /* Values near UINT64_MAX fail without wrapping. */
     build(4096); put64(H + 48, UINT64_MAX); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
     build(4096); put64(H + 72, UINT64_MAX); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
@@ -186,6 +208,54 @@ static void test_entry_array_rules(void)
     build(4096); put32(H + 80, ENTRIES - 1); seal(); CHECK_EQ(find("boot"), UFS_GPT_ARGUMENT); /* buffer must match */
     /* An unused entry must be entirely zero. */
     build(4096); E[3 * UFS_GPT_ENTRY_BYTES + 40] = 1; seal(); CHECK_EQ(find("boot"), UFS_GPT_ENTRIES);
+    build(4096); E[4 * UFS_GPT_ENTRY_BYTES - 1] = 1; seal(); CHECK_EQ(find("boot"), UFS_GPT_ENTRIES); /* its last byte */
+    /* Exactly the maximum is legal, and every slot is checked and searched. */
+    build(4096); use_count(UFS_GPT_MAX_ENTRIES); entry(UFS_GPT_MAX_ENTRIES - 1, "tail", 300, 399); seal();
+    CHECK_EQ(find("tail"), UFS_GPT_OK); CHECK_EQ(X.first_block, 300);
+}
+
+/* The final slot gets every rule the others do. */
+static void test_last_slot(void)
+{
+    const unsigned last = ENTRIES - 1;
+    build(4096); entry(last, "tail", 300, 399); seal(); CHECK_EQ(find("tail"), UFS_GPT_OK);
+    build(4096); entry(last, "bad", 400, 399); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(4096); entry(last, "x", 150, 160); seal(); CHECK_EQ(find("boot"), UFS_GPT_OVERLAP);
+    build(4096); entry(last, "boot", 300, 399); seal(); CHECK_EQ(find("boot"), UFS_GPT_AMBIGUOUS);
+}
+
+/* Every 64-bit field has an in-range low half here, so reading only 32 bits would pass. */
+static void test_64_bit_fields(void)
+{
+    build(4096); put64(H + 24, HIGH + 1); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(4096); put64(H + 32, HIGH + LUN_BLOCKS - 1); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(4096); put64(H + 40, HIGH + FIRST_USABLE); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(4096); put64(H + 48, HIGH + LAST_USABLE); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(4096); put64(H + 72, HIGH + 2); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(4096); entry(3, "h", HIGH + 400, 450); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+    build(4096); entry(3, "h", 400, HIGH + 450); seal(); CHECK_EQ(find("boot"), UFS_GPT_BOUNDS);
+
+    /* A LUN past 2^32 blocks, with the usable area and array above that line too. */
+    #define BIG (UINT64_C(1) << 33)
+    #define BIG_FIRST (HIGH + 0x100u)
+    #define BIG_TABLE() do { build(4096); memset(E, 0, sizeof E); D.lun_blocks = BIG; put64(H + 32, BIG - 1); \
+        put64(H + 40, BIG_FIRST); put64(H + 48, BIG - 34); put64(H + 72, HIGH + 0x10u); } while (0)
+    BIG_TABLE(); entry(0, "far", BIG_FIRST + 0x100u, BIG_FIRST + 0x1FFu); seal();
+    CHECK_EQ(find("far"), UFS_GPT_OK);
+    CHECK_EQ(X.first_block, BIG_FIRST + 0x100u); CHECK_EQ(X.blocks, 0x100);
+
+    /* Below a high usable start, and truly overlapping only through the high halves. */
+    BIG_TABLE(); entry(0, "low", 0x200, 0x2FF); seal(); CHECK_EQ(find("low"), UFS_GPT_BOUNDS);
+    BIG_TABLE(); entry(0, "a", BIG_FIRST + 0x100u, BIG_FIRST + 0x200u); entry(1, "b", BIG_FIRST + 0x150u, BIG_FIRST + 0x160u); seal();
+    CHECK_EQ(find("a"), UFS_GPT_OVERLAP);
+
+    /* Same low halves, different high halves: these do not overlap. */
+    build(4096); D.lun_blocks = BIG; put64(H + 32, BIG - 1); put64(H + 48, BIG - 34);
+    entry(1, "userdata", 1000, 900000); entry(3, "far", HIGH + 100, HIGH + 199); seal();
+    CHECK_EQ(find("far"), UFS_GPT_OK);
+    build(4096); D.lun_blocks = BIG; put64(H + 32, BIG - 1); put64(H + 48, BIG - 34);
+    entry(0, "far", HIGH + 100, HIGH + 199); entry(3, "boot", 100, 199); seal();
+    CHECK_EQ(find("boot"), UFS_GPT_OK);
 }
 
 static void test_partition_rules(void)
@@ -199,6 +269,8 @@ static void test_partition_rules(void)
     build(4096); entry(3, "left", 50, 100); seal(); CHECK_EQ(find("boot"), UFS_GPT_OVERLAP);
     build(4096); entry(3, "right", 199, 199); seal(); CHECK_EQ(find("boot"), UFS_GPT_OVERLAP); /* shares only boot's last block */
     build(4096); entry(3, "same", 100, 199); seal(); CHECK_EQ(find("boot"), UFS_GPT_OVERLAP);
+    /* An entry may start on the first usable block. */
+    build(4096); entry(3, "start", FIRST_USABLE, 40); seal(); CHECK_EQ(find("start"), UFS_GPT_OK); CHECK_EQ(X.first_block, FIRST_USABLE);
     /* Touching ranges are not overlap. */
     build(4096); entry(3, "after", 300, 310); entry(4, "before", 40, 99); seal(); CHECK_EQ(find("after"), UFS_GPT_OK); CHECK_EQ(find("before"), UFS_GPT_OK);
     /* An overlap among other entries still fails a lookup of an innocent name. */
@@ -214,6 +286,9 @@ static void test_names(void)
     build(4096); entry(3, "dtbo", 300, 399); e = E + 3 * UFS_GPT_ENTRY_BYTES; e[57] = 0x04; seal();
     CHECK_EQ(find("dtbo"), UFS_GPT_NOT_FOUND); CHECK_EQ(find("boot"), UFS_GPT_OK);
     build(4096); entry(3, "dtbo", 300, 399); e = E + 3 * UFS_GPT_ENTRY_BYTES; e[56] = 0x80; seal();
+    CHECK_EQ(find("dtbo"), UFS_GPT_NOT_FOUND);
+    /* U+0100 has a zero low byte but is not a terminator. */
+    build(4096); entry(3, "dtbo", 300, 399); e = E + 3 * UFS_GPT_ENTRY_BYTES; e[56 + 2 * 4 + 1] = 0x01; seal();
     CHECK_EQ(find("dtbo"), UFS_GPT_NOT_FOUND);
     /* All 36 units in use, with no terminator. */
     memset(full, 'n', UFS_GPT_NAME_CHARS); full[UFS_GPT_NAME_CHARS] = 0;
@@ -271,7 +346,7 @@ static void test_extent_drives_read_admission(void)
 int main(void)
 {
     static void (*const tests[])(void) = { test_crc_vector, test_valid_table, test_userdata_refused, test_arguments, test_failure_zeroes_output,
-        test_header_rules, test_crc_rules, test_lba_rules, test_entry_array_rules, test_partition_rules, test_names, test_extent_drives_read_admission };
+        test_header_rules, test_crc_rules, test_lba_rules, test_entry_array_rules, test_last_slot, test_64_bit_fields, test_partition_rules, test_names, test_extent_drives_read_admission };
     size_t i, count = sizeof tests / sizeof tests[0];
     for (i = 0; i < count; ++i) tests[i]();
     printf("{\"outcome\":\"pass\",\"tests\":%zu}\n", count);

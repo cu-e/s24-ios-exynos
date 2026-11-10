@@ -1,0 +1,70 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-09T21:22:19+00:00",
+  "summary": "Tightened GPT geometry admission and closed test gaps found by source review of DRV-005. Tested only against tables built in the test.",
+  "task": "DRV-006",
+  "owner": "claude-ufs-gpt-hardening-20261110-d6",
+  "commit": "45e435c8816ca5bed039857db8e228dec525b46d",
+  "parent_task": "DRV-005",
+  "tests": {
+    "outcome": "pass",
+    "tests": 14
+  },
+  "mutation_count": 72,
+  "mutation_survivors": [],
+  "commands": [
+    {
+      "cwd": "worktrees/drv-006-ufs-gpt-hardening-20261110/",
+      "argv": [
+        "python3",
+        "src/platform/storage/ufs/gpt_check.py",
+        "--run",
+        "check-004"
+      ],
+      "exit_code": 0,
+      "result": "worktrees/drv-006-ufs-gpt-hardening-20261110/artifacts/ufs-gpt/check-004/evidence.json"
+    }
+  ],
+  "sha256": {
+    "src/platform/storage/ufs/gpt.c": "aed3b622c6540f7e9d64a7459ae2b4b36f5a9fa92b53af4ed9fd6287453b253f",
+    "src/platform/storage/ufs/gpt.h": "2579d750ca7c21cec02b9a2889e7c02f72b881504ea2a362dbae5f2763e57611",
+    "src/platform/storage/ufs/gpt_test.c": "2799035354ada12f5283ac2355b17b0ffa91d59a04350af8b296588b38f3f9e7",
+    "src/platform/storage/ufs/gpt_check.py": "af101f914053e6d9bfc9f5b11175a047d270ecd4232f192d9919d620363f72df"
+  },
+  "artifact_sha256": {
+    "worktrees/drv-006-ufs-gpt-hardening-20261110/artifacts/ufs-gpt/check-004/evidence.json": "fb7a230f3bffcc879ee9319c2bdbf2dd38d597294855fb2901a9669ff1096f6b"
+  },
+  "artifacts": [
+    "worktrees/drv-006-ufs-gpt-hardening-20261110/artifacts/ufs-gpt/check-004/evidence.json",
+    "worktrees/drv-006-ufs-gpt-hardening-20261110/docs/procedures/ufs-gpt/README.md",
+    "worktrees/drv-006-ufs-gpt-hardening-20261110/src/platform/storage/ufs/gpt.c",
+    "worktrees/drv-006-ufs-gpt-hardening-20261110/src/platform/storage/ufs/gpt_test.c"
+  ],
+  "device_io": false,
+  "mmio": false,
+  "storage_access": false,
+  "real_gpt_examined": false,
+  "hardware_execution": false,
+  "geometry_rule_references": {
+    "normative_text": "UEFI specification chapter 5. https://uefi.org/specs/UEFI/2.10/05_GUID_Partition_Table_Format.html returned HTTP 403 on 2026-11-10, so the normative wording was not read.",
+    "secondary": [
+      "https://en.wikipedia.org/wiki/GUID_Partition_Table",
+      "https://fuchsia.googlesource.com/fuchsia/+/19cd81191e02/third_party/rust_crates/vendor/gpt/src/header.rs",
+      "https://qemu.googlesource.com/u-boot/+/refs/heads/next/doc/README.gpt"
+    ]
+  },
+  "review": "Source-only review of DRV-005 by a fresh same-session subagent that was not given the author conclusions. Commits after it have tests and mutants but were not reviewed again.",
+  "review_findings_not_changed_in_code": [
+    "UniquePartitionGUID is not checked: lookup never uses it and the rule could refuse a real table without protecting anything.",
+    "The double read of input fields is handled by requiring a stable kernel-owned buffer, documented in gpt.h.",
+    "The userdata refusal cannot identify mislabelled data; the claim was narrowed instead.",
+    "host.c READ(10) enforcement was outside this review; the extent-to-LUN binding has no integration code yet."
+  ],
+  "limitations": [
+    "No real S24 GPT has been read; the strict rules may refuse it, and relaxing any rule would need a measurement.",
+    "The geometry rules were checked against secondary sources, not the normative UEFI text.",
+    "No PHY, IOMMU, MCQ or boot behaviour is established."
+  ]
+}
