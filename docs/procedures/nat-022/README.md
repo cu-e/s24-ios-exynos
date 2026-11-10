@@ -65,7 +65,7 @@ behaves as intended on silicon: no AArch64 emulator is available on this host.
    S-Boot's own supervision does not reset the phone, recovery needs the
    hardware key combination. NAT-011 (PMU SWRESET) is blocked and not used.
 
-## Staged XNU attach plan (not authorised, not built)
+## Staged XNU attach plan (items 1, 2 and the stub half of 3 have run; replaying the displaced instruction and entering XNU are not authorised, not built)
 
 1. Canary plain, then canary fault: entry state, privilege, stack, vectors, one
    independent marker. Decide from what is seen; no retry loops.
@@ -75,10 +75,10 @@ behaves as intended on silicon: no AArch64 emulator is available on this host.
    the Mach-O entry of the kernel copy, preserving the displaced instructions, so
    a `MK_ST_XNU_ENTRY` frame can only be drawn by code inside XNU. Needs the
    entry symbol/offset from the existing kernel and a patch with a base hash.
-   (NAT-028 builds the first half of this, host-tested and not run: the stub at the
-   entry that draws the frame and holds, without replaying the displaced instruction.
-   See "loader-diag-xnu-entry" below. Replaying it and continuing into XNU is a later,
-   separate step.)
+   (NAT-028 builds the first half of this, host-tested and then run once on the phone
+   (decision 0015, "Native result 007" below): the stub at the entry that draws the frame
+   and holds, without replaying the displaced instruction. Replaying it and continuing
+   into XNU is a later, separate step.)
 4. On exception, the frames above give ESR, ELR and FAR to map to an
    instruction/address through the kernel symbols.
 
@@ -731,7 +731,7 @@ idx7 = idx8 = `0x0da0` and no decoded TRIG_CON-after; it is listed as seen and n
 The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-006/` (the video shows the owner's
 room and is not committed).
 
-## loader-diag-xnu-entry: a jump whose only target code is our marker stub at the kernel copy's entry (NAT-028; host-built, not run, no decision yet)
+## loader-diag-xnu-entry: a jump whose only target code is our marker stub at the kernel copy's entry (NAT-028; host-built 2026-11-10, run once under decision 0015, see Native result 007)
 
 Goal step 4 asks for a marker *inside* XNU's entry: a pre-jump message is not proof of kernel entry. This image is
 the first half of that. After the loader has built everything exactly as in run 006 it **jumps** (start.S's existing
@@ -825,5 +825,53 @@ Android, apps, settings, accounts and user data are not touched.
 Hashes: loader `Image` `6cb6b1a03a008a40de6ebe5e823e773000b0a3e4899f9263f06adf4a41b2bcc3` (217088 bytes), `Image.payload`
 `d4c391624ad8d50ce4c629d905a7a8fa88da142118ec2ff6a548bbeef9658f27` (21771872 bytes), RECOVERY (`artifacts/nat-022/package-008/recovery.img`)
 `4353546c4494c2aad12eaf3b0188478f4157ee5e4e3658fd253387b80416d06a`; build-008 and its reproduction agree. The session driver is
-`session_xnu.py`; it is gated on `docs/decisions/0015-nat022-loader-diag-xnu-entry-single-run-2026-11-10.md`, which does not exist: with the file missing it stops
-before any `adb` call (checked: 0 commands, no write). It has not been run against the phone.
+`session_xnu.py`; it is gated on `docs/decisions/0015-nat022-loader-diag-xnu-entry-single-run-2026-11-10.md`. When this section was written
+that file did not exist and the driver stopped before any `adb` call (checked: 0 commands, no write); the owner then accepted decision 0015 and the image was
+run once (below).
+
+## Native result 007, 2026-11-10 (decision 0015): control reached the kernel copy's entry address and ran only our stub
+
+`loader-diag-xnu-entry` (loader `Image.payload` `d4c39162…`, RECOVERY image `4353546c…`, source commit `606528b`, decision commit `2bd0c72`) was
+written to RECOVERY with a matching full readback and booted once (`adb reboot recovery` at 17:07:03.8Z). The owner filmed the screen (85.8 s,
+720×1280) and, asked what they saw, reported the loader's text lines (Russian answer, typos acknowledged by the owner: "увидел з текста только entered
+loader / BL1 / G1Cu3 ready / Gxfa200000 1080x2310 32bpp / 0x9de100000 0x20000000 / 10 segnents 21.6 MB / 13960 bytes / @xffffffr00743b4a8 /
+@xffffrrr004000000 / 6x9dc400000 / rd=ndo e1sufs= …"); these text lines are a hand transcription, not machine-decoded, and are not legible in stills of the
+recording at this resolution. Host observer: `04e8:685d` "SEC_UPLOAD" (bus 5 dev 60) at 17:08:53Z, no device at 17:09:16Z, `04e8:685d` "SAMSUNG USB"
+(bus 5 dev 61) at 17:09:21Z; the owner's note does not say whether they entered Download Mode, so the cause of these enumerations is not established. Stock
+RECOVERY was restored with one NAT-013 session on dev 61 (17:16:19Z–17:16:22Z); Android was back at 17:18:52Z; the full hash equals stock (`96620b8b…`),
+`check_android` and `assess` pass. Record: `native-attempt-007-evidence.json` (outcome `pass` for the stub-reaches-entry criterion; **not** "XNU ran").
+
+`decode_video.py` (`--y0 10`, four windows) decoded 789 CRC-valid frames (STAGE 259, REG 248, XNU 202, BOOTID 51, ENTRY 29), merged in `decoded-timeline.json`:
+
+| Time (s) | Frame | Decoded | Meaning |
+| --- | --- | --- | --- |
+| 0.0–0.5 | ENTRY | `0x8900` | EL2, MMU/D-cache off, I-cache on: the loader's own entry as S-Boot left the CPU (as in run 002) |
+| 0.8–19.4 | STAGE idx0 | `0x20`, `0x21`, `0x30`, `0x31`, `0x32`, `0x33`, `0x34` | MAIN, FB, MEM, ZERO, COPY, ADT, CLEAN (as in run 006, ~0.7 s later) |
+| 19.5–20.7 | STAGE idx0 | `0x40` | `PRE_JUMP`, one dwell, then the loader jumps |
+| 20.8–22.1 | STAGE idx0 | `0x50` | `XNU_ENTRY`: drawn by `mk_xnu_entry_hold`, called from the stub |
+| 22.2–23.2 | STAGE idx1 | `0x05ff` | mask: ENTRY..PRE_JUMP plus bit 10 (xnu entry stub); no FAIL bit |
+| 23.5–24.6 | ENTRY | `0x4000` | **EL1**, M/C/I = 0 at the current EL and at EL1 |
+| 24.9–35.3 | XNU idx0..3 / idx4..7 | `0x0000 0x0009 0xe183 0xb4a8` / `0x0000 0x0009 0xe2d7 0x8000` | stub PC `0x00000009e183b4a8`, `x0` `0x00000009e2d78000` |
+| 35.4–39.2 | BOOTID idx0/1, STAGE | `0x76f8`, `0x2777`, `0x50` | boot identifier words, then STAGE `0x50` again |
+| 39.4–52.2 | REG 0..9 | status 1, GLOBAL_CON `0x0133`, TRIG_CON `0x3062`→`0x3063`, FRAME_COUNT idx7 = idx8 = `0x0782`, kick count `0x17` | DECON0 report (loop 2: status 2, `0x3063`→`0x3062`, `0x0e47`/`0x0eef`, `0x2e`) |
+
+The loop (STAGE idx1 at 22.17, 52.36 and 82.66 s; period ~30.2 s) shows two complete XNU/REG blocks and the start of a third; the last CRC-valid frame is at
+83.5 s, the recording ends at 85.8 s. No EXC (`0x1f`), FAIL (`0x3f`), SLOT, ESR, ELR or FAR frame occurs and there are no isolated n < 3 frames.
+
+Checks on the numbers (all from CRC-valid frames): both XNU blocks give the same PC and `x0`; **`x0 − PC = 0x153cb58` exactly, as predicted** from the payload
+header and the loader's layout; the PC is 8-byte aligned; `PC − 0x343b4a8 = 0x9de400000` is the RAM window base (4 MiB aligned) and equals `x0 − 0x4978000`; the
+run-005 exception (FAR `0x9e2d743fc` − 1020 = ADT copy `0x9e2d74000`, at window base + `0x4974000`) implies the same base. The earlier approximate base from run 006 is superseded.
+The transcribed `@0xfffffff00743b4a8` equals the payload's `entry_va`; the transcribed `0x9dc400000` differs by one hex digit from the decoded base and is treated as a
+probable misreading, not a conflicting measurement.
+
+Established (observation of this S24, one run): after `PRE_JUMP` the loader's handoff path (full-window cache clean, SCTLR M/C/I cleared, `ic iallu`, `br x16`) delivered
+control to the entry address of the copied kernel; the 40 stub bytes written there by data stores were fetched and executed (so instruction fetch from the window works for
+this region after the loader's clean and I-cache invalidate); the stub's stack and function literals worked; the state at that point is EL1 with MMU and caches off and
+`x0` is the `boot_args` physical address. This is the project's first CRC-valid marker drawn from code at the kernel copy's entry address.
+
+Not established: **any XNU instruction running** (none did: the kernel's first word `b #0xfffffff00743e05c` was replaced and is not replayed); that the ADT and `boot_args`
+are acceptable to XNU or that `x0` is the convention XNU expects; what happens when the kernel's own code is entered (replaying the displaced word and continuing needs a new
+task and decision); what caused the SEC_UPLOAD/Download Mode enumerations after the display ended (the 83 s watchdog is the expected cause of the reset, but the owner's
+actions are not recorded); kick vs S-Boot refresh (no no-kick control); the REG block FRAME_COUNT idx7 = idx8 in loop 1 is listed as seen and not interpreted.
+
+The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-007/` (the video shows the owner's room and is not committed).

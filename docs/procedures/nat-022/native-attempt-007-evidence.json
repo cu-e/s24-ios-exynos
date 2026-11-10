@@ -1,0 +1,387 @@
+{
+ "kind": "native-device",
+ "origin": "owner-attended-run",
+ "outcome": "pass",
+ "criterion": "The loader-diag-xnu-entry image, started from the RECOVERY slot, jumps from the loader's handoff path to the entry address of the kernel copy and its stub draws a CRC-valid STAGE 0x50 frame together with the stub PC and x0 (decoded from an independent recording), with PC = RAM window base + (entry_va - virt_base) and x0 - PC = 0x153cb58. Passing means control reached the kernel copy's entry address and ran only the NAT-028 stub there. It does not mean that any XNU instruction ran: the kernel's own first word was replaced and is not replayed.",
+ "recorded_at": "2026-11-10T17:28:00+00:00",
+ "decision": "docs/decisions/0015-nat022-loader-diag-xnu-entry-single-run-2026-11-10.md",
+ "summary": "One native run of NAT-022 loader-diag-xnu-entry (RECOVERY image sha256 4353546c4494c2aad12eaf3b0188478f4157ee5e4e3658fd253387b80416d06a, Image.payload d4c391624ad8d50ce4c629d905a7a8fa88da142118ec2ff6a548bbeef9658f27, loader Image 6cb6b1a03a008a40de6ebe5e823e773000b0a3e4899f9263f06adf4a41b2bcc3, source commit 606528b, decision commit 2bd0c72). Written to RECOVERY (/dev/block/sda18) with a matching full readback and booted once (adb reboot recovery at 2026-11-10T17:07:03.8Z). The owner filmed the screen (85.8 s, 720x1280). decode_video.py (--y0 10, four windows) decoded 789 CRC-valid frames (STAGE 259, REG 248, XNU 202, BOOTID 51, ENTRY 29). The loader's stages MAIN 0x20, FB 0x21, MEM 0x30, ZERO 0x31, COPY 0x32, ADT 0x33, CLEAN 0x34 and PRE_JUMP 0x40 appear in order (PRE_JUMP 19.5-20.7 s, one dwell), followed at 20.8 s by STAGE 0x50 and a repeating loop of ~30.2 s: STAGE idx1 reached mask 0x05ff (bits 0-8 plus bit 10, no FAIL), ENTRY 0x4000 (EL1, M/C/I = 0 at EL1), XNU idx0-3 = stub PC 0x00000009e183b4a8, XNU idx4-7 = x0 0x00000009e2d78000, BOOTID 0x76f8/0x2777, STAGE 0x50, REG 0..9. Two full loops and the start of a third (mask at 82.7 s) are decoded; the last CRC-valid frame is at 83.5 s, the recording ends at 85.8 s. Checks on the decoded numbers: both loops give identical PC and x0; x0 - PC = 0x153cb58 exactly as predicted from the payload header and the loader's layout (boot_args at window base + 0x4978000, entry at + 0x343b4a8); PC is 8-byte aligned; PC - 0x343b4a8 gives the RAM window base 0x9de400000 (4 MiB aligned), which is also what the run-005 exception's FAR (ADT copy at window base + 0x4974000) implies. No EXC (0x1f), FAIL (0x3f), SLOT, ESR, ELR or FAR frame occurs. Meaning: the loader's handoff path (full-window cache clean, SCTLR M/C/I cleared, ic iallu, br x16) delivered control to the kernel copy's entry address; the 40 stub bytes written there by data stores were fetched and executed (instruction fetch from the window works after the loader's clean and I-cache invalidate for this region); the stub set its stack and called mk_xnu_entry_hold, which read EL1 with MMU and caches off and drew the frames. x0 at that point is the boot_args physical address. No XNU instruction ran: the kernel's first word (b #0xfffffff00743e05c) was replaced by the stub and not replayed. After the display ended (~83.5 s, matching the 83 s watchdog) the host observer saw 04e8:685d 'SEC_UPLOAD' (bus 5 dev 60) at 17:08:53Z, 109 s after the reboot request, no device at 17:09:16Z and 04e8:685d 'SAMSUNG USB' (bus 5 dev 61) at 17:09:21Z. The owner's note does not say whether they entered Download Mode; who or what caused each enumeration is not established. Stock RECOVERY was restored with one NAT-013 session on dev 61 (17:16:19Z-17:16:22Z); Android was back at 17:18:52Z; the full hash equals stock (96620b8b...), check_android and assess pass.",
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/session_xnu.py",
+    "--out",
+    "artifacts/nat-022/preflight-009"
+   ],
+   "exit_code": 0,
+   "note": "read-only preflight with decision 0015 present: outcome ready-read-only (stock RECOVERY hash matched, battery 84%, 33.1 C, no write, no reboot)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-020/observe_usb.py",
+    "--out",
+    "artifacts/nat-022/usb-attempt-007",
+    "--seconds",
+    "360"
+   ],
+   "exit_code": 0,
+   "note": "started 17:06:56Z; 5 events (see usb_events)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/session_xnu.py",
+    "--execute",
+    "--out",
+    "artifacts/nat-022/attempt-007"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T17:07:00.5Z",
+   "note": "one-shot marker created 17:07:00.5Z; full-hash write of package-008 to /dev/block/sda18, readback sha256 4353546c...; adb reboot recovery requested 17:07:03.83Z (the single reboot of decision 0015); outcome native-attempt-started"
+  },
+  {
+   "argv": [
+    "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "restore",
+    "--bus",
+    "5",
+    "--address",
+    "61",
+    "--out",
+    "artifacts/nat-022/stock-restore-007"
+   ],
+   "exit_code": 0,
+   "note": "one NAT-013 session, started 17:16:19.3Z, finished 17:16:22.6Z; pit_validated, upload_acknowledged, session_end_confirmed, reboot_confirmed all true; outcome awaiting-readback"
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-012/check_android.py",
+    "artifacts/nat-022/android-after-stock-007.json"
+   ],
+   "exit_code": 0,
+   "note": "Android up at 17:18:52Z (adb sys.boot_completed 1); outcome pass; recovery_hash_match true; user data directories present"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "assess",
+    "--report",
+    "artifacts/nat-022/stock-restore-007/report.json",
+    "--readback",
+    "artifacts/nat-022/android-after-stock-007.json"
+   ],
+   "exit_code": 0,
+   "note": "stdout saved as artifacts/nat-022/assess-007.json: outcome pass, android_booted true, recovery_readback_matches true. (A first call with an unsupported --out option exited 2 before doing anything.)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "artifacts/nat-022/video-attempt-007/camera.mp4",
+    "--y0",
+    "10",
+    "--t0",
+    "0",
+    "--t1",
+    "20",
+    "--out",
+    "artifacts/nat-022/video-attempt-007/decoded-frames-y10-t0-20.json"
+   ],
+   "exit_code": 0,
+   "log": "artifacts/nat-022/video-attempt-007/decode-y10-t0-20.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "artifacts/nat-022/video-attempt-007/camera.mp4",
+    "--y0",
+    "10",
+    "--t0",
+    "20",
+    "--t1",
+    "45",
+    "--out",
+    "artifacts/nat-022/video-attempt-007/decoded-frames-y10-t20-45.json"
+   ],
+   "exit_code": 0,
+   "log": "artifacts/nat-022/video-attempt-007/decode-y10-t20-45.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "artifacts/nat-022/video-attempt-007/camera.mp4",
+    "--y0",
+    "10",
+    "--t0",
+    "45",
+    "--t1",
+    "70",
+    "--out",
+    "artifacts/nat-022/video-attempt-007/decoded-frames-y10-t45-70.json"
+   ],
+   "exit_code": 0,
+   "log": "artifacts/nat-022/video-attempt-007/decode-y10-t45-70.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "artifacts/nat-022/video-attempt-007/camera.mp4",
+    "--y0",
+    "10",
+    "--t0",
+    "70",
+    "--t1",
+    "86",
+    "--out",
+    "artifacts/nat-022/video-attempt-007/decoded-frames-y10-t70-86.json"
+   ],
+   "exit_code": 0,
+   "log": "artifacts/nat-022/video-attempt-007/decode-y10-t70-86.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "(inline) merge CRC-valid frames of the four windows into decoded-timeline.json (same rule as run 006: same kind/idx/data, gap < 0.45 s, runs of fewer than 3 frames listed separately)"
+   ],
+   "exit_code": 0,
+   "note": "789 CRC-valid frames: STAGE 259, REG 248, XNU 202, BOOTID 51, ENTRY 29; no isolated n<3 frames; no EXC/FAIL/SLOT/ESR/ELR/FAR frame"
+  },
+  {
+   "argv": [
+    "python3",
+    "(inline) assemble XNU frames and check"
+   ],
+   "exit_code": 0,
+   "note": "both complete loops give PC 0x9e183b4a8 and x0 0x9e2d78000; x0-PC = 0x153cb58 (expected); PC-0x343b4a8 = 0x9de400000, 8-byte aligned; x0-0x4978000 = 0x9de400000; the run-005 ADT address (FAR 0x9e2d743fc - 1020 = 0x9e2d74000, minus 0x4974000 = ADT offset in the window) gives the same base"
+  }
+ ],
+ "decoded_cycle": {
+  "timeline": [
+   {
+    "t_s": "0.0-0.5",
+    "frame": "ENTRY 0x8900",
+    "meaning": "EL2, MMU off, D-cache off, I-cache on: the loader's own entry frame as S-Boot left the CPU (same value as run 002); the loader then drops to EL1"
+   },
+   {
+    "t_s": "0.8-3.0",
+    "frame": "STAGE 0x20",
+    "meaning": "LOADER_MAIN"
+   },
+   {
+    "t_s": "3.1-4.6",
+    "frame": "STAGE 0x21",
+    "meaning": "LOADER_FB"
+   },
+   {
+    "t_s": "4.7-13.0",
+    "frame": "STAGE 0x30",
+    "meaning": "LOADER_MEM"
+   },
+   {
+    "t_s": "13.1-14.2",
+    "frame": "STAGE 0x31",
+    "meaning": "LOADER_ZERO"
+   },
+   {
+    "t_s": "15.4-16.6",
+    "frame": "STAGE 0x32",
+    "meaning": "LOADER_COPY"
+   },
+   {
+    "t_s": "16.7-17.8",
+    "frame": "STAGE 0x33",
+    "meaning": "LOADER_ADT"
+   },
+   {
+    "t_s": "18.1-19.4",
+    "frame": "STAGE 0x34",
+    "meaning": "LOADER_CLEAN"
+   },
+   {
+    "t_s": "19.5-20.7",
+    "frame": "STAGE 0x40",
+    "meaning": "PRE_JUMP (dwell only, then the loader jumps: this frame is not proof of anything beyond the loader)"
+   },
+   {
+    "t_s": "20.8-22.1",
+    "frame": "STAGE 0x50",
+    "meaning": "XNU_ENTRY stub marker: drawn by mk_xnu_entry_hold called from the stub"
+   },
+   {
+    "t_s": "22.2-23.2 / 52.4-53.7 / 82.7-83.5",
+    "frame": "STAGE idx1 0x05ff",
+    "meaning": "reached mask: bits 0-8 (ENTRY..PRE_JUMP) and bit 10 (xnu entry stub); bit 9 FAIL not set"
+   },
+   {
+    "t_s": "23.5-24.6 / 53.8-54.9",
+    "frame": "ENTRY 0x4000",
+    "meaning": "EL1 (bits 15:14 = 1); current-EL M/C/I = 0; EL1 SCTLR M/C/I = 0"
+   },
+   {
+    "t_s": "24.9-35.3 / 55.1-65.5",
+    "frame": "XNU idx0..3",
+    "meaning": "0x0000, 0x0009, 0xe183, 0xb4a8 -> stub PC 0x00000009e183b4a8"
+   },
+   {
+    "t_s": "30.2-35.3 / 60.5-65.5",
+    "frame": "XNU idx4..7",
+    "meaning": "0x0000, 0x0009, 0xe2d7, 0x8000 -> x0 0x00000009e2d78000"
+   },
+   {
+    "t_s": "35.4-39.2 / 65.7-69.6",
+    "frame": "BOOTID idx0/1, STAGE idx0 0x0050",
+    "meaning": "0x76f8, 0x2777; then STAGE 0x50 again"
+   },
+   {
+    "t_s": "39.4-52.2 / 69.7-82.5",
+    "frame": "REG idx0..9",
+    "meaning": "status 1 then 2; GLOBAL_CON 0x0133; TRIG_CON 0x3062/0x3063 (swapped between loops); FRAME_COUNT 0x0782/0x0782 then 0x0e47/0x0eef; kick count 0x17 then 0x2e"
+   }
+  ],
+  "loop_period_s": 30.2,
+  "stage_idx1_frames_s": [
+   22.17,
+   52.36,
+   82.66
+  ],
+  "xnu_pc": "0x00000009e183b4a8",
+  "xnu_x0": "0x00000009e2d78000",
+  "x0_minus_pc": "0x153cb58",
+  "window_base_from_pc": "0x9de400000",
+  "reached_mask": "0x05ff",
+  "entry_frame_stub": "0x4000",
+  "entry_frame_loader": "0x8900",
+  "reg_examples": [
+   {
+    "t_s": "39.4-52.2",
+    "status": 1,
+    "global_con_lo": "0x0133",
+    "trig_before": "0x3062",
+    "trig_after": "0x3063",
+    "frame_count_idx7_idx8": [
+     "0x0782",
+     "0x0782"
+    ],
+    "kick_count": "0x17"
+   },
+   {
+    "t_s": "69.7-82.5",
+    "status": 2,
+    "global_con_lo": "0x0133",
+    "trig_before": "0x3063",
+    "trig_after": "0x3062",
+    "frame_count_idx7_idx8": [
+     "0x0e47",
+     "0x0eef"
+    ],
+    "kick_count": "0x2e"
+   }
+  ],
+  "last_crc_valid_frame_s": 83.46,
+  "recording_length_s": 85.76
+ },
+ "usb_events": [
+  {
+   "t": "17:06:56Z",
+   "event": "04e8:6860 SAMSUNG_Android (bus 5 dev 59)"
+  },
+  {
+   "t": "17:07:07Z",
+   "event": "no device (reboot requested 17:07:03.8Z)"
+  },
+  {
+   "t": "17:08:53Z",
+   "event": "04e8:685d SEC_UPLOAD (bus 5 dev 60), 109 s after the reboot request"
+  },
+  {
+   "t": "17:09:16Z",
+   "event": "no device"
+  },
+  {
+   "t": "17:09:21Z",
+   "event": "04e8:685d \"SAMSUNG USB\" (bus 5 dev 61)"
+  }
+ ],
+ "hashes": {
+  "recovery_image": "4353546c4494c2aad12eaf3b0188478f4157ee5e4e3658fd253387b80416d06a",
+  "stock_recovery": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+  "loader_image": "6cb6b1a03a008a40de6ebe5e823e773000b0a3e4899f9263f06adf4a41b2bcc3",
+  "loader_image_payload": "d4c391624ad8d50ce4c629d905a7a8fa88da142118ec2ff6a548bbeef9658f27",
+  "camera_mp4": "6c0602daa5b81478545adbf0789db2a03ecebae0af87a6edc3b65ad4d50f3efe",
+  "decoded_timeline_json": "dd893d1df468a7089dad47d2ce3ca967ffb6a957d7cebc926caef37aa44aedf9",
+  "decoded_frames_y10_t0_20_json": "f6471a71a2d3b267c8561b0898ca25fd1c62b19986a24423fb5d677d6df4ccae",
+  "decoded_frames_y10_t20_45_json": "3453ca8ec0e4222daa5e3f878bce08c35cf7de66bc1be898dd730b0cf670c413",
+  "decoded_frames_y10_t45_70_json": "8818d431cfcfe79090963307e2fe285a4f5401bea804eeab74dd279cf3e016c0",
+  "decoded_frames_y10_t70_86_json": "ae392fece7cc88fb3b464a9af7ebea695e5afb0bb7f3da43efebc1e42c88ca20"
+ },
+ "artifacts": [
+  "artifacts/nat-022/attempt-007/report.json",
+  "artifacts/nat-022/preflight-009/report.json",
+  "artifacts/nat-022/preflight-gate-008/report.json",
+  "artifacts/nat-022/stock-restore-007/report.json",
+  "artifacts/nat-022/android-after-stock-007.json",
+  "artifacts/nat-022/assess-007.json",
+  "artifacts/nat-022/usb-attempt-007/complete.json",
+  "artifacts/nat-022/usb-attempt-007/000000.json",
+  "artifacts/nat-022/usb-attempt-007/000001.json",
+  "artifacts/nat-022/usb-attempt-007/000002.json",
+  "artifacts/nat-022/usb-attempt-007/000003.json",
+  "artifacts/nat-022/usb-attempt-007/000004.json",
+  "artifacts/nat-022/usb-observer-007.log",
+  "artifacts/nat-022/native-attempt-xnuentry-used.json",
+  "artifacts/nat-022/video-attempt-007/camera.mp4",
+  "artifacts/nat-022/video-attempt-007/decoded-frames-y10-t0-20.json",
+  "artifacts/nat-022/video-attempt-007/decoded-frames-y10-t20-45.json",
+  "artifacts/nat-022/video-attempt-007/decoded-frames-y10-t45-70.json",
+  "artifacts/nat-022/video-attempt-007/decoded-frames-y10-t70-86.json",
+  "artifacts/nat-022/video-attempt-007/decoded-timeline.json",
+  "artifacts/nat-022/video-attempt-007/decode-y10-t0-20.log",
+  "artifacts/nat-022/video-attempt-007/decode-y10-t20-45.log",
+  "artifacts/nat-022/video-attempt-007/decode-y10-t45-70.log",
+  "artifacts/nat-022/video-attempt-007/decode-y10-t70-86.log",
+  "artifacts/nat-022/package-008/recovery.img",
+  "artifacts/nat-022/package-008/package.json",
+  "artifacts/nat-022/build-008/loader-diag-xnu-entry/Image",
+  "artifacts/nat-022/build-008/loader-diag-xnu-entry/Image.payload",
+  "docs/procedures/nat-022/evidence-nat028.json",
+  "docs/decisions/0015-nat022-loader-diag-xnu-entry-single-run-2026-11-10.md"
+ ],
+ "provenance": {
+  "code_commit": "606528b85b5eb738c0011ad9fdd2482f1ad502a9",
+  "evidence_commit_of_host_work": "7dcb480",
+  "decision_commit": "2bd0c72",
+  "recording": "owner camera, /home/egor/Downloads/video_2026-11-10_22-14-33.mp4 (same bytes as artifacts/nat-022/video-attempt-007/camera.mp4, sha256 6c0602daa5b81478545adbf0789db2a03ecebae0af87a6edc3b65ad4d50f3efe; shows the owner's room, not committed)",
+  "owner_note": "Asked what was seen on the screen, the owner answered (Russian, quoted as typed): \"увидел з текста только entered loader / BL1 / G1Cu3 ready / Gxfa200000 1080x2310 32bpp / 0x9de100000 0x20000000 / 10 segnents 21.6 MB / 13960 bytes / @xffffffr00743b4a8 / @xffffrrr004000000 / 6x9dc400000 / rd=ndo e1sufs= e1sufs_probe=0 ufsru=0 ufs ну тут опечатки у меня есть и 3 ok\" and gave the video path. This is a hand transcription of the loader's text lines (typos acknowledged by the owner), not machine-decoded and not verified here: the text is not legible in stills taken from the recording at 720x1280. The transcribed `@0xfffffff00743b4a8` equals the payload header's entry_va; the transcribed `0x9dc400000` differs by one hex digit from the machine-decoded window base 0x9de400000 and is treated as a probable misreading, not as a conflicting measurement.",
+  "restore": "Download Mode enumeration (bus 5 dev 61) was a fresh one after SEC_UPLOAD dev 60; the NAT-013 ledger accepted it as a new entry."
+ },
+ "established": [
+  "Control reached the entry address of the kernel copy through the loader's own handoff path and the NAT-028 stub ran there on the S24: CRC-valid STAGE 0x50, mask 0x05ff, ENTRY 0x4000 (EL1, MMU/D-cache/I-cache off) and XNU frames giving PC 0x9e183b4a8 and x0 0x9e2d78000 in two full loops, decoded from an independent recording; PC and x0 satisfy the predicted relation x0 - PC = 0x153cb58 exactly.",
+  "The RAM window base chosen by the loader is 0x9de400000 (derived from the decoded PC and the payload header; the run-005 exception address implies the same base), so the earlier approximate figure from run 006 is superseded.",
+  "Instruction fetch from the window at the kernel copy works after the loader's full-window clean, SCTLR M/C/I clear and ic iallu, at least for the 40 stub bytes written by data stores; the EL1 state at the jump is MMU off, caches off.",
+  "The stub's stack literal and function literal work from the window (the marker routine ran), and no exception occurred between PRE_JUMP and the first 0x50 frame."
+ ],
+ "not_established": [
+  "That any XNU instruction can run: none ran. The kernel's first word was replaced and not replayed; nothing after the entry executed.",
+  "That the ADT and boot_args are acceptable to XNU, or that x0 (boot_args PA) is the convention XNU expects at this stage.",
+  "Behaviour of a kernel that is entered for real: whether the displaced `b` and the code after it run correctly with this memory image, MMU off and the loader's state.",
+  "What caused the SEC_UPLOAD / Download Mode enumerations after the display ended (the 83 s watchdog is the expected cause of a reset; the host saw SEC_UPLOAD at +109 s and the owner's actions are not recorded).",
+  "That the owner's hand transcription of the loader text lines is exact; the REG block FRAME_COUNT idx7 = idx8 (0x0782) in loop 1 is listed as seen and not interpreted; no no-kick control (kick vs S-Boot refresh) was run."
+ ]
+}
