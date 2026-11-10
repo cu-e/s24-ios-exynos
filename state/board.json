@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T10:31:29+00:00",
-  "ledger_updated_at": "2026-11-10T10:31:10+00:00",
-  "registry_sha256": "d03b3aefbc60c31a257581a2f2c04cec23eb3fbd4a5fc61719c4aca05a09629e",
+  "generated_at": "2026-11-10T10:40:27+00:00",
+  "ledger_updated_at": "2026-11-10T10:39:49+00:00",
+  "registry_sha256": "9383c0094f769b875d2089f472ec6881b1fb9893d7cdd060df4af9e4cbfac032",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
-    "ready": [
-      "NAT-011"
+    "ready": [],
+    "in_progress": [
+      "NAT-016"
     ],
-    "in_progress": [],
     "blocked": [
       "INT-002",
       "INT-003",
@@ -17,6 +17,7 @@
       "KRN-003",
       "KRN-004",
       "KRN-034",
+      "NAT-009",
       "KRN-001",
       "CELL-010",
       "ESIM-004",
@@ -25,6 +26,7 @@
       "GPU-005"
     ],
     "waiting": [
+      "NAT-011",
       "GPU-007",
       "GPU-009",
       "AUD-001",
@@ -41,6 +43,7 @@
       "UI-005"
     ],
     "gated": [
+      "NAT-017",
       "NAT-003",
       "DRV-003",
       "NAT-004",
@@ -172,6 +175,7 @@
       "REV-013",
       "KRN-037",
       "VM-008",
+      "NAT-015",
       "USB-001",
       "RES-008",
       "KRN-002",
@@ -237,7 +241,6 @@
       "VM-055",
       "KRN-033",
       "NAT-014",
-      "NAT-009",
       "KRN-035",
       "KRN-036",
       "KRN-028",
@@ -5022,6 +5025,42 @@
       "card_path": "planning/tasks/VM-007.md"
     },
     {
+      "id": "NAT-017",
+      "title": "Qualify an independent early-log canary and per-reset retention before any further XNU attempt",
+      "status": "pending",
+      "priority": 97,
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "depends_on": [
+        "NAT-015",
+        "NAT-016"
+      ],
+      "paths": [
+        "docs/procedures/nat-017",
+        "artifacts/nat-017"
+      ],
+      "sources": [
+        "s24-port",
+        "s24-linux"
+      ],
+      "acceptance": [
+        "Obtain a new image-specific owner decision preserving Android/data and explicitly permitting the selected canary and reset; no XNU execution is included by default.",
+        "Establish a real safe physical log channel; receive early stage markers and a unique boot ID before a controlled failure.",
+        "Retain separate logs across reset and collector restart, measure gaps/overflow and verify return to unchanged Android/stock RECOVERY; do not infer kernel execution from USB IDs."
+      ],
+      "steps": [
+        "Resolve channel and exact board electrical/memory/reset facts without guessing",
+        "Prepare image hash, bounded run, independent return and stock restore plan for review",
+        "Only after explicit authorization execute the log canary and assess retention"
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native",
+        "Dependencies: NAT-016"
+      ],
+      "card_path": "planning/tasks/NAT-017.md"
+    },
+    {
       "id": "KRN-005",
       "title": "Qualify real selected XNU allocator type compiler metadata",
       "priority": 96,
@@ -5281,6 +5320,81 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/VM-008.md"
+    },
+    {
+      "id": "NAT-015",
+      "title": "Audit actual early log destinations, reset lifetime and overwrite behavior of the failed RECOVERY image",
+      "status": "done",
+      "priority": 96,
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "depends_on": [
+        "NAT-014"
+      ],
+      "paths": [
+        "docs/procedures/nat-015",
+        "artifacts/nat-015"
+      ],
+      "sources": [
+        "s24-port",
+        "s24-linux"
+      ],
+      "acceptance": [
+        "Trace logging in the exact attempted image source and linked ELF, including pre-log stages, loader and XNU buffers, overflow and initialization.",
+        "Determine which logs can survive reset and whether per-boot overwrite is established; distinguish source behavior from unobserved runtime.",
+        "Document feasible capture routes and a prerequisite canary/retention gate without new phone writes or XNU execution."
+      ],
+      "steps": [
+        "Inspect exact source/ELF and pinned primary references",
+        "Save reproducible findings and minimal provenance",
+        "Define the logging and reset retention qualification gate"
+      ],
+      "owner": "codex-earlylogs-20261110-r3",
+      "started_at": "2026-11-10T10:33:03+00:00",
+      "last_heartbeat": "2026-11-10T10:33:03+00:00",
+      "updated_at": "2026-11-10T10:35:43+00:00",
+      "evidence": "docs/procedures/nat-015/evidence.json",
+      "evidence_sha256": "cbb0b81121e2c813dfeddb66c794ed09648b1e5ca4111b7c4929b475251ed9e0",
+      "finished_at": "2026-11-10T10:35:43+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-015.md"
+    },
+    {
+      "id": "NAT-016",
+      "title": "Implement append-only host early-log archive with separate boot records and loss reporting",
+      "status": "in_progress",
+      "priority": 96,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-015"
+      ],
+      "paths": [
+        "docs/procedures/nat-016",
+        "artifacts/nat-016"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "Create exclusive per-attempt storage, preserve received raw bytes and separate explicit boot-ID records without overwriting prior boots.",
+        "Record receive times, sequence gaps, invalid frames, bounds and interrupted/incomplete capture honestly; hash completed artifacts.",
+        "Verify fragmented streams, repeated boots, sequence errors, interrupted collector, time/size limits and output reuse with host-only tests; document lack of a qualified phone transport."
+      ],
+      "steps": [
+        "Implement bounded host-only recorder and format",
+        "Run real pipe/subprocess failure controls",
+        "Save provenance and usage instructions without phone commands"
+      ],
+      "owner": "codex-earlylogs-20261110-r3",
+      "started_at": "2026-11-10T10:36:03+00:00",
+      "last_heartbeat": "2026-11-10T10:36:03+00:00",
+      "updated_at": "2026-11-10T10:36:03+00:00",
+      "column": "in_progress",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-016.md",
+      "report_health": "recent"
     },
     {
       "id": "USB-001",
@@ -8366,8 +8480,10 @@
         "Implement PMU SWRESET helper and integrate into E1S RECOVERY loader exit/exception/halt paths",
         "Host-verify and rebuild the candidate RECOVERY image"
       ],
-      "column": "ready",
-      "reasons": [],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: NAT-009"
+      ],
       "card_path": "planning/tasks/NAT-011.md"
     },
     {
@@ -8455,7 +8571,7 @@
     {
       "id": "NAT-009",
       "title": "Integrate S5E9945 hardware watchdog arming and one-shot PMU recovery-reason clearing into the E1S RECOVERY loader",
-      "status": "done",
+      "status": "blocked",
       "priority": 88,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -8482,10 +8598,10 @@
         "Patch the E1S loader to arm the hardware watchdog and clear sticky recovery reboot markers",
         "Verify with host tests and rebuild the NAT-006 RECOVERY image"
       ],
-      "owner": "agy-nat006-20261110-aca2",
-      "started_at": "2026-11-10T08:02:09+00:00",
-      "last_heartbeat": "2026-11-10T08:37:42+00:00",
-      "updated_at": "2026-11-10T08:42:49+00:00",
+      "owner": "claude-takeover-20261110-6c8f",
+      "started_at": "2026-11-10T10:35:49+00:00",
+      "last_heartbeat": "2026-11-10T10:39:49+00:00",
+      "updated_at": "2026-11-10T10:39:49+00:00",
       "progress_note": "Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.",
       "next_step": "Obtain applicable S-Boot contract or separately authorized NAT-004 hardware recovery evidence; retain pre-flash gate",
       "handoff": "docs/procedures/nat-009/README.md",
@@ -8498,12 +8614,25 @@
           "at": "2026-11-10T08:36:40+00:00"
         }
       ],
-      "evidence": "docs/procedures/nat-009/evidence.json",
-      "evidence_sha256": "a9d068e8d51d0d0b6ce064e7d5c5cbba77d16ac6522ddb2550a7e50111af011d",
-      "finished_at": "2026-11-10T08:42:49+00:00",
-      "column": "done",
-      "reasons": [],
-      "card_path": "planning/tasks/NAT-009.md"
+      "reopen_history": [
+        {
+          "from_owner": "agy-nat006-20261110-aca2",
+          "evidence": "docs/procedures/nat-009/evidence.json",
+          "evidence_sha256": "a9d068e8d51d0d0b6ce064e7d5c5cbba77d16ac6522ddb2550a7e50111af011d",
+          "finished_at": "2026-11-10T08:42:49+00:00",
+          "reason": "Recorded done by stopped agy-nat006-20261110-aca2 (no agy/antigravity process alive, checked 2026-11-10) with an evidence file committed only in a6c97b8; its own note says overall evidence inconclusive, and its one-shot prediction was not met on hardware (NAT-014). Reopened under decision 0006.",
+          "decision": "docs/decisions/0006-nat009-reopen-nat011-host-and-antigravity-revert-2026-11-10.md",
+          "by": "claude-takeover-20261110-6c8f",
+          "at": "2026-11-10T10:35:49+00:00"
+        }
+      ],
+      "blocked_reason": "Stopped by the safety classifier at about 10:36Z on 2026-11-10 during the S-Boot static review for this task (second stop on the NAT-008..011 line). Per the owner's rule it is not retried, reworded or delegated. Done so far under decision 0006: reopened; Antigravity edits preserved (a6c97b8) and reverted to d46915a (359189c). Resume only on an explicit owner instruction after support review.",
+      "column": "blocked",
+      "reasons": [
+        "Stopped by the safety classifier at about 10:36Z on 2026-11-10 during the S-Boot static review for this task (second stop on the NAT-008..011 line). Per the owner's rule it is not retried, reworded or delegated. Done so far under decision 0006: reopened; Antigravity edits preserved (a6c97b8) and reverted to d46915a (359189c). Resume only on an explicit owner instruction after support review."
+      ],
+      "card_path": "planning/tasks/NAT-009.md",
+      "report_health": "recent"
     },
     {
       "id": "KRN-035",
@@ -12527,7 +12656,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-016"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -12566,7 +12695,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-016"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -13438,6 +13567,17 @@
         "worktree": null
       },
       {
+        "id": "NAT-009",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-10T10:39:49+00:00",
+        "report_health": "recent",
+        "progress_note": "Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.",
+        "next_step": "Obtain applicable S-Boot contract or separately authorized NAT-004 hardware recovery evidence; retain pre-flash gate",
+        "handoff": "docs/procedures/nat-009/README.md",
+        "branch": null,
+        "worktree": null
+      },
+      {
         "id": "KRN-001",
         "status": "blocked",
         "last_heartbeat": "2026-11-10T08:14:28+00:00",
@@ -13506,6 +13646,19 @@
         "worktree": "worktrees/krn-026-20261105"
       }
     ],
+    "codex-earlylogs-20261110-r3": [
+      {
+        "id": "NAT-016",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-10T10:36:03+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": null,
+        "worktree": null
+      }
+    ],
     "codex-e1s-dependencies-20261105-k": [
       {
         "id": "KRN-003",
@@ -13547,97 +13700,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-10T09:52:42+00:00",
-      "action": "project.permit:native",
-      "owner": "codex-stock-rescue-20261110-r2",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-10T09:52:50+00:00",
-      "action": "task.claim:NAT-012",
-      "owner": "codex-stock-rescue-20261110-r2",
-      "tasks": [
-        {
-          "id": "NAT-012",
-          "status": "in_progress",
-          "owner": "codex-stock-rescue-20261110-r2",
-          "priority": 100,
-          "last_heartbeat": "2026-11-10T09:52:50+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T09:54:56+00:00",
-      "action": "task.update:NAT-012",
-      "owner": "codex-stock-rescue-20261110-r2",
-      "tasks": [
-        {
-          "id": "NAT-012",
-          "status": "in_progress",
-          "owner": "codex-stock-rescue-20261110-r2",
-          "priority": 100,
-          "progress_note": "No active transfer; last patched Odin session failed before PIT. Stock hashes/archive verified. Preserved prior changes; provisioned independent Heimdall 2.2.2 and reviewed target/size path.",
-          "next_step": "Wait for owner fresh Download Mode confirmation; read actual PIT without writing before rescue",
-          "last_heartbeat": "2026-11-10T09:54:56+00:00",
-          "handoff": "docs/procedures/nat-012/handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T09:57:40+00:00",
-      "action": "experiment.plan:NAT012-STOCK-RESTORE-001",
-      "owner": "codex-stock-rescue-20261110-r2"
-    },
-    {
-      "at": "2026-11-10T09:58:56+00:00",
-      "action": "task.update:NAT-012",
-      "owner": "codex-stock-rescue-20261110-r2",
-      "tasks": [
-        {
-          "id": "NAT-012",
-          "status": "in_progress",
-          "owner": "codex-stock-rescue-20261110-r2",
-          "priority": 100,
-          "progress_note": "Actual PIT read passed; unique RECOVERY target is UFS8/id18, 96MiB. Single stock-only flash acknowledged RECOVERY upload successful; session end timed out, exit1. No active writer or repeat flash.",
-          "next_step": "Owner performs normal forced restart; verify ADB, boot_completed and full recovery hash",
-          "last_heartbeat": "2026-11-10T09:58:56+00:00",
-          "handoff": "docs/procedures/nat-012/handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T10:07:14+00:00",
-      "action": "experiment.plan:NAT012-STOCK-RESTORE-002",
-      "owner": "codex-stock-rescue-20261110-r2"
-    },
-    {
-      "at": "2026-11-10T10:12:41+00:00",
-      "action": "experiment.plan:NAT012-STOCK-RESTORE-003",
-      "owner": "codex-stock-rescue-20261110-r2"
-    },
-    {
-      "at": "2026-11-10T10:12:54+00:00",
-      "action": "task.update:NAT-012",
-      "owner": "codex-stock-rescue-20261110-r2",
-      "tasks": [
-        {
-          "id": "NAT-012",
-          "status": "in_progress",
-          "owner": "codex-stock-rescue-20261110-r2",
-          "priority": 100,
-          "progress_note": "Two resumed post-PIT sessions accepted data but EndSession timed out. Local S-Boot lifecycle analysis identifies stopped async workers after standalone EndSession. No writer active; preparing fresh single-session stock-only restoration.",
-          "next_step": "Wait for owner fresh Download Mode confirmation, then handshake, validated PIT, stock RECOVERY transfer and EndSession without intervening session end",
-          "last_heartbeat": "2026-11-10T10:12:54+00:00",
-          "handoff": "docs/procedures/nat-012/handoff.md"
-        }
-      ]
-    },
     {
       "at": "2026-11-10T10:13:58+00:00",
       "action": "experiment.record:NAT012-STOCK-RESTORE-001",
@@ -13777,11 +13839,124 @@
           "last_heartbeat": "2026-11-10T10:19:56+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T10:32:43+00:00",
+      "action": "task.add:NAT-015",
+      "owner": "codex-earlylogs-20261110-r3",
+      "tasks": [
+        {
+          "id": "NAT-015",
+          "status": "pending",
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:33:03+00:00",
+      "action": "task.claim:NAT-015",
+      "owner": "codex-earlylogs-20261110-r3",
+      "tasks": [
+        {
+          "id": "NAT-015",
+          "status": "in_progress",
+          "owner": "codex-earlylogs-20261110-r3",
+          "priority": 96,
+          "last_heartbeat": "2026-11-10T10:33:03+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:35:43+00:00",
+      "action": "task.done:NAT-015",
+      "owner": "codex-earlylogs-20261110-r3",
+      "tasks": [
+        {
+          "id": "NAT-015",
+          "status": "done",
+          "owner": "codex-earlylogs-20261110-r3",
+          "priority": 96,
+          "last_heartbeat": "2026-11-10T10:33:03+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:35:49+00:00",
+      "action": "task.reopen:NAT-009",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "NAT-009",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 88,
+          "progress_note": "Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.",
+          "next_step": "Obtain applicable S-Boot contract or separately authorized NAT-004 hardware recovery evidence; retain pre-flash gate",
+          "last_heartbeat": "2026-11-10T10:35:49+00:00",
+          "handoff": "docs/procedures/nat-009/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:35:55+00:00",
+      "action": "task.add:NAT-016",
+      "owner": "codex-earlylogs-20261110-r3",
+      "tasks": [
+        {
+          "id": "NAT-016",
+          "status": "pending",
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:36:03+00:00",
+      "action": "task.claim:NAT-016",
+      "owner": "codex-earlylogs-20261110-r3",
+      "tasks": [
+        {
+          "id": "NAT-016",
+          "status": "in_progress",
+          "owner": "codex-earlylogs-20261110-r3",
+          "priority": 96,
+          "last_heartbeat": "2026-11-10T10:36:03+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:36:14+00:00",
+      "action": "task.add:NAT-017",
+      "owner": "codex-earlylogs-20261110-r3",
+      "tasks": [
+        {
+          "id": "NAT-017",
+          "status": "pending",
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:39:49+00:00",
+      "action": "task.block:NAT-009",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "NAT-009",
+          "status": "blocked",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 88,
+          "progress_note": "Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.",
+          "next_step": "Obtain applicable S-Boot contract or separately authorized NAT-004 hardware recovery evidence; retain pre-flash gate",
+          "blocked_reason": "Stopped by the safety classifier at about 10:36Z on 2026-11-10 during the S-Boot static review for this task (second stop on the NAT-008..011 line). Per the owner's rule it is not retried, reworded or delegated. Done so far under decision 0006: reopened; Antigravity edits preserved (a6c97b8) and reverted to d46915a (359189c). Resume only on an explicit owner instruction after support review.",
+          "last_heartbeat": "2026-11-10T10:39:49+00:00",
+          "handoff": "docs/procedures/nat-009/README.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "a089cfb52a92105e9df521f114bffa89987a05fb199d3f088fcf45f0197b0f22",
-    "BOARD.md": "c43218ce2226dd8fbd4bdc7313ab28865f4de8d6e55f444e28211753489c6b9d",
+    "STATUS.md": "d27d283611067bdc606c2570c67b8a5ddbd5e8fe9df4f9e1471457bf8512fcf1",
+    "BOARD.md": "bc718052b71a763ff6f22b98398975efa3e1b163b820a352c4b3a0fac1ab5135",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -13888,12 +14063,15 @@
     "planning/tasks/REV-009.md": "88b28ac896c5615f69c1ffb4715e88285d7a3b59bc3fdf967d4674cca5835f6e",
     "planning/tasks/REV-015.md": "84076ee6c39ee7f9f07a3039a2f9035a9bb7ed6993a9449c4e948c879c37fb6e",
     "planning/tasks/VM-007.md": "cc3b0371dde27da4854d9f1f989289328970ae84f3c9c4429fda2bcdd403761f",
+    "planning/tasks/NAT-017.md": "67978488f011cef36a689e0a26b6d752aa94f3ffe5843ac0574b1d09159d0225",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/REV-004.md": "8c7b273845208b121b2d6d1f05038b627689d3f97b766a765a91cdf23082bdb1",
     "planning/tasks/REV-011.md": "5ea2857fe5caca100edd1f7f53667f0b2a27de4b576000ecd14e2a55f1e7d51b",
     "planning/tasks/REV-013.md": "e4056763dd5895c307942995fae9a0890ba6a6bcb459f309250da4cc92f29d56",
     "planning/tasks/KRN-037.md": "22c7de3e8ba69554cc1ab4d2209cb21cc7591527eecd27cfb020e312c5afa5c9",
     "planning/tasks/VM-008.md": "48718704e8c7ce104a5e4091bc1e9be010b98b3813d25f7d606caec915e81807",
+    "planning/tasks/NAT-015.md": "d3da9cca6b7204c40dc5da311ee0db2d14b789dccfff79164de319a5fda88da5",
+    "planning/tasks/NAT-016.md": "4c6b6e71adfe308f3edc36dd0af0d78a45882ce829af612f316706a8c584b163",
     "planning/tasks/USB-001.md": "19299959cb09f2aa3b00ffa299face5e25f485c75dfcc2e5f1879b39d435471a",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
@@ -13960,10 +14138,10 @@
     "planning/tasks/NAT-008.md": "0c608898e59aa41112423e268085e55a1010b958e7ac36e7ee64211ccc82a0a3",
     "planning/tasks/VM-055.md": "fe28b385b930f00cd778325365baf0ac4f48ec8512078e17196762089ecc652a",
     "planning/tasks/KRN-033.md": "65895b5673cb8432d904647391ec6378b6eafcac42e79bfd6cef92a0dcc4b83f",
-    "planning/tasks/NAT-011.md": "8c90a58bfef48ef9835caa5401b3b24fcf9d5b072b03320ac49eea6110e663e4",
+    "planning/tasks/NAT-011.md": "13d5b59a05e410c27749dd20732dbe9312dda69ca349e32845cd4b144be9aaa3",
     "planning/tasks/NAT-014.md": "8ab44f96da942083ed04d834447e25cd58e8ddda08c83b2f1ca4e44327720c71",
     "planning/tasks/KRN-034.md": "216955769016c966a7b2ed1191501a2967d901d5371a7e1ec31f2230896ac5cc",
-    "planning/tasks/NAT-009.md": "3ffbf563cd6fcd24ffdb604231f883bbad9d7ea9b0526f0bd2b3ca46e610a611",
+    "planning/tasks/NAT-009.md": "dc319e19e45a842314f8e16fbd31b61b2e823c2b921c769db25e9ccdaa9b7936",
     "planning/tasks/KRN-035.md": "73d3fdfa9f6c3f1f76fe0f244208e46b40bf7343bf78e2f78223ea9c1c7a98a7",
     "planning/tasks/KRN-036.md": "43b1fb9c66ca2aa223235ea38bf2e400888380c3822a4aca35e67b96cd532020",
     "planning/tasks/KRN-001.md": "554587c78270501a0d958373741a231572c7bb821291875740611622113b3242",
@@ -14053,8 +14231,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "8c06201d18e08b468f256bc313229accc75159c623c0d29388c702fd3ecce03d",
-    "planning/tasks/DRV-003.md": "74f3f2388e3786749a5eb2f54bb9608d0b52482e5054454102e76297ffd4c453",
+    "planning/tasks/NAT-003.md": "4f19bbce247fae7103ffe6e67c4996303b9ebe60c53e47473518fc128d7ecab6",
+    "planning/tasks/DRV-003.md": "e60fb438831d1ec3dcba417794e08d3e66fa1821ac65d0500afacb780a4380d2",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",
