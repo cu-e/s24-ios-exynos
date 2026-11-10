@@ -512,7 +512,7 @@ pixel format; whether the kick or S-Boot's refresh makes the markers visible (st
 The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-004/` (the video
 shows the owner's room and is not committed).
 
-## loader-diag-trig-hold-adt8: the run-004 image with a corrected payload header (NAT-026; not run)
+## loader-diag-trig-hold-adt8: the run-004 image with a corrected payload header (NAT-026; run once under decision 0013, result below)
 
 Run 004 stopped at `fail("bad payload header")` because the payload header's `adt_size` is 13956, not a
 multiple of 8. `fix_payload.py` rounds that one u64 up to 13960 in a copy of the payload (the 12 bytes
@@ -566,4 +566,114 @@ Session driver: `session_adt8.py` (default is read-only preflight; `--execute` w
 `--restore` writes only stock). It asserts the stock and candidate hashes, `package.json`, the loader
 `Image.payload` hash at its offset, and that `docs/decisions/0013-nat022-loader-diag-trig-hold-adt8-single-run-2026-11-10.md`
 exists. Without that file it stops before any device command (tested on 2026-11-10; the report is
-`artifacts/nat-022/preflight-gate-005/report.json`). No decision 0013 exists yet.
+`artifacts/nat-022/preflight-gate-005/report.json`). Decision 0013 was then made and the image was run once
+(next section).
+
+## Native result 005, 2026-11-10 (decision 0013): the loader reached COPY, then took an alignment fault in the ADT patch stage
+
+`loader-diag-trig-hold-adt8` (loader `Image.payload` `766218b2…`, RECOVERY image `38411cd8…`, source commit
+`1092fab`) was written to RECOVERY with a matching full readback and booted once (`adb reboot recovery`
+at 15:28:40.9Z). The owner filmed the screen (84.7 s recording). Stock RECOVERY was restored with one
+NAT-013 session in Download Mode (`04e8:685d` seen by the host observer at 15:30:36Z, restore
+15:33:10Z–15:33:14Z, Android back at 15:33:59Z); the full hash equals stock (`96620b8b…`),
+`check_android` passed and Android booted. Record: `native-attempt-005-evidence.json` (outcome `fail`: the
+criterion "reaches memory preparation, ADT/boot_args and pre-jump stages" was met only up to COPY).
+
+`decode_video.py` (unchanged) decoded 781 CRC-valid frames with `--y0 10` (the default `--y0 60` cuts the
+top sync band for t ≈ 22–60 s and decodes only 277 rows); the sources are three windows, 0–20 s, 20–62 s,
+62–85 s, merged in `decoded-timeline.json`.
+
+| Time (s) | Frame | Decoded | Meaning |
+| --- | --- | --- | --- |
+| 0.2–0.4 | STAGE idx0 | `0x20` | `LOADER_MAIN` (the recording starts at about this point) |
+| 2.5–3.9 | STAGE idx0 | `0x21` | `LOADER_FB` |
+| 4.2–12.5 | STAGE idx0 | `0x30` | `LOADER_MEM`: window chosen; RAM zeroing runs after the 1.2 s dwell (≈ 7 s) |
+| 12.6–13.7 | STAGE idx0 | `0x31` | `LOADER_ZERO`: zeroing done |
+| 14.8–16.1 | STAGE idx0 | `0x32` | `LOADER_COPY`: all 10 segments copied (21.5 MB), ≈ 1 s after the ZERO dwell |
+| 16.1–17.3 | STAGE idx0 | `0x1f` | `EXC`: exception report from inside the loader |
+| 17.35 | STAGE idx1 | `0x003f` | reached-stage mask ENTRY, MAIN, FB, MEM, ZERO, COPY (ADT, CLEAN, PRE_JUMP not reached) |
+| 18.65 | SLOT | `0x0004` | vector slot 4: synchronous exception from the current EL with SPx |
+| 19.9–24.6 | ESR 0..3 | `0x0000 0x0000 0x9600 0x0061` | ESR `0x96000061`: EC `0x25` (data abort, same EL), IL, DFSC `0x21` = alignment fault, WnR = 1 (a store) |
+| 24.8–29.6 | ELR 0..3 | `0x0000 0x0000 0x800a 0x9954` | ELR `0x800a9954` |
+| 29.7–34.6 | FAR 0..3 | `0x0000 0x0009 0xe2d7 0x43fc` | FAR `0x00000009e2d743fc` |
+| 34.7–46.9 | REG 0..9 | status 1, GLOBAL_CON `0x0133`, TRIG_CON `0x3062`→`0x3063`, FRAME_COUNT `0x0686`→`0x0687`, kick count `0x0f` | DECON0 report |
+
+The report repeats about every 29.8 s with the same ESR/ELR/FAR (three STAGE idx1 frames at 17.35, 47.13 and
+76.91 s; kick count `0x0f` → `0x27` in the second REG block; FRAME_COUNT advances ~60 Hz in between). The last
+CRC-valid frame is at 82.9 s; the screen state after the end of the recording is not known.
+
+The owner wrote (Russian, as typed) that the loader's own on-screen UI showed more than the markers:
+"там еще была загрузка сегментов ядра или типа того и ok gicv3 и ok payload header и >> RAM windows может еще
+чгео о я пропустил". This is the owner's reading of the loader's UI text; it matches the stage sequence above
+(one still near t = 14 s reads "Copying kernel segments 2/10 segments 2.6/21.5 MB"; that reading is by eye).
+
+### Which instruction faulted, and why (host analysis of the flashed loader; two independent routes)
+
+* **Base and instruction.** The S-Boot RECOVERY base for this image is `0x800a0000` (for the canary of run 003 it was
+  `0x801a0000`: the base varies with the image). `ELR − 0x800a0000 = 0x9954`; the flashed loader `Image` holds
+  `stur x19, [x11, #0x24]` there, which is `adt_set_dram+0x268`: the store of the 64-bit `dram-size` property
+  value in `adt_patch.c`. (`scan_unaligned.py` lists exactly this instruction at file offset `0x9954`, and three more.)
+* **Address.** `FAR − 1020 = 0x9e2d74000`, 16 KiB aligned, the ADT copy in the RAM window; offset 1020 is the value of
+  `dram-size` in the real `e1s.adt` (`dram-base`, at offset 976, is 8-aligned and had been written without a fault).
+* **Cause.** ADT property values start at node offset + 36 and are rounded to 4 bytes, so a value is only 4-byte
+  aligned. The loader runs at EL1 with the MMU off: all data accesses are Device memory and must be naturally
+  aligned, so a 64-bit store to a 4-byte-aligned address is an alignment fault. The NAT-026 host pre-check ran
+  `adt_patch.c` on x86-64, which accepts misaligned accesses, and could not see this.
+
+Established (observation of this S24, one run): the loader, built from the pinned NAT-020 source with the NAT-022
+instrumentation, ran from RECOVERY and completed FDT parsing, window choice, zeroing (≈ 7 s) and the copy of all 10
+segments before the ADT patch stage; the payload-header failure of run 004 is gone; the exception reporter works
+from inside the loader (stage, ESR, ELR, FAR decoded from an independent recording, goal step 5 for the loader).
+
+Not established: boot_args, the full-window cache clean and the PRE_JUMP hold; whether the loader has other
+Device-memory alignment hazards (see NAT-027 below: only scanned/sanitized, not run); any XNU entry (none was
+attempted: the image never branches to the kernel copy); the exact RAM window (implied only); who put the phone
+into Download Mode and why the screen went dark; stride/pixel format; kick vs S-Boot refresh (no no-kick control).
+
+The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-005/` (the video shows the
+owner's room and is not committed).
+
+## loader-diag-trig-hold-adt8-aln: the run-005 image with aligned ADT accesses (NAT-027; not run)
+
+`patch_loader.py --adt-aligned` (hash-anchored on the base `adt_patch.c`, SHA-256 `415bf5c0…`) adds
+`adt_ld64`/`adt_st64`, two aligned 32-bit accesses (low word first; the ADT is little-endian here), and uses
+them for the five 64-bit ADT property accesses in the source (`adt_set_dram`, `adt_set_pram` twice,
+`adt_rebase_ramdisk` read and write). Every property offset is a multiple of 4, so each 32-bit access is aligned.
+`build.py` adds the variant `loader-diag-trig-hold-adt8-aln` (`build-006`); it uses the same adt8 payload fix.
+
+| | run-005 image | aln image |
+| --- | --- | --- |
+| loader `Image` | `901565b2…` | `f0e61342…` |
+| `Image.payload` | `766218b2…` | `2fb39687…` |
+| RECOVERY image (NAT-006 packaging, `package-006`) | `38411cd8…` | `cdf4f3a1…` |
+
+Host checks (host-test evidence only; logs in `artifacts/nat-022/nat027-logs/`, summary `evidence-nat027.json`):
+
+* `build.py` reproduces `build-006` bit-for-bit (`build-006-repro`); all seven earlier images and payloads
+  (the run-005 image included) keep their hashes.
+* `scan_unaligned.py` (decodes every general-register LDUR/STUR/LDURS* in `.text`, skipping `$d` data, and reports an
+  unscaled immediate that is not a multiple of the access size): 4 findings on the run-005 loader
+  (`adt_set_dram+0x178`, `adt_set_dram+0x268` = the faulting one, `adt_set_pram+0x13c`, `adt_set_pram+0x140`), 0 on the
+  aln loader. It does not see addresses built at run time; the loader may still have such hazards.
+* `check_payload.py` now rebuilds the ADT harness with `gcc -fsanitize=alignment -fsanitize-undefined-trap-on-error`
+  and runs it: the run-005 source `FIRES adt_patch.c: MISALIGNED ACCESS in adt_set_dram`; the aln source `ok`. All
+  earlier checks still pass for the aln image (header clauses, RAM/segment, boot_args room, ADT return codes 0,
+  guard bytes intact for MPIDR 0, 0x80000000, 0x80000100, 0x80000400, 0xffffffff).
+* The aligned accessors write byte-identical ADT output to the original accessors for window bases below and above
+  4 GiB, and the written values are parsed back from the ADT layout (`test_nat022.py`).
+* `test_nat022.py`: 35 tests pass; `make check` passes (214 tests).
+
+Not evaluated on the host: every other data access of the loader with the MMU off; the real RAM window; later stages
+(boot_args, cache clean over the full window, PRE_JUMP hold); whether the 83 s watchdog the loader arms is enough for
+the stages after COPY (zeroing ≈ 7 s and the copy ≈ 1 s were measured in run 005; the full-window clean is unmeasured).
+The image still halts at PRE_JUMP and never branches to the kernel copy.
+
+What each outcome would mean (same encoding as before): PRE_JUMP held with mask `0x01ff`: ADT patch, `boot_args`, the
+full-window cache clean and the hold ran on this S24 (this is still not XNU entry); another EXC record: its
+stage/ESR/ELR/FAR name the next fault; FAIL with another code: the fnv16 of the message names the condition.
+
+Session driver: `session_aln.py` (default is read-only preflight; `--execute` writes and reboots once; `--restore`
+writes only stock), gated on `docs/decisions/0014-nat022-loader-diag-trig-hold-adt8-aln-single-run-2026-11-10.md` and its own
+one-shot marker `artifacts/nat-022/native-attempt-loaderhold-aln-used.json`. Without the decision file it stops before
+any device command (`artifacts/nat-022/preflight-gate-006/report.json`: 0 commands, no write, no reboot). No decision
+0014 exists yet.

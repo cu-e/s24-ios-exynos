@@ -3,7 +3,7 @@
 
   build.py --out DIR [--loader-source COPY_OF_build-003/source]
   build.py --check-only      (build to a temp dir, verify, discard)
-Outputs: canary-plain/Image, canary-fault/Image, canary-trig/Image (DECON0 kick, MK_TRIG=1), canary-trig-fault/Image (kick + BRK, MK_TRIG=1), [loader-diag/Image(.payload), loader-diag-trig-hold/Image(.payload): stage markers with a kick and a dwell, halted at pre-jump, never executes the payload; loader-diag-trig-hold-adt8/Image(.payload): the same loader Image with the payload header's adt_size rounded up to 8 by fix_payload.py (NAT-026; run 004 stopped on that check)].
+Outputs: canary-plain/Image, canary-fault/Image, canary-trig/Image (DECON0 kick, MK_TRIG=1), canary-trig-fault/Image (kick + BRK, MK_TRIG=1), [loader-diag/Image(.payload), loader-diag-trig-hold/Image(.payload): stage markers with a kick and a dwell, halted at pre-jump, never executes the payload; loader-diag-trig-hold-adt8/Image(.payload): the same loader Image with the payload header's adt_size rounded up to 8 by fix_payload.py (NAT-026; run 004 stopped on that check); loader-diag-trig-hold-adt8-aln/Image(.payload): that image with adt_patch.c's 64-bit ADT accesses split into aligned 32-bit accesses by patch_loader.py --adt-aligned (NAT-027; run 005 took an alignment fault in adt_set_dram)].
 """
 from pathlib import Path
 import argparse, hashlib, importlib.util, json, shutil, struct, subprocess, sys, tempfile
@@ -54,11 +54,12 @@ def _fix_payload():
     m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
     return m.fix
 
-def build_loader(out, source, name='loader-diag', trig_hold=False, fix_adt=False):
+def build_loader(out, source, name='loader-diag', trig_hold=False, fix_adt=False, adt_aligned=False):
     d = out / name; d.mkdir(parents=True)
     src = d / 'source'
     shutil.copytree(source, src, ignore=shutil.ignore_patterns('out', '.git'))
-    run([sys.executable, '-I', HERE / 'patch_loader.py', src] + (['--trig-hold'] if trig_hold else []))
+    run([sys.executable, '-I', HERE / 'patch_loader.py', src] + (['--trig-hold'] if trig_hold else []) +
+        (['--adt-aligned'] if adt_aligned else []))
     e = src / 'shim/e1s-xnu'
     shutil.copy(HERE / 'src/marker.h', e); shutil.copy(HERE / 'src/markerlib.c', e)
     objs = []
@@ -95,6 +96,7 @@ def main():
         imgs['loader-diag'] = build_loader(out, Path(a.loader_source))
         imgs['loader-diag-trig-hold'] = build_loader(out, Path(a.loader_source), 'loader-diag-trig-hold', trig_hold=True)
         imgs['loader-diag-trig-hold-adt8'] = build_loader(out, Path(a.loader_source), 'loader-diag-trig-hold-adt8', trig_hold=True, fix_adt=True)
+        imgs['loader-diag-trig-hold-adt8-aln'] = build_loader(out, Path(a.loader_source), 'loader-diag-trig-hold-adt8-aln', trig_hold=True, fix_adt=True, adt_aligned=True)
     for n, p in imgs.items():
         d = Path(p).read_bytes()
         assert d[56:60] == b'ARM\x64' and struct.unpack_from('<Q', d, 8)[0] == 0x80000

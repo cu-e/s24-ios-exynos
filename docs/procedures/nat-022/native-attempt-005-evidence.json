@@ -1,0 +1,346 @@
+{
+ "kind": "native-device",
+ "origin": "owner-attended-run",
+ "outcome": "fail",
+ "criterion": "The NAT-020 loader, started from the RECOVERY slot with visible stage markers, reaches its memory preparation, ADT/boot_args and pre-jump stages on the S24 (CRC-valid STAGE frames MAIN, FB, MEM, ZERO, COPY, ADT, CLEAN, PRE_JUMP decoded from an independent recording).",
+ "recorded_at": "2026-11-10T16:05:00+00:00",
+ "decision": "docs/decisions/0013-nat022-loader-diag-trig-hold-adt8-single-run-2026-11-10.md",
+ "summary": "One native run of NAT-022 loader-diag-trig-hold-adt8 (RECOVERY image sha256 38411cd82af4ae4b68079472d68936c23b3877208f301f33c295741ae991ce38, Image.payload 766218b288b3fddaef79d7347f91b57aab5f7329e4d574389eb142226726a87a, loader Image 901565b2..., source commit 1092fab). It was written to RECOVERY (/dev/block/sda18) with a matching full readback and booted once (adb reboot recovery at 2026-11-10T15:28:40.9Z). The owner filmed the screen (84.7 s recording). decode_video.py decoded 781 CRC-valid frames. The recording shows the loader stage markers MAIN (0x20), FB (0x21), MEM (0x30, ~8 s), ZERO (0x31), COPY (0x32), then an exception report from inside the loader: STAGE 0x1f, STAGE idx1 reached-stage mask 0x003f (ENTRY..COPY; ADT/CLEAN/PRE_JUMP not reached), SLOT 4, ESR 0x96000061 (EC 0x25 data abort without a change of EL, DFSC 0x21 alignment fault, WnR 1), ELR 0x800a9954, FAR 0x00000009e2d743fc, then the DECON0 REG report (status 1, GLOBAL_CON 0x0133, TRIG_CON 0x3062->0x3063, FRAME_COUNT 0x0686->0x0687, kick count 0x0f). The exception cycle repeats every ~29.8 s (seen three times) with the same values; the frame counter advances ~60 Hz. No ADT, CLEAN or PRE_JUMP marker and no XNU entry marker was shown. Host analysis (not a device observation): the loader runs at image base 0x800a0000 (ELR minus the code offset in the flashed loader); ELR is `stur x19, [x11, #0x24]` in adt_set_dram (adt_patch.c writing the 64-bit `dram-size` value); FAR minus 1020 = 0x9e2d74000 is the 16 KiB-aligned ADT copy, value offset 1020 = 4-byte aligned only. The loader runs with the MMU off (data accesses are Device memory and must be naturally aligned), so the 64-bit store to a 4-byte-aligned address faults. The earlier host pre-check (NAT-026) ran adt_patch.c on x86-64, which tolerates misaligned accesses, and was blind to this. Stock RECOVERY was restored with one NAT-013 session in Download Mode (host observer saw 04e8:685d at 15:30:36Z; restore 15:33:10Z-15:33:14Z; Android back 15:33:59Z); hash equals stock 96620b8b..., check_android pass, Android booted.",
+ "commands": [
+  {
+   "argv": [
+    "adb",
+    "get-state"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T15:28:36.774391+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop ro.product.model"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T15:28:36.803855+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop ro.product.device"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T15:28:36.896031+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop ro.build.PDA"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T15:28:36.967878+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop sys.boot_completed"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T15:28:37.037825+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'readlink -f /dev/block/by-name/recovery; blockdev --getsize64 /dev/block/sda18; test -b /dev/block/sda18 && echo block_device'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T15:28:37.099993+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'if pidof dd >/dev/null; then echo busy; else echo idle; fi'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T15:28:37.253931+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'sha256sum /dev/block/sda18'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T15:28:37.386867+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "dumpsys battery | toybox sed -n 's/^  level: /level=/p;s/^  temperature: /temperature=/p'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T15:28:37.636280+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'if pidof dd >/dev/null; then echo busy; else echo idle; fi'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T15:28:37.862128+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'test -b /dev/block/sda18 && dd of=/dev/block/sda18 bs=1048576 count=100663296 iflag=count_bytes conv=notrunc,fsync'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T15:28:37.963165+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'sha256sum /dev/block/sda18'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T15:28:40.713897+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "reboot",
+    "recovery"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T15:28:40.936666+00:00",
+   "note": "adb reboot recovery (the single reboot of decision 0013)"
+  },
+  {
+   "note": "Stock RECOVERY restored by one NAT-013 session in Download Mode (artifacts/nat-022/stock-restore-005/report.json: pit_validated, upload_acknowledged 100663296 B, session_end_confirmed, reboot_confirmed; started 2026-11-10T15:33:10.7Z, finished 15:33:14.0Z)",
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-012/check_android.py"
+   ],
+   "note": "artifacts/nat-022/android-after-stock-005.json: sys.boot_completed 1, model SM-S921B, device e1s, PDA S921BXXS9BYH3, user data directories present, recovery hash match; assess-005.json outcome pass (android_booted, recovery_readback_matches)",
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-020/observe_usb.py",
+    "--seconds",
+    "360"
+   ],
+   "note": "host USB observer usb-attempt-005 from 15:28:25Z; events: 15:28:25 04e8:6860 SAMSUNG_Android (bus 5 dev 55); 15:28:44 no device; 15:30:36 04e8:685d SAMSUNG USB (Download Mode, bus 5 dev 56); 15:33:14 no device (restore reboot); Android returned as dev 57 at 15:33:59Z",
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "--out",
+    "artifacts/nat-022/video-attempt-005/decoded-frames.json"
+   ],
+   "exit_code": 0,
+   "note": "default window y0 60: the top sync band is cut for t about 22-60 s, so it is not the basis of the timeline (277 ok rows)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "--y0",
+    "10",
+    "--t0",
+    "0",
+    "--t1",
+    "20",
+    "--out",
+    "artifacts/nat-022/video-attempt-005/decoded-frames-y10-t0-20.json"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "--y0",
+    "10",
+    "--t0",
+    "20",
+    "--t1",
+    "62",
+    "--out",
+    "artifacts/nat-022/video-attempt-005/decoded-frames-y10-t20-62.json"
+   ],
+   "exit_code": 0,
+   "note": "no log file saved for this window; the output JSON is hashed"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "--y0",
+    "10",
+    "--t0",
+    "62",
+    "--t1",
+    "85",
+    "--out",
+    "artifacts/nat-022/video-attempt-005/decoded-frames-y10-t62-85.json"
+   ],
+   "exit_code": 0
+  }
+ ],
+ "decoded_cycle": {
+  "stage_sequence": [
+   {
+    "t_s": "0.2-0.4",
+    "stage": "0x20 LOADER_MAIN (video starts at/after MAIN)"
+   },
+   {
+    "t_s": "2.5-3.9",
+    "stage": "0x21 LOADER_FB"
+   },
+   {
+    "t_s": "4.2-12.5",
+    "stage": "0x30 LOADER_MEM"
+   },
+   {
+    "t_s": "12.6-13.7",
+    "stage": "0x31 LOADER_ZERO"
+   },
+   {
+    "t_s": "14.8-16.1",
+    "stage": "0x32 LOADER_COPY"
+   },
+   {
+    "t_s": "16.1-17.3",
+    "stage": "0x1f EXC"
+   }
+  ],
+  "exception_report": {
+   "stage_idx1_reached_mask": "0x003f",
+   "slot": 4,
+   "esr": "0x96000061",
+   "elr": "0x800a9954",
+   "far": "0x00000009e2d743fc",
+   "frame_timing_s": {
+    "STAGE idx1": "17.35",
+    "SLOT": "18.65",
+    "ESR 0..3": "19.9-24.6",
+    "ELR 0..3": "24.8-29.6",
+    "FAR 0..3": "29.7-34.6",
+    "REG 0..9": "34.7-46.9"
+   }
+  },
+  "reg_report_examples": [
+   {
+    "t_s": "34.7-46.9",
+    "status": 1,
+    "global_con_lo": "0x0133",
+    "trig_before": "0x3062",
+    "trig_after": "0x3063",
+    "frame_count": [
+     "0x0686",
+     "0x0687"
+    ],
+    "kick_count": "0x0f"
+   },
+   {
+    "t_s": "64.5-76.8",
+    "status": 1,
+    "global_con_lo": "0x0133",
+    "trig_before": "0x3062",
+    "trig_after": "0x3063",
+    "frame_count": [
+     "0x0d8c",
+     "0x0d8d"
+    ],
+    "kick_count": "0x27"
+   }
+  ],
+  "cycle_period_s": 29.8,
+  "last_crc_valid_frame_s": 82.9
+ },
+ "hashes": {
+  "recovery_image": "38411cd82af4ae4b68079472d68936c23b3877208f301f33c295741ae991ce38",
+  "stock_recovery": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+  "loader_image": "901565b225c2137ebd99e4684cb4dc9a6b4f3ecf68632eedcf9ef8b16cf7db28",
+  "loader_image_payload": "766218b288b3fddaef79d7347f91b57aab5f7329e4d574389eb142226726a87a",
+  "camera_mp4": "618a454ae6bb03179d1bb3574d50f98ea28ef6f3cb36270902f56ae07dd473db",
+  "decoded_frames_json": "0437df4230679efe50dd6032efd809b007f322d6250f028554009e8ae73855ef",
+  "decoded_frames_y10_t0_20_json": "40391b712d90b7ceb8691310f5e84154b815da2fd91262c6cb68b69048142110",
+  "decoded_frames_y10_t20_62_json": "548060293d3f3308726430f8b05f5b3f7f67bfe306381cdb9b293ada18dcf39d",
+  "decoded_frames_y10_t62_85_json": "6cd3cd767f1c3c0dfba60bee2c27cf985100c5d3c1da5baa54df5bf6f1e4f200",
+  "decoded_timeline_json": "7b146ee2ba42c4f51556867d72bbfb462aec457094aa4d7fb7edd52ff4ae5d15"
+ },
+ "artifacts": [
+  "artifacts/nat-022/attempt-005/report.json",
+  "artifacts/nat-022/preflight-005/report.json",
+  "artifacts/nat-022/preflight-gate-005/report.json",
+  "artifacts/nat-022/stock-restore-005/report.json",
+  "artifacts/nat-022/android-after-stock-005.json",
+  "artifacts/nat-022/assess-005.json",
+  "artifacts/nat-022/usb-attempt-005/",
+  "artifacts/nat-022/usb-observer-005.log",
+  "artifacts/nat-022/native-attempt-loaderhold-adt8-used.json",
+  "artifacts/nat-022/video-attempt-005/camera.mp4",
+  "artifacts/nat-022/video-attempt-005/decoded-frames.json",
+  "artifacts/nat-022/video-attempt-005/decoded-frames-y10-t0-20.json",
+  "artifacts/nat-022/video-attempt-005/decoded-frames-y10-t20-62.json",
+  "artifacts/nat-022/video-attempt-005/decoded-frames-y10-t62-85.json",
+  "artifacts/nat-022/video-attempt-005/decoded-timeline.json",
+  "artifacts/nat-022/package-005/"
+ ],
+ "provenance": {
+  "code_commit": "1092fab",
+  "repo_head_at_recording": "b56b095",
+  "recording": "owner camera, /home/egor/Downloads/video_2026-11-10_20-31-38.mp4 (same bytes as artifacts/nat-022/video-attempt-005/camera.mp4; shows the owner's room, not committed)",
+  "owner_note": "The owner wrote (Russian message, quoted as typed): \"там еще была загрузка сегментов ядра или типа того и ok gicv3 и ok payload header и >> RAM windows может еще чгео о я пропустил\". This is the owner's reading of the loader's own on-screen UI text (the loader UI, not this project's markers); it was not decoded by this project. One frame at t=14 s of the recording shows \"Copying kernel segments 2/10 segments 2.6/21.5 MB\" (read by eye by the agent from a still), which agrees with the COPY marker.",
+  "host_analysis": "Disassembly of the flashed loader Image with a scratchpad capstone venv (not committed); base 0x800a0000 derived from ELR 0x800a9954 and the instruction at file offset 0x9954 (stur x19, [x11, #0x24] in adt_set_dram+0x268); FAR 0x9e2d743fc minus 1020 = 0x9e2d74000 (16 KiB aligned, the ADT copy), the dram-size value offset in the real ADT. The alignment-trap reproduction is NAT-027 (docs/procedures/nat-022/check_payload.py, evidence-nat027.json)."
+ },
+ "established": [
+  "The NAT-020 loader ran on the S24 from the RECOVERY slot at image base 0x800a0000 (S-Boot places a RECOVERY Image at a base that varies by image: 0x801a0000 for the canary image of run 003) and its own markers MAIN, FB, MEM, ZERO and COPY were drawn and decoded from an independent recording: FDT parsing, RAM-window choice, zeroing of the window (~7-8 s) and the copy of all 10 payload segments (21.5 MB) completed.",
+  "The loader then took a synchronous data abort in the ADT patch stage (SLOT 4, ESR 0x96000061 = alignment fault on a store, ELR 0x800a9954, FAR 0x9e2d743fc). The exception record was reported from inside the loader on the framebuffer, with stage, ESR, ELR and FAR decoded from the recording (goal step 5 met for the loader).",
+  "The failing instruction and cause are identified on the host by two independent routes (ELR + disassembly; FAR - 1020 = 16 KiB-aligned ADT base + dram-size value offset): a 64-bit store to a 4-byte-aligned ADT property value with the MMU off.",
+  "The exception reporting path keeps the display updating: DECON0 status 1, FRAME_COUNT advancing at ~60 Hz across 29.8 s cycles, kick counter rising 0x0f -> 0x27.",
+  "The run-004 payload-header failure is fixed: the loader now passes the payload header, FDT, RAM-window, zero and copy stages."
+ ],
+ "not_established": [
+  "Any stage after the ADT patch fault: boot_args, cache clean of the full window, the PRE_JUMP hold.",
+  "Any XNU entry or marker inside XNU. No jump into the kernel copy was made and none was authorized.",
+  "Whether other Device-memory alignment hazards exist in the loader outside adt_patch.c (only scanned statically for unscaled accesses and sanitized for adt_patch.c in NAT-027).",
+  "The exact RAM window the loader chose (implied only: window base about 0x9dd3fc000 from FAR and the copy layout; not read from the DTB by this project).",
+  "The cause of the dark screen after the recording and who entered Download Mode (the host observer saw 04e8:685d at 15:30:36Z; the 83 s watchdog armed by the loader is a hypothesis, not measured).",
+  "Stride and pixel format; whether the kick or S-Boot refresh makes the markers visible (no no-kick control)."
+ ]
+}

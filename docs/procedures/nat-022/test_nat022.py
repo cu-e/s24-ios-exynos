@@ -413,11 +413,175 @@ class PayloadFix(unittest.TestCase):
         fixed, _ = self.fp.fix(pb.read_bytes())
         with tempfile.TemporaryDirectory() as t:
             f = Path(t) / "fixed.bin"; f.write_bytes(fixed)
-            r = subprocess.run([sys.executable, "-P", str(HERE / "check_payload.py"), str(self.loader_c), str(f)],
+            # --no-align: this test is about the header/RAM/ADT-room checks; the alignment run has its own tests below
+            r = subprocess.run([sys.executable, "-P", str(HERE / "check_payload.py"), str(self.loader_c), str(f), "--no-align"],
                                capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertEqual(r.stdout.count("window 256 MiB: ok"), 1); self.assertEqual(r.stdout.count("window 512 MiB: ok"), 1)
         self.assertEqual(r.stdout.count("mpidr=0 dram=0 pram=0 ramdisk=0 guard_overrun=0"), 2)
+
+
+def _adt_nodes(adt):
+    """Independent ADT reader for the tests: node = nprops u32, nchildren u32, props (name[32], len u32, value), children."""
+    import struct
+    def node(off):
+        np_, nc = struct.unpack_from("<II", adt, off); o = off + 8; props = {}
+        for _ in range(np_):
+            name = adt[o:o + 32].split(b"\0")[0].decode("latin1"); ln = struct.unpack_from("<I", adt, o + 32)[0] & 0x7fffffff
+            props[name] = (o + 36, ln); o += 36 + ((ln + 3) & ~3)
+        kids = []
+        for _ in range(nc):
+            k, o = node(o); kids.append(k)
+        return {"props": props, "kids": kids, "adt": adt}, o
+    return node(0)[0]
+
+def _child(n, name):
+    import struct
+    for k in n["kids"]:
+        o, ln = k["props"]["name"]
+        if n["adt"][o:o + ln].split(b"\0")[0].decode() == name:
+            return k
+    raise KeyError(name)
+
+_DRIVER = r"""
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "adt_patch.h"
+int main(int c, char **v)
+{
+  FILE *f = fopen(v[1], "rb"); size_t n = strtoul(v[2], 0, 0);
+  unsigned char *raw = malloc(n + 64), *adt = raw + 16;      /* 16-aligned, like the page-aligned ADT on the phone */
+  if (!f || fread(adt, 1, n, f) != n) return 2;
+  uint64_t wb = strtoull(v[3], 0, 0), ws = strtoull(v[4], 0, 0), phys = strtoull(v[5], 0, 0);
+  uint64_t pb = (wb + ws - 0x100000ULL) & ~(16384ULL - 1);
+  int r[4];
+  r[0] = adt_set_boot_cpu_mpidr((uintptr_t)adt, n, (uint32_t)strtoul(v[6], 0, 0));
+  r[1] = adt_set_dram((uintptr_t)adt, n, wb, ws);
+  r[2] = adt_set_pram((uintptr_t)adt, n, pb, 0x80000);
+  r[3] = adt_rebase_ramdisk((uintptr_t)adt, n, (int64_t)(wb - phys));
+  fprintf(stderr, "%d %d %d %d\n", r[0], r[1], r[2], r[3]);
+  fwrite(adt, 1, n, stdout);
+  return 0;
+}
+"""
+
+class AdtAlignment(unittest.TestCase):
+    """NAT-027. Run 005 passed every host check and then took an alignment fault on the phone, because the loader
+    runs with the MMU off (Device memory: accesses must be aligned) and adt_patch.c stored a 64-bit value at an
+    ADT offset that is 4 mod 8. These tests make that class of failure visible on the host."""
+    @classmethod
+    def setUpClass(cls):
+        import shutil
+        cls.root = HERE.parents[2]
+        cls.src = cls.root / "artifacts/nat-020/build-003/source"
+        cls.pb = cls.root / "artifacts/nat-020/build-003/payload.bin"
+        cls.have = cls.src.exists() and cls.pb.exists() and shutil.which("gcc") and shutil.which("zig")
+        spec = importlib.util.spec_from_file_location("fix_payload", HERE / "fix_payload.py")
+        cls.fp = importlib.util.module_from_spec(spec); spec.loader.exec_module(cls.fp)
+
+    def setUp(self):
+        if not self.have:
+            self.skipTest("NAT-020 build-003 source/payload, gcc or zig missing")
+        self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
+        self.dir = Path(self.tmp.name)
+        import shutil
+        for tree, flags in (("plain", []), ("aligned", ["--adt-aligned"])):     # both get the marker patches; only one the NAT-027 patch
+            shutil.copytree(self.src, self.dir / tree, ignore=shutil.ignore_patterns("out", ".git"))
+            r = subprocess.run([sys.executable, "-I", str(HERE / "patch_loader.py"), str(self.dir / tree), *flags],
+                               capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stderr)
+        self.fixed = self.dir / "fixed.bin"
+        self.fixed.write_bytes(self.fp.fix(self.pb.read_bytes())[0])
+
+    def check(self, tree, *flags):
+        r = subprocess.run([sys.executable, "-P", str(HERE / "check_payload.py"), str(self.dir / tree / "shim/e1s-xnu/loader.c"),
+                            str(self.fixed), *flags], capture_output=True, text=True)
+        return r.returncode, r.stdout
+
+    def test_the_run_005_fault_is_reproduced_on_the_host_and_the_aligned_patch_removes_it(self):
+        rc, out = self.check("plain")
+        self.assertEqual(rc, 1, out)
+        self.assertIn("MISALIGNED ACCESS in adt_set_dram", out)           # the function the phone faulted in
+        rc, out = self.check("plain", "--no-align")                       # what run 005's pre-check could see
+        self.assertEqual(rc, 0, out)
+        rc, out = self.check("aligned")
+        self.assertEqual(rc, 0, out)
+        self.assertIn("no misaligned access", out)
+
+    def test_the_aligned_patch_leaves_no_64_bit_pointer_access_and_changes_only_adt_patch_c(self):
+        import filecmp
+        a, b = self.dir / "plain/shim/e1s-xnu", self.dir / "aligned/shim/e1s-xnu"
+        different = sorted(f.name for f in a.iterdir() if f.is_file() and not filecmp.cmp(f, b / f.name, shallow=False))
+        self.assertEqual(different, ["adt_patch.c"])
+        self.assertNotIn("uint64_t *", (b / "adt_patch.c").read_text().replace("(uint64_t)", ""))
+
+    def test_aligned_and_plain_adt_patch_write_identical_bytes_and_the_values_are_the_requested_ones(self):
+        import struct
+        (self.dir / "driver.c").write_text(_DRIVER)
+        exes = {}
+        for tree in ("plain", "aligned"):
+            exes[tree] = self.dir / f"drv_{tree}"
+            e = self.dir / tree / "shim/e1s-xnu"
+            r = subprocess.run(["gcc", "-O1", "-Wall", f"-I{e}", str(self.dir / "driver.c"), str(e / "adt_patch.c"), "-o", str(exes[tree])],
+                               capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stderr)
+        hdr = self.pb.read_bytes()
+        adt_off, adt_size = struct.unpack_from("<QQ", hdr, 32)
+        phys = struct.unpack_from("<Q", hdr, 56)[0]      # phys_base
+        adt_file = self.dir / "adt.bin"; adt_file.write_bytes(hdr[adt_off:adt_off + adt_size])
+        # window bases below and above 4 GiB: the high halves of the 64-bit stores must be right too
+        for wb, ws in ((0xc0000000, 0x10000000), (0x9dd3fc000, 0x20000000), (0x880000000, 0x10000000), (0xffffffff00000000 >> 8, 0x40000000)):
+            outs = {}
+            for tree, exe in exes.items():
+                r = subprocess.run([str(exe), str(adt_file), str(adt_size), hex(wb), hex(ws), hex(phys), "0x80000101"], capture_output=True)
+                self.assertEqual(r.returncode, 0, r.stderr)
+                outs[tree] = (r.stdout, r.stderr)
+            self.assertEqual(outs["plain"], outs["aligned"], hex(wb))
+            self.assertEqual(outs["aligned"][1].split(), [b"0", b"0", b"0", b"0"])
+            adt = outs["aligned"][0]
+            chosen = _child(_adt_nodes(adt), "chosen")
+            self.assertEqual(struct.unpack_from("<Q", adt, chosen["props"]["dram-base"][0])[0], wb)    # oracle: parsed back
+            self.assertEqual(struct.unpack_from("<Q", adt, chosen["props"]["dram-size"][0])[0], ws)
+            self.assertEqual(chosen["props"]["dram-size"][0] % 8, 4)       # the value that faulted on the phone
+            pram = _child(_adt_nodes(adt), "pram")
+            self.assertEqual(struct.unpack_from("<QQ", adt, pram["props"]["reg"][0]), (((wb + ws - 0x100000) & ~0x3fff), 0x80000))
+
+
+class ScanUnaligned(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        spec = importlib.util.spec_from_file_location("scan_unaligned", HERE / "scan_unaligned.py")
+        cls.su = importlib.util.module_from_spec(spec); spec.loader.exec_module(cls.su)
+
+    @staticmethod
+    def ldst(size, opc, imm, rn=1, rt=0, v=0):
+        """Encoding written from the Arm ARM layout (size 111 V 00 opc 0 imm9 00 Rn Rt), not from the tool."""
+        return 0x38000000 | (size << 30) | (v << 26) | (opc << 22) | ((imm & 0x1ff) << 12) | (rn << 5) | rt
+
+    def test_flags_exactly_the_misaligned_unscaled_accesses(self):
+        import struct
+        words = [
+            (self.ldst(3, 0, 0x24, 11, 19), True),     # stur x19, [x11, #0x24]: the run-005 instruction (0xf8024173)
+            (self.ldst(3, 0, 0x20, 11, 19), False),
+            (self.ldst(3, 1, -4), True),               # ldur x0, [x1, #-4]
+            (self.ldst(2, 1, 2), True),                # ldur w0, [x1, #2]
+            (self.ldst(2, 1, 4), False),
+            (self.ldst(1, 1, 2), False),               # ldurh w0, [x1, #2]
+            (self.ldst(1, 0, 1), True),                # sturh w0, [x1, #1]
+            (self.ldst(0, 0, 3), False),               # sturb: one byte is always aligned
+            (self.ldst(2, 2, 2), True),                # ldursw
+            (self.ldst(3, 2, 4), False),               # PRFUM: not an access
+            (self.ldst(3, 0, 0x24, v=1), False),       # SIMD&FP register form is not scanned
+            (0xf9000000 | (5 << 10), False),           # scaled STR x0, [x0, #40]: cannot be misaligned by its immediate
+        ]
+        self.assertEqual(words[0][0], 0xf8024173)
+        data = b"".join(struct.pack("<I", w) for w, _ in words)
+        got = [a for a, _, _, _ in self.su.scan_words(data)]
+        self.assertEqual(got, [4 * i for i, (_, bad) in enumerate(words) if bad])
+        skip = [a for a, _, _, _ in self.su.scan_words(data, 0, lambda a: a < 8)]
+        self.assertEqual(got[0], 0)
+        self.assertEqual(skip, got[1:])                                  # words in a `$d` range are not decoded
 
 
 class Aarch64Build(unittest.TestCase):
@@ -462,6 +626,26 @@ class Aarch64Build(unittest.TestCase):
             self.assertNotIn("fb_base == MK_FB_BASE", src_c)
             plain = (out / "loader-diag/source/shim/e1s-xnu/loader.c").read_text()
             self.assertNotIn("mk_hold", plain)
+            # NAT-027: the run-005 image has four statically visible misaligned 64-bit ADT accesses (all in the two
+            # adt_set_* functions, the first of which faulted on the phone); the -aln image has none, differs from it in
+            # code only, and carries the same payload bytes.
+            def scan(name):
+                d = out / name
+                r = subprocess.run([sys.executable, "-I", str(HERE / "scan_unaligned.py"), str(d / "Image"), "--elf", str(d / "loader.elf")],
+                                   capture_output=True, text=True)
+                return r.returncode, r.stdout.splitlines()
+            rc, lines = scan("loader-diag-trig-hold-adt8")
+            self.assertEqual(rc, 1)
+            self.assertEqual(lines[-1], "total 4")
+            self.assertEqual(sorted(l.split()[2].split("+")[0] for l in lines[:-1]), ["adt_set_dram"] * 2 + ["adt_set_pram"] * 2)
+            rc, lines = scan("loader-diag-trig-hold-adt8-aln")
+            self.assertEqual((rc, lines), (0, ["total 0"]))
+            self.assertNotEqual(new["loader-diag-trig-hold-adt8-aln"]["sha256"], new["loader-diag-trig-hold-adt8"]["sha256"])
+            ipa = (out / ip["loader-diag-trig-hold-adt8-aln"]["path"]).read_bytes()
+            sz = (out / "loader-diag-trig-hold-adt8-aln/Image").stat().st_size
+            self.assertEqual(ipa[sz:], b[off:])                # same SWEETXNU payload as the run-005 image
+            aln_c = (out / "loader-diag-trig-hold-adt8-aln/source/shim/e1s-xnu/loader.c").read_text()
+            self.assertEqual(aln_c, src_c)                     # loader.c is the run-005 one; only adt_patch.c differs
 
 if __name__ == "__main__":
     unittest.main()

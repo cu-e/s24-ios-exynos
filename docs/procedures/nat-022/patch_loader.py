@@ -12,18 +12,23 @@ and invalid-FDT return with a held STAGE frame (code = mk_hash16 of the message)
 the fixed marker region even if the loader's own framebuffer differs, reports loader
 exceptions unconditionally, and replaces the jump into the kernel copy by mk_hold(): this
 variant NEVER executes the payload.
+
+--adt-aligned (NAT-027): additionally rewrites adt_patch.c so that every 64-bit ADT property access is
+two aligned 32-bit accesses (run 005 took an alignment fault in adt_set_dram: the loader runs with the
+MMU off and ADT values are only 4-byte aligned). Anchored on the base adt_patch.c hash.
 """
 from pathlib import Path
 import hashlib, sys
 
 START_SHA = '4a5e1929d31254b5691ee4ad09a544ec48a4c5d242bd6d8e0ad6bfd395fd15f4'
 LOADER_SHA = '036e1c951955b6f2d692c8796fa9d335ab8c16e15df21ad261f6bb02e49bc9e8'
+ADT_PATCH_SHA = '415bf5c0cbb99dfa74f0ecaf1338a85ffc1a1e371ef5f27b9a39b52eba63166e'
 
 def once(s, old, new):
     assert s.count(old) == 1, 'anchor mismatch: ' + old[:80]
     return s.replace(old, new, 1)
 
-def main(root, trig_hold=False):
+def main(root, trig_hold=False, adt_aligned=False):
     src = Path(root) / 'shim/e1s-xnu'
     p = src / 'start.S'
     assert hashlib.sha256(p.read_bytes()).hexdigest() == START_SHA, 'start.S base changed'
@@ -152,6 +157,43 @@ static struct ui_fb ui;''')
         s = once(s, '''	if (fb_base == MK_FB_BASE && fb_size >= MK_BANDS * MK_BAND_BYTES)
 		mk_exception_loop((uint32_t)slot, esr, elr, far);''', '''	mk_exception_loop((uint32_t)slot, esr, elr, far);''')
     p.write_text(s)
+    if adt_aligned:
+        patch_adt_aligned(src)
+
+def patch_adt_aligned(src):
+    """NAT-027: make every 64-bit ADT property access two aligned 32-bit accesses.
+
+    Run 005 (loader-diag-trig-hold-adt8) took a data abort at adt_set_dram+0x268 (ESR EC 0x25, DFSC 0x21
+    alignment fault, FAR = ADT base + 1020 = the value of `dram-size`): ADT property values start at
+    node offset + 36, so they are only 4-byte aligned, and the loader runs with the MMU off (all data
+    accesses are Device memory and must be naturally aligned). Every property offset is a multiple of 4
+    (node header 8, property header 36, value length rounded up to 4), so 32-bit accesses are always
+    aligned. The ADT is little-endian on this target; the halves are stored low word first."""
+    p = src / 'adt_patch.c'
+    assert hashlib.sha256(p.read_bytes()).hexdigest() == ADT_PATCH_SHA, 'adt_patch.c base changed'
+    s = p.read_text()
+    s = once(s, '''static int rd32(uintptr_t base, uint64_t size, uint32_t off, uint32_t *v)''', '''/* ADT property values are 4-byte aligned only; the MMU is off, so 64-bit accesses would fault. */
+static inline uint64_t adt_ld64(uintptr_t a)
+{
+	return (uint64_t)*(const volatile uint32_t *)a |
+	    ((uint64_t)*(const volatile uint32_t *)(a + 4) << 32);
+}
+
+static inline void adt_st64(uintptr_t a, uint64_t v)
+{
+	*(volatile uint32_t *)a = (uint32_t)v;
+	*(volatile uint32_t *)(a + 4) = (uint32_t)(v >> 32);
+}
+
+static int rd32(uintptr_t base, uint64_t size, uint32_t off, uint32_t *v)''')
+    s = once(s, '*(volatile uint64_t *)(adt + off + 36) = value;', 'adt_st64(adt + off + 36, value);')
+    s = once(s, '*(volatile uint64_t *)(adt + off + 36) = base;', 'adt_st64(adt + off + 36, base);')
+    s = once(s, '*(volatile uint64_t *)(adt + off + 44) = pram_size;', 'adt_st64(adt + off + 44, pram_size);')
+    s = once(s, 'phys = *(const volatile uint64_t *)(adt + off + 36);', 'phys = adt_ld64(adt + off + 36);')
+    s = once(s, '''*(volatile uint64_t *)(adt + off + 36) =
+			    phys + (uint64_t)delta;''', 'adt_st64(adt + off + 36, phys + (uint64_t)delta);')
+    assert 'uint64_t *)' not in s.replace('(uint64_t)', ''), 'a 64-bit pointer access remains'
+    p.write_text(s)
 
 if __name__ == '__main__':
-    main(sys.argv[1], '--trig-hold' in sys.argv[2:])
+    main(sys.argv[1], '--trig-hold' in sys.argv[2:], '--adt-aligned' in sys.argv[2:])

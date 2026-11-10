@@ -2,7 +2,7 @@
 """Host pre-check of what the NAT-020 loader would do with a SWEETXNU payload (NAT-022 / NAT-026).
 
 usage: check_payload.py LOADER_C PAYLOAD [--offset N] [--win-mib 256,512] [--win-base 0xC0000000]
-                        [--mpidr 0x80000000] [--no-adt] [--json OUT]
+                        [--mpidr 0x80000000] [--no-adt] [--no-align] [--json OUT]
 
 LOADER_C is the loader.c of the build that will run (the NAT-020 build-003 source or a patched copy);
 adt_patch.c is read from the same directory. PAYLOAD is payload.bin (OFFSET 0) or the loader
@@ -20,12 +20,19 @@ What runs, and what is verbatim:
      payload in a guarded buffer of exactly adt_size bytes, with the argument expressions of loader.c
      (the four call sites are written out here, not extracted). Bytes changed and guard overruns are
      reported.
+  4. alignment (NAT-027): the same ADT harness is rebuilt with gcc -fsanitize=alignment
+     -fsanitize-undefined-trap-on-error and run again. The loader runs with the MMU off, so every data
+     access is Device memory and must be naturally aligned (run 005 took an alignment fault in
+     adt_set_dram); x86-64 and the plain run in step 3 tolerate misaligned accesses. A trap is reported as
+     `FIRES adt_patch.c: MISALIGNED ACCESS in <call>`, with the ESR the S24 would show (EC 0x25, DFSC 0x21).
+     --no-align skips it; it is `unavailable` if gcc cannot build it. It covers adt_patch.c only; the
+     rest of the loader is covered by scan_unaligned.py (unscaled immediates only).
 Not evaluated (no S-Boot DTB on the host): which RAM window choose_window() picks, the framebuffer
 selection, GIC access and every hardware effect. A pass here says the payload is acceptable to those
 code paths; it is host-test evidence only, not a run on the S24.
 """
 from pathlib import Path
-import argparse, json, re, subprocess, sys, tempfile
+import argparse, json, re, shutil, subprocess, sys, tempfile
 
 DEFS = ('#include <stdint.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n')
 
@@ -95,9 +102,13 @@ static void adt_run(const struct payload *p, FILE *f, long base, uint64_t win_ba
   memcpy(orig, adt, sz);
   uintptr_t adt_pa = (uintptr_t)adt;
 ''' + '  ' + pram_base + '\n  ' + pram_size + '''
+  printf("T\\tadt_set_boot_cpu_mpidr\\n");
   int r1 = adt_set_boot_cpu_mpidr(adt_pa, p->adt_size, mpidr);
+  printf("T\\tadt_set_dram\\n");
   int r2 = adt_set_dram(adt_pa, p->adt_size, win_base, win_size);
+  printf("T\\tadt_set_pram\\n");
   int r3 = adt_set_pram(adt_pa, p->adt_size, pram_base, pram_size);
+  printf("T\\tadt_rebase_ramdisk\\n");
   int r4 = adt_rebase_ramdisk(adt_pa, p->adt_size, (int64_t)(win_base - p->phys_base));
   int guard = 0;
   for (int i = 0; i < 64; i++) guard |= (raw[i] != 0xa5) | (raw[64 + sz + i] != 0xa5);
@@ -114,6 +125,7 @@ static void adt_run(const struct payload *p, FILE *f, long base, uint64_t win_ba
 }
 int main(int argc, char **argv)
 {
+  setvbuf(stdout, NULL, _IONBF, 0);   /* a trap must not lose the trace lines printed before it */
   FILE *f = fopen(argv[1], "rb"); if (!f) return 2;
   long base = strtol(argv[2], 0, 0);
   uint64_t win_base = strtoull(argv[3], 0, 0);
@@ -138,8 +150,40 @@ int main(int argc, char **argv)
 }
 '''
 
+def alignment_run(c, loader, argv, tmp):
+    """Rebuild the same harness with gcc's alignment sanitizer in trap mode and run it (NAT-027).
+
+    The loader runs with the MMU off, so every data access is Device memory and must be naturally
+    aligned (run 005: `*(volatile uint64_t *)(adt + off + 36)` with off + 36 = 4 mod 8 took an
+    alignment fault). x86 allows such stores, so the normal run cannot see them. A SIGILL here means
+    adt_patch.c made a misaligned access; the last `T` trace line names the call that was running.
+    zig's own -fsanitize=alignment did not flag a misaligned volatile store in a probe, so gcc is used."""
+    gcc = shutil.which('gcc')
+    if not gcc:
+        return dict(status='unavailable', detail='gcc not found')
+    exe = tmp / 'chk_align'
+    cmd = [gcc, '-Wall', '-O1', '-fsanitize=alignment', '-fsanitize-undefined-trap-on-error',
+           '-I', str(loader.parent), str(c), str(loader.parent / 'adt_patch.c'), '-o', str(exe)]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode:
+        return dict(status='unavailable', detail='gcc compile failed: ' + r.stderr[-300:])
+    r = subprocess.run([str(exe)] + argv[1:], capture_output=True, text=True)
+    last = win = None
+    for line in r.stdout.splitlines():
+        f = line.split('\t')
+        if f[0] == 'T':
+            last = f[1]
+        elif f[0] == 'S':
+            win = int(f[1])
+    if r.returncode == 0:
+        return dict(status='ok')
+    if r.returncode < 0:
+        return dict(status='fault', signal=-r.returncode, call=last, win_mib=win)
+    return dict(status='error', detail=f'exit {r.returncode}')
+
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument('--no-align', action='store_true', help='skip the alignment-trap run of adt_patch.c')
     ap.add_argument('loader_c'); ap.add_argument('payload')
     ap.add_argument('--offset', type=lambda s: int(s, 0), default=0)
     ap.add_argument('--win-mib', default='256,512')
@@ -164,13 +208,27 @@ def main():
         argv = [str(exe), a.payload, str(a.offset), hex(a.win_base), hex(a.mpidr), '0' if a.no_adt else '1',
                 hex(a.runtime_image + a.offset)] + [str(w) for w in wins]
         r = subprocess.run(argv, capture_output=True, text=True)
+        align = None if (a.no_align or a.no_adt) else alignment_run(c, loader, argv, Path(t))
     if r.returncode:
         sys.exit(f'harness exit {r.returncode}: {r.stdout}{r.stderr}')
     out = dict(loader_c=a.loader_c, payload=a.payload, offset=a.offset, win_base=hex(a.win_base), mpidr=hex(a.mpidr),
-               header=[], windows=[], notes='host-test only; see the module docstring for what is verbatim and what is not evaluated')
+               header=[], windows=[], alignment=align,
+               notes='host-test only; see the module docstring for what is verbatim and what is not evaluated')
     bad = False
+    if align is not None:
+        if align['status'] == 'ok':
+            print('ok    adt_patch.c: no misaligned access (gcc -fsanitize=alignment, trap mode)')
+        elif align['status'] == 'fault':
+            print(f"FIRES adt_patch.c: MISALIGNED ACCESS in {align['call']} (window {align['win_mib']} MiB, signal {align['signal']}); "
+                  'on the phone (MMU off, Device memory) this is an alignment fault, ESR EC 0x25 DFSC 0x21')
+            bad = True
+        else:
+            print(f"UNKNOWN alignment check: {align['status']} {align.get('detail', '')}; pass --no-align to skip explicitly")
+            bad = True
     for line in r.stdout.splitlines():
         f = line.split('\t')
+        if f[0] == 'T':
+            continue
         if f[0] == 'H':
             row = dict(fires=f[1] == '1', fail_message=f[2], clause=f[3]); out['header'].append(row)
             print(('FIRES ' if row['fires'] else 'ok    ') + f"[{row['fail_message']}] {row['clause']}")
