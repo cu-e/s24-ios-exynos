@@ -14,7 +14,7 @@ NEW_SHA='b5ff3bf7e4d6bcd36cc518fbc4ab0daaaf8a1985056a65708f60b51f4f9a6a49'
 STOCK=ROOT/'devices/recovery/backups/2026-11-10/recovery.img'
 STOCK_SHA='96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67'
 TARGET='/dev/block/sda18'
-WRITE="su -c 'dd of=/dev/block/sda18 bs=1048576 count=100663296 iflag=count_bytes conv=fsync,nocreat,notrunc'"
+WRITE="su -c 'test -b /dev/block/sda18 && dd of=/dev/block/sda18 bs=1048576 count=100663296 iflag=count_bytes conv=notrunc,fsync'"
 
 def now():return datetime.datetime.now(datetime.timezone.utc).isoformat()
 def digest(b):return hashlib.sha256(b).hexdigest()
