@@ -1,0 +1,42 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "task": "VM-014",
+ "owner": "claude-takeover-20261110-6c8f",
+ "recorded_at": "2026-11-10T07:26:39+00:00",
+ "summary": "Independent review of the recorded codex-guest-exec-20261106-cw PASS build: all 471 path/hash pairs that its evidence chain names inside its own worktree match the files on disk, including 77/77 libkern objects, each an ARM64 Mach-O MH_OBJECT. Branch team/vm-014-resource-final-20261106 merged into main unchanged.",
+ "commit": "db3f5a088d8ef8ca2b7bc5642861e456b67c498f",
+ "transfer": {
+  "from_owner": "codex-guest-exec-20261106-cw",
+  "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
+  "merged_branch": "team/vm-014-resource-final-20261106"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "scratchpad/hash_review.py",
+    "artifacts/guest-shard-review/vm-014.json",
+    "worktrees/vm-014-resource-final-20261106",
+    "worktrees/vm-014-resource-final-20261106/docs/procedures/avf-object-shards/libkern/resource-final/build-002-result.json"
+   ],
+   "exit_code": 0,
+   "note": "read-only: follows referenced JSON up to two levels inside the worktree, recomputes SHA-256, checks Mach-O headers of .o/.cpo"
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/avf-object-shards/libkern/review-20261110/hash-review.json",
+  "docs/procedures/avf-object-shards/libkern/resource-final/build-002-result.json"
+ ],
+ "sha256": {
+  "docs/procedures/avf-object-shards/libkern/review-20261110/hash-review.json": "9642451501367b06857a1e5f8b69c0bbdfa501bcd4ce8f5747f5ae9064788c8a",
+  "docs/procedures/avf-object-shards/libkern/resource-final/build-002-result.json": "a154f7aeb1b4db2e17c623877efdaaaeb90b04614fbd4d0020207a19b6b9a30a"
+ },
+ "limitations": [
+  "Hash and header review only; compile correctness relies on the recorded build.",
+  "These Firehose-profile guest objects were never linked: the guest kernel that VM-002 booted came from the HakiOS build route, so this shard line is superseded for the current bench.",
+  "No link, QEMU, device or native claim."
+ ]
+}
