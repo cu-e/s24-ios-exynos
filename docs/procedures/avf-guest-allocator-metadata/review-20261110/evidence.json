@@ -1,0 +1,60 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "task": "VM-033",
+ "owner": "claude-takeover-20261110-6c8f",
+ "recorded_at": "2026-11-10T07:35:19+00:00",
+ "summary": "Independent review of the codex-guest-exec-20261106-do audit. All 17 path/hash pairs in its evidence chain inside its worktree match. Rechecked on the real objects with NDK 28.2 llvm-objdump/llvm-nm: OSData.cpo __DATA_CONST,__kalloc_type is 0xc0 = 192 bytes with exactly 6 UNSIGNED pointer relocations (three records, two string pointers each; site.ExpansionData present); kalloc.o has exactly the four undefined section$start/end$__DATA_CONST$__kalloc_{type,var} boundaries.",
+ "commit": "146e61a7b0af8d53d4062fc90b09b3df59c5bc01",
+ "transfer": {
+  "from_owner": "codex-guest-exec-20261106-do",
+  "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
+  "branch": "team/vm-033-20261106",
+  "branch_content_already_in_main": true
+ },
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/avf-object-shards/hash_review.py",
+    "artifacts/guest-audit-review/vm-033.json",
+    "worktrees/vm-033-20261106",
+    "EVIDENCE"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "llvm-objdump --macho --section-headers OSData.cpo"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "llvm-objdump --macho -r OSData.cpo"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "llvm-nm -u kalloc.o | grep section$"
+   ],
+   "exit_code": 0
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/avf-guest-allocator-metadata/review-20261110/hash-review.json",
+  "fixtures/public/avf-guest-allocator-metadata/evidence.json"
+ ],
+ "sha256": {
+  "docs/procedures/avf-guest-allocator-metadata/review-20261110/hash-review.json": "ce1718f734ff6bdaa705116b7ca2e456850e99d5c971564ba3aa3489edbf606c",
+  "fixtures/public/avf-guest-allocator-metadata/evidence.json": "d1a03f41f51d5af24739b5782be3b03fd9dca74638badcee13fc3d7a2ef8ce33"
+ },
+ "limitations": [
+  "Review rechecks the stated counts and hashes; it does not re-run the original tools.",
+  "Guest (AVF/QEMU bench) line; nothing compiled, linked, booted or run on the phone.",
+  "The guest kernel VM-002 booted came from the HakiOS build route; these audits are not on its critical path."
+ ]
+}
