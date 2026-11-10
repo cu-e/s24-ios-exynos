@@ -27,11 +27,14 @@ struct vmm_layout {
     uint64_t image_size;   /* bytes the Image occupies in RAM, including its .bss */
     uint64_t initrd_size;
     const char *bootargs;
+    uint32_t scfb_w, scfb_h;   /* 0: no shared framebuffer */
+    int virtio_input;          /* describe the virtio-mmio input slot in the FDT */
     /* Outputs of vmm_plan(). */
-    uint64_t image_addr, initrd_addr, fdt_addr, gicr_base, gicr_size;
+    uint64_t image_addr, initrd_addr, fdt_addr, gicr_base, gicr_size, scfb_addr, scfb_size;
 };
 
-/* Places Image, initrd and FDT. Returns 0, or -1 if they do not fit or arguments are invalid. */
+/* Places Image, initrd, the SCFB region (below the FDT) and the FDT. Returns 0, or -1 if they do not fit
+ * or arguments are invalid. */
 int vmm_plan(struct vmm_layout *l);
 /* Writes the FDT for a planned layout. Returns the blob size, or 0 on error. */
 size_t vmm_build_fdt(const struct vmm_layout *l, uint8_t *out, size_t out_len);

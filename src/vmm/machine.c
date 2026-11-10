@@ -3,6 +3,8 @@
 #include <string.h>
 
 #include "fdt.h"
+#include "scfb.h"
+#include "virtio.h"
 
 #define GIC_PHANDLE 1u
 #define IRQ_TYPE_SPI 0u
@@ -30,7 +32,16 @@ int vmm_plan(struct vmm_layout *l) {
     l->fdt_addr = VMM_RAM_BASE + l->ram_size - VMM_FDT_MAX;
     l->gicr_size = VMM_GICR_STRIDE * l->cpus;
     l->gicr_base = VMM_GICD_BASE - l->gicr_size;
-    if (l->initrd_addr + l->initrd_size > l->fdt_addr || l->initrd_addr + l->initrd_size < l->initrd_addr) return -1;
+    l->scfb_addr = l->scfb_size = 0;
+    uint64_t top = l->fdt_addr;
+    if (l->scfb_w || l->scfb_h) {
+        if (!l->scfb_w || !l->scfb_h || l->scfb_w > 4096 || l->scfb_h > 4096) return -1;
+        l->scfb_size = scfb_region_size(l->scfb_w, l->scfb_h);
+        if (l->scfb_size > l->fdt_addr - VMM_RAM_BASE) return -1;
+        l->scfb_addr = l->fdt_addr - l->scfb_size;
+        top = l->scfb_addr;
+    }
+    if (l->initrd_addr + l->initrd_size > top || l->initrd_addr + l->initrd_size < l->initrd_addr) return -1;
     return 0;
 }
 
@@ -119,6 +130,16 @@ size_t vmm_build_fdt(const struct vmm_layout *l, uint8_t *out, size_t out_len) {
     uint32_t rtc_irq[3] = {IRQ_TYPE_SPI, VMM_RTC_SPI, IRQ_LEVEL_HIGH};
     fdt_prop_cells(&w, "interrupts", rtc_irq, 3);
     fdt_end_node(&w);
+
+    if (l->virtio_input) {
+        fdt_begin_node(&w, "virtio_mmio@a000000");
+        fdt_prop_str(&w, "compatible", "virtio,mmio");
+        reg2(&w, VIO_MMIO_BASE, VIO_MMIO_SLOT);
+        uint32_t vio_irq[3] = {IRQ_TYPE_SPI, VIO_MMIO_SPI_BASE, IRQ_LEVEL_HIGH};
+        fdt_prop_cells(&w, "interrupts", vio_irq, 3);
+        fdt_prop_empty(&w, "dma-coherent");
+        fdt_end_node(&w);
+    }
 
     fdt_end_node(&w);
     return fdt_finish(&w, out, out_len);
