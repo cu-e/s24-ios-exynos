@@ -1,0 +1,19 @@
+{
+  "id": "KRN-043",
+  "title": "Build the canonical export-checked E1S DEVELOPMENT kernel and its KPI set with the KRN-041 fixes, reproducibly from main",
+  "status": "pending",
+  "owner": null,
+  "priority": 75,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": ["KRN-041", "KRN-042", "STR-037"],
+  "paths": ["tools/build/e1s_kernel_exports.py", "docs/procedures/krn-043", "tests/test_e1s_kernel_exports.py"],
+  "acceptance": [
+    "A build tool in tools/build/ applies 0001 to the native pmap.c under the recorded STR-023 recipe and 0002 to the export lists, relinks the STR-041 link once with that object, and publishes the kernel, profile export lists, all-kpi.exp, the seven symbol sets and a hash manifest in one run directory.",
+    "The genuine kextsymboltool passes both check_all_exports passes and all seven symbol sets for the published kernel, and the stub machine code is checked; failures are kept in the report.",
+    "Two runs in different directories publish byte-identical manifests; the only flag added to the recorded recipe is a source prefix map, and the pmap.o __text is identical to the KRN-041 run-003 patched object.",
+    "Nothing is booted, packaged or sent to a device; downstream use is limited to linking and symbol resolution."
+  ],
+  "sources": ["apple-xnu"],
+  "steps": ["Reuse the KRN-041 helpers", "Add the prefix map and publish the KPI set", "Run twice and compare"]
+}

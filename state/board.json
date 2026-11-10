@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T07:17:25+00:00",
-  "ledger_updated_at": "2026-11-10T07:17:19+00:00",
-  "registry_sha256": "7c2ce6ebf41b967ac677828b213d218a864e975f9f8d77aa2cc3e2fc63673228",
+  "generated_at": "2026-11-10T07:20:59+00:00",
+  "ledger_updated_at": "2026-11-10T07:20:52+00:00",
+  "registry_sha256": "a6197bd10c3ff4563510901c159f29745b44908d877a6b59c8c4f2852758577b",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -37,6 +37,7 @@
       "CELL-010",
       "ESIM-004",
       "CELL-009",
+      "KRN-043",
       "GPU-005"
     ],
     "waiting": [
@@ -10026,6 +10027,53 @@
       "card_path": "planning/tasks/GPU-014.md"
     },
     {
+      "id": "KRN-043",
+      "title": "Build the canonical export-checked E1S DEVELOPMENT kernel and its KPI set with the KRN-041 fixes, reproducibly from main",
+      "status": "blocked",
+      "owner": "claude-takeover-20261110-6c8f",
+      "priority": 75,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "KRN-041",
+        "KRN-042",
+        "STR-037"
+      ],
+      "paths": [
+        "tools/build/e1s_kernel_exports.py",
+        "docs/procedures/krn-043",
+        "tests/test_e1s_kernel_exports.py"
+      ],
+      "acceptance": [
+        "A build tool in tools/build/ applies 0001 to the native pmap.c under the recorded STR-023 recipe and 0002 to the export lists, relinks the STR-041 link once with that object, and publishes the kernel, profile export lists, all-kpi.exp, the seven symbol sets and a hash manifest in one run directory.",
+        "The genuine kextsymboltool passes both check_all_exports passes and all seven symbol sets for the published kernel, and the stub machine code is checked; failures are kept in the report.",
+        "Two runs in different directories publish byte-identical manifests; the only flag added to the recorded recipe is a source prefix map, and the pmap.o __text is identical to the KRN-041 run-003 patched object.",
+        "Nothing is booted, packaged or sent to a device; downstream use is limited to linking and symbol resolution."
+      ],
+      "sources": [
+        "apple-xnu"
+      ],
+      "steps": [
+        "Reuse the KRN-041 helpers",
+        "Add the prefix map and publish the KPI set",
+        "Run twice and compare"
+      ],
+      "started_at": "2026-11-10T07:18:57+00:00",
+      "last_heartbeat": "2026-11-10T07:20:52+00:00",
+      "updated_at": "2026-11-10T07:20:52+00:00",
+      "branch": "main",
+      "blocked_reason": "Executing tools/build/e1s_kernel_exports.py (XNU pmap.c compile, relink, kextsymboltool build) was denied by the Claude Code auto-mode classifier (Code from External); needs the owner to allow or run it (docs/procedures/krn-043/README.md)",
+      "progress_note": "Tool written, never executed (classifier denial)",
+      "next_step": "Owner allows or runs the three commands in the README; then record evidence",
+      "handoff": "docs/procedures/krn-043/README.md",
+      "column": "blocked",
+      "reasons": [
+        "Executing tools/build/e1s_kernel_exports.py (XNU pmap.c compile, relink, kextsymboltool build) was denied by the Claude Code auto-mode classifier (Code from External); needs the owner to allow or run it (docs/procedures/krn-043/README.md)"
+      ],
+      "card_path": "planning/tasks/KRN-043.md",
+      "report_health": "recent"
+    },
+    {
       "id": "VM-002",
       "title": "Build a pinned minimal XNU guest and host launch harness",
       "status": "done",
@@ -11843,7 +11891,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, VM-053, VM-054, NAT-006"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, VM-053, VM-054, NAT-006, KRN-043"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-002.md"
@@ -11887,7 +11935,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-002, NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, VM-053, VM-054, NAT-006"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, VM-053, VM-054, NAT-006, KRN-043"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -12950,6 +12998,17 @@
         "worktree": "worktrees/vm-053-display-input-20261110"
       },
       {
+        "id": "KRN-043",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-10T07:20:52+00:00",
+        "report_health": "recent",
+        "progress_note": "Tool written, never executed (classifier denial)",
+        "next_step": "Owner allows or runs the three commands in the README; then record evidence",
+        "handoff": "docs/procedures/krn-043/README.md",
+        "branch": "main",
+        "worktree": null
+      },
+      {
         "id": "GPU-005",
         "status": "blocked",
         "last_heartbeat": "2026-11-10T07:08:15+00:00",
@@ -13078,63 +13137,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-10T06:52:10+00:00",
-      "action": "task.claim:DRV-002",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "DRV-002",
-          "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "last_heartbeat": "2026-11-10T06:52:10+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T06:52:56+00:00",
-      "action": "task.done:DRV-002",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "DRV-002",
-          "status": "done",
-          "owner": "claude-takeover-20261110-6c8f",
-          "last_heartbeat": "2026-11-10T06:52:10+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T06:53:25+00:00",
-      "action": "task.narrow:GPU-003",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "GPU-003",
-          "status": "pending",
-          "owner": null,
-          "paths": [
-            "research/notes/GPU-003-stock-vulkan-review.md"
-          ]
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T06:53:44+00:00",
-      "action": "task.claim:GPU-003",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "GPU-003",
-          "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "last_heartbeat": "2026-11-10T06:53:44+00:00",
-          "branch": "main"
-        }
-      ]
-    },
     {
       "at": "2026-11-10T06:55:48+00:00",
       "action": "task.done:GPU-003",
@@ -13408,11 +13410,74 @@
           "handoff": "docs/procedures/kernel-build.md"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T07:18:39+00:00",
+      "action": "task.add:KRN-043",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "KRN-043",
+          "status": "pending",
+          "owner": null,
+          "priority": 75
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:18:57+00:00",
+      "action": "task.claim:KRN-043",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "KRN-043",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 75,
+          "last_heartbeat": "2026-11-10T07:18:57+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:20:33+00:00",
+      "action": "task.block:KRN-043",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "KRN-043",
+          "status": "blocked",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 75,
+          "blocked_reason": "Executing tools/build/e1s_kernel_exports.py (XNU pmap.c compile, relink, kextsymboltool build) was denied by the Claude Code auto-mode classifier (Code from External); needs the owner to allow or run it (docs/procedures/krn-043/README.md)",
+          "last_heartbeat": "2026-11-10T07:20:33+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:20:52+00:00",
+      "action": "task.update:KRN-043",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "KRN-043",
+          "status": "blocked",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 75,
+          "progress_note": "Tool written, never executed (classifier denial)",
+          "next_step": "Owner allows or runs the three commands in the README; then record evidence",
+          "blocked_reason": "Executing tools/build/e1s_kernel_exports.py (XNU pmap.c compile, relink, kextsymboltool build) was denied by the Claude Code auto-mode classifier (Code from External); needs the owner to allow or run it (docs/procedures/krn-043/README.md)",
+          "last_heartbeat": "2026-11-10T07:20:52+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/krn-043/README.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "2cf0dd837ac16dad147ddcc877b2f4aecf847788ceba5673ca58769a57cb0184",
-    "BOARD.md": "d34bc05a8487af0afb83fc19c9c9c884584d8a7180f66a0f14413d8bc6de75af",
+    "STATUS.md": "deb2c03fed83c21d97e261f7d4e7b7f7c8f0c25150bc7d3a7f4bd4bfed790e42",
+    "BOARD.md": "69e6754561539f19637e338e7b013ec72931808e92bdb31736c523fa82f4a652",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -13631,6 +13696,7 @@
     "planning/tasks/VM-053.md": "150c2bf6a94ee79706a1160a68f975afa7677c46da55785ead4de91d06d12b7a",
     "planning/tasks/GPU-016.md": "63299ca04a73b68d60b98853bbd94a1afb153977f27a8621e9fcb3dc4a825bc3",
     "planning/tasks/GPU-014.md": "948575bafb8058b4b0784c6132e8043657404029a468fa04bf86b05cca2d98b6",
+    "planning/tasks/KRN-043.md": "1195c493897e80407d37a8a3771cb2e626609814f7a9c483c7359f90027d43b0",
     "planning/tasks/VM-002.md": "bca6a8c74c4b9f3569b3dcef3af10725267695a7fec8416fd2a4c7c40d4c2833",
     "planning/tasks/UI-001.md": "c625d98b72bb9f1d80a6d5bb3d2a74922ae72d9ab758fb7d12bdf71a7f474320",
     "planning/tasks/GPU-006.md": "c4420e384a9ce1eaccb816f017b6212f8b8601974b7de2218916f3115d40464f",
@@ -13673,8 +13739,8 @@
     "planning/tasks/GPU-005.md": "90191779582d044468e264c18ccf2993938162d3443cd05ea76a234d1144cc13",
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
-    "planning/tasks/NAT-002.md": "c44ed096c8bbfa307505f565f8b4ba4749895e89cc85bfd3d05a026465987d60",
-    "planning/tasks/NAT-003.md": "6962985b724aa36a43eb59682c53d742ae105bd258f1049c3be517e158a47d47",
+    "planning/tasks/NAT-002.md": "992798482b3d5ac49b9ce3b0e1c51a5bf5808a55cb7b8b4af932a86d30020001",
+    "planning/tasks/NAT-003.md": "48b9a923ef0020c6a044c9a8d2d2c4854346847e994ffb8a20fe78fb03f07843",
     "planning/tasks/DRV-003.md": "854a4ef2c5d7b8e3ca5d1e685afb97bc5bd9ebc8f52e4ee3dfaddbe84ace486f",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
