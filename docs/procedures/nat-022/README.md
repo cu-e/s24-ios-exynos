@@ -876,7 +876,7 @@ actions are not recorded); kick vs S-Boot refresh (no no-kick control); the REG 
 
 The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-007/` (the video shows the owner's room and is not committed).
 
-## loader-diag-xnu-ckpt: the kernel's own first instructions, stopped and resumed at its five assembly checkpoints (NAT-031; host-built 2026-11-11, not run)
+## loader-diag-xnu-ckpt: the kernel's own first instructions, stopped and resumed at its five assembly checkpoints (NAT-031; host-built 2026-11-11, run once under decision 0016, see Native result 008)
 
 Run 007 proved that control reaches the kernel copy's entry address, but only our stub ran there. NAT-029 read from the payload bytes that the kernel has a
 return-to-loader hook (`_loader_stub_slot`, magic `"XNULDRST"`, three words the loader fills) and five assembly checkpoints; NAT-030 ran the kernel's real
@@ -947,3 +947,41 @@ apps, settings, accounts and user data are not touched.
 
 Hashes: loader `Image` `5d40d6238ea89642e82b097766398abc29205f43150e2eb4413d739d395f368e` (221184 bytes), `Image.payload` `c8ee3a21aa620891da9c1a50da5c6279fe78015b1d8b09560a587f3947d2ed60` (21775968 bytes), RECOVERY
 (`artifacts/nat-031/package-001/recovery.img`) `b17d0a8c2a25029cc71df874093707706862faf53c3138427b325d72d98d94c1`; build-002 and its reproduction agree (all 16 images and payloads), packages agree. The SWEETXNU payload bytes are those of run 007.
+
+## Native result 008, 2026-11-11 (decision 0016): the kernel's own start code ran to its fifth checkpoint, four returns and resumes worked
+
+`loader-diag-xnu-ckpt` (loader `Image.payload` `c8ee3a21…`, RECOVERY image `b17d0a8c…`, source commit `5c7d634`, decision commit `bca6df3`) was written to
+RECOVERY with a matching full readback and booted once (`adb reboot recovery` at 2026-11-10T20:11:34.4Z, which is 01:11 on 2026-11-11 local time). The owner filmed
+the screen (85.9 s, 720×1280) and handed over the video without a description. Stock RECOVERY was restored with one NAT-013 session after a physical Download Mode
+re-entry (20:15:35Z–20:15:39Z); Android was back (`check_android` pass at 20:18:59Z), the full hash equals stock (`96620b8b…`), `assess` passes. Record:
+`native-attempt-008-evidence.json` (outcome `pass` for the decision-0016 expectation; nothing beyond checkpoint 5 is claimed).
+
+`decode_video.py` (`--y0 10`, four windows) decoded 666 CRC-valid frames (CKPT 368, STAGE 118, REG 123, BOOTID 50, ENTRY 7), merged in `decoded-timeline.json`:
+
+| Time (s) | Frame | Decoded | Meaning |
+| --- | --- | --- | --- |
+| 0.6–1.2 | ENTRY | `0x8900` | the loader's own entry state (as runs 002, 007) |
+| 12.5–20.0 | STAGE idx0 | `0x30`, `0x31`, `0x32`, `0x34` | MEM, ZERO, COPY, CLEAN (`0x20`, `0x21`, `0x33` not decoded in this recording: 133 frames of the first window fail sync/CRC) |
+| 20.1–20.9 | STAGE idx0 | `0x40` | `PRE_JUMP`, then the jump to the kernel's own entry |
+| 21.7–32.6 | CKPT idx0 / idx1 | `0x0201`/`0x2`, `0x0202`/`0x6`, `0x0203`/`0xe`, `0x0204`/`0x1e` | checkpoints 1..4: `x2 = 2`, `x3 = N` as the kernel passed them, arrival masks in order; after each the stub resumed the kernel |
+| 32.8–35.2 | STAGE idx0 / idx1 | `0x51`, `0x09ff` | inside the return stub; reached mask bits 0–8 and 11, no FAIL (9), no xnu-entry stub (10) |
+| 35.3–48.9 | CKPT idx0, 1, 10, 2/3, 4/5/6, 7, 8/9 | `0x0205`, `0x3e`, 5, SCTLR `0x3454599c`, TTBR1 `0x0009e15af000`, VBAR lo16 `0x7000`, TCR `0xa51a251a` | the held report at checkpoint 5 |
+| 49.1–65.0 | BOOTID, STAGE, REG | `0x6b3c`/`0x479e`, `0x51`, status 1, GLOBAL_CON `0x0133`, TRIG_CON `0x3062`→`0x3063`, FRAME_COUNT `0x0ac4`→`0x0ac5`, kicks `0x21` | boot identifier, DECON0 block |
+| 65.2–84.2 | second held report | same values | repeats to the 83 s watchdog (last CRC-valid frame 84.2 s) |
+
+No CKPT arrival with mask bit 8 (early-exception report), 9 (`x2 = 0`) or 10 (unexpected arrival) and no FAIL frame.
+
+**Established (observation of this S24, one run):**
+
+* The kernel's own, unmodified start code executed on the phone: the five NAT-029 assembly checkpoints were reached in order and drawn from CRC-valid frames. This is the first XNU instruction execution on this device.
+* The loader's return mechanism works on hardware: the kernel branched through the `XNULDRST` slot to the return stub, the stub saved and restored every register and the SP and resumed the kernel four times (checkpoints 1..4); the slot update (`dc civac`) took effect each time.
+* The kernel's register setup ran up to checkpoint 5: TTBR1_EL1 `0x9e15af000`, TCR_EL1 low 32 bits `0xa51a251a` and VBAR_EL1 low 16 bits `0x7000` equal the NAT-030 model's predictions exactly. The model has the kernel enable its MMU between checkpoints 4 and 5, so checkpoint 5 was reached with translation on; the reported SCTLR has M clear because the checkpoint macro clears it, so MMU-on execution is inferred from the model plus the arrival, not read back.
+* No hang before checkpoint 1, no exception, no loader FAIL; the display lasted until the 83 s watchdog.
+
+**Model comparison.** SCTLR_EL1 at the stop is `0x3454599c` on hardware and `0x3454593c` in the model (the model stores the kernel's write `0x3454593d` verbatim; the macro clears M). The two differ only in bits 5 (`CP15BEN`: model 1, hardware 0) and 7 (`ITD`: model 0, hardware 1);
+M, C, I and every other bit agree. The model does not apply per-bit RES0/RES1 rules; the difference is consistent with the S24's cores not implementing AArch32 EL0, but that was not checked against the Arm ARM or by another read here. It does not affect any checkpoint outcome.
+
+**Not established:** anything after checkpoint 5 (resuming at 5 needs loader code reachable under the kernel's own TTBR0 map because its PC is physical and its MMU was on; `arm_init` and every C checkpoint are untested; C checkpoint 10 faults through a NULL `PE_state.bootArgs`, the first safe C checkpoint is 11 and the C path is not resumable); the ADT/`boot_args` acceptance beyond the start code; the cause of the SCTLR bits 5/7 difference; memory attributes and instruction-fetch coherence under the kernel's own page tables beyond the fact that execution reached checkpoint 5; a transport independent of the screen; the GPU/display path of the kernel; SMP, interrupts and timers.
+One avoidable mistake is recorded: the first `restore_stock.py` call used the system python, claimed the Download Mode ledger entry and failed on `import usb` before any USB traffic; a physical re-entry and the pyusb venv python fixed it (always use the venv python for the first call).
+
+The recording and decoded frames stay local under `artifacts/nat-031/video-attempt-008/` (the video shows the owner's room and is not committed).

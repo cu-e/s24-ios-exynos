@@ -1,0 +1,349 @@
+{
+ "kind": "native-device",
+ "origin": "owner-attended-run",
+ "outcome": "pass",
+ "criterion": "The loader-diag-xnu-ckpt image, started from the RECOVERY slot, fills the kernel copy's XNULDRST slot and jumps to the kernel's own unmodified entry; the kernel's start code reaches its assembly checkpoints, branches to the loader's return stub, the stub draws each arrival and resumes the kernel at checkpoints 1..4, and holds at checkpoint 5 with a report (decision 0016). 'pass' means this expected result was observed; it says nothing beyond checkpoint 5.",
+ "recorded_at": "2026-11-11T01:45:00+00:00",
+ "decision": "docs/decisions/0016-nat031-loader-diag-xnu-ckpt-single-run-2026-11-11.md",
+ "summary": "One native run of NAT-022 loader-diag-xnu-ckpt (RECOVERY image sha256 b17d0a8c2a25029cc71df874093707706862faf53c3138427b325d72d98d94c1, Image.payload c8ee3a21aa620891da9c1a50da5c6279fe78015b1d8b09560a587f3947d2ed60, loader Image 5d40d6238ea89642e82b097766398abc29205f43150e2eb4413d739d395f368e, source commit 5c7d634, decision commit bca6df3). Written to RECOVERY (/dev/block/sda18) with a matching full readback and booted once (adb reboot recovery at 2026-11-10T20:11:34.4Z = 2026-11-11 01:11 local). The owner filmed the screen (85.9 s, 720x1280). decode_video.py (--y0 10, four windows) decoded 666 CRC-valid frames (CKPT 368, STAGE 118, REG 123, BOOTID 50, ENTRY 7). Order: ENTRY 0x8900; loader STAGE 0x30, 0x31, 0x32, 0x34 and PRE_JUMP 0x40 (20.1-20.9 s; STAGE 0x20, 0x21 and 0x33 were not decoded in this recording, the 0-20 s window has CRC/sync failures, but the later mask shows bits 0-8 set); then CKPT x2:x3 = 0x0201 / mask 0x2 (21.7 s), 0x0202 / 0x6, 0x0203 / 0xe, 0x0204 / 0x1e (to 32.6 s); STAGE 0x51 with STAGE idx1 mask 0x09ff (bits 0-8 and 11, no FAIL bit 9, no NAT-028 stub bit 10); then the held report: CKPT 0x0205, arrival mask 0x3e, arrivals 5, SCTLR_EL1 low32 0x3454599c, TTBR1_EL1 0x0009e15af000, VBAR_EL1 low16 0x7000, TCR_EL1 low32 0xa51a251a, BOOTID 0x6b3c/0x479e, REG block (status 1, GLOBAL_CON lo 0x0133, TRIG_CON 0x3062 -> 0x3063, FRAME_COUNT 0x0ac4 -> 0x0ac5, kicks 0x21). A second complete held report starts at 65.2 s and repeats the same values; the last CRC-valid frame is at 84.2 s, matching the 83 s watchdog. No CKPT arrival with mask bit 8 (early-exception report), bit 9 (x2=0), bit 10 (unexpected arrival) and no FAIL frame. Meaning: the kernel's own, unmodified start code ran on the S24 through five assembly checkpoints; the loader's stub took four arrivals, saved and restored every register and the SP and resumed the kernel each time; the kernel's TTBR1/TCR/VBAR setup and, per the model, its MMU enable lie between checkpoints 4 and 5, then the stub held at 5. The values the kernel wrote (TTBR1_EL1, TCR_EL1, VBAR_EL1) equal the NAT-030 model's predictions exactly; SCTLR_EL1 differs from the model in bits 5 and 7 only. Stock RECOVERY was restored with one NAT-013 session after a physical Download Mode re-entry (bus 5 dev 66, 20:15:35Z-20:15:39Z); Android was back (check_android pass at 20:18:59Z), the full hash equals stock (96620b8b...), assess pass.",
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/session_xnu_ckpt.py",
+    "--out",
+    "artifacts/nat-031/preflight-002"
+   ],
+   "exit_code": 0,
+   "note": "read-only preflight with decision 0016 present, 20:11:09Z: outcome ready-read-only (stock RECOVERY hash matched, battery 84%, 30.0 C, no write, no reboot)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/session_xnu_ckpt.py",
+    "--execute",
+    "--out",
+    "artifacts/nat-031/attempt-001"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T20:11:30.1Z",
+   "note": "one-shot marker artifacts/nat-022/native-attempt-xnuckpt-used.json; full-hash write of package-001 to /dev/block/sda18, readback sha256 b17d0a8c...; adb reboot recovery requested 20:11:34.36Z (the single reboot of decision 0016); outcome native-attempt-started"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "restore",
+    "--bus",
+    "5",
+    "--address",
+    "65"
+   ],
+   "exit_code": 1,
+   "note": "MISTAKE: run with the system python. It claimed the Download Mode ledger key, then failed with ModuleNotFoundError: usb before any USB I/O (no traffic to the phone). The tool then refused a second call for the same entry (one session per physical entry). The ledger was not edited; the owner re-entered Download Mode physically (bus 5 dev 66). Exact first-call output was not saved."
+  },
+  {
+   "argv": [
+    "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "restore",
+    "--bus",
+    "5",
+    "--address",
+    "66",
+    "--out",
+    "artifacts/nat-031/stock-restore-001"
+   ],
+   "exit_code": 0,
+   "note": "one NAT-013 session, 20:15:35.8Z-20:15:39.0Z; pit_validated, upload_acknowledged, session_end_confirmed, reboot_confirmed all true; acknowledged_bytes 100663296; outcome awaiting-readback"
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-012/check_android.py",
+    "artifacts/nat-031/android-after-stock-001.json"
+   ],
+   "exit_code": 0,
+   "note": "Android up (adb sys.boot_completed 1) at 20:18:59Z; outcome pass; recovery_hash_match true; user data directories present"
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-013/restore_stock.py",
+    "assess",
+    "--report",
+    "artifacts/nat-031/stock-restore-001/report.json",
+    "--readback",
+    "artifacts/nat-031/android-after-stock-001.json"
+   ],
+   "exit_code": 0,
+   "note": "stdout saved as artifacts/nat-031/assess-001.json: outcome pass, android_booted true, recovery_readback_matches true"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "artifacts/nat-031/video-attempt-008/camera.mp4",
+    "--y0",
+    "10",
+    "--t0",
+    "0",
+    "--t1",
+    "20",
+    "--out",
+    "artifacts/nat-031/video-attempt-008/decoded-frames-y10-t0-20.json"
+   ],
+   "exit_code": 0,
+   "note": "first call with python3 -I failed (cv2/numpy live in the user site; -I hides them), repeated with -P"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "artifacts/nat-031/video-attempt-008/camera.mp4",
+    "--y0",
+    "10",
+    "--t0",
+    "20",
+    "--t1",
+    "45",
+    "--out",
+    "artifacts/nat-031/video-attempt-008/decoded-frames-y10-t20-45.json"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "artifacts/nat-031/video-attempt-008/camera.mp4",
+    "--y0",
+    "10",
+    "--t0",
+    "45",
+    "--t1",
+    "70",
+    "--out",
+    "artifacts/nat-031/video-attempt-008/decoded-frames-y10-t45-70.json"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "artifacts/nat-031/video-attempt-008/camera.mp4",
+    "--y0",
+    "10",
+    "--t0",
+    "70",
+    "--t1",
+    "86",
+    "--out",
+    "artifacts/nat-031/video-attempt-008/decoded-frames-y10-t70-86.json"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "(inline) merge CRC-valid frames of the four windows into decoded-timeline.json (same rule as runs 006/007: same kind/idx/data, gap < 0.45 s)"
+   ],
+   "exit_code": 0,
+   "note": "666 CRC-valid frames: CKPT 368, STAGE 118, REG 123, BOOTID 50, ENTRY 7; no ESR/ELR/FAR/FAIL frame"
+  },
+  {
+   "argv": [
+    "python3",
+    "(inline) in the capstone venv: run test_nat031.KernelChain on the NAT-030/NAT-031 model and print the per-stop SCTLR_EL1/TTBR1/TCR/VBAR"
+   ],
+   "exit_code": 0,
+   "note": "model at stop 5: SCTLR_EL1 0x3454593c (stored write 0x3454593d with M set, M cleared by the checkpoint macro), TTBR1 0x9e15af000, TCR 0x22a51a251a, VBAR 0xfffffff007437000, masks 0x2/0x6/0xe/0x1e/0x3e"
+  }
+ ],
+ "decoded_cycle": {
+  "timeline": [
+   {
+    "t_s": "0.6-1.2",
+    "frame": "ENTRY 0x8900",
+    "meaning": "EL2, MMU off, D-cache off, I-cache on: the loader's own entry frame as S-Boot left the CPU (same as runs 002 and 007)"
+   },
+   {
+    "t_s": "12.5-17.3",
+    "frame": "STAGE 0x30, 0x31, 0x32",
+    "meaning": "memory window chosen, XNU RAM zeroed, kernel segments copied"
+   },
+   {
+    "t_s": "18.7-20.0",
+    "frame": "STAGE 0x34",
+    "meaning": "about to clean the XNU window"
+   },
+   {
+    "t_s": "20.1-20.9",
+    "frame": "STAGE 0x40",
+    "meaning": "PRE_JUMP (not proof of kernel entry)"
+   },
+   {
+    "t_s": "21.7-32.6",
+    "frame": "CKPT idx0 0x0201..0x0204 with idx1 masks 0x2, 0x6, 0xe, 0x1e",
+    "meaning": "x2=2 and x3=N as the kernel passed them at asm checkpoints 1..4; the stub returned and resumed the kernel after each (1.2 s dwell per frame)"
+   },
+   {
+    "t_s": "32.8-35.2",
+    "frame": "STAGE 0x51, STAGE idx1 0x09ff",
+    "meaning": "inside the NAT-031 return stub at the held arrival; reached mask: bits 0-8 and 11"
+   },
+   {
+    "t_s": "35.3-48.9",
+    "frame": "CKPT 0x0205, mask 0x3e, arrivals 5, SCTLR 0x3454599c, TTBR1 0x0009e15af000, VBAR lo16 0x7000, TCR 0xa51a251a",
+    "meaning": "held report at checkpoint 5"
+   },
+   {
+    "t_s": "49.1-51.5",
+    "frame": "BOOTID 0x6b3c/0x479e",
+    "meaning": "CNTVCT low 32 bits of the boot (identifies the boot)"
+   },
+   {
+    "t_s": "51.6-65.0",
+    "frame": "STAGE 0x51, REG 0..9",
+    "meaning": "DECON status 1, GLOBAL_CON lo 0x0133, TRIG_CON 0x3062 -> 0x3063, FRAME_COUNT 0x0ac4 -> 0x0ac5, kicks 0x21"
+   },
+   {
+    "t_s": "65.2-84.2",
+    "frame": "second held report, same values",
+    "meaning": "repeats until the 83 s watchdog ends the display"
+   }
+  ],
+  "loop_period_s": 32.4,
+  "reached_mask": "0x09ff",
+  "arrival_masks": [
+   "0x2",
+   "0x6",
+   "0xe",
+   "0x1e",
+   "0x3e"
+  ],
+  "ckpt_sequence": [
+   "0x0201",
+   "0x0202",
+   "0x0203",
+   "0x0204",
+   "0x0205"
+  ],
+  "hardware_registers_at_checkpoint_5": {
+   "sctlr_el1_lo32": "0x3454599c",
+   "ttbr1_el1_lo48": "0x0009e15af000",
+   "vbar_el1_lo16": "0x7000",
+   "tcr_el1_lo32": "0xa51a251a",
+   "arrivals": 5
+  },
+  "last_crc_valid_frame_s": 84.16,
+  "recording_length_s": 85.9,
+  "decoder_notes": "STAGE 0x20, 0x21 and 0x33 were not decoded (0-20 s window: 133 frames failed sync/CRC); not interpreted."
+ },
+ "model_comparison": {
+  "source": "docs/procedures/nat-022/test_nat031.py KernelChain (NAT-030 instruction-level model + the compiled NAT-031 stub), host-test",
+  "equal": {
+   "ttbr1_el1": "0x9e15af000 (hardware lo48 0x9e15af000)",
+   "tcr_el1_lo32": "0xa51a251a",
+   "vbar_el1_lo16": "0x7000",
+   "arrival_masks": "0x2, 0x6, 0xe, 0x1e, 0x3e",
+   "ckpt_order": "1,2,3,4,5",
+   "no_early_exception": true,
+   "sctlr_el1_bits_equal": [
+    2,
+    3,
+    4,
+    8,
+    11,
+    12,
+    14,
+    18,
+    20,
+    22,
+    26,
+    28,
+    29
+   ]
+  },
+  "differs": {
+   "sctlr_el1": {
+    "hardware": "0x3454599c",
+    "model": "0x3454593c",
+    "xor": "0x000000a0",
+    "bit5": "model 1, hardware 0",
+    "bit7": "model 0, hardware 1",
+    "reading": "The kernel's write sets bit 5 (CP15BEN) and leaves bit 7 (ITD) clear; the hardware read-back has them the other way round. The model stores a written value verbatim, without per-bit RES0/RES1 handling. That is consistent with the S24 cores not implementing AArch32 EL0 (those bits are then fixed by the architecture) but this was not checked against the Arm ARM or another read here. M, C and I agree; the difference has no effect on any checkpoint outcome."
+   }
+  }
+ },
+ "hashes": {
+  "recovery_image": "b17d0a8c2a25029cc71df874093707706862faf53c3138427b325d72d98d94c1",
+  "stock_recovery": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+  "loader_image": "5d40d6238ea89642e82b097766398abc29205f43150e2eb4413d739d395f368e",
+  "loader_image_payload": "c8ee3a21aa620891da9c1a50da5c6279fe78015b1d8b09560a587f3947d2ed60",
+  "camera_mp4": "6c001572ab651aec36640c90bc3a24d6ccb499cbe232c02803a0728ecfb63e38",
+  "decoded_timeline_json": "b656317169c40ecf6f553361d7278d6b1d8c2cc614a90e82c692d3479a06094c",
+  "decoded_frames_y10_t0_20_json": "5b895ebfc48dd45d22896bfda5c7667bff5e51fd4fca760c338eab6965859370",
+  "decoded_frames_y10_t20_45_json": "3eb53dedee92368ea17bc9787842678c9b39b3e95448be282cb3b78e38a743fd",
+  "decoded_frames_y10_t45_70_json": "c22f70833c609550edd6f46686462e543e579a4ca78248c447196895df5833d6",
+  "decoded_frames_y10_t70_86_json": "5062dd3f5c1aeaf802f1406f84b8d0542e9ce0aa50611a1cbbc700bb63d48d4a",
+  "attempt_report": "79daaa6bb270a6565d7cb4f6743bbea6b2daff73f9d2f4d2b86a917927dc0429",
+  "stock_restore_report": "f18947146f63e912115c5f6d07b869971b69fabdeaf383ffcd7ba2c5530bcd93",
+  "android_after_stock": "8a490817a3de3fd9da0825bb96834c1fe5b763616db06471be78cec1f5865000",
+  "assess": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a"
+ },
+ "artifacts": [
+  "artifacts/nat-031/preflight-002/report.json",
+  "artifacts/nat-031/attempt-001/report.json",
+  "artifacts/nat-031/stock-restore-001/report.json",
+  "artifacts/nat-031/android-after-stock-001.json",
+  "artifacts/nat-031/assess-001.json",
+  "artifacts/nat-031/package-001/package.json",
+  "artifacts/nat-022/native-attempt-xnuckpt-used.json",
+  "artifacts/nat-031/video-attempt-008/camera.mp4",
+  "artifacts/nat-031/video-attempt-008/decoded-timeline.json",
+  "artifacts/nat-031/video-attempt-008/decoded-frames-y10-t0-20.json",
+  "artifacts/nat-031/video-attempt-008/decoded-frames-y10-t20-45.json",
+  "artifacts/nat-031/video-attempt-008/decoded-frames-y10-t45-70.json",
+  "artifacts/nat-031/video-attempt-008/decoded-frames-y10-t70-86.json",
+  "artifacts/nat-031/video-attempt-008/decode-y10-t0-20.log",
+  "artifacts/nat-031/video-attempt-008/decode-y10-t20-45.log",
+  "artifacts/nat-031/video-attempt-008/decode-y10-t45-70.log",
+  "artifacts/nat-031/video-attempt-008/decode-y10-t70-86.log"
+ ],
+ "provenance": {
+  "code_commit": "5c7d634",
+  "evidence_commit_of_host_work": "5c7d634 (docs/procedures/nat-022/evidence-nat031.json)",
+  "decision_commit": "bca6df3",
+  "recording": "owner camera, /home/egor/Downloads/video_2026-11-11_01-18-44.mp4 (same bytes as artifacts/nat-031/video-attempt-008/camera.mp4)",
+  "owner_note": "The owner supplied the video after the run with the request (Russian, as typed) \"вот изучи пойми продолжи\" and gave no description of the screen; everything above is decoded from the video.",
+  "usb_observer": "No host USB observer was run for this attempt (unlike run 007); the Download Mode entries are known only from lsusb readings before the restore.",
+  "restore": "The first restore call used the system python and burned the ledger entry for bus 5 dev 65 without USB I/O; the owner re-entered Download Mode (dev 66) and one session from the pyusb venv restored stock. Never edit the ledger to avoid this; see the memory note nat013-restore-venv.",
+  "local_time": "The run happened at 2026-11-10T20:11Z = 2026-11-11 01:11 local (UTC+5); the video file name uses local time."
+ },
+ "established": [
+  "The kernel's own, unmodified start code executed on the S24: five NAT-029 assembly checkpoint macros were reached in order (CKPT 0x0201..0x0205, arrival masks 0x2, 0x6, 0xe, 0x1e, 0x3e, five arrivals), decoded from CRC-valid frames in two complete held reports. This is the first XNU instruction execution on this device.",
+  "The loader's return mechanism works on hardware: the kernel branched through the XNULDRST slot to the loader's stub (arrival frames drawn, so the stub's stack and marker code ran with the kernel's register state saved), and the saved registers and SP were restored and the kernel resumed at the checkpoint's continuation four times (checkpoints 1..4).",
+  "The kernel's own register setup ran up to checkpoint 5: at the stop the stub read TTBR1_EL1 0x9e15af000, TCR_EL1 lo32 0xa51a251a, VBAR_EL1 lo16 0x7000 and an SCTLR_EL1 carrying the kernel's configuration (C, I, SA, SA0 and the other kernel-set bits), equal to what the model predicts the kernel has written before checkpoint 5. The model has the kernel set SCTLR.M between checkpoints 4 and 5, so checkpoint 5 was reached with translation on; the hardware read shows M=0 because the checkpoint macro clears it, so MMU-on execution is inferred from the model plus the arrival, not read back directly.",
+  "TTBR1_EL1, TCR_EL1 low 32 bits and VBAR_EL1 low 16 bits equal the NAT-030 model's predictions exactly; SCTLR_EL1 agrees on every bit except 5 and 7 (see model_comparison). Neither the kernel's early-exception path (mask bit 8) nor a loader FAIL was observed.",
+  "The loader-side hazards of decision 0016 did not materialise: no exception between PRE_JUMP and the first checkpoint, no hang before checkpoint 1, and the display lasted until the 83 s watchdog (last frame 84.2 s). RECOVERY was restored to the pinned stock hash and Android returned with user data directories present."
+ ],
+ "not_established": [
+  "Anything the kernel does after checkpoint 5: the stub held there, resuming at 5 needs loader code reachable under the kernel's own TTBR0 map (the kernel's PC is physical and its MMU was on when it reached the macro); arm_init and every C checkpoint are untested (C checkpoint 10 is known from the host model to fault on a NULL boot-args pointer; the first safe C checkpoint is 11).",
+  "That the ADT and boot_args are acceptable to XNU beyond the first 8202 model steps of the start code (the real start code reached checkpoint 5 here, which is consistent with the model, nothing more).",
+  "Why SCTLR_EL1 bits 5 and 7 differ from the model (hypothesis only: architecture-fixed bits when AArch32 EL0 is absent); no other register read or comparison was made.",
+  "Instruction-fetch and cache coherence in the kernel's own MMU-on phase beyond the evidence that execution continued to checkpoint 5; memory attributes of the window under the kernel's page tables.",
+  "A transport independent of the screen, the GPU/display path of the kernel, SMP, interrupts, timers: nothing of these ran.",
+  "Frames STAGE 0x20, 0x21, 0x33 were not decoded in this recording; the loader's reach of those stages is inferred from the mask 0x09ff (bits 0-8) only.",
+  "What caused the Download Mode entries before the restore (owner action; no USB observer was running)."
+ ]
+}
