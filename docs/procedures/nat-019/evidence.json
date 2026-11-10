@@ -1,0 +1,79 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-10T11:22:17.717904+00:00",
+  "summary": "Actual watchdog API host fixtures prove83s accepted and120s rejected without register mutation; ASan/UBSan pass. Original120s readiness check intentionally exits2 before any image/write. Host has Android ADB only and no USB serial adapter; no native channel qualified. Owner amended request to83s. Read-only Android check confirms booted system and unchanged stock RECOVERY.",
+  "commit": "8b51c71be01fcd7c6d480d4fa9eec314d659d6cf",
+  "commands": [
+    {
+      "argv": [
+        "clang",
+        "-std=c11",
+        "-O1",
+        "-g",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-Isrc/native/watchdog",
+        "docs/procedures/nat-019/range_probe.c",
+        "src/native/watchdog/s5e9945.c",
+        "-o",
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/nat-019/preflight-001/probe/range_probe"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/egor/dev/pet/s24-ios-exynos/artifacts/nat-019/preflight-001/probe/range_probe"
+      ],
+      "exit_code": 0,
+      "stdout": "[\n{\"requested_seconds\":30,\"return_code\":0,\"registers_unchanged\":false,\"count\":65218,\"divisor\":92,\"nominal_seconds\":30.000280000},\n{\"requested_seconds\":83,\"return_code\":0,\"registers_unchanged\":false,\"count\":65355,\"divisor\":254,\"nominal_seconds\":83.000850000},\n{\"requested_seconds\":84,\"return_code\":-1,\"registers_unchanged\":true,\"count\":0,\"divisor\":1,\"nominal_seconds\":0.000000000},\n{\"requested_seconds\":120,\"return_code\":-1,\"registers_unchanged\":true,\"count\":0,\"divisor\":1,\"nominal_seconds\":0.000000000}\n]\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/nat-019/preflight.py",
+        "--out",
+        "artifacts/nat-019/preflight-001/probe"
+      ],
+      "started_at": "2026-11-10T11:14:34.312959+00:00",
+      "pid": 4190013,
+      "exit_code": 2,
+      "finished_at": "2026-11-10T11:14:34.563761+00:00"
+    }
+  ],
+  "artifacts": [
+    "artifacts/nat-019/preflight-001/probe/report.json",
+    "artifacts/nat-019/preflight-001/probe/range.json",
+    "artifacts/nat-019/preflight-001/probe/commands.json",
+    "artifacts/nat-019/preflight-001/probe-run/command.json",
+    "artifacts/nat-019/preflight-001/probe-run/output.log",
+    "artifacts/nat-019/preflight-001/host-interfaces.json",
+    "artifacts/nat-019/preflight-001/phone-usb-interfaces.json",
+    "artifacts/nat-019/preflight-001/android-state.json",
+    "docs/procedures/nat-019/README.md"
+  ],
+  "sha256": {
+    "artifacts/nat-019/preflight-001/probe/report.json": "f78dbb7b079c47b906ca024428767452147337d998297eb87fafbb0c8d3c22ab",
+    "artifacts/nat-019/preflight-001/probe/range.json": "29c9afd5a993e7cff30c41c6364a4a7d8d5b8173d696ee5e657bf7b4f4402cec",
+    "artifacts/nat-019/preflight-001/probe/commands.json": "9dc0b59d133cc3f4ffb28d9e6d7a4986e7e7e67fcae37501811daf51fb120c6d",
+    "artifacts/nat-019/preflight-001/probe-run/command.json": "66826fdc3df4cef9edebdfd584a986cc2cd1befdcaf102616360cf99049a09c8",
+    "artifacts/nat-019/preflight-001/probe-run/output.log": "f78dbb7b079c47b906ca024428767452147337d998297eb87fafbb0c8d3c22ab",
+    "artifacts/nat-019/preflight-001/host-interfaces.json": "22e5328b7434fa85dae099ceeae88bedab40095d24926d5758a448989e8f2ff3",
+    "artifacts/nat-019/preflight-001/phone-usb-interfaces.json": "3a354cfde48fc2571efb8236766b5d111e4679765226b8baa8786ec3414262b8",
+    "artifacts/nat-019/preflight-001/android-state.json": "59d552efaa45e0e4f17a2020911164c993251219f2dd50d55bfd4f04a18b3d61",
+    "docs/procedures/nat-019/README.md": "3209a2c2d419f8fe1bef932f9cdd077fa7e3793b3bfcdefe1caab7af7b78cf0d"
+  },
+  "limitations": [
+    "Host assessment passed; no native experiment performed or approved image readiness implied.",
+    "Read-only device metadata/hash are observations, not native watchdog calibration.",
+    "NAT-020 must prepare storage-denied83s candidate and state incomplete console coverage."
+  ]
+}

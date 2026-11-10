@@ -1,0 +1,94 @@
+{
+  "recorded_at": "2026-11-10T11:30:48.228680+00:00",
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "commit": "8b51c71be01fcd7c6d480d4fa9eec314d659d6cf",
+  "summary": "Built independent83s diagnostic candidate; all20 image checks,29 emitted UFS stubs, actual guard argument and214 project tests pass. Read-only Android stream control matches all96MiB; stock RECOVERY unchanged. No phone write/reboot.",
+  "image": {
+    "path": "artifacts/nat-020/build-003/recovery.img",
+    "sha256": "b5ff3bf7e4d6bcd36cc518fbc4ab0daaaf8a1985056a65708f60b51f4f9a6a49",
+    "size": 100663296
+  },
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/nat-020/build.py",
+        "--out",
+        "artifacts/nat-020/build-003"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+        "-I",
+        "docs/procedures/nat-020/inspect_binary.py",
+        "--build",
+        "artifacts/nat-020/build-003",
+        "--out",
+        "artifacts/nat-020/build-003/binary-review.json"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "make",
+        "check"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/nat-020/observe_usb.py",
+        "--out",
+        "artifacts/nat-020/observer-control-001",
+        "--seconds",
+        "2"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "artifacts/nat-020/build-003/report.json",
+    "artifacts/nat-020/build-003/verify.json",
+    "artifacts/nat-020/build-003/binary-review.json",
+    "artifacts/nat-020/build-003/storage-patches.json",
+    "artifacts/nat-020/build-003/commands.json",
+    "artifacts/nat-020/build-003/make-check.log",
+    "artifacts/nat-020/android-preflight-001/adb-stdin-integrity.json",
+    "artifacts/nat-020/observer-control-001/000000.json",
+    "artifacts/nat-020/observer-control-001/complete.json",
+    "docs/procedures/nat-020/build.py",
+    "docs/procedures/nat-020/observe_usb.py",
+    "docs/procedures/nat-020/inspect_binary.py",
+    "docs/procedures/nat-020/guard.c",
+    "docs/procedures/nat-020/README.md"
+  ],
+  "sha256": {
+    "artifacts/nat-020/build-003/report.json": "b2a46096ec99c94e56b111bea9f3ff4d1c496d3026a3c8420e6c4263ef66d022",
+    "artifacts/nat-020/build-003/verify.json": "00bbad8ff3798c2d4b06f93454cb7f24c40f7de5f2346af5df126139781e32ff",
+    "artifacts/nat-020/build-003/binary-review.json": "4859f5d8c716e33122135623e57726483ae56975b4152c3422c30ecf664f06d8",
+    "artifacts/nat-020/build-003/storage-patches.json": "2a2e33c00e0a8b2a075995773b6dcb837fd3c33adf18ebf085e9f21dfd67626c",
+    "artifacts/nat-020/build-003/commands.json": "4c9f1da4cc6800761e9a016cacd3fc72c913c9e3d2681a5057022db97d88ca75",
+    "artifacts/nat-020/build-003/make-check.log": "6c09c9f2c32c6e181a6b064eccac997dac74f1d022e52db26d40983d975fc387",
+    "artifacts/nat-020/android-preflight-001/adb-stdin-integrity.json": "881557d7db7e5fa8b53b35ccc35a7281d8c77cef083140d5d05fced31ab7b2d4",
+    "artifacts/nat-020/observer-control-001/000000.json": "7a27c1ce021a01552f5ec986d74739f1288ae39b6a69cfd1d3411454b7ef62b3",
+    "artifacts/nat-020/observer-control-001/complete.json": "ba4d1659799b89bc500efe2c59851240eec72299f84af98653422b226db7a273",
+    "docs/procedures/nat-020/build.py": "2c89d54217d07f8f9083864e31dab3765a9065bca2ae63aad7b2a4b7e6e59c17",
+    "docs/procedures/nat-020/observe_usb.py": "58196783814d427131485a593cbcfdbce9f41895ac37f018390bf5672c6aad86",
+    "docs/procedures/nat-020/inspect_binary.py": "f35289c324602cc5990dfd62ffbe0d10371c9718aa3d0874ccac1ed4d23b498d",
+    "docs/procedures/nat-020/guard.c": "7477d65dacaf4da4c3a1bf52b455937a88c9fc1c30994d6b4f0119f00d2b3343",
+    "docs/procedures/nat-020/README.md": "ad46073e4df84c40678fb3e7ad22064ae1ca0d853f4468e3ec9702fdef275bf7"
+  },
+  "limitations": [
+    "No qualified native USB/UART delivery or reset log retention.",
+    "Watchdog source/host checks do not calibrate hardware or establish automatic return.",
+    "UFS entry-point denial is static containment, not hardware fault isolation.",
+    "Native session and return assessment remain separate."
+  ]
+}
