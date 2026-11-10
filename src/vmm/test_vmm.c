@@ -232,17 +232,20 @@ static void test_walk(void) {
     const uint64_t ttbr1 = (5ull << 48) | (B + 0x1000);        /* ASID must be ignored */
     put_desc(ram, B, B + 0x4000, 2, 0x80000000ull | 0x401);    /* TTBR0: 1 GiB block, identity */
     put_desc(ram, B, B + 0x4000, 3, 0x200000000ull | 3);       /* table outside RAM */
-    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xfffffff007004123ull, &pa) == 0 && pa == 0x83004123ull);
-    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xfffffff007201234ull, &pa) == 0 && pa == 0x83201234ull);
-    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xfffffff007005000ull, &pa) == 4);
-    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xfffffff007006000ull, &pa) == 4);
-    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xffffffc000000000ull, &pa) == 2);
-    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xffff000000000000ull, &pa) == -1);
-    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0x80001234ull, &pa) == 0 && pa == 0x80001234ull);
-    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xc0000000ull, &pa) == -2);
-    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0x4000000000ull, &pa) == -1); /* above 38 bits */
-    CHECK(vmm_walk(ram, B, sizeof ram, tcr | 1ull << 23, B + 0x4000, ttbr1, 0xfffffff007004123ull, &pa) == -1); /* EPD1 */
-    CHECK(vmm_walk(ram, B, sizeof ram, tcr, 0x10000000ull, ttbr1, 0x1000ull, &pa) == -2);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xfffffff007004123ull, &pa, NULL) == 0 && pa == 0x83004123ull);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xfffffff007201234ull, &pa, NULL) == 0 && pa == 0x83201234ull);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xfffffff007005000ull, &pa, NULL) == 4);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xfffffff007006000ull, &pa, NULL) == 4);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xffffffc000000000ull, &pa, NULL) == 2);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xffff000000000000ull, &pa, NULL) == -1);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0x80001234ull, &pa, NULL) == 0 && pa == 0x80001234ull);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xc0000000ull, &pa, NULL) == -2);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0x4000000000ull, &pa, NULL) == -1); /* above 38 bits */
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr | 1ull << 23, B + 0x4000, ttbr1, 0xfffffff007004123ull, &pa, NULL) == -1); /* EPD1 */
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, 0x10000000ull, ttbr1, 0x1000ull, &pa, NULL) == -2);
+    uint64_t trail[4] = {7, 7, 7, 7};
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xfffffff007005000ull, &pa, trail) == 4);
+    CHECK(trail[0] == 7 && trail[1] == ((B + 0x2000) | 3) && trail[2] == ((B + 0x3000) | 3) && trail[3] == 0);
 
     /* 16K granule, T1SZ = 25 (39-bit VA): levels 1 (bits 38:36), 2 (35:25), 3 (24:14). */
     const uint64_t tcr16 = (0x19ull << 16) | (1ull << 30) | 0x19ull | (2ull << 14);
@@ -252,9 +255,9 @@ static void test_walk(void) {
     put_desc(ram, B, B + 0xc000, 0x401, 0x83004000ull | 0x403);
     put_desc(ram, B, B + 0x4000, 6, 0x1000000000ull | 1); /* a level-1 block is not allowed with 16K */
     put_desc(ram, B, B + 0x8000, 0x004, 0x84000000ull | 0x401); /* 32 MiB level-2 block */
-    CHECK(vmm_walk(ram, B, sizeof ram, tcr16, 0, B + 0x4000, 0xfffffff007004123ull, &pa) == 0 && pa == 0x83004123ull);
-    CHECK(vmm_walk(ram, B, sizeof ram, tcr16, 0, B + 0x4000, 0xffffffe000000000ull, &pa) == 2);
-    CHECK(vmm_walk(ram, B, sizeof ram, tcr16, 0, B + 0x4000, 0xfffffff009012345ull, &pa) == 0 && pa == 0x85012345ull);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr16, 0, B + 0x4000, 0xfffffff007004123ull, &pa, NULL) == 0 && pa == 0x83004123ull);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr16, 0, B + 0x4000, 0xffffffe000000000ull, &pa, NULL) == 2);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr16, 0, B + 0x4000, 0xfffffff009012345ull, &pa, NULL) == 0 && pa == 0x85012345ull);
 }
 
 int main(void) {

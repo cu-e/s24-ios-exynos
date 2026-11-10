@@ -43,6 +43,7 @@
 #include "virtio.h"
 
 #define CORE_REG(x) (KVM_REG_ARM64 | KVM_REG_SIZE_U64 | KVM_REG_ARM_CORE | (offsetof(struct kvm_regs, x) / sizeof(uint32_t)))
+static uint64_t get_reg(int fd, uint64_t id);
 #define MAX_UNKNOWN 16
 
 struct vcpu {
@@ -52,6 +53,7 @@ struct vcpu {
     uint64_t exits, mmio;
     int last_reason;
     int running; /* guarded by g.kick_lock: only a running thread may be signalled */
+    uint64_t debug_exits, debug_hsr, debug_far, debug_pc;
 };
 
 static struct {
@@ -180,6 +182,13 @@ static void *vcpu_main(void *arg) {
         switch (v->run->exit_reason) {
         case KVM_EXIT_MMIO:
             mmio(v);
+            break;
+        case KVM_EXIT_DEBUG: /* a --break hardware breakpoint: stop with the guest state intact */
+            v->debug_exits++;
+            v->debug_hsr = v->run->debug.arch.hsr;
+            v->debug_far = v->run->debug.arch.far;
+            v->debug_pc = get_reg(v->fd, CORE_REG(regs.pc));
+            set_cause("breakpoint");
             break;
         case KVM_EXIT_SYSTEM_EVENT:
             pthread_mutex_lock(&g.lock);
@@ -377,12 +386,14 @@ static void dump_mem(int fd) {
         unsigned len = where[k].code ? 80 : 0x140;
         fprintf(stderr, "%s\"%s\":{\"va\":\"0x%llx\",\"from\":\"0x%llx\"", k ? "," : "", where[k].name, (unsigned long long)va,
                 (unsigned long long)start);
-        uint64_t pa = 0;
-        int fault = (sctlr & 1) ? vmm_walk(g.ram, VMM_RAM_BASE, g.layout.ram_size, tcr, ttbr0, ttbr1, start, &pa) : (pa = start, 0);
-        fprintf(stderr, ",\"walk\":%d,\"pa\":\"0x%llx\",\"bytes\":\"", fault, (unsigned long long)pa);
+        uint64_t pa = 0, trail[4] = {0, 0, 0, 0};
+        int fault = (sctlr & 1) ? vmm_walk(g.ram, VMM_RAM_BASE, g.layout.ram_size, tcr, ttbr0, ttbr1, start, &pa, trail) : (pa = start, 0);
+        fprintf(stderr, ",\"walk\":%d,\"trail\":[\"0x%llx\",\"0x%llx\",\"0x%llx\",\"0x%llx\"],\"pa\":\"0x%llx\",\"bytes\":\"", fault,
+                (unsigned long long)trail[0], (unsigned long long)trail[1], (unsigned long long)trail[2], (unsigned long long)trail[3],
+                (unsigned long long)pa);
         for (unsigned i = 0; !fault && i < len; i++) {
             uint64_t a = start + i, p = 0;
-            int f = (sctlr & 1) ? vmm_walk(g.ram, VMM_RAM_BASE, g.layout.ram_size, tcr, ttbr0, ttbr1, a, &p) : (p = a, 0);
+            int f = (sctlr & 1) ? vmm_walk(g.ram, VMM_RAM_BASE, g.layout.ram_size, tcr, ttbr0, ttbr1, a, &p, NULL) : (p = a, 0);
             if (f || p < VMM_RAM_BASE || p >= VMM_RAM_BASE + g.layout.ram_size) break;
             fprintf(stderr, "%02x", g.ram[p - VMM_RAM_BASE]);
         }
@@ -399,6 +410,8 @@ int main(int argc, char **argv) {
     const char *image_path = NULL, *initrd_path = NULL, *params = "", *console_path = NULL, *pin = NULL;
     unsigned long mem_mib = 1024, timeout = 60, cpus = 1, scfb_w = 0, scfb_h = 0, port = 5824;
     int input = 0;
+    uint64_t breaks[4];
+    unsigned nbreaks = 0;
     for (int i = 1; i < argc; i += 2) {
         const char *a = argv[i], *v = i + 1 < argc ? argv[i + 1] : NULL;
         if (!strcmp(a, "--input")) { input = 1; i--; continue; }
@@ -413,6 +426,14 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--pin")) pin = v;
         else if (!strcmp(a, "--scfb")) { char *x; scfb_w = strtoul(v, &x, 10); scfb_h = *x == 'x' ? strtoul(x + 1, NULL, 10) : 0; }
         else if (!strcmp(a, "--display-port")) port = strtoul(v, NULL, 0);
+        else if (!strcmp(a, "--break")) { /* up to 4 guest VAs, comma separated */
+            for (const char *p = v; *p && nbreaks < 4;) {
+                char *end;
+                breaks[nbreaks++] = strtoull(p, &end, 0);
+                if (end == p) { fprintf(stderr, "bad --break %s\n", v); return 2; }
+                p = *end == ',' ? end + 1 : end;
+            }
+        }
         else { fprintf(stderr, "unknown option %s\n", a); return 2; }
     }
     if (!image_path || !timeout || timeout > 3600) { fprintf(stderr, "need --image and 1..3600 s --timeout\n"); return 2; }
@@ -459,6 +480,11 @@ int main(int argc, char **argv) {
     gic_attr(KVM_DEV_ARM_VGIC_GRP_ADDR, KVM_VGIC_V3_ADDR_TYPE_REDIST, &gicr, "vgic redist");
 
     if ((g.run_size = ioctl(g.kvm, KVM_GET_VCPU_MMAP_SIZE, 0)) <= 0) die("KVM_GET_VCPU_MMAP_SIZE");
+    int cap_debug = ioctl(g.vm, KVM_CHECK_EXTENSION, KVM_CAP_SET_GUEST_DEBUG), cap_hw_bps = ioctl(g.vm, KVM_CHECK_EXTENSION, KVM_CAP_GUEST_DEBUG_HW_BPS);
+    if (nbreaks) {
+        fprintf(stderr, "{\"s24vmm\":\"debug\",\"set_guest_debug\":%d,\"hw_bps\":%d,\"breaks\":%u}\n", cap_debug, cap_hw_bps, nbreaks);
+        if (cap_debug <= 0 || cap_hw_bps < (int)nbreaks) { errno = ENOTSUP; die("hardware breakpoints"); }
+    }
     struct kvm_vcpu_init init;
     memset(&init, 0, sizeof init);
     if (ioctl(g.vm, KVM_ARM_PREFERRED_TARGET, &init) < 0) die("KVM_ARM_PREFERRED_TARGET");
@@ -473,6 +499,17 @@ int main(int argc, char **argv) {
         vi.features[0] |= 1u << KVM_ARM_VCPU_PSCI_0_2;
         if (i) vi.features[0] |= 1u << KVM_ARM_VCPU_POWER_OFF;
         if (ioctl(v->fd, KVM_ARM_VCPU_INIT, &vi) < 0) die("KVM_ARM_VCPU_INIT");
+        if (nbreaks) {
+            /* DBGBCR: E, PMC = EL1 and EL0, BAS = all four bytes of an A64 instruction. */
+            struct kvm_guest_debug dbg;
+            memset(&dbg, 0, sizeof dbg);
+            dbg.control = KVM_GUESTDBG_ENABLE | KVM_GUESTDBG_USE_HW;
+            for (unsigned b = 0; b < nbreaks; b++) {
+                dbg.arch.dbg_bvr[b] = breaks[b];
+                dbg.arch.dbg_bcr[b] = 1u | 3u << 1 | 0xfu << 5;
+            }
+            if (ioctl(v->fd, KVM_SET_GUEST_DEBUG, &dbg) < 0) die("KVM_SET_GUEST_DEBUG");
+        }
     }
     gic_attr(KVM_DEV_ARM_VGIC_GRP_CTRL, KVM_DEV_ARM_VGIC_CTRL_INIT, NULL, "vgic init");
     set_reg(g.vcpus[0].fd, CORE_REG(regs.pc), g.layout.image_addr, "set pc");
@@ -556,8 +593,9 @@ int main(int argc, char **argv) {
     fprintf(stderr, ",\"vcpus\":[");
     for (uint32_t i = 0; i < g.layout.cpus; i++) {
         struct vcpu *v = &g.vcpus[i];
-        fprintf(stderr, "%s{\"exits\":%llu,\"mmio\":%llu,\"last_reason\":%d,\"pc\":%llu,\"regs\":{", i ? "," : "", (unsigned long long)v->exits,
-                (unsigned long long)v->mmio, v->last_reason, (unsigned long long)get_reg(v->fd, CORE_REG(regs.pc)));
+        fprintf(stderr, "%s{\"exits\":%llu,\"mmio\":%llu,\"last_reason\":%d,\"pc\":%llu,\"debug\":{\"exits\":%llu,\"hsr\":\"0x%llx\",\"far\":\"0x%llx\",\"pc\":\"0x%llx\"},\"regs\":{",
+                i ? "," : "", (unsigned long long)v->exits, (unsigned long long)v->mmio, v->last_reason, (unsigned long long)get_reg(v->fd, CORE_REG(regs.pc)),
+                (unsigned long long)v->debug_exits, (unsigned long long)v->debug_hsr, (unsigned long long)v->debug_far, (unsigned long long)v->debug_pc);
         dump_regs(v->fd);
         fprintf(stderr, "},\"memory\":{");
         dump_mem(v->fd);

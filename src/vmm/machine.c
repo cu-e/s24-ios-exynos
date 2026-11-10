@@ -17,7 +17,7 @@ static uint64_t align_up(uint64_t v, uint64_t a) {
 }
 
 int vmm_walk(const uint8_t *ram, uint64_t ram_base, uint64_t ram_size, uint64_t tcr, uint64_t ttbr0, uint64_t ttbr1,
-             uint64_t va, uint64_t *pa) {
+             uint64_t va, uint64_t *pa, uint64_t trail[4]) {
     int upper = (int)((va >> 55) & 1);
     unsigned txsz = (unsigned)(upper ? (tcr >> 16) & 0x3f : tcr & 0x3f);
     unsigned tg = (unsigned)(upper ? (tcr >> 30) & 3 : (tcr >> 14) & 3);
@@ -37,6 +37,7 @@ int vmm_walk(const uint8_t *ram, uint64_t ram_base, uint64_t ram_size, uint64_t 
         if (at < ram_base || at + 8 > ram_base + ram_size) return -2;
         uint64_t d = 0;
         for (int b = 7; b >= 0; b--) d = d << 8 | ram[at - ram_base + (uint64_t)b];
+        if (trail) trail[level] = d;
         if (!(d & 1)) return (int)level + 1;
         if (level == 3) {
             if ((d & 3) != 3) return 4;
