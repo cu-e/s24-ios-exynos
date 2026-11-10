@@ -1,0 +1,187 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-10T16:25:00+00:00",
+ "commit": "c5b942a00324d58b9ee89ac94e26ea6ebf46b03a",
+ "summary": "Host only; nothing flashed or run on the phone in this task and no XNU jump. Native run 005 (decision 0013, loader-diag-trig-hold-adt8) was decoded from the owner's recording (native-attempt-005-evidence.json, outcome fail): the loader reached MEM, ZERO and COPY and then reported SLOT 4, ESR 0x96000061, ELR 0x800a9954, FAR 0x9e2d743fc from inside the loader. Host analysis: loader base 0x800a0000, ELR = `stur x19, [x11, #0x24]` in adt_set_dram+0x268 (64-bit store of the `dram-size` ADT value), FAR - 1020 = the 16 KiB-aligned ADT copy; ADT property values are only 4-byte aligned and the loader runs with the MMU off (Device memory, natural alignment required), so the store is an alignment fault (EC 0x25, DFSC 0x21). The NAT-026 pre-check ran adt_patch.c on x86-64 and could not see it. NAT-027: patch_loader.py --adt-aligned (anchored on the base adt_patch.c SHA-256 415bf5c0...) replaces the five 64-bit ADT property accesses with two aligned 32-bit accesses; build.py adds loader-diag-trig-hold-adt8-aln (build-006): loader Image f0e61342..., Image.payload 2fb3968787688f4feb5b1dc09e4622309f1e22e5e8d76c82178d8716f1642da9 (21767776 bytes), RECOVERY package-006 cdf4f3a15831fb7c6c488085da33c12ade231460323583fd4090114945b285cd. All seven earlier images and payloads (the run-005 image included) keep their hashes; the new image is reproducible (build-006-repro and a rebuild at the commit). check_payload.py gained a gcc alignment-trap run of the real adt_patch.c: the run-005 source FIRES (MISALIGNED ACCESS in adt_set_dram), the aln source passes; scan_unaligned.py finds 4 misaligned unscaled accesses in the run-005 loader (one is the faulting instruction) and 0 in the aln loader; the aligned accessors write byte-identical ADT bytes for window bases below and above 4 GiB (test_nat022.py, 35 tests); make check passes (214 tests). session_aln.py is gated on docs/decisions/0014-nat022-loader-diag-trig-hold-adt8-aln-single-run-2026-11-10.md, which does not exist; without it the driver stops before any device command. Not shown by this evidence: that the later loader stages (ADT patch, boot_args, full-window cache clean, PRE_JUMP hold) run on the S24; other Device-memory alignment hazards outside adt_patch.c (the static scan covers unscaled immediates only; addresses computed at run time are not seen); the RAM window; any XNU entry.",
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/check_payload.py",
+    "artifacts/nat-022/build-006/loader-diag-trig-hold-adt8/source/shim/e1s-xnu/loader.c",
+    "artifacts/nat-022/build-006/loader-diag-trig-hold-adt8/Image.payload",
+    "--offset",
+    "212992"
+   ],
+   "exit_code": 1,
+   "note": "expected: the run-005 image FIRES adt_patch.c: MISALIGNED ACCESS in adt_set_dram (window 256 MiB, signal 4)",
+   "log": "artifacts/nat-022/nat027-logs/check-run005-image.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/check_payload.py",
+    "artifacts/nat-022/build-006/loader-diag-trig-hold-adt8-aln/source/shim/e1s-xnu/loader.c",
+    "artifacts/nat-022/build-006/loader-diag-trig-hold-adt8-aln/Image.payload",
+    "--offset",
+    "212992"
+   ],
+   "exit_code": 0,
+   "note": "aln image: header clauses, RAM/segment checks, boot_args room, ADT return codes, guard bytes, alignment trap all ok",
+   "log": "artifacts/nat-022/nat027-logs/check-aln-image.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/scan_unaligned.py",
+    "artifacts/nat-022/build-006/loader-diag-trig-hold-adt8/Image",
+    "--elf",
+    "artifacts/nat-022/build-006/loader-diag-trig-hold-adt8/loader.elf"
+   ],
+   "exit_code": 1,
+   "note": "expected: total 4 (adt_set_dram+0x178, +0x268 = the run-005 faulting instruction at file offset 0x9954, adt_set_pram+0x13c, +0x140)",
+   "log": "artifacts/nat-022/nat027-logs/scan-run005-image.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/scan_unaligned.py",
+    "artifacts/nat-022/build-006/loader-diag-trig-hold-adt8-aln/Image",
+    "--elf",
+    "artifacts/nat-022/build-006/loader-diag-trig-hold-adt8-aln/loader.elf"
+   ],
+   "exit_code": 0,
+   "note": "total 0",
+   "log": "artifacts/nat-022/nat027-logs/scan-aln-image.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-022/build.py",
+    "--out",
+    "artifacts/nat-022/build-006",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0,
+   "note": "build-006 (ran before the commit; same sources)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/build.py",
+    "--out",
+    "artifacts/nat-022/build-006-repro",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0,
+   "note": "images, image_payloads and payload_fixes identical to build-006"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/build.py",
+    "--out",
+    "artifacts/nat-022/build-006-commit",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0,
+   "note": "rebuilt at commit c5b942a: images, image_payloads and payload_fixes identical to build-006 (all seven earlier images and payloads unchanged vs build-005, see repro-compare.log)",
+   "log": "artifacts/nat-022/nat027-logs/build-006-commit-compare.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-022/package.py",
+    "--image",
+    "artifacts/nat-022/build-006/loader-diag-trig-hold-adt8-aln/Image.payload",
+    "--out",
+    "artifacts/nat-022/package-006"
+   ],
+   "exit_code": 0,
+   "note": "RECOVERY image cdf4f3a1..., 19634 differing 4 KiB pages, canary image at offset 2048",
+   "log": "artifacts/nat-022/nat027-logs/package-006.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-022/session_aln.py",
+    "--out",
+    "artifacts/nat-022/preflight-gate-006"
+   ],
+   "exit_code": 2,
+   "note": "expected: stopped by the missing decision 0014 before any adb command (0 commands, no write, no reboot); every other gate assertion (stock and candidate hashes, package.json, loader Image.payload at offset 2048) checked to pass"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/test_nat022.py"
+   ],
+   "exit_code": 0,
+   "note": "35 tests",
+   "log": "artifacts/nat-022/nat027-logs/tests.log"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "214 tests",
+   "log": "artifacts/nat-022/make-check-nat027.log"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-022/build-006/build.json",
+  "artifacts/nat-022/build-006-repro/build.json",
+  "artifacts/nat-022/build-006-commit/build.json",
+  "artifacts/nat-022/package-006/package.json",
+  "artifacts/nat-022/package-006/recovery.img",
+  "artifacts/nat-022/preflight-gate-006/report.json",
+  "artifacts/nat-022/make-check-nat027.log",
+  "artifacts/nat-022/nat027-task.json",
+  "docs/procedures/nat-022/README.md",
+  "docs/procedures/nat-022/build.py",
+  "docs/procedures/nat-022/check_payload.py",
+  "docs/procedures/nat-022/patch_loader.py",
+  "docs/procedures/nat-022/scan_unaligned.py",
+  "docs/procedures/nat-022/session_aln.py",
+  "docs/procedures/nat-022/test_nat022.py",
+  "docs/procedures/nat-022/native-attempt-005-evidence.json",
+  "artifacts/nat-022/nat027-logs/build-006-commit-compare.log",
+  "artifacts/nat-022/nat027-logs/build-006-commit.log",
+  "artifacts/nat-022/nat027-logs/check-aln-image.log",
+  "artifacts/nat-022/nat027-logs/check-run005-image.log",
+  "artifacts/nat-022/nat027-logs/package-006.log",
+  "artifacts/nat-022/nat027-logs/repro-compare.log",
+  "artifacts/nat-022/nat027-logs/scan-aln-image.log",
+  "artifacts/nat-022/nat027-logs/scan-run005-image.log",
+  "artifacts/nat-022/nat027-logs/tests.log"
+ ],
+ "sha256": {
+  "docs/procedures/nat-022/README.md": "035f2cbe666ead61265eb4834920706a345b7cfa19571fefb48436bddc40f480",
+  "docs/procedures/nat-022/build.py": "43372a95a2642b72d8b219f2ea3866da1be9e446ad86d81ce807fdce2949650f",
+  "docs/procedures/nat-022/check_payload.py": "435cf7761b389425e1c4588f1cb970f44509856a503b8f6268eeef80b0941654",
+  "docs/procedures/nat-022/patch_loader.py": "1b427a0d835f80e74436bd8b8df93f2acbed1ee9725ff201873601b534091468",
+  "docs/procedures/nat-022/scan_unaligned.py": "9f67d409111177dcab173eaabeece5dec063a88212bf2b61e2ab95ff3ccedecb",
+  "docs/procedures/nat-022/session_aln.py": "a294703f887747610628aad45d87aa48d0d733b01736f514eab02c3572e5bae9",
+  "docs/procedures/nat-022/test_nat022.py": "f0f4d58112281eb3068860263619844ba74b75d3dec50e3ab4388697220a92d5",
+  "docs/procedures/nat-022/native-attempt-005-evidence.json": "cb4b426fcdc3886297a3a090ae95eb1b42146888cdfaac82e726c11dec9c49af",
+  "loader-diag-trig-hold-adt8-aln Image": "f0e61342dabb231098b71a13eb023a47d068adcec39fca1dc4b86e8d868f4cb7",
+  "loader-diag-trig-hold-adt8-aln Image.payload": "2fb3968787688f4feb5b1dc09e4622309f1e22e5e8d76c82178d8716f1642da9",
+  "package-006 recovery.img": "cdf4f3a15831fb7c6c488085da33c12ade231460323583fd4090114945b285cd",
+  "run-005 loader-diag-trig-hold-adt8 Image.payload": "766218b288b3fddaef79d7347f91b57aab5f7329e4d574389eb142226726a87a",
+  "make-check-nat027.log": "4a5f177dd8948052296b981c20d86e70594d5398324448dfd17c596297931120"
+ }
+}

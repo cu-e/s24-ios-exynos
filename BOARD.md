@@ -2,13 +2,13 @@
 
 > Generated from state/lab.json. Use the CLI; do not edit this board or its task cards.
 
-Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-10T15:21:29+00:00.
+Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-10T16:19:47+00:00.
 
-Registry SHA256: `3854d19f97d42d1a2e33f92d7e0c472072ba19fb14f1bd678328f62eec0df408`. Run `python3 tools/lab.py board --check` to detect stale files.
+Registry SHA256: `f932d7d0a25d369388e61ac75bb91a5d765b3c6ce9ee5d14a24565b87472b884`. Run `python3 tools/lab.py board --check` to detect stale files.
 
 [Workflow](docs/planning.md) · [All task details](planning/README.md) · [Machine view](state/board.json) · [Status](STATUS.md)
 
-| Ready (0) | In progress (0) | Blocked (16) | Waiting (15) | Needs authorization (22) | Done (256) |
+| Ready (0) | In progress (0) | Blocked (16) | Waiting (15) | Needs authorization (22) | Done (257) |
 | --- | --- | --- | --- | --- | --- |
 | — | — | [**INT-002**](planning/tasks/INT-002.md) · P100<br>Coordinate kernel build boot and virtualization integration<br>host · claude-takeover-20261110-6c8f<br>Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance (its handoff says the role continues after the gate review). Its gate tool is in main (tools/integration_gate.py, docs/integration/kernel/test_gate.py). The work it waited for has since reached main by direct merges under decision 0002 (STR-024, STR-037, STR-041 1042-body link; VM-047 and REV-047 on 2026-11-10). Without root approval and the multi-integrator protocol it cannot pass its own acceptance. | [**NAT-011**](planning/tasks/NAT-011.md) · P89<br>Trigger S5E9945 PMU SWRESET with SEC_RESET_REASON_UNKNOWN on RECOVERY loader exit/halt so S-Boot clears persistent param(0) REBOOT_MODE=4<br>host · unassigned<br>Dependencies: NAT-009 | [**NAT-017**](planning/tasks/NAT-017.md) · P97<br>Qualify an independent early-log canary and per-reset retention before any further XNU attempt<br>native · unassigned<br>Scope not authorized: native | [**KRN-009**](planning/tasks/KRN-009.md) · P100<br>Implement actual atomic type metadata for genuine selected XNU allocator uses<br>host · codex-compiler-atomics-20261105-t |
 | — | — | [**INT-003**](planning/tasks/INT-003.md) · P100<br>Coordinate crypto drivers and platform integration<br>host · claude-takeover-20261110-6c8f<br>Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance. It depends on the stopped root/CM approval protocol, so its acceptance (serialized grants, original owners closing their tasks) cannot be met any more. Remaining component work (provider TUs, archives, link and private ABI) belongs to those component tasks. Handoff: worktrees/int-platform-20261106/docs/integration/platform/native-provider-headers98-review/handoff.md. | [**GPU-007**](planning/tasks/GPU-007.md) · P70<br>Implement and build the Xclipse native kernel backend<br>host · unassigned<br>Dependencies: KRN-001; Paths reserved by: GPU-012 | [**NAT-003**](planning/tasks/NAT-003.md) · P50<br>Run the first native BOOT session with logs and recovery<br>native · unassigned<br>Scope not authorized: native; Dependencies: NAT-004, KRN-001; Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001 | [**KRN-025**](planning/tasks/KRN-025.md) · P100<br>Build and qualify genuine selected cc_kext compiler runtime<br>host · codex-team-cc-runtime-20261105-az |
@@ -106,6 +106,7 @@ Registry SHA256: `3854d19f97d42d1a2e33f92d7e0c472072ba19fb14f1bd678328f62eec0df4
 | — | — | — | — | — | [**KRN-039**](planning/tasks/KRN-039.md) · P98<br>Integrate real DES and TDES modes and helpers into the accepted native provider graph<br>host · codex-team-kernel-des-20261105-ci |
 | — | — | — | — | — | [**REV-022**](planning/tasks/REV-022.md) · P98<br>Independently review native DES provider and active ESP CBC error ownership<br>host · codex-team-review-kernel-des-20261105-cl |
 | — | — | — | — | — | [**VM-009**](planning/tasks/VM-009.md) · P98<br>Implement bounded guest object manifest executor<br>host · codex-guest-executor-20261106-co |
+| — | — | — | — | — | [**NAT-027**](planning/tasks/NAT-027.md) · P98<br>Fix the alignment fault found by native run 005 (adt_patch.c 64-bit ADT accesses with the MMU off) and host-check the loader for the same hazard before another loader-diag run<br>host · claude-nat022-20261110-diag |
 | — | — | — | — | — | [**KRN-006**](planning/tasks/KRN-006.md) · P97<br>Harden experimental XNU compiler AST and whole-kernel expression coverage<br>host · codex-compiler-hardening-20261105-q |
 | — | — | — | — | — | [**KRN-014**](planning/tasks/KRN-014.md) · P97<br>Qualify genuine kernel firehose header exports against the selected archive profile<br>host · codex-firehose-headers-20261105-y |
 | — | — | — | — | — | [**KRN-015**](planning/tasks/KRN-015.md) · P97<br>Generate matched experimental compiler ARM NEON resource headers for genuine APFS code<br>host · codex-resource-headers-20261105-z |
@@ -292,11 +293,6 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 
 ## Recent activity
 
-- 2026-11-10T11:43:16+00:00 · codex-83s-session-20261110-r7 · project.permit:native
-- 2026-11-10T11:44:01+00:00 · codex-83s-session-20261110-r7 · experiment.record:NAT021-83S-001
-- 2026-11-10T11:44:33+00:00 · codex-83s-session-20261110-r7 · project.permit:native
-- 2026-11-10T11:44:52+00:00 · codex-83s-session-20261110-r7 · task.block:NAT-021
-  - NAT-021: Native diagnosis inconclusive: Samsung/Knox logo only, restart, SEC_UPLOAD109.684s after recovery reboot; no native console. Fresh single-session stock restore and full RECOVERY hash passed; Android boot_completed1, user0 RUNNING_UNLOCKED, pstore empty. Seven fault controls and214 project checks passed. Native scope flag returned false; no native retry.
 - 2026-11-10T11:45:18+00:00 · claude-takeover-20261110-6c8f · task.block:ODIN-001
   - ODIN-001: Stopped by the safety classifier at about 11:44Z on 2026-11-10 while writing the fake-libusb host test harness; not retried, reworded or delegated. Done: three local patches against odin4 338fde45 in artifacts/odin4-e1s/work (1fdfc82 wire sequence, 8030309 PIT chunks/no resend/payload total/pre-validation, e543114 session ledger/node check/staged report); built; upstream 47 tests pass; binary artifacts/odin4-e1s/odin4 (untested against any device or fake). Not done: wire-equivalence harness, patch export to patches/odin4-e1s, docs, evidence. The patched odin4 is not qualified; the NAT-013 tool stays the supported restore path. Resume only on an explicit owner instruction after support review.
 - 2026-11-10T11:57:49+00:00 · claude-nat022-20261110-diag · task.add:NAT-022
@@ -329,6 +325,14 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
   - NAT-026: in_progress
 - 2026-11-10T15:21:23+00:00 · claude-nat022-20261110-diag · task.done:NAT-026
   - NAT-026: done
+- 2026-11-10T16:04:41+00:00 · claude-nat022-20261110-diag · task.add:NAT-027
+  - NAT-027: pending
+- 2026-11-10T16:05:00+00:00 · claude-nat022-20261110-diag · task.claim:NAT-027
+  - NAT-027: in_progress
+- 2026-11-10T16:11:04+00:00 · claude-nat022-20261110-diag · task.update:NAT-027
+  - NAT-027: Run 005 recorded; fix built, host-verified, packaged, driver gated; evidence-nat027.json written
+- 2026-11-10T16:19:25+00:00 · claude-nat022-20261110-diag · task.done:NAT-027
+  - NAT-027: Run 005 recorded; fix built, host-verified, packaged, driver gated; evidence-nat027.json written
 
 Use a unique owner per agent session. Atomically take ready work:
 

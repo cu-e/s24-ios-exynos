@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T15:21:29+00:00",
-  "ledger_updated_at": "2026-11-10T15:21:23+00:00",
-  "registry_sha256": "3854d19f97d42d1a2e33f92d7e0c472072ba19fb14f1bd678328f62eec0df408",
+  "generated_at": "2026-11-10T16:19:47+00:00",
+  "ledger_updated_at": "2026-11-10T16:19:25+00:00",
+  "registry_sha256": "f932d7d0a25d369388e61ac75bb91a5d765b3c6ce9ee5d14a24565b87472b884",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [],
@@ -163,6 +163,7 @@
       "KRN-039",
       "REV-022",
       "VM-009",
+      "NAT-027",
       "KRN-006",
       "KRN-014",
       "KRN-015",
@@ -4814,6 +4815,47 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/VM-009.md"
+    },
+    {
+      "id": "NAT-027",
+      "title": "Fix the alignment fault found by native run 005 (adt_patch.c 64-bit ADT accesses with the MMU off) and host-check the loader for the same hazard before another loader-diag run",
+      "status": "done",
+      "owner": "claude-nat022-20261110-diag",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 98,
+      "depends_on": [
+        "NAT-026"
+      ],
+      "paths": [
+        "docs/procedures/nat-022",
+        "artifacts/nat-022"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "The run-005 on-device exception record (SLOT 4, ESR 0x96000061, ELR 0x800a9954, FAR 0x9e2d743fc) is decoded from the independent recording, and the failing instruction and its cause are identified on the host by two independent routes (ELR against the disassembly of the flashed loader at the derived base; FAR minus the ADT property offset against the real ADT). The host reproduction of the fault is a deterministic check (alignment trap harness) that fires on the run-005 source and passes on the fix.",
+        "The fix is a deterministic, hash-anchored source variant (loader-diag-trig-hold-adt8-aln) that touches only adt_patch.c 64-bit ADT accesses (two aligned 32-bit accesses); every earlier image stays byte-identical; the new image is reproducible; a static scan finds no unscaled misaligned access in the new loader; the adt_patch output is byte-identical to the original code for window bases below and above 4 GiB against an independent oracle. All of this is labelled host-test: it does not show that later loader stages run on the S24.",
+        "A RECOVERY package for the new image is built and host-tested, a session driver is gated on a new decision file, and an image-specific decision request with SHA-256s, device access, risks and recovery is put to the owner. Nothing is flashed or run on the phone and no XNU jump is made."
+      ],
+      "steps": [
+        "Record native run 005 (evidence, README, memory)",
+        "Reproduce the fault on the host and fix adt_patch.c accesses; scan the loader for the same hazard",
+        "Build, reproduce, package and gate the session driver",
+        "Document the request and put the decision question to the owner"
+      ],
+      "started_at": "2026-11-10T16:05:00+00:00",
+      "last_heartbeat": "2026-11-10T16:11:04+00:00",
+      "updated_at": "2026-11-10T16:19:25+00:00",
+      "progress_note": "Run 005 recorded; fix built, host-verified, packaged, driver gated; evidence-nat027.json written",
+      "next_step": "Mark done; then ask the owner for decision 0014 (image-specific single run of loader-diag-trig-hold-adt8-aln)",
+      "evidence": "docs/procedures/nat-022/evidence-nat027.json",
+      "evidence_sha256": "c2c9445c0f00c5db6a374f77d3a7d37263ee77c8ea96850c42e173c9e6770d13",
+      "finished_at": "2026-11-10T16:19:25+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-027.md"
     },
     {
       "id": "KRN-006",
@@ -14134,53 +14176,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-10T11:43:16+00:00",
-      "action": "project.permit:native",
-      "owner": "codex-83s-session-20261110-r7",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-10T11:44:01+00:00",
-      "action": "experiment.record:NAT021-83S-001",
-      "owner": "codex-83s-session-20261110-r7"
-    },
-    {
-      "at": "2026-11-10T11:44:33+00:00",
-      "action": "project.permit:native",
-      "owner": "codex-83s-session-20261110-r7",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-10T11:44:52+00:00",
-      "action": "task.block:NAT-021",
-      "owner": "codex-83s-session-20261110-r7",
-      "tasks": [
-        {
-          "id": "NAT-021",
-          "status": "blocked",
-          "owner": "codex-83s-session-20261110-r7",
-          "priority": 100,
-          "progress_note": "Native diagnosis inconclusive: Samsung/Knox logo only, restart, SEC_UPLOAD109.684s after recovery reboot; no native console. Fresh single-session stock restore and full RECOVERY hash passed; Android boot_completed1, user0 RUNNING_UNLOCKED, pstore empty. Seven fault controls and214 project checks passed. Native scope flag returned false; no native retry.",
-          "next_step": "Do not rerun. Missing real early-log channel/retention (NAT-017) and image-specific new owner decision before any further native work; original RECOVERY is restored and Android verified.",
-          "blocked_reason": "One authorized native session is consumed and its CPU stage remains inconclusive: no independently received early log or reset-retained RAM readout. Stock RECOVERY/full Android return passed. Need a real NAT-017 channel/canary and a new image-specific owner decision before further native diagnosis; no automatic retry.",
-          "last_heartbeat": "2026-11-10T11:44:52+00:00",
-          "branch": "main",
-          "worktree": "/home/egor/dev/pet/s24-ios-exynos",
-          "handoff": "docs/procedures/nat-021/README.md"
-        }
-      ]
-    },
-    {
       "at": "2026-11-10T11:45:18+00:00",
       "action": "task.block:ODIN-001",
       "owner": "claude-takeover-20261110-6c8f",
@@ -14395,11 +14390,70 @@
           "last_heartbeat": "2026-11-10T15:13:45+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T16:04:41+00:00",
+      "action": "task.add:NAT-027",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-027",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T16:05:00+00:00",
+      "action": "task.claim:NAT-027",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-027",
+          "status": "in_progress",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 98,
+          "last_heartbeat": "2026-11-10T16:05:00+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T16:11:04+00:00",
+      "action": "task.update:NAT-027",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-027",
+          "status": "in_progress",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 98,
+          "progress_note": "Run 005 recorded; fix built, host-verified, packaged, driver gated; evidence-nat027.json written",
+          "next_step": "Mark done; then ask the owner for decision 0014 (image-specific single run of loader-diag-trig-hold-adt8-aln)",
+          "last_heartbeat": "2026-11-10T16:11:04+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T16:19:25+00:00",
+      "action": "task.done:NAT-027",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-027",
+          "status": "done",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 98,
+          "progress_note": "Run 005 recorded; fix built, host-verified, packaged, driver gated; evidence-nat027.json written",
+          "next_step": "Mark done; then ask the owner for decision 0014 (image-specific single run of loader-diag-trig-hold-adt8-aln)",
+          "last_heartbeat": "2026-11-10T16:11:04+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "ac7eac828e14d8f2ef31da5ce9f553ff77fd34ba05d4b6a21bb03e2869528338",
-    "BOARD.md": "ccb790608b1bf8c12efe1dbe44d21023870a30e3350d1a7f018909c000ea3e0b",
+    "STATUS.md": "6ba76d14b715709b507848274208733ca00dc96e50008a82589e11fde4b37aff",
+    "BOARD.md": "a3a4001384315f1702ae098cfb3022d750222bc3019e8afb0866cb45e22921cc",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -14501,6 +14555,7 @@
     "planning/tasks/KRN-039.md": "1d7a55056ddbc0322dc025a5e09270fc14f1b57e827a3e83475612096e48656f",
     "planning/tasks/REV-022.md": "309089b648ae69cdd4f0b6c057aa9888f94209df5aabfbc4f38b44bb61ae6216",
     "planning/tasks/VM-009.md": "8d97935798a5c672c702610eeda3a40c187b0860da28264d625a7a3cf096d87d",
+    "planning/tasks/NAT-027.md": "2de722fe79be02d8ce69be3798bc1fbee5bad4ad888235d9a3ea21073d4d70e8",
     "planning/tasks/KRN-006.md": "17787b37e62d7cb230c248532450af8108a583aca6b6e955cee29637f8e981a1",
     "planning/tasks/KRN-014.md": "373bcf06587ce0b77bbacdfa023baa6c9b888953717dafa33267ff49a60ea753",
     "planning/tasks/KRN-015.md": "28783b6b5313987331209c84d30f10ddeab6ee7f41bf6bf1d963790545460926",
