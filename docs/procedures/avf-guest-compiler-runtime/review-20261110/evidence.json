@@ -1,0 +1,54 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "task": "VM-023",
+ "owner": "claude-takeover-20261110-6c8f",
+ "recorded_at": "2026-11-10T07:34:28+00:00",
+ "summary": "Independent review of the codex-guest-exec-20261106-de audit. All 32 path/hash pairs in its evidence chain inside its worktree match. Rechecked: cc_kext archive SHA-256 67304a15\u2026bed5 equals the evidenced one; llvm-ar lists exactly 287 members, none duplicated; the undefined names not defined anywhere in the archive are exactly 47 (38 C/kernel/libc/unwind names plus 9 section$start/end magic names for __llvm_prf_* and __llvm_orderfile), matching the README. The guest-target driver -### lookup itself was not re-executed.",
+ "commit": "48989c1a403d338c1b14fa8422b884652679b547",
+ "transfer": {
+  "from_owner": "codex-guest-exec-20261106-de",
+  "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
+  "branch": "team/vm-023-20261106",
+  "branch_content_already_in_main": true
+ },
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/avf-object-shards/hash_review.py",
+    "artifacts/guest-audit-review/vm-023.json",
+    "worktrees/vm-023-20261106",
+    "EVIDENCE"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "llvm-ar t ARCHIVE | wc -l  -> 287"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "llvm-nm -u ARCHIVE minus llvm-nm --defined-only ARCHIVE -> 47 names"
+   ],
+   "exit_code": 0
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/avf-guest-compiler-runtime/review-20261110/hash-review.json",
+  "docs/procedures/avf-guest-compiler-runtime/evidence.json"
+ ],
+ "sha256": {
+  "docs/procedures/avf-guest-compiler-runtime/review-20261110/hash-review.json": "9ab09c131ae9ac98108ae38dfe227f247c9b20d29e55de5885f6b747c483019a",
+  "docs/procedures/avf-guest-compiler-runtime/evidence.json": "feaf78a5050c239f144a1ab56e5bfd481c660a3d2e0347a5c33a3088ab48ce18"
+ },
+ "limitations": [
+  "Review rechecks the stated counts and hashes; it does not re-run the original tools.",
+  "Guest (AVF/QEMU bench) line; nothing compiled, linked, booted or run on the phone.",
+  "The guest kernel VM-002 booted came from the HakiOS build route; these audits are not on its critical path."
+ ]
+}
