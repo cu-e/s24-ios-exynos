@@ -1,0 +1,201 @@
+{
+ "kind": "native-device",
+ "origin": "owner-attended-run",
+ "outcome": "inconclusive",
+ "recorded_at": "2026-11-10T12:17:50.446961+00:00",
+ "decision": "docs/decisions/0009-nat022-canary-plain-single-run-2026-11-10.md",
+ "summary": "One native run of NAT-022 canary-plain (RECOVERY image sha256 a7913234df2451e00a0cc9e8c339395e072a6897dad1aec411057021437921fe) under decision 0009. Written to /dev/block/sda18 with full readback match, one adb reboot recovery at 2026-11-10T12:11:16Z. Owner-reported observation (their words: 'вроде полос не было'; they entered Download Mode because the phone kept restarting): no stripes were seen. Host passive USB events (enumeration only, not a console): ADB device gone 12:11:20; SEC_UPLOAD (685d) enumerated 12:12:51 (~95 s after the request) with no Odin command sent; it vanished at 12:13:37 and 'SAMSUNG USB' Download Mode appeared 12:13:42 (owner action). The canary arms no watchdog, so a reset near 95 s was not caused by watchdog code in this image. Stock RECOVERY restored by one NAT-013 session (bus 5 address 34); full RECOVERY hash equals stock 96620b8b..., assess pass, sys.boot_completed=1, bootanim stopped, user 0 present, user state RUNNING_LOCKED right after boot; no personal content read. NOT established: whether the canary's first instruction ran, MMU/cache state, or why no markers were seen. Untested explanations: (a) image not executed, (b) M=1 entry where the best-effort draw failed or hit another mapping, (c) panel not scanning 0xFA200000 or command-mode needing a DECON trigger, (d) contrast invisible. No video was provided to the host, so decoding was not attempted.",
+ "commands": [
+  {
+   "argv": [
+    "adb",
+    "get-state"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop ro.product.model"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop ro.product.device"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop ro.build.PDA"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop sys.boot_completed"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'readlink -f /dev/block/by-name/recovery; blockdev --getsize64 /dev/block/sda18; test -b /dev/block/sda18 && echo block_device'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'if pidof dd >/dev/null; then echo busy; else echo idle; fi'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'sha256sum /dev/block/sda18'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "dumpsys battery | toybox sed -n 's/^  level: /level=/p;s/^  temperature: /temperature=/p'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'if pidof dd >/dev/null; then echo busy; else echo idle; fi'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'test -b /dev/block/sda18 && dd of=/dev/block/sda18 bs=1048576 count=100663296 iflag=count_bytes conv=notrunc,fsync'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'sha256sum /dev/block/sda18'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "reboot",
+    "recovery"
+   ],
+   "exit_code": 0
+  }
+ ],
+ "usb_events": [
+  {
+   "at": "2026-11-10T12:11:09.808045+00:00",
+   "elapsed_seconds": 0.001239,
+   "devices": [
+    [
+     "6860",
+     "SAMSUNG_Android"
+    ]
+   ]
+  },
+  {
+   "at": "2026-11-10T12:11:20.355062+00:00",
+   "elapsed_seconds": 10.548263,
+   "devices": []
+  },
+  {
+   "at": "2026-11-10T12:12:51.136049+00:00",
+   "elapsed_seconds": 101.329248,
+   "devices": [
+    [
+     "685d",
+     "SEC_UPLOAD"
+    ]
+   ]
+  },
+  {
+   "at": "2026-11-10T12:13:37.313154+00:00",
+   "elapsed_seconds": 147.506374,
+   "devices": []
+  },
+  {
+   "at": "2026-11-10T12:13:42.850677+00:00",
+   "elapsed_seconds": 153.043884,
+   "devices": [
+    [
+     "685d",
+     "SAMSUNG USB"
+    ]
+   ]
+  },
+  {
+   "at": "2026-11-10T12:15:32.989733+00:00",
+   "elapsed_seconds": 263.182932,
+   "devices": []
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-022/package-001/recovery.img",
+  "artifacts/nat-022/package-001/package.json",
+  "artifacts/nat-022/attempt-001/report.json",
+  "artifacts/nat-022/preflight-001/report.json",
+  "artifacts/nat-022/stock-restore-001/report.json",
+  "artifacts/nat-022/android-after-stock-001.json",
+  "artifacts/nat-022/native-attempt-used.json",
+  "artifacts/nat-022/usb-attempt-001/000000.json",
+  "artifacts/nat-022/usb-attempt-001/000001.json",
+  "artifacts/nat-022/usb-attempt-001/000002.json",
+  "artifacts/nat-022/usb-attempt-001/000003.json",
+  "artifacts/nat-022/usb-attempt-001/000004.json",
+  "artifacts/nat-022/usb-attempt-001/000005.json"
+ ],
+ "sha256": {
+  "artifacts/nat-022/package-001/recovery.img": "a7913234df2451e00a0cc9e8c339395e072a6897dad1aec411057021437921fe",
+  "artifacts/nat-022/package-001/package.json": "ec78fd7cfe6fb8c62686710952dba0b040090a5e216151bc00a0abc270adcc8a",
+  "artifacts/nat-022/attempt-001/report.json": "1226201bb68e749de0ec3e5ca74aeaae1b480f9cfbeb3e74ea9a45c604e93334",
+  "artifacts/nat-022/preflight-001/report.json": "112a312b6e12d62f49ab3e992a10141683bae92012fac6ff1ece0756600ce233",
+  "artifacts/nat-022/stock-restore-001/report.json": "f159fbcb72bb45a19a47ddd53b70d0701e977e807a7f63e42320a8507f6d43c3",
+  "artifacts/nat-022/android-after-stock-001.json": "bc954253f11e6dc5e91b2d082a107308cf0eb5b4e1c3d04b500a0873da75cde3",
+  "artifacts/nat-022/native-attempt-used.json": "37bc19ca0c769816cad189ee719efc4a43b6f5bee750ab8ac3dcdb8fb2e172a1",
+  "artifacts/nat-022/usb-attempt-001/000000.json": "2b5951fd90766f1c9234910c8c81fb46e2c7182f8de55ad263acf34170585103",
+  "artifacts/nat-022/usb-attempt-001/000001.json": "4487d9c52bddf369c71baa0ad7e6c2b2b21bbd5df54acb89e093acbbd4f7bd08",
+  "artifacts/nat-022/usb-attempt-001/000002.json": "e40badac9a67aa82d393928961d631dfefead29c3b3a938247b71d5e3d262c9b",
+  "artifacts/nat-022/usb-attempt-001/000003.json": "405a8aee367b17378875e33b8385dfc9b0bf6ff9ef136232de145231ae176648",
+  "artifacts/nat-022/usb-attempt-001/000004.json": "fc031ede8fce8b04be2351c6d79596e4c15b39b96d44a8a436b91e6043cb32ab",
+  "artifacts/nat-022/usb-attempt-001/000005.json": "912d5487640ecf2d5eee5fa6e71633a33015dbf7d397f04aba9921d9482eacd3"
+ }
+}

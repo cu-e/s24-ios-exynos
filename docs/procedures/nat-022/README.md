@@ -98,7 +98,8 @@ Required before any phone action; this document is not that decision.
 `canary-plain` was written to RECOVERY (readback matched) and booted once
 (request 12:11:16Z). The owner, filming the screen, reported seeing no stripes
 and moved the phone to Download Mode because it kept restarting. The host saw
-USB vanish at +4 s and `SEC_UPLOAD` at +95 s; no command was sent to it. Stock
+USB vanish at +4 s and `SEC_UPLOAD` at +95 s (12:12:51); no command was sent to it.
+It left at 12:13:37 and Download Mode appeared at 12:13:42 (owner action). Stock
 RECOVERY was restored with one NAT-013 session; the full hash equals stock and
 Android booted (`sys.boot_completed=1`; user state `RUNNING_LOCKED` until unlock).
 Full record: `native-attempt-001-evidence.json`.
