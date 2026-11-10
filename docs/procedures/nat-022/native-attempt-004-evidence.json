@@ -1,0 +1,312 @@
+{
+ "kind": "native-device",
+ "origin": "owner-attended-run",
+ "outcome": "fail",
+ "criterion": "The NAT-020 loader, started from the RECOVERY slot with visible stage markers, reaches its memory preparation, ADT/boot_args and pre-jump stages on the S24 (CRC-valid STAGE frames MAIN, FB, MEM, ZERO, COPY, ADT, CLEAN, PRE_JUMP decoded from an independent recording).",
+ "recorded_at": "2026-11-10T15:12:00+00:00",
+ "decision": "docs/decisions/0012-nat022-loader-diag-trig-hold-single-run-2026-11-10.md",
+ "summary": "One native run of NAT-022 loader-diag-trig-hold (RECOVERY image sha256 511b4833f0b6c24f5adffe762451bcbf937aa9a23b64bdd41d254885e006c475, Image.payload 7c6206bd06923a91524afe95ec03573ed6fa680978cc839c40991debf7702cb3, source commit 82f636e). It was written to RECOVERY (/dev/block/sda18) with a matching full readback and booted once (adb reboot recovery at 2026-11-10T14:52:43Z). The owner filmed the screen. decode_video.py decoded 567 CRC-valid frames in 0.0-82.6 s of the 84.0 s recording (238 frames failed sync/CRC, 16 grid-poor, 12 no-contrast, 4 no-grid, 1 too-few-edges). The loader stage markers MAIN (0x20) and FB (0x21) were shown, then STAGE 0x3f (FAIL). The hold loop then repeats: STAGE idx1 reached-stage mask 0x0207 (ENTRY, MAIN, FB, FAIL; MEM and later never reached), STAGE idx2 0x2543 = fnv16 of \"bad payload header\", BOOTID 0x00000a10/0x0fae pair, STAGE 0x3f, REG 0..9 (status 1 and 2 alternating between cycles, GLOBAL_CON 0x133 or 0x113, TRIG_CON 0x3062<->0x3063, FRAME_COUNT advancing, kick count rising 0x18, 0x27, 0x36). No later stage (MEM, ZERO, COPY, ADT, CLEAN, PRE_JUMP) and no XNU entry marker was shown. The loader therefore stopped at its payload header check. check_payload.py, which compiles the loader.c struct and the real condition text and runs it on the flashed payload, finds exactly one firing clause: (p->adt_size & 7), adt_size = 13956 = 0x3684. The screen stayed lit until about 82.7 s of the recording. Stock RECOVERY was restored with one NAT-013 session in Download Mode (enumeration 04e8:685d seen by the host observer at 14:54:39Z, restore 14:55:22Z-14:55:25Z, ADB back 14:56:22Z); the full hash equals stock 96620b8b..., check_android pass, Android booted.",
+ "commands": [
+  {
+   "argv": [
+    "adb",
+    "get-state"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T14:52:39.664020+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop ro.product.model"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T14:52:39.692565+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop ro.product.device"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T14:52:39.759352+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop ro.build.PDA"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T14:52:39.809467+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop sys.boot_completed"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T14:52:39.866411+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'readlink -f /dev/block/by-name/recovery; blockdev --getsize64 /dev/block/sda18; test -b /dev/block/sda18 && echo block_device'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T14:52:39.917413+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'if pidof dd >/dev/null; then echo busy; else echo idle; fi'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T14:52:40.084636+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'sha256sum /dev/block/sda18'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T14:52:40.185757+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "dumpsys battery | toybox sed -n 's/^  level: /level=/p;s/^  temperature: /temperature=/p'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T14:52:40.422866+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'if pidof dd >/dev/null; then echo busy; else echo idle; fi'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T14:52:40.632828+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'test -b /dev/block/sda18 && dd of=/dev/block/sda18 bs=1048576 count=100663296 iflag=count_bytes conv=notrunc,fsync'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T14:52:40.784108+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'sha256sum /dev/block/sda18'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T14:52:43.651451+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "reboot",
+    "recovery"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T14:52:43.903229+00:00"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py"
+   ],
+   "note": "NAT-013 stock restore session; the report is artifacts/nat-022/stock-restore-004/report.json (trace, stages pit_validated/upload_acknowledged/session_end_confirmed/reboot_confirmed all true, outcome awaiting-readback); the full-hash check is in android-after-stock-004.json recovery_hash_match=true",
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-020/observe_usb.py",
+    "--seconds",
+    "420"
+   ],
+   "exit_code": 2,
+   "note": "usage error: bounded duration must be 1..360; no USB events were recorded for the first ~84 s after the reboot"
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-020/observe_usb.py",
+    "--seconds",
+    "360"
+   ],
+   "exit_code": 0,
+   "note": "started 2026-11-10T14:54:07Z, 4 events, native_console false"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "--out",
+    "artifacts/nat-022/video-attempt-004/decoded-frames.json"
+   ],
+   "exit_code": 0,
+   "note": "default window y0 60..1100"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "--t0",
+    "4",
+    "--t1",
+    "26",
+    "--y0",
+    "10",
+    "--out",
+    "artifacts/nat-022/video-attempt-004/decoded-frames-early.json"
+   ],
+   "exit_code": 0,
+   "note": "192 ok of 220 rows; the same values as the first cycles of the full decode"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/check_payload.py",
+    "artifacts/nat-020/build-003/source/shim/e1s-xnu/loader.c",
+    "artifacts/nat-020/build-003/payload.bin"
+   ],
+   "exit_code": 1,
+   "note": "host: one clause fires, (p->adt_size & 7)"
+  }
+ ],
+ "decoded_cycle": {
+  "stage_sequence": [
+   {
+    "t_s": "0.0-2.1",
+    "stage": "0x20 LOADER_MAIN"
+   },
+   {
+    "t_s": "2.2-3.3",
+    "stage": "0x21 LOADER_FB"
+   },
+   {
+    "t_s": "3.5-",
+    "stage": "0x3f LOADER_FAIL"
+   }
+  ],
+  "hold_loop": [
+   "STAGE idx1 0x0207",
+   "STAGE idx2 0x2543",
+   "BOOTID idx0 0x0a10",
+   "BOOTID idx1 0x0fae",
+   "STAGE idx0 0x003f",
+   "REG idx0..9"
+  ],
+  "cycle_period_s": 18.7,
+  "reg_cycle_examples": [
+   {
+    "t_s": "30.3-41.9",
+    "status": 2,
+    "global_con_lo": "0x0113",
+    "trig_before": "0x3063",
+    "trig_after": "0x3062",
+    "frame_count": [
+     "0x068a",
+     "0x0720"
+    ],
+    "kick_count": "0x18"
+   },
+   {
+    "t_s": "48.3-60.6",
+    "status": 1,
+    "global_con_lo": "0x0133",
+    "trig_before": "0x3062",
+    "trig_after": "0x3063",
+    "frame_count": [
+     "0x0b35",
+     "0x0b36"
+    ],
+    "kick_count": "0x27"
+   },
+   {
+    "t_s": "66.9-79.3",
+    "status": 2,
+    "global_con_lo": "0x0113",
+    "trig_before": "0x3063",
+    "trig_after": "0x3062",
+    "frame_count": [
+     "0x0f4e",
+     "0x0fe5"
+    ],
+    "kick_count": "0x36"
+   }
+  ]
+ },
+ "hashes": {
+  "recovery_image": "511b4833f0b6c24f5adffe762451bcbf937aa9a23b64bdd41d254885e006c475",
+  "stock_recovery": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+  "loader_image_payload": "7c6206bd06923a91524afe95ec03573ed6fa680978cc839c40991debf7702cb3",
+  "camera_mp4": "4f8f16e564d69692f77cd1e28b3d83529b1128b3467ac06de4573eacd34fa224",
+  "decoded_frames_json": "32d80d87657a613d5c8ae0755a95dea1e843769de1600c9d8e300f1af837bb38",
+  "decoded_frames_early_json": "e10b62e6c22e018fe3fd727990c7a1248768435e3dac238d416831766f626a17",
+  "payload_bin": "071bc632f7af0a6aa9b11a679c1d5a951ee80943be11669326949d0725caf544"
+ },
+ "artifacts": [
+  "artifacts/nat-022/attempt-004/report.json",
+  "artifacts/nat-022/preflight-004/report.json",
+  "artifacts/nat-022/stock-restore-004/report.json",
+  "artifacts/nat-022/android-after-stock-004.json",
+  "artifacts/nat-022/usb-attempt-004/",
+  "artifacts/nat-022/usb-observer-004.log",
+  "artifacts/nat-022/usb-observer-004b.log",
+  "artifacts/nat-022/native-attempt-loaderhold-used.json",
+  "artifacts/nat-022/video-attempt-004/camera.mp4",
+  "artifacts/nat-022/video-attempt-004/decoded-frames.json",
+  "artifacts/nat-022/video-attempt-004/decoded-frames-early.json",
+  "artifacts/nat-022/package-004/"
+ ],
+ "provenance": {
+  "code_commit": "82f636e",
+  "repo_head_at_recording": "82dd028",
+  "recording": "owner camera, /home/egor/Downloads/video_2026-11-10_19-57-37.mp4 (same bytes as artifacts/nat-022/video-attempt-004/camera.mp4; shows the owner's room, not committed)",
+  "owner_note": "The owner wrote (Russian message, quoted as typed): \"вот видео там снизу еще что то вроде els loader boot ealy test image not off firemaire\". The footer text was not decoded from the recording by this project; it is the owner's reading of the loader UI footer."
+ },
+ "established": [
+  "The NAT-020 loader code, built from the pinned source, ran on the S24 from the RECOVERY slot under this S-Boot: its own stage markers MAIN and FB and FAIL were drawn and decoded from an independent recording (the loader reached loader_main and the framebuffer selection).",
+  "The loader stopped at fail(\"bad payload header\") (fnv16 0x2543, reached-stage mask 0x0207); no later stage was reached.",
+  "Host check on the exact flashed payload.bin with the loader.c clause text: exactly one clause fires, (p->adt_size & 7) with adt_size 13956. The payload/loader mismatch is deterministic and independent of the device.",
+  "The start.S SCTLR_EL1 M/C halt did not stop this run: the loader code after el1_entry ran (the loader stage markers were drawn)."
+ ],
+ "not_established": [
+  "Any stage after the payload header check: window choice, RAM zeroing, copy, ADT/boot_args patching, cache clean, the pre-jump marker.",
+  "Any XNU entry or marker inside XNU.",
+  "Whether the adt_size clause is the only reason beyond the host reproduction (a re-run with a padded adt_size would confirm).",
+  "The cause of the dark screen at about 82.7 s (hypothesis: the loader 83 s watchdog, or the S-Boot timer; not measured) and who put the phone into Download Mode (the USB observer started 84 s after the reboot).",
+  "The loader ENTRY frame (not seen in the recording; one CRC-valid ENTRY candidate at 8.4 s decodes to 0xfb0b and is treated as a false positive).",
+  "Stride and pixel format; whether the kick or S-Boot refresh makes the markers visible (no no-kick control)."
+ ]
+}

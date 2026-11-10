@@ -445,3 +445,69 @@ silence is not explained by it. Limits: the NAT-021 boot itself was not observed
 the state at its first instruction only, not that the loader's later accesses are safe. The
 loader-diag variants additionally replace that silent halt by a marker-then-halt (`GATE_MC`, 0x02),
 so a run that did stop there would now say so.
+
+## Native result 004, 2026-11-10 (decision 0012): the loader stopped at its payload header check
+
+`loader-diag-trig-hold` (loader `Image.payload` `7c6206bd…`, RECOVERY image `511b4833…`, source commit
+`82f636e`) was written to RECOVERY with a matching full readback and booted once (`adb reboot recovery`
+at 14:52:43Z). The owner filmed the screen (84.0 s recording). Stock RECOVERY was restored with one
+NAT-013 session in Download Mode (`04e8:685d` seen by the host observer at 14:54:39Z, restore
+14:55:22Z–14:55:25Z, ADB back at 14:56:22Z); the full hash equals stock (`96620b8b…`),
+`check_android` passed and Android booted. Record: `native-attempt-004-evidence.json` (outcome `fail`:
+the goal's "loader reaches memory preparation, handoff and pre-jump" criterion was not met).
+
+`decode_video.py` (unchanged) decoded 567 CRC-valid frames between 0.0 s and 82.6 s (238 frames failed
+sync/CRC, 16 had a poor grid, 12 no contrast, 4 no grid, 1 too few edges). A second pass over 4–26 s
+with a wider top margin (`--y0 10`) gave 192 valid frames with the same values.
+
+| Time (s) | Frame | Decoded | Meaning |
+| --- | --- | --- | --- |
+| 0.0–2.1 | STAGE idx0 | `0x20` | `LOADER_MAIN`: `loader_main` was entered |
+| 2.2–3.3 | STAGE idx0 | `0x21` | `LOADER_FB`: framebuffer selection done |
+| 3.5– | STAGE idx0 | `0x3f` | `LOADER_FAIL` |
+| hold loop | STAGE idx1 | `0x0207` | reached-stage mask: ENTRY, MAIN, FB, FAIL; MEM, ZERO, COPY, ADT, CLEAN, PRE_JUMP not reached |
+| hold loop | STAGE idx2 | `0x2543` | fnv16 of the message `bad payload header` |
+| hold loop | BOOTID | `0x0a10`, `0x0fae` | boot identifier words |
+| hold loop | REG 0..9 | status 1/2 (alternating between cycles), GLOBAL_CON `0x133`/`0x113`, TRIG_CON `0x3062`↔`0x3063`, FRAME_COUNT advancing, kick count `0x18`, `0x27`, `0x36` | DECON0 register report; the values are listed as seen and not interpreted further |
+
+The loop repeats about every 18.7 s. The loader's own `ENTRY` frame was not captured (the recording
+starts when the owner started the camera; one CRC-valid candidate at 8.4 s decodes to `0xfb0b`, which
+is not a plausible ENTRY word and is treated as a false positive). The owner reports a text line at
+the bottom of the screen, roughly "els loader boot ealy test image not off firemaire"; the project did
+not decode that text, so it is only the owner's reading of the loader's own UI footer. The screen
+stayed lit until about 82.7 s of the recording, longer than the 60–65 s seen with the canary images
+(a hypothesis, not measured: the loader arms its 83 s watchdog).
+
+### Why `bad payload header`: a deterministic payload/loader mismatch
+
+`check_payload.py LOADER_C PAYLOAD` cuts the `struct payload` definition and the header-check
+`if (...) { return fail(...) }` text out of the real `loader.c`, compiles them unchanged for the host
+and evaluates each `||` clause on the payload bytes. On the flashed payload (`artifacts/nat-020/build-003/payload.bin`)
+exactly one clause fires:
+
+```
+FIRES [bad payload header] (p->adt_size & 7)
+```
+
+`adt_size` is `0x3684` = 13956, the unpadded length of `e1s.adt`; `mkpayload.py` records
+`len(adt_blob)` although it pads the blob to 16 bytes, and the loader requires a multiple of 8. All
+other header clauses pass (`version`, `nsegs`, `adt_off & 7`, `entry_va`/`kernel_end` against `virt_base`,
+the RAM-size clauses). This matches the decoded code `0x2543`, so the stop is explained by the payload
+bytes themselves and not by the hardware. It is inferred statically; only a re-run with a corrected
+payload would show that no other condition follows (the later stages have not run on the device).
+
+The earlier suspicion that `start.S`'s `SCTLR_EL1` M/C halt stops the loader is not what happened here:
+the loader code after `el1_entry` ran (its stage markers were drawn).
+
+Established (observation of this S24, one run): the NAT-020 loader code, started from the RECOVERY slot,
+runs on this S-Boot, reaches `loader_main` and its framebuffer selection, and shows its own CRC-valid
+stage markers and failure code on the same display channel as the canary.
+
+Not established: any stage after the payload header check (window choice, RAM zeroing, copy, ADT and
+`boot_args` patching, cache clean, the pre-jump marker); anything about XNU; the cause of the dark
+screen; who entered Download Mode (the USB observer started 84 s after the reboot because its first
+invocation used an out-of-range duration and exited; the first host USB event is at +116 s); stride and
+pixel format; whether the kick or S-Boot's refresh makes the markers visible (still no no-kick control).
+
+The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-004/` (the video
+shows the owner's room and is not committed).
