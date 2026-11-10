@@ -1,0 +1,26 @@
+--- accepted/native_link.py
++++ str-041/native_link.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Native DEVELOPMENT/E1S final-link admission and future STR037 caller.
+-
+-STR036 may inspect incomplete accepted indices; it cannot stage or execute.
++"""Native DEVELOPMENT/E1S final-link caller, copied from accepted STR-036 for STR-041.
++
++STR-041 delta: admitted task and index owner only. See source-delta.patch.
+ """
+@@ -98,3 +98,3 @@
+     """Structural admission of real accepted references; never creates outputs."""
+-    require(index['schema'] == 'native-actual-body-index-v1' and index['kind'] == 'accepted-actual-product-reference-index' and index['owner'] == 'INT-002', 'Unqualified actual index kind')
++    require(index['schema'] == 'native-actual-body-index-v1' and index['kind'] == 'accepted-actual-product-reference-index' and index['owner'] == 'STR-041', 'Unqualified actual index kind')
+     require(index['graph'] == policy['body_graph'] and index['context'] == policy['context'] and index['portable_compiler_profile'] == policy['profile'], 'Wrong graph/context/profile')
+@@ -148,3 +148,3 @@
+     common = api('common'); ledger = common.load_project(MAIN/'state/lab.json')
+-    require(request['task'] == 'STR-037', 'STR036 source task cannot stage or execute')
++    require(request['task'] == 'STR-041', 'Only the STR-041 host-test task may stage or execute')
+     tasks = {t['id']:t for t in ledger['tasks']}; t = tasks[request['task']]
+@@ -287,3 +287,3 @@
+ def execute(plan,source_plan,source_sha,approval_binding):
+-    """Future STR037 only: all copies/targets occur after exact root approval."""
++    """All copies and target tools run only after an exact approved lease."""
+     common,core,supervise = api('common'),api('core'),api('supervise')

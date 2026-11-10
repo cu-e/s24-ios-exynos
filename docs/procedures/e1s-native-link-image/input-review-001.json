@@ -1,0 +1,45 @@
+{
+  "schema": "e1s-native-link-input-review-v1",
+  "outcome": "pass",
+  "kind": "source-review",
+  "recorded_at": "2026-11-09T20:08:31+00:00",
+  "index_sha256": "84c2ae57acc90ee32fce2c7c7be93100ede7051bb9a1b0759bb6d320b38dc25c",
+  "accepted_body_count": 1042,
+  "graph_sha256": "2fa82dd9fa160a1f6311ae60ce9a1fa2dec43fdc79a157f416b49d788aff853c",
+  "overrides_sha256": "dc2e1435bbab73fd957a2c61624585c9d6ef3adaf565e7cf1f15531842ee8959",
+  "reviewer": "Fresh-context read-only Claude subagent ae6fc7c3d7ac7e5e0 spawned by claude-e1s-native-link-20261110-sr41. Same session; not a human or Codex reviewer.",
+  "reviewed_index": {
+    "path": "/home/egor/dev/pet/s24-ios-exynos/worktrees/str-041-e1s-native-link-image-20261110/artifacts/e1s-native-link-image/index-001/native-complete-1042-index.json",
+    "sha256": "f2288138e43695edc2197480269af42936db97f0a7bda333450551cb477ebf6e"
+  },
+  "reviewed_caller_sha256": "d1de0f3538a154ccda6870954e7a76fd328a0886306cd145f7836bd8f25a5811",
+  "findings": {
+    "parent_rows": "All 916 parent rows are JSON-equal in the new index; full order equals the graph order; 126 added IDs equal the parent ABSENT_ids.",
+    "added_rows": "All 65 and 61 added rows match their producer records in object, depfile, source, recipe, cwd, argv and MD map; zero mismatches.",
+    "caller_delta": "native_link.py differs from accepted STR-036 only in docstrings, the index owner and the request task. No guard removed.",
+    "runtime_repin": "Only /etc/ld.so.cache changed, in 5 places, and equals the live file. Reviewer did not verify what the new cache resolves to; the executor re-observes that with a fresh loader listing before linking.",
+    "physical_requalification": "build_index.py re-hashes every object and depfile and parses each as ARM64 Mach-O, including the 916 parent rows."
+  },
+  "known_weaknesses": [
+    "actual_tuples reads independent_review only by hash and never examines its contents.",
+    "actual_tuples takes the producer format from rows[0] of each producer group.",
+    "validate_index checks argv and MD hashes only as 64-hex values and a positive count; actual_tuples performs the real comparison.",
+    "The object-path check is a string test, and it passes for the 65 rows whose raw parent BUILD-005 report outcome is fail; STR-040 requalified those rows per object."
+  ],
+  "corrected_before_planning": {
+    "issue": "Index 001 labelled complete-170-origins.json as independent_review on the 65 added rows. That file is a STR-040 session descriptor, not a review, and treating it as one would overstate review coverage.",
+    "correction": "build_index.py no longer writes the field on added rows and now computes parent_index_rows_unchanged from the written file.",
+    "delta_index_001_to_002": {
+      "parent_rows_identical": 916,
+      "added_rows": 126,
+      "label_removed_from_added_rows": 65,
+      "other_row_differences": 0,
+      "top_level_differences_except_recorded_at": 0
+    },
+    "re_review": "The reviewer read index 001. Index 002 was checked mechanically against it; no second subagent review was run."
+  },
+  "scope_limits": [
+    "The 65 added BUILD-005 rows were not independently reviewed before this input review.",
+    "No link, private37 ABI, runtime, physical ownership or hardware qualification."
+  ]
+}
