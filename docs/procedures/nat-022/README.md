@@ -432,3 +432,16 @@ no storage and no partition; the only storage write is the RECOVERY image the ow
 `docs/decisions/0012-nat022-loader-diag-trig-hold-single-run-2026-11-10.md` exists (it does not exist
 yet; checked: the driver exits before any device command). Recovery is the earlier path
 (`--restore`, otherwise Download Mode and one NAT-013 session).
+
+### Is the `start.S` M/C check the reason NAT-021 was inconclusive? (data from runs 002 and 003)
+
+The NAT-020 loader's `el1_entry` (`start.S`, after the EL2→EL1 `eret`) halts silently when
+`SCTLR_EL1.M` or `SCTLR_EL1.C` is set (`tbnz x1, #0` / `tbnz x1, #2`), before the log and the
+watchdog. The canary reads the same register (`canary.S`: `mrs x21, sctlr_el1`, taken at EL2 before
+any change) and draws it in the ENTRY frame. In two separate boots (runs 002 and 003, same S-Boot, same
+RECOVERY boot path) the frame decodes as `0x8900`: entry at EL2, current-EL SCTLR M=0 C=0 I=1 and
+`SCTLR_EL1` M=0 C=0 I=1. So on those boots that check would not have halted the loader; the NAT-021
+silence is not explained by it. Limits: the NAT-021 boot itself was not observed, and the canary shows
+the state at its first instruction only, not that the loader's later accesses are safe. The
+loader-diag variants additionally replace that silent halt by a marker-then-halt (`GATE_MC`, 0x02),
+so a run that did stop there would now say so.
