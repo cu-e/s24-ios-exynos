@@ -116,7 +116,9 @@ enum e1s_bw_status {
 	E1S_BW_ERR_BASE = 23,
 	E1S_BW_ERR_SIZE = 24,
 	E1S_BW_ERR_MODE = 25,		/* not full-panel, unscaled, at origin */
-	E1S_BW_ERR_PIXEL = 26		/* not ARGB8888/XRGB8888 */
+	E1S_BW_ERR_PIXEL = 26,		/* not ARGB8888/XRGB8888 */
+	E1S_BW_ERR_BLOCK = 27,		/* block region active (dpp_reg.c:293-303) */
+	E1S_BW_ERR_COVERED = 28		/* colormap window stacked above the frame */
 };
 
 #define E1S_BW_F_DECON_ENABLED		(1u << 0)
@@ -157,7 +159,9 @@ uint32_t e1s_boot_window_read(const struct e1s_dpu_mmio *mmio, struct e1s_boot_w
 /* Check a decoded window against the expected CPU framebuffer contract:
  * DECON0 enabled, translation known to be off (unless allowed), frame start
  * at expect_base, ARGB8888/XRGB8888, full-panel unscaled scanout of
- * width x height from offset (0,0), stride*height inside expect_size. */
+ * width x height from offset (0,0), no active block region, no colormap
+ * window stacked above it (a higher window index is a higher zpos,
+ * exynos_drm_decon.c:709-711), stride*height inside expect_size. */
 uint32_t e1s_boot_window_validate(const struct e1s_boot_window *w, uint64_t expect_base,
     uint64_t expect_size, uint32_t width, uint32_t height, uint32_t options);
 

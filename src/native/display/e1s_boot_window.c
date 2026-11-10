@@ -210,6 +210,17 @@ uint32_t e1s_boot_window_validate(const struct e1s_boot_window *w, uint64_t expe
 	    w->src_width != width || w->src_height != height ||
 	    w->win_x0 || w->win_y0 || w->win_x1 != width - 1u || w->win_y1 != height - 1u)
 		return E1S_BW_ERR_MODE;
+	/* A block region is a plane sub-rectangle programmed with IDMA_BLOCK_EN
+	 * (exynos_drm_dpp.c:432-439, dpp_reg.c:293-303); what the panel shows
+	 * there is not stated in source, so the frame is not known to be shown
+	 * unmodified. */
+	if (w->flags & E1S_BW_F_BLOCK_MODE)
+		return E1S_BW_ERR_BLOCK;
+	/* Windows stack by index (zpos k = k-th reserved window). A solid-colour
+	 * window above the frame may hide it. window <= 15, so the shift is
+	 * defined for uint32_t. */
+	if (w->colormap_mask >> (w->window + 1u))
+		return E1S_BW_ERR_COVERED;
 	if (w->base != expect_base)
 		return E1S_BW_ERR_BASE;
 	if ((w->stride & 3u) || w->stride < (uint64_t)width * 4u)

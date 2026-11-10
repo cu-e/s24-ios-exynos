@@ -31,7 +31,7 @@ NDK_BIN = Path("/home/egor/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuil
 
 # Public API encoding of e1s_boot_window.h (status codes and result flags).
 OK, ARGS, NO_WINDOW, MULTIPLE, UNSTABLE, NO_CHANNEL, LAYOUT, FORMAT, GEOMETRY = 0, 1, 2, 3, 4, 5, 6, 7, 8
-DECON_OFF, TRANSLATED, UNKNOWN_TRANSLATION, BASE, SIZE, MODE, PIXEL = 20, 21, 22, 23, 24, 25, 26
+DECON_OFF, TRANSLATED, UNKNOWN_TRANSLATION, BASE, SIZE, MODE, PIXEL, BLOCK, COVERED = 20, 21, 22, 23, 24, 25, 26, 27, 28
 F_ENABLED, F_RUNNING, F_CMD, F_EXPLICIT, F_BLOCK, F_COLORMAP, F_RSC, F_MMU_CHECKED, F_MMU_ON = (1 << i for i in range(9))
 ALLOW_UNKNOWN_TRANSLATION = 1
 
@@ -184,8 +184,10 @@ class BootWindowTests(unittest.TestCase):
                 r = self.one(sboot(ctrl_extra=M(name)))
                 self.assertEqual(r["status"], LAYOUT)
                 self.assertEqual(r["in_ctrl"], M("IDMA_IMG_FORMAT", 0) | M(name))
+        # Block mode is decoded (the RGB fetch itself is not refused) but the frame is not known to be
+        # shown unmodified inside the block (register_facts: block-from-plane, block-enable).
         r = self.one(sboot(ctrl_extra=M("IDMA_BLOCK_EN")), (FB_BASE, FB_SIZE, W, H, 0))
-        self.assertEqual((r["status"], r["flags"] & F_BLOCK, r["validate"]), (OK, F_BLOCK, OK))
+        self.assertEqual((r["status"], r["flags"] & F_BLOCK, r["validate"]), (OK, F_BLOCK, BLOCK))
 
     # -- window selection -------------------------------------------------------------------------
     def test_window_selection_rules(self):
@@ -200,6 +202,16 @@ class BootWindowTests(unittest.TestCase):
         r = self.one(regs, (FB_BASE, FB_SIZE, W, H, 0))
         self.assertEqual((r["status"], r["window"], r["colormap_mask"], r["flags"] & F_COLORMAP, r["validate"]),
                          (OK, 4, 1, F_COLORMAP, OK))
+        # A colormap window with a higher index is a higher zpos (register_facts: zpos-is-window-order)
+        # and may hide the frame: decoded, but not validated.
+        regs = sboot(2, 6)
+        regs.window(5, 0, 0, 0, W - 1, H - 1, colormap=True)
+        r = self.one(regs, (FB_BASE, FB_SIZE, W, H, 0))
+        self.assertEqual((r["status"], r["window"], r["colormap_mask"], r["validate"]), (OK, 2, 1 << 5, COVERED))
+        regs = sboot(15, 3)
+        regs.window(14, 0, 0, 0, W - 1, H - 1, colormap=True)  # below the top window: allowed
+        r = self.one(regs, (FB_BASE, FB_SIZE, W, H, 0))
+        self.assertEqual((r["status"], r["window"], r["validate"]), (OK, 15, OK))
         regs = regfacts.RegisterFile(M).decon(GLOBAL_ON).window(0, 0, 0, 0, W - 1, H - 1, colormap=True)
         self.assertEqual(self.one(regs)["status"], NO_WINDOW)
         regs = sboot(6, 2)
@@ -248,7 +260,13 @@ class BootWindowTests(unittest.TestCase):
         r = self.one(sboot().decon(0), (FB_BASE, FB_SIZE, W, H, 0))
         self.assertEqual((r["status"], r["flags"] & F_ENABLED, r["validate"]), (OK, 0, DECON_OFF))
         self.assertEqual(self.one(sboot(), (FB_BASE + 0x1000, FB_SIZE, W, H, 0))["validate"], BASE)
-        self.assertEqual(self.one(sboot(), (FB_BASE, FB_SIZE - 4, W, H, 0))["validate"], SIZE)
+        # 1080 * 4 B * 2340 rows = 10108800 B = 0x9A3F80; FB_SIZE 0x9A4000 is that rounded up to a
+        # 4 KiB page, so the exact boundary is the frame size, not FB_SIZE.
+        frame = 1080 * 4 * 2340
+        self.assertEqual(frame, 0x9A3F80)
+        self.assertEqual(self.one(sboot(), (FB_BASE, frame, W, H, 0))["validate"], OK)
+        self.assertEqual(self.one(sboot(), (FB_BASE, frame - 4, W, H, 0))["validate"], SIZE)
+        self.assertEqual(self.one(sboot(), (FB_BASE, FB_SIZE - 4, W, H, 0))["validate"], OK)
         self.assertEqual(self.one(sboot(), (FB_BASE, 0, W, H, 0))["validate"], SIZE)
         self.assertEqual(self.one(sboot(), (FB_BASE, FB_SIZE, 1440, 3120, 0))["validate"], MODE)
         crop = sboot(img_w=W - 8, x=8)
