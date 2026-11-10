@@ -1,0 +1,122 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-10T18:11:38+00:00",
+ "commit": "e5f70cee9bb36cd639c6c1ec856b051881d9c9a9",
+ "summary": "Host only; nothing flashed, run or written on the phone. The payload kernel (artifacts/nat-020/build-003/payload.bin) carries a loader hook: _loader_stub_slot at VA 0xfffffff00743c7f0 (magic XNULDRST, stub PA, checkpoint, PA-VA), five assembly checkpoints in start.s (the fifth is the first point with the MMU on), 23 C checkpoints in arm_init, an early-exception report that hands ESR/ELR/FAR/LR/SP and the 1.5 MiB loader_log to the stub, and loader_return() from the panic paths. Decoded from the real bytes, cross-checked with capstone. Not established: any behaviour on hardware, the loader's slot fill (NAT-030), what the kernel's quiesce calls do on this SoC, whether kprintf reaches loader_log here, and the S-Boot SEC_UPLOAD protocol.",
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-029/analyze_payload.py",
+    "--out",
+    "artifacts/nat-029/payload-analysis.json"
+   ],
+   "exit_code": 0,
+   "log": "artifacts/nat-029/logs/analyze.log"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-029/test_analyze.py"
+   ],
+   "exit_code": 0,
+   "note": "6 tests; capstone re-reads the 5 assembly and 23 C checkpoint sites",
+   "log": "artifacts/nat-029/logs/test-capstone.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-029/test_analyze.py"
+   ],
+   "exit_code": 0,
+   "note": "capstone cases skipped (2)",
+   "log": "artifacts/nat-029/logs/test-system.log"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "214 tests",
+   "log": "artifacts/nat-029/logs/make-check.log"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-029/payload-analysis.json",
+  "artifacts/nat-029/logs/analyze.log",
+  "artifacts/nat-029/logs/test-capstone.log",
+  "artifacts/nat-029/logs/test-system.log",
+  "artifacts/nat-029/logs/make-check.log",
+  "artifacts/nat-020/build-003/payload.bin",
+  "artifacts/nat-020/build-003/kernel.no-storage",
+  "artifacts/nat-020/build-003/report.json",
+  "docs/procedures/nat-029/analyze_payload.py",
+  "docs/procedures/nat-029/test_analyze.py",
+  "docs/procedures/nat-029/README.md"
+ ],
+ "sha256": {
+  "artifacts/nat-029/payload-analysis.json": "a2578eadd81a13c55928cdd8c5269e9b9158b62981ecbed2306822fb1c57c137",
+  "artifacts/nat-029/logs/analyze.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-029/logs/test-capstone.log": "054d81eea3c3d0defb4223b2eaf7777b38909ee19cf0655c10e2d84fc7c60ea5",
+  "artifacts/nat-029/logs/test-system.log": "a20c34c9bb8c15f9d985843534e3674dc56b99385e31b9a056046e89f309f41e",
+  "artifacts/nat-029/logs/make-check.log": "80fb7f8f2290a8f2e5c25b21244e476a64a1159de75eed14264a9c7e268e1984",
+  "artifacts/nat-020/build-003/payload.bin": "071bc632f7af0a6aa9b11a679c1d5a951ee80943be11669326949d0725caf544",
+  "artifacts/nat-020/build-003/kernel.no-storage": "7ceda59bdbedba4d32b80c319e35ec51fe766cf61daa648f80a0c42bbca3e407",
+  "artifacts/nat-020/build-003/report.json": "b2a46096ec99c94e56b111bea9f3ff4d1c496d3026a3c8420e6c4263ef66d022",
+  "docs/procedures/nat-029/analyze_payload.py": "2fe190780b14628b4d3fa258104d83251a060e53a1bd9697f320de05c9857280",
+  "docs/procedures/nat-029/test_analyze.py": "41f9fdf2407c90899696b4447d16c7763a2d7c588a3f5af4c5e80d196013baf8",
+  "docs/procedures/nat-029/README.md": "e7c2693ef70e5b7969195a0d2cf5e1d88e50eca9f6193a1e0591510d07791470"
+ },
+ "findings": {
+  "slot_va": "0xfffffff00743c7f0",
+  "slot_pa_at_window_base_0x9de400000": "0x9e183c7f0",
+  "asm_checkpoints": {
+   "1": "0xfffffff00743e068",
+   "2": "0xfffffff00743e0c4",
+   "3": "0xfffffff00743e304",
+   "4": "0xfffffff00743e408",
+   "5": "0xfffffff00743e470"
+  },
+  "c_checkpoint_numbers": [
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   40,
+   41,
+   42,
+   43,
+   44
+  ],
+  "early_exception_handler_va": "0xfffffff00743c788",
+  "loader_log_va": "0xfffffff007b90a00",
+  "loader_log_bytes": 1572864
+ },
+ "not_established": [
+  "Any behaviour on the S24: no checkpoint has run on hardware.",
+  "Whether the kernel's start code works with the loader's boot_args and window above 4 GiB.",
+  "What gic_v3_irq_quiesce and the redwood_*_quiesce calls touch on an S5E9945 when loader_return runs.",
+  "Whether kprintf output reaches loader_log on this SoC.",
+  "The S-Boot SEC_UPLOAD (04e8:685d) protocol and whether RAM survives the watchdog reset."
+ ]
+}

@@ -1,0 +1,234 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-10T19:14:30+00:00",
+ "commit": "e5f70cee9bb36cd639c6c1ec856b051881d9c9a9",
+ "tree_state": "files uncommitted when recorded; committed afterwards together with this record",
+ "summary": "Host only; nothing was flashed, run or written on the phone. An instruction-level interpreter (capstone decode, own execution, stage-1 table walker) runs the real payload kernel bytes from the entry with the loader's boot_args layout and the window measured in native run 007 (base 0x9de400000, size 0x20000000). With an empty XNULDRST slot it falls through the five assembly checkpoints, builds the bootstrap tables, enables the MMU and returns into arm_init (8202 instructions). With the slot filled it stops at each of the five assembly checkpoints with x0=x1=0, x2=2, x3=N, MMU off, and a resuming-stub model chains 1,2,3,4,5 and reaches arm_init in the same state as the uninterrupted run. A C stop at checkpoint 10 faults (NULL PE_state.bootArgs); the first safe C checkpoint is 11. The interpreter itself is cross-checked against Unicorn. Model, not hardware: no caches, TLB, devices, SIMD, timing or exception vectoring.",
+ "commands": [
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-030/test_kstart_sim.py"
+   ],
+   "exit_code": 0,
+   "note": "all 36 tests with capstone 5.0.7 and unicorn 2.1.4 (scratch virtualenv outside the repository)",
+   "log": "artifacts/nat-030/logs/test-capstone-unicorn.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-030/test_kstart_sim.py"
+   ],
+   "exit_code": 0,
+   "note": "no capstone: every test skipped",
+   "log": "artifacts/nat-030/logs/test-system.log"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-030/kstart_sim.py"
+   ],
+   "exit_code": 0,
+   "note": "default run: entry to arm_init, window 0x9de400000/0x20000000, 0x200a = 8202 steps",
+   "log": "artifacts/nat-030/logs/cli-default-run.log"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "repository checks",
+   "log": "artifacts/nat-030/logs/make-check.log"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-030/fuzz_seeds.py",
+    "31",
+    "12000"
+   ],
+   "exit_code": 0,
+   "note": "fuzz seed 31: 12000 words, 4 trials each, vs Unicorn",
+   "log": "artifacts/nat-030/logs/fuzz-seed-31.txt"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-030/fuzz_seeds.py",
+    "32",
+    "12000"
+   ],
+   "exit_code": 0,
+   "note": "fuzz seed 32: 12000 words, 4 trials each, vs Unicorn",
+   "log": "artifacts/nat-030/logs/fuzz-seed-32.txt"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-030/fuzz_seeds.py",
+    "33",
+    "12000"
+   ],
+   "exit_code": 0,
+   "note": "fuzz seed 33: 12000 words, 4 trials each, vs Unicorn",
+   "log": "artifacts/nat-030/logs/fuzz-seed-33.txt"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-030/fuzz_seeds.py",
+    "34",
+    "12000"
+   ],
+   "exit_code": 0,
+   "note": "fuzz seed 34: 12000 words, 4 trials each, vs Unicorn",
+   "log": "artifacts/nat-030/logs/fuzz-seed-34.txt"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "<scratchpad>/coverage.py"
+   ],
+   "exit_code": 0,
+   "note": "per-class and uniform-fuzz coverage of the test suite's seeds (compared / skipped / unsupported counts)",
+   "log": "artifacts/nat-030/logs/coverage.json"
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-030/kstart_sim.py",
+  "docs/procedures/nat-030/test_kstart_sim.py",
+  "docs/procedures/nat-030/fuzz_seeds.py",
+  "docs/procedures/nat-030/README.md",
+  "artifacts/nat-020/build-003/payload.bin",
+  "artifacts/nat-030/logs/test-capstone-unicorn.log",
+  "artifacts/nat-030/logs/test-system.log",
+  "artifacts/nat-030/logs/cli-default-run.log",
+  "artifacts/nat-030/logs/make-check.log",
+  "artifacts/nat-030/logs/commands.json",
+  "artifacts/nat-030/logs/coverage.json",
+  "artifacts/nat-030/logs/fuzz-seed-31.txt",
+  "artifacts/nat-030/logs/fuzz-seed-32.txt",
+  "artifacts/nat-030/logs/fuzz-seed-33.txt",
+  "artifacts/nat-030/logs/fuzz-seed-34.txt"
+ ],
+ "sha256": {
+  "docs/procedures/nat-030/kstart_sim.py": "5e26a40143a92c9178eb4e91fa44e694a6ccc7b09c9797669d683f96867a88a9",
+  "docs/procedures/nat-030/test_kstart_sim.py": "b2925ba3c88c0e9d72cccb92f91d0df227866480c4187a285a90e49f33af559a",
+  "docs/procedures/nat-030/fuzz_seeds.py": "521bbee70129c0acb3e36c91ba4ac47070226e077ed7cb5cfe5e50638c6af8da",
+  "docs/procedures/nat-030/README.md": "268c5bc0355572bb71a94827d7d22a5407967606665a948e60301d888d23ef69",
+  "artifacts/nat-020/build-003/payload.bin": "071bc632f7af0a6aa9b11a679c1d5a951ee80943be11669326949d0725caf544",
+  "artifacts/nat-030/logs/test-capstone-unicorn.log": "7659c63196f4ffb8672ab1c70acf44567c5ecf3bb70cd903c6e4703223008c3e",
+  "artifacts/nat-030/logs/test-system.log": "6515d0e4f8da57849a476f082f60b93c1fd363b8e8240a5a5dc9eb3e7a50fd32",
+  "artifacts/nat-030/logs/cli-default-run.log": "ca6c1076e6d46728e2d0e3bdc7a8fc788c20eb8b14a69613ef554308c374d3b2",
+  "artifacts/nat-030/logs/make-check.log": "87f0838eb464888fec3840df3068212a1517330d0861c4dcf44b2dab3665e056",
+  "artifacts/nat-030/logs/commands.json": "8b1fea6a48a8c0600c38c43a4476442a69cdedff780738b99c40cda8a78d7e6b",
+  "artifacts/nat-030/logs/coverage.json": "532f5fe5086a7efd47278d1c44d01d16258911e8f54f260dadd9cb6b41986a86",
+  "artifacts/nat-030/logs/fuzz-seed-31.txt": "182a24d6756e78eef9ac749a031ca9c869a9c362594c7347d59be11dd725431d",
+  "artifacts/nat-030/logs/fuzz-seed-32.txt": "6499853ea75aa5a71b1b786f1b9438d01c3091fcf9a191f5050ac12a474ad006",
+  "artifacts/nat-030/logs/fuzz-seed-33.txt": "2ba74d537789d198e9228584a5e5cffc6d1d7dffd0b79a91515f74eae2fd6c87",
+  "artifacts/nat-030/logs/fuzz-seed-34.txt": "282d52e50304d993dd68232d7ff03f53a095644173c6830b8677dc18806b21dd"
+ },
+ "findings": {
+  "window": {
+   "base": "0x9de400000",
+   "size": "0x20000000",
+   "ttbr0": "0x9e15ae000",
+   "ttbr1": "0x9e15af000"
+  },
+  "steps_entry_to_arm_init": 8202,
+  "arm_init_state": {
+   "x0": "0xfffffff008978000",
+   "tcr_el1": "0x22a51a251a",
+   "sctlr_el1": "0x3454593d",
+   "mair_el1": "0x0c08044f00bb44ff",
+   "vbar_el1": "0xfffffff007437000"
+  },
+  "asm_checkpoint_stop_steps": [
+   19,
+   32,
+   8129,
+   8184,
+   8200
+  ],
+  "asm_checkpoint_site_continuation": "site + 15 instructions (60 bytes); x0..x3 and x9..x11 are written before being read after every site (taint tracking)",
+  "resume_at_checkpoint_5": "needs dc civac of the slot line before restoring SCTLR_EL1.M (requirement from reading; the model has no caches) and code reachable through the kernel TTBR0 identity map (window only)",
+  "c_checkpoint_10_hazard": "stop at C checkpoint 10 reaches loader_jump -> PE_parse_boot_argn with PE_state.bootArgs == NULL: translation fault at va 0x6c; checkpoint 10 precedes PE_init_platform. First safe C checkpoint is 11.",
+  "interpreter_vs_unicorn": {
+   "executed_words": "208 distinct words, 34 mnemonics, 20 skipped (system/barrier), 8 random states each: no mismatch",
+   "full_run_to_mmu_enable": "after the same instruction count 31 registers, SP, NZCV and the whole 512 MiB window identical to Unicorn",
+   "uniform_fuzz_test_seed": {
+    "words": 5000,
+    "compared": 2194,
+    "skipped": 2728,
+    "skipped_undecodable": 2589,
+    "unimplemented": 78,
+    "distinct_mnemonics": 72,
+    "ccmp_words": 0,
+    "ccmn_words": 3,
+    "csel_words": 0
+   },
+   "targeted_classes": "8 classes x 160 words by construction (ccmp/ccmn reg+imm, csel family, b.cond, cbz/cbnz, tbz/tbnz, udiv/sdiv, madd/msub, 64-bit long multiplies): 0 mismatches",
+   "extra_seeds": {
+    "31": {
+     "compared": 5356,
+     "skipped": 6395,
+     "unimplemented": 249
+    },
+    "32": {
+     "compared": 5362,
+     "skipped": 6413,
+     "unimplemented": 225
+    },
+    "33": {
+     "compared": 5344,
+     "skipped": 6445,
+     "unimplemented": 211
+    },
+    "34": {
+     "compared": 5461,
+     "skipped": 6329,
+     "unimplemented": 210
+    }
+   },
+   "extra_seeds_mismatches": 0,
+   "extra_seeds_unicorn_faults": 0,
+   "extra_seeds_reproduced_in_repo": "the four runs were repeated from fuzz_seeds.py inside the repository and gave identical counts to the earlier scratchpad runs",
+   "bugs_found_by_fuzz_and_fixed": [
+    "asr/ror shifted-register operands",
+    "extended-register operands uxtb..sxtx",
+    "negs dropping the shift operand",
+    "nv condition",
+    "sxtx/uxtx register-offset shift"
+   ]
+  },
+  "mutation_checks": {
+   "ccmp_nzcv_bit_order_swapped": {
+    "executed_word_set": "not caught (the only executed ccmp has nzcv 0)",
+    "uniform_fuzz": "not caught (no ccmp word drawn with the test seed)",
+    "targeted_class_test": "caught: mismatch on a generated ccmn x11, x27, #5, gt",
+    "log": null,
+    "note": "run in the session that wrote this record; the output was read in the session and not saved as a log file"
+   },
+   "csel_lsr_orr": "each caught by the executed-word comparison; run in an earlier session, no saved log"
+  }
+ },
+ "not_established": [
+  "Any hardware behaviour: caches, TLB, memory attributes of the window, device-memory alignment on the S24, interrupts, timing.",
+  "The window above 4 GiB on the SoC real address map (the model shows only that the table arithmetic is consistent).",
+  "Anything past C checkpoint 10: the interpreter stops at the first SIMD instruction (movi v0.16b at _cpu_data_init+0x10); PE_init_platform, gic_v3_irq_quiesce (MMIO) and the rest of arm_init are known only from disassembly.",
+  "The C-path return (MMU and caches on at the stub, one-block 1:1 mapping built by loader_jump) and any resume after it (not resumable).",
+  "The S-Boot upload-mode protocol, RAM retention across the watchdog reset, any transport for log bytes.",
+  "The interpreter does not implement every base-ISA word (210-250 of ~12000 fuzz words are counted as unimplemented); every word on the kernel path from entry to arm_init is implemented and compared."
+ ]
+}

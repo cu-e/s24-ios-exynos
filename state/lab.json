@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T17:04:59+00:00",
+  "updated_at": "2026-11-10T19:15:11+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -12696,6 +12696,107 @@
       "evidence": "docs/procedures/nat-022/evidence-nat028.json",
       "evidence_sha256": "1079a7831e60909a15098c624b6b950509af2c111495315faef07a42fede3d23",
       "finished_at": "2026-11-10T17:04:59+00:00"
+    },
+    {
+      "id": "NAT-029",
+      "title": "Derive the payload kernel's return-to-loader contract (XNULDRST slot, asm and C checkpoints, loader_log, early-exception report) from the real payload and decide what a log transport can use",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 98,
+      "depends_on": [
+        "NAT-028"
+      ],
+      "paths": [
+        "docs/procedures/nat-029",
+        "artifacts/nat-029"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "The slot (magic, stub PA, checkpoint, PA minus VA), every assembly checkpoint in start.s and every C loader_checkpoint(n) call site are located in the real payload.bin (artifacts/nat-020/build-003/payload.bin) by decoding it, not by trusting source or the loader's log; each is listed with its VA, the PA it has for the measured window base 0x9de400000, and the register convention at the return (x0..x3 or x0..x7).",
+        "The upstream source (references/s24-port/xnu/hackios, loader_return.c and the redwood.patch hunks) is compared with the payload: the facts that hold in the payload (slot offset, reasons 0/1/2, loader_log size, loader_live magic, kernel-side requirements for the stub such as TCR T0SZ range) are separated from facts that are only in the source.",
+        "The result states what a stub in our loader must do on return (MMU and cache state, stack, which registers carry what) and which boot-args and ADT facts the payload cmdline actually contains (loader_return_after and the like), and names the transports that this contract makes possible and the ones it does not (video via the loader, S-Boot upload mode, USB gadget, storage write), each with what is unknown and the check that would resolve it.",
+        "Nothing is flashed, run or written on the phone. All claims are labelled source-review or host-test."
+      ],
+      "steps": [
+        "Decode the slot and every checkpoint site from payload.bin",
+        "Compare with the upstream source and the payload's boot-args",
+        "Write the note with the register and cache contract and the transport options"
+      ],
+      "status": "done",
+      "owner": "claude-nat029-20261110-krnret",
+      "started_at": "2026-11-10T17:49:06+00:00",
+      "last_heartbeat": "2026-11-10T17:49:06+00:00",
+      "updated_at": "2026-11-10T18:11:51+00:00",
+      "evidence": "docs/procedures/nat-029/evidence.json",
+      "evidence_sha256": "aabfd0b4030597615c3d9c1cddf5e36492c67f429e3c59e908be685f9b38ebb7",
+      "finished_at": "2026-11-10T18:11:51+00:00"
+    },
+    {
+      "id": "NAT-030",
+      "status": "done",
+      "owner": "claude-nat029-20261110-krnret",
+      "title": "Simulate the payload kernel's bootstrap on the host: run start_first_cpu from the real payload bytes under a decoder-driven interpreter with an MMU walker, to checkpoints 1-5 and the return into arm_init",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 98,
+      "depends_on": [
+        "NAT-029"
+      ],
+      "paths": [
+        "docs/procedures/nat-030",
+        "artifacts/nat-030"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "An interpreter that executes the real payload bytes (decoded with capstone, executed by independent code) runs the kernel's start_first_cpu from the entry with the loader's real boot_args layout and the measured window (physBase 0x9de400000, kernel virt base 0xfffffff004000000) and reaches, in order, the five assembly checkpoints when the XNULDRST slot holds stub PA, checkpoint N and PA-VA; each stop presents x0=0, x1=0, x2=2, x3=N and a cleared SCTLR_EL1.M.",
+        "With the slot left at zero the same run falls through all five sites, builds the bootstrap tables, enables the MMU (SCTLR_EL1 write) and returns through its own `ret` to the virtual address of arm_init; every instruction fetch and data access after the MMU write is translated by a table walker that reads the tables the kernel itself wrote (TTBR0 V=P and TTBR1 KVA), and the translation of the kernel's own PCs and of arm_init matches window base + (VA - virt base). A deliberately wrong boot_args (wrong physBase or virtBase) is detected by the same checks, so they can fail.",
+        "The run states what the interpreter does not model (caches, the full ISA, timing, system-register side effects beyond the listed ones) and labels every result host-test/simulation, not hardware evidence. Nothing is run on the phone."
+      ],
+      "steps": [
+        "Decode the start code range and list the instruction forms it uses",
+        "Write the interpreter and the table walker, run the real bytes",
+        "Add negative controls and document the model limits"
+      ],
+      "started_at": "2026-11-10T18:13:39+00:00",
+      "last_heartbeat": "2026-11-10T18:13:39+00:00",
+      "updated_at": "2026-11-10T19:15:11+00:00",
+      "evidence": "docs/procedures/nat-030/evidence.json",
+      "evidence_sha256": "d482ca96ac28ba406d350c78e98fab7a8796bb030b9e38a1c1907f8a9f0a2580",
+      "finished_at": "2026-11-10T19:15:11+00:00"
+    },
+    {
+      "id": "NAT-031",
+      "status": "pending",
+      "owner": null,
+      "title": "Prepare the NAT-022 loader-diag-xnu-ckpt image: fill the kernel's XNULDRST slot, jump to the real entry, a return stub that reports checkpoints and exceptions, host-tested and held for an image-specific owner decision",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 98,
+      "depends_on": [
+        "NAT-030"
+      ],
+      "paths": [
+        "docs/procedures/nat-022",
+        "artifacts/nat-022",
+        "artifacts/nat-031"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "A deterministic hash-anchored loader variant fills slot [1]=stub PA, [2]=checkpoint, [3]=PA-VA (found by scanning the copied kernel segments for the magic, refusing unless exactly one 8-byte-aligned match followed by three zero words), keeps the kernel's own entry word (no entry stub), cleans the window after the fill and jumps to the real entry; every earlier image stays byte-identical.",
+        "The return stub handles reason 2 (assembly and C checkpoint) and reason 1 (early exception) and a held final stop: clears SCTLR_EL1 M/C, ic iallu, sets its own stack, draws new marker frames carrying reason, code, ESR/ELR/FAR where present and the log length, and never touches memory other than its own stack and the framebuffer/DECON registers already granted. Host checks: decoder-based interpretation of the stub, independent frame decode, alignment scan, reproducible build, package, gated session driver.",
+        "An image-specific decision request (SHA-256s, device access, what runs and what does not, risks, recovery, Not granted) is put to the owner. Nothing is flashed, run on the phone or jumped to before that decision."
+      ],
+      "steps": [
+        "Add the slot fill, stub and marker kinds behind new macros",
+        "Host-check, build twice, package, gate the driver",
+        "Document and put the decision question to the owner"
+      ]
     }
   ],
   "experiments": [
@@ -56261,6 +56362,101 @@
           "progress_note": "Host work complete and committed (606528b); evidence docs/procedures/nat-022/evidence-nat028.json. Putting the image-specific decision request for 0015 to the owner; no jump or device action before it.",
           "next_step": "After the owner's answer: record decision 0015 only if accepted, then mark NAT-028 done and follow the decision-0014 run sequence",
           "last_heartbeat": "2026-11-10T17:01:30+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T17:48:38+00:00",
+      "action": "task.add:NAT-029",
+      "owner": "claude-nat029-20261110-krnret",
+      "tasks": [
+        {
+          "id": "NAT-029",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T17:49:06+00:00",
+      "action": "task.claim:NAT-029",
+      "owner": "claude-nat029-20261110-krnret",
+      "tasks": [
+        {
+          "id": "NAT-029",
+          "status": "in_progress",
+          "owner": "claude-nat029-20261110-krnret",
+          "priority": 98,
+          "last_heartbeat": "2026-11-10T17:49:06+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T18:11:51+00:00",
+      "action": "task.done:NAT-029",
+      "owner": "claude-nat029-20261110-krnret",
+      "tasks": [
+        {
+          "id": "NAT-029",
+          "status": "done",
+          "owner": "claude-nat029-20261110-krnret",
+          "priority": 98,
+          "last_heartbeat": "2026-11-10T17:49:06+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T18:12:59+00:00",
+      "action": "task.add:NAT-030",
+      "owner": "claude-nat029-20261110-krnret",
+      "tasks": [
+        {
+          "id": "NAT-030",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T18:13:19+00:00",
+      "action": "task.add:NAT-031",
+      "owner": "claude-nat029-20261110-krnret",
+      "tasks": [
+        {
+          "id": "NAT-031",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T18:13:39+00:00",
+      "action": "task.claim:NAT-030",
+      "owner": "claude-nat029-20261110-krnret",
+      "tasks": [
+        {
+          "id": "NAT-030",
+          "status": "in_progress",
+          "owner": "claude-nat029-20261110-krnret",
+          "priority": 98,
+          "last_heartbeat": "2026-11-10T18:13:39+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T19:15:11+00:00",
+      "action": "task.done:NAT-030",
+      "owner": "claude-nat029-20261110-krnret",
+      "tasks": [
+        {
+          "id": "NAT-030",
+          "status": "done",
+          "owner": "claude-nat029-20261110-krnret",
+          "priority": 98,
+          "last_heartbeat": "2026-11-10T18:13:39+00:00"
         }
       ]
     }
