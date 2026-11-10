@@ -1,11 +1,13 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T04:12:31+00:00",
-  "ledger_updated_at": "2026-11-10T04:12:29+00:00",
-  "registry_sha256": "3b5a55e06470d7c0e73a1c85432cc58642d8937aec77601c0aab5f5b5151ffdd",
+  "generated_at": "2026-11-10T04:48:03+00:00",
+  "ledger_updated_at": "2026-11-10T04:47:57+00:00",
+  "registry_sha256": "7ea1ec7c69230c11339a6aa8dce01fd968135c2fae852658c6104260c4a2089d",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
-    "ready": [],
+    "ready": [
+      "VM-003"
+    ],
     "in_progress": [
       "INT-002",
       "INT-003",
@@ -18,10 +20,14 @@
       "STR-024",
       "VM-014",
       "VM-019",
+      "KRN-041",
+      "VM-054",
       "VM-023",
       "VM-031",
       "VM-032",
       "VM-033",
+      "VM-053",
+      "GPU-016",
       "GPU-012"
     ],
     "blocked": [
@@ -32,8 +38,6 @@
       "CELL-010",
       "ESIM-004",
       "CELL-009",
-      "VM-049",
-      "VM-002",
       "NAT-001"
     ],
     "waiting": [
@@ -55,8 +59,7 @@
       "GPU-003",
       "GPU-005",
       "DRV-002",
-      "NAT-002",
-      "VM-003"
+      "NAT-002"
     ],
     "gated": [
       "NAT-003",
@@ -140,6 +143,7 @@
       "STR-039",
       "STR-040",
       "STR-041",
+      "INT-004",
       "KRN-010",
       "KRN-012",
       "KRN-013",
@@ -247,6 +251,8 @@
       "VM-029",
       "VM-030",
       "STR-031",
+      "VM-051",
+      "VM-052",
       "AUD-003",
       "CAM-003",
       "PWR-003",
@@ -263,8 +269,10 @@
       "VM-005",
       "RES-010",
       "DEV-003",
+      "VM-049",
       "VM-050",
       "GPU-014",
+      "VM-002",
       "UI-001",
       "GPU-006",
       "NET-001",
@@ -3112,6 +3120,46 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/STR-041.md"
+    },
+    {
+      "id": "INT-004",
+      "title": "Merge verified 2026-11-10 branches into main and check project state consistency",
+      "status": "done",
+      "owner": "claude-integration-20261110-i1",
+      "priority": 100,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "LAB-001"
+      ],
+      "paths": [
+        "docs/integration/2026-11-10"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Inventory every local branch against main: ancestry, patch-equivalence, simulated merge result, the registry task(s) it belongs to, their status and whether the recorded evidence is pass with a matching SHA256.",
+        "Merge with --no-ff, in dependency order, on a separate integration/2026-11-10 worktree branch, only branches whose task is done with pass evidence bound to the merged commit. Resolve generated/registry files to main's version and never commit a worktree registry copy. Scan each merged diff for IMEI, MAC, device-serial patterns and large binaries.",
+        "Run the relevant per-branch checks and make check on the integration branch, then fast-forward main only when green; rerun make check and make status in the primary checkout. Never force-push, reset main or use git stash.",
+        "Record merged and unmerged branches with reasons, every non-trivial conflict resolution, registry inconsistencies found, commands with exit codes and resulting main HEAD in docs/integration/2026-11-10/README.md and evidence.json."
+      ],
+      "steps": [
+        "Inventory branches and classify them by task status and merge state.",
+        "Merge candidates on integration/2026-11-10 and run checks after each coherent batch.",
+        "Fast-forward main, rerun checks, write README and evidence, complete the task."
+      ],
+      "started_at": "2026-11-10T04:28:09+00:00",
+      "last_heartbeat": "2026-11-10T04:47:40+00:00",
+      "updated_at": "2026-11-10T04:47:51+00:00",
+      "progress_note": "Correction to the previous note: 19 merge commits (not 21). main e34c666 -> 1e36ed7 (merges) -> e99a69d (README, branches.json, evidence). make check exit 0 after both fast-forwards.",
+      "next_step": "Complete INT-004 with docs/integration/2026-11-10/evidence.json",
+      "branch": "integration/2026-11-10",
+      "worktree": "worktrees/integration-20261110",
+      "evidence": "docs/integration/2026-11-10/evidence.json",
+      "evidence_sha256": "9f9fe90852d3fb64ced3bd0182f794a31dbbf554f8c603978733310802dd61af",
+      "finished_at": "2026-11-10T04:47:51+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/INT-004.md"
     },
     {
       "id": "KRN-008",
@@ -7624,6 +7672,87 @@
       "card_path": "planning/tasks/STR-026.md"
     },
     {
+      "id": "KRN-041",
+      "title": "Per-symbol dossier for the 37 missing kernel exports and source-backed fixes for the no-Apple-kext profile",
+      "status": "in_progress",
+      "owner": "claude-export-dossier-20261110-x41",
+      "priority": 90,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "KRN-040",
+        "STR-041"
+      ],
+      "paths": [
+        "research/notes/kernel/KRN-041-missing-exports.md",
+        "docs/procedures/krn-041"
+      ],
+      "acceptance": [
+        "A 37-row table: symbol, export file and line, signature from source (mangled and demangled), consumers with file:line evidence, required implementation (real, error stub, or removal from the export list), ABI constraints, available source (file:line or none public), impact on early boot to PID 1 for a QEMU/KVM guest kernel and for the native E1S kernel, and what HakiOS and the S24 port do.",
+        "Build the genuine kextsymboltool from the pinned apple-xnu c54f35ca source on the host and run the two check_all_exports passes with the argument structure of config/Makefile against the STR-041 kernel; compare with KRN-040.",
+        "Advance only source-backed changes in owned paths: stubs only where a public declaration and a derivable unsupported semantic exist; an opt-in export profile only for names with no public declaration and zero references in every link input and in project/HakiOS/S24-port driver sources. A host check must show both passes exit 0 for the chosen configuration, the profile differs from the genuine lists by exactly the justified names, and controls fail as expected. KRN-026 and its files are not modified. No boot, QEMU or phone claim."
+      ],
+      "sources": [
+        "apple-xnu",
+        "s24-port",
+        "scion-avf",
+        "hakios-e1s-tools"
+      ],
+      "steps": [
+        "Collect consumer, provider and source evidence for each name.",
+        "Build and run the genuine kextsymboltool; scan all link inputs for references.",
+        "Implement the stubs and the profile, relink a copy of the STR-041 kernel with the stub object, run the checks and controls, record evidence."
+      ],
+      "started_at": "2026-11-10T04:31:07+00:00",
+      "last_heartbeat": "2026-11-10T04:31:07+00:00",
+      "updated_at": "2026-11-10T04:31:07+00:00",
+      "branch": "team/krn-041-missing-exports-20261110",
+      "worktree": "worktrees/krn-041-missing-exports-20261110",
+      "column": "in_progress",
+      "reasons": [],
+      "card_path": "planning/tasks/KRN-041.md",
+      "report_health": "recent"
+    },
+    {
+      "id": "VM-054",
+      "title": "Boot the source-built XNU guest to PID 1 on the S24 under s24vmm",
+      "status": "in_progress",
+      "owner": "claude-xnu-s24-20261110-v54",
+      "priority": 90,
+      "scope": "android-app",
+      "evidence_kind": "android-userland",
+      "depends_on": [
+        "VM-002",
+        "VM-052"
+      ],
+      "paths": [
+        "docs/procedures/vm-054",
+        "research/notes/virtualization/VM-054-xnu-guest-s24.md"
+      ],
+      "acceptance": [
+        "Under decision 0002, as root from tmpfs: s24vmm runs VM-002's avfboot Image and payload (xnu-8796.121.2 DEVELOPMENT BCM2837 + owned PID 1) on the S24, the console shows the Darwin banner and the PID 1 line, and the guest ends by PSCI SYSTEM_OFF within the bound.",
+        "Record console, boot time, exit cause, VMM statistics, uptime before/after and the removal of the RAM directory.",
+        "Call it what it is: an XNU guest under Android KVM on the S24, not native XNU on Exynos hardware and not Apple's launchd."
+      ],
+      "sources": [
+        "scion-avf"
+      ],
+      "steps": [
+        "Deliver VMM, Image and payload to tmpfs",
+        "Run with 1 vCPU and a bounded timeout",
+        "Record and clean up"
+      ],
+      "started_at": "2026-11-10T04:47:57+00:00",
+      "last_heartbeat": "2026-11-10T04:47:57+00:00",
+      "updated_at": "2026-11-10T04:47:57+00:00",
+      "branch": "team/vm-054-xnu-guest-s24-20261110",
+      "worktree": "worktrees/vm-054-xnu-guest-s24-20261110",
+      "column": "in_progress",
+      "reasons": [],
+      "card_path": "planning/tasks/VM-054.md",
+      "report_health": "recent"
+    },
+    {
       "id": "KRN-033",
       "title": "Implement source-qualified AES-GCM streaming modes and managed nonce helpers",
       "priority": 89,
@@ -8475,6 +8604,89 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/STR-031.md"
+    },
+    {
+      "id": "VM-051",
+      "title": "Run a minimal bounded KVM guest on the S24 as root",
+      "status": "done",
+      "owner": "claude-kvm-guest-20261110-k51",
+      "priority": 85,
+      "scope": "android-app",
+      "evidence_kind": "android-userland",
+      "depends_on": [
+        "VM-049"
+      ],
+      "paths": [
+        "docs/procedures/vm-051",
+        "research/notes/virtualization/VM-051-minimal-guest.md"
+      ],
+      "acceptance": [
+        "Under decision 0002, from tmpfs through su: KVM_CREATE_VM, a vGICv3 device, one vCPU, a 2 MiB memslot and a few instructions of guest code run to a PSCI SYSTEM_OFF exit, bounded by an in-process alarm and an outer timeout.",
+        "Record guest-visible MMIO output, the PSCI version, the guest MIDR/CurrentEL/CNTFRQ, the cost of an MMIO exit and a guest-versus-native compute loop on a little and a big core.",
+        "Remove the RAM directory, confirm its absence and confirm no reboot via uptime.",
+        "Do not claim that an XNU guest runs."
+      ],
+      "sources": [
+        "avf-docs"
+      ],
+      "steps": [
+        "Write a static NDK helper with embedded guest code.",
+        "Run it pinned to a little and a big CPU.",
+        "Record results and remove the helper."
+      ],
+      "started_at": "2026-11-10T04:25:05+00:00",
+      "last_heartbeat": "2026-11-10T04:25:05+00:00",
+      "updated_at": "2026-11-10T04:29:08+00:00",
+      "branch": "team/vm-051-minimal-guest-20261110",
+      "worktree": "worktrees/vm-051-minimal-guest-20261110",
+      "evidence": "worktrees/vm-051-minimal-guest-20261110/docs/procedures/vm-051/evidence.json",
+      "evidence_sha256": "a1a465d259935223566f79dfd215e01f208918e7b39f3c28e395dd90666f01ae",
+      "finished_at": "2026-11-10T04:29:08+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/VM-051.md"
+    },
+    {
+      "id": "VM-052",
+      "title": "Implement a root-run KVM VMM for avfboot guests on the S24 and boot avfboot to its first console line",
+      "status": "done",
+      "owner": "claude-s24vmm-20261110-v52",
+      "priority": 85,
+      "scope": "android-app",
+      "evidence_kind": "android-userland",
+      "depends_on": [
+        "VM-051"
+      ],
+      "paths": [
+        "src/vmm",
+        "docs/procedures/vm-052",
+        "research/notes/virtualization/VM-052-s24vmm.md"
+      ],
+      "acceptance": [
+        "A static NDK VMM (no external libraries) lays out RAM, Image, initrd and an FDT the way crosvm does for avfboot, with an in-kernel vGICv3, PSCI, an ns16550a console at 0x3f8 and a PL031 RTC; host unit tests cover the FDT writer and device models.",
+        "On the S24 as root from tmpfs, under decision 0002: avfboot (built from the pinned scion-avf source) prints its banner on the VMM console, and the run ends by PSCI or by the VMM's own bounded timeout, with the VMM process gone afterwards.",
+        "Record console output, exit cause, uptime before/after and the removal of the RAM directory. Do not claim an XNU boot unless the console shows one."
+      ],
+      "sources": [
+        "scion-avf",
+        "avf-docs"
+      ],
+      "steps": [
+        "Write the VMM, FDT writer and device models with host tests.",
+        "Build avfboot from the pinned source.",
+        "Run on the S24 with a bounded timeout and record the console."
+      ],
+      "started_at": "2026-11-10T04:30:45+00:00",
+      "last_heartbeat": "2026-11-10T04:30:45+00:00",
+      "updated_at": "2026-11-10T04:39:20+00:00",
+      "branch": "team/vm-052-s24vmm-20261110",
+      "worktree": "worktrees/vm-052-s24vmm-20261110",
+      "evidence": "worktrees/vm-052-s24vmm-20261110/docs/procedures/vm-052/evidence.json",
+      "evidence_sha256": "fbedc9b1db710da5463bdf7ab6e4c2094bb3b32c1b1603564aec57199f3a4119",
+      "finished_at": "2026-11-10T04:39:20+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/VM-052.md"
     },
     {
       "id": "AUD-003",
@@ -9343,7 +9555,7 @@
       "card_path": "planning/tasks/DEV-003.md"
     },
     {
-      "status": "blocked",
+      "status": "done",
       "owner": "claude-root-kvm-20261110-k49",
       "priority": 80,
       "scope": "android-readonly",
@@ -9371,17 +9583,16 @@
         "Record results and remove the probe."
       ],
       "started_at": "2026-11-09T21:43:33+00:00",
-      "last_heartbeat": "2026-11-09T21:47:53+00:00",
-      "updated_at": "2026-11-09T21:47:53+00:00",
+      "last_heartbeat": "2026-11-10T04:22:30+00:00",
+      "updated_at": "2026-11-10T04:23:56+00:00",
       "branch": "team/vm-049-root-kvm-20261110",
       "worktree": "worktrees/vm-049-root-kvm-20261110",
-      "blocked_reason": "Acceptance lists KVM_CHECK_EXTENSION and KVM_GET_VCPU_MMAP_SIZE. The owner's 2026-11-10 approval names only opening /dev/kvm and querying the API version, so these two ioctls need the owner's explicit approval. VM-050 covers the approved part.",
-      "column": "blocked",
-      "reasons": [
-        "Acceptance lists KVM_CHECK_EXTENSION and KVM_GET_VCPU_MMAP_SIZE. The owner's 2026-11-10 approval names only opening /dev/kvm and querying the API version, so these two ioctls need the owner's explicit approval. VM-050 covers the approved part."
-      ],
-      "card_path": "planning/tasks/VM-049.md",
-      "report_health": "stale"
+      "evidence": "worktrees/vm-049-root-kvm-20261110/docs/procedures/vm-049/evidence.json",
+      "evidence_sha256": "766509fc82af5e8f2326f1627917e420a469ff97adf0161136bea7b0c54bc592",
+      "finished_at": "2026-11-10T04:23:56+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/VM-049.md"
     },
     {
       "id": "VM-050",
@@ -9422,6 +9633,91 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/VM-050.md"
+    },
+    {
+      "id": "VM-053",
+      "title": "Add SCFB display streaming, virtio-mmio multitouch input and a viewer APK to s24vmm (host-tested)",
+      "status": "in_progress",
+      "owner": "claude-vm-display-20261110-v53",
+      "priority": 80,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "VM-052"
+      ],
+      "paths": [
+        "src/vmm",
+        "src/vmm-viewer",
+        "docs/procedures/vm-053"
+      ],
+      "acceptance": [
+        "s24vmm reserves an SCFB region below the FDT, passes scfb.addr/size/w/h to avfboot and streams published frames (frame_seq, POLL, DAMAGE, seqlock with drawing/host_reading as in scion-avf patch 1200/1204) to a localhost client.",
+        "s24vmm exposes a virtio-mmio v2 virtio-input multitouch device at 0x0a000000 (SPI 16, INTID 48) with name and ABS_INFO for ABS_X/Y and ABS_MT_POSITION_X/Y, fills eventq buffers with MT-B events and raises/lowers its level interrupt through KVM_IRQ_LINE.",
+        "Host tests cover the SCFB reader, virtio-mmio registers, split virtqueue handling, the input event encoding and the frame protocol; a project viewer APK builds reproducibly and decodes the frame protocol in a host test.",
+        "No claim of device behaviour: the device run is a separate task."
+      ],
+      "sources": [
+        "scion-avf"
+      ],
+      "steps": [
+        "Implement the models and wire them into s24vmm.",
+        "Write the viewer APK and its build script.",
+        "Run host tests and record evidence."
+      ],
+      "started_at": "2026-11-10T04:41:50+00:00",
+      "last_heartbeat": "2026-11-10T04:41:50+00:00",
+      "updated_at": "2026-11-10T04:41:50+00:00",
+      "branch": "team/vm-053-display-input-20261110",
+      "worktree": "worktrees/vm-053-display-input-20261110",
+      "column": "in_progress",
+      "reasons": [],
+      "card_path": "planning/tasks/VM-053.md",
+      "report_health": "recent"
+    },
+    {
+      "id": "GPU-016",
+      "title": "Run the TST-002-qualified probe APK on the S24 for the GPU-003 stock Vulkan baseline",
+      "status": "in_progress",
+      "owner": "claude-gpu-stock-20261110-g3",
+      "priority": 80,
+      "scope": "android-app",
+      "evidence_kind": "android-userland",
+      "depends_on": [
+        "DEV-001",
+        "GPU-002",
+        "TST-002",
+        "GPU-014"
+      ],
+      "paths": [
+        "docs/procedures/gpu-016",
+        "research/notes/GPU-016-stock-vulkan-baseline.md",
+        "artifacts/gpu-016/"
+      ],
+      "sources": [
+        "radv-xclipse",
+        "adb-docs"
+      ],
+      "acceptance": [
+        "Install only the exact TST-002-qualified APK bytes (SHA-256 recorded) under its own package; no su, no settings change, no reboot; uninstall it and verify absence and increased uptime at the end.",
+        "Save the renderer identity from the app report, compare it with the GPU-014 extension inventory, and save each bounded run's outcome, pixel counts and elapsed time with thermal-zone temperatures before and after.",
+        "Exercise the in-app Stop and process force-stop paths without rebooting, and document tested and untested negative cases."
+      ],
+      "steps": [
+        "Child of GPU-003, added because GPU-003's broad paths (artifacts/, research/notes/, devices/) overlap reservations held by NAT-001, KRN-003 and KRN-041.",
+        "Use a fixed host driver script with per-command timeouts; scrub the device serial from every saved byte.",
+        "Short runs only with the stock driver; no stress loop."
+      ],
+      "started_at": "2026-11-10T04:44:02+00:00",
+      "last_heartbeat": "2026-11-10T04:47:30+00:00",
+      "updated_at": "2026-11-10T04:47:30+00:00",
+      "branch": "team/gpu-003-stock-vulkan-20261110",
+      "worktree": "worktrees/gpu-003-stock-vulkan-20261110",
+      "progress_note": "Verified current compiled-input digest ff4e24ce... equals TST-002/EMULATOR-016 qualified source; installing exact qualified APK bytes 1187f632... (no rebuild needed). Driver script docs/procedures/gpu-016/run_probe.py written in worktree.",
+      "next_step": "Run the bounded device session, then write the note and evidence",
+      "column": "in_progress",
+      "reasons": [],
+      "card_path": "planning/tasks/GPU-016.md",
+      "report_health": "recent"
     },
     {
       "id": "GPU-014",
@@ -9466,8 +9762,8 @@
     {
       "id": "VM-002",
       "title": "Build a pinned minimal XNU guest and host launch harness",
-      "status": "blocked",
-      "owner": "codex-team-vm-20261105-am",
+      "status": "done",
+      "owner": "claude-guest-xnu-20261110-g2",
       "priority": 70,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -9492,21 +9788,29 @@
         "Record real results, failure modes and next-step handoff"
       ],
       "started_at": "2026-11-05T13:27:37+00:00",
-      "updated_at": "2026-11-05T14:21:27+00:00",
-      "progress_note": "VM-004 resolved genericQEMU prerequisite with actual QEMU10.2.0 virt/TCG,cortex-a76 and bounded stopped-machine controls. Read-only existing VM002 harness with explicit built binary,old built shim and ownedPID1 returns exit2 with exactly one missing completekernel input;no guest started. Historical VM002 evidence remains inconclusive.",
-      "next_step": "Supply and independently qualify a complete selected QEMU/AVF XNU guest kernel with mockfs and PSCI exit;then obtain one concrete guest resource lease,capture genuine Darwin/PID1 console and measure guest/host stopping. VM004 followup handoff:worktrees/vm-004-20261105/docs/procedures/qemu-host/README.md. Keep VM002 blocked;no Linux substitute or source/object acceptance.",
-      "handoff": "worktrees/vm-002-20261105/docs/procedures/vm-002/README.md",
+      "updated_at": "2026-11-10T04:46:35+00:00",
+      "progress_note": "Source-built XNU (scion-avf a6f4bc3, BCM2837 DEVELOPMENT) boots on QEMU virt/TCG cortex-a76 1 vCPU 512MiB to owned PID1 v2; reboot(RB_HALT) -> avf: halt (PSCI SYSTEM_OFF); QEMU exit 0 in ~0.6s; avf_exit=0 control stopped by host deadline. Commits 42ee600, 17a68e8.",
+      "next_step": "Coordinator: run guest/Image + guest/payload.bin under root KVM on S24 with a VMM FDT per guest-20261110.md (1 vCPU first; patch 1509 PA 0xFDA10000 store affects SMP).",
+      "handoff": "worktrees/vm-002-guest-20261110/docs/procedures/vm-002/guest-20261110.md",
       "released_at": "2026-11-05T11:12:50+00:00",
-      "last_heartbeat": "2026-11-05T14:21:27+00:00",
-      "branch": "team/vm-002-20261105",
-      "worktree": "worktrees/vm-002-20261105",
-      "blocked_reason": "VM-004 now supplies genuinely built generic QEMU10.2.0 ARM64 virt/TCG and measured bounded empty-machine stopping;read-only existing VM002 preflight accepts it and reports only missing kernel. Still need complete linked provenance-qualified XNU guest kernel for selected QEMU/AVF board,mockfs raw-executable ramdisk and intended PSCI exit. Actual Darwin guest/PID1 execution and guest stopping remain unmeasured;E1S object closure is not a guest kernel. VM-002 remains blocked under original am owner.",
-      "column": "blocked",
-      "reasons": [
-        "VM-004 now supplies genuinely built generic QEMU10.2.0 ARM64 virt/TCG and measured bounded empty-machine stopping;read-only existing VM002 preflight accepts it and reports only missing kernel. Still need complete linked provenance-qualified XNU guest kernel for selected QEMU/AVF board,mockfs raw-executable ramdisk and intended PSCI exit. Actual Darwin guest/PID1 execution and guest stopping remain unmeasured;E1S object closure is not a guest kernel. VM-002 remains blocked under original am owner."
+      "last_heartbeat": "2026-11-10T04:46:27+00:00",
+      "branch": "team/vm-002-guest-20261110",
+      "worktree": "worktrees/vm-002-guest-20261110",
+      "ownership_history": [
+        {
+          "from": "codex-team-vm-20261105-am",
+          "to": "claude-guest-xnu-20261110-g2",
+          "reason": "Codex owner stopped: last heartbeat 2026-11-05T14:21Z; no Codex process has its cwd or open files in this project (checked 2026-11-10 09:07 +05). Blocker (no SDK-built guest kernel) is now addressable because decision 0002 allows fetching dependencies such as the iPhoneOS16.5 SDK. Codex files and evidence in worktrees/vm-002-20261105 are kept.",
+          "decision": "docs/decisions/0002-owner-autonomy-grant-2026-11-10.md",
+          "at": "2026-11-10T04:20:23+00:00"
+        }
       ],
-      "card_path": "planning/tasks/VM-002.md",
-      "report_health": "stale"
+      "evidence": "worktrees/vm-002-guest-20261110/docs/procedures/vm-002/evidence-20261110.json",
+      "evidence_sha256": "6d27e86c5a43977ae2a4c6240b06b940b00abe615caa45821e8287c417f9cead",
+      "finished_at": "2026-11-10T04:46:35+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/VM-002.md"
     },
     {
       "id": "UI-001",
@@ -10875,7 +11179,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Paths reserved by: NAT-001, KRN-003, VM-049"
+        "Paths reserved by: NAT-001, KRN-003, KRN-041, GPU-016, VM-054"
       ],
       "priority": 50,
       "card_path": "planning/tasks/GPU-003.md"
@@ -10959,7 +11263,7 @@
       "column": "waiting",
       "reasons": [
         "Dependencies: GPU-003",
-        "Paths reserved by: KRN-003, VM-049"
+        "Paths reserved by: KRN-003, KRN-041, GPU-016, VM-054"
       ],
       "priority": 50,
       "card_path": "planning/tasks/GPU-005.md"
@@ -11082,7 +11386,7 @@
       "column": "waiting",
       "reasons": [
         "Dependencies: NAT-001",
-        "Paths reserved by: NAT-001, VM-002, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, STR-024, VM-049"
+        "Paths reserved by: NAT-001, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, STR-024, KRN-041, VM-053, GPU-016, VM-054"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-002.md"
@@ -11126,7 +11430,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-002, NAT-004, KRN-001",
-        "Paths reserved by: NAT-001, VM-002, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, STR-024, VM-049"
+        "Paths reserved by: NAT-001, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, STR-024, KRN-041, VM-053, GPU-016, VM-054"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -11165,7 +11469,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003, DRV-002",
-        "Paths reserved by: KRN-003, VM-049"
+        "Paths reserved by: KRN-003, KRN-041, GPU-016, VM-054"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -11323,10 +11627,8 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
-      "reasons": [
-        "Dependencies: VM-002"
-      ],
+      "column": "ready",
+      "reasons": [],
       "card_path": "planning/tasks/VM-003.md"
     },
     {
@@ -12156,6 +12458,32 @@
         "worktree": "worktrees/vm-019-resource-final-20261106"
       }
     ],
+    "claude-export-dossier-20261110-x41": [
+      {
+        "id": "KRN-041",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-10T04:31:07+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": "team/krn-041-missing-exports-20261110",
+        "worktree": "worktrees/krn-041-missing-exports-20261110"
+      }
+    ],
+    "claude-xnu-s24-20261110-v54": [
+      {
+        "id": "VM-054",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-10T04:47:57+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": "team/vm-054-xnu-guest-s24-20261110",
+        "worktree": "worktrees/vm-054-xnu-guest-s24-20261110"
+      }
+    ],
     "codex-team-crypto-chacha-20261105-bu": [
       {
         "id": "KRN-034",
@@ -12282,30 +12610,30 @@
         "worktree": null
       }
     ],
-    "claude-root-kvm-20261110-k49": [
+    "claude-vm-display-20261110-v53": [
       {
-        "id": "VM-049",
-        "status": "blocked",
-        "last_heartbeat": "2026-11-09T21:47:53+00:00",
-        "report_health": "stale",
+        "id": "VM-053",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-10T04:41:50+00:00",
+        "report_health": "recent",
         "progress_note": null,
         "next_step": null,
         "handoff": null,
-        "branch": "team/vm-049-root-kvm-20261110",
-        "worktree": "worktrees/vm-049-root-kvm-20261110"
+        "branch": "team/vm-053-display-input-20261110",
+        "worktree": "worktrees/vm-053-display-input-20261110"
       }
     ],
-    "codex-team-vm-20261105-am": [
+    "claude-gpu-stock-20261110-g3": [
       {
-        "id": "VM-002",
-        "status": "blocked",
-        "last_heartbeat": "2026-11-05T14:21:27+00:00",
-        "report_health": "stale",
-        "progress_note": "VM-004 resolved genericQEMU prerequisite with actual QEMU10.2.0 virt/TCG,cortex-a76 and bounded stopped-machine controls. Read-only existing VM002 harness with explicit built binary,old built shim and ownedPID1 returns exit2 with exactly one missing completekernel input;no guest started. Historical VM002 evidence remains inconclusive.",
-        "next_step": "Supply and independently qualify a complete selected QEMU/AVF XNU guest kernel with mockfs and PSCI exit;then obtain one concrete guest resource lease,capture genuine Darwin/PID1 console and measure guest/host stopping. VM004 followup handoff:worktrees/vm-004-20261105/docs/procedures/qemu-host/README.md. Keep VM002 blocked;no Linux substitute or source/object acceptance.",
-        "handoff": "worktrees/vm-002-20261105/docs/procedures/vm-002/README.md",
-        "branch": "team/vm-002-20261105",
-        "worktree": "worktrees/vm-002-20261105"
+        "id": "GPU-016",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-10T04:47:30+00:00",
+        "report_health": "recent",
+        "progress_note": "Verified current compiled-input digest ff4e24ce... equals TST-002/EMULATOR-016 qualified source; installing exact qualified APK bytes 1187f632... (no rebuild needed). Driver script docs/procedures/gpu-016/run_probe.py written in worktree.",
+        "next_step": "Run the bounded device session, then write the note and evidence",
+        "handoff": null,
+        "branch": "team/gpu-003-stock-vulkan-20261110",
+        "worktree": "worktrees/gpu-003-stock-vulkan-20261110"
       }
     ],
     "codex-gpu-userclient-20261106-eh": [
@@ -12324,28 +12652,86 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-09T21:32:06+00:00",
-      "action": "task.done:VM-001",
-      "owner": "claude-vm-interfaces-20261110-v1",
+      "at": "2026-11-10T04:30:36+00:00",
+      "action": "task.add:VM-052",
+      "owner": "claude-s24vmm-20261110-v52",
       "tasks": [
         {
-          "id": "VM-001",
-          "status": "done",
-          "owner": "claude-vm-interfaces-20261110-v1",
-          "priority": 50,
-          "last_heartbeat": "2026-11-09T21:29:01+00:00",
-          "branch": "team/vm-001-interfaces-20261110",
-          "worktree": "worktrees/vm-001-interfaces-20261110"
+          "id": "VM-052",
+          "status": "pending",
+          "owner": null,
+          "priority": 85
         }
       ]
     },
     {
-      "at": "2026-11-09T21:43:08+00:00",
-      "action": "task.add:DEV-003",
-      "owner": "claude-boot-copies-20261110-b3",
+      "at": "2026-11-10T04:30:45+00:00",
+      "action": "task.claim:VM-052",
+      "owner": "claude-s24vmm-20261110-v52",
       "tasks": [
         {
-          "id": "DEV-003",
+          "id": "VM-052",
+          "status": "in_progress",
+          "owner": "claude-s24vmm-20261110-v52",
+          "priority": 85,
+          "last_heartbeat": "2026-11-10T04:30:45+00:00",
+          "branch": "team/vm-052-s24vmm-20261110",
+          "worktree": "worktrees/vm-052-s24vmm-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:30:53+00:00",
+      "action": "task.add:KRN-041",
+      "owner": "claude-export-dossier-20261110-x41",
+      "tasks": [
+        {
+          "id": "KRN-041",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:31:07+00:00",
+      "action": "task.claim:KRN-041",
+      "owner": "claude-export-dossier-20261110-x41",
+      "tasks": [
+        {
+          "id": "KRN-041",
+          "status": "in_progress",
+          "owner": "claude-export-dossier-20261110-x41",
+          "priority": 90,
+          "last_heartbeat": "2026-11-10T04:31:07+00:00",
+          "branch": "team/krn-041-missing-exports-20261110",
+          "worktree": "worktrees/krn-041-missing-exports-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:39:20+00:00",
+      "action": "task.done:VM-052",
+      "owner": "claude-s24vmm-20261110-v52",
+      "tasks": [
+        {
+          "id": "VM-052",
+          "status": "done",
+          "owner": "claude-s24vmm-20261110-v52",
+          "priority": 85,
+          "last_heartbeat": "2026-11-10T04:30:45+00:00",
+          "branch": "team/vm-052-s24vmm-20261110",
+          "worktree": "worktrees/vm-052-s24vmm-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:41:40+00:00",
+      "action": "task.add:VM-053",
+      "owner": "claude-vm-display-20261110-v53",
+      "tasks": [
+        {
+          "id": "VM-053",
           "status": "pending",
           "owner": null,
           "priority": 80
@@ -12353,28 +12739,28 @@
       ]
     },
     {
-      "at": "2026-11-09T21:43:17+00:00",
-      "action": "task.claim:DEV-003",
-      "owner": "claude-boot-copies-20261110-b3",
+      "at": "2026-11-10T04:41:50+00:00",
+      "action": "task.claim:VM-053",
+      "owner": "claude-vm-display-20261110-v53",
       "tasks": [
         {
-          "id": "DEV-003",
+          "id": "VM-053",
           "status": "in_progress",
-          "owner": "claude-boot-copies-20261110-b3",
+          "owner": "claude-vm-display-20261110-v53",
           "priority": 80,
-          "last_heartbeat": "2026-11-09T21:43:17+00:00",
-          "branch": "team/dev-003-boot-copies-20261110",
-          "worktree": "worktrees/dev-003-boot-copies-20261110"
+          "last_heartbeat": "2026-11-10T04:41:50+00:00",
+          "branch": "team/vm-053-display-input-20261110",
+          "worktree": "worktrees/vm-053-display-input-20261110"
         }
       ]
     },
     {
-      "at": "2026-11-09T21:43:25+00:00",
-      "action": "task.add:VM-049",
-      "owner": "claude-root-kvm-20261110-k49",
+      "at": "2026-11-10T04:43:53+00:00",
+      "action": "task.add:GPU-016",
+      "owner": "claude-gpu-stock-20261110-g3",
       "tasks": [
         {
-          "id": "VM-049",
+          "id": "GPU-016",
           "status": "pending",
           "owner": null,
           "priority": 80
@@ -12382,249 +12768,179 @@
       ]
     },
     {
-      "at": "2026-11-09T21:43:33+00:00",
-      "action": "task.claim:VM-049",
-      "owner": "claude-root-kvm-20261110-k49",
+      "at": "2026-11-10T04:44:02+00:00",
+      "action": "task.claim:GPU-016",
+      "owner": "claude-gpu-stock-20261110-g3",
       "tasks": [
         {
-          "id": "VM-049",
+          "id": "GPU-016",
           "status": "in_progress",
-          "owner": "claude-root-kvm-20261110-k49",
+          "owner": "claude-gpu-stock-20261110-g3",
           "priority": 80,
-          "last_heartbeat": "2026-11-09T21:43:33+00:00",
-          "branch": "team/vm-049-root-kvm-20261110",
-          "worktree": "worktrees/vm-049-root-kvm-20261110"
+          "last_heartbeat": "2026-11-10T04:44:02+00:00",
+          "branch": "team/gpu-003-stock-vulkan-20261110",
+          "worktree": "worktrees/gpu-003-stock-vulkan-20261110"
         }
       ]
     },
     {
-      "at": "2026-11-09T21:47:45+00:00",
-      "action": "task.done:DEV-003",
-      "owner": "claude-boot-copies-20261110-b3",
+      "at": "2026-11-10T04:44:08+00:00",
+      "action": "task.update:INT-004",
+      "owner": "claude-integration-20261110-i1",
       "tasks": [
         {
-          "id": "DEV-003",
-          "status": "done",
-          "owner": "claude-boot-copies-20261110-b3",
-          "priority": 80,
-          "last_heartbeat": "2026-11-09T21:43:17+00:00",
-          "branch": "team/dev-003-boot-copies-20261110",
-          "worktree": "worktrees/dev-003-boot-copies-20261110"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-09T21:47:53+00:00",
-      "action": "task.block:VM-049",
-      "owner": "claude-root-kvm-20261110-k49",
-      "tasks": [
-        {
-          "id": "VM-049",
-          "status": "blocked",
-          "owner": "claude-root-kvm-20261110-k49",
-          "priority": 80,
-          "blocked_reason": "Acceptance lists KVM_CHECK_EXTENSION and KVM_GET_VCPU_MMAP_SIZE. The owner's 2026-11-10 approval names only opening /dev/kvm and querying the API version, so these two ioctls need the owner's explicit approval. VM-050 covers the approved part.",
-          "last_heartbeat": "2026-11-09T21:47:53+00:00",
-          "branch": "team/vm-049-root-kvm-20261110",
-          "worktree": "worktrees/vm-049-root-kvm-20261110"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-09T21:48:01+00:00",
-      "action": "task.add:VM-050",
-      "owner": "claude-root-kvm-api-20261110-k50",
-      "tasks": [
-        {
-          "id": "VM-050",
-          "status": "pending",
-          "owner": null,
-          "priority": 80
-        }
-      ]
-    },
-    {
-      "at": "2026-11-09T21:48:10+00:00",
-      "action": "task.claim:VM-050",
-      "owner": "claude-root-kvm-api-20261110-k50",
-      "tasks": [
-        {
-          "id": "VM-050",
+          "id": "INT-004",
           "status": "in_progress",
-          "owner": "claude-root-kvm-api-20261110-k50",
-          "priority": 80,
-          "last_heartbeat": "2026-11-09T21:48:10+00:00",
-          "branch": "team/vm-050-root-kvm-api-20261110",
-          "worktree": "worktrees/vm-050-root-kvm-api-20261110"
+          "owner": "claude-integration-20261110-i1",
+          "priority": 100,
+          "progress_note": "Merged 21 verified task branches (--no-ff) on integration/2026-11-10 and fast-forwarded main e34c666 -> 1e36ed7; 111 files added, none modified; per-branch rechecks reproduced recorded results; primary make check exit 0 (173 tests)",
+          "next_step": "Commit docs/integration/2026-11-10 README and evidence, fast-forward main again, complete INT-004",
+          "last_heartbeat": "2026-11-10T04:44:08+00:00",
+          "branch": "integration/2026-11-10",
+          "worktree": "worktrees/integration-20261110"
         }
       ]
     },
     {
-      "at": "2026-11-09T21:49:42+00:00",
-      "action": "task.done:VM-050",
-      "owner": "claude-root-kvm-api-20261110-k50",
-      "tasks": [
-        {
-          "id": "VM-050",
-          "status": "done",
-          "owner": "claude-root-kvm-api-20261110-k50",
-          "priority": 80,
-          "last_heartbeat": "2026-11-09T21:48:10+00:00",
-          "branch": "team/vm-050-root-kvm-api-20261110",
-          "worktree": "worktrees/vm-050-root-kvm-api-20261110"
-        }
-      ]
+      "at": "2026-11-10T04:44:32+00:00",
+      "action": "experiment.plan:KRN041-001",
+      "owner": "claude-export-dossier-20261110-x41"
     },
     {
-      "at": "2026-11-09T21:50:31+00:00",
-      "action": "task.add:GPU-014",
-      "owner": "claude-vulkan-inventory-20261110-g14",
+      "at": "2026-11-10T04:46:27+00:00",
+      "action": "task.update:VM-002",
+      "owner": "claude-guest-xnu-20261110-g2",
       "tasks": [
         {
-          "id": "GPU-014",
-          "status": "pending",
-          "owner": null,
-          "priority": 75
-        }
-      ]
-    },
-    {
-      "at": "2026-11-09T21:50:39+00:00",
-      "action": "task.claim:GPU-014",
-      "owner": "claude-vulkan-inventory-20261110-g14",
-      "tasks": [
-        {
-          "id": "GPU-014",
+          "id": "VM-002",
           "status": "in_progress",
-          "owner": "claude-vulkan-inventory-20261110-g14",
-          "priority": 75,
-          "last_heartbeat": "2026-11-09T21:50:39+00:00",
-          "branch": "team/gpu-014-vulkan-inventory-20261110",
-          "worktree": "worktrees/gpu-014-vulkan-inventory-20261110"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-09T21:51:31+00:00",
-      "action": "task.done:GPU-014",
-      "owner": "claude-vulkan-inventory-20261110-g14",
-      "tasks": [
-        {
-          "id": "GPU-014",
-          "status": "done",
-          "owner": "claude-vulkan-inventory-20261110-g14",
-          "priority": 75,
-          "last_heartbeat": "2026-11-09T21:50:39+00:00",
-          "branch": "team/gpu-014-vulkan-inventory-20261110",
-          "worktree": "worktrees/gpu-014-vulkan-inventory-20261110"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-09T22:01:39+00:00",
-      "action": "task.add:GPU-015",
-      "owner": "claude-gpu-timeline-20261110-g15",
-      "tasks": [
-        {
-          "id": "GPU-015",
-          "status": "pending",
-          "owner": null,
-          "priority": 70
-        }
-      ]
-    },
-    {
-      "at": "2026-11-09T22:01:47+00:00",
-      "action": "task.claim:GPU-015",
-      "owner": "claude-gpu-timeline-20261110-g15",
-      "tasks": [
-        {
-          "id": "GPU-015",
-          "status": "in_progress",
-          "owner": "claude-gpu-timeline-20261110-g15",
+          "owner": "claude-guest-xnu-20261110-g2",
           "priority": 70,
-          "last_heartbeat": "2026-11-09T22:01:47+00:00",
-          "branch": "team/gpu-015-timeline-20261110",
-          "worktree": "worktrees/gpu-015-timeline-20261110"
+          "progress_note": "Source-built XNU (scion-avf a6f4bc3, BCM2837 DEVELOPMENT) boots on QEMU virt/TCG cortex-a76 1 vCPU 512MiB to owned PID1 v2; reboot(RB_HALT) -> avf: halt (PSCI SYSTEM_OFF); QEMU exit 0 in ~0.6s; avf_exit=0 control stopped by host deadline. Commits 42ee600, 17a68e8.",
+          "next_step": "Coordinator: run guest/Image + guest/payload.bin under root KVM on S24 with a VMM FDT per guest-20261110.md (1 vCPU first; patch 1509 PA 0xFDA10000 store affects SMP).",
+          "last_heartbeat": "2026-11-10T04:46:27+00:00",
+          "branch": "team/vm-002-guest-20261110",
+          "worktree": "worktrees/vm-002-guest-20261110",
+          "handoff": "worktrees/vm-002-guest-20261110/docs/procedures/vm-002/guest-20261110.md"
         }
       ]
     },
     {
-      "at": "2026-11-09T22:11:58+00:00",
-      "action": "task.add:KRN-040",
-      "owner": "claude-export-coverage-20261110-k40",
+      "at": "2026-11-10T04:46:35+00:00",
+      "action": "task.done:VM-002",
+      "owner": "claude-guest-xnu-20261110-g2",
       "tasks": [
         {
-          "id": "KRN-040",
+          "id": "VM-002",
+          "status": "done",
+          "owner": "claude-guest-xnu-20261110-g2",
+          "priority": 70,
+          "progress_note": "Source-built XNU (scion-avf a6f4bc3, BCM2837 DEVELOPMENT) boots on QEMU virt/TCG cortex-a76 1 vCPU 512MiB to owned PID1 v2; reboot(RB_HALT) -> avf: halt (PSCI SYSTEM_OFF); QEMU exit 0 in ~0.6s; avf_exit=0 control stopped by host deadline. Commits 42ee600, 17a68e8.",
+          "next_step": "Coordinator: run guest/Image + guest/payload.bin under root KVM on S24 with a VMM FDT per guest-20261110.md (1 vCPU first; patch 1509 PA 0xFDA10000 store affects SMP).",
+          "last_heartbeat": "2026-11-10T04:46:27+00:00",
+          "branch": "team/vm-002-guest-20261110",
+          "worktree": "worktrees/vm-002-guest-20261110",
+          "handoff": "worktrees/vm-002-guest-20261110/docs/procedures/vm-002/guest-20261110.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:46:56+00:00",
+      "action": "experiment.record:KRN041-001",
+      "owner": "claude-export-dossier-20261110-x41"
+    },
+    {
+      "at": "2026-11-10T04:47:04+00:00",
+      "action": "experiment.plan:KRN041-002",
+      "owner": "claude-export-dossier-20261110-x41"
+    },
+    {
+      "at": "2026-11-10T04:47:30+00:00",
+      "action": "task.update:GPU-016",
+      "owner": "claude-gpu-stock-20261110-g3",
+      "tasks": [
+        {
+          "id": "GPU-016",
+          "status": "in_progress",
+          "owner": "claude-gpu-stock-20261110-g3",
+          "priority": 80,
+          "progress_note": "Verified current compiled-input digest ff4e24ce... equals TST-002/EMULATOR-016 qualified source; installing exact qualified APK bytes 1187f632... (no rebuild needed). Driver script docs/procedures/gpu-016/run_probe.py written in worktree.",
+          "next_step": "Run the bounded device session, then write the note and evidence",
+          "last_heartbeat": "2026-11-10T04:47:30+00:00",
+          "branch": "team/gpu-003-stock-vulkan-20261110",
+          "worktree": "worktrees/gpu-003-stock-vulkan-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:47:40+00:00",
+      "action": "task.update:INT-004",
+      "owner": "claude-integration-20261110-i1",
+      "tasks": [
+        {
+          "id": "INT-004",
+          "status": "in_progress",
+          "owner": "claude-integration-20261110-i1",
+          "priority": 100,
+          "progress_note": "Correction to the previous note: 19 merge commits (not 21). main e34c666 -> 1e36ed7 (merges) -> e99a69d (README, branches.json, evidence). make check exit 0 after both fast-forwards.",
+          "next_step": "Complete INT-004 with docs/integration/2026-11-10/evidence.json",
+          "last_heartbeat": "2026-11-10T04:47:40+00:00",
+          "branch": "integration/2026-11-10",
+          "worktree": "worktrees/integration-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:47:46+00:00",
+      "action": "task.add:VM-054",
+      "owner": "claude-xnu-s24-20261110-v54",
+      "tasks": [
+        {
+          "id": "VM-054",
           "status": "pending",
           "owner": null,
-          "priority": 60
+          "priority": 90
         }
       ]
     },
     {
-      "at": "2026-11-09T22:12:06+00:00",
-      "action": "task.claim:KRN-040",
-      "owner": "claude-export-coverage-20261110-k40",
+      "at": "2026-11-10T04:47:51+00:00",
+      "action": "task.done:INT-004",
+      "owner": "claude-integration-20261110-i1",
       "tasks": [
         {
-          "id": "KRN-040",
+          "id": "INT-004",
+          "status": "done",
+          "owner": "claude-integration-20261110-i1",
+          "priority": 100,
+          "progress_note": "Correction to the previous note: 19 merge commits (not 21). main e34c666 -> 1e36ed7 (merges) -> e99a69d (README, branches.json, evidence). make check exit 0 after both fast-forwards.",
+          "next_step": "Complete INT-004 with docs/integration/2026-11-10/evidence.json",
+          "last_heartbeat": "2026-11-10T04:47:40+00:00",
+          "branch": "integration/2026-11-10",
+          "worktree": "worktrees/integration-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:47:57+00:00",
+      "action": "task.claim:VM-054",
+      "owner": "claude-xnu-s24-20261110-v54",
+      "tasks": [
+        {
+          "id": "VM-054",
           "status": "in_progress",
-          "owner": "claude-export-coverage-20261110-k40",
-          "priority": 60,
-          "last_heartbeat": "2026-11-09T22:12:06+00:00",
-          "branch": "team/krn-040-export-coverage-20261110",
-          "worktree": "worktrees/krn-040-export-coverage-20261110"
+          "owner": "claude-xnu-s24-20261110-v54",
+          "priority": 90,
+          "last_heartbeat": "2026-11-10T04:47:57+00:00",
+          "branch": "team/vm-054-xnu-guest-s24-20261110",
+          "worktree": "worktrees/vm-054-xnu-guest-s24-20261110"
         }
       ]
-    },
-    {
-      "at": "2026-11-09T22:13:04+00:00",
-      "action": "task.done:KRN-040",
-      "owner": "claude-export-coverage-20261110-k40",
-      "tasks": [
-        {
-          "id": "KRN-040",
-          "status": "done",
-          "owner": "claude-export-coverage-20261110-k40",
-          "priority": 60,
-          "last_heartbeat": "2026-11-09T22:12:06+00:00",
-          "branch": "team/krn-040-export-coverage-20261110",
-          "worktree": "worktrees/krn-040-export-coverage-20261110"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-09T22:33:57+00:00",
-      "action": "task.done:GPU-015",
-      "owner": "claude-gpu-timeline-20261110-g15",
-      "tasks": [
-        {
-          "id": "GPU-015",
-          "status": "done",
-          "owner": "claude-gpu-timeline-20261110-g15",
-          "priority": 70,
-          "last_heartbeat": "2026-11-09T22:01:47+00:00",
-          "branch": "team/gpu-015-timeline-20261110",
-          "worktree": "worktrees/gpu-015-timeline-20261110"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T04:12:29+00:00",
-      "action": "project.permit:android-app",
-      "owner": "claude-authority-record-20261110",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
     }
   ],
   "view_sha256": {
-    "STATUS.md": "e386f6e642495b7ab61d7d1a7d8c0056f2ba93445cb4078078b558397e8688db",
-    "BOARD.md": "26b31d1beed4d37f815c06a645fd962d874c4cece269d4ef90deb6946a1ec313",
+    "STATUS.md": "5978a9746811a8990437e1c752ba5843d0eea8c378bde6a7cc4b63a621968a7c",
+    "BOARD.md": "ae13e676b557d7c6904a9eb82e188ef930675bed88cd6b71a76906a5eaf55e9e",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -12690,6 +13006,7 @@
     "planning/tasks/STR-039.md": "cad9a3bcdc53aafe73b7236671a63906d688ee76a35f14f7f8c27c210b065b39",
     "planning/tasks/STR-040.md": "35548d807e81c49854c32e49c92eaf2ca3239cc66e12788a98700ebb603b75ac",
     "planning/tasks/STR-041.md": "5b6244f3181be38d4d3c8c5a4ee185002710bdbc6330d000ae89d04ff445895e",
+    "planning/tasks/INT-004.md": "94c25405934320a5e7ca438b9e97c15ffec7af85e013c381d3a1f4bf4ce37613",
     "planning/tasks/KRN-008.md": "d390a17b7ba0326785326c84ac481fc17aa9afe2ab77e20bb1cef98e0016307d",
     "planning/tasks/KRN-010.md": "4f479284d71242353a2a95508bac0b5304468c6ee44704b7561bc32cee8e1832",
     "planning/tasks/KRN-012.md": "5639fd265337eacb414447c0f5aa26bb2ad600fead5ca21572bcdb2b96f7b4e8",
@@ -12791,6 +13108,8 @@
     "planning/tasks/REV-043.md": "86a64a82e83ab54a091769b98b0ae09581a145cb1aa0147af3018043d6e45243",
     "planning/tasks/REV-044.md": "e61310b8327bd3b077f5887fdd065e43521b028f1e3d33184b0d8bba61f9c11e",
     "planning/tasks/STR-026.md": "3bc9e022a78b1a1794c871789e21328314a13e078280c87934d3954438e800a8",
+    "planning/tasks/KRN-041.md": "52fce4820876e2339a866b3d48a1460f174699ad79bf153a186700057511c6f5",
+    "planning/tasks/VM-054.md": "2cd45423f4646421a311301b000e2e0dd5ee93ef5c0af25f146270e98d0f9180",
     "planning/tasks/KRN-033.md": "65895b5673cb8432d904647391ec6378b6eafcac42e79bfd6cef92a0dcc4b83f",
     "planning/tasks/KRN-034.md": "216955769016c966a7b2ed1191501a2967d901d5371a7e1ec31f2230896ac5cc",
     "planning/tasks/KRN-035.md": "73d3fdfa9f6c3f1f76fe0f244208e46b40bf7343bf78e2f78223ea9c1c7a98a7",
@@ -12811,6 +13130,8 @@
     "planning/tasks/VM-032.md": "54666609afd67afc8c1a0ed652c281179fd40a62ccb0f298ce092f0db8847c36",
     "planning/tasks/VM-033.md": "c8a011043a06b7f44ad2f024e4cb54ca9ec3acbdd4c71e6c859707924f9bc8a2",
     "planning/tasks/STR-031.md": "89a6ac5cb189888c6a3a1c898865c7de7c4cf19ce3fa27af77963ad93063c6e3",
+    "planning/tasks/VM-051.md": "1ce8573da42e1bcb24002aeeed55c3528872f07d707eb704107300beb9a593aa",
+    "planning/tasks/VM-052.md": "714929529fd9e53981d1c60eb169badc37ebb01db2918f6861a49eaa913f2977",
     "planning/tasks/AUD-003.md": "4c4e08b858298722a856838980fc435c46852158939305ce38c0a1bc36168942",
     "planning/tasks/CAM-003.md": "0011d7fd53571c5e673da8221ec031aee28c8e10835c86c34411c7c435a02086",
     "planning/tasks/PWR-003.md": "da473ec179dfaab627860f7399d8f29a8514a1123d5a13536f27e9198af03b42",
@@ -12829,10 +13150,12 @@
     "planning/tasks/VM-005.md": "7370897e28e9ad1386faaaaa63457471ab330f1c855835542e77ce322def485e",
     "planning/tasks/RES-010.md": "9493de1b743dd822b71815f30021c3af436e34d0e7d18df67f8c5c160be74c62",
     "planning/tasks/DEV-003.md": "dd9f10fd19e3ed384ae9f0318213035abe598588d0790d4bfc2f707a2600f2cd",
-    "planning/tasks/VM-049.md": "1ef5a52004591bba69427a30d7a513179268df7f8a109a0685d550ed7c7b9b03",
+    "planning/tasks/VM-049.md": "0310edf7a6608ed24ead2a027ee77f7187b0bac19e56139b9903ad653adde57e",
     "planning/tasks/VM-050.md": "4f338fc22b3709506343fd16d60bd44e78106230d77ea4de73d09df095ff560e",
+    "planning/tasks/VM-053.md": "710ded9c6cbba61428be768acf369e205f90badec9594836abe7fe1ffd8aa7dd",
+    "planning/tasks/GPU-016.md": "3a8a34397ea5c03dc59cfe1c8cef86c6f93068cc90ff14383aaaaf3fedc8d3f2",
     "planning/tasks/GPU-014.md": "948575bafb8058b4b0784c6132e8043657404029a468fa04bf86b05cca2d98b6",
-    "planning/tasks/VM-002.md": "91204ff5f5a26712e81e1011120922e7976e318be236539e547eec27995bb5d6",
+    "planning/tasks/VM-002.md": "bca6a8c74c4b9f3569b3dcef3af10725267695a7fec8416fd2a4c7c40d4c2833",
     "planning/tasks/UI-001.md": "c625d98b72bb9f1d80a6d5bb3d2a74922ae72d9ab758fb7d12bdf71a7f474320",
     "planning/tasks/GPU-006.md": "c4420e384a9ce1eaccb816f017b6212f8b8601974b7de2218916f3115d40464f",
     "planning/tasks/GPU-007.md": "05c07de9101f3c745ee6bdad49db63922f498776239fb9c1a4ef7eb442b0d572",
@@ -12866,18 +13189,18 @@
     "planning/tasks/TST-001.md": "3142333fb7f8007775cb83ea67cb783be49b72664aaf32849d2449a19b36585b",
     "planning/tasks/GPU-001.md": "54d110d5d5bd67afb776017c7220e3e6ca7a1ffcad9289a3af35f2a7b5a992fa",
     "planning/tasks/GPU-002.md": "ed6a2e320b8b805c8d6ec97f1537439282c02f999c4a7542c95e2e31e7b76eca",
-    "planning/tasks/GPU-003.md": "284ec0b356e9cab3d7e810a3d809c733bb9d3d966cc78fe65bb3970f37adc922",
+    "planning/tasks/GPU-003.md": "abde759a81abeb180ef3a38ee84c74cbe0866fb251c952b3b6da1b57f66fb732",
     "planning/tasks/GPU-004.md": "4f7b914361a5ff47439410c701bd907e3a3020383d4b33c91ce59b5fbdab2579",
-    "planning/tasks/GPU-005.md": "18d9f484ba078447456a890dd636b9f8c38b797e7e29866231209df247d28399",
+    "planning/tasks/GPU-005.md": "b3d1bf8b503afe94f43e9ce39d0e8380845194bdc6b26d8f761d4e6552e9f1d7",
     "planning/tasks/DRV-002.md": "8815064740bc04ed5a821e35a645028ea3434f5b8a9efd20c042cdfa42bc2792",
     "planning/tasks/NAT-001.md": "555b180dd2cfda5c6a7e4623041660bfd01b1c074d7fd82a9be75e83b4af7bcf",
-    "planning/tasks/NAT-002.md": "545c0b81acb17836eddaaefce1561e96897a1e91a133c4511e93e5444c169c35",
-    "planning/tasks/NAT-003.md": "85696310711805d670fe7a0f64a2a054bc817e0707e9df347f1708e13ab6b7cc",
-    "planning/tasks/DRV-003.md": "8a7abd3a90f65cdc1c563dd2643b1259e639b3e1d6718e26c25c4a502aaca23a",
+    "planning/tasks/NAT-002.md": "0441a493c44af363c5c6b4ff670e02f7a7096bc4c63b6a4fdeea77a1de6193e0",
+    "planning/tasks/NAT-003.md": "a555c7c53b64caeb156104b54f1e36a1c06c06d98fd09b197ad56b0667a467f2",
+    "planning/tasks/DRV-003.md": "d823cd3dcc88dc9d8ecf77e3ca66079c6932aa037f7400b4c9ea8b2aa1c13bff",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",
-    "planning/tasks/VM-003.md": "8d1d5a78d1deb3aeef2103c8c8ab5375f564d47b4a6f7bfd03c7c9be81c507dc",
+    "planning/tasks/VM-003.md": "dc6be7e750a5b3b98b79f0fbcd52fc07c6cb669e2d80715d32cdf1352d160c0f",
     "planning/tasks/NAT-004.md": "92ee8663bb250f96bdbd463a941d9b1c595eab5ac2055c8a0d9649f37161c232",
     "planning/tasks/UI-002.md": "5669ba2f32f4ec7d2645872861f8386ed6c8c5de8e89b251743f940b593caac4",
     "planning/tasks/USB-002.md": "7f7a1becaf541ada578adc6a25c0ea651489f967d5ff844f0be8b3568e303462",

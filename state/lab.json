@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T04:12:29+00:00",
+  "updated_at": "2026-11-10T04:47:57+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -920,8 +920,8 @@
     {
       "id": "VM-002",
       "title": "Build a pinned minimal XNU guest and host launch harness",
-      "status": "blocked",
-      "owner": "codex-team-vm-20261105-am",
+      "status": "done",
+      "owner": "claude-guest-xnu-20261110-g2",
       "priority": 70,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -946,15 +946,26 @@
         "Record real results, failure modes and next-step handoff"
       ],
       "started_at": "2026-11-05T13:27:37+00:00",
-      "updated_at": "2026-11-05T14:21:27+00:00",
-      "progress_note": "VM-004 resolved genericQEMU prerequisite with actual QEMU10.2.0 virt/TCG,cortex-a76 and bounded stopped-machine controls. Read-only existing VM002 harness with explicit built binary,old built shim and ownedPID1 returns exit2 with exactly one missing completekernel input;no guest started. Historical VM002 evidence remains inconclusive.",
-      "next_step": "Supply and independently qualify a complete selected QEMU/AVF XNU guest kernel with mockfs and PSCI exit;then obtain one concrete guest resource lease,capture genuine Darwin/PID1 console and measure guest/host stopping. VM004 followup handoff:worktrees/vm-004-20261105/docs/procedures/qemu-host/README.md. Keep VM002 blocked;no Linux substitute or source/object acceptance.",
-      "handoff": "worktrees/vm-002-20261105/docs/procedures/vm-002/README.md",
+      "updated_at": "2026-11-10T04:46:35+00:00",
+      "progress_note": "Source-built XNU (scion-avf a6f4bc3, BCM2837 DEVELOPMENT) boots on QEMU virt/TCG cortex-a76 1 vCPU 512MiB to owned PID1 v2; reboot(RB_HALT) -> avf: halt (PSCI SYSTEM_OFF); QEMU exit 0 in ~0.6s; avf_exit=0 control stopped by host deadline. Commits 42ee600, 17a68e8.",
+      "next_step": "Coordinator: run guest/Image + guest/payload.bin under root KVM on S24 with a VMM FDT per guest-20261110.md (1 vCPU first; patch 1509 PA 0xFDA10000 store affects SMP).",
+      "handoff": "worktrees/vm-002-guest-20261110/docs/procedures/vm-002/guest-20261110.md",
       "released_at": "2026-11-05T11:12:50+00:00",
-      "last_heartbeat": "2026-11-05T14:21:27+00:00",
-      "branch": "team/vm-002-20261105",
-      "worktree": "worktrees/vm-002-20261105",
-      "blocked_reason": "VM-004 now supplies genuinely built generic QEMU10.2.0 ARM64 virt/TCG and measured bounded empty-machine stopping;read-only existing VM002 preflight accepts it and reports only missing kernel. Still need complete linked provenance-qualified XNU guest kernel for selected QEMU/AVF board,mockfs raw-executable ramdisk and intended PSCI exit. Actual Darwin guest/PID1 execution and guest stopping remain unmeasured;E1S object closure is not a guest kernel. VM-002 remains blocked under original am owner."
+      "last_heartbeat": "2026-11-10T04:46:27+00:00",
+      "branch": "team/vm-002-guest-20261110",
+      "worktree": "worktrees/vm-002-guest-20261110",
+      "ownership_history": [
+        {
+          "from": "codex-team-vm-20261105-am",
+          "to": "claude-guest-xnu-20261110-g2",
+          "reason": "Codex owner stopped: last heartbeat 2026-11-05T14:21Z; no Codex process has its cwd or open files in this project (checked 2026-11-10 09:07 +05). Blocker (no SDK-built guest kernel) is now addressable because decision 0002 allows fetching dependencies such as the iPhoneOS16.5 SDK. Codex files and evidence in worktrees/vm-002-20261105 are kept.",
+          "decision": "docs/decisions/0002-owner-autonomy-grant-2026-11-10.md",
+          "at": "2026-11-10T04:20:23+00:00"
+        }
+      ],
+      "evidence": "worktrees/vm-002-guest-20261110/docs/procedures/vm-002/evidence-20261110.json",
+      "evidence_sha256": "6d27e86c5a43977ae2a4c6240b06b940b00abe615caa45821e8287c417f9cead",
+      "finished_at": "2026-11-10T04:46:35+00:00"
     },
     {
       "id": "VM-003",
@@ -10577,7 +10588,7 @@
       "finished_at": "2026-11-09T21:47:45+00:00"
     },
     {
-      "status": "blocked",
+      "status": "done",
       "owner": "claude-root-kvm-20261110-k49",
       "priority": 80,
       "scope": "android-readonly",
@@ -10605,11 +10616,13 @@
         "Record results and remove the probe."
       ],
       "started_at": "2026-11-09T21:43:33+00:00",
-      "last_heartbeat": "2026-11-09T21:47:53+00:00",
-      "updated_at": "2026-11-09T21:47:53+00:00",
+      "last_heartbeat": "2026-11-10T04:22:30+00:00",
+      "updated_at": "2026-11-10T04:23:56+00:00",
       "branch": "team/vm-049-root-kvm-20261110",
       "worktree": "worktrees/vm-049-root-kvm-20261110",
-      "blocked_reason": "Acceptance lists KVM_CHECK_EXTENSION and KVM_GET_VCPU_MMAP_SIZE. The owner's 2026-11-10 approval names only opening /dev/kvm and querying the API version, so these two ioctls need the owner's explicit approval. VM-050 covers the approved part."
+      "evidence": "worktrees/vm-049-root-kvm-20261110/docs/procedures/vm-049/evidence.json",
+      "evidence_sha256": "766509fc82af5e8f2326f1627917e420a469ff97adf0161136bea7b0c54bc592",
+      "finished_at": "2026-11-10T04:23:56+00:00"
     },
     {
       "id": "VM-050",
@@ -10758,6 +10771,270 @@
       "evidence": "worktrees/krn-040-export-coverage-20261110/docs/procedures/krn-export-coverage/evidence.json",
       "evidence_sha256": "9979f09c8876d84cd1b7b1fde2ee13925f538df1815cc9818717adf52c786157",
       "finished_at": "2026-11-09T22:13:04+00:00"
+    },
+    {
+      "id": "VM-051",
+      "title": "Run a minimal bounded KVM guest on the S24 as root",
+      "status": "done",
+      "owner": "claude-kvm-guest-20261110-k51",
+      "priority": 85,
+      "scope": "android-app",
+      "evidence_kind": "android-userland",
+      "depends_on": [
+        "VM-049"
+      ],
+      "paths": [
+        "docs/procedures/vm-051",
+        "research/notes/virtualization/VM-051-minimal-guest.md"
+      ],
+      "acceptance": [
+        "Under decision 0002, from tmpfs through su: KVM_CREATE_VM, a vGICv3 device, one vCPU, a 2 MiB memslot and a few instructions of guest code run to a PSCI SYSTEM_OFF exit, bounded by an in-process alarm and an outer timeout.",
+        "Record guest-visible MMIO output, the PSCI version, the guest MIDR/CurrentEL/CNTFRQ, the cost of an MMIO exit and a guest-versus-native compute loop on a little and a big core.",
+        "Remove the RAM directory, confirm its absence and confirm no reboot via uptime.",
+        "Do not claim that an XNU guest runs."
+      ],
+      "sources": [
+        "avf-docs"
+      ],
+      "steps": [
+        "Write a static NDK helper with embedded guest code.",
+        "Run it pinned to a little and a big CPU.",
+        "Record results and remove the helper."
+      ],
+      "started_at": "2026-11-10T04:25:05+00:00",
+      "last_heartbeat": "2026-11-10T04:25:05+00:00",
+      "updated_at": "2026-11-10T04:29:08+00:00",
+      "branch": "team/vm-051-minimal-guest-20261110",
+      "worktree": "worktrees/vm-051-minimal-guest-20261110",
+      "evidence": "worktrees/vm-051-minimal-guest-20261110/docs/procedures/vm-051/evidence.json",
+      "evidence_sha256": "a1a465d259935223566f79dfd215e01f208918e7b39f3c28e395dd90666f01ae",
+      "finished_at": "2026-11-10T04:29:08+00:00"
+    },
+    {
+      "id": "INT-004",
+      "title": "Merge verified 2026-11-10 branches into main and check project state consistency",
+      "status": "done",
+      "owner": "claude-integration-20261110-i1",
+      "priority": 100,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "LAB-001"
+      ],
+      "paths": [
+        "docs/integration/2026-11-10"
+      ],
+      "sources": [],
+      "acceptance": [
+        "Inventory every local branch against main: ancestry, patch-equivalence, simulated merge result, the registry task(s) it belongs to, their status and whether the recorded evidence is pass with a matching SHA256.",
+        "Merge with --no-ff, in dependency order, on a separate integration/2026-11-10 worktree branch, only branches whose task is done with pass evidence bound to the merged commit. Resolve generated/registry files to main's version and never commit a worktree registry copy. Scan each merged diff for IMEI, MAC, device-serial patterns and large binaries.",
+        "Run the relevant per-branch checks and make check on the integration branch, then fast-forward main only when green; rerun make check and make status in the primary checkout. Never force-push, reset main or use git stash.",
+        "Record merged and unmerged branches with reasons, every non-trivial conflict resolution, registry inconsistencies found, commands with exit codes and resulting main HEAD in docs/integration/2026-11-10/README.md and evidence.json."
+      ],
+      "steps": [
+        "Inventory branches and classify them by task status and merge state.",
+        "Merge candidates on integration/2026-11-10 and run checks after each coherent batch.",
+        "Fast-forward main, rerun checks, write README and evidence, complete the task."
+      ],
+      "started_at": "2026-11-10T04:28:09+00:00",
+      "last_heartbeat": "2026-11-10T04:47:40+00:00",
+      "updated_at": "2026-11-10T04:47:51+00:00",
+      "progress_note": "Correction to the previous note: 19 merge commits (not 21). main e34c666 -> 1e36ed7 (merges) -> e99a69d (README, branches.json, evidence). make check exit 0 after both fast-forwards.",
+      "next_step": "Complete INT-004 with docs/integration/2026-11-10/evidence.json",
+      "branch": "integration/2026-11-10",
+      "worktree": "worktrees/integration-20261110",
+      "evidence": "docs/integration/2026-11-10/evidence.json",
+      "evidence_sha256": "9f9fe90852d3fb64ced3bd0182f794a31dbbf554f8c603978733310802dd61af",
+      "finished_at": "2026-11-10T04:47:51+00:00"
+    },
+    {
+      "id": "VM-052",
+      "title": "Implement a root-run KVM VMM for avfboot guests on the S24 and boot avfboot to its first console line",
+      "status": "done",
+      "owner": "claude-s24vmm-20261110-v52",
+      "priority": 85,
+      "scope": "android-app",
+      "evidence_kind": "android-userland",
+      "depends_on": [
+        "VM-051"
+      ],
+      "paths": [
+        "src/vmm",
+        "docs/procedures/vm-052",
+        "research/notes/virtualization/VM-052-s24vmm.md"
+      ],
+      "acceptance": [
+        "A static NDK VMM (no external libraries) lays out RAM, Image, initrd and an FDT the way crosvm does for avfboot, with an in-kernel vGICv3, PSCI, an ns16550a console at 0x3f8 and a PL031 RTC; host unit tests cover the FDT writer and device models.",
+        "On the S24 as root from tmpfs, under decision 0002: avfboot (built from the pinned scion-avf source) prints its banner on the VMM console, and the run ends by PSCI or by the VMM's own bounded timeout, with the VMM process gone afterwards.",
+        "Record console output, exit cause, uptime before/after and the removal of the RAM directory. Do not claim an XNU boot unless the console shows one."
+      ],
+      "sources": [
+        "scion-avf",
+        "avf-docs"
+      ],
+      "steps": [
+        "Write the VMM, FDT writer and device models with host tests.",
+        "Build avfboot from the pinned source.",
+        "Run on the S24 with a bounded timeout and record the console."
+      ],
+      "started_at": "2026-11-10T04:30:45+00:00",
+      "last_heartbeat": "2026-11-10T04:30:45+00:00",
+      "updated_at": "2026-11-10T04:39:20+00:00",
+      "branch": "team/vm-052-s24vmm-20261110",
+      "worktree": "worktrees/vm-052-s24vmm-20261110",
+      "evidence": "worktrees/vm-052-s24vmm-20261110/docs/procedures/vm-052/evidence.json",
+      "evidence_sha256": "fbedc9b1db710da5463bdf7ab6e4c2094bb3b32c1b1603564aec57199f3a4119",
+      "finished_at": "2026-11-10T04:39:20+00:00"
+    },
+    {
+      "id": "KRN-041",
+      "title": "Per-symbol dossier for the 37 missing kernel exports and source-backed fixes for the no-Apple-kext profile",
+      "status": "in_progress",
+      "owner": "claude-export-dossier-20261110-x41",
+      "priority": 90,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "KRN-040",
+        "STR-041"
+      ],
+      "paths": [
+        "research/notes/kernel/KRN-041-missing-exports.md",
+        "docs/procedures/krn-041"
+      ],
+      "acceptance": [
+        "A 37-row table: symbol, export file and line, signature from source (mangled and demangled), consumers with file:line evidence, required implementation (real, error stub, or removal from the export list), ABI constraints, available source (file:line or none public), impact on early boot to PID 1 for a QEMU/KVM guest kernel and for the native E1S kernel, and what HakiOS and the S24 port do.",
+        "Build the genuine kextsymboltool from the pinned apple-xnu c54f35ca source on the host and run the two check_all_exports passes with the argument structure of config/Makefile against the STR-041 kernel; compare with KRN-040.",
+        "Advance only source-backed changes in owned paths: stubs only where a public declaration and a derivable unsupported semantic exist; an opt-in export profile only for names with no public declaration and zero references in every link input and in project/HakiOS/S24-port driver sources. A host check must show both passes exit 0 for the chosen configuration, the profile differs from the genuine lists by exactly the justified names, and controls fail as expected. KRN-026 and its files are not modified. No boot, QEMU or phone claim."
+      ],
+      "sources": [
+        "apple-xnu",
+        "s24-port",
+        "scion-avf",
+        "hakios-e1s-tools"
+      ],
+      "steps": [
+        "Collect consumer, provider and source evidence for each name.",
+        "Build and run the genuine kextsymboltool; scan all link inputs for references.",
+        "Implement the stubs and the profile, relink a copy of the STR-041 kernel with the stub object, run the checks and controls, record evidence."
+      ],
+      "started_at": "2026-11-10T04:31:07+00:00",
+      "last_heartbeat": "2026-11-10T04:31:07+00:00",
+      "updated_at": "2026-11-10T04:31:07+00:00",
+      "branch": "team/krn-041-missing-exports-20261110",
+      "worktree": "worktrees/krn-041-missing-exports-20261110"
+    },
+    {
+      "id": "VM-053",
+      "title": "Add SCFB display streaming, virtio-mmio multitouch input and a viewer APK to s24vmm (host-tested)",
+      "status": "in_progress",
+      "owner": "claude-vm-display-20261110-v53",
+      "priority": 80,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "VM-052"
+      ],
+      "paths": [
+        "src/vmm",
+        "src/vmm-viewer",
+        "docs/procedures/vm-053"
+      ],
+      "acceptance": [
+        "s24vmm reserves an SCFB region below the FDT, passes scfb.addr/size/w/h to avfboot and streams published frames (frame_seq, POLL, DAMAGE, seqlock with drawing/host_reading as in scion-avf patch 1200/1204) to a localhost client.",
+        "s24vmm exposes a virtio-mmio v2 virtio-input multitouch device at 0x0a000000 (SPI 16, INTID 48) with name and ABS_INFO for ABS_X/Y and ABS_MT_POSITION_X/Y, fills eventq buffers with MT-B events and raises/lowers its level interrupt through KVM_IRQ_LINE.",
+        "Host tests cover the SCFB reader, virtio-mmio registers, split virtqueue handling, the input event encoding and the frame protocol; a project viewer APK builds reproducibly and decodes the frame protocol in a host test.",
+        "No claim of device behaviour: the device run is a separate task."
+      ],
+      "sources": [
+        "scion-avf"
+      ],
+      "steps": [
+        "Implement the models and wire them into s24vmm.",
+        "Write the viewer APK and its build script.",
+        "Run host tests and record evidence."
+      ],
+      "started_at": "2026-11-10T04:41:50+00:00",
+      "last_heartbeat": "2026-11-10T04:41:50+00:00",
+      "updated_at": "2026-11-10T04:41:50+00:00",
+      "branch": "team/vm-053-display-input-20261110",
+      "worktree": "worktrees/vm-053-display-input-20261110"
+    },
+    {
+      "id": "GPU-016",
+      "title": "Run the TST-002-qualified probe APK on the S24 for the GPU-003 stock Vulkan baseline",
+      "status": "in_progress",
+      "owner": "claude-gpu-stock-20261110-g3",
+      "priority": 80,
+      "scope": "android-app",
+      "evidence_kind": "android-userland",
+      "depends_on": [
+        "DEV-001",
+        "GPU-002",
+        "TST-002",
+        "GPU-014"
+      ],
+      "paths": [
+        "docs/procedures/gpu-016",
+        "research/notes/GPU-016-stock-vulkan-baseline.md",
+        "artifacts/gpu-016/"
+      ],
+      "sources": [
+        "radv-xclipse",
+        "adb-docs"
+      ],
+      "acceptance": [
+        "Install only the exact TST-002-qualified APK bytes (SHA-256 recorded) under its own package; no su, no settings change, no reboot; uninstall it and verify absence and increased uptime at the end.",
+        "Save the renderer identity from the app report, compare it with the GPU-014 extension inventory, and save each bounded run's outcome, pixel counts and elapsed time with thermal-zone temperatures before and after.",
+        "Exercise the in-app Stop and process force-stop paths without rebooting, and document tested and untested negative cases."
+      ],
+      "steps": [
+        "Child of GPU-003, added because GPU-003's broad paths (artifacts/, research/notes/, devices/) overlap reservations held by NAT-001, KRN-003 and KRN-041.",
+        "Use a fixed host driver script with per-command timeouts; scrub the device serial from every saved byte.",
+        "Short runs only with the stock driver; no stress loop."
+      ],
+      "started_at": "2026-11-10T04:44:02+00:00",
+      "last_heartbeat": "2026-11-10T04:47:30+00:00",
+      "updated_at": "2026-11-10T04:47:30+00:00",
+      "branch": "team/gpu-003-stock-vulkan-20261110",
+      "worktree": "worktrees/gpu-003-stock-vulkan-20261110",
+      "progress_note": "Verified current compiled-input digest ff4e24ce... equals TST-002/EMULATOR-016 qualified source; installing exact qualified APK bytes 1187f632... (no rebuild needed). Driver script docs/procedures/gpu-016/run_probe.py written in worktree.",
+      "next_step": "Run the bounded device session, then write the note and evidence"
+    },
+    {
+      "id": "VM-054",
+      "title": "Boot the source-built XNU guest to PID 1 on the S24 under s24vmm",
+      "status": "in_progress",
+      "owner": "claude-xnu-s24-20261110-v54",
+      "priority": 90,
+      "scope": "android-app",
+      "evidence_kind": "android-userland",
+      "depends_on": [
+        "VM-002",
+        "VM-052"
+      ],
+      "paths": [
+        "docs/procedures/vm-054",
+        "research/notes/virtualization/VM-054-xnu-guest-s24.md"
+      ],
+      "acceptance": [
+        "Under decision 0002, as root from tmpfs: s24vmm runs VM-002's avfboot Image and payload (xnu-8796.121.2 DEVELOPMENT BCM2837 + owned PID 1) on the S24, the console shows the Darwin banner and the PID 1 line, and the guest ends by PSCI SYSTEM_OFF within the bound.",
+        "Record console, boot time, exit cause, VMM statistics, uptime before/after and the removal of the RAM directory.",
+        "Call it what it is: an XNU guest under Android KVM on the S24, not native XNU on Exynos hardware and not Apple's launchd."
+      ],
+      "sources": [
+        "scion-avf"
+      ],
+      "steps": [
+        "Deliver VMM, Image and payload to tmpfs",
+        "Run with 1 vCPU and a bounded timeout",
+        "Record and clean up"
+      ],
+      "started_at": "2026-11-10T04:47:57+00:00",
+      "last_heartbeat": "2026-11-10T04:47:57+00:00",
+      "updated_at": "2026-11-10T04:47:57+00:00",
+      "branch": "team/vm-054-xnu-guest-s24-20261110",
+      "worktree": "worktrees/vm-054-xnu-guest-s24-20261110"
     }
   ],
   "experiments": [
@@ -20700,6 +20977,47 @@
       "evidence_sha256": "a2f54f13b43a11f6887a417b4e3f45fbd1945dba79a979bd64b063ac096a92ff",
       "outcome": "pass",
       "recorded_at": "2026-11-09T20:23:19+00:00"
+    },
+    {
+      "id": "EXP-VM051-001",
+      "task": "VM-051",
+      "owner": "claude-kvm-guest-20261110-k51",
+      "kind": "android-userland",
+      "status": "recorded",
+      "hypothesis": "Root-run KVM on the S24 creates a VM with vGICv3 and one vCPU and runs guest code to PSCI SYSTEM_OFF",
+      "procedure": "worktrees/vm-051-minimal-guest-20261110/docs/procedures/vm-051/run.py",
+      "timeout_seconds": 120,
+      "created_at": "2026-11-10T04:26:53+00:00",
+      "evidence": "worktrees/vm-051-minimal-guest-20261110/docs/procedures/vm-051/evidence.json",
+      "evidence_sha256": "a1a465d259935223566f79dfd215e01f208918e7b39f3c28e395dd90666f01ae",
+      "outcome": "pass",
+      "recorded_at": "2026-11-10T04:29:00+00:00"
+    },
+    {
+      "id": "KRN041-001",
+      "task": "KRN-041",
+      "owner": "claude-export-dossier-20261110-x41",
+      "kind": "host-test",
+      "status": "recorded",
+      "hypothesis": "No link input of the STR-041 kernel references any of the 37 missing exports; with the 0001 pmap query stubs relinked into a copy of that kernel and the 0002 export profile, the genuine kextsymboltool passes both check_all_exports passes and all seven symbol sets, while the genuine lists still miss exactly 37 (STR-041) and 35 (relinked).",
+      "procedure": "worktrees/krn-041-missing-exports-20261110/docs/procedures/krn-041/missing_exports.py",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-10T04:44:32+00:00",
+      "evidence": "worktrees/krn-041-missing-exports-20261110/docs/procedures/krn-041/evidence-run-001.json",
+      "evidence_sha256": "1cb691432c6a9771784c59309dcbb645815fb28cbc25813177f9935f87a84aa9",
+      "outcome": "pass",
+      "recorded_at": "2026-11-10T04:46:56+00:00"
+    },
+    {
+      "id": "KRN041-002",
+      "task": "KRN-041",
+      "owner": "claude-export-dossier-20261110-x41",
+      "kind": "host-test",
+      "status": "planned",
+      "hypothesis": "As KRN041-001, plus: all-kpi.exp regenerated from the genuine lists equals the STR-041 bytes; a RELEASE-style link (the relinked object set plus -exported_symbols_list, as MakeInc.def does for RELEASE arm64) fails on exactly the 35 non-stubbed names with the genuine lists and links with no undefined symbol with the 0002 profile.",
+      "procedure": "worktrees/krn-041-missing-exports-20261110/docs/procedures/krn-041/missing_exports.py",
+      "timeout_seconds": 1800,
+      "created_at": "2026-11-10T04:47:04+00:00"
     }
   ],
   "events": [
@@ -50466,6 +50784,482 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-10T04:20:23+00:00",
+      "action": "task.transfer:VM-002",
+      "owner": "claude-guest-xnu-20261110-g2",
+      "tasks": [
+        {
+          "id": "VM-002",
+          "status": "blocked",
+          "owner": "claude-guest-xnu-20261110-g2",
+          "priority": 70,
+          "progress_note": "VM-004 resolved genericQEMU prerequisite with actual QEMU10.2.0 virt/TCG,cortex-a76 and bounded stopped-machine controls. Read-only existing VM002 harness with explicit built binary,old built shim and ownedPID1 returns exit2 with exactly one missing completekernel input;no guest started. Historical VM002 evidence remains inconclusive.",
+          "next_step": "Supply and independently qualify a complete selected QEMU/AVF XNU guest kernel with mockfs and PSCI exit;then obtain one concrete guest resource lease,capture genuine Darwin/PID1 console and measure guest/host stopping. VM004 followup handoff:worktrees/vm-004-20261105/docs/procedures/qemu-host/README.md. Keep VM002 blocked;no Linux substitute or source/object acceptance.",
+          "blocked_reason": "VM-004 now supplies genuinely built generic QEMU10.2.0 ARM64 virt/TCG and measured bounded empty-machine stopping;read-only existing VM002 preflight accepts it and reports only missing kernel. Still need complete linked provenance-qualified XNU guest kernel for selected QEMU/AVF board,mockfs raw-executable ramdisk and intended PSCI exit. Actual Darwin guest/PID1 execution and guest stopping remain unmeasured;E1S object closure is not a guest kernel. VM-002 remains blocked under original am owner.",
+          "last_heartbeat": "2026-11-10T04:20:23+00:00",
+          "branch": "team/vm-002-20261105",
+          "worktree": "worktrees/vm-002-20261105",
+          "handoff": "worktrees/vm-002-20261105/docs/procedures/vm-002/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:21:32+00:00",
+      "action": "task.resume:VM-002",
+      "owner": "claude-guest-xnu-20261110-g2",
+      "tasks": [
+        {
+          "id": "VM-002",
+          "status": "in_progress",
+          "owner": "claude-guest-xnu-20261110-g2",
+          "priority": 70,
+          "progress_note": "VM-004 resolved genericQEMU prerequisite with actual QEMU10.2.0 virt/TCG,cortex-a76 and bounded stopped-machine controls. Read-only existing VM002 harness with explicit built binary,old built shim and ownedPID1 returns exit2 with exactly one missing completekernel input;no guest started. Historical VM002 evidence remains inconclusive.",
+          "next_step": "Supply and independently qualify a complete selected QEMU/AVF XNU guest kernel with mockfs and PSCI exit;then obtain one concrete guest resource lease,capture genuine Darwin/PID1 console and measure guest/host stopping. VM004 followup handoff:worktrees/vm-004-20261105/docs/procedures/qemu-host/README.md. Keep VM002 blocked;no Linux substitute or source/object acceptance.",
+          "last_heartbeat": "2026-11-10T04:21:32+00:00",
+          "branch": "team/vm-002-20261105",
+          "worktree": "worktrees/vm-002-20261105",
+          "handoff": "worktrees/vm-002-20261105/docs/procedures/vm-002/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:21:54+00:00",
+      "action": "task.update:VM-002",
+      "owner": "claude-guest-xnu-20261110-g2",
+      "tasks": [
+        {
+          "id": "VM-002",
+          "status": "in_progress",
+          "owner": "claude-guest-xnu-20261110-g2",
+          "priority": 70,
+          "progress_note": "Resumed under claude-guest-xnu-20261110-g2; new worktree on top of team/vm-002-20261105",
+          "next_step": "Set up HakiOS (scion-avf a6f4bc3) toolchain and build XNU guest kernel for QEMU virt",
+          "last_heartbeat": "2026-11-10T04:21:54+00:00",
+          "branch": "team/vm-002-guest-20261110",
+          "worktree": "worktrees/vm-002-guest-20261110",
+          "handoff": "worktrees/vm-002-20261105/docs/procedures/vm-002/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:22:30+00:00",
+      "action": "task.resume:VM-049",
+      "owner": "claude-root-kvm-20261110-k49",
+      "tasks": [
+        {
+          "id": "VM-049",
+          "status": "in_progress",
+          "owner": "claude-root-kvm-20261110-k49",
+          "priority": 80,
+          "last_heartbeat": "2026-11-10T04:22:30+00:00",
+          "branch": "team/vm-049-root-kvm-20261110",
+          "worktree": "worktrees/vm-049-root-kvm-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:23:56+00:00",
+      "action": "task.done:VM-049",
+      "owner": "claude-root-kvm-20261110-k49",
+      "tasks": [
+        {
+          "id": "VM-049",
+          "status": "done",
+          "owner": "claude-root-kvm-20261110-k49",
+          "priority": 80,
+          "last_heartbeat": "2026-11-10T04:22:30+00:00",
+          "branch": "team/vm-049-root-kvm-20261110",
+          "worktree": "worktrees/vm-049-root-kvm-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:24:56+00:00",
+      "action": "task.add:VM-051",
+      "owner": "claude-kvm-guest-20261110-k51",
+      "tasks": [
+        {
+          "id": "VM-051",
+          "status": "pending",
+          "owner": null,
+          "priority": 85
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:25:05+00:00",
+      "action": "task.claim:VM-051",
+      "owner": "claude-kvm-guest-20261110-k51",
+      "tasks": [
+        {
+          "id": "VM-051",
+          "status": "in_progress",
+          "owner": "claude-kvm-guest-20261110-k51",
+          "priority": 85,
+          "last_heartbeat": "2026-11-10T04:25:05+00:00",
+          "branch": "team/vm-051-minimal-guest-20261110",
+          "worktree": "worktrees/vm-051-minimal-guest-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:26:53+00:00",
+      "action": "experiment.plan:EXP-VM051-001",
+      "owner": "claude-kvm-guest-20261110-k51"
+    },
+    {
+      "at": "2026-11-10T04:28:01+00:00",
+      "action": "task.add:INT-004",
+      "owner": "claude-integration-20261110-i1",
+      "tasks": [
+        {
+          "id": "INT-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:28:09+00:00",
+      "action": "task.claim:INT-004",
+      "owner": "claude-integration-20261110-i1",
+      "tasks": [
+        {
+          "id": "INT-004",
+          "status": "in_progress",
+          "owner": "claude-integration-20261110-i1",
+          "priority": 100,
+          "last_heartbeat": "2026-11-10T04:28:09+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:28:24+00:00",
+      "action": "task.update:INT-004",
+      "owner": "claude-integration-20261110-i1",
+      "tasks": [
+        {
+          "id": "INT-004",
+          "status": "in_progress",
+          "owner": "claude-integration-20261110-i1",
+          "priority": 100,
+          "progress_note": "Inventoried 291 local branches: 41 ancestors of main, 198 more fully patch-equivalent to main, 52 with unique commits classified by task status",
+          "next_step": "Merge done-and-pass branches on integration/2026-11-10 in dependency order",
+          "last_heartbeat": "2026-11-10T04:28:24+00:00",
+          "branch": "integration/2026-11-10",
+          "worktree": "worktrees/integration-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:29:00+00:00",
+      "action": "experiment.record:EXP-VM051-001",
+      "owner": "claude-kvm-guest-20261110-k51"
+    },
+    {
+      "at": "2026-11-10T04:29:08+00:00",
+      "action": "task.done:VM-051",
+      "owner": "claude-kvm-guest-20261110-k51",
+      "tasks": [
+        {
+          "id": "VM-051",
+          "status": "done",
+          "owner": "claude-kvm-guest-20261110-k51",
+          "priority": 85,
+          "last_heartbeat": "2026-11-10T04:25:05+00:00",
+          "branch": "team/vm-051-minimal-guest-20261110",
+          "worktree": "worktrees/vm-051-minimal-guest-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:30:36+00:00",
+      "action": "task.add:VM-052",
+      "owner": "claude-s24vmm-20261110-v52",
+      "tasks": [
+        {
+          "id": "VM-052",
+          "status": "pending",
+          "owner": null,
+          "priority": 85
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:30:45+00:00",
+      "action": "task.claim:VM-052",
+      "owner": "claude-s24vmm-20261110-v52",
+      "tasks": [
+        {
+          "id": "VM-052",
+          "status": "in_progress",
+          "owner": "claude-s24vmm-20261110-v52",
+          "priority": 85,
+          "last_heartbeat": "2026-11-10T04:30:45+00:00",
+          "branch": "team/vm-052-s24vmm-20261110",
+          "worktree": "worktrees/vm-052-s24vmm-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:30:53+00:00",
+      "action": "task.add:KRN-041",
+      "owner": "claude-export-dossier-20261110-x41",
+      "tasks": [
+        {
+          "id": "KRN-041",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:31:07+00:00",
+      "action": "task.claim:KRN-041",
+      "owner": "claude-export-dossier-20261110-x41",
+      "tasks": [
+        {
+          "id": "KRN-041",
+          "status": "in_progress",
+          "owner": "claude-export-dossier-20261110-x41",
+          "priority": 90,
+          "last_heartbeat": "2026-11-10T04:31:07+00:00",
+          "branch": "team/krn-041-missing-exports-20261110",
+          "worktree": "worktrees/krn-041-missing-exports-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:39:20+00:00",
+      "action": "task.done:VM-052",
+      "owner": "claude-s24vmm-20261110-v52",
+      "tasks": [
+        {
+          "id": "VM-052",
+          "status": "done",
+          "owner": "claude-s24vmm-20261110-v52",
+          "priority": 85,
+          "last_heartbeat": "2026-11-10T04:30:45+00:00",
+          "branch": "team/vm-052-s24vmm-20261110",
+          "worktree": "worktrees/vm-052-s24vmm-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:41:40+00:00",
+      "action": "task.add:VM-053",
+      "owner": "claude-vm-display-20261110-v53",
+      "tasks": [
+        {
+          "id": "VM-053",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:41:50+00:00",
+      "action": "task.claim:VM-053",
+      "owner": "claude-vm-display-20261110-v53",
+      "tasks": [
+        {
+          "id": "VM-053",
+          "status": "in_progress",
+          "owner": "claude-vm-display-20261110-v53",
+          "priority": 80,
+          "last_heartbeat": "2026-11-10T04:41:50+00:00",
+          "branch": "team/vm-053-display-input-20261110",
+          "worktree": "worktrees/vm-053-display-input-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:43:53+00:00",
+      "action": "task.add:GPU-016",
+      "owner": "claude-gpu-stock-20261110-g3",
+      "tasks": [
+        {
+          "id": "GPU-016",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:44:02+00:00",
+      "action": "task.claim:GPU-016",
+      "owner": "claude-gpu-stock-20261110-g3",
+      "tasks": [
+        {
+          "id": "GPU-016",
+          "status": "in_progress",
+          "owner": "claude-gpu-stock-20261110-g3",
+          "priority": 80,
+          "last_heartbeat": "2026-11-10T04:44:02+00:00",
+          "branch": "team/gpu-003-stock-vulkan-20261110",
+          "worktree": "worktrees/gpu-003-stock-vulkan-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:44:08+00:00",
+      "action": "task.update:INT-004",
+      "owner": "claude-integration-20261110-i1",
+      "tasks": [
+        {
+          "id": "INT-004",
+          "status": "in_progress",
+          "owner": "claude-integration-20261110-i1",
+          "priority": 100,
+          "progress_note": "Merged 21 verified task branches (--no-ff) on integration/2026-11-10 and fast-forwarded main e34c666 -> 1e36ed7; 111 files added, none modified; per-branch rechecks reproduced recorded results; primary make check exit 0 (173 tests)",
+          "next_step": "Commit docs/integration/2026-11-10 README and evidence, fast-forward main again, complete INT-004",
+          "last_heartbeat": "2026-11-10T04:44:08+00:00",
+          "branch": "integration/2026-11-10",
+          "worktree": "worktrees/integration-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:44:32+00:00",
+      "action": "experiment.plan:KRN041-001",
+      "owner": "claude-export-dossier-20261110-x41"
+    },
+    {
+      "at": "2026-11-10T04:46:27+00:00",
+      "action": "task.update:VM-002",
+      "owner": "claude-guest-xnu-20261110-g2",
+      "tasks": [
+        {
+          "id": "VM-002",
+          "status": "in_progress",
+          "owner": "claude-guest-xnu-20261110-g2",
+          "priority": 70,
+          "progress_note": "Source-built XNU (scion-avf a6f4bc3, BCM2837 DEVELOPMENT) boots on QEMU virt/TCG cortex-a76 1 vCPU 512MiB to owned PID1 v2; reboot(RB_HALT) -> avf: halt (PSCI SYSTEM_OFF); QEMU exit 0 in ~0.6s; avf_exit=0 control stopped by host deadline. Commits 42ee600, 17a68e8.",
+          "next_step": "Coordinator: run guest/Image + guest/payload.bin under root KVM on S24 with a VMM FDT per guest-20261110.md (1 vCPU first; patch 1509 PA 0xFDA10000 store affects SMP).",
+          "last_heartbeat": "2026-11-10T04:46:27+00:00",
+          "branch": "team/vm-002-guest-20261110",
+          "worktree": "worktrees/vm-002-guest-20261110",
+          "handoff": "worktrees/vm-002-guest-20261110/docs/procedures/vm-002/guest-20261110.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:46:35+00:00",
+      "action": "task.done:VM-002",
+      "owner": "claude-guest-xnu-20261110-g2",
+      "tasks": [
+        {
+          "id": "VM-002",
+          "status": "done",
+          "owner": "claude-guest-xnu-20261110-g2",
+          "priority": 70,
+          "progress_note": "Source-built XNU (scion-avf a6f4bc3, BCM2837 DEVELOPMENT) boots on QEMU virt/TCG cortex-a76 1 vCPU 512MiB to owned PID1 v2; reboot(RB_HALT) -> avf: halt (PSCI SYSTEM_OFF); QEMU exit 0 in ~0.6s; avf_exit=0 control stopped by host deadline. Commits 42ee600, 17a68e8.",
+          "next_step": "Coordinator: run guest/Image + guest/payload.bin under root KVM on S24 with a VMM FDT per guest-20261110.md (1 vCPU first; patch 1509 PA 0xFDA10000 store affects SMP).",
+          "last_heartbeat": "2026-11-10T04:46:27+00:00",
+          "branch": "team/vm-002-guest-20261110",
+          "worktree": "worktrees/vm-002-guest-20261110",
+          "handoff": "worktrees/vm-002-guest-20261110/docs/procedures/vm-002/guest-20261110.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:46:56+00:00",
+      "action": "experiment.record:KRN041-001",
+      "owner": "claude-export-dossier-20261110-x41"
+    },
+    {
+      "at": "2026-11-10T04:47:04+00:00",
+      "action": "experiment.plan:KRN041-002",
+      "owner": "claude-export-dossier-20261110-x41"
+    },
+    {
+      "at": "2026-11-10T04:47:30+00:00",
+      "action": "task.update:GPU-016",
+      "owner": "claude-gpu-stock-20261110-g3",
+      "tasks": [
+        {
+          "id": "GPU-016",
+          "status": "in_progress",
+          "owner": "claude-gpu-stock-20261110-g3",
+          "priority": 80,
+          "progress_note": "Verified current compiled-input digest ff4e24ce... equals TST-002/EMULATOR-016 qualified source; installing exact qualified APK bytes 1187f632... (no rebuild needed). Driver script docs/procedures/gpu-016/run_probe.py written in worktree.",
+          "next_step": "Run the bounded device session, then write the note and evidence",
+          "last_heartbeat": "2026-11-10T04:47:30+00:00",
+          "branch": "team/gpu-003-stock-vulkan-20261110",
+          "worktree": "worktrees/gpu-003-stock-vulkan-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:47:40+00:00",
+      "action": "task.update:INT-004",
+      "owner": "claude-integration-20261110-i1",
+      "tasks": [
+        {
+          "id": "INT-004",
+          "status": "in_progress",
+          "owner": "claude-integration-20261110-i1",
+          "priority": 100,
+          "progress_note": "Correction to the previous note: 19 merge commits (not 21). main e34c666 -> 1e36ed7 (merges) -> e99a69d (README, branches.json, evidence). make check exit 0 after both fast-forwards.",
+          "next_step": "Complete INT-004 with docs/integration/2026-11-10/evidence.json",
+          "last_heartbeat": "2026-11-10T04:47:40+00:00",
+          "branch": "integration/2026-11-10",
+          "worktree": "worktrees/integration-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:47:46+00:00",
+      "action": "task.add:VM-054",
+      "owner": "claude-xnu-s24-20261110-v54",
+      "tasks": [
+        {
+          "id": "VM-054",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:47:51+00:00",
+      "action": "task.done:INT-004",
+      "owner": "claude-integration-20261110-i1",
+      "tasks": [
+        {
+          "id": "INT-004",
+          "status": "done",
+          "owner": "claude-integration-20261110-i1",
+          "priority": 100,
+          "progress_note": "Correction to the previous note: 19 merge commits (not 21). main e34c666 -> 1e36ed7 (merges) -> e99a69d (README, branches.json, evidence). make check exit 0 after both fast-forwards.",
+          "next_step": "Complete INT-004 with docs/integration/2026-11-10/evidence.json",
+          "last_heartbeat": "2026-11-10T04:47:40+00:00",
+          "branch": "integration/2026-11-10",
+          "worktree": "worktrees/integration-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T04:47:57+00:00",
+      "action": "task.claim:VM-054",
+      "owner": "claude-xnu-s24-20261110-v54",
+      "tasks": [
+        {
+          "id": "VM-054",
+          "status": "in_progress",
+          "owner": "claude-xnu-s24-20261110-v54",
+          "priority": 90,
+          "last_heartbeat": "2026-11-10T04:47:57+00:00",
+          "branch": "team/vm-054-xnu-guest-s24-20261110",
+          "worktree": "worktrees/vm-054-xnu-guest-s24-20261110"
+        }
+      ]
     }
   ]
 }
