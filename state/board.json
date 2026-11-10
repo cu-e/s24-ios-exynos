@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T16:19:47+00:00",
-  "ledger_updated_at": "2026-11-10T16:19:25+00:00",
-  "registry_sha256": "f932d7d0a25d369388e61ac75bb91a5d765b3c6ce9ee5d14a24565b87472b884",
+  "generated_at": "2026-11-10T17:05:19+00:00",
+  "ledger_updated_at": "2026-11-10T17:04:59+00:00",
+  "registry_sha256": "bf97d4962c19f86e7582ab08dcae23e7a6f4b9e112b336340a378673e5efdee4",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [],
@@ -164,6 +164,7 @@
       "REV-022",
       "VM-009",
       "NAT-027",
+      "NAT-028",
       "KRN-006",
       "KRN-014",
       "KRN-015",
@@ -4856,6 +4857,49 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-027.md"
+    },
+    {
+      "id": "NAT-028",
+      "title": "Prepare the NAT-022 XNU-entry marker: a stub placed at the kernel copy's entry point that draws STAGE 0x50 from inside the jump target, plus a jump variant of the loader, host-tested and held for an owner decision",
+      "status": "done",
+      "owner": "claude-nat028-20261110-xnuentry",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 98,
+      "depends_on": [
+        "NAT-027"
+      ],
+      "paths": [
+        "docs/procedures/nat-022",
+        "artifacts/nat-022"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "The kernel entry point, its displaced first instruction and the NOP padding that can host a stub are derived from the real payload header and segment table (not from the loader's own log), and the stub placement (entry word plus NOPs, 8-byte aligned literals) is checked against the segment's copied file range.",
+        "A hash-anchored, deterministic source variant (loader-diag-xnu-entry) installs a position-independent stub at the kernel copy's entry before the full-window cache clean and returns the entry to start.S; the stub sets a known stack and calls a noreturn marker routine that draws STAGE 0x50 (XNU_ENTRY) plus the stub PC, the incoming x0, the current EL and SCTLR M/C/I bits and holds. No instruction of the XNU kernel itself is executed by this variant: the stub overwrites the first words of the entry, and the original first word is not replayed. Every earlier image stays byte-identical (new code is behind new macros).",
+        "Host checks that are independent of the implementation: the assembled stub bytes are decoded by capstone and each instruction, literal address and register use is asserted; the real installer function (compiled for the host) is run on a copy of the real kernel segment bytes and only the intended words change; the marker's frames decode with decode.py/decode_video.py (new kind) and the XNU_ENTRY stage can only be produced by the stub path; the alignment scan and trap checks pass. All labelled host-test: nothing here shows that the S24 reaches the kernel copy.",
+        "A RECOVERY package is built and host-tested, a session driver is gated on a new decision file, and an image-specific decision request (SHA-256s, device access, what runs and what does not, risks, recovery) is put to the owner. Nothing is flashed or run on the phone and no jump is made before that decision."
+      ],
+      "steps": [
+        "Derive entry/padding facts from the real payload",
+        "Write the stub, installer and marker routine behind new macros",
+        "Add the patch_loader option, build and reproduce the image, decode new frame kind",
+        "Host-check with independent decoders, package, gate the session driver",
+        "Document and put the decision question to the owner"
+      ],
+      "started_at": "2026-11-10T16:44:09+00:00",
+      "last_heartbeat": "2026-11-10T17:01:30+00:00",
+      "updated_at": "2026-11-10T17:04:59+00:00",
+      "progress_note": "Host work complete and committed (606528b); evidence docs/procedures/nat-022/evidence-nat028.json. Putting the image-specific decision request for 0015 to the owner; no jump or device action before it.",
+      "next_step": "After the owner's answer: record decision 0015 only if accepted, then mark NAT-028 done and follow the decision-0014 run sequence",
+      "evidence": "docs/procedures/nat-022/evidence-nat028.json",
+      "evidence_sha256": "1079a7831e60909a15098c624b6b950509af2c111495315faef07a42fede3d23",
+      "finished_at": "2026-11-10T17:04:59+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-028.md"
     },
     {
       "id": "KRN-006",
@@ -14176,61 +14220,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-10T11:45:18+00:00",
-      "action": "task.block:ODIN-001",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "ODIN-001",
-          "status": "blocked",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 92,
-          "blocked_reason": "Stopped by the safety classifier at about 11:44Z on 2026-11-10 while writing the fake-libusb host test harness; not retried, reworded or delegated. Done: three local patches against odin4 338fde45 in artifacts/odin4-e1s/work (1fdfc82 wire sequence, 8030309 PIT chunks/no resend/payload total/pre-validation, e543114 session ledger/node check/staged report); built; upstream 47 tests pass; binary artifacts/odin4-e1s/odin4 (untested against any device or fake). Not done: wire-equivalence harness, patch export to patches/odin4-e1s, docs, evidence. The patched odin4 is not qualified; the NAT-013 tool stays the supported restore path. Resume only on an explicit owner instruction after support review.",
-          "last_heartbeat": "2026-11-10T11:45:18+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T11:57:49+00:00",
-      "action": "task.add:NAT-022",
-      "owner": "claude-nat022-20261110-diag",
-      "tasks": [
-        {
-          "id": "NAT-022",
-          "status": "pending",
-          "priority": 97
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T11:58:09+00:00",
-      "action": "task.claim:NAT-022",
-      "owner": "claude-nat022-20261110-diag",
-      "tasks": [
-        {
-          "id": "NAT-022",
-          "status": "in_progress",
-          "owner": "claude-nat022-20261110-diag",
-          "priority": 97,
-          "last_heartbeat": "2026-11-10T11:58:09+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T12:06:53+00:00",
-      "action": "task.done:NAT-022",
-      "owner": "claude-nat022-20261110-diag",
-      "tasks": [
-        {
-          "id": "NAT-022",
-          "status": "done",
-          "owner": "claude-nat022-20261110-diag",
-          "priority": 97,
-          "last_heartbeat": "2026-11-10T11:58:09+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-10T12:28:58+00:00",
       "action": "task.add:NAT-023",
       "owner": "claude-nat022-20261110-diag",
@@ -14449,11 +14438,70 @@
           "last_heartbeat": "2026-11-10T16:11:04+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T16:43:49+00:00",
+      "action": "task.add:NAT-028",
+      "owner": "claude-nat028-20261110-xnuentry",
+      "tasks": [
+        {
+          "id": "NAT-028",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T16:44:09+00:00",
+      "action": "task.claim:NAT-028",
+      "owner": "claude-nat028-20261110-xnuentry",
+      "tasks": [
+        {
+          "id": "NAT-028",
+          "status": "in_progress",
+          "owner": "claude-nat028-20261110-xnuentry",
+          "priority": 98,
+          "last_heartbeat": "2026-11-10T16:44:09+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T17:01:30+00:00",
+      "action": "task.update:NAT-028",
+      "owner": "claude-nat028-20261110-xnuentry",
+      "tasks": [
+        {
+          "id": "NAT-028",
+          "status": "in_progress",
+          "owner": "claude-nat028-20261110-xnuentry",
+          "priority": 98,
+          "progress_note": "Host work complete and committed (606528b); evidence docs/procedures/nat-022/evidence-nat028.json. Putting the image-specific decision request for 0015 to the owner; no jump or device action before it.",
+          "next_step": "After the owner's answer: record decision 0015 only if accepted, then mark NAT-028 done and follow the decision-0014 run sequence",
+          "last_heartbeat": "2026-11-10T17:01:30+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T17:04:59+00:00",
+      "action": "task.done:NAT-028",
+      "owner": "claude-nat028-20261110-xnuentry",
+      "tasks": [
+        {
+          "id": "NAT-028",
+          "status": "done",
+          "owner": "claude-nat028-20261110-xnuentry",
+          "priority": 98,
+          "progress_note": "Host work complete and committed (606528b); evidence docs/procedures/nat-022/evidence-nat028.json. Putting the image-specific decision request for 0015 to the owner; no jump or device action before it.",
+          "next_step": "After the owner's answer: record decision 0015 only if accepted, then mark NAT-028 done and follow the decision-0014 run sequence",
+          "last_heartbeat": "2026-11-10T17:01:30+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "6ba76d14b715709b507848274208733ca00dc96e50008a82589e11fde4b37aff",
-    "BOARD.md": "a3a4001384315f1702ae098cfb3022d750222bc3019e8afb0866cb45e22921cc",
+    "STATUS.md": "2472658da99d954d75e2e2e3d0e6b07fea88cb1bac21ef85ce60a12a1fedd078",
+    "BOARD.md": "9d8f89ee76f6a074ae41340b1fa27aa96d4738ae5367e73e78ad014cc41628c4",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -14556,6 +14604,7 @@
     "planning/tasks/REV-022.md": "309089b648ae69cdd4f0b6c057aa9888f94209df5aabfbc4f38b44bb61ae6216",
     "planning/tasks/VM-009.md": "8d97935798a5c672c702610eeda3a40c187b0860da28264d625a7a3cf096d87d",
     "planning/tasks/NAT-027.md": "2de722fe79be02d8ce69be3798bc1fbee5bad4ad888235d9a3ea21073d4d70e8",
+    "planning/tasks/NAT-028.md": "9647f4f83e53ec74d3dc02e9aec44adab852c37b4003a8b6fa864c2246d647f6",
     "planning/tasks/KRN-006.md": "17787b37e62d7cb230c248532450af8108a583aca6b6e955cee29637f8e981a1",
     "planning/tasks/KRN-014.md": "373bcf06587ce0b77bbacdfa023baa6c9b888953717dafa33267ff49a60ea753",
     "planning/tasks/KRN-015.md": "28783b6b5313987331209c84d30f10ddeab6ee7f41bf6bf1d963790545460926",
