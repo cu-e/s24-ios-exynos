@@ -260,10 +260,46 @@ static void test_walk(void) {
     CHECK(vmm_walk(ram, B, sizeof ram, tcr16, 0, B + 0x4000, 0xfffffff009012345ull, &pa, NULL) == 0 && pa == 0x85012345ull);
 }
 
+/* VM-053: the SCFB region sits directly below the FDT, 2 MiB aligned, and the virtio-mmio input slot is
+ * described as QEMU virt does (0x0a000000, 0x200 bytes, GIC SPI 16 level-high = INTID 48). */
+static void test_scfb_plan_and_virtio_node(void) {
+    const uint64_t mib = 1ull << 20;
+    struct vmm_layout l = {.ram_size = 1024 * mib, .cpus = 1, .image_size = 0x30000, .initrd_size = 20 * mib,
+                           .bootargs = "", .scfb_w = 1080, .scfb_h = 2340, .virtio_input = 1};
+    CHECK(vmm_plan(&l) == 0);
+    const uint64_t want = (0x10000 + 1080ull * 2340 * 4 + 2 * mib - 1) / (2 * mib) * (2 * mib); /* header page + XR24 buffer */
+    CHECK(l.scfb_size == want && want == 10 * mib);
+    CHECK(l.fdt_addr == VMM_RAM_BASE + 1022 * mib && l.scfb_addr + l.scfb_size == l.fdt_addr && l.scfb_addr % (2 * mib) == 0);
+    CHECK(l.initrd_addr + l.initrd_size <= l.scfb_addr);
+
+    struct vmm_layout fits = l, collides = l, half = l, wide = l;
+    fits.initrd_size = l.scfb_addr - l.initrd_addr; /* ends exactly at the SCFB region */
+    CHECK(vmm_plan(&fits) == 0);
+    collides.initrd_size = l.scfb_addr - l.initrd_addr + 1;
+    CHECK(vmm_plan(&collides) == -1);
+    half.scfb_h = 0;
+    CHECK(vmm_plan(&half) == -1);
+    wide.scfb_w = 4097;
+    CHECK(vmm_plan(&wide) == -1);
+
+    static uint8_t blob[65536];
+    CHECK(vmm_build_fdt(&l, blob, sizeof blob) > 0);
+    uint32_t len = 0;
+    const uint8_t *p = lookup(blob, "/virtio_mmio@a000000", "reg", &len);
+    CHECK(p && len == 16 && cells64(p) == 0x0a000000ull && cells64(p + 8) == 0x200);
+    p = lookup(blob, "/virtio_mmio@a000000", "interrupts", &len);
+    CHECK(p && len == 12 && be32(p) == 0 && be32(p + 4) == 16 && be32(p + 8) == 4);
+    p = lookup(blob, "/virtio_mmio@a000000", "compatible", &len);
+    CHECK(p && !strcmp((const char *)p, "virtio,mmio"));
+    l.virtio_input = 0;
+    CHECK(vmm_build_fdt(&l, blob, sizeof blob) > 0 && !lookup(blob, "/virtio_mmio@a000000", "reg", &len));
+}
+
 int main(void) {
     test_walk();
     test_fdt_writer_errors();
     test_layout_and_fdt();
+    test_scfb_plan_and_virtio_node();
     test_image_extent();
     test_uart();
     test_rtc();
