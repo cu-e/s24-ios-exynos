@@ -2,9 +2,9 @@
 
 > Generated from state/lab.json. Use the CLI; do not edit this board or its task cards.
 
-Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-10T08:06:46+00:00.
+Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-10T08:14:43+00:00.
 
-Registry SHA256: `b0efe318790af614326e678cc174da4a61183a9bff25547e21b32ff93338a7d6`. Run `python3 tools/lab.py board --check` to detect stale files.
+Registry SHA256: `0ac251980b4654308c4ca4f9ba2f6a8cc3a3b968b0c010f50400c49c2c2def06`. Run `python3 tools/lab.py board --check` to detect stale files.
 
 [Workflow](docs/planning.md) · [All task details](planning/README.md) · [Machine view](state/board.json) · [Status](STATUS.md)
 
@@ -255,7 +255,7 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 | Owner | Task | State | Last heartbeat (UTC) | Report | Progress / next step | Context |
 |---|---|---|---|---|---|---|
 | claude-takeover-20261110-6c8f | VM-054 | in_progress | 2026-11-10T06:57:41+00:00 | stale | Sessions 002-004 + fp-probe (2026-11-10): first exception is EC=0x07 FP trap at _cpu_data_init (fmov d0,xzr, ELR 0xfffffff0074950b4) although XNU&#x27;s only CPACR_EL1 write (common_start) sets 0x300000 and CPACR reads 0x300000 at the breakpoint; the later SP1 recursion/address-size faults are fallout. fp_probe.S shows KVM FP is correct on A520/A720/X4 (FPEN=11 runs, FPEN=00 traps 0x1fe00000 to the guest, survives a 2 s spin). Tools: s24vmm --break (KVM_SET_GUEST_DEBUG, 6 HW BPs) and exit-time stage-1 walk/memory dump (VM-053 commits 92ae109, 8a8f77b, 01a93cc). Paused by owner: priority moved to native boot research. / Find why the FP trap reaches the guest with FPEN=11 (compare guest state at common_start vs cpu_data_init with --break; check CPTR/pKVM FP ownership); fp_probe.S uncommitted in the worktree. | branch: team/vm-054-xnu-guest-s24-20261110; worktree: worktrees/vm-054-xnu-guest-s24-20261110 |
-| claude-takeover-20261110-6c8f | KRN-001 | blocked | 2026-11-10T07:17:19+00:00 | stale | Reassessed: criteria 1 and 2 have SDK-free evidence (STR-041, KRN-041, KRN-042, STR-037); 0001/0002 integration and payload/ADT remain / After NAT-006 publishes payload/ADT evidence, or the owner decides on D22AP data, integrate 0001/0002 into a build tool and validate payload/ADT | branch: main; handoff: docs/procedures/kernel-build.md |
+| claude-takeover-20261110-6c8f | KRN-001 | blocked | 2026-11-10T08:14:28+00:00 | recent | Recheck 2026-11-10T08:15Z: NAT-006 was completed by codex-nat-priority-20261110-r1 as a host-only RECOVERY image build; its evidence has no ADT, D22AP /product tree or IPSW input, so blocker (b) is unchanged. Blocker (a) is KRN-043, stopped by the classifier. / Owner runs or allows KRN-043 (python3 -I tools/build/e1s_kernel_exports.py --run canon-a, canon-b, then --compare); owner decides on supplying the D22AP /product tree for payload/ADT validation. | branch: main; handoff: docs/procedures/kernel-build.md |
 | claude-takeover-20261110-6c8f | CELL-010 | blocked | 2026-11-10T07:51:59+00:00 | recent | Eight host guard groups pass. Exact live BYH3/uid2000 context reverified; two regular vendor RIL files exist, but ordinary shell checksum and normal ADB sync pulls are denied. No binary bytes acquired or privileges changed. / Use an explicitly supplied matching local RIL/vendor image for offline analysis, or a separately user-authorized future acquisition task; do not retry current access boundary | branch: main; handoff: docs/procedures/ril-capture/handoff.md |
 | claude-takeover-20261110-6c8f | VM-053 | in_progress | 2026-11-10T06:57:22+00:00 | stale | No progress note / Next step not reported | branch: team/vm-053-display-input-20261110; worktree: worktrees/vm-053-display-input-20261110 |
 | claude-takeover-20261110-6c8f | KRN-043 | blocked | 2026-11-10T07:20:52+00:00 | stale | Tool written, never executed (classifier denial) / Owner allows or runs the three commands in the README; then record evidence | branch: main; handoff: docs/procedures/krn-043/README.md |
@@ -275,8 +275,6 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 
 ## Recent activity
 
-- 2026-11-10T07:47:35+00:00 · claude-takeover-20261110-6c8f · task.resume:CELL-009
-  - CELL-009: CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.
 - 2026-11-10T07:48:02+00:00 · agy-nat006-20261110-aca2 · task.update:NAT-006
   - NAT-006: Commit d20cc17742a2b6f8c2aeb1273e702c98d5f41934: completed e1s_recovery.py, verify_image.py, test_e1s_recovery.py (4/4 OK), and 0002-loader-ui-pc-relative-string-tables.patch (0 C object R_AARCH64_ABS64 relocations). Built and verified artifacts/nat-006/build-002/recovery-nat006.img (c632d77c...) and stock restore package on host. Stopped at mandatory Step 4 pre-flash recovery safety gate before writing RECOVERY; phone RFCY10Z45KH untouched and running Android 14.
 - 2026-11-10T07:51:17+00:00 · claude-takeover-20261110-6c8f · task.done:CELL-009
@@ -315,6 +313,8 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
   - NAT-009: Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.
 - 2026-11-10T08:06:38+00:00 · codex-nat-priority-20261110-r1 · task.block:NAT-009
   - NAT-009: Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.
+- 2026-11-10T08:14:28+00:00 · claude-takeover-20261110-6c8f · task.update:KRN-001
+  - KRN-001: Recheck 2026-11-10T08:15Z: NAT-006 was completed by codex-nat-priority-20261110-r1 as a host-only RECOVERY image build; its evidence has no ADT, D22AP /product tree or IPSW input, so blocker (b) is unchanged. Blocker (a) is KRN-043, stopped by the classifier.
 
 Use a unique owner per agent session. Atomically take ready work:
 
