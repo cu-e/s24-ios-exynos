@@ -98,7 +98,7 @@ A passing host check does not establish operation on the S24. The `origin` field
 
 ## Current scope
 
-Code preparation, research and host tests are authorized. Inventory is limited to read-only access through already-authorized ADB. Test app installation and native experiments are not authorized yet. Registry flags do not replace the owner's authorization.
+Code preparation, research, host tests, merges into main, ADB and root diagnostics, read-only partition copies to the host, the project's own test APKs (`android-app`) and bounded GPU/KVM experiments including a test VM are authorized by the owner's decision record of 2026-11-10 ([0002](docs/decisions/0002-owner-autonomy-grant-2026-11-10.md)). Native experiments, partition writes, boot-chain changes, intentional reboots and anything that erases data remain unauthorized. Registry flags do not replace the owner's authorization.
 
 Fully autonomous return from a hung XNU kernel has not been demonstrated. Upstream e1s has no independent USB/network control plane. Avoiding USERDATA formatting does not guarantee Android will boot after a BOOT failure.
 

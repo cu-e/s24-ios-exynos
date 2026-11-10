@@ -94,6 +94,48 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("not authorized", result.stderr)
 
+    def decision(self, name="0099-test.md"):
+        (self.root / "docs/decisions").mkdir(exist_ok=True)
+        (self.root / "docs/decisions" / name).write_text("Owner decision fixture")
+        return "docs/decisions/" + name
+
+    def test_permit_requires_existing_decision_record(self):
+        before = (self.root / "state/lab.json").read_bytes()
+        for path in ["docs/decisions/missing.md", "docs/procedure.md"]:
+            result = self.cli("project", "permit", "--scope", "native", "--value", "true", "--decision", path, "--owner", "a")
+            self.assertEqual(result.returncode, 2, result.stderr)
+            self.assertIn("docs/decisions", result.stderr)
+        self.assertEqual((self.root / "state/lab.json").read_bytes(), before)
+
+    def test_permit_records_decision_and_event(self):
+        path = self.decision()
+        result = self.cli("project", "permit", "--scope", "native", "--value", "true", "--decision", path, "--owner", "a")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        state = json.loads((self.root / "state/lab.json").read_text())
+        self.assertIs(state["project"]["permissions"]["native"], True)
+        self.assertEqual(state["project"]["permission_decisions"][-1]["decision"], path)
+        self.assertEqual(state["events"][-1]["permissions"]["native"], True)
+        self.assertEqual(self.cli("task", "claim", "NAT-001", "--owner", "a").returncode, 0)
+        again = self.cli("project", "permit", "--scope", "native", "--value", "true", "--decision", path, "--owner", "a")
+        self.assertEqual(again.returncode, 2)
+
+    def test_transfer_moves_only_matching_active_claim(self):
+        path = self.decision()
+        self.assertEqual(self.cli("task", "claim", "HOST-001", "--owner", "old").returncode, 0)
+        wrong = self.cli("task", "transfer", "HOST-001", "--from-owner", "other", "--owner", "new", "--reason", "stopped", "--decision", path)
+        self.assertEqual(wrong.returncode, 2)
+        missing = self.cli("task", "transfer", "HOST-001", "--from-owner", "old", "--owner", "new", "--reason", "stopped", "--decision", path, "--handoff", "docs/none.md")
+        self.assertEqual(missing.returncode, 2)
+        pending = self.cli("task", "transfer", "HOST-002", "--from-owner", "old", "--owner", "new", "--reason", "stopped", "--decision", path)
+        self.assertEqual(pending.returncode, 2)
+        done = self.cli("task", "transfer", "HOST-001", "--from-owner", "old", "--owner", "new", "--reason", "stopped", "--decision", path, "--handoff", "docs/procedure.md")
+        self.assertEqual(done.returncode, 0, done.stderr)
+        state = json.loads((self.root / "state/lab.json").read_text())
+        moved = next(t for t in state["tasks"] if t["id"] == "HOST-001")
+        self.assertEqual((moved["owner"], moved["status"], moved["handoff"]), ("new", "in_progress", "docs/procedure.md"))
+        self.assertEqual(moved["ownership_history"][-1]["from"], "old")
+        self.assertEqual(self.cli("task", "heartbeat", "HOST-001", "--owner", "old").returncode, 2)
+
     def test_scope_cannot_be_disguised_as_host_evidence(self):
         self.state["tasks"][2]["evidence_kind"] = "host-test"
         with self.assertRaises(lab.LabError):

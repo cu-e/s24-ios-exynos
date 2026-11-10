@@ -60,6 +60,10 @@ python3 tools/lab.py task release DRV-001 --owner agent-touch-20261105-a
 
 Only the recorded owner may update, heartbeat, block, resume, release or complete owned work. Blocked tasks retain their paths until released or completed. Resume preserves the owner and rechecks prerequisites/scope. Release returns the task to pending; it does not revert files or Git changes. Save a handoff first. There is no automatic expiry, forced takeover or impersonation flow: inspect work and coordinate with its owner before explicit release.
 
+The only takeover is `task transfer ID --from-owner OLD --owner NEW --reason R --decision docs/decisions/FILE [--handoff PATH]`. It requires an owner decision record (currently 0002, for stopped Codex sessions), an active or blocked task held by OLD and a concrete reason. Check first that no live process works on the task. It keeps files, branch and results, appends `ownership_history` and leaves status unchanged. There is still no automatic expiry.
+
+Scope flags change only with `project permit --scope S --value true|false --decision docs/decisions/FILE --owner NAME`, which records the decision path in `project.permission_decisions` and in the event. The flag mirrors the owner's written decision; it never grants anything by itself.
+
 ## File reservations and parallel work
 
 Task paths are literal relative files/directories. Parent/child paths overlap: tools/ conflicts with tools/lab.py. Traversal, globs, absolute paths and symlink aliases are rejected. Claims on overlapping active/blocked task paths are rejected, even under the same owner. Pending tasks may overlap while waiting; narrow their planned scope before adding them.

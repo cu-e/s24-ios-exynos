@@ -12,7 +12,7 @@ Selected getprop values, shell uid, uname and screen dimensions are saved. IMEI,
 
 Wireless ADB can be configured separately with the owner. It does not survive entry into a kernel without its own USB/Wi-Fi driver. A connected USB cable alone does not provide control over hung XNU.
 
-The android-app stage requires a separately authorized test APK installation with documented removal and limitations. GPU-003/GPU-005 depend on that stage.
+The android-app stage is authorized since 2026-11-10 ([decision 0002](decisions/0002-owner-autonomy-grant-2026-11-10.md)): the project's own test APKs may be installed, run, updated and removed, with documented removal, time bounds and a stop path. Root diagnostics and read-only partition copies are allowed; partition writes, reboots and data-erasing actions are not. GPU-003/GPU-005 depend on that stage.
 
 Extended profile: [procedure](procedures/device-profile.md), `tools/device_profile.py --output-dir artifacts/device-profile/NEW`. Captures include CPU/GPU, kernel config, partitions and available hardware metadata, with commands, timestamps, SHA256 and availability statuses. Device-tree properties and /proc/iomem are unavailable to shell on this phone; do not automatically invoke su to bypass this restriction.
 

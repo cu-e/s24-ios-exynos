@@ -337,6 +337,8 @@ def transaction(root, action, owner):
                     changes.append({k: task[k] for k in ["id", "status", "owner", "priority", "priority_reason", "progress_note", "next_step", "blocked_reason", "last_heartbeat", "branch", "worktree", "handoff"] if k in task})
             if changes:
                 event["tasks"] = changes
+            if state["project"]["permissions"] != original["project"]["permissions"]:
+                event["permissions"] = dict(state["project"]["permissions"])
             state["events"].append(event)
             validate(root, state)
             atomic_json(path, state)
@@ -344,6 +346,14 @@ def transaction(root, action, owner):
                 publish_views(root, state)
             except (OSError, LabError) as exc:
                 raise LabError("Registry saved; generated views need refresh with 'board --write': " + str(exc)) from exc
+
+
+def decision_record(root, relative):
+    """An owner decision must be an existing regular file under docs/decisions/."""
+    path = within(root, relative)
+    if not path.is_file() or path.parent != (root / "docs/decisions").resolve():
+        raise LabError("The decision must be an existing file directly under docs/decisions/")
+    return path.relative_to(root.resolve()).as_posix()
 
 
 def owned(task, owner):
@@ -543,7 +553,7 @@ def parser():
     take.add_argument("--worktree")
     show = task.add_parser("show")
     show.add_argument("id")
-    for name in ["claim", "release", "block", "resume", "done", "update", "heartbeat", "prioritize"]:
+    for name in ["claim", "release", "block", "resume", "done", "update", "heartbeat", "prioritize", "transfer"]:
         q = task.add_parser(name)
         q.add_argument("id")
         q.add_argument("--owner", required=True)
@@ -561,6 +571,19 @@ def parser():
         if name == "prioritize":
             q.add_argument("--priority", type=int, required=True)
             q.add_argument("--reason", required=True)
+        if name == "transfer":
+            q.add_argument("--from-owner", required=True)
+            q.add_argument("--reason", required=True)
+            q.add_argument("--decision", required=True)
+            q.add_argument("--handoff")
+            q.add_argument("--branch")
+            q.add_argument("--worktree")
+    project = sub.add_parser("project").add_subparsers(dest="operation", required=True)
+    permit = project.add_parser("permit")
+    permit.add_argument("--scope", choices=sorted(SCOPES), required=True)
+    permit.add_argument("--value", choices=["true", "false"], required=True)
+    permit.add_argument("--decision", required=True)
+    permit.add_argument("--owner", required=True)
     exp = sub.add_parser("experiment").add_subparsers(dest="operation", required=True)
     plan = exp.add_parser("plan")
     plan.add_argument("id")
@@ -614,6 +637,18 @@ def main(argv=None):
     elif args.command == "history":
         for event in state["events"]:
             print(f"{event['at']} {event['owner']}: {event['action']}")
+    elif args.command == "project":
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.:@/-]{0,79}", args.owner):
+            raise LabError("Use a stable owner identifier without whitespace (up to 80 characters)")
+        decision = decision_record(root, args.decision)
+        with transaction(root, f"project.permit:{args.scope}", args.owner) as state:
+            value = args.value == "true"
+            if state["project"]["permissions"][args.scope] is value:
+                raise LabError("The permission already has this value; nothing changed")
+            state["project"]["permissions"][args.scope] = value
+            state["project"].setdefault("permission_decisions", []).append(
+                {"scope": args.scope, "value": value, "decision": decision, "owner": args.owner, "at": now()})
+        print(f"Permission {args.scope} = {args.value} per {decision}; this records an owner decision and grants nothing by itself")
     elif args.command == "task":
         if hasattr(args, "owner") and not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.:@/-]{0,79}", args.owner):
             raise LabError("Use a stable owner identifier without whitespace (up to 80 characters)")
@@ -645,6 +680,25 @@ def main(argv=None):
                 task = item(state["tasks"], args.id)
                 if args.operation == "claim":
                     claim_task(state, task, args.owner, args.branch, args.worktree)
+                elif args.operation == "transfer":
+                    decision = decision_record(root, args.decision)
+                    owned(task, args.from_owner)
+                    if task["status"] not in {"in_progress", "blocked"}:
+                        raise LabError("Only active or blocked work can be transferred")
+                    if args.owner == args.from_owner:
+                        raise LabError("A transfer needs a different new owner")
+                    if not args.reason.strip():
+                        raise LabError("A transfer needs a concrete reason")
+                    if args.handoff is not None:
+                        if not within(root, args.handoff).exists():
+                            raise LabError("The transfer handoff must be an existing project path")
+                        task["handoff"] = args.handoff
+                    for key in ["branch", "worktree"]:
+                        if getattr(args, key) is not None:
+                            task[key] = getattr(args, key)
+                    task.setdefault("ownership_history", []).append(
+                        {"from": args.from_owner, "to": args.owner, "reason": args.reason, "decision": decision, "at": now()})
+                    task.update(owner=args.owner, updated_at=now(), last_heartbeat=now())
                 elif args.operation == "prioritize":
                     if task["status"] != "pending":
                         raise LabError("Only pending work can be reprioritized")
