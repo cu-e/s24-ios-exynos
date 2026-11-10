@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T06:12:23+00:00",
+  "updated_at": "2026-11-10T06:27:48+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -11245,6 +11245,47 @@
       "evidence": "docs/procedures/ui-007/evidence.json",
       "evidence_sha256": "c812f1c2ba3860281263a074718da3a6d1cb0a6b3ba1c417c3f0513ead806980",
       "finished_at": "2026-11-10T06:12:23+00:00"
+    },
+    {
+      "id": "DRV-007",
+      "title": "Restore the source-qualified UFS host check in main and run the UFS and GPT read-only checks from make check (DRV-002 closure inputs)",
+      "status": "done",
+      "owner": "claude-takeover-20261110-6c8f",
+      "priority": 60,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "DRV-004",
+        "DRV-005",
+        "DRV-006"
+      ],
+      "paths": [
+        "src/platform/storage/ufs/check.py",
+        "tests/test_ufs_contract.py",
+        "docs/procedures/drv-002"
+      ],
+      "acceptance": [
+        "src/platform/storage/ufs/check.py passes on main by reading the pinned Samsung sources from the s24-linux object store when no session cache exists; the exact bytes are still verified by the profile sha256 and git blob id, and lazy fetch stays disabled.",
+        "tests/test_ufs_contract.py runs the UFS host check and the GPT check under make check, asserts their pass outcome and key counts, and skips only with a stated reason when the pinned references or host clang are absent.",
+        "docs/procedures/drv-002 maps each DRV-002 acceptance criterion (DMA/GPT/LUN boundaries, timeouts, write rejection, userdata not assumed readable, no PHY/IOMMU/MCQ hardware claim) to a concrete existing check, without claiming any hardware result.",
+        "No phone, MMIO or storage access."
+      ],
+      "sources": [
+        "s24-linux",
+        "s24-port"
+      ],
+      "steps": [
+        "Add an object-store source candidate to check.py",
+        "Wire both checks into a unittest",
+        "Write the DRV-002 acceptance map and evidence"
+      ],
+      "started_at": "2026-11-10T06:23:10+00:00",
+      "last_heartbeat": "2026-11-10T06:23:10+00:00",
+      "updated_at": "2026-11-10T06:27:48+00:00",
+      "branch": "main",
+      "evidence": "docs/procedures/drv-002/evidence.json",
+      "evidence_sha256": "b047d313a66009614ef33716dd82de40d4b3135c3c74189864149c4c8b2f0cc1",
+      "finished_at": "2026-11-10T06:27:48+00:00"
     }
   ],
   "experiments": [
@@ -51911,6 +51952,49 @@
           "branch": "team/ui-007-decon-boot-window-20261110",
           "worktree": "worktrees/ui-007-decon-boot-window-20261110",
           "handoff": "research/notes/native/UI-007-decon-boot-window.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:22:50+00:00",
+      "action": "task.add:DRV-007",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "DRV-007",
+          "status": "pending",
+          "owner": null,
+          "priority": 60
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:23:10+00:00",
+      "action": "task.claim:DRV-007",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "DRV-007",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 60,
+          "last_heartbeat": "2026-11-10T06:23:10+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:27:48+00:00",
+      "action": "task.done:DRV-007",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "DRV-007",
+          "status": "done",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 60,
+          "last_heartbeat": "2026-11-10T06:23:10+00:00",
+          "branch": "main"
         }
       ]
     }

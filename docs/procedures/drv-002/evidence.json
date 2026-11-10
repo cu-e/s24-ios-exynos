@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "task": "DRV-007",
+  "owner": "claude-takeover-20261110-6c8f",
+  "recorded_at": "2026-11-10T06:27:03+00:00",
+  "authorization": "docs/decisions/0002-owner-autonomy-grant-2026-11-10.md (item 1, host work)",
+  "summary": "Restored the source-qualified UFS READ(10)/MCQ host check on main by reading pinned Samsung blobs from the local object store (bytes still verified by sha256 and git blob id), wired it, the GPT admission suite and a new exact-status boundary program into make check, and mapped every DRV-002 criterion to a concrete check. No hardware result.",
+  "commit": "71b1c75",
+  "sources": {
+    "s24-linux": "417484173abc2c4fa93e738ea82ad9f2e84911b1",
+    "s24-port": "c8860decc62c6d6180e609036d027a2997972420"
+  },
+  "device_io": {"performed": false, "mmio": false, "storage_access": false},
+  "host_commands": [
+    {"argv": ["python3", "src/platform/storage/ufs/check.py", "--run", "drv007-baseline-20261110"], "revision": "97024b8", "exit_code": 1, "result": "fail: exact-source-available-0 (no session cache in main, sparse checkout lacks include/ufs/*)"},
+    {"argv": ["python3", "src/platform/storage/ufs/gpt_check.py", "--run", "drv007-baseline-20261110"], "revision": "97024b8", "exit_code": 0, "result": "pass, 14 tests, 72 mutations, no survivors"},
+    {"argv": ["python3", "src/platform/storage/ufs/check.py", "--run", "drv007-objstore-20261110"], "revision": "working tree of 71b1c75", "exit_code": 0, "result": "pass, 22/22 checks; check names, fixture counts (504318 checks, 56 donor cases, 2048 MCQ tags, 94 guard lengths, 100000 random completions) and the 10 non-check.py input hashes equal the accepted DRV-004 run artifacts/ufs-host/coordinator-integration-session1"},
+    {"argv": ["python3", "-m", "unittest", "tests.test_ufs_contract", "-v"], "exit_code": 0, "tests": 4},
+    {"argv": ["mutation check: six single-point mutations of host.c against test_exact_boundary_statuses_under_sanitizers, source restored and compared"], "exit_code": 0, "result": "6/6 killed: ucd-align-64, overlap-inclusive, lun-128-allowed, deadline-off-by-one, timeout-max-inclusive, extent-end-off-by-one"},
+    {"argv": ["make", "check"], "revision": "working tree of 71b1c75", "exit_code": 0, "tests": 205, "skipped": 0}
+  ],
+  "acceptance": [
+    {"criterion": "check.py passes on main via the object store with byte verification and lazy fetch disabled", "met": true, "where": "src/platform/storage/ufs/check.py; artifacts/ufs-host/drv007-objstore-20261110/evidence.json"},
+    {"criterion": "tests/test_ufs_contract.py runs both checks under make check with stated skips", "met": true, "where": "tests/test_ufs_contract.py"},
+    {"criterion": "docs/procedures/drv-002 maps each DRV-002 criterion to an existing check without hardware claims", "met": true, "where": "docs/procedures/drv-002/README.md"},
+    {"criterion": "No phone, MMIO or storage access", "met": true, "where": "device_io above"}
+  ],
+  "artifacts": [
+    "src/platform/storage/ufs/check.py",
+    "tests/test_ufs_contract.py",
+    "docs/procedures/drv-002/README.md",
+    "docs/procedures/drv-002/drv-007-task.json",
+    "artifacts/ufs-host/drv007-objstore-20261110/evidence.json",
+    "artifacts/ufs-gpt/drv007-baseline-20261110/evidence.json"
+  ],
+  "sha256": {
+    "src/platform/storage/ufs/check.py": "41c8cd4f2acbb1438adf89fa66e96220b074ff4ef73b4c7783038e3d23ff13d7",
+    "tests/test_ufs_contract.py": "8aae7611a98502a4fd2ada8cb3ab4739a7f99ec5d7d3edd8ba4f32ff651f0352",
+    "docs/procedures/drv-002/README.md": "fa423c08fcec3b9a3e37cc8e8f574a2b3ebca64a005b059464c80776af2ef556",
+    "docs/procedures/drv-002/drv-007-task.json": "592c97e30b4506c72042d415cc847efc18ad7fcc8f70b73d5e49108a928923fe",
+    "artifacts/ufs-host/drv007-objstore-20261110/evidence.json": "9c8fd22c78a5bc32e8aaadf2fcc7a218aa9ddd91067efb9308222c6043e6f6aa",
+    "artifacts/ufs-gpt/drv007-baseline-20261110/evidence.json": "c6d601bd0ea786ddcb0e1a32252f85944345345d281f7998a177634808f03ed0"
+  },
+  "limits": [
+    "Host-test only; no UFS PHY, UniPro, SysMMU, MCQ or DMA-coherency behaviour on Exynos 2400 is established.",
+    "The phone's real GPT has not been checked against the strict GPT rules.",
+    "DRV-002 itself stays pending: its tests/ reservation overlaps NAT-006; its owner must assess the map."
+  ]
+}
