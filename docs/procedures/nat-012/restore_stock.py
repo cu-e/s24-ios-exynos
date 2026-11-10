@@ -61,11 +61,16 @@ def main():
     a.out.mkdir(exist_ok=False,parents=True)
     image=(ROOT/'devices/recovery/backups/2026-11-10/recovery.img').read_bytes()
     if len(image)!=SIZE or hashlib.sha256(image).hexdigest()!=STOCK:raise ValueError('wrong stock bytes')
-    # The preceding probe ended its session without a reboot. Resume only.
+    # A fresh physical Download Mode entry is mandatory. EndSession stops the
+    # S-Boot async workers; BeginSession does not recreate them. Never resume
+    # after a standalone PIT/session probe on this bootloader.
     d=usb.core.find(idVendor=0x04e8,idProduct=0x685d,bus=a.bus,address=a.address)
     if d is None:raise RuntimeError('exact USB device disappeared')
     usb.util.claim_interface(d,1);link=Link(d,a.out)
     try:
+        link.write(b'ODIN')
+        if link.read(4)!=b'LOKE':raise RuntimeError('fresh-session handshake failed')
+        time.sleep(.2)
         link.command(0x64,0,(4,),expected=0x38000)
         link.command(0x64,5,(PART,))
         r=link.command(0x65,1,expected=None);size=struct.unpack('<II',r)[1]

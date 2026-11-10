@@ -95,3 +95,58 @@ attempt. 3 host guard tests pass (forbidden opcodes/targets/flags, corrupted PIT
 nonzero result). This is a changed, constrained transport attempt based on the
 successful probe, not a retry of the failed executable. It resumes the confirmed
 probe session and allows 120 seconds for individual flash/end acknowledgements.
+
+## Corrected session lifecycle, 2026-11-10T10:12Z
+
+stock-flash-002 also exited 1: all four sequence results were zero, but EndSession
+timed out after 120 seconds. No reboot command was sent; no writer remains.
+Both restore attempts incorrectly resumed a session after a standalone PIT
+EndSession. That was the rescue agent's sequencing error, not proof of a storage
+failure or a defective original image.
+
+Further local S-Boot analysis: async initializer 0x2839b0 has one direct call site
+in the code range, at Download Mode initialization 0x282af4. BeginSession handler
+0x2db8c8 allocates/reset protocol buffers but does not invoke it. EndSession calls
+0x283980 ->0x2dd32c, setting worker stop flag 0x931804; an empty work queue with
+that flag branches via 0x2dd470 to permanent loop 0x2dd89c. The second write worker
+is likewise stopped through 0x283600 ->0x2dcbdc. Thus a subsequent BeginSession
+can receive/acknowledge queued data without a live worker to commit it. This is
+a strong source-based explanation; a fresh-session device result must confirm it.
+Private disassembly/provenance: session-lifecycle-disassembly.txt and
+session-lifecycle-analysis.json under the run directory.
+
+Owner asked to re-enter Download Mode. Do not touch the current failed session.
+Next attempt performs handshake, BeginSession, PIT read/validation, stock-only
+transfer, EndSession and ordinary reboot in ONE fresh session. No preliminary
+standalone probe, no --resume, no second handshake between PIT and flash.
+The exact image/target/bounds/flags guards remain in place. All 3 host guard tests
+still pass. Full Android/root readback remains mandatory.
+
+## Successful stock restoration and Android return
+
+Owner confirmed fresh Download Mode entry; bus005/device024. No other writer.
+stock-flash-003 ran 2026-11-10T10:13:32.647158Z..10:13:36.068790Z, exit 0.
+The single session read and validated the exact same PIT, acknowledged four
+RECOVERY sequences (30+30+30+6 MiB), then confirmed EndSession result0 and
+ordinary reboot result0. This successful fresh-session result supports the
+stopped-worker explanation of the two resumed-session failures. No other
+partition, PIT, EFS, format, wipe or repartition command was sent.
+
+ADB briefly reported recovery, then Android. android-check-002 observed early
+boot (animation running, boot_completed empty) and already confirmed the full
+stock RECOVERY hash; it was correctly recorded as inconclusive. Final
+android-check-003 at 2026-11-10T10:14:50.957827Z passed: SM-S921B/e1s,
+S921BXXS9BYH3, sys.boot_completed=1, animation stopped, current user0,
+/data/user/0 and /data/app present, root full RECOVERY SHA-256
+96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67.
+user-session-check at 10:15:55.635406Z further confirms RUNNING_UNLOCKED,
+package/activity services present and boot_completed=1. No personal content,
+account list or application inventory was read; individual apps were not audited.
+
+Do not run another flash or experimental image. Save final evidence, record
+experiment003, complete NAT-012 and disable the temporary native registry flag.
+Follow-ups: NAT-013 (host restore transport/lifecycle/PIT qualification) and
+NAT-014 (saved-evidence review of boot-loop return assumptions, no native test).
+NAT-008/009/010 host completion must not be presented as proven XNU execution or
+working watchdog return on hardware. Existing NAT-011 is a proposal, not a proven
+fix; the current owner explicitly prohibits new XNU attempts.

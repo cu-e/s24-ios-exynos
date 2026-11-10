@@ -19,13 +19,18 @@ while time.monotonic()<end:
     time.sleep(2)
 else:
     out.write_text(json.dumps(dict(outcome='inconclusive',reason='No authorized ADB device within 180 seconds',recorded_at=datetime.datetime.now(datetime.timezone.utc).isoformat()),indent=2)+'\n');sys.exit(2)
+boot_deadline=time.monotonic()+180
+while time.monotonic()<boot_deadline:
+    r=run(['adb','shell','getprop','sys.boot_completed'],timeout=10)
+    if r.returncode==0 and r.stdout.strip()=='1':break
+    time.sleep(3)
 props={}
 for name in ['ro.product.model','ro.product.device','ro.build.PDA','sys.boot_completed','init.svc.bootanim']:
     r=run(['adb','shell','getprop',name]);props[name]=r.stdout.strip()
 assert props['ro.product.model']=='SM-S921B' and props['ro.product.device']=='e1s',props
 user=run(['adb','shell','am','get-current-user'])
 data=run(['adb','shell',"if test -d /data/user/0 && test -d /data/app; then echo user_data_directories_present; else echo unavailable; fi"])
-root_hash=run(['adb','shell','su','-c','sha256sum /dev/block/by-name/recovery'],timeout=120)
+root_hash=run(['adb','shell',"su -c 'sha256sum /dev/block/by-name/recovery'"],timeout=120)
 expected='96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67'
 hash_ok=root_hash.returncode==0 and root_hash.stdout.split()[:1]==[expected]
 result=dict(recorded_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),properties=props,current_user=user.stdout.strip(),user_data_directories=data.stdout.strip(),recovery_hash_match=hash_ok,commands=commands)
