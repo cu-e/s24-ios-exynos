@@ -1,0 +1,68 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-10T08:01:47.662408+00:00",
+  "commit": "d51a4110d131879e24f4bb2477a40b5c103a0497",
+  "summary": "NAT-007 source definitions and runtime phandles resolved; both variants pass ASan/UBSan register fixtures and freestanding ARM compilation; make check passes 208 tests.",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_native_watchdog.py",
+        "-v"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "clang",
+        "-target",
+        "aarch64-none-elf",
+        "-ffreestanding",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-c",
+        "src/native/watchdog/s5e9945.c",
+        "-o",
+        "artifacts/nat-007/check-001/watchdog.o"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "make",
+        "check"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "src/native/watchdog/s5e9945.c",
+    "src/native/watchdog/s5e9945.h",
+    "docs/procedures/nat-007/test.c",
+    "docs/procedures/nat-007/runtime.json",
+    "research/notes/native/NAT-007-watchdog-return-path.md",
+    "artifacts/nat-007/check-001/watchdog.o",
+    "artifacts/nat-007/check-001/make-check.log"
+  ],
+  "sha256": {
+    "src/native/watchdog/s5e9945.c": "60cebe5c84cd003c2b4e76f9fd5ec732953a9f1837fc0758961711868180b8cd",
+    "src/native/watchdog/s5e9945.h": "854022b3a3292dc20cbbaec041b5b520ce017302ba00b9cc2b3db49782182fa2",
+    "docs/procedures/nat-007/test.c": "d24b82fbf753eea64bfa52462e77776963ba36a88d257abd5857dc058a21ffc6",
+    "docs/procedures/nat-007/runtime.json": "0fd5b0027de2c6893e5bae0963af8545b483d4a2d7c323be5db501977a0747d2",
+    "research/notes/native/NAT-007-watchdog-return-path.md": "28672cadac012935c56b8f57e4600e6e9892997c4eb2a2d64578b58312ef0f3a",
+    "artifacts/nat-007/check-001/watchdog.o": "a903aa216daee32db8aba5a7d307c041468cf520fc3d4f2eddd2197970a531cd",
+    "artifacts/nat-007/check-001/make-check.log": "1516c60702a333b2dfe090b822032aa7a08f875e14c15fa4052418c050696c1c"
+  },
+  "limitations": [
+    "No native watchdog expiry, clock gate survival, secure PMU access or return to Android is established."
+  ]
+}

@@ -1,0 +1,56 @@
+--- a/shim/e1s-xnu/start.S
++++ b/shim/e1s-xnu/start.S
+@@ -44,6 +44,12 @@
+ 	eret
+ 
+ el1_entry:
++	/* No incoming translation tables or physical identity witness are known.
++	 * Reject M or C before stack/BSS/DTB/high-DRAM accesses. Never turn off
++	 * a live incoming mapping while executing at an unproven VA. */
++	mrs	x1, sctlr_el1
++	tbnz	x1, #0, halt
++	tbnz	x1, #2, halt
+ 	msr	spsel, #1
+ 	adr	x1, _stack_top
+ 	mov	sp, x1
+@@ -77,12 +83,29 @@
+ 	bl	loader_main
+ 	cbz	x0, halt
+ 	mov	x16, x0
++	/* Persist loader globals (boot_args_pa) and stacks before cache-off.
++	 * x16 holds entry; this loop performs no stores after its own clean. */
++	adr	x1, _head
++	adr	x2, _end
++	mrs	x3, ctr_el0
++	ubfx	x3, x3, #16, #4
++	mov	x4, #4
++	lsl	x4, x4, x3
++	sub	x3, x4, #1
++	bic	x1, x1, x3
++4:	dc	civac, x1
++	add	x1, x1, x4
++	cmp	x1, x2
++	b.lo	4b
++	dsb	sy
+ 	ldr	x0, boot_args_pa
+ 	mrs	x14, sctlr_el1
+ 	bic	x14, x14, #1		/* M */
+ 	bic	x14, x14, #4		/* C */
+ 	bic	x14, x14, #0x1000	/* I */
++	dsb	sy
+ 	msr	sctlr_el1, x14
++	isb
+ 	ic	iallu
+ 	dsb	sy
+ 	isb
+--- a/shim/e1s-xnu/loader.c
++++ b/shim/e1s-xnu/loader.c
+@@ -719,6 +719,8 @@
+ 	log_str("\nJUMP TO XNU\n");
+ 	/* CPU-local log needs no fixed-address flush or kernel handoff. */
+ 
++	/* Includes untouched zero pages and gaps between Mach-O segments. */
++	clean(win_base, mem_end);
+ 	hold_seconds(hold);
+ 	return entry_pa;
+ }
