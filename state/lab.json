@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T08:29:58+00:00",
+  "updated_at": "2026-11-10T08:34:57+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -11255,7 +11255,7 @@
     {
       "id": "VM-054",
       "title": "Boot the source-built XNU guest to PID 1 on the S24 under s24vmm",
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude-takeover-20261110-6c8f",
       "priority": 90,
       "scope": "android-app",
@@ -11283,7 +11283,7 @@
       ],
       "started_at": "2026-11-10T04:47:57+00:00",
       "last_heartbeat": "2026-11-10T06:57:41+00:00",
-      "updated_at": "2026-11-10T06:57:41+00:00",
+      "updated_at": "2026-11-10T08:34:57+00:00",
       "branch": "team/vm-054-xnu-guest-s24-20261110",
       "worktree": "worktrees/vm-054-xnu-guest-s24-20261110",
       "progress_note": "Sessions 002-004 + fp-probe (2026-11-10): first exception is EC=0x07 FP trap at _cpu_data_init (fmov d0,xzr, ELR 0xfffffff0074950b4) although XNU's only CPACR_EL1 write (common_start) sets 0x300000 and CPACR reads 0x300000 at the breakpoint; the later SP1 recursion/address-size faults are fallout. fp_probe.S shows KVM FP is correct on A520/A720/X4 (FPEN=11 runs, FPEN=00 traps 0x1fe00000 to the guest, survives a 2 s spin). Tools: s24vmm --break (KVM_SET_GUEST_DEBUG, 6 HW BPs) and exit-time stage-1 walk/memory dump (VM-053 commits 92ae109, 8a8f77b, 01a93cc). Paused by owner: priority moved to native boot research.",
@@ -11296,7 +11296,10 @@
           "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
           "at": "2026-11-10T06:57:41+00:00"
         }
-      ]
+      ],
+      "evidence": "docs/procedures/vm-054/evidence.json",
+      "evidence_sha256": "9bf4e5b4d170f04505726fba4a7aa5626af2411de3e96aa4f74d31723e84a28a",
+      "finished_at": "2026-11-10T08:34:57+00:00"
     },
     {
       "id": "NAT-005",
@@ -11809,7 +11812,7 @@
     {
       "id": "VM-055",
       "title": "s24vmm: optional FP-enabled boot vCPU (CPACR_EL1.FPEN=0b11 at reset) for guests that enable FP without an ISB",
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude-takeover-20261110-6c8f",
       "priority": 90,
       "scope": "host",
@@ -11836,11 +11839,14 @@
       ],
       "started_at": "2026-11-10T08:29:39+00:00",
       "last_heartbeat": "2026-11-10T08:29:58+00:00",
-      "updated_at": "2026-11-10T08:29:58+00:00",
+      "updated_at": "2026-11-10T08:33:23+00:00",
       "progress_note": "Claimed 2026-11-10T08:3xZ after the VM-054 fp-sync probe confirmed the unsynchronized CPACR write trap on cpu0/4/9.",
       "next_step": "Add --fp-on to s24vmm and run check.py",
       "branch": "team/vm-055-fp-reset-20261110",
-      "worktree": "worktrees/vm-055-fp-reset-20261110"
+      "worktree": "worktrees/vm-055-fp-reset-20261110",
+      "evidence": "docs/procedures/vm-055/evidence.json",
+      "evidence_sha256": "adda59b67725d41bfdd690c6562672e36896f1c5c270418aa55c2c8f5c4d0a5e",
+      "finished_at": "2026-11-10T08:33:23+00:00"
     }
   ],
   "experiments": [
@@ -53902,6 +53908,42 @@
           "last_heartbeat": "2026-11-10T08:29:58+00:00",
           "branch": "team/vm-055-fp-reset-20261110",
           "worktree": "worktrees/vm-055-fp-reset-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T08:33:23+00:00",
+      "action": "task.done:VM-055",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "VM-055",
+          "status": "done",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 90,
+          "progress_note": "Claimed 2026-11-10T08:3xZ after the VM-054 fp-sync probe confirmed the unsynchronized CPACR write trap on cpu0/4/9.",
+          "next_step": "Add --fp-on to s24vmm and run check.py",
+          "last_heartbeat": "2026-11-10T08:29:58+00:00",
+          "branch": "team/vm-055-fp-reset-20261110",
+          "worktree": "worktrees/vm-055-fp-reset-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T08:34:57+00:00",
+      "action": "task.done:VM-054",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "VM-054",
+          "status": "done",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 90,
+          "progress_note": "Sessions 002-004 + fp-probe (2026-11-10): first exception is EC=0x07 FP trap at _cpu_data_init (fmov d0,xzr, ELR 0xfffffff0074950b4) although XNU's only CPACR_EL1 write (common_start) sets 0x300000 and CPACR reads 0x300000 at the breakpoint; the later SP1 recursion/address-size faults are fallout. fp_probe.S shows KVM FP is correct on A520/A720/X4 (FPEN=11 runs, FPEN=00 traps 0x1fe00000 to the guest, survives a 2 s spin). Tools: s24vmm --break (KVM_SET_GUEST_DEBUG, 6 HW BPs) and exit-time stage-1 walk/memory dump (VM-053 commits 92ae109, 8a8f77b, 01a93cc). Paused by owner: priority moved to native boot research.",
+          "next_step": "Find why the FP trap reaches the guest with FPEN=11 (compare guest state at common_start vs cpu_data_init with --break; check CPTR/pKVM FP ownership); fp_probe.S uncommitted in the worktree.",
+          "last_heartbeat": "2026-11-10T06:57:41+00:00",
+          "branch": "team/vm-054-xnu-guest-s24-20261110",
+          "worktree": "worktrees/vm-054-xnu-guest-s24-20261110"
         }
       ]
     }

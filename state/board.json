@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T08:30:05+00:00",
-  "ledger_updated_at": "2026-11-10T08:29:58+00:00",
-  "registry_sha256": "231ebe62f998442537ac34f5896235236dbea61bde4d8d4b9ac65ef0b899449e",
+  "generated_at": "2026-11-10T08:35:17+00:00",
+  "ledger_updated_at": "2026-11-10T08:34:57+00:00",
+  "registry_sha256": "9c9949a11a45e935fae65e183f95a3adc7b44c8711167fde2a45219bc6dec16e",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [],
@@ -13,8 +13,6 @@
       "REV-047",
       "KRN-008",
       "KRN-004",
-      "VM-054",
-      "VM-055",
       "GPU-012"
     ],
     "blocked": [
@@ -231,9 +229,11 @@
       "REV-044",
       "STR-026",
       "KRN-041",
+      "VM-054",
       "NAT-007",
       "UI-007",
       "NAT-008",
+      "VM-055",
       "KRN-033",
       "KRN-035",
       "KRN-036",
@@ -7907,7 +7907,7 @@
     {
       "id": "VM-054",
       "title": "Boot the source-built XNU guest to PID 1 on the S24 under s24vmm",
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude-takeover-20261110-6c8f",
       "priority": 90,
       "scope": "android-app",
@@ -7935,7 +7935,7 @@
       ],
       "started_at": "2026-11-10T04:47:57+00:00",
       "last_heartbeat": "2026-11-10T06:57:41+00:00",
-      "updated_at": "2026-11-10T06:57:41+00:00",
+      "updated_at": "2026-11-10T08:34:57+00:00",
       "branch": "team/vm-054-xnu-guest-s24-20261110",
       "worktree": "worktrees/vm-054-xnu-guest-s24-20261110",
       "progress_note": "Sessions 002-004 + fp-probe (2026-11-10): first exception is EC=0x07 FP trap at _cpu_data_init (fmov d0,xzr, ELR 0xfffffff0074950b4) although XNU's only CPACR_EL1 write (common_start) sets 0x300000 and CPACR reads 0x300000 at the breakpoint; the later SP1 recursion/address-size faults are fallout. fp_probe.S shows KVM FP is correct on A520/A720/X4 (FPEN=11 runs, FPEN=00 traps 0x1fe00000 to the guest, survives a 2 s spin). Tools: s24vmm --break (KVM_SET_GUEST_DEBUG, 6 HW BPs) and exit-time stage-1 walk/memory dump (VM-053 commits 92ae109, 8a8f77b, 01a93cc). Paused by owner: priority moved to native boot research.",
@@ -7949,10 +7949,12 @@
           "at": "2026-11-10T06:57:41+00:00"
         }
       ],
-      "column": "in_progress",
+      "evidence": "docs/procedures/vm-054/evidence.json",
+      "evidence_sha256": "9bf4e5b4d170f04505726fba4a7aa5626af2411de3e96aa4f74d31723e84a28a",
+      "finished_at": "2026-11-10T08:34:57+00:00",
+      "column": "done",
       "reasons": [],
-      "card_path": "planning/tasks/VM-054.md",
-      "report_health": "stale"
+      "card_path": "planning/tasks/VM-054.md"
     },
     {
       "id": "NAT-007",
@@ -8104,7 +8106,7 @@
     {
       "id": "VM-055",
       "title": "s24vmm: optional FP-enabled boot vCPU (CPACR_EL1.FPEN=0b11 at reset) for guests that enable FP without an ISB",
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude-takeover-20261110-6c8f",
       "priority": 90,
       "scope": "host",
@@ -8131,15 +8133,17 @@
       ],
       "started_at": "2026-11-10T08:29:39+00:00",
       "last_heartbeat": "2026-11-10T08:29:58+00:00",
-      "updated_at": "2026-11-10T08:29:58+00:00",
+      "updated_at": "2026-11-10T08:33:23+00:00",
       "progress_note": "Claimed 2026-11-10T08:3xZ after the VM-054 fp-sync probe confirmed the unsynchronized CPACR write trap on cpu0/4/9.",
       "next_step": "Add --fp-on to s24vmm and run check.py",
       "branch": "team/vm-055-fp-reset-20261110",
       "worktree": "worktrees/vm-055-fp-reset-20261110",
-      "column": "in_progress",
+      "evidence": "docs/procedures/vm-055/evidence.json",
+      "evidence_sha256": "adda59b67725d41bfdd690c6562672e36896f1c5c270418aa55c2c8f5c4d0a5e",
+      "finished_at": "2026-11-10T08:33:23+00:00",
+      "column": "done",
       "reasons": [],
-      "card_path": "planning/tasks/VM-055.md",
-      "report_health": "recent"
+      "card_path": "planning/tasks/VM-055.md"
     },
     {
       "id": "KRN-033",
@@ -12218,7 +12222,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, VM-047, VM-054, KRN-043, NAT-009, VM-055"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, VM-047, KRN-043, NAT-009"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-002.md"
@@ -12262,7 +12266,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-002, NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, VM-047, VM-054, KRN-043, NAT-009, VM-055"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, VM-047, KRN-043, NAT-009"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -12301,7 +12305,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, VM-054, NAT-009"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -13232,29 +13236,33 @@
         "worktree": null
       }
     ],
-    "claude-takeover-20261110-6c8f": [
+    "codex-team-crypto-chacha-20261105-bu": [
       {
-        "id": "VM-054",
-        "status": "in_progress",
-        "last_heartbeat": "2026-11-10T06:57:41+00:00",
+        "id": "KRN-034",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-05T19:55:07+00:00",
         "report_health": "stale",
-        "progress_note": "Sessions 002-004 + fp-probe (2026-11-10): first exception is EC=0x07 FP trap at _cpu_data_init (fmov d0,xzr, ELR 0xfffffff0074950b4) although XNU's only CPACR_EL1 write (common_start) sets 0x300000 and CPACR reads 0x300000 at the breakpoint; the later SP1 recursion/address-size faults are fallout. fp_probe.S shows KVM FP is correct on A520/A720/X4 (FPEN=11 runs, FPEN=00 traps 0x1fe00000 to the guest, survives a 2 s spin). Tools: s24vmm --break (KVM_SET_GUEST_DEBUG, 6 HW BPs) and exit-time stage-1 walk/memory dump (VM-053 commits 92ae109, 8a8f77b, 01a93cc). Paused by owner: priority moved to native boot research.",
-        "next_step": "Find why the FP trap reaches the guest with FPEN=11 (compare guest state at common_start vs cpu_data_init with --break; check CPTR/pKVM FP ownership); fp_probe.S uncommitted in the worktree.",
-        "handoff": null,
-        "branch": "team/vm-054-xnu-guest-s24-20261110",
-        "worktree": "worktrees/vm-054-xnu-guest-s24-20261110"
-      },
+        "progress_note": "Coordinator accepted and integrated the supported explicit-nonce subset and REV-020 (bee71cd,11cd9ed,1302703,dbf6056). 59 vectors and 123999 host plus 123999 actual typed ARM checks, four CPU controls accepted; MAIN integration-014 make check PASS at aac27cfbc0d71b34eda33ddf366c72427507ae0b. Actual overall-inconclusive evidence: worktrees/krn-034-20261105/artifacts/crypto-chacha/commit-session2/evidence.json SHA256 f12416c502414402e32e4a6db0c040d9d2fb619d417186e2799415e7d15acc70. All-ten acceptance remains false: accepted KRN-037 leaves all eight selected incnonce contract fields unknown. No further supported-subset tests or implementation changes required.",
+        "next_step": "Await genuine applicable selected-version incnonce evidence for byte encoding, incremented byte range/order, overflow result and nonce mutation, permitted lifecycle states, state after increment and success behavior. Original owner retains reservation; resume only with legitimate new input and prospective qualification. Never infer a rule or copy restricted implementation bodies; never complete on the supported-nine-method result.",
+        "handoff": "worktrees/krn-034-20261105/docs/procedures/crypto-chacha/handoff.md",
+        "branch": "team/krn-034-20261105",
+        "worktree": "worktrees/krn-034-20261105"
+      }
+    ],
+    "codex-nat-priority-20261110-r1": [
       {
-        "id": "VM-055",
-        "status": "in_progress",
-        "last_heartbeat": "2026-11-10T08:29:58+00:00",
+        "id": "NAT-009",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-10T08:06:38+00:00",
         "report_health": "recent",
-        "progress_note": "Claimed 2026-11-10T08:3xZ after the VM-054 fp-sync probe confirmed the unsynchronized CPACR write trap on cpu0/4/9.",
-        "next_step": "Add --fp-on to s24vmm and run check.py",
-        "handoff": null,
-        "branch": "team/vm-055-fp-reset-20261110",
-        "worktree": "worktrees/vm-055-fp-reset-20261110"
-      },
+        "progress_note": "Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.",
+        "next_step": "Obtain applicable S-Boot contract or separately authorized NAT-004 hardware recovery evidence; retain pre-flash gate",
+        "handoff": "docs/procedures/nat-009/README.md",
+        "branch": null,
+        "worktree": null
+      }
+    ],
+    "claude-takeover-20261110-6c8f": [
       {
         "id": "KRN-001",
         "status": "blocked",
@@ -13300,32 +13308,6 @@
         "worktree": null
       }
     ],
-    "codex-team-crypto-chacha-20261105-bu": [
-      {
-        "id": "KRN-034",
-        "status": "blocked",
-        "last_heartbeat": "2026-11-05T19:55:07+00:00",
-        "report_health": "stale",
-        "progress_note": "Coordinator accepted and integrated the supported explicit-nonce subset and REV-020 (bee71cd,11cd9ed,1302703,dbf6056). 59 vectors and 123999 host plus 123999 actual typed ARM checks, four CPU controls accepted; MAIN integration-014 make check PASS at aac27cfbc0d71b34eda33ddf366c72427507ae0b. Actual overall-inconclusive evidence: worktrees/krn-034-20261105/artifacts/crypto-chacha/commit-session2/evidence.json SHA256 f12416c502414402e32e4a6db0c040d9d2fb619d417186e2799415e7d15acc70. All-ten acceptance remains false: accepted KRN-037 leaves all eight selected incnonce contract fields unknown. No further supported-subset tests or implementation changes required.",
-        "next_step": "Await genuine applicable selected-version incnonce evidence for byte encoding, incremented byte range/order, overflow result and nonce mutation, permitted lifecycle states, state after increment and success behavior. Original owner retains reservation; resume only with legitimate new input and prospective qualification. Never infer a rule or copy restricted implementation bodies; never complete on the supported-nine-method result.",
-        "handoff": "worktrees/krn-034-20261105/docs/procedures/crypto-chacha/handoff.md",
-        "branch": "team/krn-034-20261105",
-        "worktree": "worktrees/krn-034-20261105"
-      }
-    ],
-    "codex-nat-priority-20261110-r1": [
-      {
-        "id": "NAT-009",
-        "status": "blocked",
-        "last_heartbeat": "2026-11-10T08:06:38+00:00",
-        "report_health": "recent",
-        "progress_note": "Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.",
-        "next_step": "Obtain applicable S-Boot contract or separately authorized NAT-004 hardware recovery evidence; retain pre-flash gate",
-        "handoff": "docs/procedures/nat-009/README.md",
-        "branch": null,
-        "worktree": null
-      }
-    ],
     "codex-esim-frontend-20261105-l": [
       {
         "id": "ESIM-004",
@@ -13354,41 +13336,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-10T07:57:22+00:00",
-      "action": "task.claim:NAT-007",
-      "owner": "codex-nat-priority-20261110-r1",
-      "tasks": [
-        {
-          "id": "NAT-007",
-          "status": "in_progress",
-          "owner": "codex-nat-priority-20261110-r1",
-          "priority": 90,
-          "progress_note": "Source review started (pinned SHAs verified, driver files identical at both pins). Implementation and note were not produced in this session; no files written in the worktree.",
-          "next_step": "Caller/owner to decide how to proceed with this task",
-          "last_heartbeat": "2026-11-10T07:57:22+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T07:58:46+00:00",
-      "action": "task.transfer:NAT-006",
-      "owner": "codex-nat-priority-20261110-r1",
-      "tasks": [
-        {
-          "id": "NAT-006",
-          "status": "in_progress",
-          "owner": "codex-nat-priority-20261110-r1",
-          "priority": 95,
-          "progress_note": "Commit d20cc17742a2b6f8c2aeb1273e702c98d5f41934: completed e1s_recovery.py, verify_image.py, test_e1s_recovery.py (4/4 OK), and 0002-loader-ui-pc-relative-string-tables.patch (0 C object R_AARCH64_ABS64 relocations). Built and verified artifacts/nat-006/build-002/recovery-nat006.img (c632d77c...) and stock restore package on host. Stopped at mandatory Step 4 pre-flash recovery safety gate before writing RECOVERY; phone RFCY10Z45KH untouched and running Android 14.",
-          "next_step": "Main agent review of handoff.md / evidence.json (d20cc17742a2b6f8c2aeb1273e702c98d5f41934) and resolution of pre-flash blockers NAT-008 (host odin4/heimdall), NAT-007/NAT-009 (hardware watchdog & one-shot recovery reset), and NAT-010 (loader high-DRAM MMU/cache handoff).",
-          "last_heartbeat": "2026-11-10T07:58:46+00:00",
-          "branch": "team/nat-006-recovery-image-20261110",
-          "worktree": "worktrees/nat-006-recovery-image-20261110",
-          "handoff": "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/handoff.md"
-        }
-      ]
-    },
     {
       "at": "2026-11-10T07:59:10+00:00",
       "action": "task.update:NAT-006",
@@ -13685,11 +13632,47 @@
           "worktree": "worktrees/vm-055-fp-reset-20261110"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T08:33:23+00:00",
+      "action": "task.done:VM-055",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "VM-055",
+          "status": "done",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 90,
+          "progress_note": "Claimed 2026-11-10T08:3xZ after the VM-054 fp-sync probe confirmed the unsynchronized CPACR write trap on cpu0/4/9.",
+          "next_step": "Add --fp-on to s24vmm and run check.py",
+          "last_heartbeat": "2026-11-10T08:29:58+00:00",
+          "branch": "team/vm-055-fp-reset-20261110",
+          "worktree": "worktrees/vm-055-fp-reset-20261110"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T08:34:57+00:00",
+      "action": "task.done:VM-054",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "VM-054",
+          "status": "done",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 90,
+          "progress_note": "Sessions 002-004 + fp-probe (2026-11-10): first exception is EC=0x07 FP trap at _cpu_data_init (fmov d0,xzr, ELR 0xfffffff0074950b4) although XNU's only CPACR_EL1 write (common_start) sets 0x300000 and CPACR reads 0x300000 at the breakpoint; the later SP1 recursion/address-size faults are fallout. fp_probe.S shows KVM FP is correct on A520/A720/X4 (FPEN=11 runs, FPEN=00 traps 0x1fe00000 to the guest, survives a 2 s spin). Tools: s24vmm --break (KVM_SET_GUEST_DEBUG, 6 HW BPs) and exit-time stage-1 walk/memory dump (VM-053 commits 92ae109, 8a8f77b, 01a93cc). Paused by owner: priority moved to native boot research.",
+          "next_step": "Find why the FP trap reaches the guest with FPEN=11 (compare guest state at common_start vs cpu_data_init with --break; check CPTR/pKVM FP ownership); fp_probe.S uncommitted in the worktree.",
+          "last_heartbeat": "2026-11-10T06:57:41+00:00",
+          "branch": "team/vm-054-xnu-guest-s24-20261110",
+          "worktree": "worktrees/vm-054-xnu-guest-s24-20261110"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "05f62b7fd8055721e4623a551503abb161c0647f99e284759b1ed250be23d58a",
-    "BOARD.md": "3bf99732feefa146c4873ebac5c750f7bdd419b33149203c9a418a3dd01cfe8e",
+    "STATUS.md": "d4a510f3f6d244adec3006540d237a5dbdede32bed362ff1d90f7c1ea740d065",
+    "BOARD.md": "5b9e800d3d69d96a45f57a8de85d9933103d666a1318440529417d074137b4ab",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -13860,11 +13843,11 @@
     "planning/tasks/REV-044.md": "e61310b8327bd3b077f5887fdd065e43521b028f1e3d33184b0d8bba61f9c11e",
     "planning/tasks/STR-026.md": "3bc9e022a78b1a1794c871789e21328314a13e078280c87934d3954438e800a8",
     "planning/tasks/KRN-041.md": "73534a67d76db4777e7916e3044e6439e8bdc0e983061062ae181ead7c9a908e",
-    "planning/tasks/VM-054.md": "33fe5469744f55ab497906b89a3653bf450bba511ab58baaf5d2c6f245fb2ac1",
+    "planning/tasks/VM-054.md": "0478592320d2445c3c837ccd06cd53d58869da164f197e1c356958276214f232",
     "planning/tasks/NAT-007.md": "16c35ba9dee9f4c02ce187ce22eabf012a3def4b0831d4409d22abd288863280",
     "planning/tasks/UI-007.md": "a7b5bb6464c8544f80983813d920bc66655a5e68963adfda226f871154b588a5",
     "planning/tasks/NAT-008.md": "0c608898e59aa41112423e268085e55a1010b958e7ac36e7ee64211ccc82a0a3",
-    "planning/tasks/VM-055.md": "67651c5babb5f8ea0e0663372e4ba56f6e5ee3ec4d6bc42682381ab440480d7e",
+    "planning/tasks/VM-055.md": "fe28b385b930f00cd778325365baf0ac4f48ec8512078e17196762089ecc652a",
     "planning/tasks/KRN-033.md": "65895b5673cb8432d904647391ec6378b6eafcac42e79bfd6cef92a0dcc4b83f",
     "planning/tasks/KRN-034.md": "216955769016c966a7b2ed1191501a2967d901d5371a7e1ec31f2230896ac5cc",
     "planning/tasks/NAT-009.md": "54bd41c8f58f3c7fec8712413848b42f814bb3d46117e82a1a38b1b077013c7c",
@@ -13956,9 +13939,9 @@
     "planning/tasks/GPU-005.md": "c614eee33d64e48a0afaf3f661ea764e94463c5f760fdb294fd4a4235a71d11c",
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
-    "planning/tasks/NAT-002.md": "596cdf2513e4dfc8950a17d5a8985e58a519978a2bc9e395f19efbc28c480983",
-    "planning/tasks/NAT-003.md": "89a270c04ad1ffcf8e65b4cde77163547e30100c6d9b55ca489ac7c373d53912",
-    "planning/tasks/DRV-003.md": "e7da8db374dcc65c4adb1f9e05c1587419e91e077ad73a6007f239a5603f3bd1",
+    "planning/tasks/NAT-002.md": "cc3ef85a04226834256819aa696955363e8f92e8c6a58974015c8384093b474d",
+    "planning/tasks/NAT-003.md": "bd7f6b07956ebfb5aa67b89885b0290f19b3377e3008c4fedb60197f93d9aa69",
+    "planning/tasks/DRV-003.md": "6881042802bf82a300861ba4c840590f86cb99cdb5dd226e89bce81b823f5c13",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",
