@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T08:52:58+00:00",
+  "updated_at": "2026-11-10T10:31:10+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -48,6 +48,20 @@
         "decision": "docs/decisions/0002-owner-autonomy-grant-2026-11-10.md",
         "owner": "claude-authority-record-20261110",
         "at": "2026-11-10T04:12:29+00:00"
+      },
+      {
+        "scope": "native",
+        "value": true,
+        "decision": "docs/decisions/0005-stock-recovery-rescue-2026-11-10.md",
+        "owner": "codex-stock-rescue-20261110-r2",
+        "at": "2026-11-10T09:52:42+00:00"
+      },
+      {
+        "scope": "native",
+        "value": false,
+        "decision": "docs/decisions/0005-stock-recovery-rescue-2026-11-10.md",
+        "owner": "codex-stock-rescue-20261110-r2",
+        "at": "2026-11-10T10:17:36+00:00"
       }
     ]
   },
@@ -11953,6 +11967,142 @@
       "evidence": "docs/procedures/vm-055/evidence.json",
       "evidence_sha256": "adda59b67725d41bfdd690c6562672e36896f1c5c270418aa55c2c8f5c4d0a5e",
       "finished_at": "2026-11-10T08:33:23+00:00"
+    },
+    {
+      "id": "NAT-011",
+      "title": "Trigger S5E9945 PMU SWRESET with SEC_RESET_REASON_UNKNOWN on RECOVERY loader exit/halt so S-Boot clears persistent param(0) REBOOT_MODE=4",
+      "status": "pending",
+      "priority": 89,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-009",
+        "NAT-010"
+      ],
+      "paths": [
+        "docs/procedures/nat-011",
+        "artifacts/nat-011"
+      ],
+      "sources": [
+        "s24-linux",
+        "s24-bsp-reference"
+      ],
+      "acceptance": [
+        "Verify S5E9945 PMU SWRESET register offset and sequence from Samsung kernel sources (drivers/soc/samsung/exynos-reboot.c / sec_reboot.c) and S921BXXS9BYH3 S-Boot sbl_check_reboot_mode RST_STAT check (0x12860a0c).",
+        "Update the E1S RECOVERY loader so hold_seconds, loader_exception, and halt paths write 0x12345600 to PMU_PANIC_INFORM (0x128600bc) and trigger a PMU SWRESET before the 30s hardware watchdog expires, while keeping the hardware watchdog armed as a last-resort SoC hang failsafe.",
+        "Add a bounded pre-XNU diagnostic mode or early XNU timer/exception hook so RECOVERY exits via SWRESET into normal Android rather than looping via WDTRESET."
+      ],
+      "steps": [
+        "Resolve S5E9945 PMU SWRESET register offset and value from Samsung kernel sources and S-Boot RST_STAT check",
+        "Implement PMU SWRESET helper and integrate into E1S RECOVERY loader exit/exception/halt paths",
+        "Host-verify and rebuild the candidate RECOVERY image"
+      ]
+    },
+    {
+      "id": "NAT-012",
+      "title": "Restore only verified stock RECOVERY and verify return of Android after interrupted native attempt",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "status": "done",
+      "priority": 100,
+      "depends_on": [],
+      "paths": [
+        "docs/procedures/nat-012",
+        "artifacts/recovery-rescue-20261110-01"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "Restore only stock RECOVERY with exact pinned backup hash; record actual target and transfer boundaries.",
+        "ADB sys.boot_completed=1 and root full RECOVERY hash match; verify user environment availability without personal content."
+      ],
+      "steps": [
+        "Inspect interrupted command/process/device state and preserve prior changes",
+        "Repair and verify restricted restore transport; restore only original RECOVERY",
+        "Observe Android and record actual evidence, remaining limitations and handoff"
+      ],
+      "owner": "codex-stock-rescue-20261110-r2",
+      "started_at": "2026-11-10T09:52:50+00:00",
+      "last_heartbeat": "2026-11-10T10:17:18+00:00",
+      "updated_at": "2026-11-10T10:17:26+00:00",
+      "progress_note": "Stock-only fresh-session restore passed exit0 with EndSession/reboot results0. Android boot_completed=1; root full RECOVERY hash matches original; user0 RUNNING_UNLOCKED and services/data directory metadata available. No personal contents read.",
+      "next_step": "Close with final evidence, disable temporary native permit; retain NAT-013 transport and NAT-014 saved-evidence review follow-ups without XNU attempts",
+      "handoff": "docs/procedures/nat-012/handoff.md",
+      "evidence": "docs/procedures/nat-012/evidence.json",
+      "evidence_sha256": "10e3fbbc603747eb223c1893b2719f5e0b59174cc1235a1d0e6f678f65eb0e79",
+      "finished_at": "2026-11-10T10:17:26+00:00"
+    },
+    {
+      "id": "NAT-013",
+      "title": "Harden stock restore tooling against ended-session resume and premature success reporting",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "status": "done",
+      "priority": 91,
+      "depends_on": [
+        "NAT-012"
+      ],
+      "paths": [
+        "docs/procedures/nat-013",
+        "artifacts/nat-013"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "Document S921BXXS9BYH3 async worker lifetime with NAT-012 source and device evidence; reject reuse after EndSession in the supported restore path.",
+        "Audit the modified Odin4 PIT validation and command flags against the actual unique RECOVERY UFS8/id18 bounds; do not qualify weakened checks from unit tests alone.",
+        "Separate upload acknowledgement, successful session flush, reboot and full partition readback in reports; provide a fresh single-session stock-only procedure without another device write."
+      ],
+      "steps": [
+        "Review the failed resumed sessions and successful fresh session from NAT-012",
+        "Prepare constrained tool fixes or explicitly retire unsupported restore paths",
+        "Add meaningful host guards and document supported limits without new phone writes"
+      ],
+      "owner": "claude-takeover-20261110-6c8f",
+      "started_at": "2026-11-10T10:19:47+00:00",
+      "last_heartbeat": "2026-11-10T10:19:47+00:00",
+      "updated_at": "2026-11-10T10:31:02+00:00",
+      "evidence": "docs/procedures/nat-013/evidence.json",
+      "evidence_sha256": "d926cb9d40d1dea0e866310a56b6cbb99ae3b0ff4689b90832978914c0bc4e27",
+      "finished_at": "2026-11-10T10:31:02+00:00"
+    },
+    {
+      "id": "NAT-014",
+      "title": "Review experimental RECOVERY boot-loop return contract using saved evidence only",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "status": "done",
+      "priority": 89,
+      "depends_on": [
+        "NAT-012"
+      ],
+      "paths": [
+        "docs/procedures/nat-014",
+        "artifacts/nat-014"
+      ],
+      "sources": [
+        "s24-linux",
+        "s24-bsp-reference"
+      ],
+      "acceptance": [
+        "Record the observed 30-second boot loop and distinguish it from any unconfirmed XNU execution.",
+        "Review NAT-009/NAT-010 and proposed NAT-011 reset/marker assumptions against applicable saved S-Boot and kernel evidence, marking unverified claims.",
+        "State that no new XNU execution or experimental RECOVERY write is authorized; further native qualification requires a new owner decision."
+      ],
+      "steps": [
+        "Assess existing logs, images and source analysis without executing the experimental payload",
+        "Document established reset/return behavior and unresolved causes",
+        "Update the future qualification gate in a review report"
+      ],
+      "owner": "claude-takeover-20261110-6c8f",
+      "started_at": "2026-11-10T10:19:56+00:00",
+      "last_heartbeat": "2026-11-10T10:19:56+00:00",
+      "updated_at": "2026-11-10T10:31:10+00:00",
+      "evidence": "docs/procedures/nat-014/evidence.json",
+      "evidence_sha256": "73650162ca3c106f8e3529c37fa0978c86ae4e661ea49b8ad42684720e666028",
+      "finished_at": "2026-11-10T10:31:10+00:00"
     }
   ],
   "experiments": [
@@ -21951,6 +22101,51 @@
       "procedure": "worktrees/vm-054-xnu-guest-s24-20261110/docs/procedures/vm-054/run.py",
       "timeout_seconds": 120,
       "created_at": "2026-11-10T04:48:27+00:00"
+    },
+    {
+      "id": "NAT012-STOCK-RESTORE-001",
+      "task": "NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "kind": "native-device",
+      "status": "recorded",
+      "hypothesis": "Verified stock RECOVERY restored by name through actual PIT returns the phone to stock Android or stock recovery without modifying other partitions",
+      "procedure": "docs/procedures/nat-012/handoff.md",
+      "timeout_seconds": 600,
+      "created_at": "2026-11-10T09:57:40+00:00",
+      "evidence": "docs/procedures/nat-012/attempt-001-evidence.json",
+      "evidence_sha256": "d1fc1d73376849f60d53498a5fa045873f23036c21cc62f9590d3ce15aeb5d84",
+      "outcome": "fail",
+      "recorded_at": "2026-11-10T10:13:58+00:00"
+    },
+    {
+      "id": "NAT012-STOCK-RESTORE-002",
+      "task": "NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "kind": "native-device",
+      "status": "recorded",
+      "hypothesis": "No-ZLP exact-response transport with strict target/result checks completes verified stock RECOVERY restoration where Heimdall end-session failed",
+      "procedure": "docs/procedures/nat-012/handoff.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-10T10:07:14+00:00",
+      "evidence": "docs/procedures/nat-012/attempt-002-evidence.json",
+      "evidence_sha256": "4747ef4a6c3735d7f7250f6cac93fc3bf34bfcc596c9ad498dca5c2cca6b400e",
+      "outcome": "fail",
+      "recorded_at": "2026-11-10T10:14:21+00:00"
+    },
+    {
+      "id": "NAT012-STOCK-RESTORE-003",
+      "task": "NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "kind": "native-device",
+      "status": "recorded",
+      "hypothesis": "A fresh single session preserves S-Boot async workers through PIT validation and stock-only RECOVERY transfer, allowing successful storage commit and session completion",
+      "procedure": "docs/procedures/nat-012/handoff.md",
+      "timeout_seconds": 900,
+      "created_at": "2026-11-10T10:12:41+00:00",
+      "evidence": "docs/procedures/nat-012/evidence.json",
+      "evidence_sha256": "10e3fbbc603747eb223c1893b2719f5e0b59174cc1235a1d0e6f678f65eb0e79",
+      "outcome": "pass",
+      "recorded_at": "2026-11-10T10:17:09+00:00"
     }
   ],
   "events": [
@@ -54411,6 +54606,261 @@
           "status": "done",
           "owner": "claude-takeover-20261110-6c8f",
           "last_heartbeat": "2026-11-10T08:50:05+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T09:00:13+00:00",
+      "action": "task.add:NAT-011",
+      "owner": "agy-nat006-20261110-aca2",
+      "tasks": [
+        {
+          "id": "NAT-011",
+          "status": "pending",
+          "priority": 89
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T09:52:34+00:00",
+      "action": "task.add:NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "tasks": [
+        {
+          "id": "NAT-012",
+          "status": "pending",
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T09:52:42+00:00",
+      "action": "project.permit:native",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-10T09:52:50+00:00",
+      "action": "task.claim:NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "tasks": [
+        {
+          "id": "NAT-012",
+          "status": "in_progress",
+          "owner": "codex-stock-rescue-20261110-r2",
+          "priority": 100,
+          "last_heartbeat": "2026-11-10T09:52:50+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T09:54:56+00:00",
+      "action": "task.update:NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "tasks": [
+        {
+          "id": "NAT-012",
+          "status": "in_progress",
+          "owner": "codex-stock-rescue-20261110-r2",
+          "priority": 100,
+          "progress_note": "No active transfer; last patched Odin session failed before PIT. Stock hashes/archive verified. Preserved prior changes; provisioned independent Heimdall 2.2.2 and reviewed target/size path.",
+          "next_step": "Wait for owner fresh Download Mode confirmation; read actual PIT without writing before rescue",
+          "last_heartbeat": "2026-11-10T09:54:56+00:00",
+          "handoff": "docs/procedures/nat-012/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T09:57:40+00:00",
+      "action": "experiment.plan:NAT012-STOCK-RESTORE-001",
+      "owner": "codex-stock-rescue-20261110-r2"
+    },
+    {
+      "at": "2026-11-10T09:58:56+00:00",
+      "action": "task.update:NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "tasks": [
+        {
+          "id": "NAT-012",
+          "status": "in_progress",
+          "owner": "codex-stock-rescue-20261110-r2",
+          "priority": 100,
+          "progress_note": "Actual PIT read passed; unique RECOVERY target is UFS8/id18, 96MiB. Single stock-only flash acknowledged RECOVERY upload successful; session end timed out, exit1. No active writer or repeat flash.",
+          "next_step": "Owner performs normal forced restart; verify ADB, boot_completed and full recovery hash",
+          "last_heartbeat": "2026-11-10T09:58:56+00:00",
+          "handoff": "docs/procedures/nat-012/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:07:14+00:00",
+      "action": "experiment.plan:NAT012-STOCK-RESTORE-002",
+      "owner": "codex-stock-rescue-20261110-r2"
+    },
+    {
+      "at": "2026-11-10T10:12:41+00:00",
+      "action": "experiment.plan:NAT012-STOCK-RESTORE-003",
+      "owner": "codex-stock-rescue-20261110-r2"
+    },
+    {
+      "at": "2026-11-10T10:12:54+00:00",
+      "action": "task.update:NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "tasks": [
+        {
+          "id": "NAT-012",
+          "status": "in_progress",
+          "owner": "codex-stock-rescue-20261110-r2",
+          "priority": 100,
+          "progress_note": "Two resumed post-PIT sessions accepted data but EndSession timed out. Local S-Boot lifecycle analysis identifies stopped async workers after standalone EndSession. No writer active; preparing fresh single-session stock-only restoration.",
+          "next_step": "Wait for owner fresh Download Mode confirmation, then handshake, validated PIT, stock RECOVERY transfer and EndSession without intervening session end",
+          "last_heartbeat": "2026-11-10T10:12:54+00:00",
+          "handoff": "docs/procedures/nat-012/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:13:58+00:00",
+      "action": "experiment.record:NAT012-STOCK-RESTORE-001",
+      "owner": "codex-stock-rescue-20261110-r2"
+    },
+    {
+      "at": "2026-11-10T10:14:21+00:00",
+      "action": "experiment.record:NAT012-STOCK-RESTORE-002",
+      "owner": "codex-stock-rescue-20261110-r2"
+    },
+    {
+      "at": "2026-11-10T10:15:41+00:00",
+      "action": "task.add:NAT-013",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "tasks": [
+        {
+          "id": "NAT-013",
+          "status": "pending",
+          "priority": 91
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:16:01+00:00",
+      "action": "task.add:NAT-014",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "tasks": [
+        {
+          "id": "NAT-014",
+          "status": "pending",
+          "priority": 89
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:17:09+00:00",
+      "action": "experiment.record:NAT012-STOCK-RESTORE-003",
+      "owner": "codex-stock-rescue-20261110-r2"
+    },
+    {
+      "at": "2026-11-10T10:17:18+00:00",
+      "action": "task.update:NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "tasks": [
+        {
+          "id": "NAT-012",
+          "status": "in_progress",
+          "owner": "codex-stock-rescue-20261110-r2",
+          "priority": 100,
+          "progress_note": "Stock-only fresh-session restore passed exit0 with EndSession/reboot results0. Android boot_completed=1; root full RECOVERY hash matches original; user0 RUNNING_UNLOCKED and services/data directory metadata available. No personal contents read.",
+          "next_step": "Close with final evidence, disable temporary native permit; retain NAT-013 transport and NAT-014 saved-evidence review follow-ups without XNU attempts",
+          "last_heartbeat": "2026-11-10T10:17:18+00:00",
+          "handoff": "docs/procedures/nat-012/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:17:26+00:00",
+      "action": "task.done:NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "tasks": [
+        {
+          "id": "NAT-012",
+          "status": "done",
+          "owner": "codex-stock-rescue-20261110-r2",
+          "priority": 100,
+          "progress_note": "Stock-only fresh-session restore passed exit0 with EndSession/reboot results0. Android boot_completed=1; root full RECOVERY hash matches original; user0 RUNNING_UNLOCKED and services/data directory metadata available. No personal contents read.",
+          "next_step": "Close with final evidence, disable temporary native permit; retain NAT-013 transport and NAT-014 saved-evidence review follow-ups without XNU attempts",
+          "last_heartbeat": "2026-11-10T10:17:18+00:00",
+          "handoff": "docs/procedures/nat-012/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:17:36+00:00",
+      "action": "project.permit:native",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
+    },
+    {
+      "at": "2026-11-10T10:19:47+00:00",
+      "action": "task.claim:NAT-013",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "NAT-013",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 91,
+          "last_heartbeat": "2026-11-10T10:19:47+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:19:56+00:00",
+      "action": "task.claim:NAT-014",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "NAT-014",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 89,
+          "last_heartbeat": "2026-11-10T10:19:56+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:31:02+00:00",
+      "action": "task.done:NAT-013",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "NAT-013",
+          "status": "done",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 91,
+          "last_heartbeat": "2026-11-10T10:19:47+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:31:10+00:00",
+      "action": "task.done:NAT-014",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "NAT-014",
+          "status": "done",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 89,
+          "last_heartbeat": "2026-11-10T10:19:56+00:00"
         }
       ]
     }

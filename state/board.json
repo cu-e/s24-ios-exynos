@@ -1,11 +1,13 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T08:53:07+00:00",
-  "ledger_updated_at": "2026-11-10T08:52:58+00:00",
-  "registry_sha256": "687307632255363b833eeb38f15d9e12abfe48312390524efab3bc11aa6657c7",
+  "generated_at": "2026-11-10T10:31:29+00:00",
+  "ledger_updated_at": "2026-11-10T10:31:10+00:00",
+  "registry_sha256": "d03b3aefbc60c31a257581a2f2c04cec23eb3fbd4a5fc61719c4aca05a09629e",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
-    "ready": [],
+    "ready": [
+      "NAT-011"
+    ],
     "in_progress": [],
     "blocked": [
       "INT-002",
@@ -126,6 +128,7 @@
       "STR-040",
       "STR-041",
       "INT-004",
+      "NAT-012",
       "KRN-010",
       "KRN-012",
       "KRN-013",
@@ -206,6 +209,7 @@
       "ESIM-001",
       "VM-004",
       "SEN-001",
+      "NAT-013",
       "PLN-001",
       "SRC-001",
       "INT-001",
@@ -232,6 +236,7 @@
       "NAT-008",
       "VM-055",
       "KRN-033",
+      "NAT-014",
       "NAT-009",
       "KRN-035",
       "KRN-036",
@@ -698,7 +703,7 @@
         "Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance (its handoff says the role continues after the gate review). Its gate tool is in main (tools/integration_gate.py, docs/integration/kernel/test_gate.py). The work it waited for has since reached main by direct merges under decision 0002 (STR-024, STR-037, STR-041 1042-body link; VM-047 and REV-047 on 2026-11-10). Without root approval and the multi-integrator protocol it cannot pass its own acceptance."
       ],
       "card_path": "planning/tasks/INT-002.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "INT-003",
@@ -746,7 +751,7 @@
         "Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance. It depends on the stopped root/CM approval protocol, so its acceptance (serialized grants, original owners closing their tasks) cannot be met any more. Remaining component work (provider TUs, archives, link and private ABI) belongs to those component tasks. Handoff: worktrees/int-platform-20261106/docs/integration/platform/native-provider-headers98-review/handoff.md."
       ],
       "card_path": "planning/tasks/INT-003.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "LAB-003",
@@ -3246,6 +3251,44 @@
       "card_path": "planning/tasks/INT-004.md"
     },
     {
+      "id": "NAT-012",
+      "title": "Restore only verified stock RECOVERY and verify return of Android after interrupted native attempt",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "status": "done",
+      "priority": 100,
+      "depends_on": [],
+      "paths": [
+        "docs/procedures/nat-012",
+        "artifacts/recovery-rescue-20261110-01"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "Restore only stock RECOVERY with exact pinned backup hash; record actual target and transfer boundaries.",
+        "ADB sys.boot_completed=1 and root full RECOVERY hash match; verify user environment availability without personal content."
+      ],
+      "steps": [
+        "Inspect interrupted command/process/device state and preserve prior changes",
+        "Repair and verify restricted restore transport; restore only original RECOVERY",
+        "Observe Android and record actual evidence, remaining limitations and handoff"
+      ],
+      "owner": "codex-stock-rescue-20261110-r2",
+      "started_at": "2026-11-10T09:52:50+00:00",
+      "last_heartbeat": "2026-11-10T10:17:18+00:00",
+      "updated_at": "2026-11-10T10:17:26+00:00",
+      "progress_note": "Stock-only fresh-session restore passed exit0 with EndSession/reboot results0. Android boot_completed=1; root full RECOVERY hash matches original; user0 RUNNING_UNLOCKED and services/data directory metadata available. No personal contents read.",
+      "next_step": "Close with final evidence, disable temporary native permit; retain NAT-013 transport and NAT-014 saved-evidence review follow-ups without XNU attempts",
+      "handoff": "docs/procedures/nat-012/handoff.md",
+      "evidence": "docs/procedures/nat-012/evidence.json",
+      "evidence_sha256": "10e3fbbc603747eb223c1893b2719f5e0b59174cc1235a1d0e6f678f65eb0e79",
+      "finished_at": "2026-11-10T10:17:26+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-012.md"
+    },
+    {
       "id": "KRN-008",
       "title": "Build actual selected E1S kernel object closure from genuine component recipes",
       "status": "blocked",
@@ -3301,7 +3344,7 @@
         "Needs owner permission: to continue, the pinned XNU RELEASE recipes must be executed (925+ compiles, MIG generation with source-built migcom, generated sysproto/assym inputs). On 2026-11-10 the Claude Code auto-mode classifier refused this class of upstream build twice (GPU-005 07:07Z, KRN-043 07:20Z, \"Code from External\"). It was not retried here. Resume once the owner allows such builds or runs them. Checkpoint 679/978 objects: docs/procedures/xnu-kernel-objects.md."
       ],
       "card_path": "planning/tasks/KRN-008.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "status": "done",
@@ -5562,7 +5605,7 @@
         "Missing external input: an xnu-8796 IIG generated-header/dispatch/marshalling oracle with provenance (DriverKit generated headers matching iOS 16.5). No local path has been supplied, and the task forbids acquiring an Apple SDK. The 16 remaining implementation compiles also need a genuine kalloc_type compiler path. Handoff: docs/procedures/xnu-iig-abi.md."
       ],
       "card_path": "planning/tasks/KRN-004.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "REV-005",
@@ -7098,6 +7141,44 @@
       "card_path": "planning/tasks/SEN-001.md"
     },
     {
+      "id": "NAT-013",
+      "title": "Harden stock restore tooling against ended-session resume and premature success reporting",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "status": "done",
+      "priority": 91,
+      "depends_on": [
+        "NAT-012"
+      ],
+      "paths": [
+        "docs/procedures/nat-013",
+        "artifacts/nat-013"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "Document S921BXXS9BYH3 async worker lifetime with NAT-012 source and device evidence; reject reuse after EndSession in the supported restore path.",
+        "Audit the modified Odin4 PIT validation and command flags against the actual unique RECOVERY UFS8/id18 bounds; do not qualify weakened checks from unit tests alone.",
+        "Separate upload acknowledgement, successful session flush, reboot and full partition readback in reports; provide a fresh single-session stock-only procedure without another device write."
+      ],
+      "steps": [
+        "Review the failed resumed sessions and successful fresh session from NAT-012",
+        "Prepare constrained tool fixes or explicitly retire unsupported restore paths",
+        "Add meaningful host guards and document supported limits without new phone writes"
+      ],
+      "owner": "claude-takeover-20261110-6c8f",
+      "started_at": "2026-11-10T10:19:47+00:00",
+      "last_heartbeat": "2026-11-10T10:19:47+00:00",
+      "updated_at": "2026-11-10T10:31:02+00:00",
+      "evidence": "docs/procedures/nat-013/evidence.json",
+      "evidence_sha256": "d926cb9d40d1dea0e866310a56b6cbb99ae3b0ff4689b90832978914c0bc4e27",
+      "finished_at": "2026-11-10T10:31:02+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-013.md"
+    },
+    {
       "id": "PLN-001",
       "title": "Implement the staged hardware roadmap and evidence-backed capability matrix",
       "status": "done",
@@ -8255,6 +8336,78 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/KRN-033.md"
+    },
+    {
+      "id": "NAT-011",
+      "title": "Trigger S5E9945 PMU SWRESET with SEC_RESET_REASON_UNKNOWN on RECOVERY loader exit/halt so S-Boot clears persistent param(0) REBOOT_MODE=4",
+      "status": "pending",
+      "priority": 89,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-009",
+        "NAT-010"
+      ],
+      "paths": [
+        "docs/procedures/nat-011",
+        "artifacts/nat-011"
+      ],
+      "sources": [
+        "s24-linux",
+        "s24-bsp-reference"
+      ],
+      "acceptance": [
+        "Verify S5E9945 PMU SWRESET register offset and sequence from Samsung kernel sources (drivers/soc/samsung/exynos-reboot.c / sec_reboot.c) and S921BXXS9BYH3 S-Boot sbl_check_reboot_mode RST_STAT check (0x12860a0c).",
+        "Update the E1S RECOVERY loader so hold_seconds, loader_exception, and halt paths write 0x12345600 to PMU_PANIC_INFORM (0x128600bc) and trigger a PMU SWRESET before the 30s hardware watchdog expires, while keeping the hardware watchdog armed as a last-resort SoC hang failsafe.",
+        "Add a bounded pre-XNU diagnostic mode or early XNU timer/exception hook so RECOVERY exits via SWRESET into normal Android rather than looping via WDTRESET."
+      ],
+      "steps": [
+        "Resolve S5E9945 PMU SWRESET register offset and value from Samsung kernel sources and S-Boot RST_STAT check",
+        "Implement PMU SWRESET helper and integrate into E1S RECOVERY loader exit/exception/halt paths",
+        "Host-verify and rebuild the candidate RECOVERY image"
+      ],
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-011.md"
+    },
+    {
+      "id": "NAT-014",
+      "title": "Review experimental RECOVERY boot-loop return contract using saved evidence only",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "status": "done",
+      "priority": 89,
+      "depends_on": [
+        "NAT-012"
+      ],
+      "paths": [
+        "docs/procedures/nat-014",
+        "artifacts/nat-014"
+      ],
+      "sources": [
+        "s24-linux",
+        "s24-bsp-reference"
+      ],
+      "acceptance": [
+        "Record the observed 30-second boot loop and distinguish it from any unconfirmed XNU execution.",
+        "Review NAT-009/NAT-010 and proposed NAT-011 reset/marker assumptions against applicable saved S-Boot and kernel evidence, marking unverified claims.",
+        "State that no new XNU execution or experimental RECOVERY write is authorized; further native qualification requires a new owner decision."
+      ],
+      "steps": [
+        "Assess existing logs, images and source analysis without executing the experimental payload",
+        "Document established reset/return behavior and unresolved causes",
+        "Update the future qualification gate in a review report"
+      ],
+      "owner": "claude-takeover-20261110-6c8f",
+      "started_at": "2026-11-10T10:19:56+00:00",
+      "last_heartbeat": "2026-11-10T10:19:56+00:00",
+      "updated_at": "2026-11-10T10:31:10+00:00",
+      "evidence": "docs/procedures/nat-014/evidence.json",
+      "evidence_sha256": "73650162ca3c106f8e3529c37fa0978c86ae4e661ea49b8ad42684720e666028",
+      "finished_at": "2026-11-10T10:31:10+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-014.md"
     },
     {
       "id": "KRN-034",
@@ -11345,7 +11498,7 @@
         "Blocked on KRN-043 (owner permission): the remaining acceptance needs target compilation of SGPUUserClient against a qualified XNU KPI and header set, which is KRN-043, stopped by the classifier. The scoped input/runtime validator and the final VM-044/046 helper repin were never produced, and the Xclipse backend is GPU-007 (pending on KRN-001). The handoff forbids closing it from the source correction. Handoff: worktrees/gpu-012-signalfix-20261106/docs/procedures/gpu-userclient/signalfix-handoff.md."
       ],
       "card_path": "planning/tasks/GPU-012.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "GPU-015",
@@ -13244,7 +13397,7 @@
         "id": "INT-002",
         "status": "blocked",
         "last_heartbeat": "2026-11-10T08:46:05+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "ROOT126 provider+036commonPASS MAIN5e1f;024126 is only remaining actualbody/root125running, no provisionalcredit. Runtime002PASS recordonceCLI0 capsule36e1/Misc0fa78;3programcurrentruntime c5bc exactld10+ROOT91clang5/setseg2, frozen4a8e/no loaderreplay. Immutable916index5e23/126ABSENT,035overrides explicit. Runtime001preparationFAIL retained; future3runtimecommits combinewithfinal024only.",
         "next_step": "Await ROOT125 terminal and ownerfinal024packet for independentactual126/join1042; then fresh minimalcandidate with exactruntimeb6d4/e663/4a8e source/evidence, rootgrantpub/common only. STR037consumer runtimec5bc/index916 delivered; no source/helper/flags changes/no target/common replay or foreignclosures.",
         "handoff": "worktrees/int-history-iokit-20261106/artifacts/integration-gate/handoff.md",
@@ -13255,7 +13408,7 @@
         "id": "INT-003",
         "status": "blocked",
         "last_heartbeat": "2026-11-10T08:46:46+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "Independent native actual reviews frozen: wave88 osfmk-a26/160 and osfmk-b159/159; root93 libkern77/77; root98 provider315 filtered headers plus32 exact native signatures,315 full26-flag invocations,four export-MIG copies and Firehose14be accepted in6c61b4a. Root98 actual31 resource/cleanup records and665 input hashes matched. Original failed attempts preserved; provider4TUs/2archives and link/privateABI/runtime/hardware remain pending.",
         "next_step": "CM/root may integrate exact STR018 eight-commit header producer chain through29c11a69 plus independent header review after serialized grant; original SR18 separately prepares four native provider TUs and two archives. No target regeneration, common, publication or namespace mutation authorized by this review.",
         "handoff": "worktrees/int-platform-20261106/docs/integration/platform/native-provider-headers98-review/handoff.md",
@@ -13266,7 +13419,7 @@
         "id": "KRN-008",
         "status": "blocked",
         "last_heartbeat": "2026-11-10T08:45:24+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "Checkpoint:679/978 actual component objects emit ARM64;925 real compile attempts,246 failures and53 missing generated sources. Four top-level direct objects/archives/link metadata are additional requirements. Independent audit verifies16383 code definitions,2598 dependency files and10674 artifact digests across15 capsules.132 repository tests pass; original10889 compiler sources/198 build inputs/5111 kernel sources and other owners/scopes unchanged. Task remains in_progress.",
         "next_step": "KRN-009 atomic metadata and KRN-010 coherent MIG generation are ready; preserve compile-session2 and recorded dependency graph, then resolve all remaining component/top-level/generated/link prerequisites. No native capability is qualified.",
         "handoff": "docs/procedures/xnu-kernel-objects.md",
@@ -13277,7 +13430,7 @@
         "id": "KRN-004",
         "status": "blocked",
         "last_heartbeat": "2026-11-10T08:44:44+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "Actual17 AST pairs,14 genuine MIG server headers, experimental arm64 OSObject and invocation layout objects, eight generated cross-version IDs and11 real host decoder controls verified. Four measured malformed-input failures fixed; all13 evidence records preserved. Other16 compiles and exact selected Apple ABI remain unqualified.",
         "next_step": "Run independent KRN-005 for genuine XNU allocator compiler metadata, then recompile remaining interfaces and qualify selected dispatch/marshalling against exact-version evidence",
         "handoff": "docs/procedures/xnu-iig-abi.md",
@@ -13321,7 +13474,7 @@
         "id": "GPU-012",
         "status": "blocked",
         "last_heartbeat": "2026-11-10T08:47:25+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "Launcher restoration P2 author correction frozen cbc57f7/source212c28f in new WT; physical372535d and INT003 actual75ab counterexample preserved. Only guarded finally AST changes: block ALRM/TERM/INT through timer/handler restore, restore exact old mask last. GPUINGRESS004:71 focused real-signal/pending-mask controls pass in0.06257s, VmHWM30176KiB;23 hashes verify. Caller blocked/preexisting pending INT and default KeyboardInterrupt semantics preserved; relevant launcher/phase metadata re-pinned. Executor99b6, disabled/null policydf865, native/fixtures/AF193 unchanged; no35/process matrix repeat or target tools/allocation.",
         "next_step": "INT003/root exact bounded re-intake of restoration correction and retained failure. Task remains in progress; final accepted VM044/046 helper/profile repin still once-only pending, accepted input/runtime validator/RSS-only API and actual compiler/sanitizer/root allocation remain absent. Preserve all runtime/native/hardware gates; no task closure or execution authorized.",
         "handoff": "worktrees/gpu-012-signalfix-20261106/docs/procedures/gpu-userclient/signalfix-handoff.md",
@@ -13395,370 +13548,240 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-10T08:36:40+00:00",
-      "action": "task.transfer:NAT-009",
-      "owner": "agy-nat006-20261110-aca2",
-      "tasks": [
-        {
-          "id": "NAT-009",
-          "status": "blocked",
-          "owner": "agy-nat006-20261110-aca2",
-          "priority": 88,
-          "progress_note": "Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.",
-          "next_step": "Obtain applicable S-Boot contract or separately authorized NAT-004 hardware recovery evidence; retain pre-flash gate",
-          "blocked_reason": "Missing applicable S-Boot reset-target/one-shot RECOVERY contract or qualified NAT-004 watchdog expiry/return evidence; host compilation and PMU fixtures cannot establish bounded reset and return to Android",
-          "last_heartbeat": "2026-11-10T08:36:40+00:00",
-          "handoff": "docs/procedures/nat-009/README.md"
-        }
-      ]
+      "at": "2026-11-10T09:52:42+00:00",
+      "action": "project.permit:native",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
     },
     {
-      "at": "2026-11-10T08:37:42+00:00",
-      "action": "task.resume:NAT-009",
-      "owner": "agy-nat006-20261110-aca2",
+      "at": "2026-11-10T09:52:50+00:00",
+      "action": "task.claim:NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
       "tasks": [
         {
-          "id": "NAT-009",
+          "id": "NAT-012",
           "status": "in_progress",
-          "owner": "agy-nat006-20261110-aca2",
-          "priority": 88,
-          "progress_note": "Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.",
-          "next_step": "Obtain applicable S-Boot contract or separately authorized NAT-004 hardware recovery evidence; retain pre-flash gate",
-          "last_heartbeat": "2026-11-10T08:37:42+00:00",
-          "handoff": "docs/procedures/nat-009/README.md"
+          "owner": "codex-stock-rescue-20261110-r2",
+          "priority": 100,
+          "last_heartbeat": "2026-11-10T09:52:50+00:00"
         }
       ]
     },
     {
-      "at": "2026-11-10T08:38:53+00:00",
-      "action": "task.transfer:VM-047",
-      "owner": "claude-takeover-20261110-6c8f",
+      "at": "2026-11-10T09:54:56+00:00",
+      "action": "task.update:NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
       "tasks": [
         {
-          "id": "VM-047",
+          "id": "NAT-012",
           "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
+          "owner": "codex-stock-rescue-20261110-r2",
           "priority": 100,
-          "progress_note": "Separate driver correction frozen atd9c4b5e, measuredsourcea69c245/modulee811f74e; VM047-DRIVER-001 recorded PASS42/35 negatives,35.4MB currentHWM2.403s/143 physical bindings/zerochildren. Explicit actual driver versus source-derived diagnostic projection, coherent filelists, all-observed runtime selection including empty, raw member declarations and generic bounded atom facts. Old380/65/FD44 preserved; no target tools",
-          "next_step": "FD independent exact-source correction review, then root integration/CU adoption after acceptance; no actual link/product/retention qualification or owner closure",
-          "last_heartbeat": "2026-11-10T08:38:53+00:00",
-          "branch": "team/vm-047-driver-contract-20261106",
-          "worktree": "worktrees/vm-047-driver-contract-20261106",
-          "handoff": "worktrees/vm-047-driver-contract-20261106/docs/procedures/avf-runtime-linkmap/driver-handoff.md"
+          "progress_note": "No active transfer; last patched Odin session failed before PIT. Stock hashes/archive verified. Preserved prior changes; provisioned independent Heimdall 2.2.2 and reviewed target/size path.",
+          "next_step": "Wait for owner fresh Download Mode confirmation; read actual PIT without writing before rescue",
+          "last_heartbeat": "2026-11-10T09:54:56+00:00",
+          "handoff": "docs/procedures/nat-012/handoff.md"
         }
       ]
     },
     {
-      "at": "2026-11-10T08:39:13+00:00",
-      "action": "task.transfer:REV-047",
-      "owner": "claude-takeover-20261110-6c8f",
+      "at": "2026-11-10T09:57:40+00:00",
+      "action": "experiment.plan:NAT012-STOCK-RESTORE-001",
+      "owner": "codex-stock-rescue-20261110-r2"
+    },
+    {
+      "at": "2026-11-10T09:58:56+00:00",
+      "action": "task.update:NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
       "tasks": [
         {
-          "id": "REV-047",
+          "id": "NAT-012",
           "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
+          "owner": "codex-stock-rescue-20261110-r2",
           "priority": 100,
-          "progress_note": "Additive corrected-driver source contract PASS27/13 independent negatives at FB d9c4b5e/e811f74, capsule b9b6e93d; original380/65/FD44/b083 INCONCLUSIVE unchanged. No target tools or actual selection credit; in_progress pending publication/common acceptance.",
-          "next_step": "Root/INT002 integrate exact correction plus independent review; CU may wire v2 with complete genuine125a recipe/source/staging authentication and obtain genuine post-link witnesses on first authorized attempt. Original FD closes only after accepted publication/common.",
-          "last_heartbeat": "2026-11-10T08:39:13+00:00",
-          "branch": "team/rev-vm047-fd-20261106",
-          "worktree": "worktrees/rev-vm047-fd-20261106",
-          "handoff": "worktrees/rev-vm047-fd-20261106/docs/reviews/vm-047/driver-recheck-handoff.md"
+          "progress_note": "Actual PIT read passed; unique RECOVERY target is UFS8/id18, 96MiB. Single stock-only flash acknowledged RECOVERY upload successful; session end timed out, exit1. No active writer or repeat flash.",
+          "next_step": "Owner performs normal forced restart; verify ADB, boot_completed and full recovery hash",
+          "last_heartbeat": "2026-11-10T09:58:56+00:00",
+          "handoff": "docs/procedures/nat-012/handoff.md"
         }
       ]
     },
     {
-      "at": "2026-11-10T08:42:16+00:00",
-      "action": "task.done:VM-047",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "VM-047",
-          "status": "done",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 100,
-          "progress_note": "Separate driver correction frozen atd9c4b5e, measuredsourcea69c245/modulee811f74e; VM047-DRIVER-001 recorded PASS42/35 negatives,35.4MB currentHWM2.403s/143 physical bindings/zerochildren. Explicit actual driver versus source-derived diagnostic projection, coherent filelists, all-observed runtime selection including empty, raw member declarations and generic bounded atom facts. Old380/65/FD44 preserved; no target tools",
-          "next_step": "FD independent exact-source correction review, then root integration/CU adoption after acceptance; no actual link/product/retention qualification or owner closure",
-          "last_heartbeat": "2026-11-10T08:38:53+00:00",
-          "branch": "team/vm-047-driver-contract-20261106",
-          "worktree": "worktrees/vm-047-driver-contract-20261106",
-          "handoff": "worktrees/vm-047-driver-contract-20261106/docs/procedures/avf-runtime-linkmap/driver-handoff.md"
-        }
-      ]
+      "at": "2026-11-10T10:07:14+00:00",
+      "action": "experiment.plan:NAT012-STOCK-RESTORE-002",
+      "owner": "codex-stock-rescue-20261110-r2"
     },
     {
-      "at": "2026-11-10T08:42:35+00:00",
-      "action": "task.done:REV-047",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "REV-047",
-          "status": "done",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 100,
-          "progress_note": "Additive corrected-driver source contract PASS27/13 independent negatives at FB d9c4b5e/e811f74, capsule b9b6e93d; original380/65/FD44/b083 INCONCLUSIVE unchanged. No target tools or actual selection credit; in_progress pending publication/common acceptance.",
-          "next_step": "Root/INT002 integrate exact correction plus independent review; CU may wire v2 with complete genuine125a recipe/source/staging authentication and obtain genuine post-link witnesses on first authorized attempt. Original FD closes only after accepted publication/common.",
-          "last_heartbeat": "2026-11-10T08:39:13+00:00",
-          "branch": "team/rev-vm047-fd-20261106",
-          "worktree": "worktrees/rev-vm047-fd-20261106",
-          "handoff": "worktrees/rev-vm047-fd-20261106/docs/reviews/vm-047/driver-recheck-handoff.md"
-        }
-      ]
+      "at": "2026-11-10T10:12:41+00:00",
+      "action": "experiment.plan:NAT012-STOCK-RESTORE-003",
+      "owner": "codex-stock-rescue-20261110-r2"
     },
     {
-      "at": "2026-11-10T08:42:49+00:00",
-      "action": "task.done:NAT-009",
-      "owner": "agy-nat006-20261110-aca2",
+      "at": "2026-11-10T10:12:54+00:00",
+      "action": "task.update:NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
       "tasks": [
         {
-          "id": "NAT-009",
-          "status": "done",
-          "owner": "agy-nat006-20261110-aca2",
-          "priority": 88,
-          "progress_note": "Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.",
-          "next_step": "Obtain applicable S-Boot contract or separately authorized NAT-004 hardware recovery evidence; retain pre-flash gate",
-          "last_heartbeat": "2026-11-10T08:37:42+00:00",
-          "handoff": "docs/procedures/nat-009/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T08:44:24+00:00",
-      "action": "task.transfer:KRN-004",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "KRN-004",
+          "id": "NAT-012",
           "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 95,
-          "progress_note": "Actual17 AST pairs,14 genuine MIG server headers, experimental arm64 OSObject and invocation layout objects, eight generated cross-version IDs and11 real host decoder controls verified. Four measured malformed-input failures fixed; all13 evidence records preserved. Other16 compiles and exact selected Apple ABI remain unqualified.",
-          "next_step": "Run independent KRN-005 for genuine XNU allocator compiler metadata, then recompile remaining interfaces and qualify selected dispatch/marshalling against exact-version evidence",
-          "last_heartbeat": "2026-11-10T08:44:24+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/xnu-iig-abi.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T08:44:44+00:00",
-      "action": "task.block:KRN-004",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "KRN-004",
-          "status": "blocked",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 95,
-          "progress_note": "Actual17 AST pairs,14 genuine MIG server headers, experimental arm64 OSObject and invocation layout objects, eight generated cross-version IDs and11 real host decoder controls verified. Four measured malformed-input failures fixed; all13 evidence records preserved. Other16 compiles and exact selected Apple ABI remain unqualified.",
-          "next_step": "Run independent KRN-005 for genuine XNU allocator compiler metadata, then recompile remaining interfaces and qualify selected dispatch/marshalling against exact-version evidence",
-          "blocked_reason": "Missing external input: an xnu-8796 IIG generated-header/dispatch/marshalling oracle with provenance (DriverKit generated headers matching iOS 16.5). No local path has been supplied, and the task forbids acquiring an Apple SDK. The 16 remaining implementation compiles also need a genuine kalloc_type compiler path. Handoff: docs/procedures/xnu-iig-abi.md.",
-          "last_heartbeat": "2026-11-10T08:44:44+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/xnu-iig-abi.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T08:45:04+00:00",
-      "action": "task.transfer:KRN-008",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "KRN-008",
-          "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 99,
-          "progress_note": "Checkpoint:679/978 actual component objects emit ARM64;925 real compile attempts,246 failures and53 missing generated sources. Four top-level direct objects/archives/link metadata are additional requirements. Independent audit verifies16383 code definitions,2598 dependency files and10674 artifact digests across15 capsules.132 repository tests pass; original10889 compiler sources/198 build inputs/5111 kernel sources and other owners/scopes unchanged. Task remains in_progress.",
-          "next_step": "KRN-009 atomic metadata and KRN-010 coherent MIG generation are ready; preserve compile-session2 and recorded dependency graph, then resolve all remaining component/top-level/generated/link prerequisites. No native capability is qualified.",
-          "last_heartbeat": "2026-11-10T08:45:04+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/xnu-kernel-objects.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T08:45:24+00:00",
-      "action": "task.block:KRN-008",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "KRN-008",
-          "status": "blocked",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 99,
-          "progress_note": "Checkpoint:679/978 actual component objects emit ARM64;925 real compile attempts,246 failures and53 missing generated sources. Four top-level direct objects/archives/link metadata are additional requirements. Independent audit verifies16383 code definitions,2598 dependency files and10674 artifact digests across15 capsules.132 repository tests pass; original10889 compiler sources/198 build inputs/5111 kernel sources and other owners/scopes unchanged. Task remains in_progress.",
-          "next_step": "KRN-009 atomic metadata and KRN-010 coherent MIG generation are ready; preserve compile-session2 and recorded dependency graph, then resolve all remaining component/top-level/generated/link prerequisites. No native capability is qualified.",
-          "blocked_reason": "Needs owner permission: to continue, the pinned XNU RELEASE recipes must be executed (925+ compiles, MIG generation with source-built migcom, generated sysproto/assym inputs). On 2026-11-10 the Claude Code auto-mode classifier refused this class of upstream build twice (GPU-005 07:07Z, KRN-043 07:20Z, \"Code from External\"). It was not retried here. Resume once the owner allows such builds or runs them. Checkpoint 679/978 objects: docs/procedures/xnu-kernel-objects.md.",
-          "last_heartbeat": "2026-11-10T08:45:24+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/xnu-kernel-objects.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T08:45:45+00:00",
-      "action": "task.transfer:INT-002",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "INT-002",
-          "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
+          "owner": "codex-stock-rescue-20261110-r2",
           "priority": 100,
-          "progress_note": "ROOT126 provider+036commonPASS MAIN5e1f;024126 is only remaining actualbody/root125running, no provisionalcredit. Runtime002PASS recordonceCLI0 capsule36e1/Misc0fa78;3programcurrentruntime c5bc exactld10+ROOT91clang5/setseg2, frozen4a8e/no loaderreplay. Immutable916index5e23/126ABSENT,035overrides explicit. Runtime001preparationFAIL retained; future3runtimecommits combinewithfinal024only.",
-          "next_step": "Await ROOT125 terminal and ownerfinal024packet for independentactual126/join1042; then fresh minimalcandidate with exactruntimeb6d4/e663/4a8e source/evidence, rootgrantpub/common only. STR037consumer runtimec5bc/index916 delivered; no source/helper/flags changes/no target/common replay or foreignclosures.",
-          "last_heartbeat": "2026-11-10T08:45:45+00:00",
-          "branch": "team/int-e1s-profile-20261106",
-          "worktree": "worktrees/int-e1s-profile-20261106",
-          "handoff": "worktrees/int-history-iokit-20261106/artifacts/integration-gate/handoff.md"
+          "progress_note": "Two resumed post-PIT sessions accepted data but EndSession timed out. Local S-Boot lifecycle analysis identifies stopped async workers after standalone EndSession. No writer active; preparing fresh single-session stock-only restoration.",
+          "next_step": "Wait for owner fresh Download Mode confirmation, then handshake, validated PIT, stock RECOVERY transfer and EndSession without intervening session end",
+          "last_heartbeat": "2026-11-10T10:12:54+00:00",
+          "handoff": "docs/procedures/nat-012/handoff.md"
         }
       ]
     },
     {
-      "at": "2026-11-10T08:46:05+00:00",
-      "action": "task.block:INT-002",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "INT-002",
-          "status": "blocked",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 100,
-          "progress_note": "ROOT126 provider+036commonPASS MAIN5e1f;024126 is only remaining actualbody/root125running, no provisionalcredit. Runtime002PASS recordonceCLI0 capsule36e1/Misc0fa78;3programcurrentruntime c5bc exactld10+ROOT91clang5/setseg2, frozen4a8e/no loaderreplay. Immutable916index5e23/126ABSENT,035overrides explicit. Runtime001preparationFAIL retained; future3runtimecommits combinewithfinal024only.",
-          "next_step": "Await ROOT125 terminal and ownerfinal024packet for independentactual126/join1042; then fresh minimalcandidate with exactruntimeb6d4/e663/4a8e source/evidence, rootgrantpub/common only. STR037consumer runtimec5bc/index916 delivered; no source/helper/flags changes/no target/common replay or foreignclosures.",
-          "blocked_reason": "Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance (its handoff says the role continues after the gate review). Its gate tool is in main (tools/integration_gate.py, docs/integration/kernel/test_gate.py). The work it waited for has since reached main by direct merges under decision 0002 (STR-024, STR-037, STR-041 1042-body link; VM-047 and REV-047 on 2026-11-10). Without root approval and the multi-integrator protocol it cannot pass its own acceptance.",
-          "last_heartbeat": "2026-11-10T08:46:05+00:00",
-          "branch": "team/int-e1s-profile-20261106",
-          "worktree": "worktrees/int-e1s-profile-20261106",
-          "handoff": "worktrees/int-history-iokit-20261106/artifacts/integration-gate/handoff.md"
-        }
-      ]
+      "at": "2026-11-10T10:13:58+00:00",
+      "action": "experiment.record:NAT012-STOCK-RESTORE-001",
+      "owner": "codex-stock-rescue-20261110-r2"
     },
     {
-      "at": "2026-11-10T08:46:25+00:00",
-      "action": "task.transfer:INT-003",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "INT-003",
-          "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 100,
-          "progress_note": "Independent native actual reviews frozen: wave88 osfmk-a26/160 and osfmk-b159/159; root93 libkern77/77; root98 provider315 filtered headers plus32 exact native signatures,315 full26-flag invocations,four export-MIG copies and Firehose14be accepted in6c61b4a. Root98 actual31 resource/cleanup records and665 input hashes matched. Original failed attempts preserved; provider4TUs/2archives and link/privateABI/runtime/hardware remain pending.",
-          "next_step": "CM/root may integrate exact STR018 eight-commit header producer chain through29c11a69 plus independent header review after serialized grant; original SR18 separately prepares four native provider TUs and two archives. No target regeneration, common, publication or namespace mutation authorized by this review.",
-          "last_heartbeat": "2026-11-10T08:46:25+00:00",
-          "branch": "team/int-platform-20261106",
-          "worktree": "worktrees/int-platform-20261106",
-          "handoff": "worktrees/int-platform-20261106/docs/integration/platform/native-provider-headers98-review/handoff.md"
-        }
-      ]
+      "at": "2026-11-10T10:14:21+00:00",
+      "action": "experiment.record:NAT012-STOCK-RESTORE-002",
+      "owner": "codex-stock-rescue-20261110-r2"
     },
     {
-      "at": "2026-11-10T08:46:46+00:00",
-      "action": "task.block:INT-003",
-      "owner": "claude-takeover-20261110-6c8f",
+      "at": "2026-11-10T10:15:41+00:00",
+      "action": "task.add:NAT-013",
+      "owner": "codex-stock-rescue-20261110-r2",
       "tasks": [
         {
-          "id": "INT-003",
-          "status": "blocked",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 100,
-          "progress_note": "Independent native actual reviews frozen: wave88 osfmk-a26/160 and osfmk-b159/159; root93 libkern77/77; root98 provider315 filtered headers plus32 exact native signatures,315 full26-flag invocations,four export-MIG copies and Firehose14be accepted in6c61b4a. Root98 actual31 resource/cleanup records and665 input hashes matched. Original failed attempts preserved; provider4TUs/2archives and link/privateABI/runtime/hardware remain pending.",
-          "next_step": "CM/root may integrate exact STR018 eight-commit header producer chain through29c11a69 plus independent header review after serialized grant; original SR18 separately prepares four native provider TUs and two archives. No target regeneration, common, publication or namespace mutation authorized by this review.",
-          "blocked_reason": "Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance. It depends on the stopped root/CM approval protocol, so its acceptance (serialized grants, original owners closing their tasks) cannot be met any more. Remaining component work (provider TUs, archives, link and private ABI) belongs to those component tasks. Handoff: worktrees/int-platform-20261106/docs/integration/platform/native-provider-headers98-review/handoff.md.",
-          "last_heartbeat": "2026-11-10T08:46:46+00:00",
-          "branch": "team/int-platform-20261106",
-          "worktree": "worktrees/int-platform-20261106",
-          "handoff": "worktrees/int-platform-20261106/docs/integration/platform/native-provider-headers98-review/handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T08:47:05+00:00",
-      "action": "task.transfer:GPU-012",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "GPU-012",
-          "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 70,
-          "progress_note": "Launcher restoration P2 author correction frozen cbc57f7/source212c28f in new WT; physical372535d and INT003 actual75ab counterexample preserved. Only guarded finally AST changes: block ALRM/TERM/INT through timer/handler restore, restore exact old mask last. GPUINGRESS004:71 focused real-signal/pending-mask controls pass in0.06257s, VmHWM30176KiB;23 hashes verify. Caller blocked/preexisting pending INT and default KeyboardInterrupt semantics preserved; relevant launcher/phase metadata re-pinned. Executor99b6, disabled/null policydf865, native/fixtures/AF193 unchanged; no35/process matrix repeat or target tools/allocation.",
-          "next_step": "INT003/root exact bounded re-intake of restoration correction and retained failure. Task remains in progress; final accepted VM044/046 helper/profile repin still once-only pending, accepted input/runtime validator/RSS-only API and actual compiler/sanitizer/root allocation remain absent. Preserve all runtime/native/hardware gates; no task closure or execution authorized.",
-          "last_heartbeat": "2026-11-10T08:47:05+00:00",
-          "branch": "team/gpu-012-signalfix-20261106",
-          "worktree": "worktrees/gpu-012-signalfix-20261106",
-          "handoff": "worktrees/gpu-012-signalfix-20261106/docs/procedures/gpu-userclient/signalfix-handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T08:47:25+00:00",
-      "action": "task.block:GPU-012",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "GPU-012",
-          "status": "blocked",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 70,
-          "progress_note": "Launcher restoration P2 author correction frozen cbc57f7/source212c28f in new WT; physical372535d and INT003 actual75ab counterexample preserved. Only guarded finally AST changes: block ALRM/TERM/INT through timer/handler restore, restore exact old mask last. GPUINGRESS004:71 focused real-signal/pending-mask controls pass in0.06257s, VmHWM30176KiB;23 hashes verify. Caller blocked/preexisting pending INT and default KeyboardInterrupt semantics preserved; relevant launcher/phase metadata re-pinned. Executor99b6, disabled/null policydf865, native/fixtures/AF193 unchanged; no35/process matrix repeat or target tools/allocation.",
-          "next_step": "INT003/root exact bounded re-intake of restoration correction and retained failure. Task remains in progress; final accepted VM044/046 helper/profile repin still once-only pending, accepted input/runtime validator/RSS-only API and actual compiler/sanitizer/root allocation remain absent. Preserve all runtime/native/hardware gates; no task closure or execution authorized.",
-          "blocked_reason": "Blocked on KRN-043 (owner permission): the remaining acceptance needs target compilation of SGPUUserClient against a qualified XNU KPI and header set, which is KRN-043, stopped by the classifier. The scoped input/runtime validator and the final VM-044/046 helper repin were never produced, and the Xclipse backend is GPU-007 (pending on KRN-001). The handoff forbids closing it from the source correction. Handoff: worktrees/gpu-012-signalfix-20261106/docs/procedures/gpu-userclient/signalfix-handoff.md.",
-          "last_heartbeat": "2026-11-10T08:47:25+00:00",
-          "branch": "team/gpu-012-signalfix-20261106",
-          "worktree": "worktrees/gpu-012-signalfix-20261106",
-          "handoff": "worktrees/gpu-012-signalfix-20261106/docs/procedures/gpu-userclient/signalfix-handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T08:49:46+00:00",
-      "action": "task.narrow:NAT-002",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "NAT-002",
+          "id": "NAT-013",
           "status": "pending",
-          "owner": null,
-          "paths": [
-            "docs/procedures/nat-002",
-            "research/notes/native/NAT-002-control-return-paths.md"
-          ]
+          "priority": 91
         }
       ]
     },
     {
-      "at": "2026-11-10T08:50:05+00:00",
-      "action": "task.claim:NAT-002",
+      "at": "2026-11-10T10:16:01+00:00",
+      "action": "task.add:NAT-014",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "tasks": [
+        {
+          "id": "NAT-014",
+          "status": "pending",
+          "priority": 89
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:17:09+00:00",
+      "action": "experiment.record:NAT012-STOCK-RESTORE-003",
+      "owner": "codex-stock-rescue-20261110-r2"
+    },
+    {
+      "at": "2026-11-10T10:17:18+00:00",
+      "action": "task.update:NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "tasks": [
+        {
+          "id": "NAT-012",
+          "status": "in_progress",
+          "owner": "codex-stock-rescue-20261110-r2",
+          "priority": 100,
+          "progress_note": "Stock-only fresh-session restore passed exit0 with EndSession/reboot results0. Android boot_completed=1; root full RECOVERY hash matches original; user0 RUNNING_UNLOCKED and services/data directory metadata available. No personal contents read.",
+          "next_step": "Close with final evidence, disable temporary native permit; retain NAT-013 transport and NAT-014 saved-evidence review follow-ups without XNU attempts",
+          "last_heartbeat": "2026-11-10T10:17:18+00:00",
+          "handoff": "docs/procedures/nat-012/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:17:26+00:00",
+      "action": "task.done:NAT-012",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "tasks": [
+        {
+          "id": "NAT-012",
+          "status": "done",
+          "owner": "codex-stock-rescue-20261110-r2",
+          "priority": 100,
+          "progress_note": "Stock-only fresh-session restore passed exit0 with EndSession/reboot results0. Android boot_completed=1; root full RECOVERY hash matches original; user0 RUNNING_UNLOCKED and services/data directory metadata available. No personal contents read.",
+          "next_step": "Close with final evidence, disable temporary native permit; retain NAT-013 transport and NAT-014 saved-evidence review follow-ups without XNU attempts",
+          "last_heartbeat": "2026-11-10T10:17:18+00:00",
+          "handoff": "docs/procedures/nat-012/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:17:36+00:00",
+      "action": "project.permit:native",
+      "owner": "codex-stock-rescue-20261110-r2",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
+    },
+    {
+      "at": "2026-11-10T10:19:47+00:00",
+      "action": "task.claim:NAT-013",
       "owner": "claude-takeover-20261110-6c8f",
       "tasks": [
         {
-          "id": "NAT-002",
+          "id": "NAT-013",
           "status": "in_progress",
           "owner": "claude-takeover-20261110-6c8f",
-          "last_heartbeat": "2026-11-10T08:50:05+00:00"
+          "priority": 91,
+          "last_heartbeat": "2026-11-10T10:19:47+00:00"
         }
       ]
     },
     {
-      "at": "2026-11-10T08:52:58+00:00",
-      "action": "task.done:NAT-002",
+      "at": "2026-11-10T10:19:56+00:00",
+      "action": "task.claim:NAT-014",
       "owner": "claude-takeover-20261110-6c8f",
       "tasks": [
         {
-          "id": "NAT-002",
+          "id": "NAT-014",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 89,
+          "last_heartbeat": "2026-11-10T10:19:56+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:31:02+00:00",
+      "action": "task.done:NAT-013",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "NAT-013",
           "status": "done",
           "owner": "claude-takeover-20261110-6c8f",
-          "last_heartbeat": "2026-11-10T08:50:05+00:00"
+          "priority": 91,
+          "last_heartbeat": "2026-11-10T10:19:47+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:31:10+00:00",
+      "action": "task.done:NAT-014",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "NAT-014",
+          "status": "done",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 89,
+          "last_heartbeat": "2026-11-10T10:19:56+00:00"
         }
       ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "1cb68a28601b6f9f056996649bab9959fab2f67f69a9928d77a23eb24107fcdc",
-    "BOARD.md": "6b6611f6a0758a97d805c75c5a42f9b0f4a58c7dc7af75a9bf502414404a8e28",
+    "STATUS.md": "a089cfb52a92105e9df521f114bffa89987a05fb199d3f088fcf45f0197b0f22",
+    "BOARD.md": "c43218ce2226dd8fbd4bdc7313ab28865f4de8d6e55f444e28211753489c6b9d",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -13767,8 +13790,8 @@
     "planning/tasks/REV-017.md": "512dd8ab245be19bb24328d8d593d8a84826b3493e754ab694a57b276c56469f",
     "planning/tasks/REV-018.md": "56f708826c4a78ccf8dc12472a727b162c6dbc0eae096a64c99dba89111d8514",
     "planning/tasks/LAB-002.md": "08c531607bd807229c1702f489d085163bc637f9054bce8c423ffd2e918ade9e",
-    "planning/tasks/INT-002.md": "de7ad9221af865f5e4447bf18de492307a47ae845631a2f82eeca01a0d2e04d8",
-    "planning/tasks/INT-003.md": "79307efe41a8e1b80bf42c60a8a5fc89c4a95bd5c80d2df2d85f3fe54a7e198f",
+    "planning/tasks/INT-002.md": "82a6a16bfb6d44d2f497b79b95dadb9cbd428b638e7525b464494187b0f60e09",
+    "planning/tasks/INT-003.md": "4388885bb9af77e6f83ae638eb25aa40dbeedef7c2ac97d84c96ded1166ea1d4",
     "planning/tasks/LAB-003.md": "14a606de5c50518ece5d4abc0a7060b7bada3b155f14ef3ca2ffd25fa9ff814c",
     "planning/tasks/REV-025.md": "ca8e5596b2813be85fafd9441dc28eb11efb23a5660c0ea5feac6a3e90410d56",
     "planning/tasks/REV-026.md": "4a2c3918ab7acb78dbd14038037c2d3fe6036b3475f1bc64f731073175ad8de4",
@@ -13825,7 +13848,8 @@
     "planning/tasks/STR-040.md": "35548d807e81c49854c32e49c92eaf2ca3239cc66e12788a98700ebb603b75ac",
     "planning/tasks/STR-041.md": "5b6244f3181be38d4d3c8c5a4ee185002710bdbc6330d000ae89d04ff445895e",
     "planning/tasks/INT-004.md": "94c25405934320a5e7ca438b9e97c15ffec7af85e013c381d3a1f4bf4ce37613",
-    "planning/tasks/KRN-008.md": "67ae0c1c311aa14fd00f44de6d409fd87182a7814cc5a016604ab4191f31a4cd",
+    "planning/tasks/NAT-012.md": "44f380d81edae43e3bfdb68296d982fed468e7e3aa5454344fa7f7cf74a6628a",
+    "planning/tasks/KRN-008.md": "36d33f795d9569f340f53a5e0a909dc8efcdc5024c9133ccd614a6de5af22894",
     "planning/tasks/KRN-010.md": "4f479284d71242353a2a95508bac0b5304468c6ee44704b7561bc32cee8e1832",
     "planning/tasks/KRN-012.md": "5639fd265337eacb414447c0f5aa26bb2ad600fead5ca21572bcdb2b96f7b4e8",
     "planning/tasks/KRN-013.md": "0ba60293e22d124eaf920e2e012191cbc13737f841eec249082f67278b48f340",
@@ -13875,7 +13899,7 @@
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
     "planning/tasks/KRN-003.md": "7d37e5fece06694371991cb3127ab5121d975ec8a99179d63ec1f71a90c303ff",
     "planning/tasks/RES-009.md": "29506be617bfdcf7676f1f8e24f86b956ac88ba16ee9ae53c3c3e8570711bab8",
-    "planning/tasks/KRN-004.md": "8620fa9625e75546aadb566a8a3b6d667e6404d1da4ca97ebfe6b9e09ebd5867",
+    "planning/tasks/KRN-004.md": "6972586fcffd5802d3b02fdb5cbf7e487a73738287cd0c13c082fc5b2e10f0d7",
     "planning/tasks/REV-005.md": "7a698080b4744d8bd045b54266c5967b62aeed7274eeb60fac0a8f31c55920bf",
     "planning/tasks/KRN-029.md": "dbb36d40b64b440fc6fb10e507a7dc4b3824c6fd189af162f19533a294e922e1",
     "planning/tasks/VM-034.md": "a3fead10e6ff302eda1386fb50204b0c94301f675e2efbe72f8b4b606e404ed6",
@@ -13909,6 +13933,7 @@
     "planning/tasks/ESIM-001.md": "4ff5511bf1b91ec562d46b9fa0fdbc4dc3ffd12af187060e75777f8fcde71bb6",
     "planning/tasks/VM-004.md": "e60d0c34c4cbc0e4c68b4a74b97657a569fe4a12f25e16efc01dcaa45ccc2b15",
     "planning/tasks/SEN-001.md": "3c54f6f748160ba9c5b4c4f27f41576ddb90a5c2f73f0243805e189091695d2d",
+    "planning/tasks/NAT-013.md": "b211a32160f7a1711f4cdfb1218280216622baf34bd7fdfcfdf7b259ce4b12a9",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
     "planning/tasks/INT-001.md": "9d68fa75fae4c21f31f5ea4734c3f592ed0b41c6ed897d7b045a892c63549760",
@@ -13935,6 +13960,8 @@
     "planning/tasks/NAT-008.md": "0c608898e59aa41112423e268085e55a1010b958e7ac36e7ee64211ccc82a0a3",
     "planning/tasks/VM-055.md": "fe28b385b930f00cd778325365baf0ac4f48ec8512078e17196762089ecc652a",
     "planning/tasks/KRN-033.md": "65895b5673cb8432d904647391ec6378b6eafcac42e79bfd6cef92a0dcc4b83f",
+    "planning/tasks/NAT-011.md": "8c90a58bfef48ef9835caa5401b3b24fcf9d5b072b03320ac49eea6110e663e4",
+    "planning/tasks/NAT-014.md": "8ab44f96da942083ed04d834447e25cd58e8ddda08c83b2f1ca4e44327720c71",
     "planning/tasks/KRN-034.md": "216955769016c966a7b2ed1191501a2967d901d5371a7e1ec31f2230896ac5cc",
     "planning/tasks/NAT-009.md": "3ffbf563cd6fcd24ffdb604231f883bbad9d7ea9b0526f0bd2b3ca46e610a611",
     "planning/tasks/KRN-035.md": "73d3fdfa9f6c3f1f76fe0f244208e46b40bf7343bf78e2f78223ea9c1c7a98a7",
@@ -14003,7 +14030,7 @@
     "planning/tasks/UI-003.md": "cdd6c5ef5d563473531a5635079591d0c13fa8309ddf4234743325fb13690c64",
     "planning/tasks/UI-004.md": "46e25626887cafc4213c82caf4b3ad797d66bfad5e740579a46220b0fb02d6ae",
     "planning/tasks/UI-005.md": "893df8898fdf7ee6e20f600417d9461b52488f4560f7b34659b08cde9edba4b5",
-    "planning/tasks/GPU-012.md": "0794385ab5ed81cb78fa937f04f8a1a4a7377d6d4b6f1e4258f9839baa5eb594",
+    "planning/tasks/GPU-012.md": "8e8e2dd9fcf479839ade84fe5963f1bb025e06e266e09cdc4849e6ad994c7ecd",
     "planning/tasks/GPU-015.md": "44a7ded4ecbedd0b5dd5956bb3c75a94e34fd501716c4bec49b175c275600981",
     "planning/tasks/LAB-004.md": "a64aa0527bd07f6d7f9fda70647b73c21c349f718875e0bebbca9ee4675c6be7",
     "planning/tasks/DRV-005.md": "bb7026aa010b4fd9e6a664391f1f0866a789f7365e7bebb826ed15b7cbb53d8f",
