@@ -985,3 +985,73 @@ M, C, I and every other bit agree. The model does not apply per-bit RES0/RES1 ru
 One avoidable mistake is recorded: the first `restore_stock.py` call used the system python, claimed the Download Mode ledger entry and failed on `import usb` before any USB traffic; a physical re-entry and the pyusb venv python fixed it (always use the venv python for the first call).
 
 The recording and decoded frames stay local under `artifacts/nat-031/video-attempt-008/` (the video shows the owner's room and is not committed).
+
+## loader-diag-xnu-ckpt2: resume the kernel at checkpoint 5 and stop at its first C checkpoint (NAT-034; host-built 2026-11-11, **not run**, waiting for an image-specific owner decision 0017)
+
+Evidence category: **host-test** for everything in this section. Nothing was flashed to, run on or read from the phone; the phone is in normal Android with stock RECOVERY.
+
+Run 008 stopped at assembly checkpoint 5 because resuming there needs code the kernel's own TTBR0 map can reach. NAT-032 found a resume that avoids this (branch MMU-off to the
+kernel's MMU-enable block at `site5 - 28`, so its macro runs again and, with `slot[2] = 11`, does not stop), and NAT-033 showed in the instruction-level model that the kernel then reaches its first safe C
+checkpoint (`loader_checkpoint(11)`, after `cpu_data_init` and `PE_init_platform`) in the same state from the entry and from the resume. This image is that design, built as a new image next to the run-008 one.
+
+What it does (same loader, the NAT-031 install, the same five-checkpoint slot protocol as decision 0016 up to checkpoint 4):
+
+1. `nat034_install` (a thin variant of `nat031_prepare`) fills the slot with `nat034_stub` instead of `nat031_stub`; `[2] = 1` last.
+2. Checkpoints 1..4 are resumed exactly as in run 008 (`slot[2] = N + 1`, continuation = site + 60).
+3. At checkpoint 5 (`x2 = 2`, `x3 = 5`, expected 5) the decision is **resume**: the mask gains bit 5, `slot[2]` is set to **11** (`dc civac slot+16; dsb sy; str; dsb sy; dc civac; dsb sy`),
+   all of `x0..x30` and the SP are restored, and the stub branches (MMU off) to `site5 - 28 + (PA - VA)` = the first `movk` of the kernel's MMU-enable block (PA `0x9e183e454` in the model).
+   The kernel turns its MMU on again, `cbnz x21` reaches site 5's macro, which now reads `slot[2] = 11` and does not stop, and the start code goes on into `arm_init`.
+4. At C checkpoint 11 (`loader_checkpoint(11)`, then `loader_jump`, which builds a private TTBR0 that maps only the 2 MiB block of the stub and enters it with MMU and caches **on**; `x0` = loader_log PA, `x1` = its length,
+   `x2 = 2`, `x3 = 11`, `x5` = the stub) the stub **prologue** (registers only: `mrs x11, sctlr_el1; tbz w11,#0; bic M|C; msr; isb`) clears M and C before touching memory, because the stack may be outside the mapped block.
+   The assembly-checkpoint arrivals already have M clear, so for them it is a taken branch. The stub then saves everything, calls `nat034_ckpt_c`, which holds: it draws the full C-stop report forever. It is **not resumable**: there is no way back into the C path.
+5. Everything else holds with the NAT-031 report: an exception report, `x2 = 0`, a repeat, an out-of-order or unknown number, checkpoint 11 before 5, checkpoint 5 when not expected.
+
+### What the marker shows (kind `12` = `CKPT2`, mask bit 11)
+
+The held report at C checkpoint 11 is STAGE idx 1, REGS (`0x020b`), MASK (`0x83e`: bits 1..5 and 11), ARRIVALS (6), then eleven CKPT2 frames (`x0` as 3 x 16 bits, `x1` as 2, `x5` as 3, `TTBR0_EL1` as 3), then the SCTLR/TTBR1/VBAR/TCR block of NAT-031
+as read on arrival, BOOTID, STAGE, and the DECON0 kick block. `decode.py` decodes it (`describe()["ckpt2"]`: `x0_lo48`, `x1_lo32`, `x5_lo48`, `ttbr0_el1_lo48`). Host harness timing (1.2 s per frame, PRE_JUMP at 19.5 s): the five passes
+end at about 35 s, `x0/x1/x5/TTBR0` have been on screen once by ~52 s, the system registers by ~62 s and one complete held report by ~78 s; the display ends at ~83 s.
+
+### What each result would mean
+
+| observation | meaning |
+| --- | --- |
+| held report with `0x020b`, mask `0x83e`, arrivals 6, `x0` = a RAM PA (model: `0x9e1f90a00`), `x1` = 0 (model), `x5` in the loader image, TTBR0 `0x…9e2279000`-class, SCTLR with M set, TTBR1 `0x…9e15af000`, VBAR `0x…f007437000`, TCR `0xa51a251a` | the kernel's start code ran past checkpoint 5 on the phone, went through `arm_init`, `cpu_data_init` and `PE_init_platform` and reached the first C checkpoint: the first evidence of **C-level XNU execution** here. It says nothing about anything after checkpoint 11. |
+| held report at checkpoint 5 again (mask `0x3e`, `0x0205`) | the resume did not leave checkpoint 5: `slot[2]` did not take effect (cache coherence), the branch target was wrong or the kernel stopped there again |
+| held report with bit 8 (reason 1) | the kernel's early-exception handler ran: ESR/ELR/FAR identify the first fault after the resume |
+| a report with `x2 = 0` (bit 9, "orderly") | the kernel reached its own panic/return path (`loader_return`); the x3-dependent cause is not decoded |
+| STAGE `0x40` or `0x51`, then nothing | a hang or an exception that no handler could show: inconclusive; the last decoded checkpoint bounds it |
+| FAIL (`0x3f`) with the hash of `XNU checkpoint slot check failed` / `site N check failed` | the installer refused; nothing was jumped to |
+
+### Host checks (all host-test evidence; none shows anything about the phone)
+
+* `test_nat034.py` (31 tests; 12 skip in the system python without capstone/unicorn; needs the capstone/unicorn scratch virtualenv, `make check` does not run it): the decision table in `ckpt2.c` built for the host with gcc's alignment sanitizer; the **aarch64 stub as the loader builds it** (zig) linked with test doubles and run by the NAT-033 model from the kernel's entry:
+  chain 1..5, the resume, the arrival at the C stop equal to the NAT-033 reference run, and the final machine state equal to a run that was never stopped; the prologue clears M and C (removing the `msr` or turning `bic` into a copy raises a translation fault in the model);
+  crafted arrivals with distinct values in all live registers come back unchanged and each restoring instruction matters; unexpected arrivals hold; the C stop is final; a changed site word is refused.
+  The report is drawn against a fake DECON0 and decoded by the independent decoder, including the order, a non-zero `x1` sentinel (the real value is 0 in the model) and the display budget.
+* `test_support/mutate_nat034.py`: 26 mutations of `ckpt2.h`, `ckpt2.c`, `ckpt2_stub.S` and `markerlib.c` (wrong resume word, `slot[2]` not 11, expectation not advanced, mask bit, wrong stub register, prologue polarity, a frame showing the wrong register, ...) plus a text check of the cache-maintenance order; all 26 are caught
+  (`artifacts/nat-034/logs/mutation-002.log`; the first run had two survivors, a missing test for the reason compared at 5 and for `x1`'s two halves, both closed by tests that fail on the mutant).
+* The build: every earlier image and payload is byte-identical to the NAT-031 build records; `loader.c` differs from the NAT-031 ckpt image's only by the `#include` and the install call; `nat034_*` has no SIMD instruction; `scan_unaligned.py` finds 0 misaligned accesses; only this image references
+  `nat034_stub`/`mk_ckpt2_hold`; at both S-Boot bases seen so far (`0x800a0000`, `0x801a0000`) the stub, the stack top, `loader_log` and the end of the loader lie in one 2 MiB block (a recorded fact, not the mechanism: the prologue clears the MMU first).
+  Two builds and two packages from the same tree agree byte for byte.
+* The gated driver `session_xnu_ckpt2.py` stops before any `adb` call in every mode while `docs/decisions/0017-nat034-loader-diag-xnu-ckpt2-single-run-2026-11-11.md` does not exist (a fake `adb`: 0 invocations).
+* The NAT-031 tests were adapted for the extension, not weakened: `mk_ckpt_hold` is now also in the ckpt2 image (it serves every stop before C checkpoint 11) and the `MK_ST_CKPT` count applies to the NAT-031 part of `markerlib.c`.
+
+### Not established (the model has no caches, TLB, exception model, timers, devices)
+
+* **Caches and coherence.** The model has none. Whether `dc civac` on the `slot[2]` line is enough when the kernel reads it with its MMU on after the resume, and the order `dc civac; dsb; str; dsb; dc civac; dsb` itself, cannot be observed in the model (the order is checked as text only).
+* **The kernel's own second MMU enable**, TLB state after the MMU-off branch, exceptions and the kernel's vectors after `VBAR_EL1` is set, interrupts and timers.
+* **`boot_args` and the ADT as the loader really passes them** (the model builds them as `loader.c` does; the real content was not read back). `PE_init_platform` parses the ADT.
+* **The panic path.** Any fault or panic after the resume reaches `loader_return`, then `psci_smp_stop_others` and `redwood_*_quiesce`. These were **not analysed** and may access device registers. This is the new hazard (see below).
+* **SCTLR bits 5/7** (run 008: hardware `0x3454599c`, model `0x3454593c`): the hypothesis that they are architecture-fixed on cores without AArch32 EL0 is unverified.
+* The stub's placement relative to `loader_jump`'s private 2 MiB block on the phone (the real base of this image is not known in advance); the SIMD forms are checked against Unicorn, not the S24 core; there is no log text (`loader_log_len` is 0 in the model).
+
+### Risks and recovery (compared with decision 0016)
+
+Device access is that of 0013-0016. New hazard: the kernel's code beyond its start (`arm_init`, `cpu_data_init`, `PE_init_platform`, `loader_checkpoint`) runs on the phone. In the model this path touches only RAM inside the loader's window and EL1 system registers, with no
+MMIO and no panic call (NAT-033). If the S24 deviates, the kernel's panic path may issue PSCI calls and write device registers (`redwood_*_quiesce`) before it returns to the loader; this was not analysed. The expected worst cases are the earlier ones (a hang until the display ends and the
+watchdog resets, a reboot into Download Mode as in runs 001-008). Recovery is unchanged: RECOVERY is restored from the pinned stock image with the NAT-013 pyusb-venv python (one session in Download Mode, or `session_xnu_ckpt2.py --restore` if Android returns), Android is verified afterwards; only RECOVERY is written;
+Android, apps, settings, accounts and user data are not touched.
+
+Hashes: loader `Image` `c27e1c66c381976edb32af89bc5574142ead55b115206b917793dece31d9f16e` (229376 bytes), `Image.payload` `27d5c0075d28bde69ee8a172d2cc34f4c3b98957d562ae1e7b70e914c8684a77` (21784160 bytes), RECOVERY
+(`artifacts/nat-034/package-001/recovery.img`, 19634 pages differ from stock) `56f06e2582a4692f3f40d0d1ef3fb46633799fd9bc107e963d38731150961f59`; stock RECOVERY `96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67`.

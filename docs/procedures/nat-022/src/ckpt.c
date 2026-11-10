@@ -127,7 +127,9 @@ void nat031_set_next(const struct nat031_state *st, uint32_t next)
 #endif
 }
 
-#ifndef NAT031_HOST
+/* NAT034_IMAGE (loader-diag-xnu-ckpt2): that image has its own stub and C entry (ckpt2.c, ckpt2_stub.S), so the
+ * loader block below is left out of it. No earlier image defines the macro: their object code is unchanged. */
+#if !defined(NAT031_HOST) && !defined(NAT034_IMAGE)
 #include "marker.h"
 
 static struct nat031_state nat031_st;

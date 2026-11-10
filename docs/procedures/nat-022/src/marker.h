@@ -31,14 +31,15 @@ enum mk_kind {
 	MK_CHECK = 8,	/* canary self-checks: stack word, call depth */
 	MK_REG = 9,	/* canary-trig only: DECON0 kick report, idx = enum mk_reg_idx */
 	MK_XNU = 10,	/* NAT-028 only: idx 0..3 = stub PC bits 63:48 .. 15:0, idx 4..7 = x0 at the stub the same way */
-	MK_CKPT = 11	/* NAT-031 only, see enum mk_ckpt_idx */
+	MK_CKPT = 11,	/* NAT-031 only, see enum mk_ckpt_idx */
+	MK_CKPT2 = 12	/* NAT-034 only, see enum mk_ckpt2_idx */
 };
 
 /* NAT-031: what the return stub reports when the real XNU kernel code returns to the loader through the
  * XNULDRST slot. Every value is a register the stub read on arrival, not an inference. */
 enum mk_ckpt_idx {
 	MK_CK_REGS = 0,		/* data = (x2 & 0xff) << 8 | (x3 & 0xff): the kernel's reason (2 = checkpoint, 1 = exception) and code */
-	MK_CK_MASK = 1,		/* data = arrival mask: bit N (1..5) = arrival with x2=2, x3=N; 8 = reason 1; 9 = reason 0; 10 = other */
+	MK_CK_MASK = 1,		/* data = arrival mask: bit N (1..5) = arrival with x2=2, x3=N; 8 = reason 1; 9 = reason 0; 10 = other; 11 (NAT-034) = C checkpoint 11 */
 	MK_CK_SCTLR_LO = 2, MK_CK_SCTLR_HI = 3,	/* SCTLR_EL1 as read on arrival, bits 15:0 and 31:16 */
 	MK_CK_TTBR1_2 = 4, MK_CK_TTBR1_1 = 5, MK_CK_TTBR1_0 = 6,	/* TTBR1_EL1 bits 47:32, 31:16, 15:0 */
 	MK_CK_VBAR = 7,		/* VBAR_EL1 bits 15:0 */
@@ -51,6 +52,20 @@ struct mk_ckpt {
 	uint64_t sctlr, ttbr1, tcr, vbar;	/* read on arrival, before the stub changes anything */
 	uint64_t esr, elr, far;			/* meaningful only when x2 == 1 (x3, x4, x5 of the early-exception report) */
 	uint32_t mask, arrivals;
+};
+
+/* NAT-034: the extra registers of a stop at the first C checkpoint (11). The kernel reaches it through loader_jump with
+ * the MMU on; the stub clears SCTLR_EL1.M/C and reads these afterwards (x0, x1, x5 as the kernel passed them, TTBR0_EL1
+ * as loader_jump set it). The arrival SCTLR_EL1 (MMU still on) is the CKPT SCTLR frames, as for every other stop. */
+enum mk_ckpt2_idx {
+	MK_C2_X0_2 = 0, MK_C2_X0_1 = 1, MK_C2_X0_0 = 2,		/* x0 = loader_log PA: bits 47:32, 31:16, 15:0 */
+	MK_C2_X1_HI = 3, MK_C2_X1_LO = 4,			/* x1 = loader_log length: bits 31:16, 15:0 */
+	MK_C2_X5_2 = 5, MK_C2_X5_1 = 6, MK_C2_X5_0 = 7,		/* x5 = the stub address the kernel branched to */
+	MK_C2_TTBR0_2 = 8, MK_C2_TTBR0_1 = 9, MK_C2_TTBR0_0 = 10	/* TTBR0_EL1 */
+};
+
+struct mk_ckpt2 {
+	uint64_t x0, x1, x5, ttbr0;
 };
 
 /* DECON0 kick report (canary-trig). Values are what the code read, not inferences. */
@@ -154,6 +169,9 @@ uint32_t mk_hash16(const char *msg);
  * stub can resume the kernel; mk_ckpt_hold never returns and repeats the full report. */
 void mk_ckpt_pass(const struct mk_ckpt *r);
 void mk_ckpt_hold(const struct mk_ckpt *r) __attribute__((noreturn));
+/* NAT-034 (MK_LOADER=1, MK_XNU_CKPT=1 and MK_XNU_CKPT2=1 only): the terminal report of a stop at C checkpoint 11:
+ * the mk_ckpt_hold report with the MK_CKPT2 frames right after the arrival count. */
+void mk_ckpt2_hold(const struct mk_ckpt *r, const struct mk_ckpt2 *c) __attribute__((noreturn));
 
 void mk_canary_loop(uint64_t currentel, uint64_t sctlr_cur, uint64_t sctlr_el1, uint32_t stack_ok, int fault);
 

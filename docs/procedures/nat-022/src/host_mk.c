@@ -9,6 +9,9 @@
 #include "marker.h"
 #if defined(MK_XNU_CKPT) && MK_XNU_CKPT
 #include "ckpt.h"
+#if defined(MK_XNU_CKPT2) && MK_XNU_CKPT2
+#include "ckpt2.h"
+#endif
 #endif
 volatile uint64_t *mk_host_fb;
 uint64_t mk_host_cnt = 0x1234abcdULL;
@@ -160,6 +163,44 @@ int main(int argc, char **argv)
 			nat031_decide(&st, r.x2, r.x3, &d);
 			r.mask = st.mask; r.arrivals = st.arrivals;
 			if (d.action == NAT031_RESUME) mk_ckpt_pass(&r); else mk_ckpt_hold(&r);
+		}
+		return 6;	/* the sequence ended without a hold */
+	}
+#endif
+#if defined(MK_XNU_CKPT2) && MK_XNU_CKPT2
+	if (argc >= 7 && !strcmp(argv[1], "ckpt2")) {
+		/* ckpt2 MAXDRAWS OUTFILE GLOBAL_CON TRIG_CON SEQ [full]: what the NAT-034 stub draws for a sequence of
+		 * arrivals "x2:x3,...", decided by the real nat034_decide (ckpt2.c, NAT031_HOST). The register snapshot is the
+		 * NAT-033 model's: SCTLR with M cleared at the assembly checkpoints, the arrival value (M set) at the C stop,
+		 * where x0 = log PA, x1 = the log length, x5 = the stub and TTBR0 = loader_jump's private table. The NAT-033 model
+		 * has x1 = 0; the report test uses a non-zero sentinel so that its two 16-bit halves are distinguishable. */
+		static struct nat031_state st;
+		maxdraws = atoi(argv[2]); outfile = argv[3];
+		fake_gc = (uint32_t)strtoul(argv[4], 0, 0); fake_tc = (uint32_t)strtoul(argv[5], 0, 0);
+		mk_host_fb = calloc(1, MK_BANDS * MK_BAND_BYTES);
+		if (argc >= 8 && !strcmp(argv[7], "full")) {
+			mk_entry_frame(8, 0x30d00800, 0x30d00800);
+			mk_stage(MK_ST_LOADER_MAIN); mk_stage(MK_ST_LOADER_FB); mk_stage(MK_ST_LOADER_MEM);
+			mk_stage(MK_ST_LOADER_ZERO); mk_stage(MK_ST_LOADER_COPY); mk_stage(MK_ST_LOADER_ADT);
+			mk_stage(MK_ST_LOADER_CLEAN); mk_stage(MK_ST_PRE_JUMP);
+		}
+		st.expect = 1;
+		for (char *s = argv[6]; *s;) {
+			struct nat031_decision d;
+			struct mk_ckpt r = {0};
+			struct mk_ckpt2 c = {0};
+			char *e;
+			r.x2 = strtoull(s, &e, 0); s = *e ? e + 1 : e;
+			r.x3 = strtoull(s, &e, 0); s = *e ? e + 1 : e;
+			r.sctlr = r.x3 == NAT034_C11 ? 0x3454593dULL : 0x3454593cULL;
+			r.ttbr1 = 0x9e15af000ULL; r.tcr = 0x22a51a251aULL; r.vbar = 0xfffffff007437000ULL;
+			r.esr = r.x3; r.elr = 0xfffffff00743e0b0ULL; r.far = 0x00000000deadbeefULL;
+			c.x0 = 0x9e1f90a00ULL; c.x1 = 0x00a1b2c3ULL; c.x5 = 0x9e2d80000ULL; c.ttbr0 = 0x9e2279000ULL;
+			nat034_decide(&st, r.x2, r.x3, &d);
+			r.mask = st.mask; r.arrivals = st.arrivals;
+			if (d.action == NAT031_RESUME) mk_ckpt_pass(&r);
+			else if (d.next == NAT034_C11) mk_ckpt2_hold(&r, &c);
+			else mk_ckpt_hold(&r);
 		}
 		return 6;	/* the sequence ended without a hold */
 	}

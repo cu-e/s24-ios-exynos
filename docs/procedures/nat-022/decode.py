@@ -14,7 +14,7 @@ import argparse, json, struct, sys
 BAND_BYTES = 0x40000
 PAYLOAD_BITS = 32
 BANDS = 2 + PAYLOAD_BITS
-KINDS = {1: "ENTRY", 2: "BOOTID", 3: "STAGE", 4: "ESR", 5: "ELR", 6: "FAR", 7: "SLOT", 8: "CHECK", 9: "REG", 10: "XNU", 11: "CKPT"}
+KINDS = {1: "ENTRY", 2: "BOOTID", 3: "STAGE", 4: "ESR", 5: "ELR", 6: "FAR", 7: "SLOT", 8: "CHECK", 9: "REG", 10: "XNU", 11: "CKPT", 12: "CKPT2"}
 KICK_STATUS = {0: "no kick", 1: "sent: global update + HW-trigger unmask", 2: "sent: global update + SW trigger",
                3: "skipped: DECON not enabled", 4: "skipped: video mode", 5: "skipped: MMU on",
                6: "skipped: earlier kick faulted"}
@@ -96,12 +96,15 @@ def decode_rows(rows, strides):
 # loader-diag-trig: bit n of the STAGE idx1 mask = the loader reached this stage (drawn by mk_stage).
 MASK_BITS = ["entry", "loader_main", "fb selected", "memory window", "RAM zeroed", "segments copied",
              "ADT built", "window clean started", "pre-jump", "fail", "xnu entry stub (NAT-028)",
-             "ckpt return stub (NAT-031)"]
+             "ckpt return stub (NAT-031)"]   # NAT-034 draws the same stage for its stub
 
 # NAT-031 CKPT frames (idx): 0 = x2<<8|x3 as the kernel passed them; 1 = arrival mask; 2/3 = SCTLR_EL1 low/high 16
 # bits; 4/5/6 = TTBR1_EL1 bits 47:32/31:16/15:0; 7 = VBAR_EL1 bits 15:0; 8/9 = TCR_EL1 low/high 16 bits; 10 = arrivals.
 CKPT_MASK_BITS = {1: "checkpoint 1", 2: "checkpoint 2", 3: "checkpoint 3", 4: "checkpoint 4", 5: "checkpoint 5",
-                  8: "early-exception report (x2=1)", 9: "orderly end (x2=0)", 10: "other arrival (unexpected reason/code)"}
+                  8: "early-exception report (x2=1)", 9: "orderly end (x2=0)", 10: "other arrival (unexpected reason/code)",
+                  11: "C checkpoint 11 (NAT-034)"}
+# NAT-034 CKPT2 frames (idx): 0/1/2 = x0 bits 47:32/31:16/15:0 (the loader_log PA the kernel passed); 3/4 = x1 bits 31:16/15:0 (its
+# length); 5/6/7 = x5 bits 47:32/31:16/15:0 (the stub); 8/9/10 = TTBR0_EL1 bits 47:32/31:16/15:0.
 
 def fnv16(msg: str) -> int:
     """Independent implementation of mk_hash16: FNV-1a/32 folded to 16 bits."""
@@ -140,6 +143,8 @@ def describe(frames):
             acc.setdefault("XNU", {})[f["idx"]] = f["data"]
         elif k == "CKPT":
             acc.setdefault("CKPT", {})[f["idx"]] = f["data"]
+        elif k == "CKPT2":
+            acc.setdefault("CKPT2", {})[f["idx"]] = f["data"]
     c = acc.get("CKPT", {})
     if c:
         ck = {}
@@ -159,6 +164,18 @@ def describe(frames):
         if 8 in c and 9 in c:
             ck["tcr_el1_lo32"] = "0x%08x" % (c[9] << 16 | c[8])
         out["ckpt"] = ck
+    c2 = acc.get("CKPT2", {})
+    if c2:
+        k2 = {}
+        if set(c2) >= {0, 1, 2}:
+            k2["x0_lo48"] = "0x%012x" % (c2[0] << 32 | c2[1] << 16 | c2[2])
+        if {3, 4} <= set(c2):
+            k2["x1_lo32"] = "0x%08x" % (c2[3] << 16 | c2[4])
+        if set(c2) >= {5, 6, 7}:
+            k2["x5_lo48"] = "0x%012x" % (c2[5] << 32 | c2[6] << 16 | c2[7])
+        if set(c2) >= {8, 9, 10}:
+            k2["ttbr0_el1_lo48"] = "0x%012x" % (c2[8] << 32 | c2[9] << 16 | c2[10])
+        out["ckpt2"] = k2
     x = acc.get("XNU", {})
     if set(x) >= {0, 1, 2, 3}:
         out["xnu_stub_pc"] = "0x%016x" % bits_to_word_n([x[i] for i in range(4)])

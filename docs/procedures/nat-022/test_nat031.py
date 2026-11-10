@@ -254,7 +254,8 @@ class CkptMarker(unittest.TestCase):
         syms = subprocess.run(["nm", str(self.plain)], capture_output=True, text=True, check=True).stdout
         self.assertNotIn("mk_ckpt", syms)                                             # the plain loader markers cannot draw a CKPT frame
         src = (SRC / "markerlib.c").read_text()
-        self.assertEqual(src.count("MK_ST_CKPT"), 5)                                   # the ld_bit case, the pass' mask, the hold's mask and its two stage frames
+        nat031_part = src[:src.index("#if MK_XNU_CKPT2")]                             # NAT-034 adds mk_ckpt2_hold after it; its own stage uses are counted in test_nat034.py
+        self.assertEqual(nat031_part.count("MK_ST_CKPT"), 5)                           # the ld_bit case, the pass' mask, the hold's mask and its two stage frames
         self.assertIn("#if MK_XNU_CKPT\n\tcase MK_ST_CKPT", src[:src.index("#if MK_LOADER && MK_XNU_CKPT")])
 
     def test_arrival_order_and_unexpected_arrivals_show_in_the_mask(self):
@@ -646,7 +647,8 @@ class Build(unittest.TestCase):
                 continue
             syms = subprocess.run(["nm", str(elf)], capture_output=True, text=True, check=True).stdout
             self.assertEqual("nat031_stub" in syms, n == "loader-diag-xnu-ckpt", n)
-            self.assertEqual("mk_ckpt_hold" in syms, n == "loader-diag-xnu-ckpt", n)
+            # the NAT-034 image keeps this hold for every stop before its own C-checkpoint stop (test_nat034.py)
+            self.assertEqual("mk_ckpt_hold" in syms, n in ("loader-diag-xnu-ckpt", "loader-diag-xnu-ckpt2"), n)
 
 
 DECISION = ROOT / "docs/decisions/0016-nat031-loader-diag-xnu-ckpt-single-run-2026-11-11.md"
