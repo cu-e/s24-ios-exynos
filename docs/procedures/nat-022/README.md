@@ -1,8 +1,9 @@
 # NAT-022: framebuffer-marker canary and instrumented loader (host work only)
 
-Evidence kind: **host-test** for the build and the tests; **native-device** for the two
+Evidence kind: **host-test** for the build and the tests; **native-device** for the three
 owner-attended runs recorded below (`native-attempt-001-evidence.json`, inconclusive;
-`native-attempt-002-evidence.json`, the first decoded on-device markers). Sections written
+`native-attempt-002-evidence.json`, the first decoded on-device markers;
+`native-attempt-003-evidence.json`, the exception path decoded from the screen). Sections written
 before a run describe the plan, not the outcome; read the dated result sections for what the
 phone did.
 
@@ -238,7 +239,7 @@ with the existing payload would show stages up to pre-jump; both need an image-s
 like 0010. The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-002/`
 (the video contains the owner's room and is not committed).
 
-## canary-trig-fault: the exception path on the proven display channel (host-built; NOT run)
+## canary-trig-fault: the exception path on the proven display channel (host-built; run once under decision 0011, result in the next section)
 
 `canary-trig` (run 002) showed the display channel works with the DECON0 kick, so the smallest
 remaining step of the diagnostic plan is the exception path: does the vector table, the exception
@@ -268,6 +269,63 @@ the old value 2). Two builds give identical hashes.
   and `SHD_REG_UP_REQ`, only after the first marker, MMU off); nothing new is touched. Recovery is
   the run-002 path (`session_trigfault.py --restore`, otherwise Download Mode and one NAT-013 session).
 * `session_trigfault.py` refuses to run unless
-  `docs/decisions/0011-nat022-canary-trig-fault-single-run-2026-11-10.md` exists; that record is
-  created only if the owner accepts the image-specific request.
+  `docs/decisions/0011-nat022-canary-trig-fault-single-run-2026-11-10.md` exists; the owner accepted
+  the image-specific request and the record was written. The decision is consumed (marker
+  `artifacts/nat-022/native-attempt-trigfault-used.json`); the "image base `0x80000`" in the
+  expectation above was wrong, see the correction in the next section.
+
+## Native result 003, 2026-11-10 (decision 0011): the exception path decoded from the owner's recording
+
+`canary-trig-fault` (canary Image `f839ba30…`, RECOVERY image `e7ab288f…`) was written to RECOVERY with
+a matching readback and booted once (`adb reboot recovery` at 13:43:48Z). The owner filmed the
+screen. Stock RECOVERY was restored with one NAT-013 session in Download Mode (bus 5 dev 51,
+entered 13:46:31Z, restore 13:47:46Z); the full hash equals stock (`96620b8b…`), `check_android`
+passed and `assess` reports Android booted. Record: `native-attempt-003-evidence.json`.
+
+`decode_video.py` (unchanged) decoded 581 CRC-valid frames between 4.2 s and 63.9 s of the 66 s
+recording; the screen is dark from about 64.9 s. No (kind, idx) pair has a second value except the
+ones that are expected to change (STAGE 0x10 -> 0x11, the FRAME_COUNT and kick-count words).
+
+| Frame(s) | Decoded | Meaning |
+| --- | --- | --- |
+| CHECK | `0xa5a5` | stack check passed (as in run 002) |
+| ENTRY | `0x8900` | EL2, MMU off, D-cache off, I-cache on (same as run 002) |
+| BOOTID | `0x4fee1585` | a different boot from run 002 (`0x1ae1d195`) |
+| STAGE | `0x10`, later `0x11` | canary C reached; then "about to BRK" drawn by the code just before the BRK |
+| REG, canary loop (kick 6) | status 2, GLOBAL_CON `0x113`, TRIG_CON `0x3063` -> `0x3062`, FRAME_COUNT 165 -> 315 | same values as run 002 (163 -> 314) within the counter's spread |
+| SLOT | 4 | synchronous exception at the current EL (EL2) with SP_ELx |
+| ESR | `0x00000000f2001234` | EC 0x3c (BRK, AArch64), ISS 0x1234, exactly what the instruction raises |
+| ELR | `0x00000000801a2fb8` | see below |
+| FAR | `0x5efe5e5c70ff25fc` | not an address: FAR is architecturally UNKNOWN for BRK |
+| REG, exception loop (kick 14) | status 2, GLOBAL_CON `0x113`, TRIG_CON `0x3063` -> `0x3062`, FRAME_COUNT 1967 -> 2117 | DECON0 kicks continue from the exception handler |
+
+ELR: the Image contains exactly one `BRK #0x1234` word (`0xd4224680`), at file offset `0x2fb8`. The
+decoded ELR ends in exactly `2fb8`, so the image was executing at `0x801a0000` (64 KiB aligned). This
+base is inferred from that one match; it is not the `0x80000 + offset` the expectation above assumed
+(that came from the Image header's `text_offset` and is not where this S-Boot placed the image).
+The Android boot header (v2) names `0x10008000` as kernel address, which is not used either. A
+loader that must run from this entry has to be position-independent or relocate itself. The NAT-020
+loader links at 0 and its `start.S` addresses its stack and vectors with `adr`, so its first
+instructions do not depend on the load address; where it places the kernel segments is a separate
+question that the `loader-diag` markers are meant to answer.
+
+Established (observation of this S24, one run): our code received a synchronous exception at EL2 through
+the vector table in our image, on an exception stack, read ESR_EL2, ELR_EL2 and FAR_EL2, and drew them
+(plus the slot) as CRC-valid markers that an independent camera recording decodes. Together with run
+002 this meets the goal's third step (entry into our code, privilege level, MMU/cache state, stack,
+exception handler, one independently observable marker), for a no-XNU image.
+
+Not established:
+* Stride, pixel format and the real band height (the ~59 rows per band remains an estimate).
+* Whether the DECON0 kick, or S-Boot's own refresh, makes the markers visible: still no no-kick
+  control.
+* Anything about the loader, memory preparation, handoff or XNU (no such image was run).
+* The cause of the dark screen at about 64.9 s and of the USB sequence (ADB gone at +7 s,
+  `SEC_UPLOAD` at +95 s, gone at +118 s, no command sent; the recording clock was not aligned with
+  host time, the same limit as run 002). This image arms no watchdog.
+* The exception-entry `STAGE 0x1f` frame is drawn and replaced at once (no dwell), so it was not
+  visible; the next image should hold it for one dwell.
+
+The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-003/` (the video
+shows the owner's room and is not committed).
 

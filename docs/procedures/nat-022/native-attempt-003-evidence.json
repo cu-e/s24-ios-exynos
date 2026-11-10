@@ -1,0 +1,331 @@
+{
+  "kind": "native-device",
+  "origin": "owner-attended-run",
+  "outcome": "pass",
+  "criterion": "The exception vector, exception stack and ESR/ELR/FAR/slot report of canary code are exercised on the S24 and decoded from an independent recording: CRC-valid SLOT/ESR/ELR frames whose values only that path could produce (ESR 0xf2001234, ELR equal to the address of the single BRK #0x1234 in the image).",
+  "recorded_at": "2026-11-10T13:54:36.616442+00:00",
+  "decision": "docs/decisions/0011-nat022-canary-trig-fault-single-run-2026-11-10.md",
+  "summary": "One native run of NAT-022 canary-trig-fault (RECOVERY image sha256 e7ab288fdd689dcb15c58cf92e19a96586b30ec3b85a6df09695d3b41772a735, canary Image f839ba305fae5e89c48642b422a827bc4993d491681560b2b20fd1a46b560a1b, source commit 2e0e195). It was written to RECOVERY (/dev/block/sda18) with a matching full readback and booted once (adb reboot recovery at 2026-11-10T13:43:48Z). The owner filmed the screen; decode_video.py decoded 581 CRC-valid frames (4.2-63.9 s of the 66 s recording; the screen is dark from about 64.9 s). First round (canary loop): CHECK 0xA5A5, ENTRY 0x8900 (EL2, MMU off, D-cache off, I-cache on), BOOTID 0x4FEE1585 (differs from run 002 0x1AE1D195), STAGE 0x10, 10 REG frames of the DECON0 kick (status 2 = SW form, GLOBAL_CON 0x113, TRIG_CON 0x3063->0x3062, FRAME_COUNT 165->315, kick 6). Then STAGE 0x11 (about to BRK), then the exception loop: SLOT 4 (BRK at EL2 with SPx), ESR 0x00000000f2001234 (EC 0x3c, ISS 0x1234), ELR 0x00000000801a2fb8, FAR 0x5efe5e5c70ff25fc, then REG (status 2, GLOBAL_CON 0x113, TRIG_CON 0x3063->0x3062, FRAME_COUNT 1967->2117, kick count 14) and the SLOT/ESR/ELR cycle repeating. The Image holds exactly one BRK #0x1234 word (0xd4224680), at file offset 0x2fb8; the decoded ELR therefore implies the Image was executing at 0x801a0000. FAR is architecturally UNKNOWN for BRK and is not an address. The exception-entry STAGE 0x1f frame is replaced at once (no dwell) and was not visible. Stock RECOVERY was restored with one NAT-013 session in Download Mode (bus 5 dev 51, 2026-11-10T13:46:31Z entry); full hash equals stock 96620b8b…, check_android pass, Android booted.",
+  "commands": [
+    {
+      "argv": [
+        "adb",
+        "get-state"
+      ],
+      "exit_code": 0,
+      "started_at": "2026-11-10T13:43:43.954422+00:00"
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "-T",
+        "getprop ro.product.model"
+      ],
+      "exit_code": 0,
+      "started_at": "2026-11-10T13:43:43.983956+00:00"
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "-T",
+        "getprop ro.product.device"
+      ],
+      "exit_code": 0,
+      "started_at": "2026-11-10T13:43:44.050917+00:00"
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "-T",
+        "getprop ro.build.PDA"
+      ],
+      "exit_code": 0,
+      "started_at": "2026-11-10T13:43:44.111895+00:00"
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "-T",
+        "getprop sys.boot_completed"
+      ],
+      "exit_code": 0,
+      "started_at": "2026-11-10T13:43:44.181928+00:00"
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "-T",
+        "su -c 'readlink -f /dev/block/by-name/recovery; blockdev --getsize64 /dev/block/sda18; test -b /dev/block/sda18 && echo block_device'"
+      ],
+      "exit_code": 0,
+      "started_at": "2026-11-10T13:43:44.249250+00:00"
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "-T",
+        "su -c 'if pidof dd >/dev/null; then echo busy; else echo idle; fi'"
+      ],
+      "exit_code": 0,
+      "started_at": "2026-11-10T13:43:44.416355+00:00"
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "-T",
+        "su -c 'sha256sum /dev/block/sda18'"
+      ],
+      "exit_code": 0,
+      "started_at": "2026-11-10T13:43:44.527497+00:00"
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "-T",
+        "dumpsys battery | toybox sed -n 's/^  level: /level=/p;s/^  temperature: /temperature=/p'"
+      ],
+      "exit_code": 0,
+      "started_at": "2026-11-10T13:43:44.772091+00:00"
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "-T",
+        "su -c 'if pidof dd >/dev/null; then echo busy; else echo idle; fi'"
+      ],
+      "exit_code": 0,
+      "started_at": "2026-11-10T13:43:45.006749+00:00"
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "-T",
+        "su -c 'test -b /dev/block/sda18 && dd of=/dev/block/sda18 bs=1048576 count=100663296 iflag=count_bytes conv=notrunc,fsync'"
+      ],
+      "exit_code": 0,
+      "started_at": "2026-11-10T13:43:45.154510+00:00"
+    },
+    {
+      "argv": [
+        "adb",
+        "shell",
+        "-T",
+        "su -c 'sha256sum /dev/block/sda18'"
+      ],
+      "exit_code": 0,
+      "started_at": "2026-11-10T13:43:48.032261+00:00"
+    },
+    {
+      "argv": [
+        "adb",
+        "reboot",
+        "recovery"
+      ],
+      "exit_code": 0,
+      "started_at": "2026-11-10T13:43:48.318916+00:00"
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/nat-013/restore_stock.py",
+        "restore",
+        "--bus",
+        "5",
+        "--address",
+        "51",
+        "--out",
+        "artifacts/nat-022/stock-restore-003"
+      ],
+      "exit_code": 0,
+      "note": "awaiting-readback; stages pit_validated, upload_acknowledged, session_end_confirmed, reboot_confirmed all true; 100663296 bytes acknowledged"
+    },
+    {
+      "argv": [
+        "python3",
+        "docs/procedures/nat-012/check_android.py",
+        "artifacts/nat-022/android-after-stock-003.json"
+      ],
+      "exit_code": 0,
+      "note": "outcome pass, recovery_hash_match true"
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/nat-013/restore_stock.py",
+        "assess",
+        "--report",
+        "artifacts/nat-022/stock-restore-003/report.json",
+        "--readback",
+        "artifacts/nat-022/android-after-stock-003.json"
+      ],
+      "exit_code": 0,
+      "note": "android_booted true, recovery_readback_matches true"
+    },
+    {
+      "argv": [
+        "python3",
+        "-P",
+        "docs/procedures/nat-022/decode_video.py",
+        "artifacts/nat-022/video-attempt-003/camera.mp4",
+        "--out",
+        "artifacts/nat-022/video-attempt-003/decoded-frames.json",
+        "--step",
+        "3"
+      ],
+      "exit_code": 0,
+      "note": "ok 581, no-grid 43, no-contrast 25, sync-or-crc-fail 8, grid-poor 6"
+    }
+  ],
+  "usb_events": [
+    {
+      "at": "2026-11-10T13:43:41.668880+00:00",
+      "elapsed_seconds": 0.002502,
+      "devices": [
+        [
+          "6860",
+          "SAMSUNG_Android"
+        ]
+      ]
+    },
+    {
+      "at": "2026-11-10T13:43:55.231662+00:00",
+      "elapsed_seconds": 13.565275,
+      "devices": []
+    },
+    {
+      "at": "2026-11-10T13:45:23.003373+00:00",
+      "elapsed_seconds": 101.336984,
+      "devices": [
+        [
+          "685d",
+          "SEC_UPLOAD"
+        ]
+      ]
+    },
+    {
+      "at": "2026-11-10T13:45:45.606509+00:00",
+      "elapsed_seconds": 123.940124,
+      "devices": []
+    },
+    {
+      "at": "2026-11-10T13:46:31.259854+00:00",
+      "elapsed_seconds": 169.593461,
+      "devices": [
+        [
+          "685d",
+          "SAMSUNG USB"
+        ]
+      ]
+    },
+    {
+      "at": "2026-11-10T13:47:47.267565+00:00",
+      "elapsed_seconds": 245.601176,
+      "devices": []
+    },
+    {
+      "at": "2026-11-10T13:48:34.926927+00:00",
+      "elapsed_seconds": 293.260539,
+      "devices": [
+        [
+          "6860",
+          "SAMSUNG_Android"
+        ]
+      ]
+    }
+  ],
+  "artifacts": [
+    "artifacts/nat-022/package-003/recovery.img",
+    "artifacts/nat-022/package-003/package.json",
+    "artifacts/nat-022/attempt-003/report.json",
+    "artifacts/nat-022/preflight-003/report.json",
+    "artifacts/nat-022/stock-restore-003/report.json",
+    "artifacts/nat-022/android-after-stock-003.json",
+    "artifacts/nat-022/native-attempt-trigfault-used.json",
+    "artifacts/nat-022/build-003/canary-trig-fault/Image",
+    "artifacts/nat-022/video-attempt-003/camera.mp4",
+    "artifacts/nat-022/video-attempt-003/decoded-frames.json",
+    "artifacts/nat-022/usb-attempt-003/000000.json",
+    "artifacts/nat-022/usb-attempt-003/000001.json",
+    "artifacts/nat-022/usb-attempt-003/000002.json",
+    "artifacts/nat-022/usb-attempt-003/000003.json",
+    "artifacts/nat-022/usb-attempt-003/000004.json",
+    "artifacts/nat-022/usb-attempt-003/000005.json",
+    "artifacts/nat-022/usb-attempt-003/000006.json",
+    "artifacts/nat-022/usb-attempt-003/complete.json"
+  ],
+  "sha256": {
+    "artifacts/nat-022/package-003/recovery.img": "e7ab288fdd689dcb15c58cf92e19a96586b30ec3b85a6df09695d3b41772a735",
+    "artifacts/nat-022/package-003/package.json": "cdfabe290d8e345c690bb86ee3f38682efb229ce0c6c0ee6144b41708363dea9",
+    "artifacts/nat-022/attempt-003/report.json": "2d1360d789b7ba406535d559d662e8445391ae8423ec0abc3ef5afbfe53c992d",
+    "artifacts/nat-022/preflight-003/report.json": "8c448a68cbab9fdd66ac3bea34b94ce64dfb49e1430766f77b3622ee815c9c18",
+    "artifacts/nat-022/stock-restore-003/report.json": "aaee2853c9091431c7e24961a3bb2918e3b4ddcce0637bbe2eec774e69cc4960",
+    "artifacts/nat-022/android-after-stock-003.json": "3ac689577e1c192586da9ad4e3851cc26849c4f0635ca2f95d3cf04a4c70e0d7",
+    "artifacts/nat-022/native-attempt-trigfault-used.json": "e99861955aa3f774e3a17f09bc6c39f13340ff5c45d5a4546ba0cac70933fe91",
+    "artifacts/nat-022/build-003/canary-trig-fault/Image": "f839ba305fae5e89c48642b422a827bc4993d491681560b2b20fd1a46b560a1b",
+    "artifacts/nat-022/video-attempt-003/camera.mp4": "1385d838974a32b297380875657d3211850eb4ff05619d169ca422b1d25f9182",
+    "artifacts/nat-022/video-attempt-003/decoded-frames.json": "fef5f18c76db148b965cc9878f14d293a10136d878b9000d86b991797ef6e528",
+    "artifacts/nat-022/usb-attempt-003/000000.json": "ae4dd999f6e5a5913559e6001c1a8f3485d7806e9a059a8e97dcd7ccc4873cdf",
+    "artifacts/nat-022/usb-attempt-003/000001.json": "66ad94597c933d3a6e86a23ac46cdb14b93a24aa8fcc3f645df9d8a1e42890cf",
+    "artifacts/nat-022/usb-attempt-003/000002.json": "dd0f595a168aaaa3c9b3f2ef0669edfd4f5d1fab0b72091bc22612ed002290ad",
+    "artifacts/nat-022/usb-attempt-003/000003.json": "b3969bb0194eff0fe877d4a62d2a6a4344542fca956210abb72f8b11e391659e",
+    "artifacts/nat-022/usb-attempt-003/000004.json": "9000433fc1e7b7981c112b1d166f5176c5b85f0cd350c06a06fcb7163076a694",
+    "artifacts/nat-022/usb-attempt-003/000005.json": "128e34351d54c08eec9adc93008e2649e5e2dc97c07fcd34df3c15a98174fefc",
+    "artifacts/nat-022/usb-attempt-003/000006.json": "bdfbb591fca6f0e1aa6cf238092463f4d1c84c5912fd8405cf9549cc07cc1f0b",
+    "artifacts/nat-022/usb-attempt-003/complete.json": "758374fe68c306df997b82476c54ba368e64f378f71febcf94c0aa9d110504f8"
+  },
+  "decoded": {
+    "valid_frames": 581,
+    "first_valid_s": 4.213,
+    "last_valid_s": 63.897,
+    "fields": {
+      "CHECK": "0xa5a5",
+      "ENTRY": "0x8900",
+      "BOOTID": "0x4fee1585",
+      "STAGE_first": "0x10",
+      "STAGE_before_brk": "0x11",
+      "SLOT": 4,
+      "ESR": "0x00000000f2001234",
+      "ELR": "0x00000000801a2fb8",
+      "FAR": "0x5efe5e5c70ff25fc",
+      "REG_canary_kick6": {
+        "status": 2,
+        "GLOBAL_CON": "0x113",
+        "TRIG_CON_before": "0x3063",
+        "TRIG_CON_after": "0x3062",
+        "FRAME_COUNT": [
+          165,
+          315
+        ]
+      },
+      "REG_exception_kick14": {
+        "status": 2,
+        "GLOBAL_CON": "0x113",
+        "TRIG_CON_before": "0x3063",
+        "TRIG_CON_after": "0x3062",
+        "FRAME_COUNT": [
+          1967,
+          2117
+        ]
+      }
+    }
+  },
+  "not_established": [
+    "why FAR holds that value (UNKNOWN for BRK)",
+    "stride, pixel format and band height (still uncalibrated)",
+    "whether a kick or S-Boot refresh makes the markers visible (no no-kick control)",
+    "loader, memory preparation, handoff and anything inside XNU",
+    "the cause of the screen going dark about 64.9 s into the recording, and the USB reset/SEC_UPLOAD sequence (ADB vanished 7 s after the request, SEC_UPLOAD at 95 s, left at 118 s; the recording clock was not aligned with host time)"
+  ]
+}
