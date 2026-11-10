@@ -3,7 +3,7 @@
 
   build.py --out DIR [--loader-source COPY_OF_build-003/source]
   build.py --check-only      (build to a temp dir, verify, discard)
-Outputs: canary-plain/Image, canary-fault/Image, [loader-diag/Image(.payload)].
+Outputs: canary-plain/Image, canary-fault/Image, canary-trig/Image (DECON0 kick, MK_TRIG=1), [loader-diag/Image(.payload)].
 """
 from pathlib import Path
 import argparse, hashlib, json, shutil, struct, subprocess, sys, tempfile
@@ -37,10 +37,11 @@ def link(objs, ld, elf, img):
     run(['zig', 'objcopy', '-O', 'binary', elf, img])
     pad_image(img)
 
-def build_canary(out, name, fault):
+def build_canary(out, name, fault, trig=False):
     d = out / name; d.mkdir(parents=True)
     o = []
-    for src, extra in (('canary.S', []), ('markerlib.c', []), ('canary.c', [f'-DCANARY_FAULT={int(fault)}'])):
+    for src, extra in (('canary.S', []), ('markerlib.c', [f'-DMK_TRIG={int(trig)}']),
+                       ('canary.c', [f'-DCANARY_FAULT={int(fault)}'])):
         obj = d / (src + '.o')
         run(['zig', 'cc', *FLAGS, *extra, f'-I{HERE/"src"}', '-c', HERE / 'src' / src, '-o', obj])
         o.append(obj)
@@ -75,7 +76,8 @@ def main():
     if out.exists(): raise SystemExit('refusing existing output directory')
     out.mkdir(parents=True)
     imgs = {'canary-plain': build_canary(out, 'canary-plain', False),
-            'canary-fault': build_canary(out, 'canary-fault', True)}
+            'canary-fault': build_canary(out, 'canary-fault', True),
+            'canary-trig': build_canary(out, 'canary-trig', False, trig=True)}
     if a.loader_source:
         imgs['loader-diag'] = build_loader(out, Path(a.loader_source))
     for n, p in imgs.items():

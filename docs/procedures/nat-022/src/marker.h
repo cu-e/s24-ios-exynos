@@ -28,8 +28,43 @@ enum mk_kind {
 	MK_ELR = 5,
 	MK_FAR = 6,
 	MK_SLOT = 7,	/* vector slot 0..15 */
-	MK_CHECK = 8	/* canary self-checks: stack word, call depth */
+	MK_CHECK = 8,	/* canary self-checks: stack word, call depth */
+	MK_REG = 9	/* canary-trig only: DECON0 kick report, idx = enum mk_reg_idx */
 };
+
+/* DECON0 kick report (canary-trig). Values are what the code read, not inferences. */
+enum mk_reg_idx {
+	MK_REG_STATUS = 0,	/* data = enum mk_kick_status of the most recent kick */
+	MK_REG_GC_HI = 1, MK_REG_GC_LO = 2,	/* GLOBAL_CON as read before the writes */
+	MK_REG_TC0_HI = 3, MK_REG_TC0_LO = 4,	/* TRIG_CON as read before the writes */
+	MK_REG_TC1_HI = 5, MK_REG_TC1_LO = 6,	/* TRIG_CON read back after the writes */
+	MK_REG_FC_PREV = 7, MK_REG_FC_NOW = 8,	/* FRAME_COUNT[15:0] at the previous / this kick */
+	MK_REG_N = 9			/* data = kick count */
+};
+
+enum mk_kick_status {
+	MK_KS_NONE = 0,
+	MK_KS_SENT_HW = 1,	/* global update request + HW-trigger unmask written */
+	MK_KS_SENT_SW = 2,	/* global update request + SW-trigger written */
+	MK_KS_SKIP_OFF = 3,	/* GLOBAL_CON shows DECON not enabled: nothing written */
+	MK_KS_SKIP_VIDEO = 4,	/* GLOBAL_CON shows video mode: nothing written */
+	MK_KS_SKIP_MMU = 5,	/* MMU on at the current EL: MMIO mapping unknown, nothing touched */
+	MK_KS_POISONED = 6	/* an earlier kick faulted: no further MMIO */
+};
+
+/* NAT-022 canary-trig register contract (source: decon-trigger-facts.md). */
+#define MK_DECON0_BASE		0x19100000ULL
+#define MK_DECON_FRAME_COUNT	0x0004u
+#define MK_DECON_GLOBAL_CON	0x0020u
+#define MK_DECON_TRIG_CON	0x0030u
+#define MK_DECON_SHD_REG_UP_REQ	0x0050u
+#define MK_GC_DECON_EN		((1u << 1) | (1u << 0))
+#define MK_GC_OP_CMD		(1u << 8)
+#define MK_TC_HW_TRIG_EN	(1u << 0)
+#define MK_TC_SW_TRIG_DET_EN	(1u << 1)
+#define MK_TC_HW_TRIG_MASK	(1u << 4)
+#define MK_TC_SW_TRIG_EN	(1u << 8)
+#define MK_SHD_GLOBAL		(1u << 31)
 
 enum mk_stage {
 	MK_ST_ENTRY = 0x01,	/* first instruction drawn */

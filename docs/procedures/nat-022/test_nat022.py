@@ -109,6 +109,65 @@ class Host(unittest.TestCase):
     def test_low_contrast_rejected(self):
         self.assertIsNone(dec.decode_bands([0.55, 0.5] + [0.5] * 32))
 
+class Trigger(unittest.TestCase):
+    """canary-trig: the only MMIO is the documented DECON0 kick, and only when safe."""
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.exe_trig = Path(cls.tmp.name) / "host_mk_trig"
+        subprocess.run(["cc", "-O1", "-Wall", "-Wextra", "-Werror", "-DMK_HOST=1", "-DMK_TRIG=1", f"-I{HERE/'src'}",
+                        str(HERE / "src/markerlib.c"), str(HERE / "src/host_mk.c"), "-o", str(cls.exe_trig)], check=True)
+
+    def trig(self, n, gc, tc, *flags):
+        """Run the canary-trig loop against the fake DECON0; return (events, drawn frames)."""
+        p = subprocess.run([str(self.exe_trig), "trig", str(n), str(Path(self.tmp.name) / "t.bin"), gc, tc, *flags],
+                           capture_output=True, text=True)
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        ev = [l.split() for l in p.stdout.splitlines()]
+        return ev, [int(e[1], 16) for e in ev if e[0] == "DRAW"]
+
+    def test_no_mmio_before_first_marker_and_only_contract_offsets(self):
+        ev, _ = self.trig(20, "0x103", "0x10")
+        self.assertEqual(ev[0][0], "DRAW")           # the framebuffer marker is drawn before any MMIO
+        wr = {e[1] for e in ev if e[0] == "WR"}
+        self.assertTrue(wr <= {"30", "50"}, wr)       # BADRD/BADWR would have failed the run (exit 5)
+        self.assertTrue(wr, "a command-mode DECON must be kicked")
+
+    def test_nothing_written_when_decon_off_video_mmu_or_poisoned(self):
+        for args in (("0x0", "0x10"), ("0x1", "0x10"), ("0x2", "0x10"),   # not enabled / enabled but video mode
+                     ("0x103", "0x10", "mmu"), ("0x103", "0x10", "poison")):
+            ev, frames = self.trig(8, *args)
+            self.assertFalse([e for e in ev if e[0] == "WR"], args)
+            if "mmu" in args or "poison" in args:
+                self.assertFalse([e for e in ev if e[0] == "RD"], args)
+            self.assertTrue(frames)
+
+    def test_trigger_sequences_follow_the_vendor_driver(self):
+        ev, _ = self.trig(6, "0x103", "0x10")
+        wr = [(e[1], int(e[2], 16)) for e in ev if e[0] == "WR"]
+        # Kick 1 (HW form): mask, update request with bit 31, unmask leaving HW_TRIG_EN set and the mask clear.
+        self.assertEqual(wr[0][0], "30"); self.assertEqual(wr[0][1] & 0x11, 0x11)
+        self.assertEqual(wr[1][0], "50"); self.assertTrue(wr[1][1] & 1 << 31)
+        self.assertEqual(wr[2][0], "30"); self.assertEqual(wr[2][1] & 0x11, 0x01)
+        # Kick 2 (SW form): ends with SW_TRIG_EN | SW_TRIG_DET_EN set and HW_TRIG_EN clear.
+        self.assertEqual(wr[3][0], "30"); self.assertEqual(wr[3][1] & 0x103, 0)
+        self.assertEqual(wr[5][0], "30"); self.assertEqual(wr[5][1] & 0x103, 0x102)
+
+    def test_report_decodes_with_independent_decoder(self):
+        ev, frames = self.trig(40, "0x103", "0x10")
+        ds = dec.describe([dec.parse_frame(w) for w in frames])
+        d = ds["decon"]
+        self.assertEqual(d["global_con"], "0x00000103")
+        self.assertEqual(d["trig_con_before"][:6], "0x0000")
+        self.assertTrue(d["kick_status"].startswith("sent"))
+        self.assertGreaterEqual(d["kicks"], 2)
+        self.assertGreater(d["frame_count_now16"], d["frame_count_prev16"])   # the fake counts requests
+
+    def test_skip_status_reported_not_hidden(self):
+        for args, text in ((("0x0", "0x10"), "not enabled"), (("0x1", "0x10"), "video mode"), (("0x103", "0x10", "mmu"), "MMU on")):
+            _, frames = self.trig(40, *args)
+            self.assertIn(text, dec.describe([dec.parse_frame(w) for w in frames])["decon"]["kick_status"])
+
 class Aarch64Build(unittest.TestCase):
     def test_images_build_with_arm64_header(self):
         import shutil

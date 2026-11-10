@@ -129,10 +129,46 @@ same reasoning applies to the loader UI never being seen in NAT-021. This is
 consistent with the no-stripes report but equally with the other untested causes;
 it is not evidence that the canary executed.
 
-The register that triggers a frame transfer is not available locally
-(`references/drivers/gpu/drm/samsung` is an empty partial checkout; the facts file
-`src/native/display/register_facts.json` lacks it). A trigger variant needs that
-source pinned first (host task), and then MMIO writes to DECON0 on the phone,
-which decision 0009 does not cover and which needs a new owner decision. UART or
-a self-contained early-USB channel avoid the display path and are the other
-candidates.
+The register that triggers a frame transfer was then pinned from the BSP:
+`decon-trigger-facts.md` (source-review, SHA `f85e53cf…`). DECON0's DT says
+**hardware** trigger (`trig_mode 0`, TE from DDI0), so the earlier "software
+trigger" wording above was an assumption. Writing it from the canary is MMIO and
+is outside decision 0009; see "canary-trig" below.
+
+## canary-trig: DECON0 kick variant (host-tested only; NOT run)
+
+`build.py` also builds `canary-trig` (`markerlib.c` with `-DMK_TRIG=1`). It is the
+`canary-plain` loop plus, after every drawn frame, one DECON0 kick
+(`mk_kick`, `src/markerlib.c`), following the vendor driver
+(`decon-trigger-facts.md`): read `GLOBAL_CON`, `TRIG_CON`, `FRAME_COUNT`;
+mask the trigger; set `SHD_REG_UP_REQ` bit 31 (read-modify-write); unmask. Odd
+kicks use the HW-trigger form, even kicks the SW-trigger form, because the DT is
+not register truth.
+
+Properties asserted by host tests (`test_nat022.py::Trigger`, fake register file):
+the first framebuffer marker is drawn before any MMIO; the only registers touched
+are `FRAME_COUNT`, `GLOBAL_CON`, `TRIG_CON`, `SHD_REG_UP_REQ`, and the only ones
+written are `TRIG_CON` and `SHD_REG_UP_REQ`; nothing is written when DECON is not
+enabled, is in video mode, when the MMU is on, or after an earlier kick faulted
+(`mk_kick_state` stays 1, so an exception cannot loop on the same fault). The
+registers read are drawn as `REG` frames (`MK_REG`, decoded by `decode.py` into
+`decon`: kick status, `GLOBAL_CON`, `TRIG_CON` before/after, `FRAME_COUNT`
+previous/now), so a visible run reports what S-Boot left behind. The
+`canary-plain` and `canary-fault` Images are byte-identical to the ones built
+before (`7bc1b01d…`, `38a4feba…`).
+
+The generated code, read from `zig cc -S`, forms one base `0x19100030` and uses
+offsets `-16`, `0`, `-44`, `+32` from it, i.e. `GLOBAL_CON`, `TRIG_CON`,
+`FRAME_COUNT`, `SHD_REG_UP_REQ`; it stores only at offsets `0` and `+32`.
+
+Not shown by any host test: that the image runs on the phone, that DECON0 is
+powered and enabled when the recovery kernel is entered (a read of an unpowered
+block can hang the bus), that the panel's TE is present, that the DPP window
+points at `0xFA200000`, or that the SysMMU lets it scan that address. A visible
+result would be the first independent marker; a blank result stays inconclusive
+for the same reasons as run 001.
+
+Decision request: put to the owner in the session with the exact SHA-256. The record
+`docs/decisions/0010-nat022-canary-trig-single-run-2026-11-10.md` exists only if the
+owner accepts; `session_trig.py` refuses to run without it (and writes its own
+one-shot marker `artifacts/nat-022/native-attempt-trig-used.json`).

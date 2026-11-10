@@ -1,6 +1,10 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /* NAT-022 XNU-free stage-0 canary. Draws a marker before any decision, never
- * halts silently, performs no MMIO other than framebuffer stores. */
+ * halts silently. The plain and fault images perform no MMIO other than
+ * framebuffer stores; the canary-trig image (markerlib.c built with MK_TRIG=1)
+ * additionally reads DECON0 GLOBAL_CON/TRIG_CON/FRAME_COUNT and writes only
+ * TRIG_CON and SHD_REG_UP_REQ (see decon-trigger-facts.md), after the first
+ * marker has been drawn. */
 	.section .text.head, "ax"
 	.globl _head
 _head:

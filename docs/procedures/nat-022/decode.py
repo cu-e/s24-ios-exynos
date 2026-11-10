@@ -14,7 +14,10 @@ import argparse, json, struct, sys
 BAND_BYTES = 0x40000
 PAYLOAD_BITS = 32
 BANDS = 2 + PAYLOAD_BITS
-KINDS = {1: "ENTRY", 2: "BOOTID", 3: "STAGE", 4: "ESR", 5: "ELR", 6: "FAR", 7: "SLOT", 8: "CHECK"}
+KINDS = {1: "ENTRY", 2: "BOOTID", 3: "STAGE", 4: "ESR", 5: "ELR", 6: "FAR", 7: "SLOT", 8: "CHECK", 9: "REG"}
+KICK_STATUS = {0: "no kick", 1: "sent: global update + HW-trigger unmask", 2: "sent: global update + SW trigger",
+               3: "skipped: DECON not enabled", 4: "skipped: video mode", 5: "skipped: MMU on",
+               6: "skipped: earlier kick faulted"}
 STAGES = {0x01: "entry", 0x02: "halt: MMU/cache on at entry", 0x03: "halt: unsupported EL",
           0x10: "canary C reached via call", 0x11: "about to BRK #0x1234", 0x1f: "exception record",
           0x20: "loader_main", 0x21: "loader fb selected", 0x30: "memory window chosen",
@@ -108,8 +111,20 @@ def describe(frames):
             acc.setdefault("bootid", {})[f["idx"]] = f["data"]
         elif k in ("ESR", "ELR", "FAR"):
             acc.setdefault(k, {})[f["idx"]] = f["data"]
+        elif k == "REG":
+            acc.setdefault("REG", {})[f["idx"]] = f["data"]
     if "bootid" in acc and set(acc["bootid"]) >= {0, 1}:
         out["boot_id_cntvct32"] = acc["bootid"][1] << 16 | acc["bootid"][0]
+    r = acc.get("REG", {})
+    if r:
+        d = {"kick_status": KICK_STATUS.get(r[0], hex(r[0])) if 0 in r else None}
+        for name, hi, lo in (("global_con", 1, 2), ("trig_con_before", 3, 4), ("trig_con_after", 5, 6)):
+            if hi in r and lo in r:
+                d[name] = "0x%08x" % (r[hi] << 16 | r[lo])
+        if 7 in r: d["frame_count_prev16"] = r[7]
+        if 8 in r: d["frame_count_now16"] = r[8]
+        if 9 in r: d["kicks"] = r[9]
+        out["decon"] = d
     for k in ("ESR", "ELR", "FAR"):
         if k in acc and set(acc[k]) == {0, 1, 2, 3}:
             out[k.lower()] = "0x%016x" % bits_to_word_n([acc[k][i] for i in range(4)])

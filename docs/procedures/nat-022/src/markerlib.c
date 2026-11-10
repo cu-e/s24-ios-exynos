@@ -31,6 +31,83 @@ static inline void mk_clean(uint64_t a, uint64_t n)
 }
 #endif
 
+#ifndef MK_TRIG
+#define MK_TRIG 0
+#endif
+
+/* Report state of the DECON0 kick (canary-trig). Plain data, lives on the caller's stack. */
+struct mk_kick {
+	uint32_t gc, tc0, tc1, fc_prev, fc_now, status, n;
+};
+
+#if MK_TRIG
+#if MK_HOST
+extern uint32_t mk_host_rd(uint32_t off);
+extern void mk_host_wr(uint32_t off, uint32_t v);
+extern int mk_host_mmu_on;
+static inline uint32_t mk_rd(uint32_t o) { return mk_host_rd(o); }
+static inline void mk_wr(uint32_t o, uint32_t v) { mk_host_wr(o, v); }
+static inline int mk_mmu_on(void) { return mk_host_mmu_on; }
+#else
+static inline uint32_t mk_rd(uint32_t o) { return *(volatile uint32_t *)(uintptr_t)(MK_DECON0_BASE + o); }
+static inline void mk_wr(uint32_t o, uint32_t v)
+{
+	*(volatile uint32_t *)(uintptr_t)(MK_DECON0_BASE + o) = v;
+	__asm__ volatile("dsb sy" ::: "memory");
+}
+static inline int mk_mmu_on(void)
+{
+	uint64_t el, s;
+	__asm__ volatile("mrs %0, CurrentEL" : "=r"(el));
+	if (el == 8) __asm__ volatile("mrs %0, sctlr_el2" : "=r"(s));
+	else __asm__ volatile("mrs %0, sctlr_el1" : "=r"(s));
+	return (int)(s & 1);
+}
+#endif
+
+/* 1 while a kick's MMIO is in flight. If the MMIO faulted the exception handler
+ * finds it still 1 and never touches the block again (no fault loop). */
+volatile uint32_t mk_kick_state = 0;
+
+/* One DECON0 command-mode frame request, the vendor driver's sequence
+ * (decon-trigger-facts.md): mask, global shadow update request, unmask.
+ * Odd kicks use the HW-trigger form (the DT says trig_mode 0), even kicks the
+ * SW-trigger form, because the DT is not register truth. Only TRIG_CON (0x30)
+ * and SHD_REG_UP_REQ (0x50) are written; nothing is written when DECON is not
+ * enabled or is in video mode, when the MMU is on, or after a faulted kick. */
+static void mk_kick(struct mk_kick *k)
+{
+	uint32_t gc, tc0, mask, val;
+	k->n++;
+	if (mk_mmu_on()) { k->status = MK_KS_SKIP_MMU; return; }
+	if (mk_kick_state) { k->status = MK_KS_POISONED; return; }
+	mk_kick_state = 1;
+	gc = mk_rd(MK_DECON_GLOBAL_CON);
+	tc0 = mk_rd(MK_DECON_TRIG_CON);
+	k->gc = gc; k->tc0 = tc0; k->tc1 = tc0;
+	k->fc_prev = k->fc_now;
+	k->fc_now = mk_rd(MK_DECON_FRAME_COUNT) & 0xffff;
+	if (!(gc & MK_GC_DECON_EN)) { k->status = MK_KS_SKIP_OFF; mk_kick_state = 0; return; }
+	if (!(gc & MK_GC_OP_CMD)) { k->status = MK_KS_SKIP_VIDEO; mk_kick_state = 0; return; }
+	if (k->n & 1) {
+		mask = MK_TC_HW_TRIG_EN | MK_TC_HW_TRIG_MASK;
+		mk_wr(MK_DECON_TRIG_CON, (tc0 & ~mask) | mask);	/* mask */
+		mk_wr(MK_DECON_SHD_REG_UP_REQ, mk_rd(MK_DECON_SHD_REG_UP_REQ) | MK_SHD_GLOBAL);
+		mk_wr(MK_DECON_TRIG_CON, (mk_rd(MK_DECON_TRIG_CON) & ~mask) | MK_TC_HW_TRIG_EN);	/* unmask */
+		k->status = MK_KS_SENT_HW;
+	} else {
+		mask = MK_TC_HW_TRIG_EN | MK_TC_SW_TRIG_EN | MK_TC_SW_TRIG_DET_EN;
+		val = MK_TC_SW_TRIG_EN | MK_TC_SW_TRIG_DET_EN;
+		mk_wr(MK_DECON_TRIG_CON, tc0 & ~mask);	/* mask */
+		mk_wr(MK_DECON_SHD_REG_UP_REQ, mk_rd(MK_DECON_SHD_REG_UP_REQ) | MK_SHD_GLOBAL);
+		mk_wr(MK_DECON_TRIG_CON, (mk_rd(MK_DECON_TRIG_CON) & ~mask) | val);	/* unmask */
+		k->status = MK_KS_SENT_SW;
+	}
+	k->tc1 = mk_rd(MK_DECON_TRIG_CON);
+	mk_kick_state = 0;
+}
+#endif
+
 static inline void mk_draw(uint32_t frame, uint32_t prev, int full)
 {
 	for (uint32_t b = 0; b < MK_BANDS; b++) {
@@ -91,24 +168,57 @@ __attribute__((noinline)) void mk_stage(uint32_t stage)
 	mk_draw(mk_frame(MK_STAGE, 0, stage), 0, 1);
 }
 
-static void show(uint32_t *prev, uint32_t f)
+static void kick_after_draw(struct mk_kick *k)
+{
+#if MK_TRIG
+	mk_kick(k);
+#else
+	(void)k;
+#endif
+}
+
+static void show(uint32_t *prev, uint32_t f, struct mk_kick *k)
 {
 	mk_draw(f, *prev, 0);
 	*prev = f;
+	kick_after_draw(k);
 	mk_wait_tenths(MK_DWELL_TENTHS);
+}
+
+/* Shows a snapshot of the kick registers (canary-trig only). */
+static void show_kick_report(uint32_t *prev, struct mk_kick *k)
+{
+#if MK_TRIG
+	struct mk_kick s = *k;
+	show(prev, mk_frame(MK_REG, MK_REG_STATUS, s.status), k);
+	show(prev, mk_frame(MK_REG, MK_REG_GC_HI, s.gc >> 16), k);
+	show(prev, mk_frame(MK_REG, MK_REG_GC_LO, s.gc), k);
+	show(prev, mk_frame(MK_REG, MK_REG_TC0_HI, s.tc0 >> 16), k);
+	show(prev, mk_frame(MK_REG, MK_REG_TC0_LO, s.tc0), k);
+	show(prev, mk_frame(MK_REG, MK_REG_TC1_HI, s.tc1 >> 16), k);
+	show(prev, mk_frame(MK_REG, MK_REG_TC1_LO, s.tc1), k);
+	show(prev, mk_frame(MK_REG, MK_REG_FC_PREV, s.fc_prev), k);
+	show(prev, mk_frame(MK_REG, MK_REG_FC_NOW, s.fc_now), k);
+	show(prev, mk_frame(MK_REG, MK_REG_N, s.n), k);
+#else
+	(void)prev; (void)k;
+#endif
 }
 
 __attribute__((noinline, noreturn)) void
 mk_exception_loop(uint32_t slot, uint64_t esr, uint64_t elr, uint64_t far)
 {
 	uint32_t prev = 0;
+	struct mk_kick k = {0, 0, 0, 0, 0, 0, 0};
 	mk_draw(mk_frame(MK_STAGE, 0, MK_ST_EXC), 0, 1);
 	prev = mk_frame(MK_STAGE, 0, MK_ST_EXC);
+	kick_after_draw(&k);
 	for (;;) {
-		show(&prev, mk_frame(MK_SLOT, 0, slot));
-		for (uint32_t i = 0; i < 4; i++) show(&prev, mk_frame(MK_ESR, i, (uint32_t)(esr >> (48 - 16 * i))));
-		for (uint32_t i = 0; i < 4; i++) show(&prev, mk_frame(MK_ELR, i, (uint32_t)(elr >> (48 - 16 * i))));
-		for (uint32_t i = 0; i < 4; i++) show(&prev, mk_frame(MK_FAR, i, (uint32_t)(far >> (48 - 16 * i))));
+		show(&prev, mk_frame(MK_SLOT, 0, slot), &k);
+		for (uint32_t i = 0; i < 4; i++) show(&prev, mk_frame(MK_ESR, i, (uint32_t)(esr >> (48 - 16 * i))), &k);
+		for (uint32_t i = 0; i < 4; i++) show(&prev, mk_frame(MK_ELR, i, (uint32_t)(elr >> (48 - 16 * i))), &k);
+		for (uint32_t i = 0; i < 4; i++) show(&prev, mk_frame(MK_FAR, i, (uint32_t)(far >> (48 - 16 * i))), &k);
+		show_kick_report(&prev, &k);
 	}
 }
 
@@ -119,16 +229,19 @@ mk_canary_loop(uint64_t cel, uint64_t cur, uint64_t e1, uint32_t stack_ok, int f
 {
 	uint64_t id = mk_cnt();
 	uint32_t prev = 0;
+	struct mk_kick k = {0, 0, 0, 0, 0, 0, 0};
 	mk_draw(mk_frame(MK_STAGE, 0, MK_ST_CANARY_C), 0, 1);
 	prev = mk_frame(MK_STAGE, 0, MK_ST_CANARY_C);
+	kick_after_draw(&k);
 	for (uint32_t round = 0;; round++) {
-		show(&prev, mk_frame(MK_CHECK, 0, stack_ok ? 0xA5A5 : 0));
-		show(&prev, mk_frame(MK_ENTRY, 0, entry_data(cel, cur, e1)));
-		show(&prev, mk_frame(MK_BOOTID, 0, (uint32_t)id));
-		show(&prev, mk_frame(MK_BOOTID, 1, (uint32_t)(id >> 16)));
-		show(&prev, mk_frame(MK_STAGE, 0, MK_ST_CANARY_C));
+		show(&prev, mk_frame(MK_CHECK, 0, stack_ok ? 0xA5A5 : 0), &k);
+		show(&prev, mk_frame(MK_ENTRY, 0, entry_data(cel, cur, e1)), &k);
+		show(&prev, mk_frame(MK_BOOTID, 0, (uint32_t)id), &k);
+		show(&prev, mk_frame(MK_BOOTID, 1, (uint32_t)(id >> 16)), &k);
+		show(&prev, mk_frame(MK_STAGE, 0, MK_ST_CANARY_C), &k);
+		show_kick_report(&prev, &k);
 		if (fault && round == 2) {
-			show(&prev, mk_frame(MK_STAGE, 0, MK_ST_CANARY_BRK));
+			show(&prev, mk_frame(MK_STAGE, 0, MK_ST_CANARY_BRK), &k);
 #if !MK_HOST
 			__asm__ volatile("brk #0x1234");
 #endif
