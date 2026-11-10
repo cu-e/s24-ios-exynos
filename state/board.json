@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T06:28:09+00:00",
-  "ledger_updated_at": "2026-11-10T06:27:48+00:00",
-  "registry_sha256": "3c6991f5221a5189927ee99951e5e9d99662f3af87e151b0ae898eee614bf375",
+  "generated_at": "2026-11-10T06:45:40+00:00",
+  "ledger_updated_at": "2026-11-10T06:45:21+00:00",
+  "registry_sha256": "cba466c10de7d8ca64867a874d6f890fe5efd0a35435c8f9db189366ba12ca50",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -287,6 +287,7 @@
       "DRV-006",
       "KRN-040",
       "DRV-007",
+      "KRN-042",
       "FND-001",
       "RES-001",
       "DEV-001",
@@ -6576,7 +6577,7 @@
       "column": "in_progress",
       "reasons": [],
       "card_path": "planning/tasks/NAT-006.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "DRV-001",
@@ -11081,6 +11082,45 @@
       "card_path": "planning/tasks/DRV-007.md"
     },
     {
+      "id": "KRN-042",
+      "title": "Verify that the KRN-041 export fixes reproduce from main and record their integration status",
+      "status": "done",
+      "owner": "claude-takeover-20261110-6c8f",
+      "priority": 60,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "KRN-041",
+        "STR-041"
+      ],
+      "paths": [
+        "docs/procedures/krn-042"
+      ],
+      "acceptance": [
+        "The KRN-041 procedure is rerun from the primary checkout on a fresh run name and its pass/fail, check count and exit code are recorded.",
+        "The rerun's relinked kernel, stub object and export profile are compared with the accepted run-003; any byte difference is explained by inspection (machine code, sections, embedded strings), not assumed.",
+        "Whether 0001/0002 are applied by any project source-preparation or build tool in main is stated with the search used; nothing is claimed about booting."
+      ],
+      "sources": [
+        "apple-xnu"
+      ],
+      "steps": [
+        "Rerun from main",
+        "Compare with run-003",
+        "Record integration status"
+      ],
+      "started_at": "2026-11-10T06:44:40+00:00",
+      "last_heartbeat": "2026-11-10T06:44:40+00:00",
+      "updated_at": "2026-11-10T06:45:21+00:00",
+      "branch": "main",
+      "evidence": "docs/procedures/krn-042/evidence.json",
+      "evidence_sha256": "52f4eaa9b3812381a0d9d74e48f75e588516c76e0aa890618e7490f0513732cb",
+      "finished_at": "2026-11-10T06:45:21+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/KRN-042.md"
+    },
+    {
       "id": "FND-001",
       "title": "Prepare and verify the project foundation",
       "status": "done",
@@ -12703,7 +12743,7 @@
         "id": "NAT-006",
         "status": "in_progress",
         "last_heartbeat": "2026-11-10T05:58:27+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "Transferred under 0003 for preservation. Uncommitted files saved as-is in ac22ef5 on team/nat-006-recovery-image-20261110; verify_image.py may be partial (write interrupted by a safety classifier stop at 05:46:02Z). Nothing run, nothing flashed.",
         "next_step": "Held; not restarted. Owner decides next action.",
         "handoff": null,
@@ -12893,52 +12933,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-10T05:22:04+00:00",
-      "action": "task.add:NAT-006",
-      "owner": "claude-native-image-20261110-n6",
-      "tasks": [
-        {
-          "id": "NAT-006",
-          "status": "pending",
-          "owner": null,
-          "priority": 95
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T05:22:22+00:00",
-      "action": "task.done:NAT-001",
-      "owner": "claude-native-recovery-20261110-n1",
-      "tasks": [
-        {
-          "id": "NAT-001",
-          "status": "done",
-          "owner": "claude-native-recovery-20261110-n1",
-          "progress_note": "Recovery template records unavailable matching BYH3 images, hashed backups and measured restore; no phone operation performed",
-          "next_step": "Establish matching local image/backup provenance and separately scoped recovery qualification",
-          "last_heartbeat": "2026-11-10T05:14:53+00:00",
-          "branch": "team/nat-001-recovery-20261110",
-          "worktree": "worktrees/nat-001-recovery-20261110",
-          "handoff": "research/notes/implementation-handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T05:22:30+00:00",
-      "action": "task.claim:NAT-005",
-      "owner": "claude-native-abi-20261110-n5",
-      "tasks": [
-        {
-          "id": "NAT-005",
-          "status": "in_progress",
-          "owner": "claude-native-abi-20261110-n5",
-          "priority": 95,
-          "last_heartbeat": "2026-11-10T05:22:30+00:00",
-          "branch": "main"
-        }
-      ]
-    },
     {
       "at": "2026-11-10T05:26:06+00:00",
       "action": "task.done:NAT-005",
@@ -13211,11 +13205,54 @@
           "branch": "main"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T06:44:21+00:00",
+      "action": "task.add:KRN-042",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "KRN-042",
+          "status": "pending",
+          "owner": null,
+          "priority": 60
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:44:40+00:00",
+      "action": "task.claim:KRN-042",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "KRN-042",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 60,
+          "last_heartbeat": "2026-11-10T06:44:40+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:45:21+00:00",
+      "action": "task.done:KRN-042",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "KRN-042",
+          "status": "done",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 60,
+          "last_heartbeat": "2026-11-10T06:44:40+00:00",
+          "branch": "main"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "373207d01af9f5d4b7c2be5c640b0c5add8d06ea53795db8b1684dd7881ac208",
-    "BOARD.md": "da43a8e9341db411daf75f50b82c5ecb3ad3e0bc174ef8f184b71cfcf76dca40",
+    "STATUS.md": "2228a2fe2d6d02907f29a0fca51918ad0f2cc1381949f40d103b7e96dab1ccd6",
+    "BOARD.md": "8a8a9d23c8d49b278f8f903c4208a3a15c95740c4ff088c573df19e4211cb3ae",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -13356,7 +13393,7 @@
     "planning/tasks/STR-036.md": "732a4bc320171e9148c4debda9e77920a6868bbfd834e5e2d5b1e1fb8c522a9d",
     "planning/tasks/GPU-013.md": "2822d1f3c75ccfe1ecabdbd106a766f2e6508e7a5022664db9dd3ff3022e92d7",
     "planning/tasks/NAT-005.md": "b078a916eab662fb839780a4d34f4ce047cd47c6c35fe60a6ea80764b7ce4041",
-    "planning/tasks/NAT-006.md": "f9f2b3fea5512fbfbe6d822f8f81537eaaa3703690da8c24a928132e14ec0035",
+    "planning/tasks/NAT-006.md": "eb7dfcd03be6a8deafb5a75cfcac82ea9dc196a877093e3f6aea814d178fa3e1",
     "planning/tasks/DRV-001.md": "eaac786b5ca6d0640d7a9bea43bf42424662189e0f9f44baaa6b6ad049f10f17",
     "planning/tasks/KRN-023.md": "a95e56ff9ef7bfa3ff55cf11a48d0bba892cc95ab504b367bc3e9d4490ecdd51",
     "planning/tasks/REV-012.md": "99bf82028acd252050bbe595c74c47d22013dfccb4d261b32b98825471ce86ea",
@@ -13461,6 +13498,7 @@
     "planning/tasks/DRV-006.md": "6116f263042ff30dc687f5826b75a7c0da5afbba5326065e01ce245a027e68ba",
     "planning/tasks/KRN-040.md": "3078f05d1553121a53783a5f8e7d073b93d9c2917afb3e2ef72f381a782e9d70",
     "planning/tasks/DRV-007.md": "3d06e2678a4b40a3bcfa3cef7473f73c9c6edf9a7084945294f6b98a6951a007",
+    "planning/tasks/KRN-042.md": "9a4c9f3acb9abc5a938b6fcfa99883a550a3c9f2df3e6ddf687f9aa26c8b1231",
     "planning/tasks/FND-001.md": "ee81357df48cbcec414e6dc2f58f1325d8936e16bbbe8022d8b771c316d6b0f8",
     "planning/tasks/RES-001.md": "956b0cf0fe59602b13d98565c02c1486438c7f0451c2800e8d5c1a77e8e1d9fe",
     "planning/tasks/DEV-001.md": "387a0fc684445f6526c8517869714a41d884f7be2ebb11738782afaf0b404926",

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "task": "KRN-042",
+  "owner": "claude-takeover-20261110-6c8f",
+  "recorded_at": "2026-11-10T06:45:08+00:00",
+  "authorization": "docs/decisions/0002-owner-autonomy-grant-2026-11-10.md (item 1, host work)",
+  "summary": "KRN-041 procedure rerun from main passes 39/39; export profile and all-kpi list are byte-identical to run-003; pmap.o machine code is identical and the remaining differences are the embedded run-directory path; 0001/0002 are not applied by any source-preparation or build tool in main.",
+  "commit": "78bec9b",
+  "device_io": {"performed": false},
+  "host_commands": [
+    {"argv": ["python3", "-I", "docs/procedures/krn-041/missing_exports.py", "--run", "main-recheck-20261110", "--guest-kernel", "references/hakios-scion-full/prebuilt/hakios-kernel"], "exit_code": 0, "result": "pass, 39 checks, 0 failed"},
+    {"argv": ["llvm-objdump", "-d", "pmap.o (run-003 vs main-recheck-20261110)"], "exit_code": 0, "result": "disassembly identical, 22337 lines"},
+    {"argv": ["llvm-objdump", "-h", "pmap.o (both)"], "exit_code": 0, "result": "only __cstring +14, __debug_str +28, __debug_line +14 differ"},
+    {"argv": ["git", "grep", "-l", "-e", "0001-arm-pmap-unsupported-queries", "-e", "0002-no-apple-soc-library-exports", "-e", "no-apple-soc", "--", ":!worktrees"], "exit_code": 0, "result": "only docs/procedures/krn-041/{dossier.json,evidence.json,missing_exports.py} and research/notes/kernel/KRN-041-missing-exports.md"}
+  ],
+  "artifacts": ["docs/procedures/krn-042/README.md", "artifacts/krn-041/main-recheck-20261110/report.json", "artifacts/krn-041/main-recheck-20261110/relink/kernel.unstripped"],
+  "sha256": {
+    "docs/procedures/krn-042/README.md": "69e9201abaf2d6a1cdb771d2c7abf6ec17ec76ff5a01049a31bc7f1d33f3c21f",
+    "artifacts/krn-041/main-recheck-20261110/report.json": "468e8e47b94c378c30bcd7cc12fd4fd7b450119ac7bd76768a03db12e48a9d01",
+    "artifacts/krn-041/main-recheck-20261110/relink/kernel.unstripped": "b1c551bacb18b58573d0ff4ac3567e2d0713a045c5b50a0cb35b057f9d43b47f",
+    "artifacts/krn-041/run-003/relink/kernel.unstripped": "2a26b7d31cf62c057d6b24a671a409c2ebd3619f7c7a734f52fb760a5ef02bb5"
+  },
+  "limits": ["No kernel was booted.", "Byte reproducibility across run directories is not achieved (embedded source path).", "Integration of 0001/0002 into native source preparation remains open."]
+}

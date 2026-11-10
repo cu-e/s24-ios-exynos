@@ -2,13 +2,13 @@
 
 > Generated from state/lab.json. Use the CLI; do not edit this board or its task cards.
 
-Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-10T06:28:09+00:00.
+Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-10T06:45:40+00:00.
 
-Registry SHA256: `3c6991f5221a5189927ee99951e5e9d99662f3af87e151b0ae898eee614bf375`. Run `python3 tools/lab.py board --check` to detect stale files.
+Registry SHA256: `cba466c10de7d8ca64867a874d6f890fe5efd0a35435c8f9db189366ba12ca50`. Run `python3 tools/lab.py board --check` to detect stale files.
 
 [Workflow](docs/planning.md) · [All task details](planning/README.md) · [Machine view](state/board.json) · [Status](STATUS.md)
 
-| Ready (2) | In progress (19) | Blocked (7) | Waiting (19) | Needs authorization (21) | Done (216) |
+| Ready (2) | In progress (19) | Blocked (7) | Waiting (19) | Needs authorization (21) | Done (217) |
 | --- | --- | --- | --- | --- | --- |
 | [**NAT-007**](planning/tasks/NAT-007.md) · P90<br>Derive the s5e9945 hardware watchdog reset sequence from pinned Samsung source and host-test a freestanding arm/pet/disarm module (candidate return path, not proven on hardware)<br>host · unassigned | [**INT-002**](planning/tasks/INT-002.md) · P100<br>Coordinate kernel build boot and virtualization integration<br>host · codex-integrator-kernel-20261106-cm | [**KRN-026**](planning/tasks/KRN-026.md) · P98<br>Resolve selected kernel export-list-only symbol gaps against genuine source<br>host · codex-team-export-gaps-20261105-ba<br>Exact selected ARM64 provider inputs are unavailable:17 IOUnifiedAddressTranslator implementations with provenance-qualified class layout/vtable/type/dispatch ABI;7 pmap_iommu implementations;11 DART/SART/UAT/NVMe PPL implementations and hardware/ABI dependencies;2 pmap_has_iofilter_protected_write and pmap_cs_configuration ARM64 semantics/implementations. Native selection still requires all37 exports; public pmap sources are already-compiled placeholders. Root independently verified diagnosis and81 artifact hashes; no supported export/profile/object correction exists from supplied inputs. | [**STR-037**](planning/tasks/STR-037.md) · P100<br>Link and qualify the genuine1042-body native DEVELOPMENT E1S MachO image<br>host · unassigned<br>Dependencies: STR-024 | [**NAT-003**](planning/tasks/NAT-003.md) · P50<br>Run the first native BOOT session with logs and recovery<br>native · unassigned<br>Scope not authorized: native; Dependencies: NAT-002, NAT-004, KRN-001; Paths reserved by: KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, STR-024, VM-053, VM-054, NAT-006 | [**KRN-009**](planning/tasks/KRN-009.md) · P100<br>Implement actual atomic type metadata for genuine selected XNU allocator uses<br>host · codex-compiler-atomics-20261105-t |
 | [**VM-003**](planning/tasks/VM-003.md) · P50<br>Measure an isolated XNU guest on the S24<br>android-app · unassigned | [**INT-003**](planning/tasks/INT-003.md) · P100<br>Coordinate crypto drivers and platform integration<br>host · codex-integrator-platform-20261106-cn | [**KRN-003**](planning/tasks/KRN-003.md) · P95<br>Qualify E1S dependency compiler/board profiles and generated kernel archives<br>host · codex-e1s-dependencies-20261105-k<br>Actual pthread compilation lacks genuine TargetConditionals.h; complete SDK/export ABI and matching DriverKit generated-header inputs have no explicitly supplied/provenanced local paths. Firehose and wrapper component passes do not satisfy full dependency acceptance. | [**GPU-007**](planning/tasks/GPU-007.md) · P70<br>Implement and build the Xclipse native kernel backend<br>host · unassigned<br>Dependencies: KRN-001; Paths reserved by: GPU-012 | [**DRV-003**](planning/tasks/DRV-003.md) · P50<br>Validate minimal XNU drivers on hardware<br>native · unassigned<br>Scope not authorized: native; Dependencies: NAT-003, DRV-002; Paths reserved by: KRN-003, VM-054 | [**KRN-025**](planning/tasks/KRN-025.md) · P100<br>Build and qualify genuine selected cc_kext compiler runtime<br>host · codex-team-cc-runtime-20261105-az |
@@ -213,6 +213,7 @@ Registry SHA256: `3c6991f5221a5189927ee99951e5e9d99662f3af87e151b0ae898eee614bf3
 | — | — | — | — | — | [**DRV-006**](planning/tasks/DRV-006.md) · P60<br>Tighten GPT geometry admission and close test gaps found by source review of DRV-005<br>host · claude-ufs-gpt-hardening-20261110-d6 |
 | — | — | — | — | — | [**KRN-040**](planning/tasks/KRN-040.md) · P60<br>Measure export-list coverage of the linked native kernel with a re-implementation of the kextsymboltool membership rule<br>host · claude-export-coverage-20261110-k40 |
 | — | — | — | — | — | [**DRV-007**](planning/tasks/DRV-007.md) · P60<br>Restore the source-qualified UFS host check in main and run the UFS and GPT read-only checks from make check (DRV-002 closure inputs)<br>host · claude-takeover-20261110-6c8f |
+| — | — | — | — | — | [**KRN-042**](planning/tasks/KRN-042.md) · P60<br>Verify that the KRN-041 export fixes reproduce from main and record their integration status<br>host · claude-takeover-20261110-6c8f |
 | — | — | — | — | — | [**FND-001**](planning/tasks/FND-001.md) · P50<br>Prepare and verify the project foundation<br>host · codex |
 | — | — | — | — | — | [**RES-001**](planning/tasks/RES-001.md) · P50<br>Pin S24 upstream and document donor provenance<br>host · codex-implementation-20261105 |
 | — | — | — | — | — | [**DEV-001**](planning/tasks/DEV-001.md) · P50<br>Collect sanitized read-only S24 inventory<br>android-readonly · codex |
@@ -233,7 +234,7 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 
 | Owner | Task | State | Last heartbeat (UTC) | Report | Progress / next step | Context |
 |---|---|---|---|---|---|---|
-| claude-takeover-20261110-6c8f | NAT-006 | in_progress | 2026-11-10T05:58:27+00:00 | recent | Transferred under 0003 for preservation. Uncommitted files saved as-is in ac22ef5 on team/nat-006-recovery-image-20261110; verify_image.py may be partial (write interrupted by a safety classifier stop at 05:46:02Z). Nothing run, nothing flashed. / Held; not restarted. Owner decides next action. | branch: team/nat-006-recovery-image-20261110; worktree: worktrees/nat-006-recovery-image-20261110 |
+| claude-takeover-20261110-6c8f | NAT-006 | in_progress | 2026-11-10T05:58:27+00:00 | stale | Transferred under 0003 for preservation. Uncommitted files saved as-is in ac22ef5 on team/nat-006-recovery-image-20261110; verify_image.py may be partial (write interrupted by a safety classifier stop at 05:46:02Z). Nothing run, nothing flashed. / Held; not restarted. Owner decides next action. | branch: team/nat-006-recovery-image-20261110; worktree: worktrees/nat-006-recovery-image-20261110 |
 | claude-vm-display-20261110-v53 | VM-053 | in_progress | 2026-11-10T04:41:50+00:00 | stale | No progress note / Next step not reported | branch: team/vm-053-display-input-20261110; worktree: worktrees/vm-053-display-input-20261110 |
 | claude-xnu-s24-20261110-v54 | VM-054 | in_progress | 2026-11-10T05:12:22+00:00 | stale | Sessions 002-004 + fp-probe (2026-11-10): first exception is EC=0x07 FP trap at _cpu_data_init (fmov d0,xzr, ELR 0xfffffff0074950b4) although XNU&#x27;s only CPACR_EL1 write (common_start) sets 0x300000 and CPACR reads 0x300000 at the breakpoint; the later SP1 recursion/address-size faults are fallout. fp_probe.S shows KVM FP is correct on A520/A720/X4 (FPEN=11 runs, FPEN=00 traps 0x1fe00000 to the guest, survives a 2 s spin). Tools: s24vmm --break (KVM_SET_GUEST_DEBUG, 6 HW BPs) and exit-time stage-1 walk/memory dump (VM-053 commits 92ae109, 8a8f77b, 01a93cc). Paused by owner: priority moved to native boot research. / Find why the FP trap reaches the guest with FPEN=11 (compare guest state at common_start vs cpu_data_init with --break; check CPTR/pKVM FP ownership); fp_probe.S uncommitted in the worktree. | branch: team/vm-054-xnu-guest-s24-20261110; worktree: worktrees/vm-054-xnu-guest-s24-20261110 |
 | codex-e1s-dependencies-20261105-k | KRN-003 | blocked | 2026-11-05T03:35:41+00:00 | stale | Built genuine E1S and BCM firehose archives and measured nine ABI fields; explicit C/C++ wrapper fixtures pass. Pthread fails at genuine TargetConditionals.h; complete SDK/DriverKit/export ABI remains unavailable. Retained all failed outcomes. Released finished shared source catalog reservation; retained narrow dependency implementation paths. / Supply provenanced local SDK and matching DriverKit headers, then compile and inspect all actual E1S dependency archives; independent host tasks may proceed meanwhile | branch: main; handoff: research/notes/KRN-003-dependencies.md |
@@ -262,12 +263,6 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 
 ## Recent activity
 
-- 2026-11-10T05:22:04+00:00 · claude-native-image-20261110-n6 · task.add:NAT-006
-  - NAT-006: pending
-- 2026-11-10T05:22:22+00:00 · claude-native-recovery-20261110-n1 · task.done:NAT-001
-  - NAT-001: Recovery template records unavailable matching BYH3 images, hashed backups and measured restore; no phone operation performed
-- 2026-11-10T05:22:30+00:00 · claude-native-abi-20261110-n5 · task.claim:NAT-005
-  - NAT-005: in_progress
 - 2026-11-10T05:26:06+00:00 · claude-native-abi-20261110-n5 · task.done:NAT-005
   - NAT-005: done
 - 2026-11-10T05:27:22+00:00 · claude-native-image-20261110-n6 · task.claim:NAT-006
@@ -302,6 +297,12 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
   - DRV-007: in_progress
 - 2026-11-10T06:27:48+00:00 · claude-takeover-20261110-6c8f · task.done:DRV-007
   - DRV-007: done
+- 2026-11-10T06:44:21+00:00 · claude-takeover-20261110-6c8f · task.add:KRN-042
+  - KRN-042: pending
+- 2026-11-10T06:44:40+00:00 · claude-takeover-20261110-6c8f · task.claim:KRN-042
+  - KRN-042: in_progress
+- 2026-11-10T06:45:21+00:00 · claude-takeover-20261110-6c8f · task.done:KRN-042
+  - KRN-042: done
 
 Use a unique owner per agent session. Atomically take ready work:
 
