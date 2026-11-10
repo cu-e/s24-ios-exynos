@@ -1,0 +1,103 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-10T14:11:30.048507+00:00",
+ "commit": "82f636e9c3d7285f2f20791fc1f94045f77180b6",
+ "summary": "Host only; nothing flashed or run on the phone. loader-diag-trig-hold (NAT-020 build-003 loader through patch_loader.py --trig-hold, linked with markerlib.c -DMK_TRIG=1 -DMK_LOADER=1) builds reproducibly (two builds identical): loader Image 901565b225c2137ebd99e4684cb4dc9a6b4f3ecf68632eedcf9ef8b16cf7db28 (212992 B), Image.payload 7c6206bd06923a91524afe95ec03573ed6fa680978cc839c40991debf7702cb3 (21767776 B), packaged with the NAT-006 builder into RECOVERY image 511b4833f0b6c24f5adffe762451bcbf937aa9a23b64bdd41d254885e006c475 (19634 differing 4 KiB pages, kernel at offset 2048). All five build-003 images (canary-plain, canary-fault, canary-trig, canary-trig-fault, loader-diag) are byte-identical to build-003, including the two that ran. The variant stops at PRE_JUMP in mk_hold (noreturn) before the only 'return entry_pa;', so it never jumps into the kernel copy (source-level check; the linked instruction stream was not disassembled, no AArch64 disassembler on the host). 28 host tests pass (python3 -P docs/procedures/nat-022/test_nat022.py), including LoaderHold against the real markerlib.c and a fake DECON0: stage order and reached-stage mask, hold-loop frame set and exact frame count, no MMIO before the first marker, fail() codes (fnv16 of every fail message in loader.c, C against Python, no collisions), loader exception loop with ESR/ELR/FAR, and no MMIO with the MMU on or an interrupted kick. make check passed (214 tests; it does not include test_nat022.py). Static check of the objects: no absolute pointer other than the header _payload_start field; code and data use adr/adrp and the ui label tables are char arrays, so the loader needs no relocation at the 4 KiB-aligned 0x801a0000 where S-Boot ran the canary (inferred from run 003). Not shown by any host test: the AArch64 start path, the loader's real DTB/RAM use, RAM zero/copy/clean timing against the ~60 s display lifetime and the 83 s watchdog the loader arms, and DECON0 behaviour while the loader moves memory. session_loaderhold.py refuses to run unless docs/decisions/0012-nat022-loader-diag-trig-hold-single-run-2026-11-10.md exists; that decision is not made. The image-specific request is put to the owner in the session.",
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/test_nat022.py"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/build.py",
+    "--out",
+    "artifacts/nat-022/build-004",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/build.py",
+    "--out",
+    "artifacts/nat-022/build-004-repro",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/package.py",
+    "--image",
+    "artifacts/nat-022/build-004/loader-diag-trig-hold/Image.payload",
+    "--out",
+    "artifacts/nat-022/package-004"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "tools/lab.py",
+    "validate"
+   ],
+   "exit_code": 0
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-022/README.md",
+  "docs/procedures/nat-022/build.py",
+  "docs/procedures/nat-022/decode.py",
+  "docs/procedures/nat-022/patch_loader.py",
+  "docs/procedures/nat-022/test_nat022.py",
+  "docs/procedures/nat-022/session_loaderhold.py",
+  "docs/procedures/nat-022/src/markerlib.c",
+  "docs/procedures/nat-022/src/marker.h",
+  "docs/procedures/nat-022/src/host_mk.c",
+  "artifacts/nat-022/build-004/build.json",
+  "artifacts/nat-022/build-004-repro/build.json",
+  "artifacts/nat-022/build-004/loader-diag-trig-hold/Image.payload",
+  "artifacts/nat-022/package-004/package.json",
+  "artifacts/nat-022/package-004/recovery.img",
+  "artifacts/nat-022/make-check-nat025.log"
+ ],
+ "sha256": {
+  "docs/procedures/nat-022/README.md": "cd4c135fe46dbf09820a843d231354ba1dacd5cc2768558ca9427ac262b279a9",
+  "docs/procedures/nat-022/build.py": "106bea087de5398f26b7434cc4676b1cc2522dbca10b193cef0224e3c229e9d2",
+  "docs/procedures/nat-022/decode.py": "dbb5b4c0fafb058c6e2b8bc57538d72ebfe0ee0ff3c74321ab03c8206aa1508b",
+  "docs/procedures/nat-022/patch_loader.py": "1ad6fbf935dcdba45d9fdf1bca2029c7600f51b9676d78ac847d7c650f8cb6b3",
+  "docs/procedures/nat-022/test_nat022.py": "4923aa159a2aa1d894e0d6a1119020498afc2fa654cfefdee101bac53f037459",
+  "docs/procedures/nat-022/session_loaderhold.py": "fb479c2a132ececa80bcc12638e3f7d357ed4d3c99c91624a0584097cd0f834e",
+  "docs/procedures/nat-022/src/markerlib.c": "0ff53f5b7648babfe2b83083b584abaad4e15ea0d987d4cf0ee45efb0d1b7136",
+  "docs/procedures/nat-022/src/marker.h": "0c26b0406acbfa4f21862116731195b50112f8aff39679806d3ff736937795a9",
+  "docs/procedures/nat-022/src/host_mk.c": "833f2549a2a2073f92d7edfd70556e1f25e18f6fd4621aced208b783c4dba1f5",
+  "artifacts/nat-022/build-004/build.json": "851c012bf9d0046a4a94728cb3d8a6aca017e94d4091a78d8b70574a24f23de0",
+  "artifacts/nat-022/build-004-repro/build.json": "5ca30365243c371384ac0f25a4e38b42491180f4458a12308881b706d68ec878",
+  "artifacts/nat-022/build-004/loader-diag-trig-hold/Image.payload": "7c6206bd06923a91524afe95ec03573ed6fa680978cc839c40991debf7702cb3",
+  "artifacts/nat-022/package-004/package.json": "b44c0cac8338efa68792395a91e9d437bfb3a40128c949c05deb8ca56ce7f766",
+  "artifacts/nat-022/package-004/recovery.img": "511b4833f0b6c24f5adffe762451bcbf937aa9a23b64bdd41d254885e006c475",
+  "artifacts/nat-022/make-check-nat025.log": "9b4489a12921c0de48a5db2712301b91e562351d1023b4b794d150c298dcfbdf"
+ }
+}

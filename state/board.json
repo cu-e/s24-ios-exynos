@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T13:38:57+00:00",
-  "ledger_updated_at": "2026-11-10T13:38:37+00:00",
-  "registry_sha256": "aed3735027e287388a5facfc45d9f8cb407fcb3b88a719d5f214e1b09df81da9",
+  "generated_at": "2026-11-10T14:12:10+00:00",
+  "ledger_updated_at": "2026-11-10T14:11:42+00:00",
+  "registry_sha256": "75331b764f41e9848f7e39d9a4d269f43540479fbf917cf6051c209c61251475",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [],
@@ -174,6 +174,7 @@
       "NAT-022",
       "NAT-023",
       "NAT-024",
+      "NAT-025",
       "KRN-005",
       "REV-004",
       "REV-011",
@@ -5311,6 +5312,44 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-024.md"
+    },
+    {
+      "id": "NAT-025",
+      "title": "Build and host-test loader-diag-trig (loader stage markers with dwell and DECON0 kick, held at pre-jump) and prepare its decision request",
+      "status": "done",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "NAT-024"
+      ],
+      "paths": [
+        "docs/procedures/nat-022",
+        "artifacts/nat-022"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "A loader-diag-trig image is built reproducibly from the NAT-020 build-003 loader through patch_loader.py; the canary-plain, canary-fault, canary-trig and canary-trig-fault Images stay byte-identical to build-003. Stage markers are held for one dwell with the DECON0 kick, the reached-stage mask is shown, the exception loop of the loader reports ESR/ELR/FAR, and the image halts at pre-jump (no jump into the kernel copy) in a distinct, named variant.",
+        "Host tests cover the new marker paths (stage hold, mask, hold loop, no MMIO before the first marker, MMU-on and poisoned-kick behaviour) with the independent decoder; the loader C sources compile for AArch64 and the patch anchors match once. Simulations are labelled host-test only.",
+        "Nothing is flashed or run on the phone: the packaged RECOVERY image, an image-gated session driver and what each outcome would mean are recorded, and an image-specific decision request with SHA-256, memory writes, risks and recovery is put to the owner."
+      ],
+      "steps": [
+        "Read the loader stage order, fb_base and RAM window code",
+        "Add MK_LOADER hold/mask/kick behaviour and host tests",
+        "Build, package, gate the session driver, document the request"
+      ],
+      "owner": "claude-nat022-20261110-diag",
+      "started_at": "2026-11-10T13:58:27+00:00",
+      "last_heartbeat": "2026-11-10T13:58:27+00:00",
+      "updated_at": "2026-11-10T14:11:42+00:00",
+      "evidence": "docs/procedures/nat-022/evidence-nat025.json",
+      "evidence_sha256": "d7519760fc4713bb3b748b2eeb1902eca71f8394f0a2f6a084b420079b45063e",
+      "finished_at": "2026-11-10T14:11:42+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-025.md"
     },
     {
       "id": "KRN-005",
@@ -14055,43 +14094,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-10T11:34:41+00:00",
-      "action": "experiment.plan:NAT021-83S-001",
-      "owner": "codex-83s-session-20261110-r7"
-    },
-    {
-      "at": "2026-11-10T11:36:48+00:00",
-      "action": "task.update:NAT-021",
-      "owner": "codex-83s-session-20261110-r7",
-      "tasks": [
-        {
-          "id": "NAT-021",
-          "status": "in_progress",
-          "owner": "codex-83s-session-20261110-r7",
-          "priority": 100,
-          "progress_note": "Candidate96MiB written via bounded ADB/root to validated sda18; full readback b5ff3bf7 matches. One recovery reboot requested11:35:58.923789Z; exit0. Native CPU stages unobserved. Prior preparation rejected nocreat before open, stock hash unchanged; original reports retained. No Odin session and no other partition write.",
-          "next_step": "Observe until11:39:21.923789Z or earlier stop condition; owner screen observation pending; restore stock RECOVERY and verify Android. Do not retry native.",
-          "last_heartbeat": "2026-11-10T11:36:48+00:00",
-          "branch": "main",
-          "worktree": "/home/egor/dev/pet/s24-ios-exynos",
-          "handoff": "docs/procedures/nat-021/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T11:38:46+00:00",
-      "action": "task.add:ODIN-001",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "ODIN-001",
-          "status": "pending",
-          "owner": null,
-          "priority": 92
-        }
-      ]
-    },
-    {
       "at": "2026-11-10T11:39:05+00:00",
       "action": "task.claim:ODIN-001",
       "owner": "claude-takeover-20261110-6c8f",
@@ -14316,11 +14318,51 @@
           "last_heartbeat": "2026-11-10T13:37:08+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T13:58:08+00:00",
+      "action": "task.add:NAT-025",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-025",
+          "status": "pending",
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T13:58:27+00:00",
+      "action": "task.claim:NAT-025",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-025",
+          "status": "in_progress",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 97,
+          "last_heartbeat": "2026-11-10T13:58:27+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T14:11:42+00:00",
+      "action": "task.done:NAT-025",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-025",
+          "status": "done",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 97,
+          "last_heartbeat": "2026-11-10T13:58:27+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "0101f8d8fa613433cdb6a2301a65e711e799692ce0375030ba187e9c0f6a76ff",
-    "BOARD.md": "5d865c8cfcfc835ab596a29eaae78096d9a3503741eb66ac63db11ab4ef46f48",
+    "STATUS.md": "54d999e8297783a7cb00e826a335150eb23d8892d4115b5ff6c435f18c5068a4",
+    "BOARD.md": "0f60cf6025afb60f17a9d44a3b2244fd5a8d81be09a751c9cd615a30117232aa",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -14434,6 +14476,7 @@
     "planning/tasks/NAT-022.md": "92b1dcb59f1830629d3d1e59defeec92fe3e49eb2df1eff97d0c8d6e35eadeb9",
     "planning/tasks/NAT-023.md": "1018e390c7aa0cdda8fd59e72ec44b2a5cd0131199bb7f13a769fc9825e73bae",
     "planning/tasks/NAT-024.md": "10bde102216adebc51d1565be90df70cb2b646c764ea667e6a0472b93d210e22",
+    "planning/tasks/NAT-025.md": "e958e1e30a03146a49c07bbeece17b3c5da7421daba0c5f051311ea83bc44afc",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/REV-004.md": "8c7b273845208b121b2d6d1f05038b627689d3f97b766a765a91cdf23082bdb1",
     "planning/tasks/REV-011.md": "5ea2857fe5caca100edd1f7f53667f0b2a27de4b576000ecd14e2a55f1e7d51b",
