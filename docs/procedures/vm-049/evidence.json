@@ -1,0 +1,98 @@
+{
+  "kind": "android-userland",
+  "origin": "local-device",
+  "outcome": "pass",
+  "recorded_at": "2026-11-10T04:31:00+00:00",
+  "summary": "As root, /dev/kvm answers API 12, vCPU mmap size 8192 and 37 KVM_CHECK_EXTENSION queries (PSCI 0.2, IPA 40, vGIC device control, PMUv3, SVE, PtrAuth; no pKVM protected VM). No VM was created.",
+  "task": "VM-049",
+  "owner": "claude-root-kvm-20261110-k49",
+  "commit": "dfd7dacd418133fbb0fb707bd46d5862a42faf0c",
+  "device_inventory": "devices/local-2026-11-10-session1.json",
+  "authorization": "docs/decisions/0002-owner-autonomy-grant-2026-11-10.md",
+  "findings": {
+    "api_version": 12,
+    "vcpu_mmap_size": 8192,
+    "extensions": {
+      "KVM_CAP_IRQCHIP": 1,
+      "KVM_CAP_USER_MEMORY": 1,
+      "KVM_CAP_NR_VCPUS": 10,
+      "KVM_CAP_MAX_VCPUS": 512,
+      "KVM_CAP_MAX_VCPU_ID": 512,
+      "KVM_CAP_NR_MEMSLOTS": 32767,
+      "KVM_CAP_ONE_REG": 1,
+      "KVM_CAP_DEVICE_CTRL": 1,
+      "KVM_CAP_READONLY_MEM": 1,
+      "KVM_CAP_IOEVENTFD": 1,
+      "KVM_CAP_IRQFD": 1,
+      "KVM_CAP_IRQ_ROUTING": 4096,
+      "KVM_CAP_SIGNAL_MSI": 1,
+      "KVM_CAP_MSI_DEVID": -1,
+      "KVM_CAP_COALESCED_MMIO": 1,
+      "KVM_CAP_IMMEDIATE_EXIT": 1,
+      "KVM_CAP_VCPU_EVENTS": 1,
+      "KVM_CAP_ARM_PSCI": 1,
+      "KVM_CAP_ARM_PSCI_0_2": 1,
+      "KVM_CAP_ARM_EL1_32BIT": 0,
+      "KVM_CAP_ARM_PMU_V3": 1,
+      "KVM_CAP_ARM_VM_IPA_SIZE": 40,
+      "KVM_CAP_ARM_SVE": 1,
+      "KVM_CAP_ARM_PTRAUTH_ADDRESS": 1,
+      "KVM_CAP_ARM_PTRAUTH_GENERIC": 1,
+      "KVM_CAP_ARM_MTE": 0,
+      "KVM_CAP_ARM_USER_IRQ": 1,
+      "KVM_CAP_ARM_NISV_TO_USER": 1,
+      "KVM_CAP_ARM_INJECT_SERROR_ESR": 1,
+      "KVM_CAP_ARM_INJECT_EXT_DABT": 1,
+      "KVM_CAP_ARM_SYSTEM_SUSPEND": 1,
+      "KVM_CAP_ARM_SET_DEVICE_ADDR": 1,
+      "KVM_CAP_ARM_IRQ_LINE_LAYOUT_2": 1,
+      "KVM_CAP_SYSTEM_EVENT_DATA": 1,
+      "KVM_CAP_VCPU_ATTRIBUTES": 1,
+      "KVM_CAP_PMU_CAPABILITY": 0,
+      "KVM_CAP_ARM_PROTECTED_VM(android)": 0
+    },
+    "vm_created": false,
+    "reboot_observed": false,
+    "helper_removed": true
+  },
+  "commands": [
+    {
+      "argv": [
+        "aarch64-linux-android35-clang",
+        "-static",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "docs/procedures/vm-049/kvm_caps.c",
+        "-o",
+        "artifacts/vm-049/build-001/kvm_caps"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "docs/procedures/vm-049/run.py",
+        "--run",
+        "session-001",
+        "--helper",
+        "artifacts/vm-049/build-001/kvm_caps"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "sha256": {
+    "artifacts/vm-049/build-001/kvm_caps": "74b84108bbec92cb7a0986583683ad9d0b4c2edabf7ffc938863675c6ccb950d",
+    "artifacts/vm-049/session-001/report.json": "c11866e9304f934b17dcf23f6a1901718c6b17150d391d52ad01cb03be6e4db9"
+  },
+  "artifacts": [
+    "artifacts/vm-049/session-001/report.json",
+    "artifacts/vm-049/build-001/kvm_caps",
+    "worktrees/vm-049-root-kvm-20261110/research/notes/virtualization/VM-049-root-kvm.md"
+  ],
+  "limits": [
+    "Capability answers are static; VM creation and KVM_RUN are not tested here (VM-051).",
+    "The device serial is not recorded."
+  ]
+}
