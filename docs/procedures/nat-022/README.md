@@ -92,3 +92,23 @@ Required before any phone action; this document is not that decision.
   (inconclusive, not a failure of the phone).
 * **Recovery:** NAT-021 showed physical Download Mode plus NAT-013 restored stock
   RECOVERY and Android on 2026-11-10; this is a precedent, not a guarantee.
+
+## Native result, 2026-11-10 (decision 0009): inconclusive
+
+`canary-plain` was written to RECOVERY (readback matched) and booted once
+(request 12:11:16Z). The owner, filming the screen, reported seeing no stripes
+and moved the phone to Download Mode because it kept restarting. The host saw
+USB vanish at +4 s and `SEC_UPLOAD` at +95 s; no command was sent to it. Stock
+RECOVERY was restored with one NAT-013 session; the full hash equals stock and
+Android booted (`sys.boot_completed=1`; user state `RUNNING_LOCKED` until unlock).
+Full record: `native-attempt-001-evidence.json`.
+
+Established: the framebuffer markers were **not seen**; the same reset/upload
+pattern as NAT-021 occurred even though this image arms no watchdog (so the ~95-110 s
+reset is not ours). Not established: whether our first instruction ran. Untested
+explanations: image not executed; M=1 entry with a failed best-effort draw; panel
+not scanning `0xFA200000` or needing an explicit DECON trigger (command-mode
+panel); contrast invisible. No further native run is authorised. The next
+information must come from host/Android-read-only work (e.g. how S-Boot's own
+splash is scanned out) or from a new owner decision for a different channel
+(UART, early USB, or a DECON-triggering variant).
