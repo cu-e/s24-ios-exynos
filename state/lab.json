@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T07:46:27+00:00",
+  "updated_at": "2026-11-10T07:51:17+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -2450,18 +2450,29 @@
         "Perform static extraction and independent checks on synthetic or offline inputs",
         "Version only sanitized schema facts and reproducible analysis reports"
       ],
-      "status": "blocked",
-      "owner": "codex-ril-inputs-20261105-m",
+      "status": "done",
+      "owner": "claude-takeover-20261110-6c8f",
       "scope": "host",
       "evidence_kind": "host-test",
       "started_at": "2026-11-05T03:56:48+00:00",
-      "last_heartbeat": "2026-11-05T03:56:51+00:00",
-      "updated_at": "2026-11-05T03:56:51+00:00",
+      "last_heartbeat": "2026-11-10T07:47:35+00:00",
+      "updated_at": "2026-11-10T07:51:17+00:00",
       "branch": "main",
       "progress_note": "CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.",
       "next_step": "Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay",
       "handoff": "docs/procedures/ril/handoff.md",
-      "blocked_reason": "No explicitly supplied matching BYH3 RIL bytes/hash or vendor-image artifact; CELL-010 verified current ordinary shell and ADB sync access denial. Static schema extraction cannot run on file metadata or another-device examples."
+      "ownership_history": [
+        {
+          "from": "codex-ril-inputs-20261105-m",
+          "to": "claude-takeover-20261110-6c8f",
+          "reason": "Codex owner stopped: last heartbeat 2026-11-05T03:56Z and no Codex process is running. The missing input (matching BYH3 RIL bytes with hashes) now exists from CELL-011; transfer to do the offline analysis.",
+          "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
+          "at": "2026-11-10T07:47:27+00:00"
+        }
+      ],
+      "evidence": "docs/procedures/ril/evidence.json",
+      "evidence_sha256": "09da83f1405ca85061aaf3b98422694aa549d6faaad9466dc437cfd9a1cc055d",
+      "finished_at": "2026-11-10T07:51:17+00:00"
     },
     {
       "id": "RES-004",
@@ -11349,8 +11360,8 @@
       "status": "in_progress",
       "owner": "agy-nat006-20261110-aca2",
       "started_at": "2026-11-10T05:27:22+00:00",
-      "last_heartbeat": "2026-11-10T07:08:55+00:00",
-      "updated_at": "2026-11-10T07:08:55+00:00",
+      "last_heartbeat": "2026-11-10T07:48:02+00:00",
+      "updated_at": "2026-11-10T07:48:02+00:00",
       "branch": "team/nat-006-recovery-image-20261110",
       "worktree": "worktrees/nat-006-recovery-image-20261110",
       "ownership_history": [
@@ -11369,8 +11380,9 @@
           "at": "2026-11-10T07:08:36+00:00"
         }
       ],
-      "progress_note": "Resumed NAT-006 in worktrees/nat-006-recovery-image-20261110 from ac22ef5 per owner decision 0004: inventorying saved artifacts, completing verify_image.py and tests, building and verifying the header-v2 recovery image and restore package, and verifying connected device and pre-flash recovery readiness.",
-      "next_step": "Complete inventory, finish verify_image.py and tests/test_e1s_recovery.py, run e1s_recovery.py, and verify connected S24 and recovery gate."
+      "progress_note": "Commit d20cc17742a2b6f8c2aeb1273e702c98d5f41934: completed e1s_recovery.py, verify_image.py, test_e1s_recovery.py (4/4 OK), and 0002-loader-ui-pc-relative-string-tables.patch (0 C object R_AARCH64_ABS64 relocations). Built and verified artifacts/nat-006/build-002/recovery-nat006.img (c632d77c...) and stock restore package on host. Stopped at mandatory Step 4 pre-flash recovery safety gate before writing RECOVERY; phone RFCY10Z45KH untouched and running Android 14.",
+      "next_step": "Main agent review of handoff.md / evidence.json (d20cc17742a2b6f8c2aeb1273e702c98d5f41934) and resolution of pre-flash blockers NAT-008 (host odin4/heimdall), NAT-007/NAT-009 (hardware watchdog & one-shot recovery reset), and NAT-010 (loader high-DRAM MMU/cache handoff).",
+      "handoff": "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/handoff.md"
     },
     {
       "id": "NAT-007",
@@ -53357,6 +53369,80 @@
           "priority": 55,
           "last_heartbeat": "2026-11-10T07:45:44+00:00",
           "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:47:27+00:00",
+      "action": "task.transfer:CELL-009",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "CELL-009",
+          "status": "blocked",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 80,
+          "progress_note": "CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.",
+          "next_step": "Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay",
+          "blocked_reason": "No explicitly supplied matching BYH3 RIL bytes/hash or vendor-image artifact; CELL-010 verified current ordinary shell and ADB sync access denial. Static schema extraction cannot run on file metadata or another-device examples.",
+          "last_heartbeat": "2026-11-10T07:47:27+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/ril/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:47:35+00:00",
+      "action": "task.resume:CELL-009",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "CELL-009",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 80,
+          "progress_note": "CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.",
+          "next_step": "Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay",
+          "last_heartbeat": "2026-11-10T07:47:35+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/ril/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:48:02+00:00",
+      "action": "task.update:NAT-006",
+      "owner": "agy-nat006-20261110-aca2",
+      "tasks": [
+        {
+          "id": "NAT-006",
+          "status": "in_progress",
+          "owner": "agy-nat006-20261110-aca2",
+          "priority": 95,
+          "progress_note": "Commit d20cc17742a2b6f8c2aeb1273e702c98d5f41934: completed e1s_recovery.py, verify_image.py, test_e1s_recovery.py (4/4 OK), and 0002-loader-ui-pc-relative-string-tables.patch (0 C object R_AARCH64_ABS64 relocations). Built and verified artifacts/nat-006/build-002/recovery-nat006.img (c632d77c...) and stock restore package on host. Stopped at mandatory Step 4 pre-flash recovery safety gate before writing RECOVERY; phone RFCY10Z45KH untouched and running Android 14.",
+          "next_step": "Main agent review of handoff.md / evidence.json (d20cc17742a2b6f8c2aeb1273e702c98d5f41934) and resolution of pre-flash blockers NAT-008 (host odin4/heimdall), NAT-007/NAT-009 (hardware watchdog & one-shot recovery reset), and NAT-010 (loader high-DRAM MMU/cache handoff).",
+          "last_heartbeat": "2026-11-10T07:48:02+00:00",
+          "branch": "team/nat-006-recovery-image-20261110",
+          "worktree": "worktrees/nat-006-recovery-image-20261110",
+          "handoff": "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:51:17+00:00",
+      "action": "task.done:CELL-009",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "CELL-009",
+          "status": "done",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 80,
+          "progress_note": "CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.",
+          "next_step": "Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay",
+          "last_heartbeat": "2026-11-10T07:47:35+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/ril/handoff.md"
         }
       ]
     }

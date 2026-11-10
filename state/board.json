@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T07:46:30+00:00",
-  "ledger_updated_at": "2026-11-10T07:46:27+00:00",
-  "registry_sha256": "7797fdcc4562bf59bb781651fb073698ac4f7e23c8c38f6ad1bd3d63424e1b88",
+  "generated_at": "2026-11-10T07:51:20+00:00",
+  "ledger_updated_at": "2026-11-10T07:51:17+00:00",
+  "registry_sha256": "679bbfab74f50a57dd57eeb1d79a974231e3c182bea5ca77d0352a1f9bc98d79",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -27,7 +27,6 @@
       "KRN-001",
       "CELL-010",
       "ESIM-004",
-      "CELL-009",
       "KRN-043",
       "GPU-005"
     ],
@@ -262,6 +261,7 @@
       "LAB-001",
       "TST-002",
       "RES-003",
+      "CELL-009",
       "RES-004",
       "GPU-011",
       "RES-005",
@@ -6603,8 +6603,8 @@
       "status": "in_progress",
       "owner": "agy-nat006-20261110-aca2",
       "started_at": "2026-11-10T05:27:22+00:00",
-      "last_heartbeat": "2026-11-10T07:08:55+00:00",
-      "updated_at": "2026-11-10T07:08:55+00:00",
+      "last_heartbeat": "2026-11-10T07:48:02+00:00",
+      "updated_at": "2026-11-10T07:48:02+00:00",
       "branch": "team/nat-006-recovery-image-20261110",
       "worktree": "worktrees/nat-006-recovery-image-20261110",
       "ownership_history": [
@@ -6623,12 +6623,13 @@
           "at": "2026-11-10T07:08:36+00:00"
         }
       ],
-      "progress_note": "Resumed NAT-006 in worktrees/nat-006-recovery-image-20261110 from ac22ef5 per owner decision 0004: inventorying saved artifacts, completing verify_image.py and tests, building and verifying the header-v2 recovery image and restore package, and verifying connected device and pre-flash recovery readiness.",
-      "next_step": "Complete inventory, finish verify_image.py and tests/test_e1s_recovery.py, run e1s_recovery.py, and verify connected S24 and recovery gate.",
+      "progress_note": "Commit d20cc17742a2b6f8c2aeb1273e702c98d5f41934: completed e1s_recovery.py, verify_image.py, test_e1s_recovery.py (4/4 OK), and 0002-loader-ui-pc-relative-string-tables.patch (0 C object R_AARCH64_ABS64 relocations). Built and verified artifacts/nat-006/build-002/recovery-nat006.img (c632d77c...) and stock restore package on host. Stopped at mandatory Step 4 pre-flash recovery safety gate before writing RECOVERY; phone RFCY10Z45KH untouched and running Android 14.",
+      "next_step": "Main agent review of handoff.md / evidence.json (d20cc17742a2b6f8c2aeb1273e702c98d5f41934) and resolution of pre-flash blockers NAT-008 (host odin4/heimdall), NAT-007/NAT-009 (hardware watchdog & one-shot recovery reset), and NAT-010 (loader high-DRAM MMU/cache handoff).",
+      "handoff": "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/handoff.md",
       "column": "in_progress",
       "reasons": [],
       "card_path": "planning/tasks/NAT-006.md",
-      "report_health": "stale"
+      "report_health": "recent"
     },
     {
       "id": "DRV-001",
@@ -8338,7 +8339,7 @@
         "SDK premise superseded: STR-041 linked the 1042-body image without an SDK, and KRN-041/KRN-042 give the precise export result. Still missing: (a) a build tool that applies KRN-041 0001/0002 to the canonical image; (b) payload/ADT validation, which needs the D22AP /product tree from an Apple IPSW (owner decision) and is the in-progress NAT-006 work of agy-nat006-20261110-aca2. See docs/procedures/kernel-build.md, Reassessment of 2026-11-10."
       ],
       "card_path": "planning/tasks/KRN-001.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "CELL-010",
@@ -9504,24 +9505,32 @@
         "Perform static extraction and independent checks on synthetic or offline inputs",
         "Version only sanitized schema facts and reproducible analysis reports"
       ],
-      "status": "blocked",
-      "owner": "codex-ril-inputs-20261105-m",
+      "status": "done",
+      "owner": "claude-takeover-20261110-6c8f",
       "scope": "host",
       "evidence_kind": "host-test",
       "started_at": "2026-11-05T03:56:48+00:00",
-      "last_heartbeat": "2026-11-05T03:56:51+00:00",
-      "updated_at": "2026-11-05T03:56:51+00:00",
+      "last_heartbeat": "2026-11-10T07:47:35+00:00",
+      "updated_at": "2026-11-10T07:51:17+00:00",
       "branch": "main",
       "progress_note": "CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.",
       "next_step": "Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay",
       "handoff": "docs/procedures/ril/handoff.md",
-      "blocked_reason": "No explicitly supplied matching BYH3 RIL bytes/hash or vendor-image artifact; CELL-010 verified current ordinary shell and ADB sync access denial. Static schema extraction cannot run on file metadata or another-device examples.",
-      "column": "blocked",
-      "reasons": [
-        "No explicitly supplied matching BYH3 RIL bytes/hash or vendor-image artifact; CELL-010 verified current ordinary shell and ADB sync access denial. Static schema extraction cannot run on file metadata or another-device examples."
+      "ownership_history": [
+        {
+          "from": "codex-ril-inputs-20261105-m",
+          "to": "claude-takeover-20261110-6c8f",
+          "reason": "Codex owner stopped: last heartbeat 2026-11-05T03:56Z and no Codex process is running. The missing input (matching BYH3 RIL bytes with hashes) now exists from CELL-011; transfer to do the offline analysis.",
+          "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
+          "at": "2026-11-10T07:47:27+00:00"
+        }
       ],
-      "card_path": "planning/tasks/CELL-009.md",
-      "report_health": "stale"
+      "evidence": "docs/procedures/ril/evidence.json",
+      "evidence_sha256": "09da83f1405ca85061aaf3b98422694aa549d6faaad9466dc437cfd9a1cc055d",
+      "finished_at": "2026-11-10T07:51:17+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/CELL-009.md"
     },
     {
       "id": "RES-004",
@@ -10265,7 +10274,7 @@
         "Executing tools/build/e1s_kernel_exports.py (XNU pmap.c compile, relink, kextsymboltool build) was denied by the Claude Code auto-mode classifier (Code from External); needs the owner to allow or run it (docs/procedures/krn-043/README.md)"
       ],
       "card_path": "planning/tasks/KRN-043.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "VM-002",
@@ -10796,7 +10805,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Dependencies: KRN-001, CELL-009"
+        "Dependencies: KRN-001"
       ],
       "card_path": "planning/tasks/CELL-004.md"
     },
@@ -12121,7 +12130,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, VM-047, VM-053, VM-054, NAT-006, KRN-043"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, VM-047, VM-053, VM-054, NAT-006, KRN-043"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-002.md"
@@ -12165,7 +12174,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-002, NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, VM-047, VM-053, VM-054, NAT-006, KRN-043"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, VM-047, VM-053, VM-054, NAT-006, KRN-043"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -13139,11 +13148,11 @@
       {
         "id": "NAT-006",
         "status": "in_progress",
-        "last_heartbeat": "2026-11-10T07:08:55+00:00",
-        "report_health": "stale",
-        "progress_note": "Resumed NAT-006 in worktrees/nat-006-recovery-image-20261110 from ac22ef5 per owner decision 0004: inventorying saved artifacts, completing verify_image.py and tests, building and verifying the header-v2 recovery image and restore package, and verifying connected device and pre-flash recovery readiness.",
-        "next_step": "Complete inventory, finish verify_image.py and tests/test_e1s_recovery.py, run e1s_recovery.py, and verify connected S24 and recovery gate.",
-        "handoff": null,
+        "last_heartbeat": "2026-11-10T07:48:02+00:00",
+        "report_health": "recent",
+        "progress_note": "Commit d20cc17742a2b6f8c2aeb1273e702c98d5f41934: completed e1s_recovery.py, verify_image.py, test_e1s_recovery.py (4/4 OK), and 0002-loader-ui-pc-relative-string-tables.patch (0 C object R_AARCH64_ABS64 relocations). Built and verified artifacts/nat-006/build-002/recovery-nat006.img (c632d77c...) and stock restore package on host. Stopped at mandatory Step 4 pre-flash recovery safety gate before writing RECOVERY; phone RFCY10Z45KH untouched and running Android 14.",
+        "next_step": "Main agent review of handoff.md / evidence.json (d20cc17742a2b6f8c2aeb1273e702c98d5f41934) and resolution of pre-flash blockers NAT-008 (host odin4/heimdall), NAT-007/NAT-009 (hardware watchdog & one-shot recovery reset), and NAT-010 (loader high-DRAM MMU/cache handoff).",
+        "handoff": "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/handoff.md",
         "branch": "team/nat-006-recovery-image-20261110",
         "worktree": "worktrees/nat-006-recovery-image-20261110"
       }
@@ -13164,7 +13173,7 @@
         "id": "KRN-001",
         "status": "blocked",
         "last_heartbeat": "2026-11-10T07:17:19+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "Reassessed: criteria 1 and 2 have SDK-free evidence (STR-041, KRN-041, KRN-042, STR-037); 0001/0002 integration and payload/ADT remain",
         "next_step": "After NAT-006 publishes payload/ADT evidence, or the owner decides on D22AP data, integrate 0001/0002 into a build tool and validate payload/ADT",
         "handoff": "docs/procedures/kernel-build.md",
@@ -13186,7 +13195,7 @@
         "id": "KRN-043",
         "status": "blocked",
         "last_heartbeat": "2026-11-10T07:20:52+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "Tool written, never executed (classifier denial)",
         "next_step": "Owner allows or runs the three commands in the README; then record evidence",
         "handoff": "docs/procedures/krn-043/README.md",
@@ -13229,17 +13238,6 @@
         "handoff": "docs/procedures/ril-capture/handoff.md",
         "branch": "main",
         "worktree": null
-      },
-      {
-        "id": "CELL-009",
-        "status": "blocked",
-        "last_heartbeat": "2026-11-05T03:56:51+00:00",
-        "report_health": "stale",
-        "progress_note": "CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.",
-        "next_step": "Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay",
-        "handoff": "docs/procedures/ril/handoff.md",
-        "branch": "main",
-        "worktree": null
       }
     ],
     "codex-esim-frontend-20261105-l": [
@@ -13270,82 +13268,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-10T07:27:30+00:00",
-      "action": "task.transfer:VM-019",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "VM-019",
-          "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 90,
-          "progress_note": "Grant31 VM019FINALBUILD-002 recorded PASS once: 23 real compiler commands exit0, 23 ARM64 Mach-O objects, 7227 dependency edges/394 paths. Clean frozen HEAD 0f7df29a7da9e02fae9556bf44e06ccda333af3d; raw887a65812790c87a00f26cd058c53fcf53aede6100a30b355e73bb17c3e8df4b; conventional cdb45d30ee1fbbaee15c6da78718a1f6008b7e9f2d92f04701327073a13f35ad; actualplan3189868c/input295e6ed. Current-image HWM176787456; own controller+child peak234897408; all command cleanup empty, independent PID/start scan empty, own reservation complete. Grant30 BUILD001 FAIL preserved. No retry/replan/global release/common/link/QEMU/task closure.",
-          "next_step": "CN independent actual-object review, integrator/root acceptance and fresh MAIN common checks before original DD closure authorization.",
-          "last_heartbeat": "2026-11-10T07:27:30+00:00",
-          "branch": "team/vm-019-resource-final-20261106",
-          "worktree": "worktrees/vm-019-resource-final-20261106",
-          "handoff": "worktrees/vm-019-resource-final-20261106/docs/procedures/avf-object-shards/security/final-resource-build-handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T07:27:52+00:00",
-      "action": "task.done:VM-019",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "VM-019",
-          "status": "done",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 90,
-          "progress_note": "Grant31 VM019FINALBUILD-002 recorded PASS once: 23 real compiler commands exit0, 23 ARM64 Mach-O objects, 7227 dependency edges/394 paths. Clean frozen HEAD 0f7df29a7da9e02fae9556bf44e06ccda333af3d; raw887a65812790c87a00f26cd058c53fcf53aede6100a30b355e73bb17c3e8df4b; conventional cdb45d30ee1fbbaee15c6da78718a1f6008b7e9f2d92f04701327073a13f35ad; actualplan3189868c/input295e6ed. Current-image HWM176787456; own controller+child peak234897408; all command cleanup empty, independent PID/start scan empty, own reservation complete. Grant30 BUILD001 FAIL preserved. No retry/replan/global release/common/link/QEMU/task closure.",
-          "next_step": "CN independent actual-object review, integrator/root acceptance and fresh MAIN common checks before original DD closure authorization.",
-          "last_heartbeat": "2026-11-10T07:27:30+00:00",
-          "branch": "team/vm-019-resource-final-20261106",
-          "worktree": "worktrees/vm-019-resource-final-20261106",
-          "handoff": "worktrees/vm-019-resource-final-20261106/docs/procedures/avf-object-shards/security/final-resource-build-handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T07:28:04+00:00",
-      "action": "task.transfer:VM-042",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "VM-042",
-          "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 100,
-          "progress_note": "Original EN fresh final-resource actual002 PASS77of77 commands/objects/depfiles/resource under exact root31 grant, exit0;673deps/4780936B objects, maxowned266338304B/controller178606080B/project796774400B,212.627s, currentcleanup0 and ownreservationcomplete. Experiment002 recordedPASS CLI0;001 recordedFAIL preserved canonical-path refusal. Freeze557d896/evidencec9bdb358/index2f05e25e, clean WT; no replan/resume/old credit/global release/common/pub/closure",
-          "next_step": "INT002 independent review exact77 final products, root global release/integration authorization, serialized current-HEAD common and explicit acceptance before original EN completion; no further builds/tests now",
-          "last_heartbeat": "2026-11-10T07:28:04+00:00",
-          "branch": "team/vm-042-final-resource-20261106",
-          "worktree": "worktrees/vm-042-final-resource-20261106",
-          "handoff": "worktrees/vm-042-final-resource-20261106/docs/procedures/avf-object-shards/osfmk-machine/final-resource/handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T07:28:13+00:00",
-      "action": "task.done:VM-042",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "VM-042",
-          "status": "done",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 100,
-          "progress_note": "Original EN fresh final-resource actual002 PASS77of77 commands/objects/depfiles/resource under exact root31 grant, exit0;673deps/4780936B objects, maxowned266338304B/controller178606080B/project796774400B,212.627s, currentcleanup0 and ownreservationcomplete. Experiment002 recordedPASS CLI0;001 recordedFAIL preserved canonical-path refusal. Freeze557d896/evidencec9bdb358/index2f05e25e, clean WT; no replan/resume/old credit/global release/common/pub/closure",
-          "next_step": "INT002 independent review exact77 final products, root global release/integration authorization, serialized current-HEAD common and explicit acceptance before original EN completion; no further builds/tests now",
-          "last_heartbeat": "2026-11-10T07:28:04+00:00",
-          "branch": "team/vm-042-final-resource-20261106",
-          "worktree": "worktrees/vm-042-final-resource-20261106",
-          "handoff": "worktrees/vm-042-final-resource-20261106/docs/procedures/avf-object-shards/osfmk-machine/final-resource/handoff.md"
-        }
-      ]
-    },
     {
       "at": "2026-11-10T07:28:21+00:00",
       "action": "task.transfer:VM-043",
@@ -13614,11 +13536,85 @@
           "branch": "main"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T07:47:27+00:00",
+      "action": "task.transfer:CELL-009",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "CELL-009",
+          "status": "blocked",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 80,
+          "progress_note": "CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.",
+          "next_step": "Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay",
+          "blocked_reason": "No explicitly supplied matching BYH3 RIL bytes/hash or vendor-image artifact; CELL-010 verified current ordinary shell and ADB sync access denial. Static schema extraction cannot run on file metadata or another-device examples.",
+          "last_heartbeat": "2026-11-10T07:47:27+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/ril/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:47:35+00:00",
+      "action": "task.resume:CELL-009",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "CELL-009",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 80,
+          "progress_note": "CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.",
+          "next_step": "Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay",
+          "last_heartbeat": "2026-11-10T07:47:35+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/ril/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:48:02+00:00",
+      "action": "task.update:NAT-006",
+      "owner": "agy-nat006-20261110-aca2",
+      "tasks": [
+        {
+          "id": "NAT-006",
+          "status": "in_progress",
+          "owner": "agy-nat006-20261110-aca2",
+          "priority": 95,
+          "progress_note": "Commit d20cc17742a2b6f8c2aeb1273e702c98d5f41934: completed e1s_recovery.py, verify_image.py, test_e1s_recovery.py (4/4 OK), and 0002-loader-ui-pc-relative-string-tables.patch (0 C object R_AARCH64_ABS64 relocations). Built and verified artifacts/nat-006/build-002/recovery-nat006.img (c632d77c...) and stock restore package on host. Stopped at mandatory Step 4 pre-flash recovery safety gate before writing RECOVERY; phone RFCY10Z45KH untouched and running Android 14.",
+          "next_step": "Main agent review of handoff.md / evidence.json (d20cc17742a2b6f8c2aeb1273e702c98d5f41934) and resolution of pre-flash blockers NAT-008 (host odin4/heimdall), NAT-007/NAT-009 (hardware watchdog & one-shot recovery reset), and NAT-010 (loader high-DRAM MMU/cache handoff).",
+          "last_heartbeat": "2026-11-10T07:48:02+00:00",
+          "branch": "team/nat-006-recovery-image-20261110",
+          "worktree": "worktrees/nat-006-recovery-image-20261110",
+          "handoff": "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:51:17+00:00",
+      "action": "task.done:CELL-009",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "CELL-009",
+          "status": "done",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 80,
+          "progress_note": "CELL-010 measured exact live vendor filenames/sizes and denied normal acquisition, replacing the assumed missing-file gap with actual evidence. No matching RIL bytes or qualified static analyzer were supplied; no schema extraction pass.",
+          "next_step": "Supply explicit matching BYH3 RIL/vendor-image provenance and hashes, then qualify isolated analyzer and extract command/request/event schemas without live replay",
+          "last_heartbeat": "2026-11-10T07:47:35+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/ril/handoff.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "452596892ff710cff7241bd175eec351ce1c6290f763a09502736cc864a91889",
-    "BOARD.md": "b970eb7dee23432df0a49f077ba9c1b30d247c41c45f675b3eb081e76472ee8f",
+    "STATUS.md": "64ab605e93718feb94ee5c89a2f1a3555fdc69bd280b21698a7c32558ac7f96c",
+    "BOARD.md": "9bd2a536b0c7cbb7e4519d10342242f527a3bcaa049af26ca8ea1b232e888921",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -13759,7 +13755,7 @@
     "planning/tasks/STR-036.md": "732a4bc320171e9148c4debda9e77920a6868bbfd834e5e2d5b1e1fb8c522a9d",
     "planning/tasks/GPU-013.md": "2822d1f3c75ccfe1ecabdbd106a766f2e6508e7a5022664db9dd3ff3022e92d7",
     "planning/tasks/NAT-005.md": "b078a916eab662fb839780a4d34f4ce047cd47c6c35fe60a6ea80764b7ce4041",
-    "planning/tasks/NAT-006.md": "ad48d101e2a57603c30698bab696a2a826209715691e202a8d2eb7dba54da54f",
+    "planning/tasks/NAT-006.md": "9b7a4c85053695e19c5394ead26c75d44e040357a3ea91f5cd81de4876604acc",
     "planning/tasks/DRV-001.md": "eaac786b5ca6d0640d7a9bea43bf42424662189e0f9f44baaa6b6ad049f10f17",
     "planning/tasks/KRN-023.md": "a95e56ff9ef7bfa3ff55cf11a48d0bba892cc95ab504b367bc3e9d4490ecdd51",
     "planning/tasks/REV-012.md": "99bf82028acd252050bbe595c74c47d22013dfccb4d261b32b98825471ce86ea",
@@ -13798,7 +13794,7 @@
     "planning/tasks/NAT-009.md": "4e8a0b34e399a4ae4f2d3abd1670d1c5bf78e58b85df1a13b0de1a3d9c8ed47c",
     "planning/tasks/KRN-035.md": "73d3fdfa9f6c3f1f76fe0f244208e46b40bf7343bf78e2f78223ea9c1c7a98a7",
     "planning/tasks/KRN-036.md": "43b1fb9c66ca2aa223235ea38bf2e400888380c3822a4aca35e67b96cd532020",
-    "planning/tasks/KRN-001.md": "d6a9ac3a138345378b4fed606d5814ae2ace8ec42acd424cb4a23f8dc88c4706",
+    "planning/tasks/KRN-001.md": "e2d77042f722233c718b5afea8af5fb4437cb5d8e0fbe8cba06481e3787dc27c",
     "planning/tasks/CELL-010.md": "19e917f0ad825829661a820f7a58d49c1f573d78dbdff618a983f52141e99104",
     "planning/tasks/KRN-028.md": "e3a53637d27e69f4b0fe97812206275d0813012ff2cdf563ffa3c215c05830e5",
     "planning/tasks/VM-006.md": "c30be2df99fdbb5066a9add35b609dc2ac6ffbfff0632bb6051badf3d768b6e7",
@@ -13824,7 +13820,7 @@
     "planning/tasks/TST-002.md": "d78a91ef43894923e022402e9c91dd075e4a7bc4697e33fb7b99263486c544aa",
     "planning/tasks/RES-003.md": "0818cb4fa8ca49d7acad01a7d80cc67041f504e381b68cfc74e8cfa6d369ce50",
     "planning/tasks/ESIM-004.md": "5e29d4b6130fec198ec2bea4c33a4848b706db553f56cf57ce00bc3284e7e147",
-    "planning/tasks/CELL-009.md": "9de452dda4b6bbeae122a777b694ab8947cfbe5b69853b37dec30cdacdf190a7",
+    "planning/tasks/CELL-009.md": "3f06213fbbfb09caa877b823ac13d09a97bbce528924daeac7efede1a3a1103a",
     "planning/tasks/RES-004.md": "08bac80e27799418f00000fe2e775a3d800660263c225e58147765b25d905e9a",
     "planning/tasks/GPU-011.md": "80d1aa7ea8b4a3374af3e3373d65fdb0f18f581cfd9297d29b4e707dfb732580",
     "planning/tasks/RES-005.md": "8bed1c3def30237963fab381a9b7130571df463daeb0a727c2c367496c02d5b8",
@@ -13840,7 +13836,7 @@
     "planning/tasks/VM-053.md": "ab0917436b37f17b5ed7f70511e4fab1d523e6cc73a910b86392622a9c894441",
     "planning/tasks/GPU-016.md": "63299ca04a73b68d60b98853bbd94a1afb153977f27a8621e9fcb3dc4a825bc3",
     "planning/tasks/GPU-014.md": "948575bafb8058b4b0784c6132e8043657404029a468fa04bf86b05cca2d98b6",
-    "planning/tasks/KRN-043.md": "1195c493897e80407d37a8a3771cb2e626609814f7a9c483c7359f90027d43b0",
+    "planning/tasks/KRN-043.md": "7d3eb72e29a1ae24dc3566dcab341709857b29711ba397ef6a174c3a03e6ec00",
     "planning/tasks/VM-002.md": "bca6a8c74c4b9f3569b3dcef3af10725267695a7fec8416fd2a4c7c40d4c2833",
     "planning/tasks/UI-001.md": "c625d98b72bb9f1d80a6d5bb3d2a74922ae72d9ab758fb7d12bdf71a7f474320",
     "planning/tasks/GPU-006.md": "c4420e384a9ce1eaccb816f017b6212f8b8601974b7de2218916f3115d40464f",
@@ -13853,7 +13849,7 @@
     "planning/tasks/PWR-001.md": "4845edf6b466d79887e056b3760de4f17c9da9b4527d0af7371e649ccf3b2320",
     "planning/tasks/CELL-001.md": "1daa2c0f314edeeda07b368ca4d7cfa93de97865d45186208754b781f40a715f",
     "planning/tasks/CELL-002.md": "c2bb9100905400e0956657ba95d37ac92efe7749f1fe3bf362e01ff66719db07",
-    "planning/tasks/CELL-004.md": "405eb4534873c8285637644c1f4a913afd663fb4e8dbc628d2eea10440fafc51",
+    "planning/tasks/CELL-004.md": "ce07dca2d0fcf010b4f070266a073d614c2cd22bfe99f3156b2e5aba2da98e48",
     "planning/tasks/MISC-001.md": "2601cafe28e232e2d18902292762755f980b3942341aa2bfb61e1c05abea1581",
     "planning/tasks/NET-004.md": "8bd5a17e9165df26cb213f576c2614428ff7e343f1f272f45e1bf5d5906dbeb4",
     "planning/tasks/NET-005.md": "14907c958852b82d97046f0aeefe666073dd6309b0a26f3a119f1a7b4c0acc9f",
@@ -13884,8 +13880,8 @@
     "planning/tasks/GPU-005.md": "c614eee33d64e48a0afaf3f661ea764e94463c5f760fdb294fd4a4235a71d11c",
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
-    "planning/tasks/NAT-002.md": "25ab0e0a61a6121533586f00a5477d4c679272a706e5f415eccd52eda80ebe15",
-    "planning/tasks/NAT-003.md": "bcccac1806aa1fec0456f923dbfa61cfe9cb3297b4c08e50fade63467572ae69",
+    "planning/tasks/NAT-002.md": "880fb24640e78758d246ffb638f93c0d614defefde3f6bfb642b5a9ee47a6a38",
+    "planning/tasks/NAT-003.md": "3004c8753f04be84db882d8be203a6937e5b286896e897056511e5e75654e539",
     "planning/tasks/DRV-003.md": "854a4ef2c5d7b8e3ca5d1e685afb97bc5bd9ebc8f52e4ee3dfaddbe84ace486f",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",

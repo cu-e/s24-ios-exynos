@@ -1,5 +1,7 @@
 # CELL-009: matching Samsung vendor command input gap
 
+> 2026-11-10 update: the input gap described below was closed by CELL-011 (read-only su copy, decision 0002), and the static analysis is in [README.md](README.md). This handoff is kept as the historical record.
+
 2026-11-05. Owner `codex-ril-inputs-20261105-m`, main checkout. No matching binary was supplied or analyzed; this task cannot complete command-schema acceptance yet.
 
 CELL-010 now provides actual evidence instead of an assumed missing file: exact SM-S921B/e1s/S921BXXS9BYH3 uid2000 context was verified before/after passive acquisition attempts. The phone has regular /vendor/lib64/libsec-ril.so5459848 bytes and /vendor/lib64/libsecril-client.so134368 bytes. Current shell SHA256 and ordinary ADB sync pull both return Permission denied. Source bytes/hashes/ELF identity remain unavailable. No root or access-control changes were requested. See state/evidence/RILINPUT-003.json and004 and docs/procedures/ril-capture/handoff.md.

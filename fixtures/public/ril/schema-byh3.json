@@ -1,0 +1,3023 @@
+{
+ "schema": "byh3-ril-ipc41-static-v1",
+ "task": "CELL-009",
+ "inputs": {
+  "libsec-ril.so": {
+   "bytes": 5459848,
+   "sha256": "fa4c0b63dfb37f91af77710bc8ba4cea064a00adc3707ca2d2ab0e51df4c04ae",
+   "source": "CELL-011 read-only su copy of /vendor/lib64/libsec-ril.so"
+  },
+  "libsecril-client.so": {
+   "bytes": 134368,
+   "sha256": "458cb6bec12d340d6576a13bf5e5f499fd86061b08087c0cef91642309d8adfb",
+   "source": "CELL-011 read-only su copy of /vendor/lib64/libsecril-client.so"
+  }
+ },
+ "analyzer": {
+  "path": "tools/research/ril/schema.py",
+  "sha256": "5fd77bac15638332b432ab92ed520872362f6f741861bf9769b0d0f1461cd142",
+  "ndk": "28.2.13676358"
+ },
+ "transport": {
+  "device_nodes": [
+   "/dev/nr_boot0",
+   "/dev/nr_rfs0",
+   "/dev/umts_boot0",
+   "/dev/umts_ipc0",
+   "/dev/umts_ipc1",
+   "/dev/umts_rfs0"
+  ],
+  "io_classes": [
+   "DevIoctlIoChannel",
+   "HalIoChannel",
+   "IoChannel",
+   "IoChannelReader",
+   "IpcDebugIoChannel",
+   "SerialIoChannel",
+   "SockInetIoChannel",
+   "SockMHIIoChannel",
+   "SockPhonetIoChannel",
+   "SockUnixIoChannel",
+   "VmIoChannel"
+  ],
+  "io_entry_points": [
+   "IpcModem::ReceiveMessage(char*, int, IoChannel*)",
+   "IpcModem::SendMessage(char*, int)",
+   "IpcModem::SendMessageSync(char*, int, IpcHistoryRecord*)",
+   "IpcModem::SendRawIpc(Message*, int, char*, int)"
+  ],
+  "frame_header": {
+   "function": "IpcProtocol::MakeHeader(char*, bool, char const*)",
+   "loads": [
+    {
+     "width": "u16",
+     "offset": 0
+    },
+    {
+     "width": "u8",
+     "offset": 2
+    },
+    {
+     "width": "u8",
+     "offset": 3
+    },
+    {
+     "width": "u8",
+     "offset": 4
+    },
+    {
+     "width": "u8",
+     "offset": 5
+    },
+    {
+     "width": "u8",
+     "offset": 6
+    }
+   ],
+   "format_string": "%s %3s (M)%s (S)%s (T)%s l:%x m:%02x a:%02x [ ",
+   "format_matches_expected": true
+  },
+  "interpretation": "u16 length @0, u8 main-sequence @2, u8 ack-sequence @3, u8 main command @4, u8 sub command @5, u8 type @6 (the formatter prints l/m/a from bytes 0-3 and resolves M, S and T names from bytes 4, 5 and 6)."
+ },
+ "domains": {
+  "sim": {
+   "groups": [
+    "Pb",
+    "Sap",
+    "Sim",
+    "Stk"
+   ],
+   "requests": {
+    "Sim.CloseChannel": {
+     "params": [
+      "unsigned char",
+      "unsigned char, bool"
+     ],
+     "header": {
+      "status": "ambiguous",
+      "candidates": [
+       [
+        5,
+        6,
+        2
+       ],
+       [
+        5,
+        32,
+        2
+       ]
+      ]
+     }
+    },
+    "Sim.DoUiccAuth": {
+     "params": [
+      "int, char*, int, char*, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 5,
+      "sub": 9,
+      "type": 2
+     }
+    },
+    "Sim.Exchange": {
+     "params": [
+      "char, char, char, char, char, char*, int",
+      "char, char, char, char, char, char*, int, bool"
+     ],
+     "header": {
+      "status": "ambiguous",
+      "candidates": [
+       [
+        5,
+        6,
+        2
+       ],
+       [
+        5,
+        32,
+        2
+       ]
+      ]
+     }
+    },
+    "Sim.ExecSimLowLevelControl": {
+     "params": [
+      "int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sim.ExecUiccRecovery": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sim.GetAtr": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 5,
+      "sub": 10,
+      "type": 2
+     }
+    },
+    "Sim.GetPhoneLock": {
+     "params": [
+      "int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sim.GetPinStatus": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 5,
+      "sub": 1,
+      "type": 2
+     }
+    },
+    "Sim.GetRSIM": {
+     "params": [
+      "char*, int, int, int, int, int, int, char*, int, char*, int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sim.GetRsimWithAid": {
+     "params": [
+      "char*, int, int, int, int, int, int, char*, int, char*, int"
+     ],
+     "header": {
+      "status": "ambiguous",
+      "candidates": [
+       [
+        5,
+        5,
+        2
+       ],
+       [
+        10,
+        0,
+        10
+       ]
+      ]
+     }
+    },
+    "Sim.GetSimAppsInfo": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 5,
+      "sub": 15,
+      "type": 2
+     }
+    },
+    "Sim.GetSimLockInfo": {
+     "params": [
+      "int, LockType"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 5,
+      "sub": 8,
+      "type": 2
+     }
+    },
+    "Sim.GetTfLockStatus": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 5,
+      "sub": 20,
+      "type": 2
+     }
+    },
+    "Sim.OpenUiccChannel": {
+     "params": [
+      "",
+      "bool"
+     ],
+     "header": {
+      "status": "ambiguous",
+      "candidates": [
+       [
+        5,
+        6,
+        2
+       ],
+       [
+        5,
+        32,
+        2
+       ]
+      ]
+     }
+    },
+    "Sim.PcscPowerUp": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 5,
+      "sub": 10,
+      "type": 2
+     }
+    },
+    "Sim.PcscTransmitApdu": {
+     "params": [
+      "char*, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 5,
+      "sub": 6,
+      "type": 2
+     }
+    },
+    "Sim.SelectChannel": {
+     "params": [
+      "unsigned char, char*, int",
+      "unsigned char, char*, int, int",
+      "unsigned char, char*, int, int, bool"
+     ],
+     "header": {
+      "status": "ambiguous",
+      "candidates": [
+       [
+        5,
+        6,
+        2
+       ],
+       [
+        5,
+        32,
+        2
+       ],
+       [
+        164,
+        4,
+        4
+       ]
+      ]
+     }
+    },
+    "Sim.SendESeRecoveryStatus": {
+     "params": [
+      "int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sim.SendLpaInfo": {
+     "params": [
+      "unsigned char*, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 5,
+      "sub": 25,
+      "type": 5
+     }
+    },
+    "Sim.SetChangeLockPwd": {
+     "params": [
+      "char*, char*, PinType"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 5,
+      "sub": 3,
+      "type": 3
+     }
+    },
+    "Sim.SetPhoneLock": {
+     "params": [
+      "int, bool, char*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 5,
+      "sub": 2,
+      "type": 3
+     }
+    },
+    "Sim.SetPinStatus": {
+     "params": [
+      "char*, char*, PinType"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 5,
+      "sub": 1,
+      "type": 3
+     }
+    },
+    "Sim.SetSimOnOff": {
+     "params": [
+      "int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sim.SetSimPower": {
+     "params": [
+      "int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sim.SetSlotMapping": {
+     "params": [
+      "int, int (*) [2]"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 5,
+      "sub": 24,
+      "type": 3
+     }
+    },
+    "Sim.SetVerifyTfLockStatusPassword": {
+     "params": [
+      "char*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 5,
+      "sub": 20,
+      "type": 3
+     }
+    },
+    "Sim.Transmit": {
+     "params": [
+      "char, char, char, char, char, bool, unsigned char, char*, int",
+      "char, char, char, char, char, bool, unsigned char, char*, int, bool"
+     ],
+     "header": {
+      "status": "ambiguous",
+      "candidates": [
+       [
+        5,
+        6,
+        2
+       ],
+       [
+        5,
+        32,
+        2
+       ]
+      ]
+     }
+    },
+    "Sap.GetCardReaderStatus": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 18,
+      "sub": 7,
+      "type": 2
+     }
+    },
+    "Sap.GetSapConnect": {
+     "params": [
+      "SapMessageId"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 18,
+      "sub": 1,
+      "type": 2
+     }
+    },
+    "Sap.GetSapSimPower": {
+     "params": [
+      "SapMessageId"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sap.GetSapStatus": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 18,
+      "sub": 2,
+      "type": 2
+     }
+    },
+    "Sap.GetSapTransferApdu": {
+     "params": [
+      "char*, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 18,
+      "sub": 4,
+      "type": 2
+     }
+    },
+    "Sap.GetSapTransferAtr": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 18,
+      "sub": 3,
+      "type": 2
+     }
+    },
+    "Sap.PRSimApdu": {
+     "params": [
+      "int, char*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 18,
+      "sub": 20,
+      "type": 4
+     }
+    },
+    "Sap.PRSimAtr": {
+     "params": [
+      "int, char*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 18,
+      "sub": 19,
+      "type": 4
+     }
+    },
+    "Sap.PRSimStatusEvent": {
+     "params": [
+      "RmtUimEventInfo, RmtUimErrorCause"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 18,
+      "sub": 18,
+      "type": 5
+     }
+    },
+    "Pb.GetPhoneBookEntriesInfo": {
+     "params": [
+      "SimType, SimPbEfid"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 6,
+      "sub": 4,
+      "type": 2
+     }
+    },
+    "Pb.GetPhoneBookEntry": {
+     "params": [
+      "SimType, SimPbEfid, int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Pb.GetPhoneBookStorage": {
+     "params": [
+      "SimType, SimPbEfid"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 6,
+      "sub": 2,
+      "type": 2
+     }
+    },
+    "Pb.GetUsimPhoneBookCapaEntriesInfo": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Pb.PhoneBookAccessPBEntry": {
+     "params": [
+      "SimType, SimPbAccessData*"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Pb.SetPhoneBookStorage": {
+     "params": [
+      "SimType, SimPbEfid"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 6,
+      "sub": 2,
+      "type": 3
+     }
+    },
+    "Stk.CfrmRefresh": {
+     "params": [
+      "int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Stk.ExecEnvleopeCmd": {
+     "params": [
+      "StkMessage*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 14,
+      "sub": 2,
+      "type": 1
+     }
+    },
+    "Stk.GetProactiveCmd": {
+     "params": [
+      "StkMessage*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 14,
+      "sub": 3,
+      "type": 2
+     }
+    },
+    "Stk.GetSetupEventList": {
+     "params": [
+      "StkMessage*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 14,
+      "sub": 9,
+      "type": 2
+     }
+    },
+    "Stk.GetStkProfile": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 14,
+      "sub": 1,
+      "type": 2
+     }
+    },
+    "Stk.SetStkProfile": {
+     "params": [
+      "StkMessage*"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Stk.SetUserCnfrm": {
+     "params": [
+      "StkUserCnfrm*"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Stk.SimInitMessage": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 14,
+      "sub": 13,
+      "type": 5
+     }
+    }
+   },
+   "parsers": [
+    "Sim.CloseChannel",
+    "Sim.ExchangeApdu",
+    "Sim.GetAtr",
+    "Sim.GetSelectChannel",
+    "Sim.NotiICCID",
+    "Sim.NotiIRuimConfig",
+    "Sim.NotiSimMode",
+    "Sim.OpenChannel",
+    "Sim.PcscTransmitApdu",
+    "Sim.SecGsim",
+    "Sim.SecImsAuth",
+    "Sim.SecLockInfo",
+    "Sim.SecLpaInfo",
+    "Sim.SecPcscPowerUp",
+    "Sim.SecPhoneLock",
+    "Sim.SecPinStatus",
+    "Sim.SecRSIM",
+    "Sim.SecSimAppInfo",
+    "Sim.SecSimCardType",
+    "Sim.SecTfLockStatus",
+    "Sim.SetSimOnOff",
+    "Sim.SetSimPower",
+    "Sim.SimEonsInfo",
+    "Sim.SimInfo",
+    "Sim.SimLowLevelControl",
+    "Sim.SlotStatus",
+    "Sim.TransmitApdu",
+    "Sap.GetSapCardReaderStatus",
+    "Sap.GetSapConnect",
+    "Sap.GetSapSimPower",
+    "Sap.GetSapStatus",
+    "Sap.GetSapTransferApdu",
+    "Sap.GetSapTransferAtr",
+    "Sap.PRSimApdu",
+    "Sap.PRSimAtr",
+    "Sap.PRSimConnect",
+    "Sap.PRSimPower",
+    "Pb.PhoneBookEntriesInfo",
+    "Pb.PhoneBookGetEntry",
+    "Pb.PhoneBookStorage",
+    "Pb.UsimPhoneBookCapa",
+    "Stk.CallControlResult",
+    "Stk.SatEnvelopeCmd",
+    "Stk.SatEventList",
+    "Stk.SatProactiveCmd",
+    "Stk.SatProfileDownload",
+    "Stk.SatRefresh"
+   ],
+   "apdu_related": [
+    "parser Sap.GetSapTransferApdu",
+    "parser Sap.GetSapTransferAtr",
+    "parser Sap.PRSimApdu",
+    "parser Sap.PRSimAtr",
+    "parser Sap.PRSimConnect",
+    "parser Sap.PRSimPower",
+    "parser Sim.CloseChannel",
+    "parser Sim.ExchangeApdu",
+    "parser Sim.GetAtr",
+    "parser Sim.GetSelectChannel",
+    "parser Sim.OpenChannel",
+    "parser Sim.PcscTransmitApdu",
+    "parser Sim.SecGsim",
+    "parser Sim.SecImsAuth",
+    "parser Sim.SecPcscPowerUp",
+    "parser Sim.SecRSIM",
+    "parser Sim.TransmitApdu",
+    "parser Stk.SatRefresh",
+    "request Sap.GetSapTransferApdu",
+    "request Sap.GetSapTransferAtr",
+    "request Sap.PRSimApdu",
+    "request Sap.PRSimAtr",
+    "request Sap.PRSimStatusEvent",
+    "request Sim.CloseChannel",
+    "request Sim.DoUiccAuth",
+    "request Sim.Exchange",
+    "request Sim.GetAtr",
+    "request Sim.GetRSIM",
+    "request Sim.GetRsimWithAid",
+    "request Sim.OpenUiccChannel",
+    "request Sim.PcscPowerUp",
+    "request Sim.PcscTransmitApdu",
+    "request Sim.SelectChannel",
+    "request Sim.Transmit"
+   ]
+  },
+  "registration": {
+   "groups": [
+    "IilNet",
+    "JsonNet",
+    "Net"
+   ],
+   "requests": {
+    "Net.EventMeasurementReport": {
+     "params": [
+      "unsigned char"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.GetAutonomousGap": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 35,
+      "type": 2
+     }
+    },
+    "Net.GetBandEnabled": {
+     "params": [
+      "unsigned char"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.GetBandPriority": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 32,
+      "type": 2
+     }
+    },
+    "Net.GetBarringInfo": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 59,
+      "type": 2
+     }
+    },
+    "Net.GetCaConfig": {
+     "params": [
+      "unsigned char, unsigned char"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.GetCaEnabled": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 34,
+      "type": 2
+     }
+    },
+    "Net.GetCdmaHybridMode": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.GetDisable2g": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 37,
+      "type": 2
+     }
+    },
+    "Net.GetDrxSetting": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 41,
+      "type": 2
+     }
+    },
+    "Net.GetDualStandbyPref": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 22,
+      "type": 2
+     }
+    },
+    "Net.GetEndcStatus": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 53,
+      "type": 2
+     }
+    },
+    "Net.GetExtendedBandMode": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 48,
+      "type": 2
+     }
+    },
+    "Net.GetLteRoamingEnabled": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 33,
+      "type": 2
+     }
+    },
+    "Net.GetNetworkQuality": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 57,
+      "type": 2
+     }
+    },
+    "Net.GetNr5gVoiceSupport": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 63,
+      "type": 2
+     }
+    },
+    "Net.GetNrDualConnectivityState": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 64,
+      "type": 2
+     }
+    },
+    "Net.GetNrModeConfig": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 58,
+      "type": 2
+     }
+    },
+    "Net.GetScgBearerAllocationStatus": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 54,
+      "type": 2
+     }
+    },
+    "Net.GetSystemSelectionChannels": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 65,
+      "type": 2
+     }
+    },
+    "Net.GetUsageSetting": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 68,
+      "type": 2
+     }
+    },
+    "Net.NetCancelAvailableNetworks": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 4,
+      "type": 3
+     }
+    },
+    "Net.NetCellInfoList": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 17,
+      "type": 2
+     }
+    },
+    "Net.NetCsgQuery": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 19,
+      "type": 2
+     }
+    },
+    "Net.NetCsgSearch": {
+     "params": [
+      "NetSelectCsgMode"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.NetCsgSelect": {
+     "params": [
+      "char*, int, RadioTechnology"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 19,
+      "type": 3
+     }
+    },
+    "Net.NetGetAcquisitionOrder": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 11,
+      "type": 2
+     }
+    },
+    "Net.NetGetAvailableBandMode": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.NetGetAvailableNetworks": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 4,
+      "type": 2
+     }
+    },
+    "Net.NetGetDataRegState": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.NetGetLteHpueIpc": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 50,
+      "type": 2
+     }
+    },
+    "Net.NetGetNetSelectionMode": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 2,
+      "type": 2
+     }
+    },
+    "Net.NetGetOperator": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 3,
+      "type": 2
+     }
+    },
+    "Net.NetGetPciEarfcnLockIpc": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 51,
+      "type": 2
+     }
+    },
+    "Net.NetGetPreferredNetList": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 1,
+      "type": 2
+     }
+    },
+    "Net.NetGetPreferredNetType": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 10,
+      "type": 2
+     }
+    },
+    "Net.NetGetRoamingPref": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 13,
+      "type": 2
+     }
+    },
+    "Net.NetGetSatelliteMode": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 71,
+      "type": 2
+     }
+    },
+    "Net.NetGetServiceDomain": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 8,
+      "type": 2
+     }
+    },
+    "Net.NetGetVoiceRegState": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.NetSetBandMode": {
+     "params": [
+      "NetBandModeType"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.NetSetLteHpueIpc": {
+     "params": [
+      "char*"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.NetSetNetSelectionAuto": {
+     "params": [
+      "NetSelectModeType"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 2,
+      "type": 3
+     }
+    },
+    "Net.NetSetNetSelectionManual": {
+     "params": [
+      "char*, RadioTechnology"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 2,
+      "type": 3
+     }
+    },
+    "Net.NetSetPciEarfcnLockIpc": {
+     "params": [
+      "char*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 51,
+      "type": 3
+     }
+    },
+    "Net.NetSetPreferredNetList": {
+     "params": [
+      "PreferredNetInfo*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 1,
+      "type": 3
+     }
+    },
+    "Net.NetSetPreferredNetType": {
+     "params": [
+      "PreferredNetType"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.NetSetRoamingPref": {
+     "params": [
+      "NetRoamingPrefType"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.NetSetSatelliteMode": {
+     "params": [
+      "SatelliteModeType"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.NetSetSatellitePlmnList": {
+     "params": [
+      "int, std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>&, int, std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>&"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 72,
+      "type": 3
+     }
+    },
+    "Net.NetSetServiceDomain": {
+     "params": [
+      "NetServiceDomainType"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.NetSetVoWifiHandoverThreshold": {
+     "params": [
+      "int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.ResetNetworkSetting": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 75,
+      "type": 3
+     }
+    },
+    "Net.SetAutonomousGap": {
+     "params": [
+      "unsigned char"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.SetBandEnabled": {
+     "params": [
+      "unsigned char, unsigned char"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 7,
+      "type": 3
+     }
+    },
+    "Net.SetBandPriority": {
+     "params": [
+      "unsigned char*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 32,
+      "type": 3
+     }
+    },
+    "Net.SetCaConfig": {
+     "params": [
+      "unsigned char, unsigned char, unsigned char"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 7,
+      "type": 3
+     }
+    },
+    "Net.SetCaEnabled": {
+     "params": [
+      "LteCaStatus"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.SetCdmaHybridMode": {
+     "params": [
+      "NetHybridModeType"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.SetDisable2g": {
+     "params": [
+      "bool"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.SetDrxSetting": {
+     "params": [
+      "DrxSetting"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.SetDualStandbyPref": {
+     "params": [
+      "DdsSwitchParam"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 22,
+      "type": 3
+     }
+    },
+    "Net.SetDualStandbyPrefModem": {
+     "params": [
+      "int, DdsSwitchParam"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 22,
+      "type": 3
+     }
+    },
+    "Net.SetExtendedBandMode": {
+     "params": [
+      "unsigned char*, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 48,
+      "type": 3
+     }
+    },
+    "Net.SetLteRoamingEnabled": {
+     "params": [
+      "LteRoamingStatus"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.SetMmsMode": {
+     "params": [
+      "int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.SetNr5gVoiceSupport": {
+     "params": [
+      "Nr5gVonrModeType"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.SetNrDualConnectivityState": {
+     "params": [
+      "RIL_NrDualConnectivityState"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.SetNrModeConfig": {
+     "params": [
+      "Nr5gDisableModeType, bool"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.SetSystemSelectionChannels": {
+     "params": [
+      "SystemSelectionChannels*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 65,
+      "type": 3
+     }
+    },
+    "Net.SetUsageSetting": {
+     "params": [
+      "RIL_UsageSetting"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.SetVolteStateNotification": {
+     "params": [
+      "bool"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Net.StartNetworkScan": {
+     "params": [
+      "NetworkScanInfo*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 55,
+      "type": 3
+     }
+    },
+    "Net.StopNetworkScan": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonNet.GetBarringInfo": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonNet.GetSystemSelectionChannels": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonNet.NetCancelAvailableNetworks": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonNet.NetCellInfoList": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonNet.NetGetAvailableNetworks": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonNet.NetGetDataRegState": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonNet.NetGetOperator": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonNet.NetGetPreferredNetType": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonNet.NetGetVoiceRegState": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonNet.NetSetPreferredNetType": {
+     "params": [
+      "PreferredNetType"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonNet.SetSystemSelectionChannels": {
+     "params": [
+      "SystemSelectionChannels*"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonNet.StartNetworkScan": {
+     "params": [
+      "NetworkScanInfo*"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonNet.StopNetworkScan": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "IilNet.NetGetDataRegState": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "IilNet.NetHandoverStatus": {
+     "params": [
+      "unsigned char, unsigned char, RadioTechnology, PdnType"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 8,
+      "sub": 15,
+      "type": 3
+     }
+    }
+   },
+   "parsers": [
+    "Net.BarringInfo",
+    "Net.DualStandbyPref",
+    "Net.ExtendedBandMode",
+    "Net.GetNetworkQuality",
+    "Net.GetNrDualConnectivityState",
+    "Net.GetSatelliteMode",
+    "Net.GetSystemSelectionChannels",
+    "Net.GetUsageSetting",
+    "Net.LteUeCapa",
+    "Net.MeasurementReport",
+    "Net.NetAcbInfo",
+    "Net.NetAcqOrder",
+    "Net.NetAutonomousGap",
+    "Net.NetBandMode",
+    "Net.NetBandPriority",
+    "Net.NetCaStatus",
+    "Net.NetCdmaHybridMode",
+    "Net.NetCellInfoList",
+    "Net.NetCsgList",
+    "Net.NetCsgSearch",
+    "Net.NetCsgSearchResult",
+    "Net.NetDisable2g",
+    "Net.NetDomainSpecificRestricted",
+    "Net.NetDrxSetting",
+    "Net.NetEccRat",
+    "Net.NetEndcStatus",
+    "Net.NetGetLteHpueIpc",
+    "Net.NetGetPciEarfcnLockIpc",
+    "Net.NetHandover",
+    "Net.NetIdentity",
+    "Net.NetLteRoamingStatus",
+    "Net.NetModeSelect",
+    "Net.NetMultiModeSlot",
+    "Net.NetNasTimer",
+    "Net.NetNrModeConfig",
+    "Net.NetPlmnList",
+    "Net.NetPlmnSelect",
+    "Net.NetPreferredNetworkList",
+    "Net.NetRRCStateChange",
+    "Net.NetRegState",
+    "Net.NetRoamingPref",
+    "Net.NetServiceDomain",
+    "Net.NetServingNetwork",
+    "Net.NetServingNetworkGsm",
+    "Net.NetSmsEmergencyReady",
+    "Net.NetSsacInfo",
+    "Net.NetVoWifiHoThreshold",
+    "Net.NetworkRejectIndi",
+    "Net.Nr5gVoiceSupport",
+    "Net.PhysicalChannelConfig",
+    "Net.ScanNetworkNoti",
+    "JsonNet.BarringInfo",
+    "JsonNet.GetSystemSelectionChannels",
+    "JsonNet.NetAcbInfo",
+    "JsonNet.NetCellInfoList",
+    "JsonNet.NetIdentity",
+    "JsonNet.NetModeSelect",
+    "JsonNet.NetPlmnList",
+    "JsonNet.NetRegState",
+    "JsonNet.NetServingNetwork",
+    "JsonNet.NetSsacInfo",
+    "JsonNet.NetworkRejectIndi",
+    "JsonNet.PhysicalChannelConfig",
+    "JsonNet.ScanNetworkNoti",
+    "IilNet.NetEpdgHoThreshold",
+    "IilNet.NetHandover"
+   ]
+  },
+  "pdp": {
+   "groups": [
+    "Data",
+    "IilData",
+    "JsonData"
+   ],
+   "requests": {
+    "Data.DefinePdpContext": {
+     "params": [
+      "AccessNetworkType, char const*, unsigned char, DataProtocol, SnssaiPdnInfo, DataProfile, bool, unsigned char*, unsigned char*, char*, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 255,
+      "sub": 0,
+      "type": 2
+     }
+    },
+    "Data.DunPinCtrl": {
+     "params": [
+      "DataSignalLine, bool"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 15,
+      "type": 1
+     }
+    },
+    "Data.EnablePortBlackList": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.EventPsiQueryInfo": {
+     "params": [
+      "int, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 38,
+      "type": 5
+     }
+    },
+    "Data.GetDdtmModeConfig": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.GetEmbmsCcpGlobalCellId": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 23,
+      "sub": 11,
+      "type": 2
+     }
+    },
+    "Data.GetEmbmsCcpMbmsSai": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 23,
+      "sub": 10,
+      "type": 2
+     }
+    },
+    "Data.GetEmbmsSessionList": {
+     "params": [
+      "TmgiListType, char*"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.GetEmbmsSignalStrength": {
+     "params": [
+      "char*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 23,
+      "sub": 6,
+      "type": 2
+     }
+    },
+    "Data.GetEvdoRevisionConfig": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 3,
+      "sub": 15,
+      "type": 2
+     }
+    },
+    "Data.GetLceInfo": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 35,
+      "type": 2
+     }
+    },
+    "Data.GetModemNai": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.GetNetworkSliceInfo": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.GetNssaiInfo": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.GetPdpContext": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 4,
+      "type": 2
+     }
+    },
+    "Data.GetProfileInfo": {
+     "params": [
+      "int, int, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 37,
+      "type": 2
+     }
+    },
+    "Data.GetPsiQueryInfo": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 38,
+      "type": 2
+     }
+    },
+    "Data.GetQoSInfo": {
+     "params": [
+      "int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.Ipv6Configuration": {
+     "params": [
+      "char*, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 9,
+      "type": 3
+     }
+    },
+    "Data.PsAttach": {
+     "params": [
+      "unsigned char, bool, bool, DataDetachReason"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 3,
+      "type": 3
+     }
+    },
+    "Data.SetAlwaysOnPdn": {
+     "params": [
+      "bool, DataProfile, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 34,
+      "type": 3
+     }
+    },
+    "Data.SetCdmaDataPinControl": {
+     "params": [
+      "DataSignalLine, bool"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.SetCdmaDataServiceType": {
+     "params": [
+      "CdmaDataServiceType"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 3,
+      "sub": 1,
+      "type": 3
+     }
+    },
+    "Data.SetCdmaDunMode": {
+     "params": [
+      "bool"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.SetDataCallConfiguration": {
+     "params": [
+      "CdmaDataServiceType"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 3,
+      "sub": 1,
+      "type": 3
+     }
+    },
+    "Data.SetDataCallEstablish": {
+     "params": [
+      "bool"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.SetDataProfile": {
+     "params": [
+      "char const*, char const*, char const*, DataAuth, DataProtocol, DataProfile, bool, PcscfViaPco, int, int, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 27,
+      "type": 3
+     }
+    },
+    "Data.SetDdtmModeConfig": {
+     "params": [
+      "unsigned char"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.SetDormancy": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 14,
+      "type": 3
+     }
+    },
+    "Data.SetEmbmsMcpttSigThreshold": {
+     "params": [
+      "char*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 23,
+      "sub": 12,
+      "type": 3
+     }
+    },
+    "Data.SetEmbmsService": {
+     "params": [
+      "ServiceType"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.SetEmbmsSession": {
+     "params": [
+      "SessionType, char*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 23,
+      "sub": 2,
+      "type": 3
+     }
+    },
+    "Data.SetEpdgConectionState": {
+     "params": [
+      "EpdgConnectionState"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.SetEpdgHandoverState": {
+     "params": [
+      "bool"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.SetEvdoRevisionConfig": {
+     "params": [
+      "unsigned char"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.SetFdInfo": {
+     "params": [
+      "int, int*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 23,
+      "type": 3
+     }
+    },
+    "Data.SetImsTestModeStatus": {
+     "params": [
+      "bool"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.SetLceMode": {
+     "params": [
+      "int, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 35,
+      "type": 3
+     }
+    },
+    "Data.SetLteAttachProfile": {
+     "params": [
+      "unsigned char, char const*, char const*, char const*, DataAuth, DataProtocol, DataProtocol, PcscfViaPco, unsigned char*, unsigned char*, bool"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 20,
+      "type": 3
+     }
+    },
+    "Data.SetLteAttachProfileLegacy": {
+     "params": [
+      "unsigned char, char const*, char const*, char const*, DataAuth, DataProtocol, DataProtocol, PcscfViaPco, unsigned char*, unsigned char*, bool"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 20,
+      "type": 3
+     }
+    },
+    "Data.SetMobileDataSetting": {
+     "params": [
+      "bool, bool"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 29,
+      "type": 3
+     }
+    },
+    "Data.SetModemNai": {
+     "params": [
+      "unsigned char"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.SetPdpContext": {
+     "params": [
+      "unsigned char, int, char const*, char const*, int, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 4,
+      "type": 3
+     }
+    },
+    "Data.SetPdpContextLegacy": {
+     "params": [
+      "unsigned char, int, char const*, char const*, int, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 4,
+      "type": 3
+     }
+    },
+    "Data.SetProcTypeInfo": {
+     "params": [
+      "bool"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Data.SetSipParam": {
+     "params": [
+      "char const*, char const*, char const*, DataAuth, DataProtocol"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 3,
+      "sub": 19,
+      "type": 3
+     }
+    },
+    "Data.SyncProfileInfo": {
+     "params": [
+      "int, RadioTechnologyType, char const*, char const*, char const*, DataAuth, DataProfile, DataProtocol, DataProtocol, int, PcscfViaPco, bool"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.DefinePdpContext": {
+     "params": [
+      "AccessNetworkType, char const*, unsigned char, DataProtocol, SnssaiPdnInfo, DataProfile, bool, unsigned char*, unsigned char*, char*, int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.DunPinCtrl": {
+     "params": [
+      "DataSignalLine, bool"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.EventPsiQueryInfo": {
+     "params": [
+      "int, int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.GetNetworkSliceInfo": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.GetNssaiInfo": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.GetPdpContext": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.GetProfileInfo": {
+     "params": [
+      "int, int, int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.GetPsiQueryInfo": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.GetQoSInfo": {
+     "params": [
+      "int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.GetTDQuery": {
+     "params": [
+      "int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.Ipv6Configuration": {
+     "params": [
+      "char*, int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.PsAttach": {
+     "params": [
+      "unsigned char, bool, bool, DataDetachReason"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.SetAlwaysOnPdn": {
+     "params": [
+      "bool, DataProfile, int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.SetEpdgConectionState": {
+     "params": [
+      "EpdgConnectionState"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.SetFdInfo": {
+     "params": [
+      "int, int*"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.SetImsTestModeStatus": {
+     "params": [
+      "bool"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.SetMobileDataSetting": {
+     "params": [
+      "bool, bool"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.SetPdpContext": {
+     "params": [
+      "unsigned char, int, char const*, char const*, int, int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.SetPdpContextLegacy": {
+     "params": [
+      "unsigned char, int, char const*, char const*, int, int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.SetProcTypeInfo": {
+     "params": [
+      "int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "JsonData.SyncProfileInfo": {
+     "params": [
+      "int, RadioTechnologyType, char const*, char const*, char const*, DataAuth, DataProtocol, DataProtocol, int, PcscfViaPco, bool"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "IilData.DefinePdpContext": {
+     "params": [
+      "AccessNetworkType, char const*, unsigned char, DataProtocol, bool, unsigned char*, unsigned char*"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "IilData.GetPdpContext": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 4,
+      "type": 2
+     }
+    },
+    "IilData.SetPdpContext": {
+     "params": [
+      "unsigned char, int, char const*, char const*, int, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 13,
+      "sub": 4,
+      "type": 3
+     }
+    }
+   },
+   "parsers": [
+    "Data.CdmaData",
+    "Data.CdmaDataCallStatusIpBased",
+    "Data.CdmaDataDdtmModeConfig",
+    "Data.CdmaDataKoreaMode",
+    "Data.CdmaDataMipConnectStatus",
+    "Data.CdmaDataModemNai",
+    "Data.CdmaEvdoRevisionConfig",
+    "Data.CdmaIpConfiguration",
+    "Data.DunPinControl",
+    "Data.Embms",
+    "Data.EmbmsCcpGlobalCellId",
+    "Data.EmbmsCcpMbmsSai",
+    "Data.EmbmsCoverage",
+    "Data.EmbmsGlobalCellId",
+    "Data.EmbmsMcpttSigThreshold",
+    "Data.EmbmsSaiList",
+    "Data.EmbmsSessionList",
+    "Data.EmbmsSib16NetworkTime",
+    "Data.EmbmsSignalStrength",
+    "Data.GetProfileInfo",
+    "Data.GetPsiQueryInfo",
+    "Data.Gprs",
+    "Data.GprsApnThrottleInfo",
+    "Data.GprsBackoffTimer",
+    "Data.GprsCallStatus",
+    "Data.GprsEpdgStatus",
+    "Data.GprsPsState",
+    "Data.HandoffInfo",
+    "Data.HsdpaStatus",
+    "Data.IpConfiguration",
+    "Data.LceInfo",
+    "Data.LteAdvancedIcon",
+    "Data.LteCaStatus",
+    "Data.MobileIpNai",
+    "Data.PdpContext",
+    "Data.TrafficChannel",
+    "JsonData.DunPinControl",
+    "JsonData.GetNetworkSliceInfo",
+    "JsonData.GetNssaiInfo",
+    "JsonData.GetPsiQueryInfo",
+    "JsonData.GetQoSInfo",
+    "JsonData.GetTDQuery",
+    "JsonData.GprsCallStatus",
+    "JsonData.GprsPsState",
+    "JsonData.HandoffInfo",
+    "JsonData.HsdpaStatus",
+    "JsonData.IpConfiguration",
+    "JsonData.LteAdvancedIcon",
+    "JsonData.LteCaStatus",
+    "JsonData.NetworkSliceInfo",
+    "JsonData.NssaiInfo",
+    "JsonData.PdpContext",
+    "JsonData.ProcTypeInfo",
+    "JsonData.QoSInfo"
+   ]
+  },
+  "sms": {
+   "groups": [
+    "IilSms",
+    "Mms",
+    "Sms"
+   ],
+   "requests": {
+    "Sms.DeleteMsg": {
+     "params": [
+      "int, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 4,
+      "sub": 5,
+      "type": 1
+     }
+    },
+    "Sms.DeleteMsgRuim": {
+     "params": [
+      "int, int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sms.DeliveryReport": {
+     "params": [
+      "int, int, int, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 4,
+      "sub": 6,
+      "type": 1
+     }
+    },
+    "Sms.DeliveryReportWithPdu": {
+     "params": [
+      "int, int, int, char*, unsigned long"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 4,
+      "sub": 6,
+      "type": 1
+     }
+    },
+    "Sms.GetCBActivation": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sms.GetCBConfig": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "ambiguous",
+      "candidates": [
+       [
+        4,
+        14,
+        2
+       ],
+       [
+        4,
+        26,
+        2
+       ]
+      ]
+     }
+    },
+    "Sms.GetReadMsg": {
+     "params": [
+      "int, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 4,
+      "sub": 3,
+      "type": 2
+     }
+    },
+    "Sms.GetSelectMem": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sms.GetSmscAddress": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 4,
+      "sub": 10,
+      "type": 2
+     }
+    },
+    "Sms.GetStoredMsgCount": {
+     "params": [
+      "int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sms.SendCdmaSms": {
+     "params": [
+      "unsigned char, unsigned char*, unsigned long"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 4,
+      "sub": 1,
+      "type": 1
+     }
+    },
+    "Sms.SendRPSMMA": {
+     "params": [
+      "char*"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sms.SendSms": {
+     "params": [
+      "unsigned char, int, int, unsigned char, unsigned char, char*, unsigned long"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 4,
+      "sub": 1,
+      "type": 1
+     }
+    },
+    "Sms.SetCBActivation": {
+     "params": [
+      "int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 4,
+      "sub": 14,
+      "type": 3
+     }
+    },
+    "Sms.SetCBConfig": {
+     "params": [
+      "int, int, int, int, int*, BroadcastSmsConfigInfo*"
+     ],
+     "header": {
+      "status": "ambiguous",
+      "candidates": [
+       [
+        4,
+        14,
+        3
+       ],
+       [
+        4,
+        26,
+        3
+       ]
+      ]
+     }
+    },
+    "Sms.SetDeviceReady": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 4,
+      "sub": 7,
+      "type": 3
+     }
+    },
+    "Sms.SetE911SmsCallbackMode": {
+     "params": [
+      "SmsEcbModeType"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sms.SetMemStatus": {
+     "params": [
+      "int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sms.SetSelectMem": {
+     "params": [
+      "unsigned char"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Sms.SetSmsEmergencyStatus": {
+     "params": [
+      "E911CallStatus, RadioTechnology, E911LtePriorityScan"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 4,
+      "sub": 27,
+      "type": 3
+     }
+    },
+    "Sms.SetSmscAddress": {
+     "params": [
+      "char*, unsigned long"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 4,
+      "sub": 10,
+      "type": 3
+     }
+    },
+    "Sms.WriteSmsToRuim": {
+     "params": [
+      "int, int, unsigned char*, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 4,
+      "sub": 4,
+      "type": 1
+     }
+    },
+    "Sms.WriteSmsToSim": {
+     "params": [
+      "int, int, int, char*, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 4,
+      "sub": 4,
+      "type": 1
+     }
+    },
+    "IilSms.SendRPSMMA": {
+     "params": [
+      "char*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 4,
+      "sub": 21,
+      "type": 3
+     }
+    },
+    "Mms.GetMmsItem": {
+     "params": [
+      ""
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 24,
+      "sub": 1,
+      "type": 2
+     }
+    }
+   },
+   "parsers": [
+    "Sms.CBConfig",
+    "Sms.CBConfigRange",
+    "Sms.DeleteMsg",
+    "Sms.DeliveryReportMsg",
+    "Sms.DeviceReady",
+    "Sms.IncomingCBMsg",
+    "Sms.IncomingMsg",
+    "Sms.MemoryStatus",
+    "Sms.ReadMsg",
+    "Sms.SaveMsg",
+    "Sms.SendMsg",
+    "Sms.SmsE911CallbackModeMsg",
+    "Sms.Smsc",
+    "Sms.StoredMsgCount",
+    "IilSms.SmsIncomingMsg",
+    "Mms.MmsItemData"
+   ]
+  },
+  "ims": {
+   "groups": [
+    "IilIil",
+    "Ims",
+    "Qmiims"
+   ],
+   "requests": {
+    "Ims.AvoidTuneaway": {
+     "params": [
+      "unsigned char"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Ims.ImsReqSetDeregistration": {
+     "params": [
+      "int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Ims.ImsReqSetImsPdnInfoE911": {
+     "params": [
+      "char const*, char const**, char const*"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Ims.ImsReqSetRegState": {
+     "params": [
+      "ImsRegStatus, int, NetworkType, EcmpState, EpdgState, EpdgAvailableState, int, RadioTechnology"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "Qmiims.QmiImsStartE911Search": {
+     "params": [
+      "bool"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "IilIil.EpdgHandoverParam": {
+     "params": [
+      "int, int"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 112,
+      "sub": 25,
+      "type": 5
+     }
+    },
+    "IilIil.ImsReqSetDeregistration": {
+     "params": [
+      "int"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "IilIil.ImsReqSetImsPdnInfoE911": {
+     "params": [
+      "char const*, char const**, char const*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 112,
+      "sub": 10,
+      "type": 1
+     }
+    },
+    "IilIil.ImsReqSetPreferredNetworkType": {
+     "params": [
+      "int, PreferredNetType"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 112,
+      "sub": 21,
+      "type": 1
+     }
+    },
+    "IilIil.ImsReqSetRegState": {
+     "params": [
+      "ImsRegStatus, int, NetworkType, EcmpState, EpdgState, EpdgAvailableState, int, RadioTechnology"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "IilIil.ImsReqSetSuspendNotiType": {
+     "params": [
+      "ImsHandoffInfo*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 112,
+      "sub": 22,
+      "type": 3
+     }
+    },
+    "IilIil.ImsVonrUserPreferenceNotiType": {
+     "params": [
+      "Nr5gVonrModeType"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "IilIil.SetEmcAttachAuthState": {
+     "params": [
+      "Nr5gEmcAttachAuthState*"
+     ],
+     "header": {
+      "status": "unknown"
+     }
+    },
+    "IilIil.SetSsacInfo": {
+     "params": [
+      "SsacInfo*"
+     ],
+     "header": {
+      "status": "recovered",
+      "main": 112,
+      "sub": 14,
+      "type": 5
+     }
+    }
+   },
+   "parsers": [
+    "Ims.ImsModeChange",
+    "Qmiims.QmiImsEcmFoundSvc",
+    "IilIil.EpdgConfiguration",
+    "IilIil.EpdgHandoverParam",
+    "IilIil.EpdgMapcon",
+    "IilIil.IilChangePreferredNetwork",
+    "IilIil.IilConnected",
+    "IilIil.IilPreference",
+    "IilIil.IilRegistration"
+   ]
+  }
+ },
+ "other_groups": [
+  "Call",
+  "Config",
+  "Display",
+  "Domestic",
+  "Factory",
+  "Imei",
+  "Jpn",
+  "JsonCall",
+  "JsonConfig",
+  "JsonDisp",
+  "Misc",
+  "Modemtest",
+  "Oes",
+  "Power",
+  "Sound",
+  "Ss",
+  "Svcmode",
+  "System"
+ ],
+ "counts": {
+  "groups": 34,
+  "requests": 588,
+  "parsers": 424,
+  "per_group": {
+   "Call": [
+    25,
+    19
+   ],
+   "Config": [
+    54,
+    34
+   ],
+   "Data": [
+    47,
+    36
+   ],
+   "Display": [
+    3,
+    3
+   ],
+   "Domestic": [
+    44,
+    33
+   ],
+   "Factory": [
+    13,
+    6
+   ],
+   "IilData": [
+    3,
+    0
+   ],
+   "IilIil": [
+    9,
+    7
+   ],
+   "IilNet": [
+    2,
+    2
+   ],
+   "IilSms": [
+    1,
+    1
+   ],
+   "Imei": [
+    11,
+    6
+   ],
+   "Ims": [
+    4,
+    1
+   ],
+   "Jpn": [
+    2,
+    2
+   ],
+   "JsonCall": [
+    0,
+    1
+   ],
+   "JsonConfig": [
+    1,
+    1
+   ],
+   "JsonData": [
+    21,
+    18
+   ],
+   "JsonDisp": [
+    1,
+    1
+   ],
+   "JsonNet": [
+    13,
+    13
+   ],
+   "Misc": [
+    129,
+    90
+   ],
+   "Mms": [
+    1,
+    1
+   ],
+   "Modemtest": [
+    0,
+    3
+   ],
+   "Net": [
+    74,
+    51
+   ],
+   "Oes": [
+    4,
+    2
+   ],
+   "Pb": [
+    6,
+    4
+   ],
+   "Power": [
+    7,
+    5
+   ],
+   "Qmiims": [
+    1,
+    1
+   ],
+   "Sap": [
+    9,
+    10
+   ],
+   "Sim": [
+    27,
+    27
+   ],
+   "Sms": [
+    23,
+    14
+   ],
+   "Sound": [
+    15,
+    4
+   ],
+   "Ss": [
+    15,
+    10
+   ],
+   "Stk": [
+    8,
+    6
+   ],
+   "Svcmode": [
+    14,
+    10
+   ],
+   "System": [
+    1,
+    2
+   ]
+  }
+ },
+ "unknown": [
+  "main/sub/type for requests marked unknown or ambiguous, and for every parser (dispatch not traced)",
+  "payload field layouts and lengths",
+  "which requests the BYH3 modem firmware actually accepts",
+  "behaviour of any command on hardware"
+ ],
+ "request_id_status": {
+  "recovered": 312,
+  "unknown": 267,
+  "ambiguous": 9
+ },
+ "note": "Names and C++ parameter types from the export table of the proprietary library; no code or binary is included. Static inference only, not a hardware result."
+}

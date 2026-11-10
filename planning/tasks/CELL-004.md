@@ -14,7 +14,7 @@
 
 ## Readiness
 
-Dependencies: KRN-001, CELL-009
+Dependencies: KRN-001
 
 ## Reserved paths
 
