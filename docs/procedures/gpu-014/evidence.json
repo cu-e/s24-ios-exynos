@@ -1,0 +1,91 @@
+{
+  "kind": "android-userland",
+  "origin": "local-device",
+  "outcome": "pass",
+  "recorded_at": "2026-11-09T21:51:26+00:00",
+  "summary": "Read the Vulkan driver inventory through the gpu service as the shell user. Xclipse 940, Vulkan 1.3.279, two queue families and 153 device extensions. No frame was rendered.",
+  "task": "GPU-014",
+  "owner": "claude-vulkan-inventory-20261110-g14",
+  "commit": "c0c592e00c989c052daf5052fbf3b3506e3a7679",
+  "device_inventory": "devices/local-2026-11-10-session1.json",
+  "findings": {
+    "device": "Samsung Xclipse 940",
+    "api_version": "1.3.279",
+    "vendor_id": "0x144d",
+    "device_id": "0x2600200",
+    "driver_version_raw": 100675593,
+    "queue_families": [
+      {
+        "queues": 4,
+        "flags": 31
+      },
+      {
+        "queues": 2,
+        "flags": 30
+      }
+    ],
+    "memory_heap_bytes": [
+      5599395840,
+      67108864
+    ],
+    "device_extensions": 153,
+    "watched_extensions": {
+      "VK_KHR_acceleration_structure": true,
+      "VK_KHR_ray_query": true,
+      "VK_KHR_ray_tracing_pipeline": true,
+      "VK_EXT_mesh_shader": false,
+      "VK_KHR_fragment_shading_rate": true,
+      "VK_EXT_device_fault": true,
+      "VK_KHR_timeline_semaphore": true,
+      "VK_KHR_synchronization2": true,
+      "VK_KHR_swapchain": true,
+      "VK_EXT_external_memory_dma_buf": true
+    }
+  },
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/gpu-014/inventory.py",
+        "--run",
+        "session-001"
+      ],
+      "exit_code": 1,
+      "result": "Host parser TypeError on floating-point integers. Only the raw output was saved; no report."
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/gpu-014/inventory.py",
+        "--run",
+        "session-002"
+      ],
+      "exit_code": 0,
+      "result": "artifacts/gpu-014/session-002/report.json"
+    }
+  ],
+  "sha256": {
+    "docs/procedures/gpu-014/inventory.py": "2b4395682c58449fbbe301e541b975395f1ea6393daa9d8003d73e6a463564e9"
+  },
+  "artifact_sha256": {
+    "artifacts/gpu-014/session-002/report.json": "e6d372737431879db778edba8f2d5fef2d52a453e9aca1aa59ef8a2a18c385be"
+  },
+  "artifacts": [
+    "artifacts/gpu-014/session-002/report.json",
+    "worktrees/gpu-014-vulkan-inventory-20261110/research/notes/GPU-014-vulkan-inventory.md"
+  ],
+  "su_used": false,
+  "installed": false,
+  "rendered": false,
+  "device_state_changed": false,
+  "serial_recorded": false,
+  "authorization": "Scope android-readonly over already-authorized ADB, as the shell user. No su, install, settings change or reboot.",
+  "limitations": [
+    "This does not satisfy GPU-003: no frame was rendered and no Stop path was exercised.",
+    "The kernel sgpu interface was not examined.",
+    "cmd gpu vkjson makes the system gpu service enumerate the driver; that service, not this project, loads the vendor driver."
+  ],
+  "review": "Acceptance assessed by the executing agent in the same session. No independent reviewer."
+}
