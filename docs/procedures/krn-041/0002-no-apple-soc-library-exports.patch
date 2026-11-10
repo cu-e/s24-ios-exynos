@@ -1,0 +1,75 @@
+KRN-041: no-Apple-SoC-library export profile for arm64 machines without the KDK library
+
+Base: apple-oss-distributions/xnu c54f35ca767986246321eb901baf8f5ff7923f6a
+(xnu-8796.121.2), config/Private.arm64.exports. License: APSL 2.0, as the
+file it changes. Author: KRN-041 (claude-export-dossier-20261110-x41).
+
+Opt-in profile, for E1S and the BCM2837-based guest only. Never apply it to
+T6000, T8101 or VMAPPLE: makedefs/MakeInc.def force-loads Apple's closed
+lib<MACHINE>.os.<CONFIG>.a for those machines, and these names are expected
+to come from it there.
+
+It removes the 35 names that public source neither declares nor defines:
+7 pmap_iommu_*, 11 DART/SART/UAT/NVMe PPL descriptor entry points and the 17
+IOUnifiedAddressTranslator class symbols. They are kext-facing KPI: no object
+or library of the linked kernel references any of them (KRN-041 scan), and the
+project, HakiOS and S24-port driver sources do not either. Without a provider
+the genuine check_all_exports and the Private symbol set fail on them. The
+other two missing names, _pmap_has_iofilter_protected_write and
+_pmap_cs_configuration, stay listed; 0001 defines them.
+
+The removed lines are the same 35 that the S24 port's legacy
+xnu/legacy-sweet-patches/0009-sweet-drop-apple-soc-only-exports.patch
+(c8860decc62c6d6180e609036d027a2997972420) removes from this file.
+
+--- a/config/Private.arm64.exports
++++ b/config/Private.arm64.exports
+@@ -75,48 +75,13 @@
+ _mach_bridge_init_timestamp
+ _mach_bridge_set_params
+ _vfs_resolver_result
+-_pmap_iommu_init
+-_pmap_iommu_iovmalloc
+-_pmap_iommu_map
+-_pmap_iommu_unmap
+-_pmap_iommu_iovmfree
+-_pmap_iommu_ioctl
+-_pmap_iommu_alloc_contiguous_pages
+-_nvme_ppl_get_desc
+-_sart_get_desc
+-_t8020dart_get_desc
+-_t8020dart_vo_tte
+-_t6000dart_get_desc
+-_t6000dart_vo_tte
+-_t8110dart_get_desc
+-_t8110dart_max_translation_levels
+-_t8110dart_vo_tte
+-_t8110dart_vo_tt_index
+ _ml_mcache_flush_callback_register
+-_uat_get_desc
+ _set_invalidate_hmac_function
+ _PE_panic_debugging_enabled
+ _register_additional_panic_data_buffer
+ _apply_func_phys
+ _Switch_context
+ _gT1Sz
+-__ZN26IOUnifiedAddressTranslator10gMetaClassE
+-__ZN26IOUnifiedAddressTranslator10superClassE
+-__ZN26IOUnifiedAddressTranslator17getPageTableEntryEy
+-__ZN26IOUnifiedAddressTranslator18setClientContextIDEjb
+-__ZN26IOUnifiedAddressTranslator21removeClientContextIDEv
+-__ZN26IOUnifiedAddressTranslator19isPageFaultExpectedEyj
+-__ZN26IOUnifiedAddressTranslator22registerTaskForServiceEP4taskP9IOService
+-__ZN26IOUnifiedAddressTranslator23createMappingInApertureEjP18IOMemoryDescriptorjym
+-__ZN26IOUnifiedAddressTranslator23getTotalPageTableMemoryEv
+-__ZN26IOUnifiedAddressTranslator3mapEP11IOMemoryMapj
+-__ZN26IOUnifiedAddressTranslator5doMapEP18IOMemoryDescriptoryyj
+-__ZN26IOUnifiedAddressTranslator5unmapEP11IOMemoryMap
+-__ZN26IOUnifiedAddressTranslator7doUnmapEP18IOMemoryDescriptoryy
+-__ZN26IOUnifiedAddressTranslator8taskDiedEv
+-__ZN26IOUnifiedAddressTranslator12commitUnmapsEv
+-__ZN26IOUnifiedAddressTranslator14prepareFWUnmapEyy
+-__ZTV26IOUnifiedAddressTranslator
+ __ZN24IOBufferMemoryDescriptor18initWithGuardPagesEP4taskjy
+ __ZN24IOBufferMemoryDescriptor20inTaskWithGuardPagesEP4taskjy
+ __ZN27IOGuardPageMemoryDescriptor12initWithSizeEm
