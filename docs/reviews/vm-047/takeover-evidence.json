@@ -1,0 +1,67 @@
+{
+ "origin": "local-host",
+ "kind": "host-test",
+ "owner": "claude-takeover-20261110-6c8f",
+ "recorded_at": "2026-11-10T08:41:31+00:00",
+ "independent_hash_review": {
+  "script": "docs/procedures/avf-object-shards/hash_review.py",
+  "report": "artifacts/vm-047-takeover/hash-review-001.json",
+  "json_followed": 115,
+  "pairs": 473,
+  "missing": 0,
+  "mismatched": [
+   "/home/egor/dev/pet/s24-ios-exynos/worktrees/rev-vm047-fd-20261106/docs/reviews/vm-047/driver-run-1/controls/late-filelist-growth/first.filelist",
+   "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-047-driver-contract-20261106/artifacts/avf-runtime-linkmap/driver-controls-001/forged-filelist-hash/synthetic-filelist",
+   "/home/egor/dev/pet/s24-ios-exynos/worktrees/vm-047-driver-contract-20261106/fixtures/public/avf-runtime-linkmap/driver-forwarding-source.json"
+  ],
+  "mismatch_assessment": "all three are deliberate negative-control records: late-filelist-growth grows its file after hashing, forged-filelist-hash and forged-forwarding-proof/wrong-driver-proof record forged (all-zero) hashes; every non-control record matches",
+  "non_macho_objects": 88,
+  "non_macho_assessment": "synthetic staged objects of the controls (evidence field synthetic_maps_images_and_staged_objects=true), not compiler output"
+ },
+ "make_check": {
+  "argv": [
+   "make",
+   "check"
+  ],
+  "exit_code": 0,
+  "tests": 208
+ },
+ "task": "REV-047",
+ "outcome": "pass",
+ "summary": "The REV-047 independent review of the frozen VM-047 producer was merged into main unchanged: plan, controls, run-1 inconclusive verdict and the driver-correction recheck (driver-run-1 PASS, 27 controls / 13 independent negatives, through 2b517db). The pending step was root integration and common checks before reviewer closure; it is now done: merge 3cbc39c, make check 208 tests OK. A takeover rerun of the producer controls from main also passed, and every non-control hash in the review evidence matches.",
+ "merged": {
+  "branch": "team/rev-vm047-fd-20261106",
+  "head": "2b517db",
+  "merge_commit": "3cbc39c",
+  "excluded": "c8b0ec9 review(str036), a different review"
+ },
+ "transfer": {
+  "from_owner": "codex-review-runtime-linkmap-20261106-fd",
+  "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md"
+ },
+ "reviewed_verdict": {
+  "capsule": "docs/reviews/vm-047/driver-run-1/capsule.json",
+  "outcome": "pass",
+  "recorded_at": "2026-11-06T07:49:52.318984+00:00",
+  "actual_driver_executed": false,
+  "compiler_started": false
+ },
+ "limitations": [
+  "The original run-1 review verdict stays INCONCLUSIVE as recorded; this closure rests on the corrected-driver recheck.",
+  "No target tools were run; real map/image success needs a separately leased linker run."
+ ],
+ "artifacts": [
+  "docs/reviews/vm-047/driver-recheck-evidence.json",
+  "docs/reviews/vm-047/driver-run-1/capsule.json",
+  "docs/reviews/vm-047/driver-recheck-handoff.md",
+  "artifacts/vm-047-takeover/hash-review-001.json",
+  "artifacts/vm-047-takeover/driver-controls-002/evidence.json"
+ ],
+ "sha256": {
+  "docs/reviews/vm-047/driver-recheck-evidence.json": "b9b6e93d8c04c0d69274165fe1b52272b1c0acc04ae41eb9fd63800939f5d7ba",
+  "docs/reviews/vm-047/driver-run-1/capsule.json": "d9b7b89d6cc299bde8a6c708a69233d7a5dc40886c4a3bdecab23b4a5b814142",
+  "docs/reviews/vm-047/driver-recheck-handoff.md": "cab255a041634687d809796271e4521ef128444f25423b6535a3cd41c35a2fe9",
+  "artifacts/vm-047-takeover/hash-review-001.json": "b77c0ca6a1051b746da57f5864fb3a2c3ac12536289810b015b0aaac8a114378",
+  "artifacts/vm-047-takeover/driver-controls-002/evidence.json": "2aa982e7cd0ac709b1fefcf33a6265b124ea6430b013c4cdac236b245cd364fe"
+ }
+}
