@@ -7,13 +7,13 @@
 | Field | Value |
 |---|---|
 | State / column | blocked / blocked |
-| Owner | codex-ril-inputs-20261105-m |
+| Owner | claude-takeover-20261110-6c8f |
 | Priority | 85 (higher first; default 50) |
 | Scope / evidence | android-readonly / android-userland |
 | Dependencies | DEV-001, CELL-001 |
 | started_at | 2026-11-05T03:48:29+00:00 |
-| last_heartbeat | 2026-11-05T03:56:50+00:00 |
-| report_health | stale |
+| last_heartbeat | 2026-11-10T07:51:59+00:00 |
+| report_health | recent |
 | progress_note | Eight host guard groups pass. Exact live BYH3/uid2000 context reverified; two regular vendor RIL files exist, but ordinary shell checksum and normal ADB sync pulls are denied. No binary bytes acquired or privileges changed. |
 | next_step | Use an explicitly supplied matching local RIL/vendor image for offline analysis, or a separately user-authorized future acquisition task; do not retry current access boundary |
 | branch | main |
@@ -21,7 +21,7 @@
 
 ## Readiness
 
-Existing exact-BYH3 vendor RIL files deny current uid2000 shell checksums and ordinary authorized ADB sync pulls; actual file bytes/hash cannot be acquired within approved current read-only access. No supplied local matching copy exists in this task.
+Cannot meet its own no-root acceptance: both files are unreadable to uid 2000 (RILINPUT-003/004). Superseded by CELL-011, which copied them with read-only su under decision 0002 (hashes match the device); CELL-009 consumed that copy. Kept blocked rather than completed because its stated method was not the one used.
 
 ## Reserved paths
 
@@ -46,5 +46,5 @@ Existing exact-BYH3 vendor RIL files deny current uid2000 shell checksums and or
 
 ```sh
 python3 tools/lab.py task show CELL-010
-python3 tools/lab.py task update CELL-010 --owner codex-ril-inputs-20261105-m --note 'Observed result' --next-step 'Next concrete check'
+python3 tools/lab.py task update CELL-010 --owner claude-takeover-20261110-6c8f --note 'Observed result' --next-step 'Next concrete check'
 ```

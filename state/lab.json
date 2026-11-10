@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T07:51:17+00:00",
+  "updated_at": "2026-11-10T07:51:59+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -3204,7 +3204,7 @@
       "title": "Capture exact BYH3 vendor RIL inputs through authorized read-only ADB",
       "priority": 85,
       "status": "blocked",
-      "owner": "codex-ril-inputs-20261105-m",
+      "owner": "claude-takeover-20261110-6c8f",
       "scope": "android-readonly",
       "evidence_kind": "android-userland",
       "depends_on": [
@@ -3233,13 +3233,22 @@
         "Bind captured input provenance to future offline CELL-009 analysis; no command replay or live RIL code execution"
       ],
       "started_at": "2026-11-05T03:48:29+00:00",
-      "last_heartbeat": "2026-11-05T03:56:50+00:00",
-      "updated_at": "2026-11-05T03:56:50+00:00",
+      "last_heartbeat": "2026-11-10T07:51:59+00:00",
+      "updated_at": "2026-11-10T07:51:59+00:00",
       "branch": "main",
       "progress_note": "Eight host guard groups pass. Exact live BYH3/uid2000 context reverified; two regular vendor RIL files exist, but ordinary shell checksum and normal ADB sync pulls are denied. No binary bytes acquired or privileges changed.",
       "next_step": "Use an explicitly supplied matching local RIL/vendor image for offline analysis, or a separately user-authorized future acquisition task; do not retry current access boundary",
       "handoff": "docs/procedures/ril-capture/handoff.md",
-      "blocked_reason": "Existing exact-BYH3 vendor RIL files deny current uid2000 shell checksums and ordinary authorized ADB sync pulls; actual file bytes/hash cannot be acquired within approved current read-only access. No supplied local matching copy exists in this task."
+      "blocked_reason": "Cannot meet its own no-root acceptance: both files are unreadable to uid 2000 (RILINPUT-003/004). Superseded by CELL-011, which copied them with read-only su under decision 0002 (hashes match the device); CELL-009 consumed that copy. Kept blocked rather than completed because its stated method was not the one used.",
+      "ownership_history": [
+        {
+          "from": "codex-ril-inputs-20261105-m",
+          "to": "claude-takeover-20261110-6c8f",
+          "reason": "Codex owner stopped: last heartbeat 2026-11-05T03:56Z and no Codex process is running. Transfer to record that CELL-011 obtained the bytes with root under decision 0002, which this task excludes.",
+          "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
+          "at": "2026-11-10T07:51:51+00:00"
+        }
+      ]
     },
     {
       "id": "RES-009",
@@ -53443,6 +53452,44 @@
           "last_heartbeat": "2026-11-10T07:47:35+00:00",
           "branch": "main",
           "handoff": "docs/procedures/ril/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:51:51+00:00",
+      "action": "task.transfer:CELL-010",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "CELL-010",
+          "status": "blocked",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 85,
+          "progress_note": "Eight host guard groups pass. Exact live BYH3/uid2000 context reverified; two regular vendor RIL files exist, but ordinary shell checksum and normal ADB sync pulls are denied. No binary bytes acquired or privileges changed.",
+          "next_step": "Use an explicitly supplied matching local RIL/vendor image for offline analysis, or a separately user-authorized future acquisition task; do not retry current access boundary",
+          "blocked_reason": "Existing exact-BYH3 vendor RIL files deny current uid2000 shell checksums and ordinary authorized ADB sync pulls; actual file bytes/hash cannot be acquired within approved current read-only access. No supplied local matching copy exists in this task.",
+          "last_heartbeat": "2026-11-10T07:51:51+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/ril-capture/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:51:59+00:00",
+      "action": "task.block:CELL-010",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "CELL-010",
+          "status": "blocked",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 85,
+          "progress_note": "Eight host guard groups pass. Exact live BYH3/uid2000 context reverified; two regular vendor RIL files exist, but ordinary shell checksum and normal ADB sync pulls are denied. No binary bytes acquired or privileges changed.",
+          "next_step": "Use an explicitly supplied matching local RIL/vendor image for offline analysis, or a separately user-authorized future acquisition task; do not retry current access boundary",
+          "blocked_reason": "Cannot meet its own no-root acceptance: both files are unreadable to uid 2000 (RILINPUT-003/004). Superseded by CELL-011, which copied them with read-only su under decision 0002 (hashes match the device); CELL-009 consumed that copy. Kept blocked rather than completed because its stated method was not the one used.",
+          "last_heartbeat": "2026-11-10T07:51:59+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/ril-capture/handoff.md"
         }
       ]
     }
