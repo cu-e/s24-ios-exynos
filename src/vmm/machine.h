@@ -27,16 +27,27 @@ struct vmm_layout {
     uint64_t image_size;   /* bytes the Image occupies in RAM, including its .bss */
     uint64_t initrd_size;
     const char *bootargs;
+    uint32_t scfb_w, scfb_h;   /* 0: no shared framebuffer */
+    int virtio_input;          /* describe the virtio-mmio input slot in the FDT */
     /* Outputs of vmm_plan(). */
-    uint64_t image_addr, initrd_addr, fdt_addr, gicr_base, gicr_size;
+    uint64_t image_addr, initrd_addr, fdt_addr, gicr_base, gicr_size, scfb_addr, scfb_size;
 };
 
-/* Places Image, initrd and FDT. Returns 0, or -1 if they do not fit or arguments are invalid. */
+/* Places Image, initrd, the SCFB region (below the FDT) and the FDT. Returns 0, or -1 if they do not fit
+ * or arguments are invalid. */
 int vmm_plan(struct vmm_layout *l);
 /* Writes the FDT for a planned layout. Returns the blob size, or 0 on error. */
 size_t vmm_build_fdt(const struct vmm_layout *l, uint8_t *out, size_t out_len);
 /* Reads the arm64 Image header: returns the size to reserve (max of file and image_size), 0 if invalid. */
 uint64_t vmm_image_extent(const uint8_t *image, size_t len);
+
+/* Stage-1 translation of guest virtual address va through the guest's own tables in RAM (VMSAv8-64
+ * long descriptors, 4K/16K/64K granule, 48-bit output, no LPA2): bit 55 selects TTBR1. Returns 0 and
+ * *pa, 1..4 for a translation fault at level 0..3, -1 for an unusable TCR or an address outside the
+ * configured range, -2 when a table lies outside RAM. trail (may be NULL) receives the descriptor read at
+ * each level, indexed by level; levels not read are left untouched. Used only for post-mortem diagnostics. */
+int vmm_walk(const uint8_t *ram, uint64_t ram_base, uint64_t ram_size, uint64_t tcr, uint64_t ttbr0, uint64_t ttbr1,
+             uint64_t va, uint64_t *pa, uint64_t trail[4]);
 
 /* 8250/16550 subset: polled transmit, a small receive queue, LSR/IIR/MSR answers a driver expects. */
 struct vmm_uart {

@@ -3,6 +3,8 @@
 #include <string.h>
 
 #include "fdt.h"
+#include "scfb.h"
+#include "virtio.h"
 
 #define GIC_PHANDLE 1u
 #define IRQ_TYPE_SPI 0u
@@ -12,6 +14,44 @@
 
 static uint64_t align_up(uint64_t v, uint64_t a) {
     return (v + a - 1) & ~(a - 1);
+}
+
+int vmm_walk(const uint8_t *ram, uint64_t ram_base, uint64_t ram_size, uint64_t tcr, uint64_t ttbr0, uint64_t ttbr1,
+             uint64_t va, uint64_t *pa, uint64_t trail[4]) {
+    int upper = (int)((va >> 55) & 1);
+    unsigned txsz = (unsigned)(upper ? (tcr >> 16) & 0x3f : tcr & 0x3f);
+    unsigned tg = (unsigned)(upper ? (tcr >> 30) & 3 : (tcr >> 14) & 3);
+    unsigned g = upper ? (tg == 1 ? 14 : tg == 2 ? 12 : tg == 3 ? 16 : 0) : (tg == 0 ? 12 : tg == 2 ? 14 : 16);
+    if (!g || txsz < 16 || txsz > 39 || (tcr >> (upper ? 23 : 7) & 1)) return -1; /* EPDn: walks disabled */
+    unsigned va_bits = 64 - txsz, stride = g - 3;
+    uint64_t top = va >> va_bits & ((1ull << (56 - va_bits)) - 1); /* bits 55..va_bits must copy bit 55 */
+    if (top != (upper ? (1ull << (56 - va_bits)) - 1 : 0)) return -1;
+    unsigned levels = (va_bits - g + stride - 1) / stride;
+    if (levels < 1 || levels > 4) return -1;
+    const uint64_t oa_mask = 0x0000fffffffff000ull & ~((1ull << g) - 1);
+    uint64_t table = (upper ? ttbr1 : ttbr0) & 0x0000fffffffffffeull & ~7ull;
+    uint64_t in = va & ((1ull << va_bits) - 1);
+    for (unsigned level = 4 - levels; level <= 3; level++) {
+        unsigned shift = g + stride * (3 - level);
+        uint64_t at = table + ((in >> shift) & ((1ull << stride) - 1)) * 8;
+        if (at < ram_base || at + 8 > ram_base + ram_size) return -2;
+        uint64_t d = 0;
+        for (int b = 7; b >= 0; b--) d = d << 8 | ram[at - ram_base + (uint64_t)b];
+        if (trail) trail[level] = d;
+        if (!(d & 1)) return (int)level + 1;
+        if (level == 3) {
+            if ((d & 3) != 3) return 4;
+            *pa = (d & oa_mask) | (va & ((1ull << g) - 1));
+            return 0;
+        }
+        if ((d & 3) == 1) { /* block: 4K at levels 1-2, 16K and 64K at level 2 */
+            if (level == 0 || (level == 1 && g != 12)) return (int)level + 1;
+            *pa = (d & 0x0000fffffffff000ull & ~((1ull << shift) - 1)) | (va & ((1ull << shift) - 1));
+            return 0;
+        }
+        table = d & oa_mask;
+    }
+    return -1;
 }
 
 uint64_t vmm_image_extent(const uint8_t *image, size_t len) {
@@ -30,7 +70,16 @@ int vmm_plan(struct vmm_layout *l) {
     l->fdt_addr = VMM_RAM_BASE + l->ram_size - VMM_FDT_MAX;
     l->gicr_size = VMM_GICR_STRIDE * l->cpus;
     l->gicr_base = VMM_GICD_BASE - l->gicr_size;
-    if (l->initrd_addr + l->initrd_size > l->fdt_addr || l->initrd_addr + l->initrd_size < l->initrd_addr) return -1;
+    l->scfb_addr = l->scfb_size = 0;
+    uint64_t top = l->fdt_addr;
+    if (l->scfb_w || l->scfb_h) {
+        if (!l->scfb_w || !l->scfb_h || l->scfb_w > 4096 || l->scfb_h > 4096) return -1;
+        l->scfb_size = scfb_region_size(l->scfb_w, l->scfb_h);
+        if (l->scfb_size > l->fdt_addr - VMM_RAM_BASE) return -1;
+        l->scfb_addr = l->fdt_addr - l->scfb_size;
+        top = l->scfb_addr;
+    }
+    if (l->initrd_addr + l->initrd_size > top || l->initrd_addr + l->initrd_size < l->initrd_addr) return -1;
     return 0;
 }
 
@@ -119,6 +168,16 @@ size_t vmm_build_fdt(const struct vmm_layout *l, uint8_t *out, size_t out_len) {
     uint32_t rtc_irq[3] = {IRQ_TYPE_SPI, VMM_RTC_SPI, IRQ_LEVEL_HIGH};
     fdt_prop_cells(&w, "interrupts", rtc_irq, 3);
     fdt_end_node(&w);
+
+    if (l->virtio_input) {
+        fdt_begin_node(&w, "virtio_mmio@a000000");
+        fdt_prop_str(&w, "compatible", "virtio,mmio");
+        reg2(&w, VIO_MMIO_BASE, VIO_MMIO_SLOT);
+        uint32_t vio_irq[3] = {IRQ_TYPE_SPI, VIO_MMIO_SPI_BASE, IRQ_LEVEL_HIGH};
+        fdt_prop_cells(&w, "interrupts", vio_irq, 3);
+        fdt_prop_empty(&w, "dma-coherent");
+        fdt_end_node(&w);
+    }
 
     fdt_end_node(&w);
     return fdt_finish(&w, out, out_len);

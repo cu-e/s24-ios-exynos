@@ -1,0 +1,179 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "task": "VM-053",
+ "owner": "claude-takeover-20261110-6c8f",
+ "recorded_at": "2026-11-10T08:23:06+00:00",
+ "summary": "s24vmm reserves the SCFB region directly below the FDT and streams S24F frames from the seqlocked SCFB (frame_seq, POLL, DAMAGE, drawing/host_reading) to one localhost viewer. Its virtio-mmio v2 virtio-input multitouch device at 0x0a000000 (SPI 16 = INTID 48) reports MT-B events through KVM_IRQ_LINE. Host tests pass: test_vmm 220 checks, test_io 92 under ASan+UBSan, the seqlock test under TSan, and a warning-free static NDK build. The SCFB header offsets match both pinned scion-avf structs. The viewer APK decodes the VMM C encoder output on the host JVM, 39 checks, and the C decoder reads its touches back. Two clean builds in each of two runs gave the same unsigned aligned APK. Nothing was run on the device.",
+ "commit": "6dc5a8858e90297a5003a471d0bfaacc8564b602",
+ "branch": "team/vm-053-display-input-20261110",
+ "transfer": {
+  "from_owner": "claude-vm-display-20261110-v53",
+  "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md"
+ },
+ "checks": {
+  "vmm_host_tests": {
+   "test_vmm": {
+    "checks": 220,
+    "failures": 0
+   },
+   "test_io": {
+    "checks": 92,
+    "failures": 0
+   },
+   "tsan": {
+    "exit_code": 0,
+    "warnings": false
+   },
+   "ndk_static_binary_sha256": "e09c17061fac769e68d6c580f42454f6de23ebd584b9b17d042ce9c491bdcab9"
+  },
+  "viewer": {
+   "protocol": true,
+   "reproducible": true,
+   "signed": true,
+   "only_internet_permission": true,
+   "java_test": {
+    "checks": 39,
+    "failures": 0
+   },
+   "c_decoded_touches": [
+    {
+     "rc": 0,
+     "slot": 0,
+     "tracking_id": 0,
+     "x": 10,
+     "y": 20
+    },
+    {
+     "rc": 0,
+     "slot": 9,
+     "tracking_id": 65535,
+     "x": 1124,
+     "y": 2435
+    },
+    {
+     "rc": 0,
+     "slot": 0,
+     "tracking_id": -1,
+     "x": 0,
+     "y": 0
+    },
+    {
+     "rc": -1,
+     "slot": 10,
+     "tracking_id": 1,
+     "x": 2,
+     "y": 3
+    }
+   ]
+  },
+  "reproducible_across_runs": true,
+  "scfb_layout_matches_upstream": true
+ },
+ "apk": {
+  "path": "artifacts/vm-053/viewer-002/viewer/s24vmm-viewer.apk",
+  "size": 16787,
+  "sha256": "b1c478dff996e9ea50073c4bf603f4fed48a6b8d4fcdacb4356c0156cb75df88",
+  "unsigned_aligned_sha256": "224b23e5d4653170d24f8dca096a11c13e7395b256ff3c7813b3c3f88ae8de27",
+  "verified": true,
+  "package": "dev.egor.s24vmmviewer",
+  "permissions": [
+   "android.permission.INTERNET"
+  ],
+  "installed": false
+ },
+ "upstream": {
+  "source": "scion-avf",
+  "revision": "a6f4bc38aa244359cd365c976244a88c9d6b3304",
+  "files": {
+   "xnu/patches/1200-avf-scfb-display.patch": "e60380e8eff225721af66c054e740e7e685fe500047c26632d22d685e96359ce",
+   "avf/shim/avfboot.c": "2957f3c8b17009b1d96191f6ccb782e90b135e7dc22208df2e3045b69d5f2c75"
+  }
+ },
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "src/vmm/check.py",
+    "--run",
+    "check-005"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "src/vmm-viewer/build.py",
+    "--run",
+    "viewer-001"
+   ],
+   "exit_code": 0,
+   "note": "uncommitted sources (dirty=true); same unsigned APK as viewer-002"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "src/vmm-viewer/build.py",
+    "--run",
+    "viewer-002"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "aarch64-linux-android35-clang",
+    "-std=c11",
+    "-fsyntax-only",
+    "-Wall",
+    "-Werror",
+    "layout.c"
+   ],
+   "exit_code": 0,
+   "note": "static asserts of scfb.h offsets against both upstream SCFB header structs (NDK 28.2.13676358)"
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/vm-053/README.md",
+  "src/vmm/check.py",
+  "src/vmm-viewer/build.py",
+  "src/vmm/test_vmm.c",
+  "src/vmm/test_io.c",
+  "src/vmm-viewer/test/ProtocolTest.java",
+  "src/vmm-viewer/test/wire.c",
+  "artifacts/vm-053/check-005/check.json",
+  "artifacts/vm-053/viewer-002/viewer/build-report.json",
+  "artifacts/vm-053/viewer-002/viewer/s24vmm-viewer.apk",
+  "artifacts/vm-053/viewer-001/viewer/build-report.json",
+  "artifacts/vm-053/scfb-layout-001/layout.c",
+  "artifacts/vm-053/scfb-layout-001/upstream_struct.h",
+  "artifacts/vm-053/scfb-layout-001/avfboot_struct.h",
+  "artifacts/vm-053/scfb-layout-001/result.txt"
+ ],
+ "sha256": {
+  "docs/procedures/vm-053/README.md": "f49b7524b90f9ac0fb4ce672936eb791e336665b59881728687558b1a25e43e0",
+  "src/vmm/check.py": "4dc09d5e13ec4c3dfdc52045f07a76aaf44bbed465c71d69058e41829b45cb3c",
+  "src/vmm-viewer/build.py": "78c4acb349f98b955c4ee09e5d2d0f9af61cc6c7c9bcdf406c4ee363a5928eb3",
+  "src/vmm/test_vmm.c": "10124c0435b3d0ca8b584b620dea4ec3ea911f7d6e147e59766a9d9edd0e6ade",
+  "src/vmm/test_io.c": "313ba0bf1b99107de81aee3f50caf8aeccdce1e499e9d4817621da4986c69d94",
+  "src/vmm-viewer/test/ProtocolTest.java": "0fe82e5d62234b006e361d455797aa331f9f4160097f775167e7225d6abc1895",
+  "src/vmm-viewer/test/wire.c": "91d21ed1b54b2607df7240e0fd567ce133e5c4292b95132f79c94dd78f3148bb",
+  "artifacts/vm-053/check-005/check.json": "685205c721f760ece049d90113f9ba6c4158ac5b4dbb3e63a85406e546aaf189",
+  "artifacts/vm-053/viewer-002/viewer/build-report.json": "dd8858ea83b777bb828e036e7fd9c31658ac998b49ead040167bc7e2e63caa10",
+  "artifacts/vm-053/viewer-002/viewer/s24vmm-viewer.apk": "b1c478dff996e9ea50073c4bf603f4fed48a6b8d4fcdacb4356c0156cb75df88",
+  "artifacts/vm-053/viewer-001/viewer/build-report.json": "d438bb08e12d574518b2eb1e3b6ae4b8a3ecacecfd25f4808e79baa8ba09fc09",
+  "artifacts/vm-053/scfb-layout-001/layout.c": "77f7f69ff847ce3199a1c3575d416b581f83e08c1bc20404cc8ed3f1b9d6d6ed",
+  "artifacts/vm-053/scfb-layout-001/upstream_struct.h": "15753f2d6154297547a00bde4995d8e120f09f02c1cb149e2d4828a599198b79",
+  "artifacts/vm-053/scfb-layout-001/avfboot_struct.h": "cb64ee728bd4b301d37d68fb416e33c8ca2ffe4a07a98d26e1f1a98f96d24a60",
+  "artifacts/vm-053/scfb-layout-001/result.txt": "8218dfa3adc5d208ae1f07b3c657cb1e87535a339287dc04ade26f38cc0ee2c5"
+ },
+ "device_io": false,
+ "limitations": [
+  "No device run: frame rate, latency and guest frame publication on the S24 are unmeasured.",
+  "The viewer APK was built and signed, not installed or run.",
+  "XNU under s24vmm does not yet reach the framebuffer (VM-054)."
+ ]
+}

@@ -212,9 +212,94 @@ static void test_rtc(void) {
     CHECK(vmm_rtc_read(&r, 0x10, 0) == 1);
 }
 
+static void put_desc(uint8_t *ram, uint64_t base, uint64_t table, unsigned index, uint64_t desc) {
+    for (int b = 0; b < 8; b++) ram[table - base + index * 8u + (unsigned)b] = (uint8_t)(desc >> (8 * b));
+}
+
+/* Indices below are computed by hand from the architecture's bit fields, not from vmm_walk. */
+static void test_walk(void) {
+    static uint8_t ram[0x40000];
+    const uint64_t B = 0x80000000ull;
+    uint64_t pa = 0;
+    /* 4K granule with the TCR_EL1 the XNU guest set on the S24: T0SZ = T1SZ = 26 (38-bit VA), TG1 = 4K. */
+    const uint64_t tcr = 0x22a51a251aull;
+    memset(ram, 0, sizeof ram);
+    put_desc(ram, B, B + 0x1000, 0xc0, (B + 0x2000) | 3);    /* VA bits 37:30 of 0xfffffff007004123 */
+    put_desc(ram, B, B + 0x2000, 0x38, (B + 0x3000) | 3);    /* bits 29:21 */
+    put_desc(ram, B, B + 0x3000, 0x04, 0x83004000ull | 0x403); /* bits 20:12, AF | page */
+    put_desc(ram, B, B + 0x3000, 0x06, 0x83006000ull | 0x401); /* level 3 with type 01 is reserved */
+    put_desc(ram, B, B + 0x2000, 0x39, 0x83200000ull | 0x401); /* 2 MiB block */
+    const uint64_t ttbr1 = (5ull << 48) | (B + 0x1000);        /* ASID must be ignored */
+    put_desc(ram, B, B + 0x4000, 2, 0x80000000ull | 0x401);    /* TTBR0: 1 GiB block, identity */
+    put_desc(ram, B, B + 0x4000, 3, 0x200000000ull | 3);       /* table outside RAM */
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xfffffff007004123ull, &pa, NULL) == 0 && pa == 0x83004123ull);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xfffffff007201234ull, &pa, NULL) == 0 && pa == 0x83201234ull);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xfffffff007005000ull, &pa, NULL) == 4);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xfffffff007006000ull, &pa, NULL) == 4);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xffffffc000000000ull, &pa, NULL) == 2);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xffff000000000000ull, &pa, NULL) == -1);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0x80001234ull, &pa, NULL) == 0 && pa == 0x80001234ull);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xc0000000ull, &pa, NULL) == -2);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0x4000000000ull, &pa, NULL) == -1); /* above 38 bits */
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr | 1ull << 23, B + 0x4000, ttbr1, 0xfffffff007004123ull, &pa, NULL) == -1); /* EPD1 */
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, 0x10000000ull, ttbr1, 0x1000ull, &pa, NULL) == -2);
+    uint64_t trail[4] = {7, 7, 7, 7};
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr, B + 0x4000, ttbr1, 0xfffffff007005000ull, &pa, trail) == 4);
+    CHECK(trail[0] == 7 && trail[1] == ((B + 0x2000) | 3) && trail[2] == ((B + 0x3000) | 3) && trail[3] == 0);
+
+    /* 16K granule, T1SZ = 25 (39-bit VA): levels 1 (bits 38:36), 2 (35:25), 3 (24:14). */
+    const uint64_t tcr16 = (0x19ull << 16) | (1ull << 30) | 0x19ull | (2ull << 14);
+    memset(ram, 0, sizeof ram);
+    put_desc(ram, B, B + 0x4000, 7, (B + 0x8000) | 3);
+    put_desc(ram, B, B + 0x8000, 0x003, (B + 0xc000) | 3);
+    put_desc(ram, B, B + 0xc000, 0x401, 0x83004000ull | 0x403);
+    put_desc(ram, B, B + 0x4000, 6, 0x1000000000ull | 1); /* a level-1 block is not allowed with 16K */
+    put_desc(ram, B, B + 0x8000, 0x004, 0x84000000ull | 0x401); /* 32 MiB level-2 block */
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr16, 0, B + 0x4000, 0xfffffff007004123ull, &pa, NULL) == 0 && pa == 0x83004123ull);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr16, 0, B + 0x4000, 0xffffffe000000000ull, &pa, NULL) == 2);
+    CHECK(vmm_walk(ram, B, sizeof ram, tcr16, 0, B + 0x4000, 0xfffffff009012345ull, &pa, NULL) == 0 && pa == 0x85012345ull);
+}
+
+/* VM-053: the SCFB region sits directly below the FDT, 2 MiB aligned, and the virtio-mmio input slot is
+ * described as QEMU virt does (0x0a000000, 0x200 bytes, GIC SPI 16 level-high = INTID 48). */
+static void test_scfb_plan_and_virtio_node(void) {
+    const uint64_t mib = 1ull << 20;
+    struct vmm_layout l = {.ram_size = 1024 * mib, .cpus = 1, .image_size = 0x30000, .initrd_size = 20 * mib,
+                           .bootargs = "", .scfb_w = 1080, .scfb_h = 2340, .virtio_input = 1};
+    CHECK(vmm_plan(&l) == 0);
+    const uint64_t want = (0x10000 + 1080ull * 2340 * 4 + 2 * mib - 1) / (2 * mib) * (2 * mib); /* header page + XR24 buffer */
+    CHECK(l.scfb_size == want && want == 10 * mib);
+    CHECK(l.fdt_addr == VMM_RAM_BASE + 1022 * mib && l.scfb_addr + l.scfb_size == l.fdt_addr && l.scfb_addr % (2 * mib) == 0);
+    CHECK(l.initrd_addr + l.initrd_size <= l.scfb_addr);
+
+    struct vmm_layout fits = l, collides = l, half = l, wide = l;
+    fits.initrd_size = l.scfb_addr - l.initrd_addr; /* ends exactly at the SCFB region */
+    CHECK(vmm_plan(&fits) == 0);
+    collides.initrd_size = l.scfb_addr - l.initrd_addr + 1;
+    CHECK(vmm_plan(&collides) == -1);
+    half.scfb_h = 0;
+    CHECK(vmm_plan(&half) == -1);
+    wide.scfb_w = 4097;
+    CHECK(vmm_plan(&wide) == -1);
+
+    static uint8_t blob[65536];
+    CHECK(vmm_build_fdt(&l, blob, sizeof blob) > 0);
+    uint32_t len = 0;
+    const uint8_t *p = lookup(blob, "/virtio_mmio@a000000", "reg", &len);
+    CHECK(p && len == 16 && cells64(p) == 0x0a000000ull && cells64(p + 8) == 0x200);
+    p = lookup(blob, "/virtio_mmio@a000000", "interrupts", &len);
+    CHECK(p && len == 12 && be32(p) == 0 && be32(p + 4) == 16 && be32(p + 8) == 4);
+    p = lookup(blob, "/virtio_mmio@a000000", "compatible", &len);
+    CHECK(p && !strcmp((const char *)p, "virtio,mmio"));
+    l.virtio_input = 0;
+    CHECK(vmm_build_fdt(&l, blob, sizeof blob) > 0 && !lookup(blob, "/virtio_mmio@a000000", "reg", &len));
+}
+
 int main(void) {
+    test_walk();
     test_fdt_writer_errors();
     test_layout_and_fdt();
+    test_scfb_plan_and_virtio_node();
     test_image_extent();
     test_uart();
     test_rtc();
