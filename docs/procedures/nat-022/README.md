@@ -881,7 +881,7 @@ The recording and decoded frames stay local under `artifacts/nat-022/video-attem
 Run 007 proved that control reaches the kernel copy's entry address, but only our stub ran there. NAT-029 read from the payload bytes that the kernel has a
 return-to-loader hook (`_loader_stub_slot`, magic `"XNULDRST"`, three words the loader fills) and five assembly checkpoints; NAT-030 ran the kernel's real
 start code in an instruction-level model and showed where each checkpoint stops and that a stub can resume 1..4. This image uses that hook. **It is the first
-image in which XNU instructions execute on the phone** if it is ever run (no decision exists yet, see below).
+image in which XNU instructions execute on the phone** if it is run (decision 0016, accepted 2026-11-11 for exactly one run of this image, `docs/decisions/0016-nat031-loader-diag-xnu-ckpt-single-run-2026-11-11.md`).
 
 What it does, in order (same loader as run 007 up to the window clean):
 
@@ -930,7 +930,7 @@ complete held report (25 frames, DECON block included) ends at ~63 s; the displa
   `start.S` by `.globl _stack_top`; the payload bytes are run 007's; `nat031_*` has no SIMD instruction and `scan_unaligned.py` finds 0 misaligned accesses; only this image references `nat031_stub`/`mk_ckpt_hold`.
   (zig's `-mgeneral-regs-only` does not keep SIMD out of the older loader code — it already contains q-register copies — so `ckpt.c` is built with `-mcpu=generic-neon-fp_armv8`; the marker routines the stub calls still use the loader's FPEN, which the kernel
   does not change before checkpoint 5.)
-* The gated driver `session_xnu_ckpt.py` stops before any `adb` call in every mode while `docs/decisions/0016-nat031-loader-diag-xnu-ckpt-single-run-2026-11-11.md` does not exist (checked with a fake `adb`: 0 invocations).
+* The gated driver `session_xnu_ckpt.py` stopped before any `adb` call in every mode as long as `docs/decisions/0016-nat031-loader-diag-xnu-ckpt-single-run-2026-11-11.md` did not exist (checked with a fake `adb`: 0 invocations; the test skips itself once the file exists). The file was written after the owner accepted the single run.
 
 ### Not established (the model has no caches, TLB, exception model, timers, devices or SIMD)
 

@@ -1,13 +1,11 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T19:15:32+00:00",
-  "ledger_updated_at": "2026-11-10T19:15:11+00:00",
-  "registry_sha256": "7c63b9abf1cb87c584ec535fa11b3494df085dffcfbaefdc7ae2c73122f3fcfd",
+  "generated_at": "2026-11-10T20:10:05+00:00",
+  "ledger_updated_at": "2026-11-10T20:09:48+00:00",
+  "registry_sha256": "9205954eef74d1d24aed4b11644081d9db27226a127002934204764f2406e565",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
-    "ready": [
-      "NAT-031"
-    ],
+    "ready": [],
     "in_progress": [],
     "blocked": [
       "INT-002",
@@ -169,6 +167,7 @@
       "NAT-028",
       "NAT-029",
       "NAT-030",
+      "NAT-031",
       "KRN-006",
       "KRN-014",
       "KRN-015",
@@ -4984,8 +4983,8 @@
     },
     {
       "id": "NAT-031",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "claude-nat031-20261111-ckpt",
       "title": "Prepare the NAT-022 loader-diag-xnu-ckpt image: fill the kernel's XNULDRST slot, jump to the real entry, a return stub that reports checkpoints and exceptions, host-tested and held for an image-specific owner decision",
       "scope": "host",
       "evidence_kind": "host-test",
@@ -5011,7 +5010,16 @@
         "Host-check, build twice, package, gate the driver",
         "Document and put the decision question to the owner"
       ],
-      "column": "ready",
+      "started_at": "2026-11-10T19:16:37+00:00",
+      "last_heartbeat": "2026-11-10T19:16:58+00:00",
+      "updated_at": "2026-11-10T20:09:48+00:00",
+      "branch": "main",
+      "progress_note": "Design fixed after reading patch_loader.py, xnu_stub.S, markerlib.c and the NAT-030 model: no entry stub (the kernel's own first word runs); slot filled by scanning the copied segments; return stub in the loader image saves x0..x30+SP+SCTLR+VBAR, switches to the loader stack and VBAR, draws a new CKPT marker, resumes asm checkpoints 1..4 (MMU off) through slot[2]=N+1, and holds at 5 (first MMU-on point; resuming there would need code in the kernel's TTBR0 map). C checkpoints are not used (not modelled past 10).",
+      "next_step": "Write src/ckpt_stub.S + ckpt.c/h, marker kind CKPT=11, patch_loader --ckpt, host tests against the NAT-030 interpreter, build twice, package, gated driver, decision question.",
+      "evidence": "docs/procedures/nat-022/evidence-nat031.json",
+      "evidence_sha256": "f3d9c5896ec472cfcb67896e3ad45b7c4645347e7fdd621fd8904aee2ae31999",
+      "finished_at": "2026-11-10T20:09:48+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-031.md"
     },
@@ -14334,47 +14342,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-10T13:58:27+00:00",
-      "action": "task.claim:NAT-025",
-      "owner": "claude-nat022-20261110-diag",
-      "tasks": [
-        {
-          "id": "NAT-025",
-          "status": "in_progress",
-          "owner": "claude-nat022-20261110-diag",
-          "priority": 97,
-          "last_heartbeat": "2026-11-10T13:58:27+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T14:11:42+00:00",
-      "action": "task.done:NAT-025",
-      "owner": "claude-nat022-20261110-diag",
-      "tasks": [
-        {
-          "id": "NAT-025",
-          "status": "done",
-          "owner": "claude-nat022-20261110-diag",
-          "priority": 97,
-          "last_heartbeat": "2026-11-10T13:58:27+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T15:13:26+00:00",
-      "action": "task.add:NAT-026",
-      "owner": "claude-nat022-20261110-diag",
-      "tasks": [
-        {
-          "id": "NAT-026",
-          "status": "pending",
-          "owner": null,
-          "priority": 97
-        }
-      ]
-    },
-    {
       "at": "2026-11-10T15:13:45+00:00",
       "action": "task.claim:NAT-026",
       "owner": "claude-nat022-20261110-diag",
@@ -14614,11 +14581,60 @@
           "last_heartbeat": "2026-11-10T18:13:39+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T19:16:37+00:00",
+      "action": "task.claim:NAT-031",
+      "owner": "claude-nat031-20261111-ckpt",
+      "tasks": [
+        {
+          "id": "NAT-031",
+          "status": "in_progress",
+          "owner": "claude-nat031-20261111-ckpt",
+          "priority": 98,
+          "last_heartbeat": "2026-11-10T19:16:37+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T19:16:58+00:00",
+      "action": "task.update:NAT-031",
+      "owner": "claude-nat031-20261111-ckpt",
+      "tasks": [
+        {
+          "id": "NAT-031",
+          "status": "in_progress",
+          "owner": "claude-nat031-20261111-ckpt",
+          "priority": 98,
+          "progress_note": "Design fixed after reading patch_loader.py, xnu_stub.S, markerlib.c and the NAT-030 model: no entry stub (the kernel's own first word runs); slot filled by scanning the copied segments; return stub in the loader image saves x0..x30+SP+SCTLR+VBAR, switches to the loader stack and VBAR, draws a new CKPT marker, resumes asm checkpoints 1..4 (MMU off) through slot[2]=N+1, and holds at 5 (first MMU-on point; resuming there would need code in the kernel's TTBR0 map). C checkpoints are not used (not modelled past 10).",
+          "next_step": "Write src/ckpt_stub.S + ckpt.c/h, marker kind CKPT=11, patch_loader --ckpt, host tests against the NAT-030 interpreter, build twice, package, gated driver, decision question.",
+          "last_heartbeat": "2026-11-10T19:16:58+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T20:09:48+00:00",
+      "action": "task.done:NAT-031",
+      "owner": "claude-nat031-20261111-ckpt",
+      "tasks": [
+        {
+          "id": "NAT-031",
+          "status": "done",
+          "owner": "claude-nat031-20261111-ckpt",
+          "priority": 98,
+          "progress_note": "Design fixed after reading patch_loader.py, xnu_stub.S, markerlib.c and the NAT-030 model: no entry stub (the kernel's own first word runs); slot filled by scanning the copied segments; return stub in the loader image saves x0..x30+SP+SCTLR+VBAR, switches to the loader stack and VBAR, draws a new CKPT marker, resumes asm checkpoints 1..4 (MMU off) through slot[2]=N+1, and holds at 5 (first MMU-on point; resuming there would need code in the kernel's TTBR0 map). C checkpoints are not used (not modelled past 10).",
+          "next_step": "Write src/ckpt_stub.S + ckpt.c/h, marker kind CKPT=11, patch_loader --ckpt, host tests against the NAT-030 interpreter, build twice, package, gated driver, decision question.",
+          "last_heartbeat": "2026-11-10T19:16:58+00:00",
+          "branch": "main"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "c3ca348e9cdbae68e12701456d08eeb2cde6204ffb3f2a067d79780a266ff9b1",
-    "BOARD.md": "3ec4e271ec553affaa7384f95d2e3295876a8df5fd394dc176a3265ac97b3ef2",
+    "STATUS.md": "6dcc0ce085a7189d57db4914e41dc042afb661a4dd6b4464db37d8f91e3fd8e5",
+    "BOARD.md": "bdc05cd2cf76417ee34d1acd88f2fcb215260af58b528bc6528eff4460c6dc0b",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -14724,7 +14740,7 @@
     "planning/tasks/NAT-028.md": "9647f4f83e53ec74d3dc02e9aec44adab852c37b4003a8b6fa864c2246d647f6",
     "planning/tasks/NAT-029.md": "a7b0722f0c1b6bdef2232e9cd6bdda7edacec3e5522d26c048be86d6640f18b9",
     "planning/tasks/NAT-030.md": "af82535557c35993d34b88b2b1728c97c25884f78d95d40d4657f66eb13a7bc3",
-    "planning/tasks/NAT-031.md": "2d34ceee9ebaa87a9d686240b5963ce214f5afc8a07b272ffc3eceed9c5c02ed",
+    "planning/tasks/NAT-031.md": "c6448051d086e0db4de11f11c1182d0f1f9f4f4176a58f95fbb788b064f6c2b1",
     "planning/tasks/KRN-006.md": "17787b37e62d7cb230c248532450af8108a583aca6b6e955cee29637f8e981a1",
     "planning/tasks/KRN-014.md": "373bcf06587ce0b77bbacdfa023baa6c9b888953717dafa33267ff49a60ea753",
     "planning/tasks/KRN-015.md": "28783b6b5313987331209c84d30f10ddeab6ee7f41bf6bf1d963790545460926",

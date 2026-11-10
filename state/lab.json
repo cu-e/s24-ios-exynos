@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T19:15:11+00:00",
+  "updated_at": "2026-11-10T20:09:48+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -12770,8 +12770,8 @@
     },
     {
       "id": "NAT-031",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "claude-nat031-20261111-ckpt",
       "title": "Prepare the NAT-022 loader-diag-xnu-ckpt image: fill the kernel's XNULDRST slot, jump to the real entry, a return stub that reports checkpoints and exceptions, host-tested and held for an image-specific owner decision",
       "scope": "host",
       "evidence_kind": "host-test",
@@ -12796,7 +12796,16 @@
         "Add the slot fill, stub and marker kinds behind new macros",
         "Host-check, build twice, package, gate the driver",
         "Document and put the decision question to the owner"
-      ]
+      ],
+      "started_at": "2026-11-10T19:16:37+00:00",
+      "last_heartbeat": "2026-11-10T19:16:58+00:00",
+      "updated_at": "2026-11-10T20:09:48+00:00",
+      "branch": "main",
+      "progress_note": "Design fixed after reading patch_loader.py, xnu_stub.S, markerlib.c and the NAT-030 model: no entry stub (the kernel's own first word runs); slot filled by scanning the copied segments; return stub in the loader image saves x0..x30+SP+SCTLR+VBAR, switches to the loader stack and VBAR, draws a new CKPT marker, resumes asm checkpoints 1..4 (MMU off) through slot[2]=N+1, and holds at 5 (first MMU-on point; resuming there would need code in the kernel's TTBR0 map). C checkpoints are not used (not modelled past 10).",
+      "next_step": "Write src/ckpt_stub.S + ckpt.c/h, marker kind CKPT=11, patch_loader --ckpt, host tests against the NAT-030 interpreter, build twice, package, gated driver, decision question.",
+      "evidence": "docs/procedures/nat-022/evidence-nat031.json",
+      "evidence_sha256": "f3d9c5896ec472cfcb67896e3ad45b7c4645347e7fdd621fd8904aee2ae31999",
+      "finished_at": "2026-11-10T20:09:48+00:00"
     }
   ],
   "experiments": [
@@ -56457,6 +56466,55 @@
           "owner": "claude-nat029-20261110-krnret",
           "priority": 98,
           "last_heartbeat": "2026-11-10T18:13:39+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T19:16:37+00:00",
+      "action": "task.claim:NAT-031",
+      "owner": "claude-nat031-20261111-ckpt",
+      "tasks": [
+        {
+          "id": "NAT-031",
+          "status": "in_progress",
+          "owner": "claude-nat031-20261111-ckpt",
+          "priority": 98,
+          "last_heartbeat": "2026-11-10T19:16:37+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T19:16:58+00:00",
+      "action": "task.update:NAT-031",
+      "owner": "claude-nat031-20261111-ckpt",
+      "tasks": [
+        {
+          "id": "NAT-031",
+          "status": "in_progress",
+          "owner": "claude-nat031-20261111-ckpt",
+          "priority": 98,
+          "progress_note": "Design fixed after reading patch_loader.py, xnu_stub.S, markerlib.c and the NAT-030 model: no entry stub (the kernel's own first word runs); slot filled by scanning the copied segments; return stub in the loader image saves x0..x30+SP+SCTLR+VBAR, switches to the loader stack and VBAR, draws a new CKPT marker, resumes asm checkpoints 1..4 (MMU off) through slot[2]=N+1, and holds at 5 (first MMU-on point; resuming there would need code in the kernel's TTBR0 map). C checkpoints are not used (not modelled past 10).",
+          "next_step": "Write src/ckpt_stub.S + ckpt.c/h, marker kind CKPT=11, patch_loader --ckpt, host tests against the NAT-030 interpreter, build twice, package, gated driver, decision question.",
+          "last_heartbeat": "2026-11-10T19:16:58+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T20:09:48+00:00",
+      "action": "task.done:NAT-031",
+      "owner": "claude-nat031-20261111-ckpt",
+      "tasks": [
+        {
+          "id": "NAT-031",
+          "status": "done",
+          "owner": "claude-nat031-20261111-ckpt",
+          "priority": 98,
+          "progress_note": "Design fixed after reading patch_loader.py, xnu_stub.S, markerlib.c and the NAT-030 model: no entry stub (the kernel's own first word runs); slot filled by scanning the copied segments; return stub in the loader image saves x0..x30+SP+SCTLR+VBAR, switches to the loader stack and VBAR, draws a new CKPT marker, resumes asm checkpoints 1..4 (MMU off) through slot[2]=N+1, and holds at 5 (first MMU-on point; resuming there would need code in the kernel's TTBR0 map). C checkpoints are not used (not modelled past 10).",
+          "next_step": "Write src/ckpt_stub.S + ckpt.c/h, marker kind CKPT=11, patch_loader --ckpt, host tests against the NAT-030 interpreter, build twice, package, gated driver, decision question.",
+          "last_heartbeat": "2026-11-10T19:16:58+00:00",
+          "branch": "main"
         }
       ]
     }

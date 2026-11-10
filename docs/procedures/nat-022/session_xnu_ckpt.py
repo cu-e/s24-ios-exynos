@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""NAT-031 / decision 0016 (NOT YET MADE): one fixed loader-diag-xnu-ckpt RECOVERY write, readback, one reboot; no retries.
+"""NAT-031 / decision 0016 (accepted 2026-11-11, this image only): one fixed loader-diag-xnu-ckpt RECOVERY write, readback, one reboot; no retries.
 
 The image fills the payload kernel's XNULDRST slot and jumps to the kernel's own, unmodified entry: the first
 XNU instructions run, up to the assembly checkpoints 1..5 of NAT-029 (the loader's return stub draws each and
 resumes the kernel through 4; checkpoint 5 is held). Every preflight and launch path stops before touching the
-phone unless the owner decision file named below exists. Nothing here creates that file.
+phone unless the owner decision file named below exists (it was written only after the owner's answer; this
+script never creates it).
 
 The default is read-only preflight. --restore writes only the pinned stock image
 without rebooting. No file is staged on the phone. Failed writes never reboot.
