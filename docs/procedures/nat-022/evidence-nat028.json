@@ -1,0 +1,147 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-10T17:00:58+00:00",
+ "commit": "606528b85b5eb738c0011ad9fdd2482f1ad502a9",
+ "summary": "Host only; nothing flashed or run on the phone in this task and no jump made. Native run 006 (decision 0014, loader-diag-trig-hold-adt8-aln) reached the held PRE_JUMP (mask 0x01ff, no exception). NAT-028 prepares the remainder of goal step 4 on the host: loader-diag-xnu-entry (build-008) keeps the loader unchanged up to the cache clean and then, instead of holding at PRE_JUMP, jumps through start.S's existing br x16 to the entry of the kernel copy, where a 40-byte position-independent stub (xnu_stub.S) written by the loader draws STAGE 0x50 and holds. Entry facts are derived from the payload header (virt_base 0xfffffff004000000, entry_va 0xfffffff00743b4a8, segment 2, payload offset 0x437898; entry word 14000aed = b #0xfffffff00743e05c followed by 725 NOP words before the next real instruction), not from the loader log; expected PC = window base + 0x343b4a8 and x0 - PC = 0x153cb58. The installer (xnu_entry.c) overwrites word 0 plus nine NOPs only and refuses (writes nothing) when the entry is not 8-byte aligned, fewer than 0x28 file-backed bytes remain, a word after word 0 is not a NOP or the template is bad; it stores aligned 32-bit words, word 0 last, before the full-window clean. No XNU instruction is executed: the kernel's first word is replaced and not replayed; replaying it and continuing into XNU is a separate, not-built step. New marker kind XNU (10) and mask bit 10; mk_xnu_report exists only with MK_XNU_ENTRY=1; decode.py reports xnu_stub_pc / xnu_stub_x0. Host checks (test_nat022.py, 45 tests): stub bytes decoded by an independent field decoder, a decoder-driven interpreter of the installed stub on the real kernel entry bytes and capstone (venv only); the real installer compiled with gcc -fsanitize=alignment (trap mode) on the real entry bytes changes only the 40 stub bytes and every refusal case leaves bytes untouched; build test whitelists the loader.c diff (one removed HOLD line, 12 added lines), start.S diff exactly one '.globl _stack_top', other sources byte-identical, same SWEETXNU payload bytes, scan_unaligned 0; three mutation checks (wrong sp register, dropped NOP check, 64-bit literal store) were each detected. Builds: build-008 and build-008-repro agree; all eight earlier images and payloads keep their hashes (build-006); loader-diag-xnu-entry Image 6cb6b1a03a008a40de6ebe5e823e773000b0a3e4899f9263f06adf4a41b2bcc3 (217088 bytes), Image.payload d4c391624ad8d50ce4c629d905a7a8fa88da142118ec2ff6a548bbeef9658f27 (21771872 bytes), RECOVERY package-008 4353546c4494c2aad12eaf3b0188478f4157ee5e4e3658fd253387b80416d06a (payload verbatim at offset 2048). session_xnu.py is gated on docs/decisions/0015-nat022-loader-diag-xnu-entry-single-run-2026-11-10.md, which does not exist: it stopped with 0 adb commands. Not shown by this evidence: that the S24 fetches and runs code at the kernel copy entry (never tried), I-cache/fetch coherence after the loader's clean and ic iallu, the actual RAM window (implied ~0x9dd3fc000 from run 006, never read directly), behaviour after the 83 s watchdog, that nothing in the window is unlisted firmware memory, ADT/boot_args correctness for XNU, and any XNU instruction executing. A PRE_JUMP-or-0x50 frame is a statement about the loader's handoff path, not about XNU.",
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-022/test_nat022.py"
+   ],
+   "exit_code": 0,
+   "note": "45 tests, 1 skipped (capstone not installed in the system python)",
+   "log": "artifacts/nat-022/nat028-logs/test_nat022-system-python.log"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-022/test_nat022.py"
+   ],
+   "exit_code": 0,
+   "note": "45 tests, 2 skipped (numpy missing in the capstone venv: the video-decode tests; the capstone cross-check ran). Together every test ran in at least one environment.",
+   "log": "artifacts/nat-022/nat028-logs/test_nat022-capstone-venv.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/check_payload.py",
+    "artifacts/nat-022/build-008/loader-diag-xnu-entry/source/shim/e1s-xnu/loader.c",
+    "artifacts/nat-022/build-008/loader-diag-xnu-entry/Image.payload",
+    "--offset",
+    "217088"
+   ],
+   "exit_code": 0,
+   "note": "header clauses, RAM/segment checks, boot_args at +0x4978000, ADT return codes 0, alignment trap ok (an earlier call with --offset 212992 exited 1 \"bad magic\": the loader grew by 4096 bytes)",
+   "log": "artifacts/nat-022/nat028-logs/check-xnu-entry-image.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/scan_unaligned.py",
+    "artifacts/nat-022/build-008/loader-diag-xnu-entry/Image",
+    "--elf",
+    "artifacts/nat-022/build-008/loader-diag-xnu-entry/loader.elf",
+    "--end",
+    "217088"
+   ],
+   "exit_code": 0,
+   "note": "total 0 unaligned unscaled accesses",
+   "log": "artifacts/nat-022/nat028-logs/scan-xnu-entry-image.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "(inline) compare Image/Image.payload SHA-256 of build-008 vs build-008-repro vs build-006"
+   ],
+   "exit_code": 0,
+   "note": "14 comparisons ALL OK: every earlier image identical to build-006; the new image identical in the repro build",
+   "log": "artifacts/nat-022/nat028-logs/repro-compare.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/session_xnu.py",
+    "--out",
+    "artifacts/nat-022/preflight-gate-008"
+   ],
+   "exit_code": 2,
+   "note": "expected: stopped at the missing decision 0015 file, 0 adb commands, no write, no reboot",
+   "log": "artifacts/nat-022/nat028-logs/session-xnu-gate.log"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "214 tests",
+   "log": "artifacts/nat-022/nat028-logs/make-check-nat028.log"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-022/build-008/build.json",
+  "artifacts/nat-022/build-008-repro/build.json",
+  "artifacts/nat-022/build-008.stdout",
+  "artifacts/nat-022/build-008-repro.stdout",
+  "artifacts/nat-022/build-008/loader-diag-xnu-entry/Image",
+  "artifacts/nat-022/build-008/loader-diag-xnu-entry/Image.payload",
+  "artifacts/nat-022/build-008/loader-diag-xnu-entry/loader.elf",
+  "artifacts/nat-022/package-008/package.json",
+  "artifacts/nat-022/package-008/recovery.img",
+  "artifacts/nat-022/preflight-gate-008/report.json",
+  "artifacts/nat-022/nat028-task.json",
+  "docs/procedures/nat-022/README.md",
+  "docs/procedures/nat-022/build.py",
+  "docs/procedures/nat-022/decode.py",
+  "docs/procedures/nat-022/patch_loader.py",
+  "docs/procedures/nat-022/test_nat022.py",
+  "docs/procedures/nat-022/session_xnu.py",
+  "docs/procedures/nat-022/src/xnu_stub.S",
+  "docs/procedures/nat-022/src/xnu_entry.c",
+  "docs/procedures/nat-022/src/xnu_entry.h",
+  "docs/procedures/nat-022/src/marker.h",
+  "docs/procedures/nat-022/src/markerlib.c",
+  "docs/procedures/nat-022/src/host_mk.c",
+  "artifacts/nat-022/nat028-logs/check-xnu-entry-image.log",
+  "artifacts/nat-022/nat028-logs/make-check-nat028.log",
+  "artifacts/nat-022/nat028-logs/repro-compare.log",
+  "artifacts/nat-022/nat028-logs/scan-xnu-entry-image.log",
+  "artifacts/nat-022/nat028-logs/session-xnu-gate.log",
+  "artifacts/nat-022/nat028-logs/test_nat022-capstone-venv.log",
+  "artifacts/nat-022/nat028-logs/test_nat022-system-python.log"
+ ],
+ "sha256": {
+  "artifacts/nat-022/build-008/build.json": "fc019c7217127b2585f18d43431f54a02fcce7afec1d2424f3c1a3b8db2eea35",
+  "artifacts/nat-022/build-008-repro/build.json": "f2d5db041d9c1843aaf49ccb14ffe99b2fa30d1ad8d41b3b236a969c6f3f92b8",
+  "artifacts/nat-022/build-008/loader-diag-xnu-entry/Image": "6cb6b1a03a008a40de6ebe5e823e773000b0a3e4899f9263f06adf4a41b2bcc3",
+  "artifacts/nat-022/build-008/loader-diag-xnu-entry/Image.payload": "d4c391624ad8d50ce4c629d905a7a8fa88da142118ec2ff6a548bbeef9658f27",
+  "artifacts/nat-022/build-008/loader-diag-xnu-entry/loader.elf": "1ed6a0bc75b4cb62082ec5b7ccc20a826c75ec4d0fccc066b1f081563c5887ca",
+  "artifacts/nat-022/package-008/package.json": "4722260c742e0e0ad283363efa2285b8217fa8d6d2cb390507d8802be3b1991c",
+  "artifacts/nat-022/package-008/recovery.img": "4353546c4494c2aad12eaf3b0188478f4157ee5e4e3658fd253387b80416d06a",
+  "artifacts/nat-022/nat028-task.json": "e36df4cdf0eaf12e15a2775590e2667c16a9f850f44f0be0b19daf26cbf41fe4",
+  "docs/procedures/nat-022/README.md": "075cec9e3e845362188af251b5903e44d3e70a67b8efb4c3dd7e32e526c73222",
+  "docs/procedures/nat-022/build.py": "166139cc97b67feb04b73d54449174dc7870ad4acf16f7a349073133d1ecf0bd",
+  "docs/procedures/nat-022/decode.py": "e5d73c0e930408d7665fea9a16094dc3b47420ca4cefc9d9490442007e1dd8ef",
+  "docs/procedures/nat-022/patch_loader.py": "00c87961783982e980c4ffde6eac59ee7f307bd8f54c1d5a1cc6bfa5b7461455",
+  "docs/procedures/nat-022/test_nat022.py": "9549857fea729a7dc6b10fcc2f6f473bcc7c21e05d15fcf09f425ece736c22a1",
+  "docs/procedures/nat-022/session_xnu.py": "1c1344e9c0208e0000d23c2f0406cd1b46c7e998532cf4b2d3c61996048d5df1",
+  "docs/procedures/nat-022/src/xnu_stub.S": "91944e94a879e802f698bc43a6a74e03273cb298e5c92e98bfa0cc3762324b7d",
+  "docs/procedures/nat-022/src/xnu_entry.c": "733675d74e245a1d7dec38748c58c78223438135ee0f1d8838176034e1742a17",
+  "docs/procedures/nat-022/src/xnu_entry.h": "9a4345c347c0b7de4de376c973c06849893b20e19bd95b80c3ef4ecb3a6f6254",
+  "docs/procedures/nat-022/src/marker.h": "00f888ad4cf4020b9fe0ea1da6b0b5efce207c72e1f9fbb6fe6fa7c6d665322d",
+  "docs/procedures/nat-022/src/markerlib.c": "33ac475c9f8251132b0b201b04df7a980ecfab08a0f0f8da3a390223c49035a7",
+  "docs/procedures/nat-022/src/host_mk.c": "9a440d33edfce30eab7cb05a611f9a733d47e17a2237df9483f939d2db57f5de",
+  "make-check-nat028.log": "d68ccc76342d39ac81b72a7edfa3b67ca0bb7a5395225541f6d4fce4201a237b",
+  "loader-diag-xnu-entry Image": "6cb6b1a03a008a40de6ebe5e823e773000b0a3e4899f9263f06adf4a41b2bcc3",
+  "loader-diag-xnu-entry Image.payload": "d4c391624ad8d50ce4c629d905a7a8fa88da142118ec2ff6a548bbeef9658f27",
+  "package-008 recovery.img": "4353546c4494c2aad12eaf3b0188478f4157ee5e4e3658fd253387b80416d06a"
+ }
+}
