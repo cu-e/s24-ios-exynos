@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "task": "NAT-006",
+  "owner": "agy-nat006-20261110-aca2",
+  "recorded_at": "2026-11-10T07:45:00+00:00",
+  "authorization": "docs/decisions/0004-nat006-continuation-and-recovery-gate-2026-11-10.md",
+  "summary": "Completed NAT-006 image builder (tools/build/e1s_recovery.py), independent byte-level verifier (docs/procedures/nat-006/verify_image.py) and unit test suite (tests/test_e1s_recovery.py); fixed silent git-apply skip in worktree artifacts and eliminated all 37 R_AARCH64_ABS64 relocations in shim/e1s-xnu/ui.c.o via 0002-loader-ui-pc-relative-string-tables.patch; built and verified artifacts/nat-006/build-002/recovery-nat006.img (100,663,296 bytes, 20/20 verifier checks pass) and stock RECOVERY restore package; stopped at the mandatory Step 4 pre-flash recovery safety gate before any RECOVERY partition write because host Download Mode flashing tools (odin4/heimdall) are absent (NAT-008), hardware watchdog/one-shot recovery reset clearing is pending (NAT-007/NAT-009), and loader high-DRAM MMU/cache handoff requires hardening (NAT-010).",
+  "device_io": {
+    "writes": false,
+    "reboot": false,
+    "flashed": false,
+    "su_used": true,
+    "commands": [
+      "adb shell getprop sys.boot_completed",
+      "adb shell \"su -c 'sha256sum /dev/block/by-name/recovery /dev/block/by-name/boot /dev/block/by-name/init_boot /dev/block/by-name/vendor_boot /dev/block/by-name/dtbo /dev/block/by-name/vbmeta /dev/block/by-name/vbmeta_system'\""
+    ]
+  },
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "devices/recovery/backups/2026-11-10/verify_backups.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "worktrees/nat-006-recovery-image-20261110/tools/build/e1s_recovery.py",
+        "--root",
+        "/home/egor/dev/pet/s24-ios-exynos",
+        "--run",
+        "build-002"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "worktrees/nat-006-recovery-image-20261110/tests",
+        "-p",
+        "test_e1s_recovery.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "tests": 4
+    }
+  ],
+  "artifacts": [
+    "worktrees/nat-006-recovery-image-20261110/tools/build/e1s_recovery.py",
+    "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/verify_image.py",
+    "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/check_loader.py",
+    "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/window_harness.c",
+    "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/patches/0001-loader-sboot-dynamic-reservations-and-framebuffer.patch",
+    "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/patches/0002-loader-ui-pc-relative-string-tables.patch",
+    "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/handoff.md",
+    "worktrees/nat-006-recovery-image-20261110/tests/test_e1s_recovery.py",
+    "artifacts/nat-006/build-002/recovery-nat006.img",
+    "artifacts/nat-006/build-002/report.json",
+    "artifacts/nat-006/build-002/verify.json",
+    "artifacts/nat-006/build-002/window-check/report.json",
+    "artifacts/nat-006/build-002/restore/recovery.img",
+    "artifacts/nat-006/build-002/restore/recovery-stock-odin.tar"
+  ],
+  "sha256": {
+    "worktrees/nat-006-recovery-image-20261110/tools/build/e1s_recovery.py": "648a351cc0f38feeb2ca7846c318e33a7e3ce9255054d62792522a14961ec25e",
+    "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/verify_image.py": "913e401832c2bb6821005741b72e874f494c8cc38b14507034b61ab627f9bb33",
+    "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/check_loader.py": "bb44b13c9beeae27eb128d3efa04e96855ffd0d9ba32550b7788b9617c459188",
+    "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/window_harness.c": "35162854c1f9ae30343cb0f2116076a0fa76d7372b20981fe61025d282696dff",
+    "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/patches/0001-loader-sboot-dynamic-reservations-and-framebuffer.patch": "dbfb5c3ac316b0b02b501be399cd3cb584699a24a8b58842b6612d7799a2643f",
+    "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/patches/0002-loader-ui-pc-relative-string-tables.patch": "31c62fa7443d9b5650e99158bed90b8e3f8f93f26a9db66ef98c0033e5320c40",
+    "worktrees/nat-006-recovery-image-20261110/tests/test_e1s_recovery.py": "c074f1e0ba9d8d3aa2789b5c8150d71a75a8335cb6a355dd475286762fad9910",
+    "artifacts/nat-006/build-002/recovery-nat006.img": "c632d77c19c3bd73869da808fba793040c4279208882f261c61308fa3f069376",
+    "artifacts/nat-006/build-002/report.json": "60ea8dfa5a6b78b173f37373bb75338d94858e28cf638b8690455ccb6206b04a",
+    "artifacts/nat-006/build-002/verify.json": "78873522a7d24d6f9d58ce9d045d8331fe845cd62f072fe114278b5799cf7339",
+    "artifacts/nat-006/build-002/window-check/report.json": "efc51826e9764eb88d9901f0e70f20cd4db719435cef9545ae384868309a6208",
+    "artifacts/nat-006/build-002/restore/recovery.img": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+    "artifacts/nat-006/build-002/restore/recovery-stock-odin.tar": "2787aa3e07d1f09d5f2c808166e0640719f111a618105ceed1ef67ea721fe84e",
+    "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/handoff.md": "ad284e6589f60dee0e4518d1e868697aff123f5294b30c64d105cccb6586d505"
+  },
+  "limits": [
+    "Host build and byte-level verification only; RECOVERY was not flashed and no hardware boot was attempted.",
+    "Pre-flash recovery gate stopped execution before RECOVERY write due to missing host Download Mode flashing tools (NAT-008), pending hardware watchdog/one-shot recovery reset clearing (NAT-007/NAT-009), and loader high-DRAM MMU/cache handoff hardening (NAT-010)."
+  ],
+  "base_commit": "ac22ef588e0830a80847bd3475ae0d6796d8b3e7"
+}

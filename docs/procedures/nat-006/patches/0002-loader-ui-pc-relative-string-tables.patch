@@ -1,0 +1,122 @@
+Base repository: https://github.com/halal-beef/s24-ios-port
+Base commit: ffb8ce72172f4d43299e6d88149ab0f605d5c66e
+Upstream file: shim/e1s-xnu/ui.c (after STR-005 display patch)
+License: GPL-2.0-only
+
+Replace static const char *const pointer tables and the stage-mark switch in
+shim/e1s-xnu/ui.c with fixed-width 2D char arrays and branch selection so the
+freestanding loader linked at 0x0 contains zero R_AARCH64_ABS64 relocations in
+C objects when S-Boot loads it at 0x80080000/0x800f0000.
+
+diff --git a/shim/e1s-xnu/ui.c b/shim/e1s-xnu/ui.c
+index 1fcf545..23b91f4 100644
+--- a/shim/e1s-xnu/ui.c
++++ b/shim/e1s-xnu/ui.c
+@@ -186,7 +186,7 @@ static void row_value(const struct ui_fb *fb, int y, const char *value,
+ 	text(fb, VALUE_X, y, value, color, TEXT_SCALE);
+ }
+ 
+-static const char *const stage_names[UI_STAGE_COUNT] = {
++static const char stage_names[UI_STAGE_COUNT][24] = {
+ 	"S-Boot handoff",
+ 	"Framebuffer",
+ 	"GICv3",
+@@ -198,7 +198,7 @@ static const char *const stage_names[UI_STAGE_COUNT] = {
+ 	"Jump to XNU",
+ };
+ 
+-static const char *const device_labels[] = {
++static const char device_labels[8][12] = {
+ 	"Model",
+ 	"SoC",
+ 	"CPU",
+@@ -209,7 +209,7 @@ static const char *const device_labels[] = {
+ 	"Kernel",
+ };
+ 
+-static const char *const device_values[] = {
++static const char device_values[8][32] = {
+ 	"SM-S921B (e1s)",
+ 	"Exynos 2400 (S5E9945)",
+ 	"10-core ARMv9 (1+2+3+4)",
+@@ -220,7 +220,7 @@ static const char *const device_values[] = {
+ 	"XNU 8796.121.2 (iOS 16.5)",
+ };
+ 
+-static const char *const boot_labels[] = {
++static const char boot_labels[8][16] = {
+ 	"S-Boot",
+ 	"EL",
+ 	"GIC",
+@@ -231,7 +231,7 @@ static const char *const boot_labels[] = {
+ 	"Entry",
+ };
+ 
+-static const char *const kernel_labels[] = {
++static const char kernel_labels[3][12] = {
+ 	"Virt base",
+ 	"Phys load",
+ 	"Cmdline",
+@@ -243,7 +243,7 @@ static void colour_bars(const struct ui_fb *fb)
+ 		0xffffffffU, 0xffffff00U, 0xff00ffffU, 0xff00ff00U,
+ 		0xffff00ffU, 0xffff0000U, 0xff0000ffU, 0xff000000U,
+ 	};
+-	static const char *const names[8] = {
++	static const char names[8][8] = {
+ 		"WHITE", "YELLOW", "CYAN", "GREEN",
+ 		"MAGENTA", "RED", "BLUE", "BLACK",
+ 	};
+@@ -398,9 +398,9 @@ void ui_set_info(const struct ui_fb *fb, const struct ui_boot_info *info)
+ void ui_set_stage(const struct ui_fb *fb, int stage, int state)
+ {
+ 	if (!ui_fb_valid(fb)) return;
+-	const char *mark;
+-	uint32_t mark_color;
+-	uint32_t name_color;
++	char mark[3] = { '.', '.', 0 };
++	uint32_t mark_color = UI_TEXT_MUTED;
++	uint32_t name_color = UI_TEXT_MUTED;
+ 	int y;
+ 
+ 	if (stage < 0 || stage >= UI_STAGE_COUNT)
+@@ -408,32 +408,22 @@ void ui_set_stage(const struct ui_fb *fb, int stage, int state)
+ 	y = STAGE_ROW_Y + stage * STAGE_ROW_H;
+ 	rect(fb, 0, y, (int)fb->width, STAGE_ROW_H, C_BG);
+ 
+-	switch (state) {
+-	case UI_ACTIVE:
+-		mark = ">>";
++	if (state == UI_ACTIVE) {
++		mark[0] = '>'; mark[1] = '>';
+ 		mark_color = UI_TEXT_WARN;
+ 		name_color = UI_TEXT_MAIN;
+-		break;
+-	case UI_OK:
+-		mark = "ok";
++	} else if (state == UI_OK) {
++		mark[0] = 'o'; mark[1] = 'k';
+ 		mark_color = UI_TEXT_OK;
+ 		name_color = UI_TEXT_MAIN;
+-		break;
+-	case UI_WARN:
+-		mark = "??";
++	} else if (state == UI_WARN) {
++		mark[0] = '?'; mark[1] = '?';
+ 		mark_color = UI_TEXT_WARN;
+ 		name_color = UI_TEXT_WARN;
+-		break;
+-	case UI_FAIL:
+-		mark = "!!";
++	} else if (state == UI_FAIL) {
++		mark[0] = '!'; mark[1] = '!';
+ 		mark_color = UI_TEXT_ERR;
+ 		name_color = UI_TEXT_ERR;
+-		break;
+-	default:
+-		mark = "..";
+-		mark_color = UI_TEXT_MUTED;
+-		name_color = UI_TEXT_MUTED;
+-		break;
+ 	}
+ 	text(fb, MARGIN, y, mark, mark_color, TEXT_SCALE);
+ 	text(fb, 160, y, stage_names[stage], name_color, TEXT_SCALE);

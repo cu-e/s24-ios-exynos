@@ -1,0 +1,188 @@
+diff --git a/shim/e1s-xnu/fdt.c b/shim/e1s-xnu/fdt.c
+index a2e88a9..daf8414 100644
+--- a/shim/e1s-xnu/fdt.c
++++ b/shim/e1s-xnu/fdt.c
+@@ -251,7 +251,7 @@ reg_walk(uintptr_t p, uintptr_t strings, int depth, uint32_t parent_ac,
+ 	    (depth == 1 && (streq(name, "memory") || str_starts(name, "memory@")));
+ 	uint32_t ac = parent_ac, sc = parent_sc, reglen = 0;
+ 	uintptr_t regval = 0;
+-	int children = 0, ranges = 0;
++	int children = 0, ranges = 0, dynamic = 0;
+ 	if (mode && in_reserved && depth > 2) return 0;
+ 	p = align4(skip_str(p));
+ 	for (;;) {
+@@ -269,6 +269,10 @@ reg_walk(uintptr_t p, uintptr_t strings, int depth, uint32_t parent_ac,
+ 			} else if (target && streq(prop, "reg")) {
+ 				if (regval) return 0;
+ 				regval = val; reglen = len;
++			} else if (target && mode && streq(prop, "size")) {
++				/* Encoded in the parent's #size-cells, like reg. */
++				if (!parent_sc || parent_sc > 2 || len != 4 * parent_sc) return 0;
++				dynamic = 1;
+ 			} else if (reserved && streq(prop, "ranges")) {
+ 				if (len) return 0; /* No translated reservation bus support. */
+ 				ranges = 1;
+@@ -283,6 +287,10 @@ reg_walk(uintptr_t p, uintptr_t strings, int depth, uint32_t parent_ac,
+ 		else if (tok != FDT_NOP) return 0;
+ 	}
+ 	if (mode && reserved && (!ranges || ac != parent_ac || sc != parent_sc)) return 0;
++	/* A reserved-memory child with "size" and no "reg" is a dynamic allocation
++	 * request that a running OS satisfies (devicetree reserved-memory binding);
++	 * it names no firmware-owned range. Children with neither stay invalid. */
++	if (target && mode && !regval && dynamic) return p;
+ 	if (target && (!regval || !range_reg(regval, reglen, parent_ac, parent_sc,
+ 	    out, max, count))) return 0;
+ 	return p;
+@@ -428,3 +436,99 @@ int fdt_find_framebuffer(uintptr_t fdt, uint64_t *base, uint64_t *size,
+ 	*width = best.width; *height = best.height; *stride = best.stride;
+ 	return 1;
+ }
++
++/* S-Boot on e1s describes its boot framebuffer only by the kernel argument
++ * "s3cfb.bootloaderfb=0x<PA>" and adds no simple-framebuffer node (NAT-005,
++ * measured on a normal boot). The geometry is the e1s panel mode: every
++ * e1s_panel_display_modes entry in the measured DTB is 1080x2340. The DT does
++ * not carry the pixel format or line pitch; 32 bpp with a packed 4*width
++ * stride is an ASSUMPTION the caller must report, not a measurement.
++ * The range must sit inside one /memory range and clear every reservation,
++ * so a wrong argument cannot direct writes at firmware-owned memory. */
++#define E1S_PANEL_W	1080U
++#define E1S_PANEL_H	2340U
++#define E1S_FB_MAX_RANGES	96
++
++static int
++chosen_prop(uintptr_t fdt, const char *want, uintptr_t *val, uint32_t *len)
++{
++	uintptr_t p = fdt + be32(fdt + 8), strings = fdt + be32(fdt + 12);
++	int depth = 0, in_chosen = 0;
++	for (;;) {
++		uint32_t tok = be32(p); p += 4;
++		if (tok == FDT_BEGIN_NODE) {
++			depth++;
++			in_chosen = depth == 2 && streq((const char *)p, "chosen");
++			p = align4(skip_str(p));
++		} else if (tok == FDT_END_NODE) {
++			if (in_chosen || --depth <= 0) return 0;
++		} else if (tok == FDT_PROP) {
++			uint32_t l = be32(p), off = be32(p + 4);
++			if (in_chosen && streq((const char *)(strings + off), want)) {
++				*val = p + 8; *len = l;
++				return 1;
++			}
++			p = align4(p + 8 + l);
++		} else if (tok != FDT_NOP) return 0;
++	}
++}
++
++static int is_space(char c)
++{
++	return c == ' ' || c == '\t' || c == '\n';
++}
++
++int fdt_sboot_framebuffer(uintptr_t fdt, uint64_t *base, uint64_t *size,
++    uint32_t *width, uint32_t *height, uint32_t *stride)
++{
++	static const char key[] = "s3cfb.bootloaderfb=";
++	uintptr_t v = 0;
++	uint32_t len = 0;
++	uint64_t pa = 0;
++	int hits = 0;
++	if (!base || !size || !width || !height || !stride || !fdt_validate(fdt) ||
++	    !chosen_prop(fdt, "bootargs", &v, &len)) return 0;
++	const char *s = (const char *)v;
++	for (uint32_t i = 0; i < len;) {
++		while (i < len && is_space(s[i])) i++;
++		uint32_t j = i;
++		while (j < len && s[j] && !is_space(s[j])) j++;
++		uint32_t k = 0;
++		while (key[k] && i + k < j && s[i + k] == key[k]) k++;
++		if (!key[k]) {
++			uint32_t q = i + k;
++			uint64_t a = 0;
++			if (q + 2 >= j || s[q] != '0' || (s[q + 1] != 'x' && s[q + 1] != 'X'))
++				return 0;
++			for (q += 2; q < j; q++) {
++				char c = s[q];
++				uint32_t d;
++				if (c >= '0' && c <= '9') d = (uint32_t)(c - '0');
++				else if (c >= 'a' && c <= 'f') d = (uint32_t)(c - 'a') + 10;
++				else if (c >= 'A' && c <= 'F') d = (uint32_t)(c - 'A') + 10;
++				else return 0;
++				if (a >> 60) return 0;
++				a = a << 4 | d;
++			}
++			if (hits++ && a != pa) return 0; /* Conflicting duplicates. */
++			pa = a;
++		}
++		if (j >= len || !s[j]) break;
++		i = j;
++	}
++	uint64_t pitch = (uint64_t)E1S_PANEL_W * 4, bytes = pitch * E1S_PANEL_H;
++	if (!hits || (pa & 0xfff) || pa < 0x80000000ULL || pa >= 0x100000000ULL ||
++	    bytes > 0x100000000ULL - pa) return 0;
++	struct fdt_range r[E1S_FB_MAX_RANGES];
++	int n = fdt_memory_ranges(fdt, r, E1S_FB_MAX_RANGES), inside = 0;
++	for (int i = 0; i < n; i++)
++		if (r[i].base <= pa && pa + bytes <= r[i].base + r[i].size) inside = 1;
++	if (!inside) return 0;
++	n = fdt_reserved_ranges(fdt, r, E1S_FB_MAX_RANGES);
++	if (n < 0) return 0;
++	for (int i = 0; i < n; i++)
++		if (pa < r[i].base + r[i].size && r[i].base < pa + bytes) return 0;
++	*base = pa; *size = bytes;
++	*width = E1S_PANEL_W; *height = E1S_PANEL_H; *stride = (uint32_t)pitch;
++	return 1;
++}
+diff --git a/shim/e1s-xnu/fdt.h b/shim/e1s-xnu/fdt.h
+index 27cd68f..6e222d4 100644
+--- a/shim/e1s-xnu/fdt.h
++++ b/shim/e1s-xnu/fdt.h
+@@ -11,6 +11,9 @@ int fdt_validate(uintptr_t fdt);
+ int fdt_chosen_u64(uintptr_t fdt, const char *prop, uint64_t *out);
+ int fdt_find_framebuffer(uintptr_t fdt, uint64_t *base, uint64_t *size,
+     uint32_t *width, uint32_t *height, uint32_t *stride);
++/* e1s S-Boot fallback: s3cfb.bootloaderfb + panel mode; 32 bpp packed stride assumed. */
++int fdt_sboot_framebuffer(uintptr_t fdt, uint64_t *base, uint64_t *size,
++    uint32_t *width, uint32_t *height, uint32_t *stride);
+ int fdt_memory_ranges(uintptr_t fdt, struct fdt_range *out, int max);
+ int fdt_reserved_ranges(uintptr_t fdt, struct fdt_range *out, int max);
+ 
+diff --git a/shim/e1s-xnu/loader.c b/shim/e1s-xnu/loader.c
+index a853944..03d59b9 100644
+--- a/shim/e1s-xnu/loader.c
++++ b/shim/e1s-xnu/loader.c
+@@ -279,6 +279,18 @@ static uint64_t fail(const char *why)
+ }
+ 
+ #define MAX_RANGES	96
++
++/* Framebuffer source: 1 = simple-framebuffer node, 2 = e1s S-Boot bootargs
++ * fallback (pixel format and stride assumed), 0 = none. */
++static int
++loader_select_fb(uintptr_t dtb, uint64_t *base, uint64_t *size, uint32_t *w,
++    uint32_t *h, uint32_t *stride)
++{
++	if (fdt_find_framebuffer(dtb, base, size, w, h, stride)) return 1;
++	if (fdt_sboot_framebuffer(dtb, base, size, w, h, stride)) return 2;
++	*base = *size = 0; *w = *h = *stride = 0;
++	return 0;
++}
+ #define MIN_WINDOW	(256UL << 20)
+ #define MAX_WINDOW	(512UL << 20)
+ 
+@@ -410,11 +422,14 @@ uint64_t loader_main(uintptr_t dtb, uint64_t el, uint64_t sctlr)
+ 	log_str("Galaxy S24 SM-S921B e1s\n");
+ 	log_str("Exynos 2400 S5E9945 10-core\n");
+ 
+-	int have_fb = fdt_find_framebuffer(dtb, &fb_base, &fb_size, &fb_w,
++	int fb_source = loader_select_fb(dtb, &fb_base, &fb_size, &fb_w,
+ 	    &fb_h, &fb_stride);
++	int have_fb = fb_source != 0;
+ 	ui_init(have_fb);
+ 	have_fb = ui_ready;
+ 	if (!have_fb) log_str("CPU framebuffer UI disabled: no supported complete DTB contract\n");
++	else if (fb_source == 2)
++		log_str("FB from s3cfb.bootloaderfb; 32bpp packed stride ASSUMED\n");
+ 	ui_set_stage(&ui, UI_STAGE_SBOOT, UI_OK);
+ 	ui_set_stage(&ui, UI_STAGE_FB, have_fb ? UI_OK : UI_WARN);
+ 	fb_flush();
