@@ -1,0 +1,19 @@
+{
+  "schema_version": 1, "kind": "host-test", "origin": "local-host", "outcome": "pass",
+  "task": "LAB-004", "owner": "claude-takeover-20261110-6c8f", "recorded_at": "2026-11-10T06:50:54+00:00",
+  "authorization": "docs/decisions/0002-owner-autonomy-grant-2026-11-10.md (item 1, repairing project infrastructure)",
+  "summary": "tools/lab.py gains 'task narrow' for pending, unowned tasks: new paths must equal or lie inside current ones; widening, duplicates, traversal, empty reason, unchanged sets and owned/active tasks are rejected without mutating the registry; path_history and the event record the change.",
+  "commit": "c30deff",
+  "host_commands": [
+    {"argv": ["python3", "-m", "unittest", "tests.test_lab"], "exit_code": 0, "tests": 28},
+    {"argv": ["mutation check: no-widening-check, allow-owned, allow-unchanged, allow-duplicates against test_narrow_rejections_leave_the_registry_unchanged"], "exit_code": 0, "result": "4/4 killed"},
+    {"argv": ["make", "check"], "exit_code": 0, "tests": 207}
+  ],
+  "artifacts": ["tools/lab.py", "tests/test_lab.py", "docs/planning.md"],
+  "sha256": {
+    "tools/lab.py": "8ac0896600eedb329ed016f0b84b66e917e2354e6f7c663597e08a49e534e2ab",
+    "tests/test_lab.py": "c9c3bd32fa540b3415fa87c57e401f8b854202e6646fdafefb4a7c336b7d6f6b",
+    "docs/planning.md": "882311b5cf206708833efc0e3c1381ad6d7d691fceaddeae96bc6a3ba9c9dd7f"
+  },
+  "limits": ["Registry coordination only; it does not enforce filesystem access."]
+}

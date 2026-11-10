@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T06:45:21+00:00",
+  "updated_at": "2026-11-10T06:51:06+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -11322,6 +11322,40 @@
       "evidence": "docs/procedures/krn-042/evidence.json",
       "evidence_sha256": "52f4eaa9b3812381a0d9d74e48f75e588516c76e0aa890618e7490f0513732cb",
       "finished_at": "2026-11-10T06:45:21+00:00"
+    },
+    {
+      "id": "LAB-004",
+      "title": "Add a planner-only 'task narrow' command that shrinks a pending task's file boundaries to sub-paths of its current ones",
+      "status": "done",
+      "owner": "claude-takeover-20261110-6c8f",
+      "priority": 70,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [],
+      "paths": [
+        "tools/lab.py",
+        "tests/test_lab.py",
+        "docs/planning.md",
+        "docs/procedures/lab-004"
+      ],
+      "acceptance": [
+        "task narrow ID --owner PLANNER --paths P... --reason R works only on a pending, unowned task; every new path equals or lies inside one of the current paths; duplicates, widening, empty reason and unchanged sets are rejected without mutating the registry.",
+        "The change is recorded in the task's path_history and in the event log; reservations, claims, transfers and other commands are unchanged.",
+        "Behavioural tests cover success, each rejection and that a narrowed task becomes claimable when only its old broad path conflicted; docs/planning.md documents the command."
+      ],
+      "sources": [],
+      "steps": [
+        "Implement",
+        "Test",
+        "Document"
+      ],
+      "started_at": "2026-11-10T06:48:32+00:00",
+      "last_heartbeat": "2026-11-10T06:48:32+00:00",
+      "updated_at": "2026-11-10T06:51:06+00:00",
+      "branch": "main",
+      "evidence": "docs/procedures/lab-004/evidence.json",
+      "evidence_sha256": "b4054f0608b3fbf0dc02840008f2a30e8a5b0f0d493a4fb1fbd8a28c5b82b29e",
+      "finished_at": "2026-11-10T06:51:06+00:00"
     }
   ],
   "experiments": [
@@ -52073,6 +52107,49 @@
           "owner": "claude-takeover-20261110-6c8f",
           "priority": 60,
           "last_heartbeat": "2026-11-10T06:44:40+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:48:14+00:00",
+      "action": "task.add:LAB-004",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "LAB-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 70
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:48:32+00:00",
+      "action": "task.claim:LAB-004",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "LAB-004",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 70,
+          "last_heartbeat": "2026-11-10T06:48:32+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T06:51:06+00:00",
+      "action": "task.done:LAB-004",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "LAB-004",
+          "status": "done",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 70,
+          "last_heartbeat": "2026-11-10T06:48:32+00:00",
           "branch": "main"
         }
       ]
