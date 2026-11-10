@@ -113,3 +113,26 @@ panel); contrast invisible. No further native run is authorised. The next
 information must come from host/Android-read-only work (e.g. how S-Boot's own
 splash is scanned out) or from a new owner decision for a different channel
 (UART, early USB, or a DECON-triggering variant).
+
+## Post-run source review: the channel was probably unable to show anything
+
+Host source-review only, from existing project records; it does not explain the
+run, it narrows hypothesis (c). `research/notes/native/UI-007-decon-boot-window.md`
+records, from this phone's runtime FDT, `DECON0 op_mode = 1` (command mode), and
+that the DPP DMA reaches memory through `/sysmmu@19840000` (bypass state unknown).
+A command-mode panel keeps its last frame in its own GRAM and is refreshed only
+when DECON issues a frame transfer. So even a canary that ran correctly could
+not make a framebuffer-only marker visible without (1) a DECON frame trigger and
+(2) the DMA address being the physical `0xFA200000` (SysMMU bypass). The NAT-022
+design did not account for this; `canary-plain` never issued a trigger. The
+same reasoning applies to the loader UI never being seen in NAT-021. This is
+consistent with the no-stripes report but equally with the other untested causes;
+it is not evidence that the canary executed.
+
+The register that triggers a frame transfer is not available locally
+(`references/drivers/gpu/drm/samsung` is an empty partial checkout; the facts file
+`src/native/display/register_facts.json` lacks it). A trigger variant needs that
+source pinned first (host task), and then MMIO writes to DECON0 on the phone,
+which decision 0009 does not cover and which needs a new owner decision. UART or
+a self-contained early-USB channel avoid the display path and are the other
+candidates.
