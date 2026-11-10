@@ -1,0 +1,60 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "task": "VM-031",
+ "owner": "claude-takeover-20261110-6c8f",
+ "recorded_at": "2026-11-10T07:34:45+00:00",
+ "summary": "Independent review of the codex-guest-exec-20261106-dm audit. All 6 path/hash pairs in its evidence chain inside its worktree match. Rechecked against the pinned sources: Scion a6f4bc3 mc_provider.c has blob 4ba60565\u2026 and SHA-256 06e18046\u20264869 as stated; XNU c54f35c struct crypto_functions has 56 fields; the provider assigns 35 (34 in the static initializer plus ccsha256_di after mc_ce_start); the 21 unassigned are exactly the 2 XTS, 2 GCM, 2 GCM helper, 1 ChaCha, 8 DES/TDES, 2 DES helper, 2 CTS3 and 2 RSA fields named in the README; minicrypto_init is STARTUP(EARLY_BOOT, STARTUP_RANK_FIRST) while kmem_crypto_init is EARLY_BOOT/MIDDLE; register_crypto_functions returns -1 when a provider exists and the donor then skips register_and_init_prng.",
+ "commit": "4c2ed507fac8fd9436af4c37024281fa26d75c16",
+ "transfer": {
+  "from_owner": "codex-guest-exec-20261106-dm",
+  "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
+  "branch": "team/vm-031-20261106",
+  "branch_content_already_in_main": true
+ },
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/avf-object-shards/hash_review.py",
+    "artifacts/guest-audit-review/vm-031.json",
+    "worktrees/vm-031-20261106",
+    "EVIDENCE"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "git show a6f4bc3:xnu/files/osfmk/minicrypto/mc_provider.c"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "git show c54f35c:libkern/libkern/crypto/register_crypto.h (field count)"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "git grep STARTUP(EARLY_BOOT, STARTUP_RANK_MIDDLE c54f35c -- osfmk"
+   ],
+   "exit_code": 0
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/avf-guest-crypto-route/review-20261110/hash-review.json",
+  "docs/procedures/avf-guest-crypto-route/evidence.json"
+ ],
+ "sha256": {
+  "docs/procedures/avf-guest-crypto-route/review-20261110/hash-review.json": "5023ec6c2af99d83513ac53b50da9efa0bd559680e6ac4b82a1bc0e3c5c55d53",
+  "docs/procedures/avf-guest-crypto-route/evidence.json": "8fb6d01fdb88653a9d3aebcd4ffadf6c7f425a0ea380de145f8d2a31651560e9"
+ },
+ "limitations": [
+  "Review rechecks the stated counts and hashes; it does not re-run the original tools.",
+  "Guest (AVF/QEMU bench) line; nothing compiled, linked, booted or run on the phone.",
+  "The guest kernel VM-002 booted came from the HakiOS build route; these audits are not on its critical path."
+ ]
+}
