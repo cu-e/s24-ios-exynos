@@ -1,0 +1,103 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "task": "NAT-013",
+ "owner": "claude-takeover-20261110-6c8f",
+ "recorded_at": "2026-11-10T10:30:52+00:00",
+ "summary": "Stock restore tooling hardened for this e1s. restore_stock.py (derived from NAT-012) enforces one Odin session per USB enumeration via a ledger written before any USB I/O, a forward-only state machine (after EndSession only reboot), no concurrent holder of the device node, the exact image/PIT hashes plus the original odin4 PIT rules, and separate report stages; it never reports pass, assess requires a matching Android readback. 16 host tests pass; the emitted command sequence equals the real restore-003 trace and a second session in one entry reproduces restore-002 (acknowledged, EndSession timeout, nothing committed, no reboot). The actual PIT passes the original odin4 rules with RECOVERY uniquely at index 24 (0,8,18; 75152/24576), so the weakened odin4 checks were unnecessary; the modified odin4 is retired. No phone I/O.",
+ "commit": "2722bd1cc573b83561e5d5d6204aa110c48f836e",
+ "acceptance": {
+  "worker_lifetime_documented_and_reuse_rejected": "README section 1 (NAT-012 disassembly + three USB entries); ledger and state machine, tests SessionLifecycle/StateMachine/HostGuards",
+  "odin4_pit_and_flags_audited_against_actual_recovery_bounds": "README section 2; artifacts/nat-013/pit-audit-001/report.json from the measured PIT, not unit tests alone",
+  "separate_stages_and_fresh_single_session_procedure": "README sections 3-4; report stages and assess; no device write performed"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-013/pit_audit.py",
+    "--pit",
+    "artifacts/recovery-rescue-20261110-01/device.pit",
+    "--out",
+    "artifacts/nat-013/pit-audit-001"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-013/test_restore.py",
+    "-v"
+   ],
+   "exit_code": 0,
+   "result": "Ran 16 tests, OK"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "result": "Ran 208 tests in 12.792s"
+  }
+ ],
+ "device_io": false,
+ "limits": [
+  "Worker explanation rests on one binary reading and three USB entries.",
+  "Patched odin4 BeginSession timeout at 09:38:56Z is unexplained.",
+  "restore_stock.py restore writes RECOVERY and needs its own owner decision; it was not run."
+ ],
+ "artifacts": [
+  "docs/procedures/nat-013/README.md",
+  "docs/procedures/nat-013/restore_stock.py",
+  "docs/procedures/nat-013/test_restore.py",
+  "docs/procedures/nat-013/pit_audit.py",
+  "artifacts/nat-013/pit-audit-001/report.json",
+  "artifacts/nat-013/host-test-001/output.log",
+  "artifacts/nat-013/make-check-001/output.log",
+  "artifacts/recovery-rescue-20261110-01/device.pit",
+  "artifacts/recovery-rescue-20261110-01/prior-odin.diff",
+  "artifacts/recovery-rescue-20261110-01/restore-002/trace.json",
+  "artifacts/recovery-rescue-20261110-01/restore-003/trace.json",
+  "artifacts/recovery-rescue-20261110-01/session-lifecycle-analysis.json",
+  "artifacts/recovery-rescue-20261110-01/session-lifecycle-disassembly.txt",
+  "artifacts/recovery-rescue-20261110-01/stock-flash-001/command.json",
+  "artifacts/recovery-rescue-20261110-01/stock-flash-001/output.log",
+  "artifacts/recovery-rescue-20261110-01/pit-read-001/command.json",
+  "artifacts/recovery-rescue-20261110-01/probe-run-001/command.json",
+  "artifacts/recovery-rescue-20261110-01/stock-flash-002/command.json",
+  "artifacts/recovery-rescue-20261110-01/stock-flash-003/command.json",
+  "artifacts/recovery-rescue-20261110-01/android-check-002.json",
+  "artifacts/recovery-rescue-20261110-01/android-check-003.json",
+  "docs/procedures/nat-012/restore_stock.py",
+  "docs/procedures/nat-012/handoff.md"
+ ],
+ "sha256": {
+  "docs/procedures/nat-013/README.md": "34cef26c091fb84f9b976e2748ddb3ad1968e4b455cfd6048330cb0a3d1b7671",
+  "docs/procedures/nat-013/restore_stock.py": "e58990b23616a2b0ddefd28c636bae3759db2e20c03fb9bd95d89681d753a9ef",
+  "docs/procedures/nat-013/test_restore.py": "799b18f474323bb4d262e98924c67d8f7324667c674933c671ebe18f21b74e68",
+  "docs/procedures/nat-013/pit_audit.py": "9d2d6189be7c6035e391558d28f9e732def2842303776753a06327c574bea732",
+  "artifacts/nat-013/pit-audit-001/report.json": "103e90b06a3c93fc9bd2164099a9aa7702922c3375922c62a36d918644fdcd30",
+  "artifacts/nat-013/host-test-001/output.log": "1ac98047c6b1c074cdd89552227a82af9af0c717535d4c6883de986fddf6e844",
+  "artifacts/nat-013/make-check-001/output.log": "506dcbb1148d6eee3d893a3950c18177abbbe71c0ecbfd084a208d2d557f1cea",
+  "artifacts/recovery-rescue-20261110-01/device.pit": "a169ae2c9dc0b11066a3738ccc6913fff94c2ed2c458c6aec1c94108c58b891a",
+  "artifacts/recovery-rescue-20261110-01/prior-odin.diff": "0f52a35a37860121a1861e88389435dd602d4094e950e7cb835837b8ceab4061",
+  "artifacts/recovery-rescue-20261110-01/restore-002/trace.json": "0767bae49a0cb59f728d26c50655be36451bf419811458d9383682765f5faec6",
+  "artifacts/recovery-rescue-20261110-01/restore-003/trace.json": "a8585b59319a0b64c12a5a3e6b7a5ea3ba0047649e405e3e78c025557eb1f88f",
+  "artifacts/recovery-rescue-20261110-01/session-lifecycle-analysis.json": "98811cfd375b7d09cc1555a16d47f039453809dc481f4005f38bf84a06139532",
+  "artifacts/recovery-rescue-20261110-01/session-lifecycle-disassembly.txt": "700eb813114d9541c6b9636411690a3f065597c3dfdc3f717a970d96a3ccee78",
+  "artifacts/recovery-rescue-20261110-01/stock-flash-001/command.json": "384eb90c49b1582d4b41ee396040568bf9cd195143a26e52a0fb1d667b317317",
+  "artifacts/recovery-rescue-20261110-01/stock-flash-001/output.log": "8f6da81c8b4f5a679de4279de3eb634bf4a1e89d376c81598de8eb46e4a3e960",
+  "artifacts/recovery-rescue-20261110-01/pit-read-001/command.json": "ba7ee5748e11ccd4317becc34926194efdcad2d11ae16bcb1e8aa8d4d94e73c2",
+  "artifacts/recovery-rescue-20261110-01/probe-run-001/command.json": "45615348d0cb7ac36c6444720bf253884c415e15d82cc5fe15791cabe11f22ef",
+  "artifacts/recovery-rescue-20261110-01/stock-flash-002/command.json": "3d63e2d59fe3251839f363d3d0400519c341842ca0e6fc0724e683881cd09712",
+  "artifacts/recovery-rescue-20261110-01/stock-flash-003/command.json": "e664f64dffee6c8d175e3f4e9cb5b68106075b97121a4337d59e35138974df0f",
+  "artifacts/recovery-rescue-20261110-01/android-check-002.json": "daf06d42117000dc10430fa884c3af74b5803892903d64bfa5c16a2fd3d637eb",
+  "artifacts/recovery-rescue-20261110-01/android-check-003.json": "190ebc7ac8e5b0b7466b26f26893936f8651455cb71ba0bb8bb16b9a9135240e",
+  "docs/procedures/nat-012/restore_stock.py": "ae732f69b145cd75493e5ebbfd11233cf7d29e01e89b2b56bbd76d2186a730ef",
+  "docs/procedures/nat-012/handoff.md": "1157e595dffc8df680ebbeccea37c69f945d319f6f0eec490e540bc89c95f4c1"
+ }
+}
