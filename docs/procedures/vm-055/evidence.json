@@ -1,0 +1,76 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "task": "VM-055",
+ "owner": "claude-takeover-20261110-6c8f",
+ "recorded_at": "2026-11-10T08:33:10+00:00",
+ "summary": "s24vmm --fp-on sets CPACR_EL1=0x300000 on the boot vCPU before its first KVM_RUN and reports fp_on in the start event; without the option, behaviour is unchanged. check.py passes on 368e146: test_vmm 220 and test_io 92 checks under ASan+UBSan, TSan, and a warning-free static NDK build. The reason: XNU common_start writes CPACR_EL1 with no ISB after it (start.s:762-763), and the VM-054 fp-sync probe shows that an FP instruction after an unsynchronized FPEN write still traps on the S24 cores.",
+ "commit": "368e14687af26dceacd3cfadfb1c4ba58ed4ea0d",
+ "branch": "team/vm-055-fp-reset-20261110",
+ "checks": {
+  "test_vmm": {
+   "checks": 220,
+   "failures": 0
+  },
+  "test_io": {
+   "checks": 92,
+   "failures": 0
+  },
+  "tsan": {
+   "exit_code": 0,
+   "warnings": false
+  },
+  "ndk_static_binary_sha256": "e343626df33db5ecdc1c1a8b863d8d5d606a32e035756f839de2c53589ec93a3",
+  "outcome": "pass"
+ },
+ "source_reference": {
+  "source": "apple-xnu",
+  "revision": "c54f35ca767986246321eb901baf8f5ff7923f6a",
+  "location": "osfmk/arm64/start.s:762-763",
+  "note": "msr CPACR_EL1 with no following ISB; the next context synchronization comes after cpu_data_init (osfmk/arm/arm_init.c:357)"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "src/vmm/check.py",
+    "--run",
+    "check-007",
+    "--task",
+    "vm-055"
+   ],
+   "exit_code": 0
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/vm-055/README.md",
+  "src/vmm/s24vmm.c",
+  "src/vmm/check.py",
+  "artifacts/vm-055/check-007/check.json",
+  "artifacts/vm-055/check-007/s24vmm",
+  "artifacts/vm-054/fp-sync-cpu0/report.json",
+  "artifacts/vm-054/fp-sync-cpu0/stdout.txt",
+  "artifacts/vm-054/fp-sync-cpu4/stdout.txt",
+  "artifacts/vm-054/fp-sync-cpu9/stdout.txt",
+  "artifacts/vm-054/fp-sync-build-001/fp_sync_probe.bin"
+ ],
+ "sha256": {
+  "docs/procedures/vm-055/README.md": "b32d031175272c013093f86f96c9f607fc5154c1c4d41107e19df1510c863cd1",
+  "src/vmm/s24vmm.c": "330d9cf296b7f2b5332f6d8891068ddc14722699fd288af0a7886a656e4f62a7",
+  "src/vmm/check.py": "4dc09d5e13ec4c3dfdc52045f07a76aaf44bbed465c71d69058e41829b45cb3c",
+  "artifacts/vm-055/check-007/check.json": "70c4b833d9e7fb297cf6035608dc4ee709d3dcfc48008343d22587d1b1b5b7b7",
+  "artifacts/vm-055/check-007/s24vmm": "e343626df33db5ecdc1c1a8b863d8d5d606a32e035756f839de2c53589ec93a3",
+  "artifacts/vm-054/fp-sync-cpu0/report.json": "b2fab8bac4c3734b661d72eed974813623feb581a29b2e4be9748d7d64864441",
+  "artifacts/vm-054/fp-sync-cpu0/stdout.txt": "49b2161eb01db7acf5f93ba6c85df045c99ff85b5f8f2fca9554e5fbb541fcbd",
+  "artifacts/vm-054/fp-sync-cpu4/stdout.txt": "33d2d68b9fb8b3793ace9f289f933ac238f53356a34b8d03f452a933cf428e44",
+  "artifacts/vm-054/fp-sync-cpu9/stdout.txt": "49b2161eb01db7acf5f93ba6c85df045c99ff85b5f8f2fca9554e5fbb541fcbd",
+  "artifacts/vm-054/fp-sync-build-001/fp_sync_probe.bin": "fadefbf30b414cc91ffd993a25c5fe24e74e6ed07b615c91b8ca8c757dc171ed"
+ },
+ "device_io": false,
+ "limitations": [
+  "Boot vCPU only: KVM resets a PSCI CPU_ON secondary, so SMP XNU guests need a fix in avfboot or XNU.",
+  "The device effect is recorded in VM-054, not here."
+ ]
+}
