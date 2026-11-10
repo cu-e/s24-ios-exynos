@@ -1,0 +1,66 @@
+{
+ "kind": "android-userland",
+ "origin": "local-device",
+ "outcome": "pass",
+ "task": "VM-003",
+ "owner": "claude-takeover-20261110-6c8f",
+ "recorded_at": "2026-11-10T07:22:58+00:00",
+ "device_inventory": "devices/local-2026-11-10-session1.json",
+ "summary": "Review of the VM-054 device sessions of 2026-11-10. The source-built XNU guest ran isolated in a KVM VM (s24vmm, via the existing su and /dev/kvm, with no policy change). The guest console output (804 bytes, from avfboot) and the VMM exit state were captured, and each session ended by its own timeout or breakpoint with no reboot. XNU itself printed nothing: it traps with EC=0x07 at _cpu_data_init.",
+ "commit": "59af67d5656f071093efba2624933e9c34e05f2b",
+ "measured_by": "claude-xnu-s24-20261110-v54 (VM-054 sessions 001-004)",
+ "rerun_for_review": false,
+ "commands": [
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "su",
+    "-c",
+    "cd /dev/s24-vm054 && timeout 105 /dev/s24-vm054/vmm --timeout 90 --image ... --initrd ... --mem 1024 --cpus 1 --pin 9"
+   ],
+   "exit_code": 0,
+   "note": "vmm exit 1 at its own timeout; recorded in artifacts/vm-054/session-001/report.json"
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/vm-003/README.md",
+  "devices/local-2026-11-10-session1.json",
+  "worktrees/vm-001-interfaces-20261110/docs/procedures/vm-001/evidence.json",
+  "artifacts/vm-054/session-001/report.json",
+  "artifacts/vm-054/session-001/stdout.txt",
+  "artifacts/vm-054/session-001/stderr.txt",
+  "artifacts/vm-054/session-002/report.json",
+  "artifacts/vm-054/session-002/stdout.txt",
+  "artifacts/vm-054/session-002/stderr.txt",
+  "artifacts/vm-054/session-003/report.json",
+  "artifacts/vm-054/session-003/stdout.txt",
+  "artifacts/vm-054/session-003/stderr.txt",
+  "artifacts/vm-054/session-004/report.json",
+  "artifacts/vm-054/session-004/stdout.txt",
+  "artifacts/vm-054/session-004/stderr.txt"
+ ],
+ "sha256": {
+  "docs/procedures/vm-003/README.md": "f0c313e701a6efec589136c1cb66ea30d1dee1e6e59015d50dec0cf00dd3ec32",
+  "devices/local-2026-11-10-session1.json": "806acc9919a7f84172d93a224f9d5cbea6c9997f329efb0134fed2d577c8a37e",
+  "worktrees/vm-001-interfaces-20261110/docs/procedures/vm-001/evidence.json": "da6dcd8204260ba0203e1d87d3617d3c36fda3d5556f632f63ae3365b2c98531",
+  "artifacts/vm-054/session-001/report.json": "fdb8538445aec4159d7708f01d637f7043e39bcc610397d08a27e632cafbf0d7",
+  "artifacts/vm-054/session-001/stdout.txt": "2edeb0a6f1dd8ae8972140ea1346013dfe39a78813c51208317fc79db0869273",
+  "artifacts/vm-054/session-001/stderr.txt": "cbd574d3ed80e1617b584632f85a6e54fd1eb2ad26327327f27060fc8c95ce1f",
+  "artifacts/vm-054/session-002/report.json": "03540e73675ca15b58a22419b59b7688fce660d7ea2653271422f5a6866d1569",
+  "artifacts/vm-054/session-002/stdout.txt": "2edeb0a6f1dd8ae8972140ea1346013dfe39a78813c51208317fc79db0869273",
+  "artifacts/vm-054/session-002/stderr.txt": "90e82b535b6ee9e06da458a8eba69c39263aa9f9ad8d3d1b2a9bf65e29ed40c9",
+  "artifacts/vm-054/session-003/report.json": "3132a9d24aa02c0fbebaee3abddccbafb50096b0a5b0f5e1c9e8b0cb36d0e204",
+  "artifacts/vm-054/session-003/stdout.txt": "2edeb0a6f1dd8ae8972140ea1346013dfe39a78813c51208317fc79db0869273",
+  "artifacts/vm-054/session-003/stderr.txt": "645f0a804e6647c55c46092be4f22f77bff0fa191ae209950eac8ef712ce1324",
+  "artifacts/vm-054/session-004/report.json": "0ee2792953ab2812824781c2471d73b047f7527ad6fa208d4106e45505152b23",
+  "artifacts/vm-054/session-004/stdout.txt": "2edeb0a6f1dd8ae8972140ea1346013dfe39a78813c51208317fc79db0869273",
+  "artifacts/vm-054/session-004/stderr.txt": "bb9aa4c1047f11efbe96bb2ffa56660b88bfa3e5db3221560b4c9b4d2122a43a"
+ },
+ "limitations": [
+  "Root-only interface (VM-001: none without root).",
+  "XNU produced no console output; boot stops at an FP trap (VM-054 open).",
+  "No performance measurement; no Exynos hardware access by the guest.",
+  "Review only; nothing rerun."
+ ]
+}
