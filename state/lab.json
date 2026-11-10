@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T07:15:31+00:00",
+  "updated_at": "2026-11-10T07:17:19+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -2176,7 +2176,7 @@
       "id": "KRN-001",
       "title": "Build the full E1S XNU kernel with supplied SDK and pinned dependencies",
       "status": "blocked",
-      "owner": "codex-implementation-20261105",
+      "owner": "claude-takeover-20261110-6c8f",
       "priority": 85,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -2204,13 +2204,22 @@
         "Build in artifacts and retain actual exit codes; never mask export failures"
       ],
       "started_at": "2026-11-04T23:15:24+00:00",
-      "last_heartbeat": "2026-11-04T23:25:13+00:00",
-      "updated_at": "2026-11-04T23:25:13+00:00",
+      "last_heartbeat": "2026-11-10T07:17:19+00:00",
+      "updated_at": "2026-11-10T07:17:19+00:00",
       "branch": "main",
-      "blocked_reason": "No explicit iPhoneOS16.5 SDK or matching pinned XNU dependency/build tool directory is configured; see fixtures/public/build/kernel-preflight.json",
-      "progress_note": "Exact XNU patch preparation passes; full kernel not compiled because SDK/build-tool inputs are unconfigured",
-      "next_step": "Provide and verify explicit iPhoneOS16.5 SDK and pinned dependency-tool paths, then resume this claim",
-      "handoff": "research/notes/implementation-handoff.md"
+      "blocked_reason": "SDK premise superseded: STR-041 linked the 1042-body image without an SDK, and KRN-041/KRN-042 give the precise export result. Still missing: (a) a build tool that applies KRN-041 0001/0002 to the canonical image; (b) payload/ADT validation, which needs the D22AP /product tree from an Apple IPSW (owner decision) and is the in-progress NAT-006 work of agy-nat006-20261110-aca2. See docs/procedures/kernel-build.md, Reassessment of 2026-11-10.",
+      "progress_note": "Reassessed: criteria 1 and 2 have SDK-free evidence (STR-041, KRN-041, KRN-042, STR-037); 0001/0002 integration and payload/ADT remain",
+      "next_step": "After NAT-006 publishes payload/ADT evidence, or the owner decides on D22AP data, integrate 0001/0002 into a build tool and validate payload/ADT",
+      "handoff": "docs/procedures/kernel-build.md",
+      "ownership_history": [
+        {
+          "from": "codex-implementation-20261105",
+          "to": "claude-takeover-20261110-6c8f",
+          "reason": "Codex owner stopped: last heartbeat 2026-11-04T23:25Z and no Codex process is running (only this session and agy-nat006 are live in the project). Transfer to record a reassessment: the SDK premise is superseded by the SDK-free STR-041 link, and the export result comes from KRN-041/KRN-042.",
+          "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
+          "at": "2026-11-10T07:16:41+00:00"
+        }
+      ]
     },
     {
       "id": "INT-001",
@@ -52551,6 +52560,63 @@
           "priority": 100,
           "last_heartbeat": "2026-11-10T07:13:45+00:00",
           "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:16:41+00:00",
+      "action": "task.transfer:KRN-001",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "KRN-001",
+          "status": "blocked",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 85,
+          "progress_note": "Exact XNU patch preparation passes; full kernel not compiled because SDK/build-tool inputs are unconfigured",
+          "next_step": "Provide and verify explicit iPhoneOS16.5 SDK and pinned dependency-tool paths, then resume this claim",
+          "blocked_reason": "No explicit iPhoneOS16.5 SDK or matching pinned XNU dependency/build tool directory is configured; see fixtures/public/build/kernel-preflight.json",
+          "last_heartbeat": "2026-11-10T07:16:41+00:00",
+          "branch": "main",
+          "handoff": "research/notes/implementation-handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:17:00+00:00",
+      "action": "task.block:KRN-001",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "KRN-001",
+          "status": "blocked",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 85,
+          "progress_note": "Exact XNU patch preparation passes; full kernel not compiled because SDK/build-tool inputs are unconfigured",
+          "next_step": "Provide and verify explicit iPhoneOS16.5 SDK and pinned dependency-tool paths, then resume this claim",
+          "blocked_reason": "SDK premise superseded: STR-041 linked the 1042-body image without an SDK, and KRN-041/KRN-042 give the precise export result. Still missing: (a) a build tool that applies KRN-041 0001/0002 to the canonical image; (b) payload/ADT validation, which needs the D22AP /product tree from an Apple IPSW (owner decision) and is the in-progress NAT-006 work of agy-nat006-20261110-aca2. See docs/procedures/kernel-build.md, Reassessment of 2026-11-10.",
+          "last_heartbeat": "2026-11-10T07:17:00+00:00",
+          "branch": "main",
+          "handoff": "research/notes/implementation-handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:17:19+00:00",
+      "action": "task.update:KRN-001",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "KRN-001",
+          "status": "blocked",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 85,
+          "progress_note": "Reassessed: criteria 1 and 2 have SDK-free evidence (STR-041, KRN-041, KRN-042, STR-037); 0001/0002 integration and payload/ADT remain",
+          "next_step": "After NAT-006 publishes payload/ADT evidence, or the owner decides on D22AP data, integrate 0001/0002 into a build tool and validate payload/ADT",
+          "blocked_reason": "SDK premise superseded: STR-041 linked the 1042-body image without an SDK, and KRN-041/KRN-042 give the precise export result. Still missing: (a) a build tool that applies KRN-041 0001/0002 to the canonical image; (b) payload/ADT validation, which needs the D22AP /product tree from an Apple IPSW (owner decision) and is the in-progress NAT-006 work of agy-nat006-20261110-aca2. See docs/procedures/kernel-build.md, Reassessment of 2026-11-10.",
+          "last_heartbeat": "2026-11-10T07:17:19+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/kernel-build.md"
         }
       ]
     }
