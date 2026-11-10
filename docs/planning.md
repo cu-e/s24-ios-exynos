@@ -68,6 +68,16 @@ Scope flags change only with `project permit --scope S --value true|false --deci
 
 Task paths are literal relative files/directories. Parent/child paths overlap: tools/ conflicts with tools/lab.py. Traversal, globs, absolute paths and symlink aliases are rejected. Claims on overlapping active/blocked task paths are rejected, even under the same owner. Pending tasks may overlap while waiting; narrow their planned scope before adding them.
 
+A planner may shrink the reservation of a pending, unowned task whose broad historical paths overlap active work:
+
+```sh
+python3 tools/lab.py task narrow DRV-002 --owner planner-session \
+  --paths docs/procedures/drv-002 tests/test_ufs_contract.py \
+  --reason 'Only these paths remain open; tests/ overlapped another reservation'
+```
+
+Each new path must equal or lie inside one of the task's current paths; widening, duplicates and an unchanged set are rejected. The old and new paths go to the task's `path_history` and to the event. Narrowing never assigns an owner and never applies to claimed or blocked work.
+
 Reservations are CLI coordination, not OS access control. They cannot stop direct edits by an uncooperative process. Shared generated state/views are maintained by the CLI and do not need to be listed in each task. Keep shared task boundaries narrow. Existing task boundaries are not silently broadened or automatically reassigned.
 
 Parallel implementation still requires explicit authorization and separate worktrees. All workers must address the same primary checkout ledger:

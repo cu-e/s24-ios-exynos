@@ -334,7 +334,10 @@ def transaction(root, action, owner):
             for task in state["tasks"]:
                 old = next((t for t in original["tasks"] if t["id"] == task["id"]), {})
                 if task != old:
-                    changes.append({k: task[k] for k in ["id", "status", "owner", "priority", "priority_reason", "progress_note", "next_step", "blocked_reason", "last_heartbeat", "branch", "worktree", "handoff"] if k in task})
+                    change = {k: task[k] for k in ["id", "status", "owner", "priority", "priority_reason", "progress_note", "next_step", "blocked_reason", "last_heartbeat", "branch", "worktree", "handoff"] if k in task}
+                    if old and task.get("paths") != old.get("paths"):
+                        change["paths"] = list(task["paths"])
+                    changes.append(change)
             if changes:
                 event["tasks"] = changes
             if state["project"]["permissions"] != original["project"]["permissions"]:
@@ -553,7 +556,7 @@ def parser():
     take.add_argument("--worktree")
     show = task.add_parser("show")
     show.add_argument("id")
-    for name in ["claim", "release", "block", "resume", "done", "update", "heartbeat", "prioritize", "transfer"]:
+    for name in ["claim", "release", "block", "resume", "done", "update", "heartbeat", "prioritize", "transfer", "narrow"]:
         q = task.add_parser(name)
         q.add_argument("id")
         q.add_argument("--owner", required=True)
@@ -570,6 +573,9 @@ def parser():
             q.add_argument("--handoff")
         if name == "prioritize":
             q.add_argument("--priority", type=int, required=True)
+            q.add_argument("--reason", required=True)
+        if name == "narrow":
+            q.add_argument("--paths", nargs="+", required=True)
             q.add_argument("--reason", required=True)
         if name == "transfer":
             q.add_argument("--from-owner", required=True)
@@ -705,6 +711,25 @@ def main(argv=None):
                     if not args.reason.strip():
                         raise LabError("Priority changes need a reason")
                     task.update(priority=args.priority, priority_reason=args.reason, updated_at=now())
+                elif args.operation == "narrow":
+                    # Planner-only shrinking of an unclaimed task's reservation; never a widening.
+                    if task["status"] != "pending" or task.get("owner"):
+                        raise LabError("Only pending, unowned work can be narrowed")
+                    if not args.reason.strip():
+                        raise LabError("Narrowing needs a reason")
+                    new = list(args.paths)
+                    if len(set(new)) != len(new):
+                        raise LabError("Narrowed paths must be distinct")
+                    old_parts = [Path(p).parts for p in task["paths"]]
+                    for name in new:
+                        parts = Path(name).parts
+                        if not parts or not any(parts[:len(b)] == b for b in old_parts):
+                            raise LabError(f"Narrowing cannot widen the boundary: {name} is not inside {task['paths']}")
+                    if sorted(new) == sorted(task["paths"]):
+                        raise LabError("Narrowing must change the boundary")
+                    task.setdefault("path_history", []).append(
+                        {"from": list(task["paths"]), "to": new, "reason": args.reason, "owner": args.owner, "at": now()})
+                    task.update(paths=new, updated_at=now())
                 else:
                     owned(task, args.owner)
                     if task["status"] not in {"in_progress", "blocked"}:

@@ -136,6 +136,51 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(moved["ownership_history"][-1]["from"], "old")
         self.assertEqual(self.cli("task", "heartbeat", "HOST-001", "--owner", "old").returncode, 2)
 
+    def narrow_fixture(self):
+        self.state["tasks"][0]["paths"] = ["tools/a.py"]
+        broad = task("HOST-003")
+        broad["paths"] = ["tools/", "docs/"]
+        self.state["tasks"].append(broad)
+        self.save()
+
+    def test_narrow_makes_an_overlapping_pending_task_claimable(self):
+        self.narrow_fixture()
+        self.assertEqual(self.cli("task", "claim", "HOST-001", "--owner", "a").returncode, 0)
+        blocked = self.cli("task", "claim", "HOST-003", "--owner", "b")
+        self.assertEqual(blocked.returncode, 2)
+        self.assertIn("HOST-001", blocked.stderr)
+        result = self.cli("task", "narrow", "HOST-003", "--owner", "planner", "--paths", "tools/b.py", "docs/b.md",
+                          "--reason", "only b is still open")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        state = json.loads((self.root / "state/lab.json").read_text())
+        narrowed = next(t for t in state["tasks"] if t["id"] == "HOST-003")
+        self.assertEqual(narrowed["paths"], ["tools/b.py", "docs/b.md"])
+        self.assertEqual(narrowed["path_history"][-1]["from"], ["tools/", "docs/"])
+        self.assertEqual(narrowed["path_history"][-1]["owner"], "planner")
+        self.assertEqual((narrowed["status"], narrowed["owner"]), ("pending", None))
+        self.assertEqual(state["events"][-1]["action"], "task.narrow:HOST-003")
+        self.assertEqual(state["events"][-1]["tasks"][0]["paths"], ["tools/b.py", "docs/b.md"])
+        self.assertEqual(self.cli("task", "claim", "HOST-003", "--owner", "b").returncode, 0)
+
+    def test_narrow_rejections_leave_the_registry_unchanged(self):
+        self.narrow_fixture()
+        self.assertEqual(self.cli("task", "claim", "HOST-001", "--owner", "a").returncode, 0)
+        before = (self.root / "state/lab.json").read_bytes()
+        cases = [
+            ("HOST-003", ["research/x.md"], "outside"),                 # widening to a new tree
+            ("HOST-003", ["tools/", "docs/", "research/"], "wider"),    # superset
+            ("HOST-003", ["tools/", "docs/"], "same"),                  # unchanged
+            ("HOST-003", ["tools/b.py", "tools/b.py"], "duplicate"),
+            ("HOST-003", ["tools/../research/x.md"], "traversal"),
+            ("HOST-003", ["tools/b.py"], " "),                          # empty reason
+            ("HOST-001", ["tools/a.py/x"], "claimed"),                  # in progress, owned
+        ]
+        for ident, paths, reason in cases:
+            with self.subTest(ident=ident, paths=paths, reason=reason):
+                result = self.cli("task", "narrow", ident, "--owner", "planner", "--paths", *paths, "--reason", reason)
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                self.assertEqual((self.root / "state/lab.json").read_bytes(), before)
+
     def test_scope_cannot_be_disguised_as_host_evidence(self):
         self.state["tasks"][2]["evidence_kind"] = "host-test"
         with self.assertRaises(lab.LabError):
