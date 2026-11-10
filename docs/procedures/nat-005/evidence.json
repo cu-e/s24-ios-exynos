@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "kind": "android-userland",
+  "origin": "local-device",
+  "outcome": "pass",
+  "task": "NAT-005",
+  "owner": "claude-native-abi-20261110-n5",
+  "recorded_at": "2026-11-10T05:45:00+00:00",
+  "device_inventory": "devices/local-2026-11-10-session1.json",
+  "authorization": "docs/decisions/0002-owner-autonomy-grant-2026-11-10.md (item 4)",
+  "summary": "Read-only copy of /sys/firmware/fdt (S-Boot runtime DTB, normal boot) plus the vendor_boot and recovery DTB sections; a host-tested parser confirms S-Boot-injected /memory (7 nodes), GICv3 0x10200000/0x10240000, 25.6 MHz timer, 10 CPUs/PSCI-smc, boot framebuffer base 0xfa200000 (s3cfb.bootloaderfb) at 1080x2340 inside ordinary /memory, STM SPI touch; format/stride, entry EL and recovery-boot fixups are not determinable from Android.",
+  "device_io": {
+    "writes": false,
+    "reboot": false,
+    "su_used": true,
+    "commands": [
+      "adb exec-out \"su -c 'cat /sys/firmware/fdt'\" > devices/e1s-fdt/2026-11-10/runtime.dtb",
+      "su -c 'sha256sum /sys/firmware/fdt'",
+      "su -c 'grep -i -E \"kernel (code|data)\" /proc/iomem'"
+    ]
+  },
+  "blobs": {
+    "runtime.dtb": {
+      "size": 762424,
+      "sha256": "95fa811abca3f5f8889705add485f94c4490c57a853bded10539d4631bef46c3",
+      "device_sha256_equal": true
+    },
+    "vendor_boot.dtb": {
+      "size": 433300,
+      "sha256": "9b77987a324b1cdb93c82de8864b88446e1509459a0731c144d521c647ed17c1"
+    },
+    "recovery.dtb": {
+      "size": 433300,
+      "sha256": "9b77987a324b1cdb93c82de8864b88446e1509459a0731c144d521c647ed17c1"
+    }
+  },
+  "host_commands": [
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tests.test_fdt_facts"
+      ],
+      "exit_code": 0,
+      "tests": 6
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/verify/fdt_facts.py",
+        "devices/e1s-fdt/2026-11-10/runtime.dtb",
+        "--json",
+        "devices/e1s-fdt/2026-11-10/runtime.facts.json"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "research/notes/native/NAT-005-e1s-boot-abi.md",
+    "tools/verify/fdt_facts.py",
+    "tests/test_fdt_facts.py",
+    "docs/procedures/nat-005/runtime-facts.json"
+  ],
+  "sha256": {
+    "research/notes/native/NAT-005-e1s-boot-abi.md": "4e450c29088870a104093a2b32ca4c310575877fdd4d3707c8f54a62a018acbb",
+    "tools/verify/fdt_facts.py": "9c0b6cdba750f05af90f2e4ac3aa5b9cc277888552a698fb7805c1f3c5bdd060",
+    "tests/test_fdt_facts.py": "408dd723d5724f62c2c0eb1c821d4a8c99961891248b1451f015b316c61b32cd",
+    "docs/procedures/nat-005/runtime-facts.json": "b7e8cd93a6f54febfbd46b8daa952186ede49bb69acb0d7edd8eaa52af87aeb0"
+  },
+  "limits": [
+    "Normal Android boot only; recovery-boot fixups not observed.",
+    "Entry EL/MMU state, CNTFRQ at entry, watchdog state at handoff and framebuffer format/stride are not determinable from Android.",
+    "Only the first DTB of the vendor_boot section was parsed."
+  ]
+}
