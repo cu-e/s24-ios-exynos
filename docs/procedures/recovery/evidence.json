@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "kind": "source-review",
+  "origin": "local-device",
+  "outcome": "pass",
+  "task": "NAT-001",
+  "owner": "claude-native-recovery-20261110-n1",
+  "recorded_at": "2026-11-10T05:30:00+00:00",
+  "authorization": "docs/decisions/0002-owner-autonomy-grant-2026-11-10.md (item 4: ADB, root diagnostics, copying partitions to the host)",
+  "device_inventory": "devices/local-2026-11-10-session1.json",
+  "summary": "Bootloader state measured from /proc/bootconfig (orange, vbmeta unlocked, ulcnt=1, warranty_bit=1); userspace props green/locked are rewritten. Seven boot-chain partitions copied read-only, each host SHA-256 equal to the on-device sha256sum. AVB digests recomputed against the stock-signed vbmeta: boot, recovery, vendor_boot stock; init_boot Magisk-patched and mismatching while Android boots. Restore path (Odin, single-image AP tar) is documented and NOT tested.",
+  "device_io": {
+    "writes": false,
+    "reboot": false,
+    "su_used": true,
+    "commands": [
+      "su -c 'grep -E androidboot.(verifiedbootstate|vbmeta.device_state|flash.locked|warranty_bit|em.status|kg|ulcnt|bootloader|hardware) /proc/bootconfig'",
+      "getprop ro.boot.verifiedbootstate / ro.boot.vbmeta.device_state / ro.boot.flash.locked / ro.boot.warranty_bit",
+      "su -c 'uname -r; zcat /proc/config.gz | grep CONFIG_KEXEC; ls /sys/kernel/kexec_loaded; tr \" \" \"\\n\" < /proc/cmdline | grep kvm-arm'",
+      "su -c 'blockdev --getsize64 /dev/block/by-name/<p>'",
+      "adb exec-out \"su -c 'dd if=/dev/block/by-name/<p> bs=4194304'\" > devices/recovery/backups/2026-11-10/<p>.img",
+      "su -c 'sha256sum /dev/block/by-name/<p>'",
+      "su -c 'ls /vendor/recovery-from-boot.p /vendor/bin/install-recovery.sh'"
+    ],
+    "partitions": [
+      "boot",
+      "init_boot",
+      "vendor_boot",
+      "recovery",
+      "dtbo",
+      "vbmeta",
+      "vbmeta_system"
+    ]
+  },
+  "bootconfig": {
+    "verifiedbootstate": "orange",
+    "vbmeta_device_state": "unlocked",
+    "ulcnt": "1",
+    "warranty_bit": "1",
+    "em_status": "0x0",
+    "kg": "0x4",
+    "bootloader": "S921BXXS9BYH3",
+    "hardware": "s5e9945"
+  },
+  "userspace_props": {
+    "verifiedbootstate": "green",
+    "vbmeta_device_state": "locked",
+    "flash_locked": "1",
+    "warranty_bit": "0"
+  },
+  "kernel": {
+    "release": "6.1.93-android14-11",
+    "kvm_arm_mode": "protected",
+    "kexec_configured": false
+  },
+  "backups": {
+    "location": "devices/recovery/backups/2026-11-10 (primary checkout, git-ignored, mode 700/600)",
+    "taken_at": "2026-11-10T05:15:28Z",
+    "images": {
+      "boot": {
+        "size": 67108864,
+        "sha256": "a05a3c3b1085ecf9dc7522079a28d196732e0fd6384068aa6f964b71c29a86ab",
+        "device_sha256_equal": true
+      },
+      "init_boot": {
+        "size": 16777216,
+        "sha256": "480181ac8480bc2abd22909bbd0dc2669136d7194a6a50d59cda1c0ee7422b8e",
+        "device_sha256_equal": true
+      },
+      "vendor_boot": {
+        "size": 67108864,
+        "sha256": "7d028e3398a1f3fdf1bd3bb5b990af1b8cfb078930f6e8aec53d289717739129",
+        "device_sha256_equal": true
+      },
+      "recovery": {
+        "size": 100663296,
+        "sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+        "device_sha256_equal": true
+      },
+      "dtbo": {
+        "size": 8388608,
+        "sha256": "2afdb40b4be82e2158e863df926a12b2394a6b2361c711e0aa47acc8043f3f9d",
+        "device_sha256_equal": true
+      },
+      "vbmeta": {
+        "size": 65536,
+        "sha256": "063ebf5a98d9584e879e4649ba8033eb8c142ef47e2560533d44d0f135e858e5",
+        "device_sha256_equal": true
+      },
+      "vbmeta_system": {
+        "size": 65536,
+        "sha256": "b44d99474c55a6fbfe5071e5098f0638bae194fa6ce9ba581f42285c234087b4",
+        "device_sha256_equal": true
+      }
+    }
+  },
+  "avb": {
+    "algorithm": "SHA256_RSA4096",
+    "flags": 0,
+    "chain": [
+      "dtbo",
+      "prism",
+      "optics"
+    ],
+    "hash": {
+      "boot": true,
+      "init_boot": false,
+      "recovery": true,
+      "vendor_boot": true
+    }
+  },
+  "findings": {
+    "init_boot_magisk": true,
+    "stock_per_vbmeta": [
+      "boot",
+      "recovery",
+      "vendor_boot"
+    ],
+    "avb_mismatch": [
+      "init_boot"
+    ]
+  },
+  "host_commands": [
+    {
+      "argv": [
+        "python3",
+        "docs/procedures/recovery/verify_backups.py",
+        "--dir",
+        "devices/recovery/backups/2026-11-10"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "worktrees/nat-001-recovery-20261110/docs/recovery.md",
+    "worktrees/nat-001-recovery-20261110/docs/procedures/recovery/verify_backups.py"
+  ],
+  "limits": [
+    "No restore, Download Mode entry or Odin use was performed; every restore step except image availability is untested.",
+    "S-Boot booting a non-stock recovery is inferred from the Magisk init_boot, not observed.",
+    "One host copy only; stock init_boot is not on hand.",
+    "kg=0x4 is recorded without interpretation."
+  ],
+  "sha256": {
+    "docs/recovery.md": "b4ada6160e5550c77b0514bb7a79c74798c248bb7417b249752418ff9bee9d71",
+    "docs/procedures/recovery/verify_backups.py": "1cd24a46b815ab017cf6ad78b49c38ab3f3487b8eae2e0d9f0813cd4dd0490bb"
+  }
+}
