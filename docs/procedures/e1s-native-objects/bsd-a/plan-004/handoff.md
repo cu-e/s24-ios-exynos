@@ -1,0 +1,9 @@
+# STR024BUILD-004 source-only remaining133 freeze
+
+Original STR-024 SR24 owner registered STR024BUILD-004 CLI0 after recording003FAIL once CLI0. The same physical2676caller ran plan exactly once, exit0/empty stderr, without any compiler/loader/Make/private projection. Source-plan RSS is unknown/unmeasured. Fresh bsd-a-build-004 output remains absent.
+
+The strict8-field manifest selects exact original[37:170]133 IDs, e1s_pmic.o through content_filter.o;133 original_argv vectors equal full001 slice[37:170]. Caller/resource profile/graph/context/profile/runtime/namespace/absence fields equal previous003. Runtime lookup metadata changes only the exact private-output path prefix to004; actual runtime pins/policy are unchanged. A packaging assertion initially incorrectly demanded literal equality of runtime_lookup path keys; its failed metadata-only observation is preserved. No caller rerun or source-plan alteration occurred.
+
+Prior25 independently accepted origins plus12new raw-qualified003 origins are preserved additively as37. New12 await independent actual review at this freeze. All001/002/003parentFAIL statuses remain unchanged. The003e1s_pmic compiler exited0 but resource-inconclusive; it is excluded from qualified origins and retained in the remaining133 list. Do not adopt its old physical output.
+
+execute-request.json binds exact plan/manifest/caller/identity/output and non-authorizing rootapproval placeholders. STR024BUILD-004 staysPLANNED. Future root must independently review/admit and allocate exact immutable inputs after recovery. Preserve one compiler/512MiB,3600whole, root outer watchdog and unchanged ProjectBudget/stable memory/PSI policy. No threshold/source/flags/context/helper change or current target retry, queue/common/phone action/taskclosure. A later170descriptor must retain all object/MD/rawparent/plan/experiment provenance and receive independent review, publication/common and root acceptance.

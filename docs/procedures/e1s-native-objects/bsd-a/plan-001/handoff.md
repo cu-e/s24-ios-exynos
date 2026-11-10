@@ -1,0 +1,7 @@
+# STR024 native BSD-a exact source plan
+
+Root source-plan-only route CMfinal1e5a2ee8 consumed exact physical STR030fix2 caller2676a8ed... once. Identity STR-024/codex-e1s-native-objects-20261106-sr24/STR024BUILD-001/bsd-a. Raw plan.json0d46c7302d6181431c8e7adbbe2940a0545db9bd52abb87e767a41c001ad5122; manifest build-manifest-001.json1bd9557d77eece8b4b7f9b58157b10fee12d3a27f579c44f8a295a23eabe11be. Raw CLI0/empty stderr; evidence455e58560ec11037a672fd7e5f6080c7ba665e8d2c024ceefd3464265a6bc278. Planning RSS unknown, not measured.
+
+The old170source slice/provenance and parent c866graph/251996partitions/a65fprofile/00a9context/STR014source are unchanged. Plan contains170command rows,6659inputs,72projection metadata; compiled=false and actual output remains absent. No projection, callerfork, compiler, loader, Make or other target tool ran.
+
+Prospective output is worktrees/str-024-e1s-native-objects-bsd-a-20261106/artifacts/e1s-native-compile/bsd-a-build-001, whole3600s, onejob512MiB within root6job/6GiB policy. Build procedure and structured execute-request.json bind exact future vector and root approval placeholders, which convey no admission. STR024BUILD-001 must stayplanned after registration until actual experiment. Root common84PASS and exact ProjectBudget/root outer-watchdog grant remain required before any execution. No task closure or object/runtime/ABI/hardware result is requested from this source plan.
