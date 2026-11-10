@@ -85,6 +85,44 @@ int main(int argc, char **argv)
 		return 4;
 	}
 #endif
+#if defined(MK_LOADER) && MK_LOADER
+	if (argc >= 6 && !strcmp(argv[1], "ldstages")) {
+		/* ldstages MAXDRAWS OUTFILE GLOBAL_CON TRIG_CON [mmu] [poison]: what the loader calls in order
+		 * (ENTRY frame, then the stage markers), then mk_hold(PRE_JUMP) with the fake DECON0. */
+		maxdraws = atoi(argv[2]); outfile = argv[3];
+		fake_gc = (uint32_t)strtoul(argv[4], 0, 0); fake_tc = (uint32_t)strtoul(argv[5], 0, 0);
+		for (int i = 6; i < argc; i++) {
+			if (!strcmp(argv[i], "mmu")) mk_host_mmu_on = 1;
+			if (!strcmp(argv[i], "poison")) mk_kick_state = 1;
+		}
+		mk_host_fb = calloc(1, MK_BANDS * MK_BAND_BYTES);
+		mk_entry_frame(8, 0x30d00800, 0x30d00800);
+		mk_stage(MK_ST_LOADER_MAIN); mk_stage(MK_ST_LOADER_FB); mk_stage(MK_ST_LOADER_MEM);
+		mk_stage(MK_ST_LOADER_ZERO); mk_stage(MK_ST_LOADER_COPY); mk_stage(MK_ST_LOADER_ADT);
+		mk_stage(MK_ST_LOADER_CLEAN); mk_stage(MK_ST_PRE_JUMP);
+		mk_hold(MK_ST_PRE_JUMP, 0);
+	}
+	if (argc >= 7 && !strcmp(argv[1], "ldfail")) {
+		/* ldfail MAXDRAWS OUTFILE GLOBAL_CON TRIG_CON MESSAGE: stages up to ZERO, then the fail() hold. */
+		maxdraws = atoi(argv[2]); outfile = argv[3];
+		fake_gc = (uint32_t)strtoul(argv[4], 0, 0); fake_tc = (uint32_t)strtoul(argv[5], 0, 0);
+		mk_host_fb = calloc(1, MK_BANDS * MK_BAND_BYTES);
+		mk_entry_frame(8, 0x30d00800, 0x30d00800);
+		mk_stage(MK_ST_LOADER_MAIN); mk_stage(MK_ST_LOADER_FB); mk_stage(MK_ST_LOADER_MEM);
+		mk_stage(MK_ST_LOADER_ZERO);
+		mk_hold(MK_ST_LOADER_FAIL, mk_hash16(argv[6]));
+	}
+	if (argc == 3 && !strcmp(argv[1], "hash16")) { printf("%04x\n", mk_hash16(argv[2])); return 0; }
+	if (argc >= 6 && !strcmp(argv[1], "ldexc")) {
+		/* ldexc MAXDRAWS OUTFILE GLOBAL_CON TRIG_CON: loader exception loop after four stages. */
+		maxdraws = atoi(argv[2]); outfile = argv[3];
+		fake_gc = (uint32_t)strtoul(argv[4], 0, 0); fake_tc = (uint32_t)strtoul(argv[5], 0, 0);
+		mk_host_fb = calloc(1, MK_BANDS * MK_BAND_BYTES);
+		mk_entry_frame(8, 0x30d00800, 0x30d00800);
+		mk_stage(MK_ST_LOADER_MAIN); mk_stage(MK_ST_LOADER_FB); mk_stage(MK_ST_LOADER_MEM);
+		mk_exception_loop(4, 0x96000045ULL, 0xffffff8000123456ULL, 0x0000000000dead00ULL);
+	}
+#endif
 	if (argc != 4) return 2;
 	maxdraws = atoi(argv[2]); outfile = argv[3];
 	mk_host_fb = calloc(1, MK_BANDS * MK_BAND_BYTES);

@@ -79,6 +79,8 @@ enum mk_stage {
 	MK_ST_LOADER_ZERO = 0x31,
 	MK_ST_LOADER_COPY = 0x32,
 	MK_ST_LOADER_ADT = 0x33,
+	MK_ST_LOADER_CLEAN = 0x34,	/* about to clean the whole XNU window (can be slow) */
+	MK_ST_LOADER_FAIL = 0x3f,	/* fail(): data of STAGE idx 2 is mk_hash16(message) */
 	MK_ST_PRE_JUMP = 0x40,	/* loader finished; jump pending. NOT proof of kernel entry */
 	MK_ST_XNU_ENTRY = 0x50	/* reserved: only a marker executed inside XNU's first instructions may use it */
 };
@@ -117,6 +119,11 @@ int mk_fb_safe(uint64_t image_start, uint64_t image_end, uint64_t dtb);
 void mk_entry_frame(uint64_t currentel, uint64_t sctlr_cur, uint64_t sctlr_el1);
 void mk_gate_halt(uint64_t stage, uint64_t currentel, uint64_t sctlr_cur, uint64_t sctlr_el1) __attribute__((noreturn));
 void mk_stage(uint32_t stage);
+/* loader-diag-trig only (MK_LOADER=1): STAGE frames carry a one-dwell hold and a DECON0 kick, and
+ * mk_hold() never returns: it repeats STAGE idx0 = stage, STAGE idx1 = reached-stage mask,
+ * STAGE idx2 = code, BOOTID and the DECON0 report. mk_hash16 folds FNV-1a/32 of a message. */
+void mk_hold(uint32_t stage, uint32_t code) __attribute__((noreturn));
+uint32_t mk_hash16(const char *msg);
 
 void mk_canary_loop(uint64_t currentel, uint64_t sctlr_cur, uint64_t sctlr_el1, uint32_t stack_ok, int fault);
 

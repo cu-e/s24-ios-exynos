@@ -22,6 +22,7 @@ STAGES = {0x01: "entry", 0x02: "halt: MMU/cache on at entry", 0x03: "halt: unsup
           0x10: "canary C reached via call", 0x11: "about to BRK #0x1234", 0x1f: "exception record",
           0x20: "loader_main", 0x21: "loader fb selected", 0x30: "memory window chosen",
           0x31: "XNU RAM zeroed", 0x32: "kernel segments copied", 0x33: "ADT/boot_args built",
+          0x34: "about to clean the XNU window", 0x3f: "loader fail() (STAGE idx2 = message hash)",
           0x40: "pre-jump (NOT proof of kernel entry)", 0x50: "inside XNU entry stub"}
 
 def crc8(v24: int) -> int:
@@ -92,6 +93,17 @@ def decode_rows(rows, strides):
             hits.append({"stride": s, **f})
     return hits
 
+# loader-diag-trig: bit n of the STAGE idx1 mask = the loader reached this stage (drawn by mk_stage).
+MASK_BITS = ["entry", "loader_main", "fb selected", "memory window", "RAM zeroed", "segments copied",
+             "ADT built", "window clean started", "pre-jump", "fail"]
+
+def fnv16(msg: str) -> int:
+    """Independent implementation of mk_hash16: FNV-1a/32 folded to 16 bits."""
+    h = 0x811C9DC5
+    for b in msg.encode():
+        h = ((h ^ b) * 0x01000193) & 0xFFFFFFFF
+    return (h ^ (h >> 16)) & 0xFFFF
+
 def describe(frames):
     """Assemble a sequence of decoded frames into named fields."""
     out, acc = {}, {}
@@ -101,6 +113,11 @@ def describe(frames):
             d = f["data"]
             out["entry"] = {"el": d >> 14 & 3, "cur": {"M": d >> 13 & 1, "C": d >> 12 & 1, "I": d >> 11 & 1},
                             "el1": {"M": d >> 10 & 1, "C": d >> 9 & 1, "I": d >> 8 & 1}}
+        elif k == "STAGE" and f["idx"] == 1:
+            out["stage_mask"] = f["data"]
+            out["stages_reached"] = [n for i, n in enumerate(MASK_BITS) if f["data"] >> i & 1]
+        elif k == "STAGE" and f["idx"] == 2:
+            out["stage_code"] = f["data"]
         elif k == "STAGE":
             out.setdefault("stages", []).append(STAGES.get(f["data"], hex(f["data"])))
         elif k == "CHECK":

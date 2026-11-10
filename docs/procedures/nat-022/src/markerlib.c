@@ -35,6 +35,13 @@ static inline void mk_clean(uint64_t a, uint64_t n)
 #define MK_TRIG 0
 #endif
 
+/* loader-diag-trig (patch_loader.py --trig-hold): STAGE and ENTRY frames get a DECON0 kick and one
+ * dwell so a camera can read them, a reached-stage mask is kept, and mk_hold() halts for good.
+ * Everything under MK_LOADER is compiled out of the canary images, which stay byte-identical. */
+#ifndef MK_LOADER
+#define MK_LOADER 0
+#endif
+
 /* The fault images BRK after this many full report rounds (one round is 15 frames, ~18 s, in the
  * canary-trig loop). The default keeps canary-fault byte-identical. canary-trig-fault uses 0: the
  * two recordings so far show the display ending ~60 s after the first marker, so a BRK after
@@ -143,6 +150,44 @@ static inline void mk_wait_tenths(uint32_t tenths)
 #endif
 }
 
+#if MK_LOADER
+static struct mk_kick ld_k;
+static uint32_t ld_mask = 1u;	/* bit 0 = ENTRY: true by control flow once a later stage runs */
+
+static void ld_after_draw(void)
+{
+#if MK_TRIG
+	mk_kick(&ld_k);
+#endif
+	mk_wait_tenths(MK_DWELL_TENTHS);
+}
+
+/* Bit of the reached-stage mask; 15 = a stage this table does not know. */
+static uint32_t ld_bit(uint32_t stage)
+{
+	switch (stage) {
+	case MK_ST_ENTRY: return 0;
+	case MK_ST_LOADER_MAIN: return 1;
+	case MK_ST_LOADER_FB: return 2;
+	case MK_ST_LOADER_MEM: return 3;
+	case MK_ST_LOADER_ZERO: return 4;
+	case MK_ST_LOADER_COPY: return 5;
+	case MK_ST_LOADER_ADT: return 6;
+	case MK_ST_LOADER_CLEAN: return 7;
+	case MK_ST_PRE_JUMP: return 8;
+	case MK_ST_LOADER_FAIL: return 9;
+	default: return 15;
+	}
+}
+
+uint32_t mk_hash16(const char *m)
+{
+	uint32_t h = 0x811c9dc5u;
+	for (; *m; m++) { h ^= (uint8_t)*m; h *= 0x01000193u; }
+	return (h ^ (h >> 16)) & 0xffff;
+}
+#endif
+
 static inline uint32_t entry_data(uint64_t cel, uint64_t cur, uint64_t e1)
 {
 	return (uint32_t)(((cel >> 2) & 3) << 14 | (cur & 1) << 13 | ((cur >> 2) & 1) << 12 |
@@ -152,6 +197,9 @@ static inline uint32_t entry_data(uint64_t cel, uint64_t cur, uint64_t e1)
 __attribute__((noinline)) void mk_entry_frame(uint64_t cel, uint64_t cur, uint64_t e1)
 {
 	mk_draw(mk_frame(MK_ENTRY, 0, entry_data(cel, cur, e1)), 0, 1);
+#if MK_LOADER
+	ld_after_draw();
+#endif
 }
 
 __attribute__((noinline, noreturn)) void
@@ -173,7 +221,13 @@ mk_gate_halt(uint64_t stage, uint64_t cel, uint64_t cur, uint64_t e1)
 
 __attribute__((noinline)) void mk_stage(uint32_t stage)
 {
+#if MK_LOADER
+	ld_mask |= 1u << ld_bit(stage);
+#endif
 	mk_draw(mk_frame(MK_STAGE, 0, stage), 0, 1);
+#if MK_LOADER
+	ld_after_draw();
+#endif
 }
 
 static void kick_after_draw(struct mk_kick *k)
@@ -221,7 +275,13 @@ mk_exception_loop(uint32_t slot, uint64_t esr, uint64_t elr, uint64_t far)
 	mk_draw(mk_frame(MK_STAGE, 0, MK_ST_EXC), 0, 1);
 	prev = mk_frame(MK_STAGE, 0, MK_ST_EXC);
 	kick_after_draw(&k);
+#if MK_LOADER
+	mk_wait_tenths(MK_DWELL_TENTHS);	/* the EXC stage frame was never visible in run 003 */
+#endif
 	for (;;) {
+#if MK_LOADER
+		show(&prev, mk_frame(MK_STAGE, 1, ld_mask), &k);	/* which loader stages were reached */
+#endif
 		show(&prev, mk_frame(MK_SLOT, 0, slot), &k);
 		for (uint32_t i = 0; i < 4; i++) show(&prev, mk_frame(MK_ESR, i, (uint32_t)(esr >> (48 - 16 * i))), &k);
 		for (uint32_t i = 0; i < 4; i++) show(&prev, mk_frame(MK_ELR, i, (uint32_t)(elr >> (48 - 16 * i))), &k);
@@ -256,6 +316,28 @@ mk_canary_loop(uint64_t cel, uint64_t cur, uint64_t e1, uint32_t stack_ok, int f
 		}
 	}
 }
+
+#if MK_LOADER
+__attribute__((noinline, noreturn)) void mk_hold(uint32_t stage, uint32_t code)
+{
+	uint64_t id = mk_cnt();
+	uint32_t prev = mk_frame(MK_STAGE, 0, stage);
+	ld_mask |= 1u << ld_bit(stage);
+	mk_draw(prev, 0, 1);		/* full redraw: the loader UI may have painted over the bands */
+#if MK_TRIG
+	mk_kick(&ld_k);
+#endif
+	mk_wait_tenths(MK_DWELL_TENTHS);
+	for (;;) {
+		show(&prev, mk_frame(MK_STAGE, 1, ld_mask), &ld_k);
+		show(&prev, mk_frame(MK_STAGE, 2, code), &ld_k);
+		show(&prev, mk_frame(MK_BOOTID, 0, (uint32_t)id), &ld_k);
+		show(&prev, mk_frame(MK_BOOTID, 1, (uint32_t)(id >> 16)), &ld_k);
+		show(&prev, mk_frame(MK_STAGE, 0, stage), &ld_k);
+		show_kick_report(&prev, &ld_k);
+	}
+}
+#endif
 
 static inline int overlaps(uint64_t a0, uint64_t a1)
 {

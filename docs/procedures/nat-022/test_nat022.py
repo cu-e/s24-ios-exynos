@@ -193,6 +193,89 @@ class Trigger(unittest.TestCase):
             _, frames = self.trig(40, *args)
             self.assertIn(text, dec.describe([dec.parse_frame(w) for w in frames])["decon"]["kick_status"])
 
+class LoaderHold(unittest.TestCase):
+    """loader-diag-trig: stage frames with a kick and a dwell, the reached-stage mask, the hold loop that
+    never returns, and fail()/exception reports. The real markerlib.c against the fake DECON0."""
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.exe = Path(cls.tmp.name) / "host_mk_ld"
+        subprocess.run(["cc", "-O1", "-Wall", "-Wextra", "-Werror", "-DMK_HOST=1", "-DMK_TRIG=1", "-DMK_LOADER=1",
+                        f"-I{HERE/'src'}", str(HERE / "src/markerlib.c"), str(HERE / "src/host_mk.c"), "-o", str(cls.exe)], check=True)
+
+    def go(self, scn, n, gc, tc, *extra):
+        p = subprocess.run([str(self.exe), scn, str(n), str(Path(self.tmp.name) / "l.bin"), gc, tc, *extra],
+                           capture_output=True, text=True)
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)       # 0 = it ran until the draw budget: it did not return
+        ev = [l.split() for l in p.stdout.splitlines()]
+        return ev, [dec.parse_frame(int(e[1], 16)) for e in ev if e[0] == "DRAW"]
+
+    def test_every_draw_is_followed_by_a_kick_and_nothing_precedes_the_first_marker(self):
+        ev, frames = self.go("ldstages", 12, "0x113", "0x3063")
+        self.assertEqual(ev[0][0], "DRAW")
+        draws = [i for i, e in enumerate(ev) if e[0] == "DRAW"]
+        for a, b in zip(draws, draws[1:]):          # between two draws exactly one kick: reads then the contract writes
+            seg = ev[a + 1:b]
+            self.assertTrue(seg and seg[0][:2] == ["RD", "20"], seg)
+            self.assertTrue({e[1] for e in seg if e[0] == "WR"} <= {"30", "50"})
+        self.assertTrue({e[1] for e in ev if e[0] == "RD"} <= {"04", "4", "20", "30", "50"})
+
+    def test_stage_order_mask_and_hold_loop(self):
+        ev, frames = self.go("ldstages", 80, "0x113", "0x3063")
+        d = dec.describe(frames)
+        names = [dec.STAGES[f["data"]] for f in frames if f["kind"] == 3 and f["idx"] == 0]
+        self.assertEqual(names[:8], ["loader_main", "loader fb selected", "memory window chosen", "XNU RAM zeroed",
+                                      "kernel segments copied", "ADT/boot_args built", "about to clean the XNU window",
+                                      "pre-jump (NOT proof of kernel entry)"])
+        self.assertEqual(d["stage_mask"], 0x1ff)                   # entry .. pre-jump; fail bit not set
+        self.assertEqual(d["stages_reached"][-1], "pre-jump")
+        self.assertEqual(d["stage_code"], 0)
+        self.assertTrue(d["decon"]["kick_status"].startswith("sent"))
+        self.assertIn("boot_id_cntvct32", d)
+        # The hold never returns: the draw budget ran out inside the loop and frames kept cycling.
+        loop = {(f["kind"], f["idx"]) for f in frames[-15:]}
+        self.assertTrue({(3, 0), (3, 1), (3, 2), (2, 0), (2, 1), (9, 0), (9, 9)} <= loop, loop)
+        self.assertEqual(len(frames), 80)
+
+    def test_fail_hold_carries_the_message_hash_and_no_pre_jump(self):
+        msg = "bad payload header"
+        ev, frames = self.go("ldfail", 60, "0x113", "0x3063", msg)
+        d = dec.describe(frames)
+        self.assertEqual(d["stage_code"], dec.fnv16(msg))           # independent Python hash equals the C one
+        self.assertIn("fail", d["stages_reached"])
+        self.assertNotIn("pre-jump", d["stages_reached"])
+        self.assertNotIn("window clean started", d["stages_reached"])
+        self.assertEqual(d["stage_mask"] & 1, 1)
+        last_stage = [f["data"] for f in frames if f["kind"] == 3 and f["idx"] == 0][-1]
+        self.assertEqual(last_stage, 0x3f)
+
+    def test_exception_loop_reports_the_mask_with_esr_elr_far(self):
+        ev, frames = self.go("ldexc", 80, "0x113", "0x3063")
+        d = dec.describe(frames)
+        self.assertEqual((d["esr"], d["elr"], d["far"]), ("0x0000000096000045", "0xffffff8000123456", "0x0000000000dead00"))
+        self.assertEqual(d["slot"], 4)
+        self.assertEqual(d["stage_mask"], 0b1111)                   # entry, loader_main, fb, memory window
+        self.assertEqual(d["stages_reached"], ["entry", "loader_main", "fb selected", "memory window"])
+
+    def test_no_mmio_when_mmu_on_or_a_kick_was_interrupted(self):
+        for flag in ("mmu", "poison"):
+            ev, frames = self.go("ldstages", 30, "0x113", "0x3063", flag)
+            self.assertFalse([e for e in ev if e[0] in ("RD", "WR")], flag)
+            self.assertEqual(dec.describe(frames)["stage_mask"], 0x1ff, flag)   # still reported, just not kicked
+
+    def test_hash16_matches_python_for_every_loader_failure_message(self):
+        src = (HERE.parents[2] / "artifacts/nat-020/build-003/source/shim/e1s-xnu/loader.c")
+        if not src.exists():
+            self.skipTest("NAT-020 build-003 source not present")
+        import re
+        msgs = re.findall(r'fail\("([^"]+)"\)', src.read_text())
+        self.assertGreaterEqual(len(msgs), 15)
+        hashes = {dec.fnv16(m) for m in msgs}
+        self.assertEqual(len(hashes), len(set(msgs)), "two loader failure messages share a 16-bit hash")
+        for m in set(msgs):
+            out = subprocess.run([str(self.exe), "hash16", m], capture_output=True, text=True, check=True).stdout.strip()
+            self.assertEqual(int(out, 16), dec.fnv16(m), m)
+
 try:
     import numpy as np
     HAVE_NP = True
@@ -254,6 +337,31 @@ class Aarch64Build(unittest.TestCase):
             self.skipTest("zig missing")
         out = subprocess.run([sys.executable, str(HERE / "build.py"), "--check-only"], capture_output=True, text=True)
         self.assertEqual(out.returncode, 0, out.stderr)
+
+    def test_loader_variants_build_and_the_run_images_are_unchanged(self):
+        import json, shutil
+        root = HERE.parents[2]
+        src = root / "artifacts/nat-020/build-003/source"
+        ref = root / "artifacts/nat-022/build-003/build.json"
+        if not shutil.which("zig") or not src.exists() or not ref.exists():
+            self.skipTest("zig, the NAT-020 source or the build-003 record is missing")
+        with tempfile.TemporaryDirectory() as t:
+            out = Path(t) / "o"
+            r = subprocess.run([sys.executable, str(HERE / "build.py"), "--out", str(out), "--loader-source", str(src)],
+                               capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            new = json.loads((out / "build.json").read_text())["images"]
+            old = json.loads(ref.read_text())["images"]
+            for n, v in old.items():                      # every image of build-003, including the two that ran
+                self.assertEqual(new[n]["sha256"], v["sha256"], n)
+            self.assertNotEqual(new["loader-diag-trig-hold"]["sha256"], new["loader-diag"]["sha256"])
+            src_c = (out / "loader-diag-trig-hold/source/shim/e1s-xnu/loader.c").read_text()
+            # The hold variant never reaches the return that jumps into the kernel copy.
+            hold = src_c.index("NAT022_HOLD(MK_ST_PRE_JUMP, 0)")
+            self.assertLess(hold, src_c.index("return entry_pa;"))
+            self.assertNotIn("fb_base == MK_FB_BASE", src_c)
+            plain = (out / "loader-diag/source/shim/e1s-xnu/loader.c").read_text()
+            self.assertNotIn("mk_hold", plain)
 
 if __name__ == "__main__":
     unittest.main()

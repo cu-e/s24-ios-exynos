@@ -3,7 +3,7 @@
 
   build.py --out DIR [--loader-source COPY_OF_build-003/source]
   build.py --check-only      (build to a temp dir, verify, discard)
-Outputs: canary-plain/Image, canary-fault/Image, canary-trig/Image (DECON0 kick, MK_TRIG=1), canary-trig-fault/Image (kick + BRK, MK_TRIG=1), [loader-diag/Image(.payload)].
+Outputs: canary-plain/Image, canary-fault/Image, canary-trig/Image (DECON0 kick, MK_TRIG=1), canary-trig-fault/Image (kick + BRK, MK_TRIG=1), [loader-diag/Image(.payload), loader-diag-trig-hold/Image(.payload): stage markers with a kick and a dwell, halted at pre-jump, never executes the payload].
 """
 from pathlib import Path
 import argparse, hashlib, json, shutil, struct, subprocess, sys, tempfile
@@ -48,17 +48,18 @@ def build_canary(out, name, fault, trig=False, fault_round=None):
     link(o, HERE / 'src/canary.ld', d / 'canary.elf', d / 'Image')
     return d / 'Image'
 
-def build_loader(out, source):
-    d = out / 'loader-diag'; d.mkdir(parents=True)
+def build_loader(out, source, name='loader-diag', trig_hold=False):
+    d = out / name; d.mkdir(parents=True)
     src = d / 'source'
     shutil.copytree(source, src, ignore=shutil.ignore_patterns('out', '.git'))
-    run([sys.executable, '-I', HERE / 'patch_loader.py', src])
+    run([sys.executable, '-I', HERE / 'patch_loader.py', src] + (['--trig-hold'] if trig_hold else []))
     e = src / 'shim/e1s-xnu'
     shutil.copy(HERE / 'src/marker.h', e); shutil.copy(HERE / 'src/markerlib.c', e)
     objs = []
     for c in ('start.S', 'loader.c', 'ui.c', 'adt_patch.c', 'gic.c', 'fdt.c', 'guard.c', 's5e9945.c', 'markerlib.c'):
         obj = d / (c + '.o')
-        run(['zig', 'cc', *[f for f in FLAGS if f != '-Werror'], f'-I{e}', '-c', e / c, '-o', obj])
+        extra = ['-DMK_TRIG=1', '-DMK_LOADER=1'] if trig_hold and c == 'markerlib.c' else []
+        run(['zig', 'cc', *[f for f in FLAGS if f != '-Werror'], *extra, f'-I{e}', '-c', e / c, '-o', obj])
         objs.append(obj)
     link(objs, e / 'loader.ld', d / 'loader.elf', d / 'Image')
     payload = B3 / 'payload.bin'
@@ -81,6 +82,7 @@ def main():
             'canary-trig-fault': build_canary(out, 'canary-trig-fault', True, trig=True, fault_round=0)}
     if a.loader_source:
         imgs['loader-diag'] = build_loader(out, Path(a.loader_source))
+        imgs['loader-diag-trig-hold'] = build_loader(out, Path(a.loader_source), 'loader-diag-trig-hold', trig_hold=True)
     for n, p in imgs.items():
         d = Path(p).read_bytes()
         assert d[56:60] == b'ARM\x64' and struct.unpack_from('<Q', d, 8)[0] == 0x80000

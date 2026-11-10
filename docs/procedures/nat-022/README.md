@@ -329,3 +329,106 @@ Not established:
 The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-003/` (the video
 shows the owner's room and is not committed).
 
+
+## loader-diag-trig-hold: the NAT-020 loader with visible stage markers, held before the jump (host-built, NAT-025; not run)
+
+Goal step 4 asks for the staged path loader → memory preparation → handoff → a marker inside XNU.
+Repeating a full XNU start is not useful until the loader's own progress is visible, so this image
+only extends the stage that is already proven (a NAT-022 marker channel that run 002/003 decoded):
+`build.py --loader-source` derives it from the NAT-020 build-003 loader source through
+`patch_loader.py --trig-hold` and links the loader with `markerlib.c` (`-DMK_TRIG=1 -DMK_LOADER=1`).
+The loader's own logic is otherwise unchanged. Plain `loader-diag` (no kick, no hold) is still built
+and byte-identical to the earlier build; the four canary Images are byte-identical to
+`build-003/build.json`. Two builds give identical hashes (`artifacts/nat-022/build-004`,
+`build-004-repro`).
+
+* `loader-diag-trig-hold` Image.payload SHA-256
+  `7c6206bd06923a91524afe95ec03573ed6fa680978cc839c40991debf7702cb3` (21767776 bytes: the loader
+  Image `901565b2…`, 212992 bytes, plus the 21 MB SWEETXNU payload), RECOVERY image
+  `511b4833f0b6c24f5adffe762451bcbf937aa9a23b64bdd41d254885e006c475`
+  (`artifacts/nat-022/package-004/package.json`, NAT-006 packaging, kernel at offset 2048).
+* **It never jumps.** The patch replaces the final `BR` into the kernel copy by `mk_hold(PRE_JUMP)`,
+  which loops its frames for ever. A `PRE_JUMP` frame is therefore a statement about the loader, not
+  about XNU. XNU-entry evidence needs a later image that has code inside the kernel draw
+  `MK_ST_XNU_ENTRY` (0x50, reserved).
+* Sequence (each `mk_stage` redraws all bands, kicks DECON0 once, and dwells 1.2 s): ENTRY frame at
+  `_start` (EL, MMU/cache bits; same as the canary), `LOADER_MAIN` (0x20), `LOADER_FB` (0x21),
+  `LOADER_MEM` (0x30, window chosen), `ZERO` (0x31), `COPY` (0x32), `ADT` (0x33), `CLEAN` (0x34,
+  before the full-window cache clean, which may take a long time), `PRE_JUMP` (0x40), then the hold
+  loop. Each stage frame carries the mask of stages reached so far, so a missed frame cannot hide
+  progress.
+* Hold loop frames: STAGE idx 0 = the stage, STAGE idx 1 = reached-stage mask (bit 0 ENTRY, 1 MAIN,
+  2 FB, 3 MEM, 4 ZERO, 5 COPY, 6 ADT, 7 CLEAN, 8 PRE_JUMP, 9 FAIL, 15 other), STAGE idx 2 = a stage
+  code (the failure code below, otherwise 0), BOOTID, and the REG report with the kick status.
+* Every `fail()` and the invalid-FDT return hold a `LOADER_FAIL` (0x3f) frame whose code is
+  `fnv16` of the message (FNV-1a/32 of the string, `h ^ (h >> 16)`, low 16 bits; `decode.py` has the
+  same function and the table). Invalid FDT is `0xfd7d`.
+* A loader exception reports SLOT, ESR, ELR and FAR through the same exception loop as the canary,
+  unconditionally (the original code only drew when the loader's framebuffer was the marker region).
+
+| Code | `fail()` message |
+| --- | --- |
+| `0xa4c6` | not entered at EL1 |
+| `0x9d89` | no appended SWEETXNU payload or initrd |
+| `0xb215` | initrd is not a SWEETXNU payload |
+| `0x2543` | bad payload header |
+| `0xa6f2` | bad payload RAM size |
+| `0x7f24` | invalid loader image exclusion |
+| `0xe266` | incomplete or unusable DTB RAM map |
+| `0xc6b7` | no usable RAM window |
+| `0xd27d` | kernel larger than RAM window |
+| `0xb0ca` | bad ADT offset/size |
+| `0x07cf` | bad segment |
+| `0x224e` | bad segment file range |
+| `0x377c` | payload overlaps XNU RAM |
+| `0x5313` | no room for ADT/boot_args |
+| `0x2ce4` | ADT boot CPU MPIDR patch failed |
+| `0xfb45` | ADT memory patch failed |
+| `0x129a` | entry outside kernel |
+
+Load address: run 003 showed that this S-Boot starts an Image at `0x801a0000`, not at the header's
+`text_offset`. The loader is linked at 0, but `readelf -r` on its objects shows no absolute pointer
+other than the header's `_payload_start` field; code and data are reached with `adr`/`adrp` (the
+`ADD_ABS_LO12` entries are the low halves of `adrp` pairs, valid because `0x801a0000` is 4 KiB
+aligned), and the `ui.c` label tables are two-dimensional `char` arrays, not pointer tables. So no
+relocation is needed to run it where the canary ran. This is a static check of the objects; whether
+the loader's later steps (window choice around the loader at `0x801a0000`, the 21 MB payload
+placement) behave is what the run would measure.
+
+Not host-testable (no AArch64 emulator): the AArch64 start path, the loader's real use of the DTB,
+the RAM zero/copy/clean timings, and the DECON0 behaviour while the loader moves large amounts of
+memory. Host tests (`test_nat022.py`, 28 pass, `LoaderHold`) run the real `markerlib.c` against a
+RAM buffer and a fake DECON0 register file and check, with the independent decoder: the stage
+order and mask, the hold-loop frame set and exact frame count, no MMIO before the first marker, the
+hash16 code of every `fail("…")` message in `loader.c` (C against Python, no two messages share a
+hash), the loader exception loop, and behaviour with the MMU on and with a poisoned kick. The build
+test additionally checks that every `patch_loader.py` anchor matches (it asserts once per anchor),
+that every `build-003` image hash is unchanged, and that in the patched `loader.c` the
+`mk_hold(MK_ST_PRE_JUMP, 0)` call (a `noreturn` function) stands before the only `return entry_pa;`,
+so the `br` in `start.S` is not reached. That is a source-level check; the instruction stream of the
+linked Image was not disassembled (no AArch64 disassembler on the host).
+
+What each outcome would mean (one run, image-specific; any stage list is a minimum):
+* Frames to `PRE_JUMP` with the hold loop: the loader reached its end on this phone from the
+  S-Boot entry (EL2→EL1, PMU/watchdog guard, GIC, window, 21 MB copy, ADT, clean). The recovery
+  guard armed the 83 s watchdog, so a hold longer than that ends in a reset whose effect on the
+  phone is part of what is being measured.
+* A `LOADER_FAIL` frame: the table above names the exact refusal.
+* A loader exception frame: SLOT/ESR/ELR/FAR of the failing instruction (ELR minus `0x801a0000`
+  maps into `loader.elf`).
+* Markers stop part-way with no exception: unresolved; the last mask bit shows where, the cause may
+  be a hang, a long clean, the watchdog, or the display going dark, and the run alone cannot
+  distinguish them.
+* No markers at all: the loader did not reach its first marker (`recovery_guard` runs before
+  `loader_main`, so a guard-related refusal is possible), or nothing was visible.
+
+Device access that differs from the canary (this is why a separate decision is needed): beyond the
+DECON0 contract of decisions 0010/0011 the NAT-020 loader reads and may clear PMU INFORM `0xbc`
+(`0x12860000`), arms the S5E9945 watchdog at `0x10040000` for 83 s, initialises the GIC
+(`0x10200000`/`0x10240000`), zeroes and copies RAM, and cleans caches over the XNU window. It writes
+no storage and no partition; the only storage write is the RECOVERY image the owner approves.
+
+`session_loaderhold.py` refuses to run unless
+`docs/decisions/0012-nat022-loader-diag-trig-hold-single-run-2026-11-10.md` exists (it does not exist
+yet; checked: the driver exits before any device command). Recovery is the earlier path
+(`--restore`, otherwise Download Mode and one NAT-013 session).

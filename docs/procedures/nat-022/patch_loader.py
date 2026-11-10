@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 """Derive an instrumented copy of the NAT-020 build-003 loader source.
 
-Host only. usage: patch_loader.py SOURCE_ROOT (a copy of build-003/source, already
-NAT-010-patched). It replaces the silent M/C/EL halts with marker-then-halt and
+Host only. usage: patch_loader.py SOURCE_ROOT [--trig-hold] (a copy of build-003/source,
+already NAT-010-patched). It replaces the silent M/C/EL halts with marker-then-halt and
 adds stage markers. UI code is left unchanged; each mk_stage redraws every band,
 so partially repainted UI cannot corrupt a marker. Every anchor must match once.
+
+--trig-hold (loader-diag-trig, built with MK_TRIG=1 MK_LOADER=1 MK_HOLD=1): additionally
+marks loader_main entry and the start of the full-window cache clean, reports every fail()
+and invalid-FDT return with a held STAGE frame (code = mk_hash16 of the message), draws on
+the fixed marker region even if the loader's own framebuffer differs, reports loader
+exceptions unconditionally, and replaces the jump into the kernel copy by mk_hold(): this
+variant NEVER executes the payload.
 """
 from pathlib import Path
 import hashlib, sys
@@ -16,7 +23,7 @@ def once(s, old, new):
     assert s.count(old) == 1, 'anchor mismatch: ' + old[:80]
     return s.replace(old, new, 1)
 
-def main(root):
+def main(root, trig_hold=False):
     src = Path(root) / 'shim/e1s-xnu'
     p = src / 'start.S'
     assert hashlib.sha256(p.read_bytes()).hexdigest() == START_SHA, 'start.S base changed'
@@ -119,7 +126,32 @@ static struct ui_fb ui;''')
 	if (fb_base == MK_FB_BASE && fb_size >= MK_BANDS * MK_BAND_BYTES)
 		mk_exception_loop((uint32_t)slot, esr, elr, far);
 	log_str("\\nEXCEPTION slot=");''')
+    if trig_hold:
+        # The kernel copy is never entered, so a marker landing in the XNU window cannot corrupt a
+        # running kernel; the loader's own framebuffer is not required to be at the marker region.
+        s = once(s, '''#define NAT022_STAGE(st) do { if (fb_base == MK_FB_BASE && \\
+	fb_size >= MK_BANDS * MK_BAND_BYTES) mk_stage(st); } while (0)''', '''#define NAT022_STAGE(st) mk_stage(st)
+#define NAT022_HOLD(st, code) mk_hold((st), (code))''')
+        s = once(s, '\tdiagnostic_value("loader_main_enter",dtb);\n',
+                 '\tdiagnostic_value("loader_main_enter",dtb);\n\tNAT022_STAGE(MK_ST_LOADER_MAIN);\n')
+        s = once(s, '\t\tdiagnostic_value("invalid_fdt",dtb);\n',
+                 '\t\tdiagnostic_value("invalid_fdt",dtb);\n\t\tNAT022_HOLD(MK_ST_LOADER_FAIL, 0xfd7d);\n')
+        s = once(s, '''		ui_fail(&ui, why);
+		fb_flush();
+	}
+	return 0;''', '''		ui_fail(&ui, why);
+		fb_flush();
+	}
+	NAT022_HOLD(MK_ST_LOADER_FAIL, mk_hash16(why));
+	return 0;''')
+        s = once(s, '\tdiagnostic_value("clean_full_window_begin",win_base);\n',
+                 '\tNAT022_STAGE(MK_ST_LOADER_CLEAN);\n\tdiagnostic_value("clean_full_window_begin",win_base);\n')
+        s = once(s, '\tNAT022_STAGE(MK_ST_PRE_JUMP); /* last marker before BR: not proof of kernel entry */\n',
+                 '\tNAT022_STAGE(MK_ST_PRE_JUMP); /* last marker before BR: not proof of kernel entry */\n'
+                 '\tNAT022_HOLD(MK_ST_PRE_JUMP, 0); /* loader-diag-trig: never jump */\n')
+        s = once(s, '''	if (fb_base == MK_FB_BASE && fb_size >= MK_BANDS * MK_BAND_BYTES)
+		mk_exception_loop((uint32_t)slot, esr, elr, far);''', '''	mk_exception_loop((uint32_t)slot, esr, elr, far);''')
     p.write_text(s)
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv[1], '--trig-hold' in sys.argv[2:])
