@@ -2,13 +2,13 @@
 
 > Generated from state/lab.json. Use the CLI; do not edit this board or its task cards.
 
-Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-10T10:44:39+00:00.
+Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-10T11:08:31+00:00.
 
-Registry SHA256: `668734da2950d74fd5be10483aa23863aec37a2537983b9ff39264b53718a50a`. Run `python3 tools/lab.py board --check` to detect stale files.
+Registry SHA256: `083c511cba15293ceddf317149f8fd5c9e4bad14cb38986eb7beb986c7fd53eb`. Run `python3 tools/lab.py board --check` to detect stale files.
 
 [Workflow](docs/planning.md) · [All task details](planning/README.md) · [Machine view](state/board.json) · [Status](STATUS.md)
 
-| Ready (0) | In progress (0) | Blocked (14) | Waiting (15) | Needs authorization (22) | Done (248) |
+| Ready (0) | In progress (0) | Blocked (14) | Waiting (15) | Needs authorization (22) | Done (249) |
 | --- | --- | --- | --- | --- | --- |
 | — | — | [**INT-002**](planning/tasks/INT-002.md) · P100<br>Coordinate kernel build boot and virtualization integration<br>host · claude-takeover-20261110-6c8f<br>Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance (its handoff says the role continues after the gate review). Its gate tool is in main (tools/integration_gate.py, docs/integration/kernel/test_gate.py). The work it waited for has since reached main by direct merges under decision 0002 (STR-024, STR-037, STR-041 1042-body link; VM-047 and REV-047 on 2026-11-10). Without root approval and the multi-integrator protocol it cannot pass its own acceptance. | [**NAT-011**](planning/tasks/NAT-011.md) · P89<br>Trigger S5E9945 PMU SWRESET with SEC_RESET_REASON_UNKNOWN on RECOVERY loader exit/halt so S-Boot clears persistent param(0) REBOOT_MODE=4<br>host · unassigned<br>Dependencies: NAT-009 | [**NAT-017**](planning/tasks/NAT-017.md) · P97<br>Qualify an independent early-log canary and per-reset retention before any further XNU attempt<br>native · unassigned<br>Scope not authorized: native | [**KRN-009**](planning/tasks/KRN-009.md) · P100<br>Implement actual atomic type metadata for genuine selected XNU allocator uses<br>host · codex-compiler-atomics-20261105-t |
 | — | — | [**INT-003**](planning/tasks/INT-003.md) · P100<br>Coordinate crypto drivers and platform integration<br>host · claude-takeover-20261110-6c8f<br>Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance. It depends on the stopped root/CM approval protocol, so its acceptance (serialized grants, original owners closing their tasks) cannot be met any more. Remaining component work (provider TUs, archives, link and private ABI) belongs to those component tasks. Handoff: worktrees/int-platform-20261106/docs/integration/platform/native-provider-headers98-review/handoff.md. | [**GPU-007**](planning/tasks/GPU-007.md) · P70<br>Implement and build the Xclipse native kernel backend<br>host · unassigned<br>Dependencies: KRN-001; Paths reserved by: GPU-012 | [**NAT-003**](planning/tasks/NAT-003.md) · P50<br>Run the first native BOOT session with logs and recovery<br>native · unassigned<br>Scope not authorized: native; Dependencies: NAT-004, KRN-001; Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009 | [**KRN-025**](planning/tasks/KRN-025.md) · P100<br>Build and qualify genuine selected cc_kext compiler runtime<br>host · codex-team-cc-runtime-20261105-az |
@@ -120,6 +120,7 @@ Registry SHA256: `668734da2950d74fd5be10483aa23863aec37a2537983b9ff39264b53718a5
 | — | — | — | — | — | [**VM-008**](planning/tasks/VM-008.md) · P96<br>Qualify coherent public guest generated and installed header namespace<br>host · codex-team-avf-kernel-headers-20261105-cd |
 | — | — | — | — | — | [**NAT-015**](planning/tasks/NAT-015.md) · P96<br>Audit actual early log destinations, reset lifetime and overwrite behavior of the failed RECOVERY image<br>host · codex-earlylogs-20261110-r3 |
 | — | — | — | — | — | [**NAT-016**](planning/tasks/NAT-016.md) · P96<br>Implement append-only host early-log archive with separate boot records and loss reporting<br>host · codex-earlylogs-20261110-r3 |
+| — | — | — | — | — | [**NAT-018**](planning/tasks/NAT-018.md) · P96<br>Integrate reviewed NAT-006 RECOVERY host builder and verifier into main<br>host · codex-nat006-main-20261110-r4 |
 | — | — | — | — | — | [**USB-001**](planning/tasks/USB-001.md) · P95<br>Implement host-buildable native USB and block-transport adapters<br>host · codex-team-usb-20261105-ai |
 | — | — | — | — | — | [**RES-008**](planning/tasks/RES-008.md) · P95<br>Validate actual XNU sysroot, SDK and donor build-tool requirements<br>host · codex-xnu-inputs-20261105-i |
 | — | — | — | — | — | [**KRN-002**](planning/tasks/KRN-002.md) · P95<br>Build and qualify pinned open-source XNU host generators and Mach-O tools<br>host · codex-xnu-host-tools-20261105-j |
@@ -282,13 +283,6 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 
 ## Recent activity
 
-- 2026-11-10T10:15:41+00:00 · codex-stock-rescue-20261110-r2 · task.add:NAT-013
-  - NAT-013: pending
-- 2026-11-10T10:16:01+00:00 · codex-stock-rescue-20261110-r2 · task.add:NAT-014
-  - NAT-014: pending
-- 2026-11-10T10:17:09+00:00 · codex-stock-rescue-20261110-r2 · experiment.record:NAT012-STOCK-RESTORE-003
-- 2026-11-10T10:17:18+00:00 · codex-stock-rescue-20261110-r2 · task.update:NAT-012
-  - NAT-012: Stock-only fresh-session restore passed exit0 with EndSession/reboot results0. Android boot_completed=1; root full RECOVERY hash matches original; user0 RUNNING_UNLOCKED and services/data directory metadata available. No personal contents read.
 - 2026-11-10T10:17:26+00:00 · codex-stock-rescue-20261110-r2 · task.done:NAT-012
   - NAT-012: Stock-only fresh-session restore passed exit0 with EndSession/reboot results0. Android boot_completed=1; root full RECOVERY hash matches original; user0 RUNNING_UNLOCKED and services/data directory metadata available. No personal contents read.
 - 2026-11-10T10:17:36+00:00 · codex-stock-rescue-20261110-r2 · project.permit:native
@@ -320,6 +314,14 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
   - NAT-016: Append-only host archive implemented. 9 real pipe/process controls pass, including fragmented/repeated boots, malformed streams, SIGKILL and 80 boots under 32 FDs. make check passed 210 tests. No phone operation or qualified native channel.
 - 2026-11-10T10:44:21+00:00 · codex-earlylogs-20261110-r3 · task.done:NAT-016
   - NAT-016: Append-only host archive implemented. 9 real pipe/process controls pass, including fragmented/repeated boots, malformed streams, SIGKILL and 80 boots under 32 FDs. make check passed 210 tests. No phone operation or qualified native channel.
+- 2026-11-10T11:04:31+00:00 · codex-nat006-main-20261110-r4 · task.add:NAT-018
+  - NAT-018: pending
+- 2026-11-10T11:04:46+00:00 · codex-nat006-main-20261110-r4 · task.claim:NAT-018
+  - NAT-018: in_progress
+- 2026-11-10T11:07:45+00:00 · codex-nat006-main-20261110-r4 · task.update:NAT-018
+  - NAT-018: Integrated nine-file NAT-006 final tree into main via squash. Executable source/evidence preserved; handoff serials redacted with historical-status annotation. 4 recovery tests, 20 saved-image verifier checks and make check 214 tests passed; no phone I/O.
+- 2026-11-10T11:08:07+00:00 · codex-nat006-main-20261110-r4 · task.done:NAT-018
+  - NAT-018: Integrated nine-file NAT-006 final tree into main via squash. Executable source/evidence preserved; handoff serials redacted with historical-status annotation. 4 recovery tests, 20 saved-image verifier checks and make check 214 tests passed; no phone I/O.
 
 Use a unique owner per agent session. Atomically take ready work:
 
