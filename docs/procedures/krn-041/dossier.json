@@ -21,7 +21,7 @@
         "_pmap_cs_configuration": "extern int pmap_cs_configuration(void); osfmk/vm/pmap.h:902"
       },
       "apple_consumer": "Not in public source. Kexts that would write PPL-filtered MMIO registers (has_iofilter) and code-signing clients reporting pmap_cs settings (cs_configuration); unverified inference from vm/pmap.h comments.",
-      "required_implementation": "Definition with the declared signature. Semantics derived from this pmap: pmap_iofilter_protected_write() panics 'called on an unsupported platform' (osfmk/arm/pmap/pmap.c:12354), and vm/pmap.h:856-871 says support is what has_iofilter reports, so false. No PMAP_CS or XNU_MONITOR (pexpert/arm64/board_config.h defines them only for T6000/T8101/T8103) means no pmap_cs monitor; vm/pmap.h:889-902 makes 0 the default answer and warns it never means secure.",
+      "required_implementation": "Definition with the declared signature. Semantics derived from this pmap: pmap_iofilter_protected_write() panics 'called on an unsupported platform' (osfmk/arm/pmap/pmap.c:12354), and vm/pmap.h:845-871 says support is what has_iofilter reports, so false. No PMAP_CS or XNU_MONITOR (pexpert/arm64/board_config.h defines them only for T6000/T8101/T8103) means no pmap_cs monitor; vm/pmap.h:891-902 makes 0 the default answer and warns it never means secure.",
       "abi": "Plain C, AAPCS64: bool in w0 (0/1), int in w0. No state.",
       "source": "Declarations osfmk/vm/pmap.h:856 and :902. x86_64 bodies osfmk/x86_64/pmap.c:3405 (return 0) and :3419 (return false). arm64: none public; KRN-041 0001 adds them next to pmap_iofilter_protected_write.",
       "fix": "0001-arm-pmap-unsupported-queries.patch, guarded to builds with no PMAP_CS, no XNU_MONITOR and no force-loaded closed library."

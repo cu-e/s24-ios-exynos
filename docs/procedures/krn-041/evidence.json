@@ -1,0 +1,331 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-10T04:50:05+00:00",
+ "summary": "KRN041-002 run-003: 39 of 39 checks pass. None of the 37 missing exports is defined or referenced by any of the 1049 inputs of the STR-041 link, by project/HakiOS/S24-port driver code, or (KRN-024 RELEASE link) by anything but the export list. 0001 adds source-backed arm64 stubs for the two declared pmap queries (each compiles to mov w0,#0; ret); 0002 removes the 35 undeclared names from Private.arm64.exports for E1S/BCM2837 only. With a copy of the STR-041 kernel relinked with the stub object, the genuine kextsymboltool passes both check_all_exports passes and all seven symbol sets with the profile, and a RELEASE-style export-list link has no undefined symbol; with genuine lists it misses exactly 37 (STR-041) or 35 (relinked).",
+ "task": "KRN-041",
+ "experiment": "KRN041-002",
+ "owner": "claude-export-dossier-20261110-x41",
+ "commit": "7506b40735beac3cee6015dc9c7569d906a13305",
+ "branch": "team/krn-041-missing-exports-20261110",
+ "worktree": "worktrees/krn-041-missing-exports-20261110",
+ "sources": {
+  "apple-xnu": "c54f35ca767986246321eb901baf8f5ff7923f6a",
+  "scion-avf": "a6f4bc38aa244359cd365c976244a88c9d6b3304",
+  "s24-port": "c8860decc62c6d6180e609036d027a2997972420",
+  "hakios-e1s-tools": "d82c64a3a31cd27a0a0afbf6e213e467e44b1b4c"
+ },
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/krn-041/missing_exports.py",
+    "--run",
+    "run-003",
+    "--guest-kernel",
+    "/home/egor/dev/pet/s24-ios-exynos/references/hakios-scion-full/prebuilt/hakios-kernel"
+   ],
+   "cwd": "worktrees/krn-041-missing-exports-20261110",
+   "exit_code": 0,
+   "note": "registered run (KRN041-002)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/krn-041/missing_exports.py",
+    "--run",
+    "run-002",
+    "--guest-kernel",
+    ".../prebuilt/hakios-kernel"
+   ],
+   "cwd": "worktrees/krn-041-missing-exports-20261110",
+   "exit_code": 0,
+   "note": "same commit; executed before KRN041-002 was registered (shell error in the registry call); not used as evidence"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/krn-041/missing_exports.py",
+    "--run",
+    "run-001",
+    "--guest-kernel",
+    ".../prebuilt/hakios-kernel"
+   ],
+   "cwd": "worktrees/krn-041-missing-exports-20261110",
+   "exit_code": 0,
+   "note": "KRN041-001, commit f0e3819, 36 checks, without the RELEASE-style link"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/krn-041/missing_exports.py",
+    "--run",
+    "dev-001"
+   ],
+   "cwd": "worktrees/krn-041-missing-exports-20261110",
+   "exit_code": 1,
+   "note": "tool defects: kernel functions show as nm type S; Linux lseek(/dev/null) returns 0"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/krn-041/missing_exports.py",
+    "--run",
+    "dev-002|dev-003|dev-004"
+   ],
+   "cwd": "worktrees/krn-041-missing-exports-20261110",
+   "exit_code": 0,
+   "note": "development iterations; not evidence"
+  }
+ ],
+ "child_command_exit_codes": {
+  "git": {
+   "0": 4
+  },
+  "nm-scan": {
+   "0": 6
+  },
+  "nm": {
+   "0": 8
+  },
+  "xnu-grep": {
+   "1": 19,
+   "0": 5
+  },
+  "patch": {
+   "0": 4
+  },
+  "compile": {
+   "0": 2
+  },
+  "otool": {
+   "0": 3
+  },
+  "relink": {
+   "0": 2,
+   "1": 1
+  },
+  "generate_linker_exports": {
+   "0": 2
+  },
+  "kextsymboltool-cc": {
+   "0": 1
+  },
+  "kextsymboltool-ld": {
+   "0": 1
+  },
+  "allsymbols": {
+   "0": 3
+  },
+  "check_all_exports": {
+   "0": 5,
+   "1": 9
+  },
+  "symbolset": {
+   "0": 13,
+   "1": 1
+  }
+ },
+ "max_child_rss_kib": 297692,
+ "checks": {
+  "pin apple-xnu": true,
+  "pin scion-avf": true,
+  "pin s24-port": true,
+  "pin hakios-e1s-tools": true,
+  "37 names = KRN-040 missing set": true,
+  "native E1S tree export files = upstream": true,
+  "KRN-040 tree export files = upstream": true,
+  "no arm64 iPhoneOS platform export files": true,
+  "dossier covers exactly the 37 names": true,
+  "stubbed names": true,
+  "RELEASE link: the only referrer of each name is the exported symbols list": true,
+  "scanner control: _panic is referenced by link inputs": true,
+  "every name has exactly one export-list line": true,
+  "no link input defines or references any of the 37": true,
+  "no consumer in project/HakiOS/S24-port code": true,
+  "guard admits every profile removal": true,
+  "guard rejects names with a provider, references or a public declaration": true,
+  "0002 removes exactly the dossier removals and nothing else": true,
+  "profile changes only Private.arm64.exports": true,
+  "0002 = S24-port 0009 for Private.arm64.exports": true,
+  "S24-port 0009 also removes the two stubbed names from Private.exports": true,
+  "control compile reproduces the original pmap.o external symbols": true,
+  "control compile used the original headers": true,
+  "patched pmap.o adds exactly the two stubs": true,
+  "control compile: __TEXT,__text byte-identical to the STR-023 pmap.o": true,
+  "stub machine code returns 0 and nothing else": true,
+  "relinked image keeps segment order and type": true,
+  "relinked image has no undefined symbols": true,
+  "relinked image exports exactly the STR-041 set plus the two stubs, defined": true,
+  "all-kpi.exp from the genuine lists = STR-041 bytes": true,
+  "RELEASE-style link, genuine lists: fails on exactly the 35, referenced only by the export list": true,
+  "RELEASE-style link, profile lists: links with no undefined symbol": true,
+  "host control: literal -output /dev/null fails only in seekFile, with no missing name": true,
+  "check_all_exports str041+genuine: second pass misses exactly 37": true,
+  "check_all_exports str041+profile: second pass misses exactly 2": true,
+  "check_all_exports relinked+genuine: second pass misses exactly 35": true,
+  "check_all_exports relinked+profile: second pass misses exactly 0": true,
+  "genuine lists: only the Private symbol set fails, on all 37": true,
+  "profile + stubs: all seven symbol sets build": true
+ },
+ "results": {
+  "check_all_exports": {
+   "str041+genuine": {
+    "without-Private": {
+     "exit_code": 0,
+     "missing": 0
+    },
+    "without-Unsupported": {
+     "exit_code": 1,
+     "missing": 37
+    }
+   },
+   "str041+profile": {
+    "without-Private": {
+     "exit_code": 0,
+     "missing": 0
+    },
+    "without-Unsupported": {
+     "exit_code": 1,
+     "missing": 2
+    }
+   },
+   "relinked+genuine": {
+    "without-Private": {
+     "exit_code": 0,
+     "missing": 0
+    },
+    "without-Unsupported": {
+     "exit_code": 1,
+     "missing": 35
+    }
+   },
+   "relinked+profile": {
+    "without-Private": {
+     "exit_code": 0,
+     "missing": 0
+    },
+    "without-Unsupported": {
+     "exit_code": 0,
+     "missing": 0
+    }
+   }
+  },
+  "symbol_sets": {
+   "str041+genuine": {
+    "BSDKernel": 0,
+    "IOKit": 0,
+    "Libkern": 0,
+    "Mach": 0,
+    "MACFramework": 0,
+    "Unsupported": 0,
+    "Private": 1
+   },
+   "relinked+profile": {
+    "BSDKernel": 0,
+    "IOKit": 0,
+    "Libkern": 0,
+    "Mach": 0,
+    "MACFramework": 0,
+    "Unsupported": 0,
+    "Private": 0
+   }
+  },
+  "release_style_links": {
+   "genuine": {
+    "exit_code": 1,
+    "undefined": 35
+   },
+   "profile": {
+    "exit_code": 0,
+    "undefined": 0
+   }
+  },
+  "guest_hakios_prebuilt": {
+   "sha256": "03e794e8e1d389a6abb9bcd2431eaccf9747271ff8c1234922225718c70441e9",
+   "genuine_missing_of_37": 37,
+   "profile_missing_of_37": 2,
+   "other_missing": 94
+  },
+  "stub_words": {
+   "_pmap_cs_configuration": [
+    "52800000",
+    "d65f03c0"
+   ],
+   "_pmap_has_iofilter_protected_write": [
+    "52800000",
+    "d65f03c0"
+   ]
+  },
+  "counts": {
+   "real_implementation_needed_for_our_kernels": 0,
+   "stub": 2,
+   "removed_from_profile": 35
+  }
+ },
+ "artifact_sha256": {
+  "artifacts/krn-041/run-003/report.json": "2195a5a6aed7d579461de87f44375c1edcf7da31cb6d8729bebe7b5feecc978c",
+  "artifacts/krn-041/run-003/relink/kernel.unstripped": "2a26b7d31cf62c057d6b24a671a409c2ebd3619f7c7a734f52fb760a5ef02bb5",
+  "artifacts/krn-041/run-003/compile/patched/pmap.o": "2a2dda05ac2b3f47ccac7df627098b86b2d249817b6dc5f4f989ef60bb0e4ae1",
+  "artifacts/krn-041/run-003/compile/control/pmap.o": "fafc90ef55940a7eccb89a65e9a6d80c99d8dbd151b7d84e5213fc5d5413b0ec",
+  "artifacts/krn-041/run-003/kextsymboltool/kextsymboltool": "390d299d2f9b433723b1cdf635a616bec40d405c17c912bcd2be257d24aeab88",
+  "artifacts/krn-041/run-003/exports/profile/Private.arm64.exports": "dc3a4f304566ce1175c5f24d2ff49f0d0bab4b1682cc5e34391681f55c381192",
+  "artifacts/krn-041/run-003/kpi/profile-all-kpi.exp": "cef532c5420337e294af9d4e226f1ac7a7a974fa6ab107d5a3b3071394cb6a04",
+  "artifacts/krn-041/run-003/release-style-profile/kernel.unstripped": "83357ef7f2aa9b9e4b98b2e8c38a122cd0a23efa4b8998d74e30e60e2b9053c9"
+ },
+ "committed_sha256": {
+  "worktrees/krn-041-missing-exports-20261110/docs/procedures/krn-041/missing_exports.py": "45570212b2a7b7a48ea83d4bea3a94a1183c3caa10b185d89d3bc98c1bd616d5",
+  "worktrees/krn-041-missing-exports-20261110/docs/procedures/krn-041/dossier.json": "3da7c986fb56f75cf74e54db2238da6927ac0c46b951187063e6cbf3a06ca49c",
+  "worktrees/krn-041-missing-exports-20261110/docs/procedures/krn-041/0001-arm-pmap-unsupported-queries.patch": "11248ee1be2c127582b57b8c504f4b4a83bd72446e9b14aebb00ead1e9df5a60",
+  "worktrees/krn-041-missing-exports-20261110/docs/procedures/krn-041/0002-no-apple-soc-library-exports.patch": "fb856912b810e6310434f2fd9709f4d47e22e6069b47d4b3d24baa24ee565ff8",
+  "worktrees/krn-041-missing-exports-20261110/docs/procedures/krn-041/compat/uuid/uuid.h": "24dd4b61a92acde18a9ea0ef6affa023778dc2c5bf7a05fd821a15e09baf8909"
+ },
+ "artifacts": [
+  "artifacts/krn-041/run-003/report.json",
+  "artifacts/krn-041/run-003/relink/kernel.unstripped",
+  "artifacts/krn-041/run-003/compile/patched/pmap.o",
+  "artifacts/krn-041/run-003/compile/control/pmap.o",
+  "artifacts/krn-041/run-003/kextsymboltool/kextsymboltool",
+  "artifacts/krn-041/run-003/exports/profile/Private.arm64.exports",
+  "artifacts/krn-041/run-003/kpi/profile-all-kpi.exp",
+  "artifacts/krn-041/run-003/release-style-profile/kernel.unstripped",
+  "worktrees/krn-041-missing-exports-20261110/docs/procedures/krn-041/missing_exports.py",
+  "worktrees/krn-041-missing-exports-20261110/docs/procedures/krn-041/dossier.json",
+  "worktrees/krn-041-missing-exports-20261110/docs/procedures/krn-041/0001-arm-pmap-unsupported-queries.patch",
+  "worktrees/krn-041-missing-exports-20261110/docs/procedures/krn-041/0002-no-apple-soc-library-exports.patch",
+  "worktrees/krn-041-missing-exports-20261110/docs/procedures/krn-041/compat/uuid/uuid.h",
+  "worktrees/krn-041-missing-exports-20261110/research/notes/kernel/KRN-041-missing-exports.md"
+ ],
+ "kernel_booted": false,
+ "device_used": false,
+ "krn026_modified": false,
+ "acceptance": [
+  {
+   "criterion": 1,
+   "assessment": "met: 37-row table in research/notes/kernel/KRN-041-missing-exports.md with all requested columns; Apple-side consumers are marked as inference."
+  },
+  {
+   "criterion": 2,
+   "assessment": "met: genuine kextsymboltool built from c54f35ca and run with the config/Makefile two-pass structure; reproduces KRN-040 (37 missing in the second pass, 0 in the first). Only deviation: -output to a scratch file instead of /dev/null, with a control showing why."
+  },
+  {
+   "criterion": 3,
+   "assessment": "met for the chosen configuration (E1S DEVELOPMENT relinked copy with 0001 + 0002 lists): both passes exit 0, all seven symbol sets build, profile diff is exactly the 35 guard-admitted names, controls fail as expected. Not integrated into the build pipeline; symbolsets.plist in the relinked copy is still from the genuine lists."
+  }
+ ],
+ "limitations": [
+  "Host only; no kernel was booted; the relinked image is a test copy, not an integrated build.",
+  "Contents of Apple lib<MACHINE>.os.<CONFIG>.a not inspected; Apple-side consumers are inferred.",
+  "The guest data point is HakiOS prebuilt/hakios-kernel (upstream-built), not a VM-002 build.",
+  "RELEASE-style link uses DEVELOPMENT objects; it tests export-list resolution only.",
+  "kextsymboltool was compiled with the Android NDK clang 18 and HakiOS hostinc compatibility headers, not on macOS.",
+  "dossier.json citation text (two line ranges) was corrected after run-003; names and decisions are unchanged (verified against 7506b40)."
+ ],
+ "review": "Acceptance assessed by the executing agent in the same session. No independent reviewer."
+}
