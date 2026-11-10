@@ -2,13 +2,13 @@
 
 > Generated from state/lab.json. Use the CLI; do not edit this board or its task cards.
 
-Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-10T20:10:05+00:00.
+Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-10T20:51:23+00:00.
 
-Registry SHA256: `9205954eef74d1d24aed4b11644081d9db27226a127002934204764f2406e565`. Run `python3 tools/lab.py board --check` to detect stale files.
+Registry SHA256: `8b2676b452d04ab4f885655033dd18b65d7b9833da306230109007a4b1c24287`. Run `python3 tools/lab.py board --check` to detect stale files.
 
 [Workflow](docs/planning.md) · [All task details](planning/README.md) · [Machine view](state/board.json) · [Status](STATUS.md)
 
-| Ready (0) | In progress (0) | Blocked (16) | Waiting (15) | Needs authorization (22) | Done (261) |
+| Ready (0) | In progress (0) | Blocked (16) | Waiting (15) | Needs authorization (22) | Done (262) |
 | --- | --- | --- | --- | --- | --- |
 | — | — | [**INT-002**](planning/tasks/INT-002.md) · P100<br>Coordinate kernel build boot and virtualization integration<br>host · claude-takeover-20261110-6c8f<br>Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance (its handoff says the role continues after the gate review). Its gate tool is in main (tools/integration_gate.py, docs/integration/kernel/test_gate.py). The work it waited for has since reached main by direct merges under decision 0002 (STR-024, STR-037, STR-041 1042-body link; VM-047 and REV-047 on 2026-11-10). Without root approval and the multi-integrator protocol it cannot pass its own acceptance. | [**NAT-011**](planning/tasks/NAT-011.md) · P89<br>Trigger S5E9945 PMU SWRESET with SEC_RESET_REASON_UNKNOWN on RECOVERY loader exit/halt so S-Boot clears persistent param(0) REBOOT_MODE=4<br>host · unassigned<br>Dependencies: NAT-009 | [**NAT-017**](planning/tasks/NAT-017.md) · P97<br>Qualify an independent early-log canary and per-reset retention before any further XNU attempt<br>native · unassigned<br>Scope not authorized: native | [**KRN-009**](planning/tasks/KRN-009.md) · P100<br>Implement actual atomic type metadata for genuine selected XNU allocator uses<br>host · codex-compiler-atomics-20261105-t |
 | — | — | [**INT-003**](planning/tasks/INT-003.md) · P100<br>Coordinate crypto drivers and platform integration<br>host · claude-takeover-20261110-6c8f<br>Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance. It depends on the stopped root/CM approval protocol, so its acceptance (serialized grants, original owners closing their tasks) cannot be met any more. Remaining component work (provider TUs, archives, link and private ABI) belongs to those component tasks. Handoff: worktrees/int-platform-20261106/docs/integration/platform/native-provider-headers98-review/handoff.md. | [**GPU-007**](planning/tasks/GPU-007.md) · P70<br>Implement and build the Xclipse native kernel backend<br>host · unassigned<br>Dependencies: KRN-001; Paths reserved by: GPU-012 | [**NAT-003**](planning/tasks/NAT-003.md) · P50<br>Run the first native BOOT session with logs and recovery<br>native · unassigned<br>Scope not authorized: native; Dependencies: NAT-004, KRN-001; Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001 | [**KRN-025**](planning/tasks/KRN-025.md) · P100<br>Build and qualify genuine selected cc_kext compiler runtime<br>host · codex-team-cc-runtime-20261105-az |
@@ -111,6 +111,7 @@ Registry SHA256: `9205954eef74d1d24aed4b11644081d9db27226a127002934204764f2406e5
 | — | — | — | — | — | [**NAT-029**](planning/tasks/NAT-029.md) · P98<br>Derive the payload kernel&#x27;s return-to-loader contract (XNULDRST slot, asm and C checkpoints, loader_log, early-exception report) from the real payload and decide what a log transport can use<br>host · claude-nat029-20261110-krnret |
 | — | — | — | — | — | [**NAT-030**](planning/tasks/NAT-030.md) · P98<br>Simulate the payload kernel&#x27;s bootstrap on the host: run start_first_cpu from the real payload bytes under a decoder-driven interpreter with an MMU walker, to checkpoints 1-5 and the return into arm_init<br>host · claude-nat029-20261110-krnret |
 | — | — | — | — | — | [**NAT-031**](planning/tasks/NAT-031.md) · P98<br>Prepare the NAT-022 loader-diag-xnu-ckpt image: fill the kernel&#x27;s XNULDRST slot, jump to the real entry, a return stub that reports checkpoints and exceptions, host-tested and held for an image-specific owner decision<br>host · claude-nat031-20261111-ckpt |
+| — | — | — | — | — | [**NAT-032**](planning/tasks/NAT-032.md) · P98<br>Review what the payload kernel executes after asm checkpoint 5 up to the first safe C checkpoint, and design the resume past checkpoint 5 (host source-review; no image built, nothing run on the phone)<br>host · claude-nat032-20261111-cpath |
 | — | — | — | — | — | [**KRN-006**](planning/tasks/KRN-006.md) · P97<br>Harden experimental XNU compiler AST and whole-kernel expression coverage<br>host · codex-compiler-hardening-20261105-q |
 | — | — | — | — | — | [**KRN-014**](planning/tasks/KRN-014.md) · P97<br>Qualify genuine kernel firehose header exports against the selected archive profile<br>host · codex-firehose-headers-20261105-y |
 | — | — | — | — | — | [**KRN-015**](planning/tasks/KRN-015.md) · P97<br>Generate matched experimental compiler ARM NEON resource headers for genuine APFS code<br>host · codex-resource-headers-20261105-z |
@@ -297,14 +298,6 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 
 ## Recent activity
 
-- 2026-11-10T15:13:45+00:00 · claude-nat022-20261110-diag · task.claim:NAT-026
-  - NAT-026: in_progress
-- 2026-11-10T15:21:23+00:00 · claude-nat022-20261110-diag · task.done:NAT-026
-  - NAT-026: done
-- 2026-11-10T16:04:41+00:00 · claude-nat022-20261110-diag · task.add:NAT-027
-  - NAT-027: pending
-- 2026-11-10T16:05:00+00:00 · claude-nat022-20261110-diag · task.claim:NAT-027
-  - NAT-027: in_progress
 - 2026-11-10T16:11:04+00:00 · claude-nat022-20261110-diag · task.update:NAT-027
   - NAT-027: Run 005 recorded; fix built, host-verified, packaged, driver gated; evidence-nat027.json written
 - 2026-11-10T16:19:25+00:00 · claude-nat022-20261110-diag · task.done:NAT-027
@@ -337,6 +330,14 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
   - NAT-031: Design fixed after reading patch_loader.py, xnu_stub.S, markerlib.c and the NAT-030 model: no entry stub (the kernel&#x27;s own first word runs); slot filled by scanning the copied segments; return stub in the loader image saves x0..x30+SP+SCTLR+VBAR, switches to the loader stack and VBAR, draws a new CKPT marker, resumes asm checkpoints 1..4 (MMU off) through slot[2]=N+1, and holds at 5 (first MMU-on point; resuming there would need code in the kernel&#x27;s TTBR0 map). C checkpoints are not used (not modelled past 10).
 - 2026-11-10T20:09:48+00:00 · claude-nat031-20261111-ckpt · task.done:NAT-031
   - NAT-031: Design fixed after reading patch_loader.py, xnu_stub.S, markerlib.c and the NAT-030 model: no entry stub (the kernel&#x27;s own first word runs); slot filled by scanning the copied segments; return stub in the loader image saves x0..x30+SP+SCTLR+VBAR, switches to the loader stack and VBAR, draws a new CKPT marker, resumes asm checkpoints 1..4 (MMU off) through slot[2]=N+1, and holds at 5 (first MMU-on point; resuming there would need code in the kernel&#x27;s TTBR0 map). C checkpoints are not used (not modelled past 10).
+- 2026-11-10T20:29:15+00:00 · claude-nat032-20261111-cpath · task.add:NAT-032
+  - NAT-032: pending
+- 2026-11-10T20:29:23+00:00 · claude-nat032-20261111-cpath · task.claim:NAT-032
+  - NAT-032: in_progress
+- 2026-11-10T20:50:38+00:00 · claude-nat032-20261111-cpath · task.update:NAT-032
+  - NAT-032: README + evidence written; 15 host tests pass; resume at asm checkpoint 5 designed (MMU-off branch to site5-28, no trampoline) and differential-checked in the NAT-030 model; static reach after cp5 listed; unknowns and NAT-033 proposal recorded; nothing built or run on the phone
+- 2026-11-10T20:51:14+00:00 · claude-nat032-20261111-cpath · task.done:NAT-032
+  - NAT-032: README + evidence written; 15 host tests pass; resume at asm checkpoint 5 designed (MMU-off branch to site5-28, no trampoline) and differential-checked in the NAT-030 model; static reach after cp5 listed; unknowns and NAT-033 proposal recorded; nothing built or run on the phone
 
 Use a unique owner per agent session. Atomically take ready work:
 

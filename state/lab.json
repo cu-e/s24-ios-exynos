@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T20:09:48+00:00",
+  "updated_at": "2026-11-10T20:51:14+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -12806,6 +12806,45 @@
       "evidence": "docs/procedures/nat-022/evidence-nat031.json",
       "evidence_sha256": "f3d9c5896ec472cfcb67896e3ad45b7c4645347e7fdd621fd8904aee2ae31999",
       "finished_at": "2026-11-10T20:09:48+00:00"
+    },
+    {
+      "id": "NAT-032",
+      "status": "done",
+      "owner": "claude-nat032-20261111-cpath",
+      "title": "Review what the payload kernel executes after asm checkpoint 5 up to the first safe C checkpoint, and design the resume past checkpoint 5 (host source-review; no image built, nothing run on the phone)",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 98,
+      "depends_on": [
+        "NAT-031"
+      ],
+      "paths": [
+        "docs/procedures/nat-032",
+        "artifacts/nat-032"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "From the real payload bytes (capstone cross-checked), list the kernel code reached from the continuation of asm checkpoint 5 up to C checkpoint 11 and inside loader_jump/loader_checkpoint: functions called, every system-register write, SIMD use, and every memory access that can hit a device (MMIO) or leave the loader's window, each marked modelled / not modelled by the NAT-030 interpreter; calls into gic_v3_irq_quiesce and its register reach are resolved or explicitly marked unknown.",
+        "Run 008 (decision 0016) results that constrain the design (checkpoint 5 reached with the kernel's TTBR0 identity map and TTBR1 as modelled; the stub holds there) are used; the NAT-030 model is extended only as far as the next run needs.",
+        "A design for resuming at checkpoint 5 is written and host-checked as far as the model allows: where a trampoline can live inside the kernel copy's identity-mapped range (the 725-NOP sled at the entry is the candidate), the SCTLR/M re-enable sequence, and the cache maintenance on the slot line with the order that cannot let a stale kernel-cached line or a clean overwrite the new value, plus the stop/hold policy for the first C checkpoint; every unmodelled step is listed as an unknown for the decision request.",
+        "No image is built for the phone, flashed or run here. If an image is proposed, a separate task and an image-specific owner decision (hashes, device access, risks, recovery, Not granted) come first."
+      ],
+      "steps": [
+        "Trace the code path after checkpoint 5 and list its hardware reach",
+        "Check which parts the NAT-030 model covers and where it stops",
+        "Design the resume trampoline and cache sequence, list unknowns",
+        "Write the report and the next-image proposal"
+      ],
+      "started_at": "2026-11-10T20:29:23+00:00",
+      "last_heartbeat": "2026-11-10T20:50:38+00:00",
+      "updated_at": "2026-11-10T20:51:14+00:00",
+      "progress_note": "README + evidence written; 15 host tests pass; resume at asm checkpoint 5 designed (MMU-off branch to site5-28, no trampoline) and differential-checked in the NAT-030 model; static reach after cp5 listed; unknowns and NAT-033 proposal recorded; nothing built or run on the phone",
+      "next_step": "complete with docs/procedures/nat-032/evidence.json; NAT-033 and decision 0017 are separate",
+      "evidence": "docs/procedures/nat-032/evidence.json",
+      "evidence_sha256": "1095186cdc173d984a08939dc4b8bdd41f8ec07ff9b23878063969cf31015b1b",
+      "finished_at": "2026-11-10T20:51:14+00:00"
     }
   ],
   "experiments": [
@@ -56515,6 +56554,65 @@
           "next_step": "Write src/ckpt_stub.S + ckpt.c/h, marker kind CKPT=11, patch_loader --ckpt, host tests against the NAT-030 interpreter, build twice, package, gated driver, decision question.",
           "last_heartbeat": "2026-11-10T19:16:58+00:00",
           "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T20:29:15+00:00",
+      "action": "task.add:NAT-032",
+      "owner": "claude-nat032-20261111-cpath",
+      "tasks": [
+        {
+          "id": "NAT-032",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T20:29:23+00:00",
+      "action": "task.claim:NAT-032",
+      "owner": "claude-nat032-20261111-cpath",
+      "tasks": [
+        {
+          "id": "NAT-032",
+          "status": "in_progress",
+          "owner": "claude-nat032-20261111-cpath",
+          "priority": 98,
+          "last_heartbeat": "2026-11-10T20:29:23+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T20:50:38+00:00",
+      "action": "task.update:NAT-032",
+      "owner": "claude-nat032-20261111-cpath",
+      "tasks": [
+        {
+          "id": "NAT-032",
+          "status": "in_progress",
+          "owner": "claude-nat032-20261111-cpath",
+          "priority": 98,
+          "progress_note": "README + evidence written; 15 host tests pass; resume at asm checkpoint 5 designed (MMU-off branch to site5-28, no trampoline) and differential-checked in the NAT-030 model; static reach after cp5 listed; unknowns and NAT-033 proposal recorded; nothing built or run on the phone",
+          "next_step": "complete with docs/procedures/nat-032/evidence.json; NAT-033 and decision 0017 are separate",
+          "last_heartbeat": "2026-11-10T20:50:38+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T20:51:14+00:00",
+      "action": "task.done:NAT-032",
+      "owner": "claude-nat032-20261111-cpath",
+      "tasks": [
+        {
+          "id": "NAT-032",
+          "status": "done",
+          "owner": "claude-nat032-20261111-cpath",
+          "priority": 98,
+          "progress_note": "README + evidence written; 15 host tests pass; resume at asm checkpoint 5 designed (MMU-off branch to site5-28, no trampoline) and differential-checked in the NAT-030 model; static reach after cp5 listed; unknowns and NAT-033 proposal recorded; nothing built or run on the phone",
+          "next_step": "complete with docs/procedures/nat-032/evidence.json; NAT-033 and decision 0017 are separate",
+          "last_heartbeat": "2026-11-10T20:50:38+00:00"
         }
       ]
     }

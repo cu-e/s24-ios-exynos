@@ -1,0 +1,100 @@
+{
+ "kind": "source-review",
+ "also": [
+  "host-test"
+ ],
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T02:10:00+00:00",
+ "commit": "035372d (HEAD when recorded; the files listed below are committed afterwards together with this record)",
+ "tree_state": "NAT-032 files uncommitted when recorded; committed with this record",
+ "owner": "claude-nat032-20261111-cpath",
+ "summary": "Host only: nothing was built for, flashed to, run on or read from the phone, and no decision was requested. From the real payload bytes (capstone) and the NAT-030 instruction-level model, the code the kernel runs after assembly checkpoint 5 up to the first safe C checkpoint (11) was listed, and a resume at checkpoint 5 was designed and checked in the model: the stub branches MMU-off to the kernel's own MMU-enable block 28 bytes before the checkpoint-5 macro (0xfffffff00743e454) with slot[2] set to 11 under a civac/dsb/str/dsb/civac/dsb sequence and every live register and SP restored, which makes the trampoline ideas (NAT-029 'restore M in the stub', the 725-NOP sled) unnecessary because the loader image (about 0x801a0000) is outside the kernel's TTBR0 identity range 0x9e1400000..0x9fe200000. The resumed run equals the uninterrupted run in registers, system registers and RAM for two junk values with no taint violation; the obvious resume at site+60 with the MMU off fails; an unchanged slot stops again; a wrong x21 diverges. The model reaches the call of loader_checkpoint(10) in 275 steps after the resume (arm_set_kernel_tbi, memmove, loader_checkpoint) and stops at the first SIMD instruction in cpu_data_init+0x10. Statically the first PE_init_platform(0, args) call path (46 functions without the panic and vm_initialized edges) has no system-register access, no svc/hvc/smc, no tlbi/dc/ic and two jump-table indirect branches; gic_v3_irq_quiesce is a no-op because gicd_base is 0 and its only direct writer is outside the path. The C path arrives MMU-on in a private 2 MiB Normal-WB block (MAIR byte 0 = 0xff) and needs a stub prologue that clears SCTLR_EL1.M; it is not resumable. Not established: any behaviour of the S24 past checkpoint 5.",
+ "acceptance": {
+  "1_reach_list": "README 'Established' items 4-8 and the static reach table; artifacts/nat-032/reach-after5.json (depth 4, over-approximate: direct bl and tail b only, no indirect calls). Per function: system-register reads/writes, SIMD count, svc/hvc/smc, dc/ic/tlbi, indirect branches. Modelled/not modelled is stated per class in the README (NAT-030 models registers, MMU walk and RAM inside the window; not caches, TLB, exceptions, timers, SIMD, devices). gic_v3_irq_quiesce resolved (no-op, gicd_base = 0); the panic-path MMIO (redwood_*_quiesce, psci_smp_stop_others) is explicitly marked not analysed.",
+  "2_run008_constraints": "Run 008 (native-attempt-008-evidence.json) used: checkpoint 5 reached, TTBR1/TCR/VBAR equal the model, SCTLR differs in bits 5 (CP15BEN) and 7 (ITD) only (hypothesis, not verified). The model was not extended; after5.py reuses kstart_sim.py unchanged.",
+  "3_resume_design": "README 'Design': branch target site5-28 (MMU off, kernel's own code in the identity range) instead of a trampoline; cache sequence on the slot line; stop/hold policy (cp11 final, no C resume); C-arrival prologue requirements; unknowns list. Host-checked by ResumeAtFive (7 tests).",
+  "4_no_image": "No image built, flashed or run; next image proposed as NAT-033, which needs its own task and an image-specific decision 0017."
+ },
+ "commands": [
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-032/test_nat032.py"
+   ],
+   "exit_code": 0,
+   "note": "15 tests OK with capstone (scratch virtualenv outside the repository)",
+   "log": "artifacts/nat-032/logs/test-capstone.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-032/test_nat032.py"
+   ],
+   "exit_code": 0,
+   "note": "no capstone: all 15 skipped",
+   "log": "artifacts/nat-032/logs/test-system.log"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-032/after5.py",
+    "--out",
+    "artifacts/nat-032/reach-after5.json"
+   ],
+   "exit_code": 0,
+   "note": "static reach (depth 4) and the model run to the call of loader_checkpoint(10)",
+   "log": "artifacts/nat-032/logs/after5-run.log"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "214 repository tests OK (does not run docs/procedures tests)",
+   "log": "artifacts/nat-032/logs/make-check.log"
+  }
+ ],
+ "sha256": {
+  "docs/procedures/nat-032/after5.py": "35d98932f2c5911fe0d86887ce4f142d7128212b48c8ae0d447d4aa99e2bd3f4",
+  "docs/procedures/nat-032/test_nat032.py": "99dab6e05b063a0e3a32102f46c9fdbafbed5d8112e61ecea3fc247f1d326468",
+  "docs/procedures/nat-032/README.md": "8173f681df43353aa5cba9225f4b26e50f91c7c0c27f1d78804e359d84d608e5",
+  "artifacts/nat-032/reach-after5.json": "04034a6ea0abe6998f5fc434a296b8f68fb9ed724a6925956d67c84e5bd88660",
+  "artifacts/nat-032/logs/test-capstone.log": "65fa6c536eb1b4494f3be29aeb2f9f29955a881ed24c36f90dc9ffeae15d2b67",
+  "artifacts/nat-032/logs/test-system.log": "0fb6a5eae17c821ec9d57ecdcd38cb7bed6b15782dd58fcdee37f1a73ca5236d",
+  "artifacts/nat-032/logs/make-check.log": "cef5cddcddf977ac12b1dddac72da2d7dbf8386977af24b7ee754848592958d9",
+  "artifacts/nat-032/logs/after5-run.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-020/build-003/payload.bin": "071bc632f7af0a6aa9b11a679c1d5a951ee80943be11669326949d0725caf544",
+  "artifacts/nat-029/payload-analysis.json": "a2578eadd81a13c55928cdd8c5269e9b9158b62981ecbed2306822fb1c57c137",
+  "docs/procedures/nat-030/kstart_sim.py": "05a946740f5bb91e21c1daec546e1d9061b848729f7cedb13cca905a2714567a",
+  "docs/procedures/nat-029/analyze_payload.py": "2fe190780b14628b4d3fa258104d83251a060e53a1bd9697f320de05c9857280"
+ },
+ "artifacts": [
+  "artifacts/nat-032/reach-after5.json",
+  "artifacts/nat-032/task.json",
+  "artifacts/nat-032/logs/test-capstone.log",
+  "artifacts/nat-032/logs/test-system.log",
+  "artifacts/nat-032/logs/after5-run.log",
+  "artifacts/nat-032/logs/make-check.log"
+ ],
+ "established": [
+  "Resume at checkpoint 5 by re-executing the kernel's own MMU-enable block (site5 - 28, MMU off) equals the uninterrupted run in the model; no trampoline needed.",
+  "The loader image is outside the kernel's TTBR0 identity range, so a stub that sets SCTLR_EL1.M itself would fault at its next fetch.",
+  "From the resume to loader_checkpoint(10): 275 model steps, 3 system-register writes (sctlr_el1, cpacr_el1, tpidr_el1), 3 calls.",
+  "C checkpoint 11 is the first safe C stop; the first PE_init_platform(0) call path has no system-register access, no svc/hvc/smc, no cache/TLB maintenance, and two jump-table indirect branches (static, direct-call closure).",
+  "gic_v3_irq_quiesce does nothing at this point (gicd_base == 0 in the payload; its only direct writer is not on the path).",
+  "loader_jump's private block is Normal write-back (MAIR byte 0 = 0xff) with MAIR as modelled; the C arrival has the MMU and caches on."
+ ],
+ "not_established": [
+  "Any behaviour of the S24 past asm checkpoint 5 (cpu_data_init and PE_init_platform: SIMD, caches, TLB, exceptions are not modelled).",
+  "That the resume works on hardware (cache sequence, stack coherence, I-cache coherence for the stub, the SCTLR bits 5/7 difference).",
+  "The MMIO behaviour of the panic path (loader_return, redwood_*_quiesce, psci_smp_stop_others).",
+  "That the stub, its stack and the log lie inside the private 2 MiB block of loader_jump.",
+  "Resumable C checkpoints; anything past checkpoint 11; that XNU boots."
+ ],
+ "next": "NAT-033 (host-tested image: resume past 5 with slot[2] = 11, C-arrival prologue, hold at cp11) then an image-specific owner decision numbered 0017; optional Unicorn run of cp10..cp11 first."
+}
