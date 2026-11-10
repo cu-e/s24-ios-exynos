@@ -1,0 +1,100 @@
+{
+ "kind": "android-userland",
+ "origin": "local-device",
+ "outcome": "pass",
+ "task": "CELL-011",
+ "owner": "claude-takeover-20261110-6c8f",
+ "recorded_at": "2026-11-10T07:46:22+00:00",
+ "device_inventory": "devices/local-2026-11-10-session1.json",
+ "device_identity": {
+  "model": "SM-S921B",
+  "device": "e1s",
+  "incremental": "S921BXXS9BYH3",
+  "build_type": "user"
+ },
+ "summary": "With read-only su, both measured BYH3 vendor RIL libraries were copied to ignored host artifacts. Each host SHA-256 equals the on-device sha256sum, and the sizes equal CELL-010 (5459848 and 134368 bytes). Both are ELF64 AArch64 shared objects. Nothing was written to the phone or executed.",
+ "commit": "69711de1e21b42189641fc65622298c0069816b9",
+ "files": {
+  "/vendor/lib64/libsec-ril.so": {
+   "bytes": 5459848,
+   "sha256": "fa4c0b63dfb37f91af77710bc8ba4cea064a00adc3707ca2d2ab0e51df4c04ae",
+   "elf": "ELF64 AArch64 DYN"
+  },
+  "/vendor/lib64/libsecril-client.so": {
+   "bytes": 134368,
+   "sha256": "458cb6bec12d340d6576a13bf5e5f499fd86061b08087c0cef91642309d8adfb",
+   "elf": "ELF64 AArch64 DYN"
+  }
+ },
+ "commands": [
+  {
+   "argv": [
+    "adb",
+    "-t",
+    "<transport>",
+    "shell",
+    "getprop",
+    "ro.product.model|ro.product.device|ro.build.version.incremental|ro.build.type"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "-t",
+    "<transport>",
+    "shell",
+    "su -c 'sha256sum <2 files>; stat -c \"%n %s %F\" <2 files>'"
+   ],
+   "exit_code": 0,
+   "output": "artifacts/ril-root-capture/session-001/remote.txt"
+  },
+  {
+   "argv": [
+    "adb",
+    "-t",
+    "<transport>",
+    "exec-out",
+    "su -c 'cat /vendor/lib64/libsec-ril.so'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "-t",
+    "<transport>",
+    "exec-out",
+    "su -c 'cat /vendor/lib64/libsecril-client.so'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "sha256sum",
+    "llvm-readelf -h (NDK 28.2)"
+   ],
+   "exit_code": 0
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/ril-root-capture/README.md",
+  "artifacts/ril-root-capture/session-001/remote.txt",
+  "artifacts/ril-root-capture/session-001/libsec-ril.so",
+  "artifacts/ril-root-capture/session-001/libsecril-client.so",
+  "devices/local-2026-11-10-session1.json"
+ ],
+ "sha256": {
+  "docs/procedures/ril-root-capture/README.md": "293d9f15eb369efde580d46c5a07d7087a1c40232bbf7bc28cb241abc0dcc669",
+  "artifacts/ril-root-capture/session-001/remote.txt": "bd5d243cc8133376acc13681701c1c6ed7cb5b5e7dcd5f3e96705ade8d0199c5",
+  "artifacts/ril-root-capture/session-001/libsec-ril.so": "fa4c0b63dfb37f91af77710bc8ba4cea064a00adc3707ca2d2ab0e51df4c04ae",
+  "artifacts/ril-root-capture/session-001/libsecril-client.so": "458cb6bec12d340d6576a13bf5e5f499fd86061b08087c0cef91642309d8adfb",
+  "devices/local-2026-11-10-session1.json": "806acc9919a7f84172d93a224f9d5cbea6c9997f329efb0134fed2d577c8a37e"
+ },
+ "binaries_committed": false,
+ "limitations": [
+  "Proprietary binaries are kept local only.",
+  "No analysis of the code is claimed here (CELL-009).",
+  "Root access is not evidence of safety; only reads were issued."
+ ]
+}

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T07:35:27+00:00",
-  "ledger_updated_at": "2026-11-10T07:35:24+00:00",
-  "registry_sha256": "dda23e0d91964928c8834fb4483ecfa6aaae6ffaa7ea94a7c3bb8b481a06045e",
+  "generated_at": "2026-11-10T07:46:30+00:00",
+  "ledger_updated_at": "2026-11-10T07:46:27+00:00",
+  "registry_sha256": "7797fdcc4562bf59bb781651fb073698ac4f7e23c8c38f6ad1bd3d63424e1b88",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -32,6 +32,9 @@
       "GPU-005"
     ],
     "waiting": [
+      "NAT-008",
+      "NAT-009",
+      "NAT-010",
       "GPU-007",
       "GPU-009",
       "AUD-001",
@@ -287,6 +290,7 @@
       "KRN-040",
       "DRV-007",
       "KRN-042",
+      "CELL-011",
       "FND-001",
       "RES-001",
       "DEV-001",
@@ -6624,7 +6628,7 @@
       "column": "in_progress",
       "reasons": [],
       "card_path": "planning/tasks/NAT-006.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "DRV-001",
@@ -8044,6 +8048,39 @@
       "card_path": "planning/tasks/UI-007.md"
     },
     {
+      "id": "NAT-008",
+      "title": "Install and verify host Download Mode flashing tool (odin4/heimdall) for stock RECOVERY restore",
+      "status": "pending",
+      "priority": 90,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-006"
+      ],
+      "paths": [
+        "docs/procedures/nat-008",
+        "artifacts/nat-008"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "Install or provision a verified Linux Samsung Download Mode flashing binary (odin4 or heimdall) on the host and record its exact version, path and SHA-256.",
+        "Verify that the tool parses and validates the NAT-006 restore package (restore/recovery-stock-odin.tar containing stock recovery.img, SHA-256 96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67) on the host without touching the device.",
+        "Document the exact non-destructive Download Mode restore command sequence for NAT-004 hardware qualification."
+      ],
+      "steps": [
+        "Provision odin4 or heimdall on the Linux host and record binary provenance and SHA-256",
+        "Validate tar/image compatibility against artifacts/nat-006/build-002/restore/recovery-stock-odin.tar",
+        "Write host verification report and evidence"
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: NAT-006"
+      ],
+      "card_path": "planning/tasks/NAT-008.md"
+    },
+    {
       "id": "KRN-033",
       "title": "Implement source-qualified AES-GCM streaming modes and managed nonce helpers",
       "priority": 89,
@@ -8127,6 +8164,42 @@
       ],
       "card_path": "planning/tasks/KRN-034.md",
       "report_health": "stale"
+    },
+    {
+      "id": "NAT-009",
+      "title": "Integrate S5E9945 hardware watchdog arming and one-shot PMU recovery-reason clearing into the E1S RECOVERY loader",
+      "status": "pending",
+      "priority": 88,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-006",
+        "NAT-007"
+      ],
+      "paths": [
+        "docs/procedures/nat-009",
+        "artifacts/nat-009"
+      ],
+      "sources": [
+        "s24-linux",
+        "s24-bsp-reference",
+        "s24-port"
+      ],
+      "acceptance": [
+        "Integrate the NAT-007 freestanding S5E9945 watchdog arm/pet/disarm sequence into the E1S RECOVERY loader before XNU handoff so any hang in loader_main, loader_exception or early XNU triggers a bounded hardware SoC reset.",
+        "Verify from Samsung kernel/S-Boot sources and PMU syscon offsets how SEC_RESET_REASON_RECOVERY (0x12345604 in PMU panic_inform) interacts with watchdog reset and ensure the loader clears any sticky recovery reboot marker before jumping to XNU.",
+        "Rebuild and host-verify the updated RECOVERY image with zero C object R_AARCH64_ABS64 relocations."
+      ],
+      "steps": [
+        "Consume NAT-007 watchdog register and PMU syscon definitions",
+        "Patch the E1S loader to arm the hardware watchdog and clear sticky recovery reboot markers",
+        "Verify with host tests and rebuild the NAT-006 RECOVERY image"
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: NAT-006, NAT-007"
+      ],
+      "card_path": "planning/tasks/NAT-009.md"
     },
     {
       "id": "KRN-035",
@@ -9031,6 +9104,39 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/VM-052.md"
+    },
+    {
+      "id": "NAT-010",
+      "title": "Harden E1S loader EL1 MMU/cache state before high-DRAM (0x9de400000) window zeroing and segment copy",
+      "status": "pending",
+      "priority": 85,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-006"
+      ],
+      "paths": [
+        "docs/procedures/nat-010",
+        "artifacts/nat-010"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "Verify whether shim/e1s-xnu/start.S can safely disable SCTLR_EL1.M (cleaning/invalidating active loader stack/data cache lines) before loader_main accesses the high-DRAM window 0x9de400000..0x9fe400000 or whether S-Boot enters at EL1 with SCTLR_EL1.M=0.",
+        "Ensure all zeroed pages in the 512 MiB XNU RAM window (0x9de400000..0x9fe400000), not only copied Mach-O segments and ADT/boot_args, are cache-clean to PoC before SCTLR_EL1.C is cleared prior to jumping to XNU __start.",
+        "Record host verification evidence for the updated loader assembly and C handoff path."
+      ],
+      "steps": [
+        "Audit start.S and loader.c cache/MMU sequence across the 0x9de400000 high-DRAM window",
+        "Patch start.S/loader.c to guarantee PoC coherency across the full zeroed window and safe MMU state",
+        "Run host verification and record evidence"
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: NAT-006"
+      ],
+      "card_path": "planning/tasks/NAT-010.md"
     },
     {
       "id": "AUD-003",
@@ -11345,6 +11451,42 @@
       "card_path": "planning/tasks/KRN-042.md"
     },
     {
+      "id": "CELL-011",
+      "title": "Copy the two measured BYH3 vendor RIL libraries to the host with read-only root (decision 0002 item 3)",
+      "status": "done",
+      "owner": "claude-takeover-20261110-6c8f",
+      "priority": 55,
+      "scope": "android-readonly",
+      "evidence_kind": "android-userland",
+      "depends_on": [],
+      "paths": [
+        "docs/procedures/ril-root-capture",
+        "artifacts/ril-root-capture"
+      ],
+      "acceptance": [
+        "Before any read, the single selected endpoint reports SM-S921B, e1s and S921BXXS9BYH3; otherwise nothing is read.",
+        "Only /vendor/lib64/libsec-ril.so and /vendor/lib64/libsecril-client.so are read, through su with cat and sha256sum only; no write, chmod, mount, setenforce, setprop, service, modem or RIL command is issued and nothing is executed from the files.",
+        "Each copy's host SHA-256 equals the on-device sha256sum and its size equals the CELL-010 measurement (5459848 and 134368 bytes); the bytes stay in ignored artifacts and are never committed or published; only hashes, sizes and ELF header facts are recorded.",
+        "Evidence records the exact commands, exit codes and the device inventory, and states that root access is not proof of safety."
+      ],
+      "sources": [],
+      "steps": [
+        "Identity check",
+        "Two read-only su reads with on-device hashes",
+        "Host hash/size/ELF check and evidence"
+      ],
+      "started_at": "2026-11-10T07:45:44+00:00",
+      "last_heartbeat": "2026-11-10T07:45:44+00:00",
+      "updated_at": "2026-11-10T07:46:27+00:00",
+      "branch": "main",
+      "evidence": "docs/procedures/ril-root-capture/evidence.json",
+      "evidence_sha256": "da5609b16e5a5dbd47c9ac2170ab022771bb755242fd5ec286a872d2a2ded4ac",
+      "finished_at": "2026-11-10T07:46:27+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/CELL-011.md"
+    },
+    {
       "id": "FND-001",
       "title": "Prepare and verify the project foundation",
       "status": "done",
@@ -11833,7 +11975,7 @@
       ],
       "priority": 50,
       "card_path": "planning/tasks/GPU-005.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "DRV-002",
@@ -12998,7 +13140,7 @@
         "id": "NAT-006",
         "status": "in_progress",
         "last_heartbeat": "2026-11-10T07:08:55+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "Resumed NAT-006 in worktrees/nat-006-recovery-image-20261110 from ac22ef5 per owner decision 0004: inventorying saved artifacts, completing verify_image.py and tests, building and verifying the header-v2 recovery image and restore package, and verifying connected device and pre-flash recovery readiness.",
         "next_step": "Complete inventory, finish verify_image.py and tests/test_e1s_recovery.py, run e1s_recovery.py, and verify connected S24 and recovery gate.",
         "handoff": null,
@@ -13055,7 +13197,7 @@
         "id": "GPU-005",
         "status": "blocked",
         "last_heartbeat": "2026-11-10T07:08:15+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "Source pinned and cloned, venv ready, build.py written but never executed (classifier denial)",
         "next_step": "Owner allows or runs the RADV build; then add the app-local loader APK variant",
         "handoff": "research/notes/GPU-005/handoff.md",
@@ -13128,109 +13270,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-10T07:20:33+00:00",
-      "action": "task.block:KRN-043",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "KRN-043",
-          "status": "blocked",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 75,
-          "blocked_reason": "Executing tools/build/e1s_kernel_exports.py (XNU pmap.c compile, relink, kextsymboltool build) was denied by the Claude Code auto-mode classifier (Code from External); needs the owner to allow or run it (docs/procedures/krn-043/README.md)",
-          "last_heartbeat": "2026-11-10T07:20:33+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T07:20:52+00:00",
-      "action": "task.update:KRN-043",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "KRN-043",
-          "status": "blocked",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 75,
-          "progress_note": "Tool written, never executed (classifier denial)",
-          "next_step": "Owner allows or runs the three commands in the README; then record evidence",
-          "blocked_reason": "Executing tools/build/e1s_kernel_exports.py (XNU pmap.c compile, relink, kextsymboltool build) was denied by the Claude Code auto-mode classifier (Code from External); needs the owner to allow or run it (docs/procedures/krn-043/README.md)",
-          "last_heartbeat": "2026-11-10T07:20:52+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/krn-043/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T07:22:31+00:00",
-      "action": "task.claim:VM-003",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "VM-003",
-          "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 50,
-          "last_heartbeat": "2026-11-10T07:22:31+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T07:23:10+00:00",
-      "action": "task.done:VM-003",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "VM-003",
-          "status": "done",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 50,
-          "last_heartbeat": "2026-11-10T07:22:31+00:00",
-          "branch": "main"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T07:26:29+00:00",
-      "action": "task.transfer:VM-014",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "VM-014",
-          "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 90,
-          "progress_note": "Grant31 exact single VMLIBRESOURCEFINAL-002 finished exit0:77 objects/commands PASS, project-budget-v1 resource PASS and no command accounting errors. Raw e18f2ca1; current retained owned survivors0, reservation complete. Frozen result commit89064739952403ae7601a9b533112dfa16793c9e. Grant30 refusal and old incomplete OSKext accounting preserved.",
-          "next_step": "Await CN independent bounded review and root/integrator acceptance plus fresh common/publication; original owner leaves VM-014 open. No rerun, global queue release, task closure, common/link/QEMU.",
-          "last_heartbeat": "2026-11-10T07:26:29+00:00",
-          "branch": "team/vm-014-resource-final-20261106",
-          "worktree": "worktrees/vm-014-resource-final-20261106",
-          "handoff": "worktrees/vm-014-resource-final-20261106/docs/procedures/avf-object-shards/libkern/resource-final/build-002-handoff.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T07:26:58+00:00",
-      "action": "task.done:VM-014",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "VM-014",
-          "status": "done",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 90,
-          "progress_note": "Grant31 exact single VMLIBRESOURCEFINAL-002 finished exit0:77 objects/commands PASS, project-budget-v1 resource PASS and no command accounting errors. Raw e18f2ca1; current retained owned survivors0, reservation complete. Frozen result commit89064739952403ae7601a9b533112dfa16793c9e. Grant30 refusal and old incomplete OSKext accounting preserved.",
-          "next_step": "Await CN independent bounded review and root/integrator acceptance plus fresh common/publication; original owner leaves VM-014 open. No rerun, global queue release, task closure, common/link/QEMU.",
-          "last_heartbeat": "2026-11-10T07:26:29+00:00",
-          "branch": "team/vm-014-resource-final-20261106",
-          "worktree": "worktrees/vm-014-resource-final-20261106",
-          "handoff": "worktrees/vm-014-resource-final-20261106/docs/procedures/avf-object-shards/libkern/resource-final/build-002-handoff.md"
-        }
-      ]
-    },
     {
       "at": "2026-11-10T07:27:30+00:00",
       "action": "task.transfer:VM-019",
@@ -13496,11 +13535,90 @@
           "handoff": "worktrees/vm-033-20261106/docs/procedures/avf-guest-allocator-metadata/handoff.md"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T07:44:24+00:00",
+      "action": "task.add:NAT-008",
+      "owner": "agy-nat006-20261110-aca2",
+      "tasks": [
+        {
+          "id": "NAT-008",
+          "status": "pending",
+          "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:44:32+00:00",
+      "action": "task.add:NAT-009",
+      "owner": "agy-nat006-20261110-aca2",
+      "tasks": [
+        {
+          "id": "NAT-009",
+          "status": "pending",
+          "priority": 88
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:44:40+00:00",
+      "action": "task.add:NAT-010",
+      "owner": "agy-nat006-20261110-aca2",
+      "tasks": [
+        {
+          "id": "NAT-010",
+          "status": "pending",
+          "priority": 85
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:45:36+00:00",
+      "action": "task.add:CELL-011",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "CELL-011",
+          "status": "pending",
+          "owner": null,
+          "priority": 55
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:45:44+00:00",
+      "action": "task.claim:CELL-011",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "CELL-011",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 55,
+          "last_heartbeat": "2026-11-10T07:45:44+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:46:27+00:00",
+      "action": "task.done:CELL-011",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "CELL-011",
+          "status": "done",
+          "owner": "claude-takeover-20261110-6c8f",
+          "priority": 55,
+          "last_heartbeat": "2026-11-10T07:45:44+00:00",
+          "branch": "main"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "43908c735cb95707f40f27abbbeb7432ccce6f4b2773ccd375cd3411d98594e7",
-    "BOARD.md": "8e284dccb8e99d5d07ddd7400f71c5888c573d3078a90c2206672880fee4ec4f",
+    "STATUS.md": "452596892ff710cff7241bd175eec351ce1c6290f763a09502736cc864a91889",
+    "BOARD.md": "b970eb7dee23432df0a49f077ba9c1b30d247c41c45f675b3eb081e76472ee8f",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -13641,7 +13759,7 @@
     "planning/tasks/STR-036.md": "732a4bc320171e9148c4debda9e77920a6868bbfd834e5e2d5b1e1fb8c522a9d",
     "planning/tasks/GPU-013.md": "2822d1f3c75ccfe1ecabdbd106a766f2e6508e7a5022664db9dd3ff3022e92d7",
     "planning/tasks/NAT-005.md": "b078a916eab662fb839780a4d34f4ce047cd47c6c35fe60a6ea80764b7ce4041",
-    "planning/tasks/NAT-006.md": "bfa21396087113f822aabbb60f108ee789628d6d0098a8861d45be35f1aa6622",
+    "planning/tasks/NAT-006.md": "ad48d101e2a57603c30698bab696a2a826209715691e202a8d2eb7dba54da54f",
     "planning/tasks/DRV-001.md": "eaac786b5ca6d0640d7a9bea43bf42424662189e0f9f44baaa6b6ad049f10f17",
     "planning/tasks/KRN-023.md": "a95e56ff9ef7bfa3ff55cf11a48d0bba892cc95ab504b367bc3e9d4490ecdd51",
     "planning/tasks/REV-012.md": "99bf82028acd252050bbe595c74c47d22013dfccb4d261b32b98825471ce86ea",
@@ -13674,8 +13792,10 @@
     "planning/tasks/VM-054.md": "33fe5469744f55ab497906b89a3653bf450bba511ab58baaf5d2c6f245fb2ac1",
     "planning/tasks/NAT-007.md": "65afe708e5475d331a6ec3a7eb88fb5fcb7c4ca37c4128803df23ae7beddde79",
     "planning/tasks/UI-007.md": "a7b5bb6464c8544f80983813d920bc66655a5e68963adfda226f871154b588a5",
+    "planning/tasks/NAT-008.md": "493041fc2e957d89592a90a0ef0f2c7707b54a5790ed876840f87a4640ca017f",
     "planning/tasks/KRN-033.md": "65895b5673cb8432d904647391ec6378b6eafcac42e79bfd6cef92a0dcc4b83f",
     "planning/tasks/KRN-034.md": "216955769016c966a7b2ed1191501a2967d901d5371a7e1ec31f2230896ac5cc",
+    "planning/tasks/NAT-009.md": "4e8a0b34e399a4ae4f2d3abd1670d1c5bf78e58b85df1a13b0de1a3d9c8ed47c",
     "planning/tasks/KRN-035.md": "73d3fdfa9f6c3f1f76fe0f244208e46b40bf7343bf78e2f78223ea9c1c7a98a7",
     "planning/tasks/KRN-036.md": "43b1fb9c66ca2aa223235ea38bf2e400888380c3822a4aca35e67b96cd532020",
     "planning/tasks/KRN-001.md": "d6a9ac3a138345378b4fed606d5814ae2ace8ec42acd424cb4a23f8dc88c4706",
@@ -13696,6 +13816,7 @@
     "planning/tasks/STR-031.md": "89a6ac5cb189888c6a3a1c898865c7de7c4cf19ce3fa27af77963ad93063c6e3",
     "planning/tasks/VM-051.md": "1ce8573da42e1bcb24002aeeed55c3528872f07d707eb704107300beb9a593aa",
     "planning/tasks/VM-052.md": "714929529fd9e53981d1c60eb169badc37ebb01db2918f6861a49eaa913f2977",
+    "planning/tasks/NAT-010.md": "ff14e12bef7fda43cdf40a9dec5f73e7ddd93a6b49bcb8d873d36b1e0d343b61",
     "planning/tasks/AUD-003.md": "4c4e08b858298722a856838980fc435c46852158939305ce38c0a1bc36168942",
     "planning/tasks/CAM-003.md": "0011d7fd53571c5e673da8221ec031aee28c8e10835c86c34411c7c435a02086",
     "planning/tasks/PWR-003.md": "da473ec179dfaab627860f7399d8f29a8514a1123d5a13536f27e9198af03b42",
@@ -13749,6 +13870,7 @@
     "planning/tasks/KRN-040.md": "3078f05d1553121a53783a5f8e7d073b93d9c2917afb3e2ef72f381a782e9d70",
     "planning/tasks/DRV-007.md": "3d06e2678a4b40a3bcfa3cef7473f73c9c6edf9a7084945294f6b98a6951a007",
     "planning/tasks/KRN-042.md": "9a4c9f3acb9abc5a938b6fcfa99883a550a3c9f2df3e6ddf687f9aa26c8b1231",
+    "planning/tasks/CELL-011.md": "aab6d3d32eec01b9cf0d5004a01000984ffd490a36161a7c56fd92d0359ef932",
     "planning/tasks/FND-001.md": "ee81357df48cbcec414e6dc2f58f1325d8936e16bbbe8022d8b771c316d6b0f8",
     "planning/tasks/RES-001.md": "956b0cf0fe59602b13d98565c02c1486438c7f0451c2800e8d5c1a77e8e1d9fe",
     "planning/tasks/DEV-001.md": "387a0fc684445f6526c8517869714a41d884f7be2ebb11738782afaf0b404926",
@@ -13759,7 +13881,7 @@
     "planning/tasks/GPU-002.md": "ed6a2e320b8b805c8d6ec97f1537439282c02f999c4a7542c95e2e31e7b76eca",
     "planning/tasks/GPU-003.md": "7f77e05e13c17ad1261dbe3fb017276f21c548ffcba60cf892c891d37e44469a",
     "planning/tasks/GPU-004.md": "4f7b914361a5ff47439410c701bd907e3a3020383d4b33c91ce59b5fbdab2579",
-    "planning/tasks/GPU-005.md": "90191779582d044468e264c18ccf2993938162d3443cd05ea76a234d1144cc13",
+    "planning/tasks/GPU-005.md": "c614eee33d64e48a0afaf3f661ea764e94463c5f760fdb294fd4a4235a71d11c",
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "25ab0e0a61a6121533586f00a5477d4c679272a706e5f415eccd52eda80ebe15",

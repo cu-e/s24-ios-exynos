@@ -1,0 +1,19 @@
+{
+  "id": "CELL-011",
+  "title": "Copy the two measured BYH3 vendor RIL libraries to the host with read-only root (decision 0002 item 3)",
+  "status": "pending",
+  "owner": null,
+  "priority": 55,
+  "scope": "android-readonly",
+  "evidence_kind": "android-userland",
+  "depends_on": [],
+  "paths": ["docs/procedures/ril-root-capture", "artifacts/ril-root-capture"],
+  "acceptance": [
+    "Before any read, the single selected endpoint reports SM-S921B, e1s and S921BXXS9BYH3; otherwise nothing is read.",
+    "Only /vendor/lib64/libsec-ril.so and /vendor/lib64/libsecril-client.so are read, through su with cat and sha256sum only; no write, chmod, mount, setenforce, setprop, service, modem or RIL command is issued and nothing is executed from the files.",
+    "Each copy's host SHA-256 equals the on-device sha256sum and its size equals the CELL-010 measurement (5459848 and 134368 bytes); the bytes stay in ignored artifacts and are never committed or published; only hashes, sizes and ELF header facts are recorded.",
+    "Evidence records the exact commands, exit codes and the device inventory, and states that root access is not proof of safety."
+  ],
+  "sources": [],
+  "steps": ["Identity check", "Two read-only su reads with on-device hashes", "Host hash/size/ELF check and evidence"]
+}
