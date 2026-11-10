@@ -1,0 +1,59 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-09T20:33:38+00:00",
+  "summary": "Strict primary-GPT admission with no I/O returns extents the READ(10) boundary enforces; 12 tests pass under ASan/UBSan and 43 single-line mutants are killed.",
+  "task": "DRV-005",
+  "owner": "claude-ufs-gpt-20261110-d5",
+  "commit": "0210adb76b51b51e278ca3a0c0299e73d2d5ad5c",
+  "checks_commit": "6d3a79b0784ac5b6403f0f55fec8b3408ec21916",
+  "tests": {
+    "outcome": "pass",
+    "tests": 12
+  },
+  "mutation_count": 43,
+  "mutation_survivors": [],
+  "commands": [
+    {
+      "argv": "python3 src/platform/storage/ufs/gpt_check.py --run check-002",
+      "exit_code": 0,
+      "cwd": "/home/egor/dev/pet/s24-ios-exynos/worktrees/drv-005-ufs-gpt-20261110",
+      "report": "worktrees/drv-005-ufs-gpt-20261110/artifacts/ufs-gpt/check-002/evidence.json"
+    }
+  ],
+  "sha256": {
+    "gpt.h": "135be9e1917199ac6dbd1080a7a745439df918e20ab8de49279639b218ee167a",
+    "gpt.c": "8934f493534a6ccc9eab470a5ac8d9e264d5cdaaa83c81a17013d6482434dc8b",
+    "gpt_test.c": "b047b67861bbcbc3ccde92c79f747ff3581490d0b3b4614b87a3b6cbcb64afd3",
+    "host.h": "4196f00a812f7af110aec05f3daf03e4e4ea9b3cf6b319f64b73ed329749418e",
+    "host.c": "770a8480f069f3e3cea7b8987b1fe126a65d986497a8da782949d8b227035036",
+    "gpt_check.py": "711cc2bcd2c7db8f7524fbe95273ce8a6cb569f0b7a767338695ee0d9d6e65c6"
+  },
+  "artifact_sha256": {
+    "check-002/evidence.json": "46aa7caa414cd0a96ba9a954d3d51c2a8f36e55244eb7639ca27815ffae8f327"
+  },
+  "artifacts": [
+    "worktrees/drv-005-ufs-gpt-20261110/artifacts/ufs-gpt/check-002/evidence.json",
+    "worktrees/drv-005-ufs-gpt-20261110/docs/procedures/ufs-gpt/README.md",
+    "worktrees/drv-005-ufs-gpt-20261110/docs/procedures/ufs-gpt/ram-root.md",
+    "worktrees/drv-005-ufs-gpt-20261110/src/platform/storage/ufs/gpt.c",
+    "worktrees/drv-005-ufs-gpt-20261110/src/platform/storage/ufs/gpt_test.c"
+  ],
+  "device_io": false,
+  "mmio": false,
+  "storage_access": false,
+  "real_gpt_examined": false,
+  "hardware_execution": false,
+  "method_notes": [
+    "An earlier run, check-001, had 7 survivors. Four exposed clauses implied by other checks, which were removed. Three exposed real test gaps, which were closed."
+  ],
+  "limitations": [
+    "Test tables are synthetic: no real S24 GPT was read, so its shape on this device is unknown.",
+    "The backup GPT is not examined.",
+    "UFS PHY, IOMMU and MCQ compatibility are not claimed; nothing touched hardware.",
+    "No independent review of this code was performed.",
+    "The RAM root document is a plan from existing project documents; nothing was built or measured.",
+    "DRV-002 itself stays pending: its registered paths overlap active reservations, so it cannot be claimed."
+  ]
+}
