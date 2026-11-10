@@ -352,7 +352,7 @@ def compile_pmap(out, patched):
                 original_object_sha256=sha(command['object']))
 
 
-def relink(out, pmap_object):
+def relink(out, pmap_object, extra=(), check=True):
     evidence = json.loads((LINK/'evidence.json').read_text())
     command = next(c for c in evidence['commands'] if c.get('role') == 'native-driver-link')['process']
     original_filelist = (LINK/'kernel/link.filelist').read_text().splitlines()
@@ -373,8 +373,19 @@ def relink(out, pmap_object):
     home.mkdir(parents=True)
     env = dict(command['environment'])
     env.update(HOME=str(home), TMPDIR=str(home), TMP=str(home), TEMP=str(home))
-    code, _, err = run('relink kernel', argv, cwd=out, env=env, timeout=600)
-    return kernel, dict(argv_changes=changed, filelist_lines_changed=1, stderr=err[-600:], exit_code=code)
+    argv += list(extra)
+    code, _, err = run('relink kernel '+out.name, argv, cwd=out, env=env, timeout=600, check=check)
+    undefined = dict(re.findall(r'"(_[^"]+)", referenced from:\n\s+(.*)', err))
+    return kernel, dict(argv_changes=changed, filelist_lines_changed=1, extra_args=list(extra), stderr=err[-600:], exit_code=code,
+                        undefined=undefined)
+
+
+def kpi_exp(directory, out):
+    """config/Makefile all-kpi.exp: generate_linker_exports.sh over EXPORTS_FILES plus the Kasan/Kcov lists."""
+    exports = [directory/f'{c}{arch}.exports' for c in COMPONENTS for arch in ('', '.arm64')]
+    run('generate_linker_exports '+out.name, ['sh', XNU/'config/generate_linker_exports.sh', out, *exports, XNU/'config/Unused.exports',
+                                             XNU/'config/Kasan_disabled.exports', XNU/'config/Kcov_disabled.exports'])
+    return out
 
 
 def macho_summary(path):
@@ -553,6 +564,21 @@ def main():
     check('relinked image exports exactly the STR-041 set plus the two stubs, defined',
           names_of(relinked_symbols) - names_of(image) == set(STUBBED) and not names_of(image) - names_of(relinked_symbols)
           and set(STUBBED) <= defined_of(relinked_symbols), sorted(relinked_symbols ^ image))
+
+    # 5b. RELEASE arm64 adds -exported_symbols_list all-kpi.exp (makedefs/MakeInc.def:811-812). Same DEVELOPMENT objects:
+    #     this tests only how ld64 resolves the export list, not a RELEASE kernel.
+    (out/'kpi').mkdir()
+    genuine_exp, profile_exp = kpi_exp(genuine, out/'kpi/genuine-all-kpi.exp'), kpi_exp(profile, out/'kpi/profile-all-kpi.exp')
+    check('all-kpi.exp from the genuine lists = STR-041 bytes', sha(genuine_exp) == sha(LINK/'kernel/all-kpi.exp'))
+    _, release_genuine = relink(out/'release-style-genuine', patched['object'], ['-Wl,-exported_symbols_list,'+str(genuine_exp)], check=False)
+    release_kernel, release_profile = relink(out/'release-style-profile', patched['object'], ['-Wl,-exported_symbols_list,'+str(profile_exp)], check=False)
+    report['release_style_links'] = dict(genuine=release_genuine, profile=release_profile)
+    check('RELEASE-style link, genuine lists: fails on exactly the 35, referenced only by the export list',
+          release_genuine['exit_code'] != 0 and sorted(release_genuine['undefined']) == sorted(dropped)
+          and set(release_genuine['undefined'].values()) == {'-exported_symbol[s_list] command line option'}, release_genuine['stderr'])
+    check('RELEASE-style link, profile lists: links with no undefined symbol',
+          release_profile['exit_code'] == 0 and not release_profile['undefined'] and not run('nm -u', [str(TOOLS)+'nm', '-u', release_kernel])[1].strip(),
+          release_profile['stderr'])
 
     # 6. the genuine tool
     tool, tool_info = build_kextsymboltool(out/'kextsymboltool')
