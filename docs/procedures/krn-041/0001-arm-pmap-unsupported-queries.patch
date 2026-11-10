@@ -1,0 +1,64 @@
+KRN-041: arm pmap answers the two pmap query exports itself
+
+Base: apple-oss-distributions/xnu c54f35ca767986246321eb901baf8f5ff7923f6a
+(xnu-8796.121.2), osfmk/arm/pmap/pmap.c. Also applies, with an offset, to the
+HakiOS-derived native E1S tree (str-014 derive-001, pmap.c SHA256
+cc6d5d2ead6c40fa63c5e5d8d09169d0d8252abece33a8c1a75d2210475ca8bd).
+License: APSL 2.0, as the file it changes. Author: KRN-041
+(claude-export-dossier-20261110-x41).
+
+config/Private.exports lists _pmap_has_iofilter_protected_write and
+_pmap_cs_configuration. osfmk/vm/pmap.h declares both, but public source
+defines them only for x86_64. This adds arm64 definitions whose answers follow
+from code already in this file and from the contract in vm/pmap.h:
+
+- pmap_iofilter_protected_write() here panics "called on an unsupported
+  platform"; vm/pmap.h says support is what pmap_has_iofilter_protected_write()
+  reports, so it returns false.
+- With no PMAP_CS and no XNU_MONITOR there is no pmap_cs monitor; vm/pmap.h
+  says 0 is the default answer and must never be read as "secure".
+
+The guard leaves out PPL/pmap_cs builds and the T6000/T8101/VMAPPLE builds
+that force-load Apple's closed per-machine library, so no build that may
+already get these names from there gets a second definition.
+
+--- a/osfmk/arm/pmap/pmap.c
++++ b/osfmk/arm/pmap/pmap.c
+@@ -12356,6 +12356,37 @@
+ 	panic("%s called on an unsupported platform.", __FUNCTION__);
+ }
+ 
++#if !XNU_MONITOR && !PMAP_CS && \
++    !(defined(ARM64_BOARD_CONFIG_T6000) || defined(ARM64_BOARD_CONFIG_T8101) || defined(ARM64_BOARD_CONFIG_VMAPPLE))
++/*
++ * Public source has no arm64 definition of the next two exports. T6000, T8101
++ * and VMAPPLE builds force-load Apple's closed lib<MACHINE>.os.<CONFIG>.a
++ * (makedefs/MakeInc.def), and PPL builds have a pmap_cs monitor, so those
++ * builds are left alone. This pmap has neither and answers for itself.
++ */
++
++/*
++ * pmap_iofilter_protected_write() above panics on every call: this pmap does
++ * not support register-level MMIO filtering (see vm/pmap.h).
++ */
++bool
++pmap_has_iofilter_protected_write(void)
++{
++	return false;
++}
++
++/*
++ * No pmap_cs monitor is built, so there is no non-default pmap_cs
++ * configuration to report. vm/pmap.h: 0 is the default answer and never
++ * means "secure".
++ */
++int
++pmap_cs_configuration(void)
++{
++	return 0;
++}
++#endif
++
+ void *
+ pmap_claim_reserved_ppl_page(void)
+ {

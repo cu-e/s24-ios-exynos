@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "task": "KRN-041",
+  "xnu": "apple-oss-distributions/xnu c54f35ca767986246321eb901baf8f5ff7923f6a (xnu-8796.121.2)",
+  "common": {
+    "export_role": "config/*.exports are the KPI that kexts in a kernel collection link against. They reach the build in four places: check_all_exports (config/Makefile:120-134) and the per-component symbol sets (config/Makefile:70-80), both under do_config_all (config/Makefile:144,188); all-kpi.exp, passed as -exported_symbols_list only for RELEASE arm64 (makedefs/MakeInc.def:811-812; DEVELOPMENT passes nothing, :819); and symbolsets.plist, embedded as __LINKINFO,__symbolsets (makedefs/MakeInc.def:852) for the host kernel-collection builder. No XNU source reads __symbolsets at run time, and no arm64 or x86_64 MASTER configuration enables CONFIG_KXLD (config/MASTER:523), so this kernel cannot link a kext at run time.",
+    "provider_in_apple_builds": "makedefs/MakeInc.def:861-864 force-loads $(KDKROOT)/System/Library/KernelSupport/lib<MACHINE>.os.<CONFIG>.a for T6000, T8101 and VMAPPLE only. Public source defines none of the 37 for arm64, so in those builds they can only come from that closed library or not exist. Inference: the library's contents were not inspected (Apple binary, not available, must not be committed); nm of libT8101.os.DEVELOPMENT.a from a KDK would settle it.",
+    "consumers_in_our_kernels": "None. KRN-041 scanned all 1042 objects, 4 extra objects and 3 archives of the STR-041 link with nm: no input defines or references any of the 37. In KRN-024's RELEASE link (native-session2) ld64 lists '-exported_symbol[s_list] command line option' as the only referrer of each of the 37. Project src/, HakiOS drivers/xnu/files/avf/iig-impl, S24-port hackios files and shim, and lines added by project, HakiOS and S24-port patches have no occurrence.",
+    "boot_impact_development": "None on the path to PID 1: nothing in the kernel calls or reads these names, and a DEVELOPMENT link does not use the export list. The visible effect is on the build: the second check_all_exports pass and the Private symbol set exit non-zero after the kernel is linked.",
+    "boot_impact_release": "A RELEASE arm64 link fails outright (ld64 'symbol(s) not found', KRN-024 native-session2), so no RELEASE kernel exists until each name is either defined or removed from the export list.",
+    "guest": "QEMU/KVM guest (HakiOS BCM2837-derived, VM-002): same arm64 export lists; BCM2837 is not in the force-load list (makedefs/MakeInc.def:862), its board_config.h block defines no PMAP_CS/XNU_MONITOR, and its drivers are compiled into the kernel, so the same conclusions apply. Not measured on a guest kernel: none was built when KRN-041 ran.",
+    "hakios": "HakiOS (scion-avf a6f4bc3) keeps the lists unchanged and builds with make -k: tools/make-kernel.sh:7-14 accepts only the symbol-set and check_all_exports failures and requires the kernel file; xnu/README.md:35-36 and hakios-e1s-tools xnu/README.md:67-69 call the failure known and pre-existing. 'Nothing here loads a kext.'",
+    "s24_port": "S24 port (c8860dec, current E1S path) also keeps the lists and stops in check_all_exports after linking mach.development.e1s (xnu/hackios/README.md:38-40, xnu/e1s/README.md:298-301, docs/e1s-bringup.md:52-54). Its legacy SM7150 series removed all 37 from the lists (xnu/legacy-sweet-patches/0009-sweet-drop-apple-soc-only-exports.patch)."
+  },
+  "families": {
+    "pmap-query": {
+      "decision": "implement-stub",
+      "names": ["_pmap_has_iofilter_protected_write", "_pmap_cs_configuration"],
+      "signatures": {
+        "_pmap_has_iofilter_protected_write": "extern bool pmap_has_iofilter_protected_write(void); osfmk/vm/pmap.h:856",
+        "_pmap_cs_configuration": "extern int pmap_cs_configuration(void); osfmk/vm/pmap.h:902"
+      },
+      "apple_consumer": "Not in public source. Kexts that would write PPL-filtered MMIO registers (has_iofilter) and code-signing clients reporting pmap_cs settings (cs_configuration); unverified inference from vm/pmap.h comments.",
+      "required_implementation": "Definition with the declared signature. Semantics derived from this pmap: pmap_iofilter_protected_write() panics 'called on an unsupported platform' (osfmk/arm/pmap/pmap.c:12354), and vm/pmap.h:845-871 says support is what has_iofilter reports, so false. No PMAP_CS or XNU_MONITOR (pexpert/arm64/board_config.h defines them only for T6000/T8101/T8103) means no pmap_cs monitor; vm/pmap.h:891-902 makes 0 the default answer and warns it never means secure.",
+      "abi": "Plain C, AAPCS64: bool in w0 (0/1), int in w0. No state.",
+      "source": "Declarations osfmk/vm/pmap.h:856 and :902. x86_64 bodies osfmk/x86_64/pmap.c:3405 (return 0) and :3419 (return false). arm64: none public; KRN-041 0001 adds them next to pmap_iofilter_protected_write.",
+      "fix": "0001-arm-pmap-unsupported-queries.patch, guarded to builds with no PMAP_CS, no XNU_MONITOR and no force-loaded closed library."
+    },
+    "pmap-iommu": {
+      "decision": "remove-from-profile",
+      "names": ["_pmap_iommu_init", "_pmap_iommu_iovmalloc", "_pmap_iommu_map", "_pmap_iommu_unmap", "_pmap_iommu_iovmfree", "_pmap_iommu_ioctl", "_pmap_iommu_alloc_contiguous_pages"],
+      "apple_consumer": "Not in public source. PPL-protected IOMMU clients (Apple DART/SART/NVMe/UAT kexts) registering an IOMMU instance with the pmap; inference from the names, from the PV-list IOMMU hooks (osfmk/arm/pmap/pmap_data.h:170-191, :449) and from tools/lldbmacros/pmap.py:833-844 (ppl_iommu_state, descriptor objects 't8020dart/nvme_ppl/etc').",
+      "required_implementation": "For Apple kexts: the PPL IOMMU framework (page-table ownership in the PPL, the pv_head_table IOMMU entries). Our drivers do not need it: there is no PPL in these builds and the E1S SysMMU is not a DART. Correct action here: leave the names out of the export list.",
+      "abi": "Unknown: no declaration, so no parameter or return types. Mach-O C symbols carry no type.",
+      "source": "None public. osfmk/arm/pmap/pmap_iommu.c is a placeholder; osfmk/tests/pmap_tests.c:443 test_pmap_iommu_disconnect just returns KERN_SUCCESS.",
+      "fix": "0002-no-apple-soc-library-exports.patch removes them."
+    },
+    "ppl-iommu-descriptors": {
+      "decision": "remove-from-profile",
+      "names": ["_nvme_ppl_get_desc", "_sart_get_desc", "_t8020dart_get_desc", "_t8020dart_vo_tte", "_t6000dart_get_desc", "_t6000dart_vo_tte", "_t8110dart_get_desc", "_t8110dart_max_translation_levels", "_t8110dart_vo_tte", "_t8110dart_vo_tt_index", "_uat_get_desc"],
+      "apple_consumer": "Not in public source. Apple's DART (T8020/T6000/T8110), SART, NVMe and UAT drivers fetch the PPL descriptor for their IOMMU type (*_get_desc) and translate I/O addresses (*_vo_tte, *_vo_tt_index, *_max_translation_levels); inference from names and from tools/lldbmacros/pmap.py:833-844. osfmk/conf/Makefile.template:326 has a warning flag for an unpublished t8020dart.o.",
+      "required_implementation": "For Apple kexts: the PPL IOMMU drivers for Apple SoC hardware that does not exist on Exynos 2400 or on a QEMU/KVM guest. Nothing to implement for our kernels; leave the names out of the export list.",
+      "abi": "Unknown: no declaration. Whether *_max_translation_levels is a function or data is not known.",
+      "source": "None public.",
+      "fix": "0002-no-apple-soc-library-exports.patch removes them."
+    },
+    "uat-class": {
+      "decision": "remove-from-profile",
+      "names": ["__ZN26IOUnifiedAddressTranslator10gMetaClassE", "__ZN26IOUnifiedAddressTranslator10superClassE", "__ZN26IOUnifiedAddressTranslator17getPageTableEntryEy", "__ZN26IOUnifiedAddressTranslator18setClientContextIDEjb", "__ZN26IOUnifiedAddressTranslator21removeClientContextIDEv", "__ZN26IOUnifiedAddressTranslator19isPageFaultExpectedEyj", "__ZN26IOUnifiedAddressTranslator22registerTaskForServiceEP4taskP9IOService", "__ZN26IOUnifiedAddressTranslator23createMappingInApertureEjP18IOMemoryDescriptorjym", "__ZN26IOUnifiedAddressTranslator23getTotalPageTableMemoryEv", "__ZN26IOUnifiedAddressTranslator3mapEP11IOMemoryMapj", "__ZN26IOUnifiedAddressTranslator5doMapEP18IOMemoryDescriptoryyj", "__ZN26IOUnifiedAddressTranslator5unmapEP11IOMemoryMap", "__ZN26IOUnifiedAddressTranslator7doUnmapEP18IOMemoryDescriptoryy", "__ZN26IOUnifiedAddressTranslator8taskDiedEv", "__ZN26IOUnifiedAddressTranslator12commitUnmapsEv", "__ZN26IOUnifiedAddressTranslator14prepareFWUnmapEyy", "__ZTV26IOUnifiedAddressTranslator"],
+      "apple_consumer": "Not in public source. Kexts that use the Unified Address Translator (the UAT descriptor is _uat_get_desc); the name suggests GPU/coprocessor address translation, unverified.",
+      "required_implementation": "For Apple kexts: the real IOKit class with Apple's layout. Our kernels need none of it; leave the names out of the export list. A stub class is not possible without inventing an ABI.",
+      "abi": "OSMetaClass class: gMetaClass is a static IOUnifiedAddressTranslator::MetaClass object and superClass a const OSMetaClass * const (libkern/libkern/c++/OSMetaClass.h:1842-1850, :2024-2028); __ZTV is the vtable, exported so kext subclasses or the collection builder can patch against it. The mangling gives parameter types and non-const methods only: no return types, no superclass, no virtual/non-virtual split, no member layout or vtable slot order. Pointer-authentication diversifiers would also follow from the unknown declarations.",
+      "source": "None public: no header, .iig or .cpp at this pin.",
+      "fix": "0002-no-apple-soc-library-exports.patch removes them."
+    }
+  }
+}

@@ -1,0 +1,213 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-10T04:46:28+00:00",
+ "summary": "KRN041-001 run-001: 36 of 36 checks pass. No link input of the STR-041 kernel defines or references any of the 37 names. The genuine kextsymboltool, built from apple-xnu c54f35ca, misses exactly 37 (STR-041 kernel) and 35 (relinked with the 0001 stubs) in the second check_all_exports pass with the genuine lists, and passes both passes and all seven symbol sets with the 0002 profile on the relinked copy. Superseded by run-002, which adds a RELEASE-style export-list link.",
+ "task": "KRN-041",
+ "experiment": "KRN041-001",
+ "owner": "claude-export-dossier-20261110-x41",
+ "commit": "f0e3819f1420e9668db462738997ba8b8d601240",
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/krn-041/missing_exports.py",
+    "--run",
+    "run-001",
+    "--guest-kernel",
+    "references/hakios-scion-full/prebuilt/hakios-kernel"
+   ],
+   "cwd": "worktrees/krn-041-missing-exports-20261110",
+   "exit_code": 0
+  }
+ ],
+ "child_command_exit_codes": {
+  "git": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "nm-scan": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "nm": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "xnu-grep": [
+   1,
+   1,
+   0,
+   0,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   0,
+   0,
+   0
+  ],
+  "patch 0002 export profile": [
+   0
+  ],
+  "patch S24-port 0009 (comparison only)": [
+   0
+  ],
+  "patch 0001 upstream pmap.c": [
+   0
+  ],
+  "compile pmap.o control": [
+   0
+  ],
+  "patch 0001 native pmap.c": [
+   0
+  ],
+  "compile pmap.o patched": [
+   0
+  ],
+  "otool -t": [
+   0,
+   0,
+   0
+  ],
+  "relink kernel": [
+   0
+  ],
+  "nm -u": [
+   0
+  ],
+  "kextsymboltool-cc": [
+   0
+  ],
+  "kextsymboltool-ld": [
+   0
+  ],
+  "allsymbols": [
+   0,
+   0,
+   0
+  ],
+  "check_all_exports without-Private": [
+   0,
+   0,
+   0,
+   0,
+   1,
+   1,
+   1
+  ],
+  "check_all_exports without-Unsupported": [
+   1,
+   1,
+   1,
+   0,
+   1,
+   1,
+   1
+  ],
+  "symbolset BSDKernel": [
+   0,
+   0
+  ],
+  "symbolset IOKit": [
+   0,
+   0
+  ],
+  "symbolset Libkern": [
+   0,
+   0
+  ],
+  "symbolset Mach": [
+   0,
+   0
+  ],
+  "symbolset MACFramework": [
+   0,
+   0
+  ],
+  "symbolset Unsupported": [
+   0,
+   0
+  ],
+  "symbolset Private": [
+   1,
+   0
+  ]
+ },
+ "checks": {
+  "pin apple-xnu": true,
+  "pin scion-avf": true,
+  "pin s24-port": true,
+  "pin hakios-e1s-tools": true,
+  "37 names = KRN-040 missing set": true,
+  "native E1S tree export files = upstream": true,
+  "KRN-040 tree export files = upstream": true,
+  "no arm64 iPhoneOS platform export files": true,
+  "dossier covers exactly the 37 names": true,
+  "stubbed names": true,
+  "RELEASE link: the only referrer of each name is the exported symbols list": true,
+  "scanner control: _panic is referenced by link inputs": true,
+  "every name has exactly one export-list line": true,
+  "no link input defines or references any of the 37": true,
+  "no consumer in project/HakiOS/S24-port code": true,
+  "guard admits every profile removal": true,
+  "guard rejects names with a provider, references or a public declaration": true,
+  "0002 removes exactly the dossier removals and nothing else": true,
+  "profile changes only Private.arm64.exports": true,
+  "0002 = S24-port 0009 for Private.arm64.exports": true,
+  "S24-port 0009 also removes the two stubbed names from Private.exports": true,
+  "control compile reproduces the original pmap.o external symbols": true,
+  "control compile used the original headers": true,
+  "patched pmap.o adds exactly the two stubs": true,
+  "control compile: __TEXT,__text byte-identical to the STR-023 pmap.o": true,
+  "stub machine code returns 0 and nothing else": true,
+  "relinked image keeps segment order and type": true,
+  "relinked image has no undefined symbols": true,
+  "relinked image exports exactly the STR-041 set plus the two stubs, defined": true,
+  "host control: literal -output /dev/null fails only in seekFile, with no missing name": true,
+  "check_all_exports str041+genuine: second pass misses exactly 37": true,
+  "check_all_exports str041+profile: second pass misses exactly 2": true,
+  "check_all_exports relinked+genuine: second pass misses exactly 35": true,
+  "check_all_exports relinked+profile: second pass misses exactly 0": true,
+  "genuine lists: only the Private symbol set fails, on all 37": true,
+  "profile + stubs: all seven symbol sets build": true
+ },
+ "artifact_sha256": {
+  "artifacts/krn-041/run-001/report.json": "0f3c11ee872a8be3390fcbd0235b87a4c8d037b14230a7b68744347df037ab62"
+ },
+ "artifacts": [
+  "artifacts/krn-041/run-001/report.json",
+  "worktrees/krn-041-missing-exports-20261110/docs/procedures/krn-041/missing_exports.py"
+ ],
+ "kernel_booted": false,
+ "device_used": false,
+ "limitations": [
+  "Host only; no kernel was booted.",
+  "Development iterations dev-001..dev-004 preceded this run (tool defects: nm section type S for kernel functions; Linux /dev/null lseek); they are not evidence."
+ ]
+}
