@@ -1,0 +1,71 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-10T12:06:33.448574+00:00",
+ "summary": "Host-only. Built reproducibly (two builds, identical SHA-256) a XNU-free AArch64 framebuffer-marker canary (plain and BRK-fault variants) and an instrumented derivative of the NAT-020 build-003 loader whose silent MMU/cache/EL halts report on the framebuffer. 12 host tests run the real marker C code against a RAM buffer and an independent Python decoder; make check passed 214 tests. The AArch64 assembly start path was assembled/linked but never executed (no AArch64 emulator on this host) and nothing ran on the phone: framebuffer scanout at 0xFA200000, pixel order, stride and the true halt location remain unknown. A concrete owner decision request is in docs/procedures/nat-022/README.md; no native action was taken or authorised.",
+ "commit": "f63bb4e879724bc6d51763ab537e204789479c98",
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-022/test_nat022.py"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-022/build.py",
+    "--out",
+    "artifacts/nat-022/build-001",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-022/README.md",
+  "docs/procedures/nat-022/build.py",
+  "docs/procedures/nat-022/patch_loader.py",
+  "docs/procedures/nat-022/decode.py",
+  "docs/procedures/nat-022/test_nat022.py",
+  "docs/procedures/nat-022/src/marker.h",
+  "docs/procedures/nat-022/src/markerlib.c",
+  "docs/procedures/nat-022/src/canary.S",
+  "docs/procedures/nat-022/src/canary.c",
+  "docs/procedures/nat-022/src/host_mk.c",
+  "artifacts/nat-022/build-001/build.json",
+  "artifacts/nat-022/make-check.log",
+  "artifacts/nat-022/build-001/canary-plain/Image",
+  "artifacts/nat-022/build-001/canary-fault/Image",
+  "artifacts/nat-022/build-001/loader-diag/Image"
+ ],
+ "sha256": {
+  "docs/procedures/nat-022/README.md": "295047f597ff864722cca05d3e436fcde839ecf1d58d5787739de051ffc4a033",
+  "docs/procedures/nat-022/build.py": "1cd1fd4db475f146829eb83b6fe6333660c7b0d60d9446147fca8db24e8c5504",
+  "docs/procedures/nat-022/patch_loader.py": "579d9fec6add7384ab004dc58c3d8520c973db00662ac96dd6a31173a8284e7e",
+  "docs/procedures/nat-022/decode.py": "428d37956fca3f5da2a7b4a3be5b41526b9c8ff104914241e6cbd7d0c4d3d0e7",
+  "docs/procedures/nat-022/test_nat022.py": "dffe3cb085f4ef3228eeaef2c30de183d81a3b00e7839fd2b5ea8996a5d9d9cd",
+  "docs/procedures/nat-022/src/marker.h": "70a030db50c66a6f13d99cca9b7faf810d1ee24021b335c7739dd9d602dcc38f",
+  "docs/procedures/nat-022/src/markerlib.c": "db6cd43cf6dea30886ded313749c8882707b7f1bfb02c93fa045b952319312e9",
+  "docs/procedures/nat-022/src/canary.S": "71ce27033fae8cefae6b56ec84d777a47233d15955b0d8a0ce842d8f1f002587",
+  "docs/procedures/nat-022/src/canary.c": "5cc21853c8bd9be36e687568d703cb76e2e38c92f5c277a22106ea8bc069612f",
+  "docs/procedures/nat-022/src/host_mk.c": "f34c97a35ad4e6ec67f0dd2893c7112479cdd3bf469849e5586bdb6e02165ef5",
+  "artifacts/nat-022/build-001/build.json": "1a1b669d24e2604387a86a223de417a266f5cff53f3ac4a22b5f52991b563f79",
+  "artifacts/nat-022/make-check.log": "a372c52df5e3f0bbc0278197040a6b6f09a7151da28739b7f60aa17b4861da9c",
+  "artifacts/nat-022/build-001/canary-plain/Image": "7bc1b01d469ee7160d9e41252dfd0cac5a16c93f496d6478cf2eedbe8a283d2a",
+  "artifacts/nat-022/build-001/canary-fault/Image": "38a4feba9b1461e727d68abefae0cae0cc72a8608a5bb97825d90b5c793957b2",
+  "artifacts/nat-022/build-001/loader-diag/Image": "dc46bdec15233135e7fd9bc8cc599f160772743f6cef0ce3fcad684073c7c384"
+ }
+}
