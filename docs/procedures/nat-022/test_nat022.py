@@ -330,6 +330,96 @@ class VideoDecode(unittest.TestCase):
             r = self.dv.analyse(self.render(bad, 22.0, -0.003, 105, 2.0, 3.0), self.cfg)
             self.assertEqual(r["status"], "sync-or-crc-fail", hex(flip))
 
+def _payload(adt_size=13956, adt_len=13956, pad=b"\0" * 12, nsegs=1, version=1, virt=0xfffffff004000000, entry=0xfffffff004001000,
+             adt_off=0x2e8, kernel_end=0xfffffff004010000, mem_size=0x20000000, seg_file=(0x4000, 0x10)):
+    """A synthetic SWEETXNU payload written from the struct layout in the module docstring, not from the tools under test."""
+    import struct
+    h = struct.pack("<8sIIQQQQQQQ", b"SWEETXNU", version, nsegs, virt, entry, adt_off, adt_size, kernel_end, 0xa0000000, mem_size)
+    h += b"\0" * 608
+    segs = struct.pack("<4Q", virt, 0x10000, seg_file[0] + 0x4000, seg_file[1]) * max(nsegs, 0)
+    body = h + segs
+    body += b"\0" * (adt_off - len(body)) + b"\x01" * adt_len + pad
+    return body
+
+class PayloadFix(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        spec = importlib.util.spec_from_file_location("fix_payload", HERE / "fix_payload.py")
+        cls.fp = importlib.util.module_from_spec(spec); spec.loader.exec_module(cls.fp)
+        cls.root = HERE.parents[2]
+        cls.loader_c = cls.root / "artifacts/nat-020/build-003/source/shim/e1s-xnu/loader.c"
+
+    def test_fix_changes_only_adt_size_and_only_when_the_padding_is_zero(self):
+        import struct
+        src = _payload()
+        out, info = self.fp.fix(src)
+        diff = [i for i in range(len(src)) if src[i] != out[i]]
+        self.assertEqual(diff, [40])                      # one byte: 13956 (0x3684) -> 13960 (0x3688)
+        self.assertEqual(struct.unpack_from("<Q", out, 40)[0], 13960)
+        self.assertEqual((info["old"], info["new"]), (13956, 13960))
+        with self.assertRaises(SystemExit):               # non-zero byte after the ADT: not ours to claim
+            self.fp.fix(_payload(pad=b"\0\0\x07\0" + b"\0" * 8))
+        with self.assertRaises(SystemExit):               # already a multiple of 8
+            self.fp.fix(_payload(adt_size=13960, adt_len=13960, pad=b"\0" * 8))
+        with self.assertRaises(SystemExit):               # padding would run past the end of the file
+            self.fp.fix(_payload(pad=b""))
+        with self.assertRaises(SystemExit):               # a segment's file range overlaps the padding
+            self.fp.fix(_payload(seg_file=(0x2e8 + 13956 - 0x4000, 8)))
+
+    def check(self, payload, *flags):
+        if not self.loader_c.exists():
+            self.skipTest("the NAT-020 build-003 loader source is missing")
+        import shutil
+        if not shutil.which("zig"):
+            self.skipTest("zig missing")
+        with tempfile.TemporaryDirectory() as t:
+            f = Path(t) / "p.bin"; f.write_bytes(payload)
+            r = subprocess.run([sys.executable, "-P", str(HERE / "check_payload.py"), str(self.loader_c), str(f), "--no-adt", *flags],
+                               capture_output=True, text=True)
+        return r.returncode, [l for l in r.stdout.splitlines() if l.startswith("FIRES")]
+
+    def test_each_loader_header_clause_is_evaluated_on_its_own(self):
+        # Each synthetic header violates exactly one clause of loader.c's two header conditions.
+        cases = {
+            "p->version != 1": dict(version=2),
+            "!p->nsegs": dict(nsegs=0),
+            "p->nsegs > 32": dict(nsegs=33),
+            "(p->adt_off & 7)": dict(adt_off=0x2ec),
+            "(p->adt_size & 7)": dict(adt_size=13956),
+            "p->entry_va < p->virt_base": dict(entry=0xfffffff003fff000),
+            "p->kernel_end < p->virt_base": dict(kernel_end=0xfffffff003fff000),
+            "!p->mem_size": dict(mem_size=0),
+            "p->mem_size > (4UL << 30)": dict(mem_size=(4 << 30) + 1),
+        }
+        base = dict(adt_size=13960, adt_len=13960, pad=b"\0" * 8)
+        rc, fires = self.check(_payload(**base))
+        self.assertEqual((rc, fires), (0, []))
+        for clause, kw in cases.items():
+            kw = {**base, **kw}
+            if "adt_size" in kw and kw["adt_size"] == 13956:
+                kw.update(adt_len=13956, pad=b"\0" * 12)
+            rc, fires = self.check(_payload(**kw))
+            self.assertEqual(rc, 1, clause)
+            self.assertEqual(len(fires), 1, (clause, fires))
+            self.assertTrue(fires[0].endswith(clause), (clause, fires))
+
+    def test_run_004_payload_fires_and_the_fixed_payload_passes_every_stage_check(self):
+        pb = self.root / "artifacts/nat-020/build-003/payload.bin"
+        if not pb.exists() or not self.loader_c.exists():
+            self.skipTest("NAT-020 build-003 payload or loader source missing")
+        rc, fires = self.check(pb.read_bytes())
+        self.assertEqual(rc, 1)
+        self.assertEqual(len(fires), 1); self.assertTrue(fires[0].endswith("(p->adt_size & 7)"))
+        fixed, _ = self.fp.fix(pb.read_bytes())
+        with tempfile.TemporaryDirectory() as t:
+            f = Path(t) / "fixed.bin"; f.write_bytes(fixed)
+            r = subprocess.run([sys.executable, "-P", str(HERE / "check_payload.py"), str(self.loader_c), str(f)],
+                               capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(r.stdout.count("window 256 MiB: ok"), 1); self.assertEqual(r.stdout.count("window 512 MiB: ok"), 1)
+        self.assertEqual(r.stdout.count("mpidr=0 dram=0 pram=0 ramdisk=0 guard_overrun=0"), 2)
+
+
 class Aarch64Build(unittest.TestCase):
     def test_images_build_with_arm64_header(self):
         import shutil
@@ -355,6 +445,16 @@ class Aarch64Build(unittest.TestCase):
             for n, v in old.items():                      # every image of build-003, including the two that ran
                 self.assertEqual(new[n]["sha256"], v["sha256"], n)
             self.assertNotEqual(new["loader-diag-trig-hold"]["sha256"], new["loader-diag"]["sha256"])
+            # NAT-026: the adt8 variant has the same loader Image; its Image.payload differs from the run-004 image
+            # in exactly one byte, the low byte of the header's adt_size (0x84 -> 0x88), and nowhere else.
+            self.assertEqual(new["loader-diag-trig-hold-adt8"]["sha256"], new["loader-diag-trig-hold"]["sha256"])
+            ip = json.loads((out / "build.json").read_text())["image_payloads"]
+            a = (out / ip["loader-diag-trig-hold"]["path"]).read_bytes()
+            b = (out / ip["loader-diag-trig-hold-adt8"]["path"]).read_bytes()
+            off = (out / "loader-diag-trig-hold/Image").stat().st_size
+            self.assertEqual(len(a), len(b))
+            self.assertEqual([i for i in range(len(a)) if a[i] != b[i]], [off + 40])
+            self.assertEqual((a[off + 40], b[off + 40]), (0x84, 0x88))
             src_c = (out / "loader-diag-trig-hold/source/shim/e1s-xnu/loader.c").read_text()
             # The hold variant never reaches the return that jumps into the kernel copy.
             hold = src_c.index("NAT022_HOLD(MK_ST_PRE_JUMP, 0)")

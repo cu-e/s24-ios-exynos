@@ -511,3 +511,59 @@ pixel format; whether the kick or S-Boot's refresh makes the markers visible (st
 
 The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-004/` (the video
 shows the owner's room and is not committed).
+
+## loader-diag-trig-hold-adt8: the run-004 image with a corrected payload header (NAT-026; not run)
+
+Run 004 stopped at `fail("bad payload header")` because the payload header's `adt_size` is 13956, not a
+multiple of 8. `fix_payload.py` rounds that one u64 up to 13960 in a copy of the payload (the 12 bytes
+`mkpayload.py` leaves after the ADT are zero; it refuses if they are not, if no padding exists, if a
+segment's file range touches it, or if the field is already a multiple of 8). `build.py` adds the
+variant `loader-diag-trig-hold-adt8`; the loader code is not changed.
+
+| | run-004 image | adt8 image |
+| --- | --- | --- |
+| loader `Image` (`loader-diag-trig-hold`) | `901565b2…` | `901565b2…` (same bytes) |
+| `Image.payload` | `7c6206bd…` | `766218b2…` (differs in one byte, offset `0x34028`: `0x84` → `0x88`) |
+| RECOVERY image (NAT-006 packaging) | `511b4833…` | `38411cd8…` (21 bytes differ: that byte and the 20-byte boot-header id) |
+
+`build.py` reproduces the run-004 image bit-for-bit (`7c6206bd…`), so the comparison is not against a
+rebuilt approximation. All earlier canary images and `loader-diag` keep their hashes (checked by the test).
+
+Host checks (`check_payload.py LOADER_C PAYLOAD --offset 212992`; host-test evidence only):
+
+* the loader's own header clauses, cut from `loader.c` and compiled unchanged: run-004 image: only
+  `adt_size & 7` fires; adt8 image: no clause fires;
+* the RAM/segment checks, the ADT/boot_args room check and the entry check (text cut from `loader.c`), for
+  window sizes 256 and 512 MiB: `ok`; the kernel needs 0x4978000 bytes before `boot_args` and 0x497c000
+  in all, far below 256 MiB;
+* the real `adt_patch.c`, compiled for the host, on the 13960-byte ADT in a guarded buffer with the
+  argument expressions of `loader.c`: the MPIDR, DRAM, pram and ramdisk calls return 0 for window sizes
+  256/512 MiB and for MPIDR values 0, 0x80000000, 0x80000100, 0x80000400, 0xffffffff; no guard byte is
+  overwritten; 2–6 ADT bytes change per run.
+
+Tests: `test_nat022.py` (31): the synthetic-header test violates each of the loader's nine header clauses
+once and requires exactly that clause to fire; the fixer refuses the four unsafe inputs; the build test
+requires the adt8 `Image.payload` to differ from the run-004 one in exactly that byte.
+
+Not evaluated on the host, and what would first show on the phone: which RAM window `choose_window()` picks
+from the S-Boot DTB (the DTB is not available here); the framebuffer selection; the time that zeroing a
+256–512 MiB window and copying 21 MiB take with the MMU off (the loader's 83 s watchdog is armed; if the
+copy does not finish in time the screen goes dark on the last stage marker); whether anything in the
+window is in use by firmware that is not listed as reserved in the DTB. The image still halts at PRE_JUMP
+and never branches to the kernel copy (`mk_hold` is `noreturn` and sits before the only `return entry_pa;`).
+
+What each outcome would mean (same encoding as run 004; reached-stage mask bits ENTRY 0, MAIN 1, FB 2,
+MEM 3, ZERO 4, COPY 5, ADT 6, CLEAN 7, PRE_JUMP 8, FAIL 9):
+
+* PRE_JUMP held, mask `0x01ff`: the loader's window choice, zeroing, copy, ADT patching and cache
+  clean ran on this S24 and the image would have been ready to jump. This is still not XNU entry.
+* A FAIL frame with another code: the fnv16 table above names the condition that stopped it.
+* The screen going dark on a stage marker without FAIL: that stage did not finish (hang, reset or the
+  watchdog); the stage named by the last marker is where to look.
+* The same `0x2543`: the clause analysis above was incomplete.
+
+Session driver: `session_adt8.py` (default is read-only preflight; `--execute` writes and reboots once;
+`--restore` writes only stock). It asserts the stock and candidate hashes, `package.json`, the loader
+`Image.payload` hash at its offset, and that `docs/decisions/0013-nat022-loader-diag-trig-hold-adt8-single-run-2026-11-10.md`
+exists. Without that file it stops before any device command (tested on 2026-11-10; the report is
+`artifacts/nat-022/preflight-gate-005/report.json`). No decision 0013 exists yet.

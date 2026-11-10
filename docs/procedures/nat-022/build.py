@@ -3,10 +3,10 @@
 
   build.py --out DIR [--loader-source COPY_OF_build-003/source]
   build.py --check-only      (build to a temp dir, verify, discard)
-Outputs: canary-plain/Image, canary-fault/Image, canary-trig/Image (DECON0 kick, MK_TRIG=1), canary-trig-fault/Image (kick + BRK, MK_TRIG=1), [loader-diag/Image(.payload), loader-diag-trig-hold/Image(.payload): stage markers with a kick and a dwell, halted at pre-jump, never executes the payload].
+Outputs: canary-plain/Image, canary-fault/Image, canary-trig/Image (DECON0 kick, MK_TRIG=1), canary-trig-fault/Image (kick + BRK, MK_TRIG=1), [loader-diag/Image(.payload), loader-diag-trig-hold/Image(.payload): stage markers with a kick and a dwell, halted at pre-jump, never executes the payload; loader-diag-trig-hold-adt8/Image(.payload): the same loader Image with the payload header's adt_size rounded up to 8 by fix_payload.py (NAT-026; run 004 stopped on that check)].
 """
 from pathlib import Path
-import argparse, hashlib, json, shutil, struct, subprocess, sys, tempfile
+import argparse, hashlib, importlib.util, json, shutil, struct, subprocess, sys, tempfile
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
@@ -15,6 +15,7 @@ FLAGS = ['-target', 'aarch64-freestanding', '-O2', '-g0', '-ffreestanding', '-fn
          '-fno-stack-protector', '-fno-pic', '-fno-zero-initialized-in-bss', '-mstrict-align',
          '-mgeneral-regs-only', '-Wall', '-Wextra', '-Werror']
 log = []
+payload_fixes = {}
 
 def run(argv):
     p = subprocess.run(argv, capture_output=True, text=True)
@@ -48,7 +49,12 @@ def build_canary(out, name, fault, trig=False, fault_round=None):
     link(o, HERE / 'src/canary.ld', d / 'canary.elf', d / 'Image')
     return d / 'Image'
 
-def build_loader(out, source, name='loader-diag', trig_hold=False):
+def _fix_payload():
+    spec = importlib.util.spec_from_file_location('fix_payload', HERE / 'fix_payload.py')
+    m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+    return m.fix
+
+def build_loader(out, source, name='loader-diag', trig_hold=False, fix_adt=False):
     d = out / name; d.mkdir(parents=True)
     src = d / 'source'
     shutil.copytree(source, src, ignore=shutil.ignore_patterns('out', '.git'))
@@ -63,6 +69,11 @@ def build_loader(out, source, name='loader-diag', trig_hold=False):
         objs.append(obj)
     link(objs, e / 'loader.ld', d / 'loader.elf', d / 'Image')
     payload = B3 / 'payload.bin'
+    if payload.exists() and fix_adt:
+        fixed, info = _fix_payload()(payload.read_bytes())
+        payload = d / 'payload.adt8.bin'
+        payload.write_bytes(fixed)
+        payload_fixes[name] = info
     if payload.exists():
         run([sys.executable, '-I', src / 'tools/e1s/append_payload.py', '--loader', d / 'Image',
              '--payload', payload, '--output', d / 'Image.payload'])
@@ -83,6 +94,7 @@ def main():
     if a.loader_source:
         imgs['loader-diag'] = build_loader(out, Path(a.loader_source))
         imgs['loader-diag-trig-hold'] = build_loader(out, Path(a.loader_source), 'loader-diag-trig-hold', trig_hold=True)
+        imgs['loader-diag-trig-hold-adt8'] = build_loader(out, Path(a.loader_source), 'loader-diag-trig-hold-adt8', trig_hold=True, fix_adt=True)
     for n, p in imgs.items():
         d = Path(p).read_bytes()
         assert d[56:60] == b'ARM\x64' and struct.unpack_from('<Q', d, 8)[0] == 0x80000
@@ -92,6 +104,10 @@ def main():
     (out / 'build.json').write_text(json.dumps({
         'kind': 'host-test', 'device_used': False, 'flashed': False,
         'images': {n: {'path': str(Path(p).relative_to(out)), 'sha256': sha(p), 'bytes': Path(p).stat().st_size} for n, p in imgs.items()},
+        'image_payloads': {n: {'path': str((Path(p).parent / 'Image.payload').relative_to(out)), 'sha256': sha(Path(p).parent / 'Image.payload'),
+                               'bytes': (Path(p).parent / 'Image.payload').stat().st_size}
+                           for n, p in imgs.items() if (Path(p).parent / 'Image.payload').exists()},
+        'payload_fixes': payload_fixes,
         'commands': log}, indent=1))
     print(json.dumps({n: sha(p) for n, p in imgs.items()}, indent=1))
 
