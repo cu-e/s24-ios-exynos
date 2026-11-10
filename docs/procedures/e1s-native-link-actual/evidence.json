@@ -1,0 +1,82 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "task": "STR-037",
+ "owner": "claude-takeover-20261110-6c8f",
+ "recorded_at": "2026-11-10T07:15:18+00:00",
+ "summary": "STR-041 already produced the STR-037 deliverable; an independent recheck confirms it. All 4168 input files of the 1042-row index match their hashes, the staged link inputs map 1:1 (15 setsegname post-images and 2 STR-035 overrides explained), the eight filelists total 1042, and the rerun image verifier passes (ARM64 MH_EXECUTE, __start, 0 undefined symbols). check_all_exports and the private37 obligations are reported via KRN-041/KRN-042, not closed for this image.",
+ "commit": "d33ba5fdd87fc323385ccb5edb7a9785ffc54296",
+ "satisfied_by": "STR-041",
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-",
+    "(inline: sha256 of object/depfile/source/recipe for all 1042 index-002 rows)"
+   ],
+   "cwd": ".",
+   "exit_code": 0,
+   "output": "docs/procedures/e1s-native-link-actual/index-crosscheck-001.json"
+  },
+  {
+   "argv": [
+    "python3",
+    "-",
+    "(inline: staged_input_sha256 of link-001 versus index-002, transforms and overrides, filelist counts)"
+   ],
+   "cwd": ".",
+   "exit_code": 0,
+   "output": "README.md table"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "fixtures/public/e1s-native-link-image/verify_image.py",
+    "--evidence",
+    "worktrees/str-041-e1s-native-link-image-20261110/artifacts/e1s-native-link/link-001/evidence.json",
+    "--out",
+    "artifacts/str-037-closure/verify-001"
+   ],
+   "cwd": ".",
+   "exit_code": 0,
+   "output": "docs/procedures/e1s-native-link-actual/verify-001.json"
+  }
+ ],
+ "obligations": {
+  "check_all_exports": "not run on this image; passes on the KRN-041 relinked test copy with 0001/0002 (KRN-042 rerun from main); patches not integrated",
+  "private37_ABI": "the same 37 names; addressed by KRN-041 for the test copy only",
+  "physical_mapping": "UNQUALIFIED",
+  "hardware_execution": false
+ },
+ "artifacts": [
+  "docs/procedures/e1s-native-link-actual/README.md",
+  "docs/procedures/e1s-native-link-actual/index-crosscheck-001.json",
+  "docs/procedures/e1s-native-link-actual/verify-001.json",
+  "worktrees/str-041-e1s-native-link-image-20261110/artifacts/e1s-native-link-image/index-002/native-complete-1042-index.json",
+  "worktrees/str-041-e1s-native-link-image-20261110/artifacts/e1s-native-link/link-001/evidence.json",
+  "worktrees/str-041-e1s-native-link-image-20261110/artifacts/e1s-native-link/link-001/kernel/kernel.unstripped",
+  "docs/procedures/e1s-native-link-image/evidence.json",
+  "fixtures/public/e1s-kernel-log-objects/object-overrides.json",
+  "docs/procedures/krn-041/evidence.json",
+  "docs/procedures/krn-042/evidence.json"
+ ],
+ "sha256": {
+  "docs/procedures/e1s-native-link-actual/README.md": "4b53145ef1e9cd67021646a0b19a00fde125985f685291bd1484c58faf769780",
+  "docs/procedures/e1s-native-link-actual/index-crosscheck-001.json": "18b95024a0caabaa421698c4e60c3464f70791e8f7fec3f25fdf1896baeae5ea",
+  "docs/procedures/e1s-native-link-actual/verify-001.json": "ddcdec128d26716bb2c0d30219d189c8443a963307bf32c89b64daff08ef8e84",
+  "worktrees/str-041-e1s-native-link-image-20261110/artifacts/e1s-native-link-image/index-002/native-complete-1042-index.json": "84c2ae57acc90ee32fce2c7c7be93100ede7051bb9a1b0759bb6d320b38dc25c",
+  "worktrees/str-041-e1s-native-link-image-20261110/artifacts/e1s-native-link/link-001/evidence.json": "b4489cf3f548e66637fe3d3b6d2d374ef17133b5759d54932bab3861f462725d",
+  "worktrees/str-041-e1s-native-link-image-20261110/artifacts/e1s-native-link/link-001/kernel/kernel.unstripped": "4c9536d89b6ad61e49e8cc45e82820f00df4343c478d14685009ad504313595f",
+  "docs/procedures/e1s-native-link-image/evidence.json": "a2f54f13b43a11f6887a417b4e3f45fbd1945dba79a979bd64b063ac096a92ff",
+  "fixtures/public/e1s-kernel-log-objects/object-overrides.json": "dc2e1435bbab73fd957a2c61624585c9d6ef3adaf565e7cf1f15531842ee8959",
+  "docs/procedures/krn-041/evidence.json": "a72e2897e80d99d3dcda0d08211c3a25d553fc288ad7c764d29c22c964e06b40",
+  "docs/procedures/krn-042/evidence.json": "52f4eaa9b3812381a0d9d74e48f75e588516c76e0aa890618e7490f0513732cb"
+ },
+ "limitations": [
+  "Review of STR-041; no second link was run.",
+  "Same-owner-session caveat of STR-041 input review is offset only by the hash checks recorded here.",
+  "No packaging, boot, QEMU or phone claim."
+ ]
+}
