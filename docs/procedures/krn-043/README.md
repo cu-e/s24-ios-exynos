@@ -1,6 +1,6 @@
 # KRN-043 — canonical export-checked E1S kernel and KPI set (not run yet)
 
-The tool `tools/build/e1s_kernel_exports.py` is written but **has never been executed**. At 2026-11-10 ~07:3xZ, the Claude Code auto-mode classifier denied `python3 -I tools/build/e1s_kernel_exports.py --run canon-a` ("Code from External"). Following the owner's rule, no other way to run it was tried.
+The tool `tools/build/e1s_kernel_exports.py` is written but **has never been executed**. At 2026-11-10 ~07:20Z, the Claude Code auto-mode classifier denied `python3 -I tools/build/e1s_kernel_exports.py --run canon-a` ("Code from External"). Following the owner's rule, no other way to run it was tried.
 
 What the tool does, for any owner who resumes the task:
 - It reuses the KRN-041 helpers from `docs/procedures/krn-041/missing_exports.py` unchanged.
