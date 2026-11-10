@@ -237,3 +237,37 @@ Next steps and the decisions they need (none authorised): `canary-fault` for the
 with the existing payload would show stages up to pre-jump; both need an image-specific decision
 like 0010. The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-002/`
 (the video contains the owner's room and is not committed).
+
+## canary-trig-fault: the exception path on the proven display channel (host-built; NOT run)
+
+`canary-trig` (run 002) showed the display channel works with the DECON0 kick, so the smallest
+remaining step of the diagnostic plan is the exception path: does the vector table, the exception
+stack and the ESR/ELR/FAR report work on this phone, and can the report be read from the screen.
+`build.py` builds `canary-trig-fault` = `canary-trig` plus `BRK #0x1234` after the first full report
+round (`-DMK_TRIG=1 -DCANARY_FAULT=1 -DMK_FAULT_ROUND=0`). The plain, fault, trig and loader-diag
+Images are byte-identical to the earlier builds (`build-003/build.json`; `MK_FAULT_ROUND` defaults to
+the old value 2). Two builds give identical hashes.
+
+* Canary Image SHA-256 `f839ba305fae5e89c48642b422a827bc4993d491681560b2b20fd1a46b560a1b`
+  (49152 bytes), RECOVERY image `e7ab288fdd689dcb15c58cf92e19a96586b30ec3b85a6df09695d3b41772a735`
+  (`artifacts/nat-022/package-003/package.json`, same NAT-006 packaging as run 002).
+* Why round 0: in run 002 the display ended about 60 s after the first marker; three rounds
+  (~55 s) would leave a couple of seconds for ESR/ELR/FAR. With the BRK at about 19 s one exception
+  cycle (SLOT, 4 ESR, 4 ELR, 4 FAR, then the DECON report; about 28 s) completes before that point and
+  repeats. The 60 s figure is two observations of one effect, not a measured timeout.
+* Expected on a working handler (entry was EL2, so VBAR_EL2/ESR_EL2 are used): slot 4 (current EL,
+  SPx, synchronous), ESR `0xf2001234` (EC 0x3c, ISS 0x1234), ELR the address of the BRK in the image
+  (image base `0x80000` + offset, to be matched against `build-003/canary-trig-fault/canary.elf`),
+  FAR not meaningful for BRK. Anything else is a result to explain, not to adjust.
+* Host tests (`test_nat022.py::Trigger`, 21 pass in total): the exception loop with kicks draws its
+  marker before any MMIO, touches only the contract registers, reads ESR/ELR/FAR back with the
+  independent decoder, and with a poisoned kick or the MMU on reports without any MMIO. The AArch64
+  vector entry (`exc_common`) and the BRK itself are not host-testable (no AArch64 emulator): the
+  hardware run is what would test them, as it also was for the first start path.
+* MMIO and sequence are those of decision 0010 (reads of four DECON0 registers, writes of `TRIG_CON`
+  and `SHD_REG_UP_REQ`, only after the first marker, MMU off); nothing new is touched. Recovery is
+  the run-002 path (`session_trigfault.py --restore`, otherwise Download Mode and one NAT-013 session).
+* `session_trigfault.py` refuses to run unless
+  `docs/decisions/0011-nat022-canary-trig-fault-single-run-2026-11-10.md` exists; that record is
+  created only if the owner accepts the image-specific request.
+

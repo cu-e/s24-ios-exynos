@@ -163,6 +163,31 @@ class Trigger(unittest.TestCase):
         self.assertGreaterEqual(d["kicks"], 2)
         self.assertGreater(d["frame_count_now16"], d["frame_count_prev16"])   # the fake counts requests
 
+    def trigexc(self, n, gc, tc, *flags):
+        p = subprocess.run([str(self.exe_trig), "trigexc", str(n), str(Path(self.tmp.name) / "e.bin"), gc, tc, *flags],
+                           capture_output=True, text=True)
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        ev = [l.split() for l in p.stdout.splitlines()]
+        return ev, [int(e[1], 16) for e in ev if e[0] == "DRAW"]
+
+    def test_exception_report_with_kicks_reads_back_and_stays_in_contract(self):
+        # One exception cycle is STAGE + SLOT + ESR/ELR/FAR (12) + 10 REG frames; run two cycles.
+        ev, frames = self.trigexc(50, "0x103", "0x10")
+        self.assertEqual(ev[0][0], "DRAW")                       # the exception marker precedes any MMIO
+        self.assertTrue({e[1] for e in ev if e[0] == "WR"} <= {"30", "50"})
+        ds = dec.describe([dec.parse_frame(w) for w in frames])
+        self.assertEqual((ds["esr"], ds["elr"], ds["far"]), ("0x00000000f2001234", "0xffffff8000123456", "0x00000000deadbeef"))
+        self.assertEqual(ds["slot"], 4)
+        self.assertTrue(ds["decon"]["kick_status"].startswith("sent"))
+
+    def test_exception_report_survives_a_poisoned_or_mmu_on_kick(self):
+        # An exception that interrupted a kick (or MMU on) must still report ESR/ELR/FAR with no MMIO at all.
+        for flag in ("poison", "mmu"):
+            ev, frames = self.trigexc(30, "0x103", "0x10", flag)
+            self.assertFalse([e for e in ev if e[0] in ("RD", "WR")], flag)
+            ds = dec.describe([dec.parse_frame(w) for w in frames])
+            self.assertEqual(ds["esr"], "0x00000000f2001234", flag)
+
     def test_skip_status_reported_not_hidden(self):
         for args, text in ((("0x0", "0x10"), "not enabled"), (("0x1", "0x10"), "video mode"), (("0x103", "0x10", "mmu"), "MMU on")):
             _, frames = self.trig(40, *args)

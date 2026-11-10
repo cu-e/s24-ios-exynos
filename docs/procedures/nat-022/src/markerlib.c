@@ -35,6 +35,14 @@ static inline void mk_clean(uint64_t a, uint64_t n)
 #define MK_TRIG 0
 #endif
 
+/* The fault images BRK after this many full report rounds (one round is 15 frames, ~18 s, in the
+ * canary-trig loop). The default keeps canary-fault byte-identical. canary-trig-fault uses 0: the
+ * two recordings so far show the display ending ~60 s after the first marker, so a BRK after
+ * three rounds would leave too little time to read ESR/ELR/FAR. */
+#ifndef MK_FAULT_ROUND
+#define MK_FAULT_ROUND 2
+#endif
+
 /* Report state of the DECON0 kick (canary-trig). Plain data, lives on the caller's stack. */
 struct mk_kick {
 	uint32_t gc, tc0, tc1, fc_prev, fc_now, status, n;
@@ -240,7 +248,7 @@ mk_canary_loop(uint64_t cel, uint64_t cur, uint64_t e1, uint32_t stack_ok, int f
 		show(&prev, mk_frame(MK_BOOTID, 1, (uint32_t)(id >> 16)), &k);
 		show(&prev, mk_frame(MK_STAGE, 0, MK_ST_CANARY_C), &k);
 		show_kick_report(&prev, &k);
-		if (fault && round == 2) {
+		if (fault && round == MK_FAULT_ROUND) {
 			show(&prev, mk_frame(MK_STAGE, 0, MK_ST_CANARY_BRK), &k);
 #if !MK_HOST
 			__asm__ volatile("brk #0x1234");

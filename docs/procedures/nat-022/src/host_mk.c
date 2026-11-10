@@ -71,6 +71,19 @@ int main(int argc, char **argv)
 		mk_canary_loop(4, 0x30d00800, 0x30d00800, 1, 0);
 		return 4;
 	}
+	if (argc >= 6 && !strcmp(argv[1], "trigexc")) {
+		/* trigexc MAXDRAWS OUTFILE GLOBAL_CON TRIG_CON [mmu] [poison]: the exception loop of a
+		 * canary-trig-fault image (what BRK #0x1234 reaches), against the fake DECON0. */
+		maxdraws = atoi(argv[2]); outfile = argv[3];
+		fake_gc = (uint32_t)strtoul(argv[4], 0, 0); fake_tc = (uint32_t)strtoul(argv[5], 0, 0);
+		for (int i = 6; i < argc; i++) {
+			if (!strcmp(argv[i], "mmu")) mk_host_mmu_on = 1;
+			if (!strcmp(argv[i], "poison")) mk_kick_state = 1;
+		}
+		mk_host_fb = calloc(1, MK_BANDS * MK_BAND_BYTES);
+		mk_exception_loop(4, 0xf2001234ULL, 0xffffff8000123456ULL, 0x00000000deadbeefULL);
+		return 4;
+	}
 #endif
 	if (argc != 4) return 2;
 	maxdraws = atoi(argv[2]); outfile = argv[3];
