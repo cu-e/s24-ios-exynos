@@ -1,0 +1,153 @@
+{
+  "kind": "android-userland",
+  "origin": "local-device",
+  "outcome": "pass",
+  "recorded_at": "2026-11-10T04:52:00+00:00",
+  "summary": "As root, KVM on the S24 created a VM with vGICv3, one vCPU and 2 MiB RAM; guest code ran at EL1 to PSCI SYSTEM_OFF on Cortex-A520, A720 and X4 cores. PSCI 1.1, CNTFRQ 25.6 MHz, MMIO exit 3-10 us, guest loop at native speed. No reboot; RAM directory removed.",
+  "task": "VM-051",
+  "owner": "claude-kvm-guest-20261110-k51",
+  "commit": "7f2940e01d884c1cfe31e53c2cd56e5bd69b47e0",
+  "device_inventory": "devices/local-2026-11-10-session1.json",
+  "authorization": "docs/decisions/0002-owner-autonomy-grant-2026-11-10.md",
+  "findings": {
+    "0": {
+      "ok": true,
+      "console": "Hi",
+      "psci_version": 65537,
+      "current_el": 4,
+      "midr": 1091557377,
+      "mpidr": 2147483648,
+      "cntfrq": 25600000,
+      "system_event_type": 1,
+      "mmio_counter_exits": 10000,
+      "mmio_exit_span_ns": 100234414,
+      "guest_loop_ticks": 2135821,
+      "guest_loop_wall_ns": 83456055,
+      "native_loop_ns": [
+        84525430,
+        77405234,
+        105984023,
+        83275313
+      ],
+      "alarm_fired": 0,
+      "other_mmio": 0
+    },
+    "4": {
+      "ok": true,
+      "console": "Hi",
+      "psci_version": 65537,
+      "current_el": 4,
+      "midr": 1091557393,
+      "mpidr": 2147483648,
+      "cntfrq": 25600000,
+      "system_event_type": 1,
+      "mmio_counter_exits": 10000,
+      "mmio_exit_span_ns": 40296679,
+      "guest_loop_ticks": 991263,
+      "guest_loop_wall_ns": 38728633,
+      "native_loop_ns": [
+        47151015,
+        38764024,
+        38773945,
+        38902344
+      ],
+      "alarm_fired": 0,
+      "other_mmio": 0
+    },
+    "9": {
+      "ok": true,
+      "console": "Hi",
+      "psci_version": 65537,
+      "current_el": 4,
+      "midr": 1091557409,
+      "mpidr": 2147483648,
+      "cntfrq": 25600000,
+      "system_event_type": 1,
+      "mmio_counter_exits": 10000,
+      "mmio_exit_span_ns": 29954531,
+      "guest_loop_ticks": 894257,
+      "guest_loop_wall_ns": 34935078,
+      "native_loop_ns": [
+        56945390,
+        55803633,
+        54694024,
+        31406367
+      ],
+      "alarm_fired": 0,
+      "other_mmio": 0
+    }
+  },
+  "reboot_observed": false,
+  "helper_removed": true,
+  "commands": [
+    {
+      "argv": [
+        "aarch64-linux-android35-clang",
+        "-static",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "docs/procedures/vm-051/kvm_guest.c",
+        "docs/procedures/vm-051/guest.S",
+        "-o",
+        "artifacts/vm-051/build-001/kvm_guest"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "docs/procedures/vm-051/run.py",
+        "--run",
+        "session-001",
+        "--helper",
+        "artifacts/vm-051/build-001/kvm_guest"
+      ],
+      "exit_code": 0,
+      "result": "Guest reached SYSTEM_OFF on all CPUs but my guest code lost its base register after hvc (SMCCC x0-x3 results); reports after the first hvc went to the wrong address. Kept as a failed measurement."
+    },
+    {
+      "argv": [
+        "aarch64-linux-android35-clang",
+        "-static",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "docs/procedures/vm-051/kvm_guest.c",
+        "docs/procedures/vm-051/guest.S",
+        "-o",
+        "artifacts/vm-051/build-002/kvm_guest"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "docs/procedures/vm-051/run.py",
+        "--run",
+        "session-002",
+        "--helper",
+        "artifacts/vm-051/build-002/kvm_guest"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "sha256": {
+    "artifacts/vm-051/build-002/kvm_guest": "6d0858521f1d09e16e7bd3e8453143ffdc19f0abf492d8b41032b5e1af45918c",
+    "artifacts/vm-051/session-002/report.json": "e0fed9ad9bb07f888f61e3299b13b6208d3f7525bcf9f3c0b242a75effb542a3",
+    "artifacts/vm-051/session-001/report.json": "c510180b64f1871833b2c3775ee875cce10007e1697c4e060133c132605cb1d5"
+  },
+  "artifacts": [
+    "artifacts/vm-051/session-002/report.json",
+    "artifacts/vm-051/session-001/report.json",
+    "artifacts/vm-051/build-002/kvm_guest",
+    "worktrees/vm-051-minimal-guest-20261110/research/notes/virtualization/VM-051-minimal-guest.md"
+  ],
+  "limits": [
+    "No XNU guest, no interrupts delivered, one vCPU, 2 MiB RAM.",
+    "Run as root; an app cannot open /dev/kvm (VM-001).",
+    "The device serial is not recorded."
+  ]
+}
