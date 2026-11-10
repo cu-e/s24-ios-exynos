@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T13:31:30+00:00",
+  "updated_at": "2026-11-10T13:38:37+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -12512,6 +12512,41 @@
       "evidence": "docs/procedures/nat-022/evidence-nat023.json",
       "evidence_sha256": "7d092864275dc39f4f0650c165ec99e83cd7bfba39223ef6396cbdc2ebdf1f69",
       "finished_at": "2026-11-10T13:31:30+00:00"
+    },
+    {
+      "id": "NAT-024",
+      "title": "Build and host-test canary-trig-fault (exception report on the proven DECON0 display channel) and prepare its decision request",
+      "status": "done",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "NAT-023"
+      ],
+      "paths": [
+        "docs/procedures/nat-022",
+        "artifacts/nat-022"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "A canary-trig-fault image is built reproducibly; canary-plain, canary-fault, canary-trig and loader-diag stay byte-identical to the earlier builds. The BRK fires after the first report round so ESR/ELR/FAR fit before the display ended in run 002.",
+        "Host tests run the exception loop with the DECON0 kick: marker before any MMIO, only the contract registers touched, ESR/ELR/FAR read back with the independent decoder, no MMIO when a kick was interrupted or the MMU is on.",
+        "Nothing is flashed or run on the phone: the packaged RECOVERY image, an image-gated session driver and the expected ESR/ELR values are recorded, and an image-specific decision request with the SHA-256, risks and recovery is put to the owner."
+      ],
+      "steps": [
+        "Add MK_FAULT_ROUND and the canary-trig-fault build",
+        "Add exception-loop host tests with the fake DECON0",
+        "Package, gate the session driver, document the request"
+      ],
+      "owner": "claude-nat022-20261110-diag",
+      "started_at": "2026-11-10T13:37:08+00:00",
+      "last_heartbeat": "2026-11-10T13:37:08+00:00",
+      "updated_at": "2026-11-10T13:38:37+00:00",
+      "evidence": "docs/procedures/nat-022/evidence-nat024.json",
+      "evidence_sha256": "09b014dd39e88bd76f55b7025cc2d9135430c3dd715b379ae9e349a9c2533a6d",
+      "finished_at": "2026-11-10T13:38:37+00:00"
     }
   ],
   "experiments": [
@@ -55838,6 +55873,46 @@
           "owner": "claude-nat022-20261110-diag",
           "priority": 97,
           "last_heartbeat": "2026-11-10T12:29:17+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T13:36:48+00:00",
+      "action": "task.add:NAT-024",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-024",
+          "status": "pending",
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T13:37:08+00:00",
+      "action": "task.claim:NAT-024",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-024",
+          "status": "in_progress",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 97,
+          "last_heartbeat": "2026-11-10T13:37:08+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T13:38:37+00:00",
+      "action": "task.done:NAT-024",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-024",
+          "status": "done",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 97,
+          "last_heartbeat": "2026-11-10T13:37:08+00:00"
         }
       ]
     }

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T13:31:50+00:00",
-  "ledger_updated_at": "2026-11-10T13:31:30+00:00",
-  "registry_sha256": "f32d89e69125ceaebbe58e01ba8ecc23ec405c97ef4dcf77490d2b4802362cf5",
+  "generated_at": "2026-11-10T13:38:57+00:00",
+  "ledger_updated_at": "2026-11-10T13:38:37+00:00",
+  "registry_sha256": "aed3735027e287388a5facfc45d9f8cb407fcb3b88a719d5f214e1b09df81da9",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [],
@@ -173,6 +173,7 @@
       "VM-007",
       "NAT-022",
       "NAT-023",
+      "NAT-024",
       "KRN-005",
       "REV-004",
       "REV-011",
@@ -5272,6 +5273,44 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-023.md"
+    },
+    {
+      "id": "NAT-024",
+      "title": "Build and host-test canary-trig-fault (exception report on the proven DECON0 display channel) and prepare its decision request",
+      "status": "done",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "NAT-023"
+      ],
+      "paths": [
+        "docs/procedures/nat-022",
+        "artifacts/nat-022"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "A canary-trig-fault image is built reproducibly; canary-plain, canary-fault, canary-trig and loader-diag stay byte-identical to the earlier builds. The BRK fires after the first report round so ESR/ELR/FAR fit before the display ended in run 002.",
+        "Host tests run the exception loop with the DECON0 kick: marker before any MMIO, only the contract registers touched, ESR/ELR/FAR read back with the independent decoder, no MMIO when a kick was interrupted or the MMU is on.",
+        "Nothing is flashed or run on the phone: the packaged RECOVERY image, an image-gated session driver and the expected ESR/ELR values are recorded, and an image-specific decision request with the SHA-256, risks and recovery is put to the owner."
+      ],
+      "steps": [
+        "Add MK_FAULT_ROUND and the canary-trig-fault build",
+        "Add exception-loop host tests with the fake DECON0",
+        "Package, gate the session driver, document the request"
+      ],
+      "owner": "claude-nat022-20261110-diag",
+      "started_at": "2026-11-10T13:37:08+00:00",
+      "last_heartbeat": "2026-11-10T13:37:08+00:00",
+      "updated_at": "2026-11-10T13:38:37+00:00",
+      "evidence": "docs/procedures/nat-022/evidence-nat024.json",
+      "evidence_sha256": "09b014dd39e88bd76f55b7025cc2d9135430c3dd715b379ae9e349a9c2533a6d",
+      "finished_at": "2026-11-10T13:38:37+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-024.md"
     },
     {
       "id": "KRN-005",
@@ -14016,43 +14055,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-10T11:31:13+00:00",
-      "action": "task.add:NAT-021",
-      "owner": "codex-83s-session-20261110-r7",
-      "tasks": [
-        {
-          "id": "NAT-021",
-          "status": "pending",
-          "priority": 100
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T11:31:36+00:00",
-      "action": "project.permit:native",
-      "owner": "codex-83s-session-20261110-r7",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-10T11:32:06+00:00",
-      "action": "task.claim:NAT-021",
-      "owner": "codex-83s-session-20261110-r7",
-      "tasks": [
-        {
-          "id": "NAT-021",
-          "status": "in_progress",
-          "owner": "codex-83s-session-20261110-r7",
-          "priority": 100,
-          "last_heartbeat": "2026-11-10T11:32:06+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-10T11:34:41+00:00",
       "action": "experiment.plan:NAT021-83S-001",
       "owner": "codex-83s-session-20261110-r7"
@@ -14274,11 +14276,51 @@
           "last_heartbeat": "2026-11-10T12:29:17+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T13:36:48+00:00",
+      "action": "task.add:NAT-024",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-024",
+          "status": "pending",
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T13:37:08+00:00",
+      "action": "task.claim:NAT-024",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-024",
+          "status": "in_progress",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 97,
+          "last_heartbeat": "2026-11-10T13:37:08+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T13:38:37+00:00",
+      "action": "task.done:NAT-024",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-024",
+          "status": "done",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 97,
+          "last_heartbeat": "2026-11-10T13:37:08+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "2e17a07d5e3e9fc2c9a46018f4efd90e3c84574d3da7241c07f0cac69df7a2b1",
-    "BOARD.md": "b61e9b11c3e6a872c21f8caf04ae2fdcadb93efe158d3b137ff285d49ba25457",
+    "STATUS.md": "0101f8d8fa613433cdb6a2301a65e711e799692ce0375030ba187e9c0f6a76ff",
+    "BOARD.md": "5d865c8cfcfc835ab596a29eaae78096d9a3503741eb66ac63db11ab4ef46f48",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -14391,6 +14433,7 @@
     "planning/tasks/NAT-017.md": "44ba4989437a4baf7399488bbf4f0dbf893079dfcc00500dfa86a2f0686be690",
     "planning/tasks/NAT-022.md": "92b1dcb59f1830629d3d1e59defeec92fe3e49eb2df1eff97d0c8d6e35eadeb9",
     "planning/tasks/NAT-023.md": "1018e390c7aa0cdda8fd59e72ec44b2a5cd0131199bb7f13a769fc9825e73bae",
+    "planning/tasks/NAT-024.md": "10bde102216adebc51d1565be90df70cb2b646c764ea667e6a0472b93d210e22",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/REV-004.md": "8c7b273845208b121b2d6d1f05038b627689d3f97b766a765a91cdf23082bdb1",
     "planning/tasks/REV-011.md": "5ea2857fe5caca100edd1f7f53667f0b2a27de4b576000ecd14e2a55f1e7d51b",

@@ -1,0 +1,90 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-10T13:38:24.007557+00:00",
+ "commit": "2e0e195c68067f7d2523d4e58a856e4f2806337c",
+ "summary": "Host only; nothing flashed or run. canary-trig-fault (canary-trig + BRK #0x1234 after the first report round, -DMK_FAULT_ROUND=0) builds reproducibly (two builds identical): Image f839ba305fae5e89c48642b422a827bc4993d491681560b2b20fd1a46b560a1b (49152 B), packaged with the NAT-006 builder into RECOVERY image e7ab288fdd689dcb15c58cf92e19a96586b30ec3b85a6df09695d3b41772a735 (19608 differing 4 KiB pages, canary at offset 2048). canary-plain 7bc1b01d, canary-fault 38a4feba, canary-trig 572ebd0f and loader-diag dc46bdec are byte-identical to build-002. 21 host tests pass (python3 -m unittest docs/procedures/nat-022/test_nat022.py), including the exception loop with kicks against the fake DECON0: marker before any MMIO, only TRIG_CON/SHD_REG_UP_REQ written, ESR/ELR/FAR/slot read back by the independent decoder, no MMIO when a kick was interrupted or the MMU is on. make check passed (214 tests; it does not include test_nat022.py). Not shown by any host test: the AArch64 vector entry (exc_common), the BRK itself and the EL2 ESR/ELR reads (no AArch64 emulator here); the 19 s BRK timing rests on two observations of the display ending ~60 s after the first marker, not on a measured timeout. session_trigfault.py refuses to run unless docs/decisions/0011-nat022-canary-trig-fault-single-run-2026-11-10.md exists; that decision is not made. The image-specific request is in the README section 'canary-trig-fault' and is put to the owner in the session.",
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "docs/procedures/nat-022/test_nat022.py"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/build.py",
+    "--out",
+    "artifacts/nat-022/build-003",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/build.py",
+    "--out",
+    "artifacts/nat-022/build-003-repro",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/package.py",
+    "--image",
+    "artifacts/nat-022/build-003/canary-trig-fault/Image",
+    "--out",
+    "artifacts/nat-022/package-003"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-022/README.md",
+  "docs/procedures/nat-022/build.py",
+  "docs/procedures/nat-022/test_nat022.py",
+  "docs/procedures/nat-022/session_trigfault.py",
+  "docs/procedures/nat-022/src/markerlib.c",
+  "docs/procedures/nat-022/src/host_mk.c",
+  "artifacts/nat-022/build-003/build.json",
+  "artifacts/nat-022/build-003-repro/build.json",
+  "artifacts/nat-022/build-003/canary-trig-fault/Image",
+  "artifacts/nat-022/package-003/package.json",
+  "artifacts/nat-022/package-003/recovery.img",
+  "artifacts/nat-022/make-check-nat024.log"
+ ],
+ "sha256": {
+  "docs/procedures/nat-022/README.md": "f8a4ea72e4b80dc000dbd59366794d566f5687af7d7411b4785e26ebc0a3f09e",
+  "docs/procedures/nat-022/build.py": "55c0b6feaed8369f095ab704bedbdc50548b444d59b068ad2712f9954b521aaa",
+  "docs/procedures/nat-022/test_nat022.py": "7fb856c72706835b55a14715c96f6568f85ddd5a8390a90d55aa91e9b869972c",
+  "docs/procedures/nat-022/session_trigfault.py": "59ac2e7ec42b4d74d1bee297116819245772470f19f459038344f74d07706621",
+  "docs/procedures/nat-022/src/markerlib.c": "86251177df857c35db7a638817bb74220bb7c834f20fe58f7c6e2b7a973565d4",
+  "docs/procedures/nat-022/src/host_mk.c": "c49fa7e460d2cae9ad8db757c2b8af8284218d0c752ea5f2ed93b5fa331ed6ef",
+  "artifacts/nat-022/build-003/build.json": "e24b67b079d77193cbed45aa465531d20ad10d4b94a4b2b3f431da8684fcbba3",
+  "artifacts/nat-022/build-003-repro/build.json": "caa9278fc3046b08506d031e4996ffadd2dc186ea54ae4074686aad77a2fc0b8",
+  "artifacts/nat-022/build-003/canary-trig-fault/Image": "f839ba305fae5e89c48642b422a827bc4993d491681560b2b20fd1a46b560a1b",
+  "artifacts/nat-022/package-003/package.json": "cdfabe290d8e345c690bb86ee3f38682efb229ce0c6c0ee6144b41708363dea9",
+  "artifacts/nat-022/package-003/recovery.img": "e7ab288fdd689dcb15c58cf92e19a96586b30ec3b85a6df09695d3b41772a735",
+  "artifacts/nat-022/make-check-nat024.log": "0ca90a683179af47f2f3067625f7a7c62c455aa2ccc0b1b3f168b91e0ff5300d"
+ }
+}
