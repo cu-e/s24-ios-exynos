@@ -151,6 +151,14 @@ def main():
             check('pinned-tree-blob-'+str(index),tree.split()[2]==item['git_blob'])
             candidates=[cache/'source-session1'/name,cache/'source-session2'/name,samsung/name]
             original=next((p for p in candidates if p.is_file() and sha(p)==item['sha256']),None)
+            if original is None:
+                # Sparse/partial checkout (DRV-007): materialise the pinned blob from the local object
+                # store with lazy fetch disabled. sha256 and the git blob id are still checked below.
+                blob=subprocess.run(['git','-C',str(samsung),'cat-file','blob',item['git_blob']],env=env,capture_output=True,timeout=60)
+                if blob.returncode==0 and hashlib.sha256(blob.stdout).hexdigest()==item['sha256']:
+                    original=out/'object-store-inputs'/name;original.parent.mkdir(parents=True,exist_ok=True);original.write_bytes(blob.stdout)
+                    report['commands'].append(dict(argv=['git','-C',str(samsung),'cat-file','blob',item['git_blob']],cwd=str(ROOT),exit_code=0,
+                        environment={'GIT_NO_LAZY_FETCH':'1'},note='pinned blob read from the local object store'))
             check('exact-source-available-'+str(index),original is not None)
             data=original.read_bytes();check('actual-git-blob-'+str(index),hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()==item['git_blob'])
             target=out/'primary-inputs'/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(data)
