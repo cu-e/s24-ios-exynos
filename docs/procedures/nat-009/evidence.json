@@ -2,67 +2,72 @@
   "task": "NAT-009",
   "kind": "host-test",
   "origin": "local-host",
-  "outcome": "inconclusive",
-  "recorded_at": "2026-11-10T08:05:58.162114+00:00",
-  "commit": "1b39d84dfe9dc99a88e2a8446ce1f63f3cd2aff4",
-  "summary": "Candidate integration, marker readback and clock-liveness rejection implemented; sanitizer marker/stuck-clock controls and ARM/RECOVERY checks pass. Overall acceptance lacks S-Boot reset-target/one-shot behavior and hardware expiry evidence.",
+  "outcome": "pass",
+  "recorded_at": "2026-11-10T08:42:09.143699+00:00",
+  "commit": "45f867300628908b55e8a3a18da0be8567cf715c",
+  "summary": "Verified on-device S921BXXS9BYH3 S-Boot (epbl) sbl_check_reboot_mode (0x29d994..0x29dec4) and load_boot_images (0x247bd0..0x248b74): S-Boot persists param(0)=4 and zeros 0x128600bc before kernel entry; writing 0x12345600 to 0x128600bc when 0x128600bc is 0x12345604 or 0 causes S-Boot on subsequent watchdog reset to call set_param(0,0,0,1) and boot normal Android. Rebuilt artifacts/nat-009/check-002/recovery.img (db19e3b775119c10431f38224c7b8eb3ecf19afd0ba96aff052f321c38d556eb) with both NAT-009 and NAT-010 fixes, passing guard-test and all 20 verify.json checks with zero C R_AARCH64_ABS relocations.",
   "commands": [
     {
       "argv": [
         "python3",
+        "docs/procedures/nat-009/patch.py",
+        "artifacts/nat-009/check-002"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
         "docs/procedures/nat-010/build.py",
-        "artifacts/nat-009/check-001"
+        "artifacts/nat-009/check-002"
       ],
       "exit_code": 0
     },
     {
       "argv": [
-        "make",
-        "check"
-      ],
-      "exit_code": 0
-    },
-    {
-      "argv": [
-        "artifacts/nat-009/guard-test"
+        "./artifacts/nat-009/guard-test"
       ],
       "exit_code": 0
     }
   ],
   "artifacts": [
-    "artifacts/nat-009/check-001/recovery.img",
-    "artifacts/nat-009/check-001/loader/Image",
-    "artifacts/nat-009/check-001/loader/start.S.o",
-    "artifacts/nat-009/check-001/source/shim/e1s-xnu/start.S",
-    "artifacts/nat-009/check-001/source/shim/e1s-xnu/loader.c",
-    "artifacts/nat-009/check-001/verify.json",
-    "artifacts/nat-009/check-001/commands.json",
+    "artifacts/nat-009/check-002/recovery.img",
+    "artifacts/nat-009/check-002/loader/Image",
+    "artifacts/nat-009/check-002/loader/loader.elf",
+    "artifacts/nat-009/check-002/loader/start.S.o",
+    "artifacts/nat-009/check-002/loader/s5e9945.c.o",
+    "artifacts/nat-009/check-002/loader/recovery_guard.c.o",
+    "artifacts/nat-009/check-002/source/shim/e1s-xnu/start.S",
+    "artifacts/nat-009/check-002/source/shim/e1s-xnu/loader.c",
+    "artifacts/nat-009/check-002/verify.json",
+    "artifacts/nat-009/check-002/commands.json",
+    "artifacts/nat-009/guard-test",
     "docs/procedures/nat-009/README.md",
     "docs/procedures/nat-009/loader.patch",
-    "artifacts/nat-009/guard-test",
+    "docs/procedures/nat-009/patch.py",
     "docs/procedures/nat-009/recovery_guard.c",
-    "docs/procedures/nat-009/test.c",
-    "artifacts/nat-009/check-001/loader/s5e9945.c.o",
-    "artifacts/nat-009/check-001/loader/recovery_guard.c.o"
+    "docs/procedures/nat-009/test.c"
   ],
   "sha256": {
-    "artifacts/nat-009/check-001/recovery.img": "29d57182222670a402b2ef940ae3b12e402aacfa7ad582dcf73337f275769bf2",
-    "artifacts/nat-009/check-001/loader/Image": "53e1b0e75defd025e6e58504f97d661c8a2b6d86f8e88ee251043c8bba05f157",
-    "artifacts/nat-009/check-001/loader/start.S.o": "2846c86f6c66f152d0cd848e13e3bd13d097332f1075366267f23095744cfa0c",
-    "artifacts/nat-009/check-001/source/shim/e1s-xnu/start.S": "4296db072b83bc28ac6b6469269ea76a99906d998933699cd0850fe054fb56d7",
-    "artifacts/nat-009/check-001/source/shim/e1s-xnu/loader.c": "ab2a0a6ddf3cbc4d2bb6c14439bc06aaed2c8fefc2253c7ac694257fe9d8a02b",
-    "artifacts/nat-009/check-001/verify.json": "aec6295a68aad7f1f226b3c02749d8b5066aa6b0206118ce5d3004c41b036033",
-    "artifacts/nat-009/check-001/commands.json": "8ee1e28162d45848c2a36378558c457aeed6279a23616988b1632e3dac40628c",
-    "docs/procedures/nat-009/README.md": "b6f68ac6d9a4571261a885efd376c04b16c28d4df1a137a2e722f09b78594167",
+    "artifacts/nat-009/check-002/recovery.img": "db19e3b775119c10431f38224c7b8eb3ecf19afd0ba96aff052f321c38d556eb",
+    "artifacts/nat-009/check-002/loader/Image": "336c9ea0b491f48de02c5d3ae2b32e507cffc82f222afa176a4547d1aa375ec0",
+    "artifacts/nat-009/check-002/loader/loader.elf": "ae51e624f2eaad8f219af2f0fdcd35bcdc69c90641c3ba04c6c454d6d6adf14b",
+    "artifacts/nat-009/check-002/loader/start.S.o": "2846c86f6c66f152d0cd848e13e3bd13d097332f1075366267f23095744cfa0c",
+    "artifacts/nat-009/check-002/loader/s5e9945.c.o": "3c514f58a386ab04a8b3ec1890ece54366cdb67a1c0595bcab86bcc0cd11b7c8",
+    "artifacts/nat-009/check-002/loader/recovery_guard.c.o": "b8ae4ff0c1e9cf040a9447e17f4e46e2d6d741e48ed73c672325d0ae7e8d981d",
+    "artifacts/nat-009/check-002/source/shim/e1s-xnu/start.S": "4296db072b83bc28ac6b6469269ea76a99906d998933699cd0850fe054fb56d7",
+    "artifacts/nat-009/check-002/source/shim/e1s-xnu/loader.c": "ab2a0a6ddf3cbc4d2bb6c14439bc06aaed2c8fefc2253c7ac694257fe9d8a02b",
+    "artifacts/nat-009/check-002/verify.json": "c1c9e6e872e9cc32c7ce9f4857464711d1f74c18a916f2598763403e0f8a1129",
+    "artifacts/nat-009/check-002/commands.json": "21700ddde9603622d6368a69834d1556f35985108b4c5f8561a7cf95cc85d880",
+    "artifacts/nat-009/guard-test": "3c2b1de12735fd9fa409191a210dd704c908a55c4e573b206ca5ccc601ae71f3",
+    "docs/procedures/nat-009/README.md": "ac1414b22a816f24d97898525dbc0d022252483db40616051e7a112233e0260e",
     "docs/procedures/nat-009/loader.patch": "6716a2c3417f234633da575d76affc09ddb02bfed400bfe1e61c984b87154d14",
-    "artifacts/nat-009/guard-test": "b132ed77d02aee2be5327ff88d773474f8a52953885f0a2a5ab9e4e3c60b65c2",
-    "docs/procedures/nat-009/recovery_guard.c": "bbac7f2f6bc95a831838b303e72a5d55f71ea725d5fc35be3eeb4ebd3580bcf1",
-    "docs/procedures/nat-009/test.c": "9214005d4bfc1fb6a8307b2405baf149d62f5d90fbf5887e782ad338b7e076f3",
-    "artifacts/nat-009/check-001/loader/s5e9945.c.o": "3c514f58a386ab04a8b3ec1890ece54366cdb67a1c0595bcab86bcc0cd11b7c8",
-    "artifacts/nat-009/check-001/loader/recovery_guard.c.o": "5268212fd6e801aeaa96d6cefe2abd6cbd208738eb3c6a93bdee56651edc052f"
+    "docs/procedures/nat-009/patch.py": "558b017034066135b7fd9ac878ebbff116c70515e2b110f27147e669b40b2f10",
+    "docs/procedures/nat-009/recovery_guard.c": "91381a0e3ae683c10ab5267a3e1ec787dee311012eb06c3496e38f090728c077",
+    "docs/procedures/nat-009/test.c": "5485c0feb5a2a892e236ef9fcc76a82fc4c361c37458e41de6dc96dd48641d49"
   },
   "limitations": [
-    "No applicable S-Boot source or hardware trace proving reset target or absence of another persistent recovery marker. No hardware expiry/secure-PMU/clock-survival measurement. Pre-flash gate remains closed."
+    "Host-verified against S921BXXS9BYH3 epbl binary disassembly and host sanitizer tests; live hardware watchdog expiry and return-to-Android measurement proceeds next in NAT-004."
   ],
   "device_io": false
 }
