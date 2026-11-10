@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T06:57:47+00:00",
-  "ledger_updated_at": "2026-11-10T06:57:41+00:00",
-  "registry_sha256": "ba955be27d8c44c5cb98a001668cd817f0da70141779f4010b2b2a18fd6b8001",
+  "generated_at": "2026-11-10T07:08:21+00:00",
+  "ledger_updated_at": "2026-11-10T07:08:15+00:00",
+  "registry_sha256": "16e4be109d9b90e19d2690a3484d0be8aaea8ae172af772054185c137a67085b",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -37,7 +37,8 @@
       "KRN-001",
       "CELL-010",
       "ESIM-004",
-      "CELL-009"
+      "CELL-009",
+      "GPU-005"
     ],
     "waiting": [
       "STR-037",
@@ -55,7 +56,6 @@
       "UI-003",
       "UI-004",
       "UI-005",
-      "GPU-005",
       "NAT-002"
     ],
     "gated": [
@@ -11604,8 +11604,8 @@
     {
       "id": "GPU-005",
       "title": "Compare the stock driver and Xclipse RADV in the test APK",
-      "status": "pending",
-      "owner": null,
+      "status": "blocked",
+      "owner": "claude-takeover-20261110-6c8f",
       "scope": "android-app",
       "evidence_kind": "android-userland",
       "depends_on": [
@@ -11614,9 +11614,9 @@
       ],
       "paths": [
         "src/android-probe/",
-        "src/graphics/",
-        "artifacts/",
-        "research/notes/"
+        "src/graphics/radv",
+        "artifacts/gpu-005",
+        "research/notes/GPU-005"
       ],
       "acceptance": [
         "RADV loads only inside the test process, without system library replacement.",
@@ -11632,12 +11632,40 @@
         "Start with one frame and a short timeout.",
         "On GPU hang, stop the series and preserve available logs."
       ],
-      "column": "waiting",
+      "path_history": [
+        {
+          "from": [
+            "src/android-probe/",
+            "src/graphics/",
+            "artifacts/",
+            "research/notes/"
+          ],
+          "to": [
+            "src/android-probe/",
+            "src/graphics/radv",
+            "artifacts/gpu-005",
+            "research/notes/GPU-005"
+          ],
+          "reason": "research/notes/ and artifacts/ overlap the KRN-003 and VM-054 reservations; GPU-005 needs only the probe app, a RADV build directory, its own artifacts and its own note/evidence directory",
+          "owner": "claude-takeover-20261110-6c8f",
+          "at": "2026-11-10T07:05:27+00:00"
+        }
+      ],
+      "updated_at": "2026-11-10T07:08:15+00:00",
+      "started_at": "2026-11-10T07:05:46+00:00",
+      "last_heartbeat": "2026-11-10T07:08:15+00:00",
+      "branch": "main",
+      "blocked_reason": "Executing the pinned radv-xclipse Meson/Ninja build was denied by the Claude Code auto-mode classifier (Code from External) at 2026-11-10T07:07Z; needs the owner to allow or run python3 src/graphics/radv/build.py --run build-001",
+      "progress_note": "Source pinned and cloned, venv ready, build.py written but never executed (classifier denial)",
+      "next_step": "Owner allows or runs the RADV build; then add the app-local loader APK variant",
+      "handoff": "research/notes/GPU-005/handoff.md",
+      "column": "blocked",
       "reasons": [
-        "Paths reserved by: KRN-003, VM-054"
+        "Executing the pinned radv-xclipse Meson/Ninja build was denied by the Claude Code auto-mode classifier (Code from External) at 2026-11-10T07:07Z; needs the owner to allow or run python3 src/graphics/radv/build.py --run build-001"
       ],
       "priority": 50,
-      "card_path": "planning/tasks/GPU-005.md"
+      "card_path": "planning/tasks/GPU-005.md",
+      "report_health": "recent"
     },
     {
       "id": "DRV-002",
@@ -11783,7 +11811,7 @@
       ],
       "column": "waiting",
       "reasons": [
-        "Paths reserved by: KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, STR-024, VM-053, VM-054, NAT-006"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, STR-024, VM-053, VM-054, NAT-006"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-002.md"
@@ -11827,7 +11855,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-002, NAT-004, KRN-001",
-        "Paths reserved by: KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, STR-024, VM-053, VM-054, NAT-006"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, CELL-009, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, VM-014, VM-019, VM-023, VM-031, VM-032, VM-033, GPU-012, VM-042, VM-043, VM-047, STR-024, VM-053, VM-054, NAT-006"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -11866,7 +11894,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: KRN-003, VM-054"
+        "Paths reserved by: GPU-005, KRN-003, VM-054"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -12862,6 +12890,17 @@
         "handoff": null,
         "branch": "team/vm-053-display-input-20261110",
         "worktree": "worktrees/vm-053-display-input-20261110"
+      },
+      {
+        "id": "GPU-005",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-10T07:08:15+00:00",
+        "report_health": "recent",
+        "progress_note": "Source pinned and cloned, venv ready, build.py written but never executed (classifier denial)",
+        "next_step": "Owner allows or runs the RADV build; then add the app-local loader APK variant",
+        "handoff": "research/notes/GPU-005/handoff.md",
+        "branch": "main",
+        "worktree": null
       }
     ],
     "codex-guest-exec-20261106-cw": [
@@ -13020,75 +13059,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-10T05:58:27+00:00",
-      "action": "task.update:NAT-006",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "NAT-006",
-          "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 95,
-          "progress_note": "Transferred under 0003 for preservation. Uncommitted files saved as-is in ac22ef5 on team/nat-006-recovery-image-20261110; verify_image.py may be partial (write interrupted by a safety classifier stop at 05:46:02Z). Nothing run, nothing flashed.",
-          "next_step": "Held; not restarted. Owner decides next action.",
-          "last_heartbeat": "2026-11-10T05:58:27+00:00",
-          "branch": "team/nat-006-recovery-image-20261110",
-          "worktree": "worktrees/nat-006-recovery-image-20261110"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T06:12:03+00:00",
-      "action": "task.update:UI-007",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "UI-007",
-          "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 90,
-          "progress_note": "Reviewed and fixed (test boundary defect; validate refuses block mode and covered frames); 22 UI-007 tests and make check (201) pass on main c3cf4ed; 6/6 mutants killed.",
-          "next_step": "Native run of the reader is a separate, unauthorized step.",
-          "last_heartbeat": "2026-11-10T06:12:03+00:00",
-          "branch": "team/ui-007-decon-boot-window-20261110",
-          "worktree": "worktrees/ui-007-decon-boot-window-20261110",
-          "handoff": "research/notes/native/UI-007-decon-boot-window.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T06:12:23+00:00",
-      "action": "task.done:UI-007",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "UI-007",
-          "status": "done",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 90,
-          "progress_note": "Reviewed and fixed (test boundary defect; validate refuses block mode and covered frames); 22 UI-007 tests and make check (201) pass on main c3cf4ed; 6/6 mutants killed.",
-          "next_step": "Native run of the reader is a separate, unauthorized step.",
-          "last_heartbeat": "2026-11-10T06:12:03+00:00",
-          "branch": "team/ui-007-decon-boot-window-20261110",
-          "worktree": "worktrees/ui-007-decon-boot-window-20261110",
-          "handoff": "research/notes/native/UI-007-decon-boot-window.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T06:22:50+00:00",
-      "action": "task.add:DRV-007",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "DRV-007",
-          "status": "pending",
-          "owner": null,
-          "priority": 60
-        }
-      ]
-    },
     {
       "at": "2026-11-10T06:23:10+00:00",
       "action": "task.claim:DRV-007",
@@ -13324,11 +13294,76 @@
           "worktree": "worktrees/vm-054-xnu-guest-s24-20261110"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T07:05:27+00:00",
+      "action": "task.narrow:GPU-005",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "GPU-005",
+          "status": "pending",
+          "owner": null,
+          "paths": [
+            "src/android-probe/",
+            "src/graphics/radv",
+            "artifacts/gpu-005",
+            "research/notes/GPU-005"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:05:46+00:00",
+      "action": "task.claim:GPU-005",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "GPU-005",
+          "status": "in_progress",
+          "owner": "claude-takeover-20261110-6c8f",
+          "last_heartbeat": "2026-11-10T07:05:46+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:07:56+00:00",
+      "action": "task.block:GPU-005",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "GPU-005",
+          "status": "blocked",
+          "owner": "claude-takeover-20261110-6c8f",
+          "blocked_reason": "Executing the pinned radv-xclipse Meson/Ninja build was denied by the Claude Code auto-mode classifier (Code from External) at 2026-11-10T07:07Z; needs the owner to allow or run python3 src/graphics/radv/build.py --run build-001",
+          "last_heartbeat": "2026-11-10T07:07:56+00:00",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:08:15+00:00",
+      "action": "task.update:GPU-005",
+      "owner": "claude-takeover-20261110-6c8f",
+      "tasks": [
+        {
+          "id": "GPU-005",
+          "status": "blocked",
+          "owner": "claude-takeover-20261110-6c8f",
+          "progress_note": "Source pinned and cloned, venv ready, build.py written but never executed (classifier denial)",
+          "next_step": "Owner allows or runs the RADV build; then add the app-local loader APK variant",
+          "blocked_reason": "Executing the pinned radv-xclipse Meson/Ninja build was denied by the Claude Code auto-mode classifier (Code from External) at 2026-11-10T07:07Z; needs the owner to allow or run python3 src/graphics/radv/build.py --run build-001",
+          "last_heartbeat": "2026-11-10T07:08:15+00:00",
+          "branch": "main",
+          "handoff": "research/notes/GPU-005/handoff.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "a065101b59aa89f3046890f154c3392915510b0eb28249377532fe96cf9039e1",
-    "BOARD.md": "a1a494fcc8410dc06806b30e8405e7fa41ed58ec4fa787fefb015d6ec04be8f1",
+    "STATUS.md": "16598f6d897aaabc713cbdd80542618de85f5fd47a821205d33fc070e8752845",
+    "BOARD.md": "f3d2f1264b0f30b1b150e8a1cbfeb52de22bcdf900e05e402603fc2b32dacb7a",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -13586,12 +13621,12 @@
     "planning/tasks/GPU-002.md": "ed6a2e320b8b805c8d6ec97f1537439282c02f999c4a7542c95e2e31e7b76eca",
     "planning/tasks/GPU-003.md": "7f77e05e13c17ad1261dbe3fb017276f21c548ffcba60cf892c891d37e44469a",
     "planning/tasks/GPU-004.md": "4f7b914361a5ff47439410c701bd907e3a3020383d4b33c91ce59b5fbdab2579",
-    "planning/tasks/GPU-005.md": "779c9cbf048fc9fdb973eff255d2efeb1aa4d5238918cdaf45e0f65257f311d2",
+    "planning/tasks/GPU-005.md": "90191779582d044468e264c18ccf2993938162d3443cd05ea76a234d1144cc13",
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
-    "planning/tasks/NAT-002.md": "e81eb2837f67a43ff5046ba4f8cfc328d3efa4c33592b327745e80cc8cd9eb16",
-    "planning/tasks/NAT-003.md": "779a50a4a2fdc79f93985a570c7f5e5c2023f2ca9bbe33823bb1da6ac6467bf3",
-    "planning/tasks/DRV-003.md": "b3e89c90a78cb59f246dc059417b740094c140eba3d3fa210901ce699415547b",
+    "planning/tasks/NAT-002.md": "ef95822366141944096dfcfc185b608f96adde983ceda911a54723bfcdc2f5cb",
+    "planning/tasks/NAT-003.md": "b311512c33decdad2f43c4a6e530b4aa5cebe96c82f3d9b62e93a84ee7679e0f",
+    "planning/tasks/DRV-003.md": "854a4ef2c5d7b8e3ca5d1e685afb97bc5bd9ebc8f52e4ee3dfaddbe84ace486f",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",
