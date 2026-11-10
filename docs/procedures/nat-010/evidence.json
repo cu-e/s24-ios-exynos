@@ -1,0 +1,58 @@
+{
+  "task": "NAT-010",
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-10T08:05:58.087340+00:00",
+  "commit": "1b39d84dfe9dc99a88e2a8446ce1f63f3cd2aff4",
+  "summary": "Fail-closed M/C entry before stack/C; full selected 512MiB RAM clean and loader/stack clean before cache-off. ARM build and independent RECOVERY verifier pass; make check passes 208 tests.",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "docs/procedures/nat-010/build.py",
+        "artifacts/nat-010/check-001"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "make",
+        "check"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "artifacts": [
+    "artifacts/nat-010/check-001/recovery.img",
+    "artifacts/nat-010/check-001/loader/Image",
+    "artifacts/nat-010/check-001/loader/start.S.o",
+    "artifacts/nat-010/check-001/source/shim/e1s-xnu/start.S",
+    "artifacts/nat-010/check-001/source/shim/e1s-xnu/loader.c",
+    "artifacts/nat-010/check-001/verify.json",
+    "artifacts/nat-010/check-001/commands.json",
+    "docs/procedures/nat-010/README.md",
+    "docs/procedures/nat-010/loader.patch",
+    "artifacts/nat-010/check-001/make-check-final.log",
+    "docs/procedures/nat-010/patch.py",
+    "docs/procedures/nat-010/build.py"
+  ],
+  "sha256": {
+    "artifacts/nat-010/check-001/recovery.img": "0068cfc0222a8eefdad587d898bd93adfe54ecb87fdb08a71cd45d6efc3d4682",
+    "artifacts/nat-010/check-001/loader/Image": "77399f2de9952ba2e8c4ed552f550079bfa82f24d4fe5c3c524f8a4d727be05e",
+    "artifacts/nat-010/check-001/loader/start.S.o": "f132d31864ef5e3f0657da846aefc0e353625206c7baba1f2a98eb68dd0ab51c",
+    "artifacts/nat-010/check-001/source/shim/e1s-xnu/start.S": "6d3fb413819c3802d4f9e8dda625ae759e7bfa53723e83d893ea0c3436c934bc",
+    "artifacts/nat-010/check-001/source/shim/e1s-xnu/loader.c": "ab2a0a6ddf3cbc4d2bb6c14439bc06aaed2c8fefc2253c7ac694257fe9d8a02b",
+    "artifacts/nat-010/check-001/verify.json": "de22ca1a8d0a3f4e6e3a81a8db5adf3a5c7616e27f88c9c75a7e17dd288128f4",
+    "artifacts/nat-010/check-001/commands.json": "fbbf688b654d4cdffa356ae199d607d688c76de05f7a26d0c3764a29b6d6f498",
+    "docs/procedures/nat-010/README.md": "048168d68d42389c445cbb36bcb73434ee6cf0a22eb06f71afea956099bcd6b3",
+    "docs/procedures/nat-010/loader.patch": "8a4772e1bcfdec23ffd90c890b771c7189e133a3f393b37b1602f86b69b91740",
+    "artifacts/nat-010/check-001/make-check-final.log": "b2514c011679e2dd8de3dddda3c16fc1d6d569b2101f16eb896e44fe840e2774",
+    "docs/procedures/nat-010/patch.py": "341a624189b2d408370c8dc63ab31379ac183066aa1772e7c533f2d671c414e9",
+    "docs/procedures/nat-010/build.py": "4b756e4909ce1580db5e2387a3015c3c9964daa6aea7346be27a9131ec8f589c"
+  },
+  "limitations": [
+    "No measured S-Boot entry state: enabled M/C deliberately halt. No native cache/boot/return qualification. Incoming dirty data/EL2 state still subject to Linux boot protocol."
+  ],
+  "device_io": false
+}

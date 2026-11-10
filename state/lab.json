@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T07:51:59+00:00",
+  "updated_at": "2026-11-10T08:06:38+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -11366,11 +11366,11 @@
         "Verify against the stock header and runtime FDT",
         "Build and verify the restore package"
       ],
-      "status": "in_progress",
-      "owner": "agy-nat006-20261110-aca2",
+      "status": "done",
+      "owner": "codex-nat-priority-20261110-r1",
       "started_at": "2026-11-10T05:27:22+00:00",
-      "last_heartbeat": "2026-11-10T07:48:02+00:00",
-      "updated_at": "2026-11-10T07:48:02+00:00",
+      "last_heartbeat": "2026-11-10T07:59:10+00:00",
+      "updated_at": "2026-11-10T07:59:18+00:00",
       "branch": "team/nat-006-recovery-image-20261110",
       "worktree": "worktrees/nat-006-recovery-image-20261110",
       "ownership_history": [
@@ -11387,18 +11387,28 @@
           "reason": "Owner explicitly instructed Antigravity session agy-nat006-20261110-aca2 to resume NAT-006 from its held preservation state (claude-takeover-20261110-6c8f recorded next_step: 'Held; not restarted. Owner decides next action.' and moved on to other tasks; lsof confirms no process touches worktrees/nat-006-recovery-image-20261110).",
           "decision": "docs/decisions/0004-nat006-continuation-and-recovery-gate-2026-11-10.md",
           "at": "2026-11-10T07:08:36+00:00"
+        },
+        {
+          "from": "agy-nat006-20261110-aca2",
+          "to": "codex-nat-priority-20261110-r1",
+          "reason": "Owner confirms executor finished in current session; process inventory has no NAT-006 build/verifier, saved worktree clean at d20cc177. Preserve all artifacts; assess host-only acceptance.",
+          "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
+          "at": "2026-11-10T07:58:46+00:00"
         }
       ],
-      "progress_note": "Commit d20cc17742a2b6f8c2aeb1273e702c98d5f41934: completed e1s_recovery.py, verify_image.py, test_e1s_recovery.py (4/4 OK), and 0002-loader-ui-pc-relative-string-tables.patch (0 C object R_AARCH64_ABS64 relocations). Built and verified artifacts/nat-006/build-002/recovery-nat006.img (c632d77c...) and stock restore package on host. Stopped at mandatory Step 4 pre-flash recovery safety gate before writing RECOVERY; phone RFCY10Z45KH untouched and running Android 14.",
-      "next_step": "Main agent review of handoff.md / evidence.json (d20cc17742a2b6f8c2aeb1273e702c98d5f41934) and resolution of pre-flash blockers NAT-008 (host odin4/heimdall), NAT-007/NAT-009 (hardware watchdog & one-shot recovery reset), and NAT-010 (loader high-DRAM MMU/cache handoff).",
-      "handoff": "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/handoff.md"
+      "progress_note": "Reviewed four host-only acceptance criteria against build-002 verifier/window reports; all 14 evidence hashes match and four recovery tests pass. Native safety gate remains unqualified and separate.",
+      "next_step": "Close host-only task and consume artifacts for NAT-008/009/010",
+      "handoff": "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/handoff.md",
+      "evidence": "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/evidence.json",
+      "evidence_sha256": "2083d3180d1df29c199a06b346f9af505fde685ff4ae414827ddefd7ee45b322",
+      "finished_at": "2026-11-10T07:59:18+00:00"
     },
     {
       "id": "NAT-007",
       "title": "Derive the s5e9945 hardware watchdog reset sequence from pinned Samsung source and host-test a freestanding arm/pet/disarm module (candidate return path, not proven on hardware)",
       "priority": 90,
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "codex-nat-priority-20261110-r1",
       "scope": "host",
       "evidence_kind": "host-test",
       "depends_on": [
@@ -11426,13 +11436,16 @@
         "Write the freestanding module and independent simulated-register host tests",
         "Write the research note and evidence"
       ],
-      "started_at": "2026-11-10T05:28:37+00:00",
-      "updated_at": "2026-11-10T05:41:06+00:00",
-      "branch": "team/nat-007-watchdog-20261110",
-      "worktree": "worktrees/nat-007-watchdog-20261110",
-      "progress_note": "Source review started (pinned SHAs verified, driver files identical at both pins). Implementation and note were not produced in this session; no files written in the worktree.",
-      "next_step": "Caller/owner to decide how to proceed with this task",
-      "released_at": "2026-11-10T05:41:06+00:00"
+      "started_at": "2026-11-10T07:57:22+00:00",
+      "updated_at": "2026-11-10T08:02:01+00:00",
+      "progress_note": "Source-derived v1/v2 module passes sanitizer fixtures and ARM compile; runtime PMU phandles resolved; make check passes 208 tests.",
+      "next_step": "Consume candidate in NAT-009; hardware recovery remains NAT-004",
+      "released_at": "2026-11-10T05:41:06+00:00",
+      "last_heartbeat": "2026-11-10T08:01:53+00:00",
+      "handoff": "research/notes/native/NAT-007-watchdog-return-path.md",
+      "evidence": "docs/procedures/nat-007/evidence.json",
+      "evidence_sha256": "09dbe24188df599fef0e70aca19bdd8b1527f927123f81d76e5977aaec7253b2",
+      "finished_at": "2026-11-10T08:02:01+00:00"
     },
     {
       "id": "UI-007",
@@ -11645,7 +11658,7 @@
     {
       "id": "NAT-008",
       "title": "Install and verify host Download Mode flashing tool (odin4/heimdall) for stock RECOVERY restore",
-      "status": "pending",
+      "status": "done",
       "priority": 90,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -11668,12 +11681,22 @@
         "Provision odin4 or heimdall on the Linux host and record binary provenance and SHA-256",
         "Validate tar/image compatibility against artifacts/nat-006/build-002/restore/recovery-stock-odin.tar",
         "Write host verification report and evidence"
-      ]
+      ],
+      "owner": "codex-nat-priority-20261110-r1",
+      "started_at": "2026-11-10T07:59:26+00:00",
+      "last_heartbeat": "2026-11-10T08:03:44+00:00",
+      "updated_at": "2026-11-10T08:06:03+00:00",
+      "progress_note": "Provisioned pinned open-source odin4 7.3.0-a46321b locally; 47 upstream tests pass. Unmodified offline parser accepts stock restore tar and rejects checksum/truncation/wrong-partition controls; stock hash matches.",
+      "next_step": "Record host evidence; NAT-004 must qualify actual Download Mode/PIT/restore separately",
+      "handoff": "docs/procedures/nat-008/README.md",
+      "evidence": "docs/procedures/nat-008/evidence.json",
+      "evidence_sha256": "f2eed43b73f650f702772c8eeb1abe4166e018a446b4dc7a7128a558981ee60a",
+      "finished_at": "2026-11-10T08:06:03+00:00"
     },
     {
       "id": "NAT-009",
       "title": "Integrate S5E9945 hardware watchdog arming and one-shot PMU recovery-reason clearing into the E1S RECOVERY loader",
-      "status": "pending",
+      "status": "blocked",
       "priority": 88,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -11699,12 +11722,20 @@
         "Consume NAT-007 watchdog register and PMU syscon definitions",
         "Patch the E1S loader to arm the hardware watchdog and clear sticky recovery reboot markers",
         "Verify with host tests and rebuild the NAT-006 RECOVERY image"
-      ]
+      ],
+      "owner": "codex-nat-priority-20261110-r1",
+      "started_at": "2026-11-10T08:02:09+00:00",
+      "last_heartbeat": "2026-11-10T08:06:38+00:00",
+      "updated_at": "2026-11-10T08:06:38+00:00",
+      "progress_note": "Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.",
+      "next_step": "Obtain applicable S-Boot contract or separately authorized NAT-004 hardware recovery evidence; retain pre-flash gate",
+      "handoff": "docs/procedures/nat-009/README.md",
+      "blocked_reason": "Missing applicable S-Boot reset-target/one-shot RECOVERY contract or qualified NAT-004 watchdog expiry/return evidence; host compilation and PMU fixtures cannot establish bounded reset and return to Android"
     },
     {
       "id": "NAT-010",
       "title": "Harden E1S loader EL1 MMU/cache state before high-DRAM (0x9de400000) window zeroing and segment copy",
-      "status": "pending",
+      "status": "done",
       "priority": 85,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -11727,7 +11758,17 @@
         "Audit start.S and loader.c cache/MMU sequence across the 0x9de400000 high-DRAM window",
         "Patch start.S/loader.c to guarantee PoC coherency across the full zeroed window and safe MMU state",
         "Run host verification and record evidence"
-      ]
+      ],
+      "owner": "codex-nat-priority-20261110-r1",
+      "started_at": "2026-11-10T07:59:34+00:00",
+      "last_heartbeat": "2026-11-10T08:06:12+00:00",
+      "updated_at": "2026-11-10T08:06:20+00:00",
+      "progress_note": "Host acceptance reviewed: reject unproven incoming M/C before stack; full 512MiB window clean plus post-C loader/stack clean; rebuilt RECOVERY independent verification passes, no C ABS relocations; make check 208 tests pass.",
+      "next_step": "Native SCTLR/cache observation belongs to separately qualified hardware test",
+      "handoff": "docs/procedures/nat-010/README.md",
+      "evidence": "docs/procedures/nat-010/evidence.json",
+      "evidence_sha256": "dc16b4d8ed94b0eaa5cf07c15ba25fd2646e496de0367bdfca50598fda2afb9b",
+      "finished_at": "2026-11-10T08:06:20+00:00"
     },
     {
       "id": "CELL-011",
@@ -53490,6 +53531,258 @@
           "last_heartbeat": "2026-11-10T07:51:59+00:00",
           "branch": "main",
           "handoff": "docs/procedures/ril-capture/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:57:22+00:00",
+      "action": "task.claim:NAT-007",
+      "owner": "codex-nat-priority-20261110-r1",
+      "tasks": [
+        {
+          "id": "NAT-007",
+          "status": "in_progress",
+          "owner": "codex-nat-priority-20261110-r1",
+          "priority": 90,
+          "progress_note": "Source review started (pinned SHAs verified, driver files identical at both pins). Implementation and note were not produced in this session; no files written in the worktree.",
+          "next_step": "Caller/owner to decide how to proceed with this task",
+          "last_heartbeat": "2026-11-10T07:57:22+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:58:46+00:00",
+      "action": "task.transfer:NAT-006",
+      "owner": "codex-nat-priority-20261110-r1",
+      "tasks": [
+        {
+          "id": "NAT-006",
+          "status": "in_progress",
+          "owner": "codex-nat-priority-20261110-r1",
+          "priority": 95,
+          "progress_note": "Commit d20cc17742a2b6f8c2aeb1273e702c98d5f41934: completed e1s_recovery.py, verify_image.py, test_e1s_recovery.py (4/4 OK), and 0002-loader-ui-pc-relative-string-tables.patch (0 C object R_AARCH64_ABS64 relocations). Built and verified artifacts/nat-006/build-002/recovery-nat006.img (c632d77c...) and stock restore package on host. Stopped at mandatory Step 4 pre-flash recovery safety gate before writing RECOVERY; phone RFCY10Z45KH untouched and running Android 14.",
+          "next_step": "Main agent review of handoff.md / evidence.json (d20cc17742a2b6f8c2aeb1273e702c98d5f41934) and resolution of pre-flash blockers NAT-008 (host odin4/heimdall), NAT-007/NAT-009 (hardware watchdog & one-shot recovery reset), and NAT-010 (loader high-DRAM MMU/cache handoff).",
+          "last_heartbeat": "2026-11-10T07:58:46+00:00",
+          "branch": "team/nat-006-recovery-image-20261110",
+          "worktree": "worktrees/nat-006-recovery-image-20261110",
+          "handoff": "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:59:10+00:00",
+      "action": "task.update:NAT-006",
+      "owner": "codex-nat-priority-20261110-r1",
+      "tasks": [
+        {
+          "id": "NAT-006",
+          "status": "in_progress",
+          "owner": "codex-nat-priority-20261110-r1",
+          "priority": 95,
+          "progress_note": "Reviewed four host-only acceptance criteria against build-002 verifier/window reports; all 14 evidence hashes match and four recovery tests pass. Native safety gate remains unqualified and separate.",
+          "next_step": "Close host-only task and consume artifacts for NAT-008/009/010",
+          "last_heartbeat": "2026-11-10T07:59:10+00:00",
+          "branch": "team/nat-006-recovery-image-20261110",
+          "worktree": "worktrees/nat-006-recovery-image-20261110",
+          "handoff": "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:59:18+00:00",
+      "action": "task.done:NAT-006",
+      "owner": "codex-nat-priority-20261110-r1",
+      "tasks": [
+        {
+          "id": "NAT-006",
+          "status": "done",
+          "owner": "codex-nat-priority-20261110-r1",
+          "priority": 95,
+          "progress_note": "Reviewed four host-only acceptance criteria against build-002 verifier/window reports; all 14 evidence hashes match and four recovery tests pass. Native safety gate remains unqualified and separate.",
+          "next_step": "Close host-only task and consume artifacts for NAT-008/009/010",
+          "last_heartbeat": "2026-11-10T07:59:10+00:00",
+          "branch": "team/nat-006-recovery-image-20261110",
+          "worktree": "worktrees/nat-006-recovery-image-20261110",
+          "handoff": "worktrees/nat-006-recovery-image-20261110/docs/procedures/nat-006/handoff.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:59:26+00:00",
+      "action": "task.claim:NAT-008",
+      "owner": "codex-nat-priority-20261110-r1",
+      "tasks": [
+        {
+          "id": "NAT-008",
+          "status": "in_progress",
+          "owner": "codex-nat-priority-20261110-r1",
+          "priority": 90,
+          "last_heartbeat": "2026-11-10T07:59:26+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T07:59:34+00:00",
+      "action": "task.claim:NAT-010",
+      "owner": "codex-nat-priority-20261110-r1",
+      "tasks": [
+        {
+          "id": "NAT-010",
+          "status": "in_progress",
+          "owner": "codex-nat-priority-20261110-r1",
+          "priority": 85,
+          "last_heartbeat": "2026-11-10T07:59:34+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T08:01:53+00:00",
+      "action": "task.update:NAT-007",
+      "owner": "codex-nat-priority-20261110-r1",
+      "tasks": [
+        {
+          "id": "NAT-007",
+          "status": "in_progress",
+          "owner": "codex-nat-priority-20261110-r1",
+          "priority": 90,
+          "progress_note": "Source-derived v1/v2 module passes sanitizer fixtures and ARM compile; runtime PMU phandles resolved; make check passes 208 tests.",
+          "next_step": "Consume candidate in NAT-009; hardware recovery remains NAT-004",
+          "last_heartbeat": "2026-11-10T08:01:53+00:00",
+          "handoff": "research/notes/native/NAT-007-watchdog-return-path.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T08:02:01+00:00",
+      "action": "task.done:NAT-007",
+      "owner": "codex-nat-priority-20261110-r1",
+      "tasks": [
+        {
+          "id": "NAT-007",
+          "status": "done",
+          "owner": "codex-nat-priority-20261110-r1",
+          "priority": 90,
+          "progress_note": "Source-derived v1/v2 module passes sanitizer fixtures and ARM compile; runtime PMU phandles resolved; make check passes 208 tests.",
+          "next_step": "Consume candidate in NAT-009; hardware recovery remains NAT-004",
+          "last_heartbeat": "2026-11-10T08:01:53+00:00",
+          "handoff": "research/notes/native/NAT-007-watchdog-return-path.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T08:02:09+00:00",
+      "action": "task.claim:NAT-009",
+      "owner": "codex-nat-priority-20261110-r1",
+      "tasks": [
+        {
+          "id": "NAT-009",
+          "status": "in_progress",
+          "owner": "codex-nat-priority-20261110-r1",
+          "priority": 88,
+          "last_heartbeat": "2026-11-10T08:02:09+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T08:03:44+00:00",
+      "action": "task.update:NAT-008",
+      "owner": "codex-nat-priority-20261110-r1",
+      "tasks": [
+        {
+          "id": "NAT-008",
+          "status": "in_progress",
+          "owner": "codex-nat-priority-20261110-r1",
+          "priority": 90,
+          "progress_note": "Provisioned pinned open-source odin4 7.3.0-a46321b locally; 47 upstream tests pass. Unmodified offline parser accepts stock restore tar and rejects checksum/truncation/wrong-partition controls; stock hash matches.",
+          "next_step": "Record host evidence; NAT-004 must qualify actual Download Mode/PIT/restore separately",
+          "last_heartbeat": "2026-11-10T08:03:44+00:00",
+          "handoff": "docs/procedures/nat-008/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T08:06:03+00:00",
+      "action": "task.done:NAT-008",
+      "owner": "codex-nat-priority-20261110-r1",
+      "tasks": [
+        {
+          "id": "NAT-008",
+          "status": "done",
+          "owner": "codex-nat-priority-20261110-r1",
+          "priority": 90,
+          "progress_note": "Provisioned pinned open-source odin4 7.3.0-a46321b locally; 47 upstream tests pass. Unmodified offline parser accepts stock restore tar and rejects checksum/truncation/wrong-partition controls; stock hash matches.",
+          "next_step": "Record host evidence; NAT-004 must qualify actual Download Mode/PIT/restore separately",
+          "last_heartbeat": "2026-11-10T08:03:44+00:00",
+          "handoff": "docs/procedures/nat-008/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T08:06:12+00:00",
+      "action": "task.update:NAT-010",
+      "owner": "codex-nat-priority-20261110-r1",
+      "tasks": [
+        {
+          "id": "NAT-010",
+          "status": "in_progress",
+          "owner": "codex-nat-priority-20261110-r1",
+          "priority": 85,
+          "progress_note": "Host acceptance reviewed: reject unproven incoming M/C before stack; full 512MiB window clean plus post-C loader/stack clean; rebuilt RECOVERY independent verification passes, no C ABS relocations; make check 208 tests pass.",
+          "next_step": "Native SCTLR/cache observation belongs to separately qualified hardware test",
+          "last_heartbeat": "2026-11-10T08:06:12+00:00",
+          "handoff": "docs/procedures/nat-010/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T08:06:20+00:00",
+      "action": "task.done:NAT-010",
+      "owner": "codex-nat-priority-20261110-r1",
+      "tasks": [
+        {
+          "id": "NAT-010",
+          "status": "done",
+          "owner": "codex-nat-priority-20261110-r1",
+          "priority": 85,
+          "progress_note": "Host acceptance reviewed: reject unproven incoming M/C before stack; full 512MiB window clean plus post-C loader/stack clean; rebuilt RECOVERY independent verification passes, no C ABS relocations; make check 208 tests pass.",
+          "next_step": "Native SCTLR/cache observation belongs to separately qualified hardware test",
+          "last_heartbeat": "2026-11-10T08:06:12+00:00",
+          "handoff": "docs/procedures/nat-010/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T08:06:29+00:00",
+      "action": "task.update:NAT-009",
+      "owner": "codex-nat-priority-20261110-r1",
+      "tasks": [
+        {
+          "id": "NAT-009",
+          "status": "in_progress",
+          "owner": "codex-nat-priority-20261110-r1",
+          "priority": 88,
+          "progress_note": "Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.",
+          "next_step": "Obtain applicable S-Boot contract or separately authorized NAT-004 hardware recovery evidence; retain pre-flash gate",
+          "last_heartbeat": "2026-11-10T08:06:29+00:00",
+          "handoff": "docs/procedures/nat-009/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T08:06:38+00:00",
+      "action": "task.block:NAT-009",
+      "owner": "codex-nat-priority-20261110-r1",
+      "tasks": [
+        {
+          "id": "NAT-009",
+          "status": "blocked",
+          "owner": "codex-nat-priority-20261110-r1",
+          "priority": 88,
+          "progress_note": "Candidate watchdog and one-shot marker integration built and host-verified; sanitizer controls reject stuck clock and preserve other reasons. Overall evidence inconclusive: applicable S-Boot reset target/marker contract and actual reset/return unqualified.",
+          "next_step": "Obtain applicable S-Boot contract or separately authorized NAT-004 hardware recovery evidence; retain pre-flash gate",
+          "blocked_reason": "Missing applicable S-Boot reset-target/one-shot RECOVERY contract or qualified NAT-004 watchdog expiry/return evidence; host compilation and PMU fixtures cannot establish bounded reset and return to Android",
+          "last_heartbeat": "2026-11-10T08:06:38+00:00",
+          "handoff": "docs/procedures/nat-009/README.md"
         }
       ]
     }
