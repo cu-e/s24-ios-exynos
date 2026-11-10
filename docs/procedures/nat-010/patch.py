@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+"""Apply fail-closed entry and full-window coherency to NAT-006 build-002 source."""
+from pathlib import Path
+import hashlib
+import sys
+src=Path(sys.argv[1])/'shim/e1s-xnu'
+p=src/'start.S'; s=p.read_text()
+assert hashlib.sha256(p.read_bytes()).hexdigest()==hashlib.sha256(Path('artifacts/nat-006/build-002/source/shim/e1s-xnu/start.S').read_bytes()).hexdigest()
+s=s.replace('el1_entry:\n', '''el1_entry:
+	/* No incoming translation tables or physical identity witness are known.
+	 * Reject M or C before stack/BSS/DTB/high-DRAM accesses. Never turn off
+	 * a live incoming mapping while executing at an unproven VA. */
+	mrs	x1, sctlr_el1
+	tst	x1, #5
+	b.ne	halt
+''')
+s=s.replace('\tldr\tx0, boot_args_pa', '''	/* Persist loader globals (boot_args_pa) and stacks before cache-off.
+	 * x16 holds entry; this loop performs no stores after its own clean. */
+	adr	x1, _head
+	adr	x2, _end
+	mrs	x3, ctr_el0
+	ubfx	x3, x3, #16, #4
+	mov	x4, #4
+	lsl	x4, x4, x3
+	sub	x3, x4, #1
+	bic	x1, x1, x3
+4:	dc	civac, x1
+	add	x1, x1, x4
+	cmp	x1, x2
+	b.lo	4b
+	dsb	sy
+	ldr	x0, boot_args_pa''')
+s=s.replace('\tmsr\tsctlr_el1, x14','\tdsb\tsy\n\tmsr\tsctlr_el1, x14\n\tisb')
+p.write_text(s)
+p=src/'loader.c'; s=p.read_text()
+assert s.count('\thold_seconds(hold);')==1
+s=s.replace('\thold_seconds(hold);','''	/* Includes untouched zero pages and gaps between Mach-O segments. */
+	clean(win_base, mem_end);
+	hold_seconds(hold);''')
+p.write_text(s)
