@@ -633,7 +633,7 @@ into Download Mode and why the screen went dark; stride/pixel format; kick vs S-
 The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-005/` (the video shows the
 owner's room and is not committed).
 
-## loader-diag-trig-hold-adt8-aln: the run-005 image with aligned ADT accesses (NAT-027; not run)
+## loader-diag-trig-hold-adt8-aln: the run-005 image with aligned ADT accesses (NAT-027; run once under decision 0014, result below)
 
 `patch_loader.py --adt-aligned` (hash-anchored on the base `adt_patch.c`, SHA-256 `415bf5c0…`) adds
 `adt_ld64`/`adt_st64`, two aligned 32-bit accesses (low word first; the ADT is little-endian here), and uses
@@ -675,5 +675,54 @@ stage/ESR/ELR/FAR name the next fault; FAIL with another code: the fnv16 of the 
 Session driver: `session_aln.py` (default is read-only preflight; `--execute` writes and reboots once; `--restore`
 writes only stock), gated on `docs/decisions/0014-nat022-loader-diag-trig-hold-adt8-aln-single-run-2026-11-10.md` and its own
 one-shot marker `artifacts/nat-022/native-attempt-loaderhold-aln-used.json`. Without the decision file it stops before
-any device command (`artifacts/nat-022/preflight-gate-006/report.json`: 0 commands, no write, no reboot). No decision
-0014 exists yet.
+any device command (`artifacts/nat-022/preflight-gate-006/report.json`: 0 commands, no write, no reboot). Decision
+0014 was then made and the image was run once (next section).
+
+## Native result 006, 2026-11-10 (decision 0014): the loader ran through every stage up to the held PRE_JUMP
+
+`loader-diag-trig-hold-adt8-aln` (loader `Image.payload` `2fb39687…`, RECOVERY image `cdf4f3a1…`, source commit
+`c5b942a`) was written to RECOVERY with a matching full readback and booted once (`adb reboot recovery` at
+16:23:31.6Z). The owner filmed the screen (85.8 s recording) and, in their own words (Russian, as typed: "хз я его
+сразу в довнлоад режим перевл не стад ждать перезагрузки"), put the phone into Download Mode without waiting for it to
+reboot (host observer: `04e8:685d` at 16:25:25Z). Stock RECOVERY was restored with one NAT-013 session (16:30:33Z–16:30:36Z);
+Android was back at 16:31:31Z; the full hash equals stock (`96620b8b…`), `check_android` and `assess` pass. Record:
+`native-attempt-006-evidence.json` (outcome `pass` for the loader-reaches-PRE_JUMP criterion; this is not XNU entry).
+
+`decode_video.py` (unchanged, `--y0 10`, four windows) decoded 754 CRC-valid frames (STAGE 333, REG 344, BOOTID 77),
+merged in `decoded-timeline.json`:
+
+| Time (s) | Frame | Decoded | Meaning |
+| --- | --- | --- | --- |
+| 0.0–2.3 | STAGE idx0 | `0x20` | `LOADER_MAIN` |
+| 2.4–3.8 | STAGE idx0 | `0x21` | `LOADER_FB` |
+| 4.0–12.3 | STAGE idx0 | `0x30` | `LOADER_MEM` (window chosen; zeroing after the dwell) |
+| 12.4–13.5 | STAGE idx0 | `0x31` | `LOADER_ZERO` |
+| 14.6–15.9 | STAGE idx0 | `0x32` | `LOADER_COPY` (10 segments, 21.5 MB) |
+| 16.0–17.1 | STAGE idx0 | `0x33` | `LOADER_ADT`: ADT patched (MPIDR, DRAM, pram, ramdisk rebase), boot_args built, ADT range cleaned |
+| 17.3–18.7 | STAGE idx0 | `0x34` | `LOADER_CLEAN`: start of the full-window cache clean |
+| 18.8– | STAGE idx0 | `0x40` | `PRE_JUMP`, held (the image never jumps) |
+| 21.3 | STAGE idx1 | `0x01ff` | reached-stage mask: ENTRY, MAIN, FB, MEM, ZERO, COPY, ADT, CLEAN, PRE_JUMP (no FAIL bit) |
+| 22.6 | STAGE idx2 | `0x0000` | no failure code |
+| 23.8–26.2 | BOOTID idx0/1 | `0xb835`, `0x26af` | boot identifier words |
+| 27.5–39.8 | REG 0..9 | status 1, GLOBAL_CON `0x0133`, TRIG_CON `0x3062`→`0x3063`, FRAME_COUNT `0x04db`→`0x04dc`, kick count `0x0f` | DECON0 report (later blocks: status 2/1, kick count `0x1e`, `0x2d`) |
+
+The hold loop repeats every ~18.65 s (STAGE idx1 frames at 21.27, 39.92, 58.58 and 77.24 s). No EXC (`0x1f`), FAIL
+(`0x3f`), SLOT, ESR, ELR or FAR frame occurs among the 754 CRC-valid frames; the only n < 3 CRC-valid frame is one
+BOOTID candidate. The last CRC-valid frame is at 82.9 s, the recording ends at 85.8 s. A still shows the loader's UI
+footer "e1s loader | experimental BOOT-only test image … not official firmware" (read by eye at reduced resolution, as the
+owner read it after run 004).
+
+Established (observation of this S24, one run): the loader, built from the pinned NAT-020 source with the NAT-022
+instrumentation and the NAT-027 aligned ADT accesses, ran from RECOVERY through window choice, zeroing, the copy of all
+segments, the ADT patch, `boot_args`, the full-window cache clean and reached the held pre-jump state; the run-005
+alignment fault is gone (this is the first on-device confirmation of the NAT-027 fix). The loader never branched to the
+kernel copy; no XNU code ran.
+
+Not established: that the patched ADT and `boot_args` contents are right for XNU (only that the code that builds them
+ran); that the cache clean makes the copied segments fetchable after a jump; the RAM window (implied only); the display
+and watchdog behaviour after 83 s (the owner put the phone into Download Mode); any jump, XNU entry or marker inside
+XNU; stride/pixel format; kick vs S-Boot refresh (no no-kick control). The REG block at 64.8–77.1 s shows FRAME_COUNT
+idx7 = idx8 = `0x0da0` and no decoded TRIG_CON-after; it is listed as seen and not interpreted.
+
+The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-006/` (the video shows the owner's
+room and is not committed).

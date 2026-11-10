@@ -1,0 +1,420 @@
+{
+ "kind": "native-device",
+ "origin": "owner-attended-run",
+ "outcome": "pass",
+ "criterion": "The NAT-020 loader, started from the RECOVERY slot with visible stage markers, reaches its memory preparation, ADT/boot_args and pre-jump stages on the S24 (CRC-valid STAGE frames MAIN, FB, MEM, ZERO, COPY, ADT, CLEAN, PRE_JUMP decoded from an independent recording). The image holds at PRE_JUMP and never branches to the kernel copy: this is not XNU entry.",
+ "recorded_at": "2026-11-10T16:50:00+00:00",
+ "decision": "docs/decisions/0014-nat022-loader-diag-trig-hold-adt8-aln-single-run-2026-11-10.md",
+ "summary": "One native run of NAT-022 loader-diag-trig-hold-adt8-aln (RECOVERY image sha256 cdf4f3a15831fb7c6c488085da33c12ade231460323583fd4090114945b285cd, Image.payload 2fb3968787688f4feb5b1dc09e4622309f1e22e5e8d76c82178d8716f1642da9, loader Image f0e61342dabb231098b71a13eb023a47d068adcec39fca1dc4b86e8d868f4cb7, source commit c5b942a, decision commit ccd5c22). It was written to RECOVERY (/dev/block/sda18) with a matching full readback and booted once (adb reboot recovery at 2026-11-10T16:23:31.6Z). The owner filmed the screen (85.8 s recording, 720x1280) and then, in their own words, put the phone into Download Mode without waiting for it to reboot. decode_video.py (--y0 10, four windows) decoded 754 CRC-valid frames (STAGE 333, REG 344, BOOTID 77). The decoded sequence is STAGE 0x20 MAIN (0.0-2.3 s), 0x21 FB, 0x30 MEM (4.0-12.3 s, includes the RAM zeroing), 0x31 ZERO, 0x32 COPY, 0x33 ADT, 0x34 CLEAN, then 0x40 PRE_JUMP (from 18.8 s), after which a hold loop repeats every ~18.65 s: STAGE 0x40, STAGE idx1 reached-stage mask 0x01ff (ENTRY, MAIN, FB, MEM, ZERO, COPY, ADT, CLEAN, PRE_JUMP; no FAIL bit), STAGE idx2 0x0000 (no failure code), BOOTID 0xb835/0x26af, STAGE 0x40, REG 0..9 (status 1 or 2 alternating, GLOBAL_CON 0x0133/0x0113, TRIG_CON 0x3062<->0x3063, kick count 0x0f, 0x1e, 0x2d). No EXC (0x1f), FAIL (0x3f), SLOT, ESR, ELR or FAR frame occurs among the 754 CRC-valid frames. The alignment fault of run 005 did not recur: the ADT patch, boot_args and cache-clean stages completed. The loader never branched to the kernel copy (mk_hold is noreturn and precedes the only return of the entry address); no XNU code ran. Stock RECOVERY was restored with one NAT-013 session in Download Mode (host observer saw 04e8:685d, bus 5 dev 58, at 16:25:25Z; restore 16:30:33Z-16:30:36Z; Android back at 16:31:31Z); the full hash equals stock 96620b8b..., check_android pass, assess pass, Android booted.",
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/session_aln.py",
+    "--out",
+    "artifacts/nat-022/preflight-006"
+   ],
+   "exit_code": 0,
+   "note": "read-only preflight, outcome ready-read-only (stock RECOVERY hash matched, battery 84%, no write, no reboot)"
+  },
+  {
+   "argv": [
+    "adb",
+    "get-state"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T16:23:27.361962+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop ro.product.model"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T16:23:27.386124+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop ro.product.device"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T16:23:27.480005+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop ro.build.PDA"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T16:23:27.550029+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop sys.boot_completed"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T16:23:27.620103+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'readlink -f /dev/block/by-name/recovery; blockdev --getsize64 /dev/block/sda18; test -b /dev/block/sda18 && echo block_device'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T16:23:27.687989+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'if pidof dd >/dev/null; then echo busy; else echo idle; fi'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T16:23:27.828211+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'sha256sum /dev/block/sda18'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T16:23:27.963857+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "dumpsys battery | toybox sed -n 's/^  level: /level=/p;s/^  temperature: /temperature=/p'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T16:23:28.211450+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'if pidof dd >/dev/null; then echo busy; else echo idle; fi'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T16:23:28.438778+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'test -b /dev/block/sda18 && dd of=/dev/block/sda18 bs=1048576 count=100663296 iflag=count_bytes conv=notrunc,fsync'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T16:23:28.585863+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'sha256sum /dev/block/sda18'"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T16:23:31.329082+00:00"
+  },
+  {
+   "argv": [
+    "adb",
+    "reboot",
+    "recovery"
+   ],
+   "exit_code": 0,
+   "started_at": "2026-11-10T16:23:31.604290+00:00",
+   "note": "adb reboot recovery (the single reboot of decision 0014)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-020/observe_usb.py",
+    "--out",
+    "artifacts/nat-022/usb-attempt-006",
+    "--seconds",
+    "360"
+   ],
+   "exit_code": 0,
+   "note": "started 16:23:11Z; events: 16:23:11 04e8:6860 SAMSUNG_Android (bus 5 dev 57); 16:23:35 no device; 16:25:25 04e8:685d Download Mode (bus 5 dev 58); complete.json 3 events"
+  },
+  {
+   "argv": [
+    "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "restore",
+    "--bus",
+    "5",
+    "--address",
+    "58",
+    "--out",
+    "artifacts/nat-022/stock-restore-006"
+   ],
+   "exit_code": 0,
+   "note": "one NAT-013 session, started 16:30:33.5Z, finished 16:30:36.8Z; stages pit_validated, upload_acknowledged (100663296 B), session_end_confirmed, reboot_confirmed all true; outcome awaiting-readback"
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-012/check_android.py",
+    "artifacts/nat-022/android-after-stock-006.json"
+   ],
+   "exit_code": 0,
+   "note": "Android up at 16:31:31Z (adb sys.boot_completed 1); outcome pass; recovery_hash_match true; user data directories present; model SM-S921B, device e1s, PDA S921BXXS9BYH3"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "assess",
+    "--report",
+    "artifacts/nat-022/stock-restore-006/report.json",
+    "--readback",
+    "artifacts/nat-022/android-after-stock-006.json"
+   ],
+   "exit_code": 0,
+   "note": "artifacts/nat-022/assess-006.json: outcome pass; android_booted true, recovery_readback_matches true"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "artifacts/nat-022/video-attempt-006/camera.mp4",
+    "--y0",
+    "10",
+    "--t0",
+    "0",
+    "--t1",
+    "20",
+    "--out",
+    "artifacts/nat-022/video-attempt-006/decoded-frames-y10-t0-20.json"
+   ],
+   "exit_code": 0,
+   "note": "log: artifacts/nat-022/video-attempt-006/decode-y10-t0-20.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "artifacts/nat-022/video-attempt-006/camera.mp4",
+    "--y0",
+    "10",
+    "--t0",
+    "20",
+    "--t1",
+    "45",
+    "--out",
+    "artifacts/nat-022/video-attempt-006/decoded-frames-y10-t20-45.json"
+   ],
+   "exit_code": 0,
+   "note": "log: artifacts/nat-022/video-attempt-006/decode-y10-t20-45.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "artifacts/nat-022/video-attempt-006/camera.mp4",
+    "--y0",
+    "10",
+    "--t0",
+    "45",
+    "--t1",
+    "70",
+    "--out",
+    "artifacts/nat-022/video-attempt-006/decoded-frames-y10-t45-70.json"
+   ],
+   "exit_code": 0,
+   "note": "log: artifacts/nat-022/video-attempt-006/decode-y10-t45-70.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "artifacts/nat-022/video-attempt-006/camera.mp4",
+    "--y0",
+    "10",
+    "--t0",
+    "70",
+    "--t1",
+    "86",
+    "--out",
+    "artifacts/nat-022/video-attempt-006/decoded-frames-y10-t70-86.json"
+   ],
+   "exit_code": 0,
+   "note": "log: artifacts/nat-022/video-attempt-006/decode-y10-t70-86.log"
+  }
+ ],
+ "decoded_cycle": {
+  "stage_sequence": [
+   {
+    "t_s": "0.0-2.3",
+    "stage": "0x20 LOADER_MAIN (the recording starts at about this point)"
+   },
+   {
+    "t_s": "2.4-3.8",
+    "stage": "0x21 LOADER_FB"
+   },
+   {
+    "t_s": "4.0-12.3",
+    "stage": "0x30 LOADER_MEM (window chosen; RAM zeroing runs after the 1.2 s dwell)"
+   },
+   {
+    "t_s": "12.4-13.5",
+    "stage": "0x31 LOADER_ZERO"
+   },
+   {
+    "t_s": "14.6-15.9",
+    "stage": "0x32 LOADER_COPY"
+   },
+   {
+    "t_s": "16.0-17.1",
+    "stage": "0x33 LOADER_ADT (ADT built, boot_args room ok)"
+   },
+   {
+    "t_s": "17.3-18.7",
+    "stage": "0x34 LOADER_CLEAN (start of the full-window cache clean)"
+   },
+   {
+    "t_s": "18.8-",
+    "stage": "0x40 PRE_JUMP (held; never jumps)"
+   }
+  ],
+  "hold_loop": [
+   "STAGE idx0 0x0040",
+   "STAGE idx1 0x01ff",
+   "STAGE idx2 0x0000",
+   "BOOTID idx0 0xb835",
+   "BOOTID idx1 0x26af",
+   "STAGE idx0 0x0040",
+   "REG idx0..9"
+  ],
+  "cycle_period_s": 18.65,
+  "stage_idx1_frames_s": [
+   21.27,
+   39.92,
+   58.58,
+   77.24
+  ],
+  "reg_examples": [
+   {
+    "t_s": "27.5-39.8",
+    "status": 1,
+    "global_con_lo": "0x0133",
+    "trig_before": "0x3062",
+    "trig_after": "0x3063",
+    "frame_count": [
+     "0x04db",
+     "0x04dc"
+    ],
+    "kick_count": "0x0f"
+   },
+   {
+    "t_s": "46.1-58.5",
+    "status": 2,
+    "global_con_lo": "0x0113",
+    "trig_before": "0x3063",
+    "trig_after": "0x3062",
+    "frame_count": [
+     "0x08f2",
+     "0x0989"
+    ],
+    "kick_count": "0x1e"
+   },
+   {
+    "t_s": "64.8-77.1",
+    "status": 1,
+    "global_con_lo": "0x0133",
+    "trig_before": "0x3062",
+    "frame_count_idx7_idx8": [
+     "0x0da0",
+     "0x0da0"
+    ],
+    "trig_after_not_decoded": true,
+    "kick_count": "0x2d"
+   }
+  ],
+  "last_crc_valid_frame_s": 82.9,
+  "recording_length_s": 85.83
+ },
+ "hashes": {
+  "recovery_image": "cdf4f3a15831fb7c6c488085da33c12ade231460323583fd4090114945b285cd",
+  "stock_recovery": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+  "loader_image": "f0e61342dabb231098b71a13eb023a47d068adcec39fca1dc4b86e8d868f4cb7",
+  "loader_image_payload": "2fb3968787688f4feb5b1dc09e4622309f1e22e5e8d76c82178d8716f1642da9",
+  "camera_mp4": "2c2032e3aedcddb5498d59b3620f183f716970628321d2af4d5828273dd7b054",
+  "decoded_frames_y10_t0_20_json": "8f49fcdd167d750c8ea58584e41dcbb0837063aebf86d376aa4f888d50e938ed",
+  "decoded_frames_y10_t20_45_json": "304a84b4ee6bd8ffe7503f1f85d70ed0720a8cb569bc3913601f0c0d186f0d21",
+  "decoded_frames_y10_t45_70_json": "28bfc76776542a2e7d9571c3025626b44e5d98770bc2a9b88185022af3a7fad8",
+  "decoded_frames_y10_t70_86_json": "c689cdb205412b49b471ee04e7ce1533732424a15a7b87f07505f71f8d056e8e",
+  "decoded_timeline_json": "8548f9d224f6d426c4c750971acebfcb2b1e1d8f3c76777ac9fe18f53d8df913"
+ },
+ "artifacts": [
+  "artifacts/nat-022/attempt-006/report.json",
+  "artifacts/nat-022/preflight-006/report.json",
+  "artifacts/nat-022/preflight-gate-006/report.json",
+  "artifacts/nat-022/stock-restore-006/report.json",
+  "artifacts/nat-022/android-after-stock-006.json",
+  "artifacts/nat-022/assess-006.json",
+  "artifacts/nat-022/usb-attempt-006/complete.json",
+  "artifacts/nat-022/usb-observer-006.log",
+  "artifacts/nat-022/native-attempt-loaderhold-aln-used.json",
+  "artifacts/nat-022/video-attempt-006/camera.mp4",
+  "artifacts/nat-022/video-attempt-006/decoded-frames-y10-t0-20.json",
+  "artifacts/nat-022/video-attempt-006/decoded-frames-y10-t20-45.json",
+  "artifacts/nat-022/video-attempt-006/decoded-frames-y10-t45-70.json",
+  "artifacts/nat-022/video-attempt-006/decoded-frames-y10-t70-86.json",
+  "artifacts/nat-022/video-attempt-006/decoded-timeline.json",
+  "artifacts/nat-022/package-006/package.json",
+  "artifacts/nat-022/package-006/recovery.img"
+ ],
+ "provenance": {
+  "code_commit": "c5b942a00324d58b9ee89ac94e26ea6ebf46b03a",
+  "decision_commit": "ccd5c22",
+  "recording": "owner camera, /home/egor/Downloads/video_2026-11-10_21-29-22.mp4 (same bytes as artifacts/nat-022/video-attempt-006/camera.mp4; shows the owner's room, not committed)",
+  "owner_note": "Asked what was seen and in what state the phone is, the owner answered (Russian, quoted as typed): \"хз я его сразу в довнлоад режим перевл не стад ждать перезагрузки вот держи видео посомтри что там\". So the owner, not the loader, put the phone into Download Mode this time; the host observer first saw 04e8:685d 113.8 s after the reboot request, about 28 s after the 85.8 s recording ended if it began at the reboot.",
+  "ui_footer": "A still of the recording (read by the agent by eye at reduced resolution, not decoded by the project) shows the loader's own UI footer \"e1s loader | experimental BOOT-only test image ... not official firmware\", consistent with the owner's reading of run 004."
+ },
+ "established": [
+  "The NAT-020 loader, built from the pinned source with the NAT-022 instrumentation and the NAT-027 aligned ADT accesses, ran on the S24 from the RECOVERY slot through every stage up to the pre-jump hold: its own CRC-valid markers MAIN, FB, MEM, ZERO, COPY, ADT, CLEAN and PRE_JUMP were decoded from an independent recording, the held reached-stage mask is 0x01ff and no FAIL or exception frame appeared (goal step 4 up to, but excluding, the jump).",
+  "The NAT-027 fix removed the run-005 alignment fault: the ADT patch (MPIDR, DRAM, pram, ramdisk rebase), boot_args build and the full-window cache clean completed without an exception.",
+  "The image held at PRE_JUMP and never branched to the kernel copy; no XNU code ran, so nothing here is evidence of kernel entry.",
+  "Timing seen with the 1.2 s marker dwell included: window choice + zeroing ~8 s, copy of 21.5 MB ~1 s, ADT patch and clean each within about a second or two; the loader armed its 83 s watchdog (per source) and the display was still showing PRE_JUMP markers at 82.9 s.",
+  "Stock RECOVERY was restored by one NAT-013 session and Android booted with the stock hash and user data intact (check_android, assess)."
+ ],
+ "not_established": [
+  "That the patched ADT and boot_args contents are correct for XNU; only that the code that builds them ran to completion on the device.",
+  "Any jump into the kernel copy, any XNU entry or any marker inside XNU. Not attempted; not authorized by decision 0014.",
+  "That the full-window cache clean made the copied kernel visible to an instruction fetch after a jump (the clean marker and the pre-jump marker prove only that the code ran).",
+  "The exact RAM window chosen (implied only from run 005: window base about 0x9dd3fc000), and whether any firmware-owned memory lies in it.",
+  "What the loader would do after its 83 s watchdog (the owner put the phone into Download Mode; the recording ends at 85.8 s).",
+  "Stride and pixel format; whether the kick or S-Boot refresh makes the markers visible (no no-kick control).",
+  "REG block at 64.8-77.1 s: FRAME_COUNT idx7/idx8 both 0x0da0 and TRIG_CON-after not decoded; not interpreted."
+ ]
+}
