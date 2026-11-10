@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T14:11:42+00:00",
+  "updated_at": "2026-11-10T15:21:23+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -12582,6 +12582,42 @@
       "evidence": "docs/procedures/nat-022/evidence-nat025.json",
       "evidence_sha256": "d7519760fc4713bb3b748b2eeb1902eca71f8394f0a2f6a084b420079b45063e",
       "finished_at": "2026-11-10T14:11:42+00:00"
+    },
+    {
+      "id": "NAT-026",
+      "title": "Fix the payload/loader adt_size mismatch found by native run 004 and host-check the later loader stages before another loader-diag run",
+      "status": "done",
+      "owner": "claude-nat022-20261110-diag",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "NAT-025"
+      ],
+      "paths": [
+        "docs/procedures/nat-022",
+        "artifacts/nat-022"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "The cause of the run-004 stop is reproduced on the host from the exact flashed payload with the loader's own condition text (check_payload.py: only adt_size & 7 fires), and the corrected payload passes every payload-only loader clause. The correction is a deterministic post-process in the NAT-022 build with its base SHA and reason recorded; the NAT-020 build-003 outputs and the earlier canary Images stay byte-identical.",
+        "The loader's later stages are pre-checked on the host as far as the host can: the real adt_patch.c runs against the captured e1s.adt (unpadded and padded) and its results are compared with the payload fields; payload-only conditions (RAM size, segment ranges, ADT range, boot_args room) are evaluated against a stated range of RAM windows. Host-test evidence is labelled as such; it does not show that the stages run on the S24.",
+        "A new loader-diag-trig-hold Image.payload and a RECOVERY package are built and host-tested, a session driver is gated on a new decision file, and an image-specific decision request with SHA-256s, device access, risks and recovery is put to the owner. Nothing is flashed or run on the phone and no XNU jump is made."
+      ],
+      "steps": [
+        "Reproduce the run-004 stop on the host (check_payload.py)",
+        "Run the real adt_patch.c on e1s.adt and evaluate the payload-only loader conditions",
+        "Correct the payload deterministically, rebuild loader-diag-trig-hold, package, gate the session driver",
+        "Document the request and put the decision question to the owner"
+      ],
+      "started_at": "2026-11-10T15:13:45+00:00",
+      "last_heartbeat": "2026-11-10T15:13:45+00:00",
+      "updated_at": "2026-11-10T15:21:23+00:00",
+      "evidence": "docs/procedures/nat-022/evidence-nat026.json",
+      "evidence_sha256": "93b62189ce0e73d3e83c87e7b2ec3ef01042ae1162a0f78fa228ae96f7ddd0dc",
+      "finished_at": "2026-11-10T15:21:23+00:00"
     }
   ],
   "experiments": [
@@ -55988,6 +56024,47 @@
           "owner": "claude-nat022-20261110-diag",
           "priority": 97,
           "last_heartbeat": "2026-11-10T13:58:27+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T15:13:26+00:00",
+      "action": "task.add:NAT-026",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-026",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T15:13:45+00:00",
+      "action": "task.claim:NAT-026",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-026",
+          "status": "in_progress",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 97,
+          "last_heartbeat": "2026-11-10T15:13:45+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T15:21:23+00:00",
+      "action": "task.done:NAT-026",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-026",
+          "status": "done",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 97,
+          "last_heartbeat": "2026-11-10T15:13:45+00:00"
         }
       ]
     }

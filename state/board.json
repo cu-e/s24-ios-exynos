@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T14:12:10+00:00",
-  "ledger_updated_at": "2026-11-10T14:11:42+00:00",
-  "registry_sha256": "75331b764f41e9848f7e39d9a4d269f43540479fbf917cf6051c209c61251475",
+  "generated_at": "2026-11-10T15:21:29+00:00",
+  "ledger_updated_at": "2026-11-10T15:21:23+00:00",
+  "registry_sha256": "3854d19f97d42d1a2e33f92d7e0c472072ba19fb14f1bd678328f62eec0df408",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [],
@@ -175,6 +175,7 @@
       "NAT-023",
       "NAT-024",
       "NAT-025",
+      "NAT-026",
       "KRN-005",
       "REV-004",
       "REV-011",
@@ -5350,6 +5351,45 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-025.md"
+    },
+    {
+      "id": "NAT-026",
+      "title": "Fix the payload/loader adt_size mismatch found by native run 004 and host-check the later loader stages before another loader-diag run",
+      "status": "done",
+      "owner": "claude-nat022-20261110-diag",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "NAT-025"
+      ],
+      "paths": [
+        "docs/procedures/nat-022",
+        "artifacts/nat-022"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "The cause of the run-004 stop is reproduced on the host from the exact flashed payload with the loader's own condition text (check_payload.py: only adt_size & 7 fires), and the corrected payload passes every payload-only loader clause. The correction is a deterministic post-process in the NAT-022 build with its base SHA and reason recorded; the NAT-020 build-003 outputs and the earlier canary Images stay byte-identical.",
+        "The loader's later stages are pre-checked on the host as far as the host can: the real adt_patch.c runs against the captured e1s.adt (unpadded and padded) and its results are compared with the payload fields; payload-only conditions (RAM size, segment ranges, ADT range, boot_args room) are evaluated against a stated range of RAM windows. Host-test evidence is labelled as such; it does not show that the stages run on the S24.",
+        "A new loader-diag-trig-hold Image.payload and a RECOVERY package are built and host-tested, a session driver is gated on a new decision file, and an image-specific decision request with SHA-256s, device access, risks and recovery is put to the owner. Nothing is flashed or run on the phone and no XNU jump is made."
+      ],
+      "steps": [
+        "Reproduce the run-004 stop on the host (check_payload.py)",
+        "Run the real adt_patch.c on e1s.adt and evaluate the payload-only loader conditions",
+        "Correct the payload deterministically, rebuild loader-diag-trig-hold, package, gate the session driver",
+        "Document the request and put the decision question to the owner"
+      ],
+      "started_at": "2026-11-10T15:13:45+00:00",
+      "last_heartbeat": "2026-11-10T15:13:45+00:00",
+      "updated_at": "2026-11-10T15:21:23+00:00",
+      "evidence": "docs/procedures/nat-022/evidence-nat026.json",
+      "evidence_sha256": "93b62189ce0e73d3e83c87e7b2ec3ef01042ae1162a0f78fa228ae96f7ddd0dc",
+      "finished_at": "2026-11-10T15:21:23+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-026.md"
     },
     {
       "id": "KRN-005",
@@ -14094,50 +14134,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-10T11:39:05+00:00",
-      "action": "task.claim:ODIN-001",
-      "owner": "claude-takeover-20261110-6c8f",
-      "tasks": [
-        {
-          "id": "ODIN-001",
-          "status": "in_progress",
-          "owner": "claude-takeover-20261110-6c8f",
-          "priority": 92,
-          "last_heartbeat": "2026-11-10T11:39:05+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T11:41:10+00:00",
-      "action": "project.permit:native",
-      "owner": "codex-83s-session-20261110-r7",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-10T11:42:53+00:00",
-      "action": "task.update:NAT-021",
-      "owner": "codex-83s-session-20261110-r7",
-      "tasks": [
-        {
-          "id": "NAT-021",
-          "status": "in_progress",
-          "owner": "codex-83s-session-20261110-r7",
-          "priority": 100,
-          "progress_note": "Native diagnosis inconclusive: Samsung/Knox logo only, restart, SEC_UPLOAD109.684s after recovery reboot; no native console. Fresh single-session stock restore and full RECOVERY hash passed; Android boot_completed1, user0 RUNNING_UNLOCKED, pstore empty. Seven fault controls and214 project checks passed. Native scope flag returned false; no native retry.",
-          "next_step": "Do not rerun. Missing real early-log channel/retention (NAT-017) and image-specific new owner decision before any further native work; original RECOVERY is restored and Android verified.",
-          "last_heartbeat": "2026-11-10T11:42:53+00:00",
-          "branch": "main",
-          "worktree": "/home/egor/dev/pet/s24-ios-exynos",
-          "handoff": "docs/procedures/nat-021/README.md"
-        }
-      ]
-    },
-    {
       "at": "2026-11-10T11:43:16+00:00",
       "action": "project.permit:native",
       "owner": "codex-83s-session-20261110-r7",
@@ -14358,11 +14354,52 @@
           "last_heartbeat": "2026-11-10T13:58:27+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T15:13:26+00:00",
+      "action": "task.add:NAT-026",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-026",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T15:13:45+00:00",
+      "action": "task.claim:NAT-026",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-026",
+          "status": "in_progress",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 97,
+          "last_heartbeat": "2026-11-10T15:13:45+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T15:21:23+00:00",
+      "action": "task.done:NAT-026",
+      "owner": "claude-nat022-20261110-diag",
+      "tasks": [
+        {
+          "id": "NAT-026",
+          "status": "done",
+          "owner": "claude-nat022-20261110-diag",
+          "priority": 97,
+          "last_heartbeat": "2026-11-10T15:13:45+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "54d999e8297783a7cb00e826a335150eb23d8892d4115b5ff6c435f18c5068a4",
-    "BOARD.md": "0f60cf6025afb60f17a9d44a3b2244fd5a8d81be09a751c9cd615a30117232aa",
+    "STATUS.md": "ac7eac828e14d8f2ef31da5ce9f553ff77fd34ba05d4b6a21bb03e2869528338",
+    "BOARD.md": "ccb790608b1bf8c12efe1dbe44d21023870a30e3350d1a7f018909c000ea3e0b",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -14477,6 +14514,7 @@
     "planning/tasks/NAT-023.md": "1018e390c7aa0cdda8fd59e72ec44b2a5cd0131199bb7f13a769fc9825e73bae",
     "planning/tasks/NAT-024.md": "10bde102216adebc51d1565be90df70cb2b646c764ea667e6a0472b93d210e22",
     "planning/tasks/NAT-025.md": "e958e1e30a03146a49c07bbeece17b3c5da7421daba0c5f051311ea83bc44afc",
+    "planning/tasks/NAT-026.md": "acb70ae2478f94833a09a44e0f65181af1036223d44b1a27d294bda689f10a12",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/REV-004.md": "8c7b273845208b121b2d6d1f05038b627689d3f97b766a765a91cdf23082bdb1",
     "planning/tasks/REV-011.md": "5ea2857fe5caca100edd1f7f53667f0b2a27de4b576000ecd14e2a55f1e7d51b",

@@ -1,0 +1,133 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-10T15:50:00+00:00",
+ "commit": "1092fab8e8a0d7d3bdc290628f0dce8152cf1995",
+ "summary": "Host only; nothing flashed or run on the phone and no XNU jump. Native run 004 stopped at the NAT-020 loader's fail(\"bad payload header\"); check_payload.py (loader.c struct and condition text compiled unchanged, each || clause evaluated on its own) reproduces it on the exact flashed payload: only (p->adt_size & 7) fires, adt_size 13956. fix_payload.py rounds that u64 up to 13960 (the 12 bytes after the ADT are zero; it refuses non-zero padding, no padding, an overlapping segment, an already-aligned size). build.py now also builds loader-diag-trig-hold-adt8: same loader Image 901565b2..., Image.payload 766218b288b3fddaef79d7347f91b57aab5f7329e4d574389eb142226726a87a (differs from the run-004 Image.payload 7c6206bd..., which build.py still reproduces bit-for-bit, in exactly one byte: 0x84 -> 0x88 at offset 0x34028); all earlier images keep their hashes; two builds are identical. Packaged with the NAT-006 builder: RECOVERY image 38411cd82af4ae4b68079472d68936c23b3877208f301f33c295741ae991ce38 (21 bytes differ from the run-004 RECOVERY image: that byte and the 20-byte boot-header id). On the adt8 Image.payload no header clause fires; the loader's RAM/segment, ADT/boot_args room and entry blocks (text cut from loader.c) accept 256 and 512 MiB windows; the real adt_patch.c run in a guarded buffer with the loader's argument expressions returns 0 for the MPIDR, DRAM, pram and ramdisk calls for MPIDR 0, 0x80000000, 0x80000100, 0x80000400, 0xffffffff, with no guard overrun. Not evaluated: the RAM window the S-Boot DTB gives choose_window(), framebuffer selection, GIC, timing of zeroing/copying with the MMU off against the 83 s watchdog, any hardware effect. session_adt8.py (gated on decision 0013) stops before any device command while that file is missing (artifacts/nat-022/preflight-gate-005/report.json). A decision request for this image is put to the owner separately.",
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/check_payload.py",
+    "artifacts/nat-020/build-003/source/shim/e1s-xnu/loader.c",
+    "artifacts/nat-020/build-003/payload.bin"
+   ],
+   "exit_code": 1,
+   "note": "expected: the run-004 stop reproduced"
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-022/build.py",
+    "--out",
+    "artifacts/nat-022/build-005",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/build.py",
+    "--out",
+    "artifacts/nat-022/build-005-repro",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0,
+   "note": "images, image_payloads and payload_fixes identical to build-005"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/check_payload.py",
+    "artifacts/nat-020/build-003/source/shim/e1s-xnu/loader.c",
+    "artifacts/nat-022/build-005/loader-diag-trig-hold/Image.payload",
+    "--offset",
+    "212992"
+   ],
+   "exit_code": 1,
+   "note": "expected: run-004 image, adt_size & 7 fires"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/check_payload.py",
+    "artifacts/nat-020/build-003/source/shim/e1s-xnu/loader.c",
+    "artifacts/nat-022/build-005/loader-diag-trig-hold-adt8/Image.payload",
+    "--offset",
+    "212992"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-022/package.py",
+    "--image",
+    "artifacts/nat-022/build-005/loader-diag-trig-hold-adt8/Image.payload",
+    "--out",
+    "artifacts/nat-022/package-005"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-022/session_adt8.py",
+    "--out",
+    "artifacts/nat-022/preflight-gate-005"
+   ],
+   "exit_code": 2,
+   "note": "expected: stopped by the missing decision 0013 before any adb command (0 commands, no write, no reboot)"
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-022/test_nat022.py"
+   ],
+   "exit_code": 0,
+   "note": "31 tests"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "214 tests; artifacts/nat-022/make-check-nat026.log"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-022/build-005/build.json",
+  "artifacts/nat-022/build-005-repro/build.json",
+  "artifacts/nat-022/package-005/package.json",
+  "artifacts/nat-022/package-005/recovery.img",
+  "artifacts/nat-022/preflight-gate-005/report.json",
+  "artifacts/nat-022/make-check-nat026.log",
+  "docs/procedures/nat-022/README.md",
+  "docs/procedures/nat-022/build.py",
+  "docs/procedures/nat-022/check_payload.py",
+  "docs/procedures/nat-022/fix_payload.py",
+  "docs/procedures/nat-022/session_adt8.py",
+  "docs/procedures/nat-022/test_nat022.py"
+ ],
+ "sha256": {
+  "docs/procedures/nat-022/README.md": "4ec5a8cc2830cdcb6ec7a37a5286b47895deea02ffa2cb6c70c93e89b320a16e",
+  "docs/procedures/nat-022/build.py": "d9047b801142966743a42c8fa70a95f93a13f0278943c934c9d8af4c20c47535",
+  "docs/procedures/nat-022/check_payload.py": "d1e85119a5103bc2331bb7b8b80d40d9d6035030fe89208fa2ecd8421accbff1",
+  "docs/procedures/nat-022/fix_payload.py": "519ca34141420bc4a3ac054e55d70ca034f07cc7a87b9d67a879690d844916ef",
+  "docs/procedures/nat-022/session_adt8.py": "41c0c1d1538d5314927a35d1412ea6f8555016a1101339e3726160a3cdba385f",
+  "docs/procedures/nat-022/test_nat022.py": "b767b07a3760d7f6f7c9d5acb52f6d52888964ada9f1036f1e6225e01405bfda",
+  "loader-diag-trig-hold-adt8 Image.payload": "766218b288b3fddaef79d7347f91b57aab5f7329e4d574389eb142226726a87a",
+  "loader-diag-trig-hold Image.payload (run 004)": "7c6206bd06923a91524afe95ec03573ed6fa680978cc839c40991debf7702cb3",
+  "package-005 recovery.img": "38411cd82af4ae4b68079472d68936c23b3877208f301f33c295741ae991ce38",
+  "build-005/build.json": "cc8674c86a6fedb8b8eca422bef81157485bdd3da60493b07a429fa606ac7757"
+ }
+}
