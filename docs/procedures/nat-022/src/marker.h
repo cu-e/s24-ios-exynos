@@ -30,7 +30,27 @@ enum mk_kind {
 	MK_SLOT = 7,	/* vector slot 0..15 */
 	MK_CHECK = 8,	/* canary self-checks: stack word, call depth */
 	MK_REG = 9,	/* canary-trig only: DECON0 kick report, idx = enum mk_reg_idx */
-	MK_XNU = 10	/* NAT-028 only: idx 0..3 = stub PC bits 63:48 .. 15:0, idx 4..7 = x0 at the stub the same way */
+	MK_XNU = 10,	/* NAT-028 only: idx 0..3 = stub PC bits 63:48 .. 15:0, idx 4..7 = x0 at the stub the same way */
+	MK_CKPT = 11	/* NAT-031 only, see enum mk_ckpt_idx */
+};
+
+/* NAT-031: what the return stub reports when the real XNU kernel code returns to the loader through the
+ * XNULDRST slot. Every value is a register the stub read on arrival, not an inference. */
+enum mk_ckpt_idx {
+	MK_CK_REGS = 0,		/* data = (x2 & 0xff) << 8 | (x3 & 0xff): the kernel's reason (2 = checkpoint, 1 = exception) and code */
+	MK_CK_MASK = 1,		/* data = arrival mask: bit N (1..5) = arrival with x2=2, x3=N; 8 = reason 1; 9 = reason 0; 10 = other */
+	MK_CK_SCTLR_LO = 2, MK_CK_SCTLR_HI = 3,	/* SCTLR_EL1 as read on arrival, bits 15:0 and 31:16 */
+	MK_CK_TTBR1_2 = 4, MK_CK_TTBR1_1 = 5, MK_CK_TTBR1_0 = 6,	/* TTBR1_EL1 bits 47:32, 31:16, 15:0 */
+	MK_CK_VBAR = 7,		/* VBAR_EL1 bits 15:0 */
+	MK_CK_TCR_LO = 8, MK_CK_TCR_HI = 9,	/* TCR_EL1 bits 15:0 and 31:16 */
+	MK_CK_ARRIVALS = 10	/* number of arrivals at the stub so far */
+};
+
+struct mk_ckpt {
+	uint64_t x2, x3;			/* as the kernel passed them */
+	uint64_t sctlr, ttbr1, tcr, vbar;	/* read on arrival, before the stub changes anything */
+	uint64_t esr, elr, far;			/* meaningful only when x2 == 1 (x3, x4, x5 of the early-exception report) */
+	uint32_t mask, arrivals;
 };
 
 /* DECON0 kick report (canary-trig). Values are what the code read, not inferences. */
@@ -83,7 +103,8 @@ enum mk_stage {
 	MK_ST_LOADER_CLEAN = 0x34,	/* about to clean the whole XNU window (can be slow) */
 	MK_ST_LOADER_FAIL = 0x3f,	/* fail(): data of STAGE idx 2 is mk_hash16(message) */
 	MK_ST_PRE_JUMP = 0x40,	/* loader finished; jump pending. NOT proof of kernel entry */
-	MK_ST_XNU_ENTRY = 0x50	/* only mk_xnu_report, reached through the stub at the kernel entry, may use it */
+	MK_ST_XNU_ENTRY = 0x50,	/* only mk_xnu_report, reached through the stub at the kernel entry, may use it */
+	MK_ST_CKPT = 0x51	/* NAT-031: only the return stub (mk_ckpt_pass / mk_ckpt_hold) may use it */
 };
 
 static inline uint32_t mk_crc8(uint32_t v24)
@@ -129,6 +150,10 @@ void mk_hold(uint32_t stage, uint32_t code) __attribute__((noreturn));
 void mk_xnu_report(uint64_t pc, uint64_t x0, uint64_t cel, uint64_t cur, uint64_t e1) __attribute__((noreturn));
 void mk_xnu_entry_hold(uint64_t pc, uint64_t x0) __attribute__((noreturn));
 uint32_t mk_hash16(const char *msg);
+/* NAT-031 (MK_LOADER=1 and MK_CKPT=1 only). mk_ckpt_pass draws the arrival (REGS, then MASK) and returns so the
+ * stub can resume the kernel; mk_ckpt_hold never returns and repeats the full report. */
+void mk_ckpt_pass(const struct mk_ckpt *r);
+void mk_ckpt_hold(const struct mk_ckpt *r) __attribute__((noreturn));
 
 void mk_canary_loop(uint64_t currentel, uint64_t sctlr_cur, uint64_t sctlr_el1, uint32_t stack_ok, int fault);
 

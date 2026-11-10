@@ -3,7 +3,7 @@
 
   build.py --out DIR [--loader-source COPY_OF_build-003/source]
   build.py --check-only      (build to a temp dir, verify, discard)
-Outputs: canary-plain/Image, canary-fault/Image, canary-trig/Image (DECON0 kick, MK_TRIG=1), canary-trig-fault/Image (kick + BRK, MK_TRIG=1), [loader-diag/Image(.payload), loader-diag-trig-hold/Image(.payload): stage markers with a kick and a dwell, halted at pre-jump, never executes the payload; loader-diag-trig-hold-adt8/Image(.payload): the same loader Image with the payload header's adt_size rounded up to 8 by fix_payload.py (NAT-026; run 004 stopped on that check); loader-diag-trig-hold-adt8-aln/Image(.payload): that image with adt_patch.c's 64-bit ADT accesses split into aligned 32-bit accesses by patch_loader.py --adt-aligned (NAT-027; run 005 took an alignment fault in adt_set_dram); loader-diag-xnu-entry/Image(.payload): that image plus the NAT-028 stub at the kernel copy's entry, which the loader jumps to (the stub draws STAGE 0x50 and holds; no kernel instruction runs)].
+Outputs: canary-plain/Image, canary-fault/Image, canary-trig/Image (DECON0 kick, MK_TRIG=1), canary-trig-fault/Image (kick + BRK, MK_TRIG=1), [loader-diag/Image(.payload), loader-diag-trig-hold/Image(.payload): stage markers with a kick and a dwell, halted at pre-jump, never executes the payload; loader-diag-trig-hold-adt8/Image(.payload): the same loader Image with the payload header's adt_size rounded up to 8 by fix_payload.py (NAT-026; run 004 stopped on that check); loader-diag-trig-hold-adt8-aln/Image(.payload): that image with adt_patch.c's 64-bit ADT accesses split into aligned 32-bit accesses by patch_loader.py --adt-aligned (NAT-027; run 005 took an alignment fault in adt_set_dram); loader-diag-xnu-entry/Image(.payload): that image plus the NAT-028 stub at the kernel copy's entry, which the loader jumps to (the stub draws STAGE 0x50 and holds; no kernel instruction runs); loader-diag-xnu-ckpt/Image(.payload): the same loader with the NAT-031 return stub instead: the loader fills the payload's XNULDRST slot and jumps to the kernel's own, unmodified entry; the kernel's checkpoints 1..4 return to the stub, which draws them and resumes, and checkpoint 5 holds].
 """
 from pathlib import Path
 import argparse, hashlib, importlib.util, json, shutil, struct, subprocess, sys, tempfile
@@ -14,6 +14,9 @@ B3 = ROOT / 'artifacts/nat-020/build-003'
 FLAGS = ['-target', 'aarch64-freestanding', '-O2', '-g0', '-ffreestanding', '-fno-builtin',
          '-fno-stack-protector', '-fno-pic', '-fno-zero-initialized-in-bss', '-mstrict-align',
          '-mgeneral-regs-only', '-Wall', '-Wextra', '-Werror']
+# zig cc accepts -mgeneral-regs-only for aarch64 but still emits SIMD (the existing loader images contain `movi v0.2d`
+# and q-register copies), so code that runs in the checkpoint return path is built without the FP/SIMD features.
+NO_SIMD = ['-mcpu=generic-neon-fp_armv8']
 log = []
 payload_fixes = {}
 
@@ -54,12 +57,12 @@ def _fix_payload():
     m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
     return m.fix
 
-def build_loader(out, source, name='loader-diag', trig_hold=False, fix_adt=False, adt_aligned=False, xnu_entry=False):
+def build_loader(out, source, name='loader-diag', trig_hold=False, fix_adt=False, adt_aligned=False, xnu_entry=False, ckpt=False):
     d = out / name; d.mkdir(parents=True)
     src = d / 'source'
     shutil.copytree(source, src, ignore=shutil.ignore_patterns('out', '.git'))
     run([sys.executable, '-I', HERE / 'patch_loader.py', src] + (['--trig-hold'] if trig_hold else []) +
-        (['--adt-aligned'] if adt_aligned else []) + (['--xnu-entry'] if xnu_entry else []))
+        (['--adt-aligned'] if adt_aligned else []) + (['--xnu-entry'] if xnu_entry else []) + (['--ckpt'] if ckpt else []))
     e = src / 'shim/e1s-xnu'
     shutil.copy(HERE / 'src/marker.h', e); shutil.copy(HERE / 'src/markerlib.c', e)
     names = ['start.S', 'loader.c', 'ui.c', 'adt_patch.c', 'gic.c', 'fdt.c', 'guard.c', 's5e9945.c', 'markerlib.c']
@@ -67,10 +70,16 @@ def build_loader(out, source, name='loader-diag', trig_hold=False, fix_adt=False
         for f in ('xnu_entry.h', 'xnu_entry.c', 'xnu_stub.S'):
             shutil.copy(HERE / 'src' / f, e)
         names += ['xnu_entry.c', 'xnu_stub.S']
+    if ckpt:
+        for f in ('ckpt.h', 'ckpt.c', 'ckpt_stub.S'):
+            shutil.copy(HERE / 'src' / f, e)
+        names += ['ckpt.c', 'ckpt_stub.S']
     objs = []
     for c in names:
         obj = d / (c + '.o')
-        extra = ['-DMK_TRIG=1', '-DMK_LOADER=1'] + (['-DMK_XNU_ENTRY=1'] if xnu_entry else []) if trig_hold and c == 'markerlib.c' else []
+        extra = ['-DMK_TRIG=1', '-DMK_LOADER=1'] + (['-DMK_XNU_ENTRY=1'] if xnu_entry else []) + (['-DMK_XNU_CKPT=1'] if ckpt else []) if trig_hold and c == 'markerlib.c' else []
+        if c == 'ckpt.c':
+            extra = NO_SIMD
         run(['zig', 'cc', *[f for f in FLAGS if f != '-Werror'], *extra, f'-I{e}', '-c', e / c, '-o', obj])
         objs.append(obj)
     link(objs, e / 'loader.ld', d / 'loader.elf', d / 'Image')
@@ -103,6 +112,7 @@ def main():
         imgs['loader-diag-trig-hold-adt8'] = build_loader(out, Path(a.loader_source), 'loader-diag-trig-hold-adt8', trig_hold=True, fix_adt=True)
         imgs['loader-diag-trig-hold-adt8-aln'] = build_loader(out, Path(a.loader_source), 'loader-diag-trig-hold-adt8-aln', trig_hold=True, fix_adt=True, adt_aligned=True)
         imgs['loader-diag-xnu-entry'] = build_loader(out, Path(a.loader_source), 'loader-diag-xnu-entry', trig_hold=True, fix_adt=True, adt_aligned=True, xnu_entry=True)
+        imgs['loader-diag-xnu-ckpt'] = build_loader(out, Path(a.loader_source), 'loader-diag-xnu-ckpt', trig_hold=True, fix_adt=True, adt_aligned=True, ckpt=True)
     for n, p in imgs.items():
         d = Path(p).read_bytes()
         assert d[56:60] == b'ARM\x64' and struct.unpack_from('<Q', d, 8)[0] == 0x80000

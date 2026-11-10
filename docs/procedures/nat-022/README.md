@@ -875,3 +875,75 @@ task and decision); what caused the SEC_UPLOAD/Download Mode enumerations after 
 actions are not recorded); kick vs S-Boot refresh (no no-kick control); the REG block FRAME_COUNT idx7 = idx8 in loop 1 is listed as seen and not interpreted.
 
 The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-007/` (the video shows the owner's room and is not committed).
+
+## loader-diag-xnu-ckpt: the kernel's own first instructions, stopped and resumed at its five assembly checkpoints (NAT-031; host-built 2026-11-11, not run)
+
+Run 007 proved that control reaches the kernel copy's entry address, but only our stub ran there. NAT-029 read from the payload bytes that the kernel has a
+return-to-loader hook (`_loader_stub_slot`, magic `"XNULDRST"`, three words the loader fills) and five assembly checkpoints; NAT-030 ran the kernel's real
+start code in an instruction-level model and showed where each checkpoint stops and that a stub can resume 1..4. This image uses that hook. **It is the first
+image in which XNU instructions execute on the phone** if it is ever run (no decision exists yet, see below).
+
+What it does, in order (same loader as run 007 up to the window clean):
+
+1. After the entry check, `nat031_install` verifies, in the *copied* kernel, that the slot is `"XNULDRST"` followed by three zero words (8-byte aligned) and that
+   each of the five checkpoint sites is the exact 15-instruction macro of NAT-029 (the `adrp`/`add` pair is decoded and must point at the slot; the other thirteen words
+   are compared bit for bit, the site number included). Otherwise it fails with a message and **writes nothing**; the loader's `fail()` shows it.
+2. It fills the slot: `[3]` = PA − VA, `[1]` = the return stub's address (in the loader image, outside the window), `[2]` = 1 (last, so no checkpoint stops earlier).
+3. The existing full-window clean covers those stores; start.S's handoff (cache clean, SCTLR M/C/I cleared, `ic iallu`, `br x16`) jumps to the kernel's **own,
+   unmodified entry** (no entry stub, nothing displaced).
+4. The kernel's start code runs. At checkpoint *N* it stops itself (`x2 = 2`, `x3 = N`, MMU off, DAIF masked) and branches to the stub. The stub (`src/ckpt_stub.S`) saves
+   `x0..x30` and the kernel's SP on the loader's stack, calls `nat031_ckpt_c`, which draws the arrival and, for *N* = 1..4 in order, writes *N*+1 into `[2]`
+   (`dc civac` on that line) and returns the continuation (site + 60 bytes); the stub restores everything but the registers the kernel's macro clobbers and branches there.
+5. At checkpoint 5 (the first point after the kernel turned its MMU on, running from its identity map) the stub **holds**: it draws the full report forever. It also holds on an
+   early-exception report (`x2 = 1`, ESR/ELR/FAR in `x3..x5`), on `x2 = 0`, and on any arrival that is not the expected next checkpoint. Resuming at 5 would need loader code inside
+   the kernel's TTBR0 map, which the loader does not have; that is a later task.
+
+### What the marker shows (kind `11` = `CKPT`, STAGE `0x51`, mask bit 11)
+
+Every value is a register the stub read on arrival, not an inference. One *pass* (checkpoints 1..4) draws `CKPT idx0` = `x2 << 8 | x3` and `CKPT idx1` = the arrival mask (bit *N* = arrival
+at checkpoint *N* in order; bit 8 = exception report, 9 = `x2 = 0`, 10 = anything else). The held report repeats: STAGE `0x51`, REGS, MASK, ARRIVALS (idx 10), then SCTLR_EL1 (idx 2/3), TTBR1_EL1
+(idx 4/5/6), VBAR_EL1 (idx 7) and TCR_EL1 (idx 8/9) as read on arrival, or — for an exception report — ESR/ELR/FAR (kinds 4/5/6, four frames each), then BOOTID and the DECON0 REG block. `decode.py` decodes all of it
+(`describe()["ckpt"]`). The host harness gives (frames x 1.2 s dwell, PRE_JUMP at 19.5 s as in runs 006 and 007): the four passes end at about 30 s, every checkpoint value has been on screen once by ~46 s and the first
+complete held report (25 frames, DECON block included) ends at ~63 s; the display ends at ~83 s, so the held values are shown once completely and a second time up to the watchdog.
+
+### What each result would mean
+
+| observation | meaning |
+| --- | --- |
+| passes with `x2:x3` = `0x0201`, `0x0202`, `0x0203`, `0x0204`, masks `0x2`, `0x6`, `0xe`, `0x1e`, then the held report with `0x0205`, mask `0x3e`, arrivals 5, SCTLR with M clear, TTBR1 `0x…9e15af000`-class, VBAR `0xfffffff007437000`, TCR `0x22a51a251a` | the kernel's real start code ran on the phone up to its fifth checkpoint, and the loader's return and resume worked four times. This is the first XNU execution evidence; it says nothing about anything after `arm_init`'s start. |
+| held report after fewer checkpoints (mask `0x2`/`0x6`/`0xe`) | the kernel stopped at the next checkpoint but the resume did not carry it there (it stopped again, faulted into the report path, or the stub's state was wrong): the held values say where |
+| held report with bit 8 (reason 1) | the kernel's early-exception handler ran: ESR/ELR/FAR identify the first fault (an unmodelled hardware behaviour) |
+| STAGE `0x40`, then nothing | the jump or the kernel hung or faulted without a report (e.g. an exception before the kernel's vectors exist and with a vector the loader cannot show): inconclusive; the checkpoint numbers seen before that bound the hang |
+| FAIL (`0x3f`) with the hash of `XNU checkpoint slot check failed` / `site N check failed` | the installer refused; nothing was jumped to |
+
+### Host checks (all host-test evidence; none shows anything about the phone)
+
+* `test_nat031.py` (see the evidence record for the counts and commands): `ckpt.c` built for the host with gcc's alignment trap and run on the real payload bytes: the site table equals an independent scan of the payload (exactly five
+  `adrp`/`add` → slot, `ldr x10,[x9,#16]`, `cmp x10,#N` places, numbered 1..5); the real payload passes; every one of the 5 × 15 × 32 single-bit changes of a site word and every damaged slot condition is refused and
+  nothing is written; the fill changes exactly slot words 1, 2, 3; the decision table (resume only the expected checkpoint, hold at 5, hold and mark the mask for an exception, `x2 = 0`, a repeat, an out-of-order or unknown number).
+* The marker routines draw against a fake DECON0 and are decoded by the independent decoder (REGS/MASK pairs, the held report, ESR/ELR/FAR, a DECON kick after every draw, the display budget above). Only the ckpt build has `mk_ckpt_*`.
+* The **aarch64 code as the loader builds it** (`zig cc`, `ckpt.c` without SIMD, `ckpt_stub.S`) is linked with test doubles for `mk_ckpt_pass`/`mk_ckpt_hold` and run by the NAT-030 interpreter on the kernel's real start code:
+  `nat031_install` fills the slot; the chain 1→5 stops five times in order with the expected records and masks; a resumed run reaches checkpoint 5 with **identical** saved `x0..x30`, SP, system registers and kernel memory to a run
+  that had `[2] = 5` from the start; crafted arrivals with distinct values in the 24 live registers (x4–x8, x12–x30) and the SP come back unchanged (the C callee is made hostile: every register it may change is poisoned on return), and removing any one of the 14 restoring loads is detected;
+  each unexpected arrival holds and reports what it was given; a changed site word makes the compiled installer refuse and write nothing.
+* The build: every earlier image and payload is byte-identical (build-003 and build-008 records); the ckpt `loader.c` differs from run 006/007's by the `#include`, the install block (before the CLEAN marker) and the missing `PRE_JUMP` hold;
+  `start.S` by `.globl _stack_top`; the payload bytes are run 007's; `nat031_*` has no SIMD instruction and `scan_unaligned.py` finds 0 misaligned accesses; only this image references `nat031_stub`/`mk_ckpt_hold`.
+  (zig's `-mgeneral-regs-only` does not keep SIMD out of the older loader code — it already contains q-register copies — so `ckpt.c` is built with `-mcpu=generic-neon-fp_armv8`; the marker routines the stub calls still use the loader's FPEN, which the kernel
+  does not change before checkpoint 5.)
+* The gated driver `session_xnu_ckpt.py` stops before any `adb` call in every mode while `docs/decisions/0016-nat031-loader-diag-xnu-ckpt-single-run-2026-11-11.md` does not exist (checked with a fake `adb`: 0 invocations).
+
+### Not established (the model has no caches, TLB, exception model, timers, devices or SIMD)
+
+Whether the S24 behaves as the model: every checkpoint stop, the real memory attributes of the window, device-memory alignment faults in the kernel's own start code, the kernel's exception path before and after it sets `VBAR_EL1`,
+whether `dc civac` on the slot line is enough with real caches (relevant only after the MMU is on, i.e. checkpoint 5, which is not resumed), whether the stub's SIMD-using marker routines are safe at every stop, and the display budget. Nothing after checkpoint 5 is
+modelled or run: C checkpoints (the first safe one is 11; 10 faults through a NULL `PE_state.bootArgs`) and `arm_init` are separate tasks. A log transport that does not depend on a video, and the GPU, are separate tasks too.
+
+### Risks and recovery (compared with decision 0015)
+
+Device access is that of 0013–0015. New hazard: the kernel's own first instructions run on the phone, up to its fifth checkpoint. In the model they touch only EL1 system registers (`VBAR`, `TTBR0/1`, `TCR`, `MAIR`, `SCTLR`, `TPIDR*`, `CPACR` is after checkpoint 5), the CPU's caches/TLB and RAM **inside the loader's window**
+(no other physical address is accessed up to `arm_init`; the model raises on one); no device register, storage or EFS is touched by that code. Unmodelled behaviour could still differ (a fault, a hang, an unexpected access); the worst case remains a hang until the
+83 s display end and the watchdog reset, as in runs 004–007. Recovery is unchanged: RECOVERY is restored from the pinned stock image (one NAT-013 session in Download Mode, or `session_xnu_ckpt.py --restore` if Android returns); only RECOVERY is written; Android,
+apps, settings, accounts and user data are not touched.
+
+Hashes: loader `Image` `5d40d6238ea89642e82b097766398abc29205f43150e2eb4413d739d395f368e` (221184 bytes), `Image.payload` `c8ee3a21aa620891da9c1a50da5c6279fe78015b1d8b09560a587f3947d2ed60` (21775968 bytes), RECOVERY
+(`artifacts/nat-031/package-001/recovery.img`) `b17d0a8c2a25029cc71df874093707706862faf53c3138427b325d72d98d94c1`; build-002 and its reproduction agree (all 16 images and payloads), packages agree. The SWEETXNU payload bytes are those of run 007.

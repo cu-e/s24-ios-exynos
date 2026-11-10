@@ -7,6 +7,9 @@
 #include <string.h>
 #include <stdint.h>
 #include "marker.h"
+#if defined(MK_XNU_CKPT) && MK_XNU_CKPT
+#include "ckpt.h"
+#endif
 volatile uint64_t *mk_host_fb;
 uint64_t mk_host_cnt = 0x1234abcdULL;
 static int maxdraws, ndraws;
@@ -126,6 +129,39 @@ int main(int argc, char **argv)
 			mk_stage(MK_ST_LOADER_CLEAN); mk_stage(MK_ST_PRE_JUMP);
 		}
 		mk_xnu_report(0x00000009e07b74a8ULL, 0x00000009e0a2fa00ULL, 4, 0x30d00800, 0x30d00800);
+	}
+#endif
+#if defined(MK_XNU_CKPT) && MK_XNU_CKPT
+	if (argc >= 7 && !strcmp(argv[1], "ckpt")) {
+		/* ckpt MAXDRAWS OUTFILE GLOBAL_CON TRIG_CON SEQ [full]: what the NAT-031 return stub draws for a
+		 * sequence of arrivals "x2:x3,x2:x3,...". The real nat031_decide (ckpt.c, NAT031_HOST) decides, per arrival,
+		 * whether the stub resumes (mk_ckpt_pass) or holds (mk_ckpt_hold, which never returns); the register
+		 * snapshot is the one the NAT-030 model gives at checkpoint 5 (SCTLR with M cleared). With "full" the
+		 * loader's stage markers are drawn first. */
+		static struct nat031_state st;
+		maxdraws = atoi(argv[2]); outfile = argv[3];
+		fake_gc = (uint32_t)strtoul(argv[4], 0, 0); fake_tc = (uint32_t)strtoul(argv[5], 0, 0);
+		mk_host_fb = calloc(1, MK_BANDS * MK_BAND_BYTES);
+		if (argc >= 8 && !strcmp(argv[7], "full")) {
+			mk_entry_frame(8, 0x30d00800, 0x30d00800);
+			mk_stage(MK_ST_LOADER_MAIN); mk_stage(MK_ST_LOADER_FB); mk_stage(MK_ST_LOADER_MEM);
+			mk_stage(MK_ST_LOADER_ZERO); mk_stage(MK_ST_LOADER_COPY); mk_stage(MK_ST_LOADER_ADT);
+			mk_stage(MK_ST_LOADER_CLEAN); mk_stage(MK_ST_PRE_JUMP);
+		}
+		st.expect = 1;
+		for (char *s = argv[6]; *s;) {
+			struct nat031_decision d;
+			struct mk_ckpt r = {0};
+			char *e;
+			r.x2 = strtoull(s, &e, 0); s = *e ? e + 1 : e;
+			r.x3 = strtoull(s, &e, 0); s = *e ? e + 1 : e;
+			r.sctlr = 0x3454593cULL; r.ttbr1 = 0x9e15af000ULL; r.tcr = 0x22a51a251aULL; r.vbar = 0xfffffff007437000ULL;
+			r.esr = r.x3; r.elr = 0xfffffff00743e0b0ULL; r.far = 0x00000000deadbeefULL;
+			nat031_decide(&st, r.x2, r.x3, &d);
+			r.mask = st.mask; r.arrivals = st.arrivals;
+			if (d.action == NAT031_RESUME) mk_ckpt_pass(&r); else mk_ckpt_hold(&r);
+		}
+		return 6;	/* the sequence ended without a hold */
 	}
 #endif
 	if (argc == 3 && !strcmp(argv[1], "hash16")) { printf("%04x\n", mk_hash16(argv[2])); return 0; }

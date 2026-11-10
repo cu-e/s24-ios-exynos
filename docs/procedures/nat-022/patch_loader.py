@@ -23,6 +23,12 @@ xnu_stub.S). The stub only calls mk_xnu_entry_hold(), which draws STAGE 0x50 and
 own first instruction is overwritten and never executed. The installer runs before the full-window
 cache clean so the clean covers the patched words, and fails (marker, no jump) unless the words it
 overwrites are NOP padding inside the file-backed part of the entry's segment.
+
+--ckpt (NAT-031, requires --trig-hold, excludes --xnu-entry): the PRE_JUMP hold becomes a real jump to the
+kernel copy's own, unmodified entry. Before the full-window cache clean the loader checks the payload's
+XNULDRST slot and the five assembly-checkpoint sites against the NAT-029 words (ckpt.c) and fills the slot
+with the address of its return stub (ckpt_stub.S): the kernel then stops at checkpoint 1, the stub draws
+the arrival and resumes to 2, 3, 4, and holds at 5. A failed check ends in a fail() hold: no jump.
 """
 from pathlib import Path
 import hashlib, sys
@@ -35,8 +41,10 @@ def once(s, old, new):
     assert s.count(old) == 1, 'anchor mismatch: ' + old[:80]
     return s.replace(old, new, 1)
 
-def main(root, trig_hold=False, adt_aligned=False, xnu_entry=False):
+def main(root, trig_hold=False, adt_aligned=False, xnu_entry=False, ckpt=False):
     assert not xnu_entry or trig_hold, '--xnu-entry requires --trig-hold'
+    assert not ckpt or trig_hold, '--ckpt requires --trig-hold'
+    assert not (ckpt and xnu_entry), '--ckpt and --xnu-entry are different variants'
     src = Path(root) / 'shim/e1s-xnu'
     p = src / 'start.S'
     assert hashlib.sha256(p.read_bytes()).hexdigest() == START_SHA, 'start.S base changed'
@@ -184,6 +192,27 @@ static struct ui_fb ui;''')
 \t}
 \tNAT022_STAGE(MK_ST_LOADER_CLEAN);
 ''')
+    if ckpt:
+        # _stack_top is a local label of start.S; the return stub (ckpt_stub.S) needs its address.
+        sp = src / 'start.S'
+        t = once(sp.read_text(), '_stack_top:\n\t.space 0x4000\n', '\t.globl _stack_top\n_stack_top:\n\t.space 0x4000\n')
+        sp.write_text(t)
+        s = once(s, '#include "marker.h"\n', '#include "marker.h"\n#include "ckpt.h"\n')
+        s = once(s, '\tNAT022_HOLD(MK_ST_PRE_JUMP, 0); /* loader-diag-trig: never jump */\n',
+                 '\t/* loader-diag-xnu-ckpt: no hold here; start.S jumps to the kernel\'s own entry */\n')
+        s = once(s, '\tNAT022_STAGE(MK_ST_LOADER_CLEAN);\n', '''\t{
+\t\tstatic const char *const nat031_msg[] = {
+\t\t\t"XNU checkpoint slot check failed", "XNU checkpoint site 1 check failed",
+\t\t\t"XNU checkpoint site 2 check failed", "XNU checkpoint site 3 check failed",
+\t\t\t"XNU checkpoint site 4 check failed", "XNU checkpoint site 5 check failed" };
+\t\tuint32_t nat031_bad = 0;
+
+\t\tif (nat031_install(win_base, p->virt_base, &nat031_bad))
+\t\t\treturn fail(nat031_msg[nat031_bad]);
+\t\tlog_str("\\nxnu checkpoint slot filled\\n");
+\t}
+\tNAT022_STAGE(MK_ST_LOADER_CLEAN);
+''')
     p.write_text(s)
     if adt_aligned:
         patch_adt_aligned(src)
@@ -224,4 +253,5 @@ static int rd32(uintptr_t base, uint64_t size, uint32_t off, uint32_t *v)''')
     p.write_text(s)
 
 if __name__ == '__main__':
-    main(sys.argv[1], '--trig-hold' in sys.argv[2:], '--adt-aligned' in sys.argv[2:], '--xnu-entry' in sys.argv[2:])
+    main(sys.argv[1], '--trig-hold' in sys.argv[2:], '--adt-aligned' in sys.argv[2:], '--xnu-entry' in sys.argv[2:],
+         '--ckpt' in sys.argv[2:])

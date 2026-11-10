@@ -48,6 +48,12 @@ static inline void mk_clean(uint64_t a, uint64_t n)
 #define MK_XNU_ENTRY 0
 #endif
 
+/* NAT-031 (loader-diag-xnu-ckpt): reports from the return stub reached through the kernel's XNULDRST
+ * slot. Compiled out of every earlier image, which stay byte-identical. */
+#ifndef MK_XNU_CKPT
+#define MK_XNU_CKPT 0
+#endif
+
 /* The fault images BRK after this many full report rounds (one round is 15 frames, ~18 s, in the
  * canary-trig loop). The default keeps canary-fault byte-identical. canary-trig-fault uses 0: the
  * two recordings so far show the display ending ~60 s after the first marker, so a BRK after
@@ -184,6 +190,9 @@ static uint32_t ld_bit(uint32_t stage)
 	case MK_ST_LOADER_FAIL: return 9;
 #if MK_XNU_ENTRY
 	case MK_ST_XNU_ENTRY: return 10;
+#endif
+#if MK_XNU_CKPT
+	case MK_ST_CKPT: return 11;
 #endif
 	default: return 15;
 	}
@@ -385,6 +394,60 @@ __attribute__((noinline, noreturn)) void mk_xnu_entry_hold(uint64_t pc, uint64_t
 	mk_xnu_report(pc, x0, cel, cur, e1);
 }
 #endif
+#endif
+
+#if MK_LOADER && MK_XNU_CKPT
+static inline uint32_t ck_regs(const struct mk_ckpt *r)
+{
+	return (uint32_t)((r->x2 & 0xff) << 8 | (r->x3 & 0xff));
+}
+
+/* Arrival of a checkpoint the stub will resume from: the kernel's reason/code, then the arrival mask. The
+ * mask frame stays on the bands, so if the kernel never reaches the next checkpoint the screen still shows
+ * which ones were passed. */
+__attribute__((noinline)) void mk_ckpt_pass(const struct mk_ckpt *r)
+{
+	uint32_t prev = mk_frame(MK_CKPT, MK_CK_REGS, ck_regs(r));
+	ld_mask |= 1u << ld_bit(MK_ST_CKPT);
+	mk_draw(prev, 0, 1);		/* full redraw: whatever was on the bands before is not trusted */
+	ld_after_draw();
+	show(&prev, mk_frame(MK_CKPT, MK_CK_MASK, r->mask), &ld_k);
+}
+
+/* The terminal report. Reason 1 (early exception) shows ESR/ELR/FAR instead of the register snapshot so
+ * one round stays near the length of the earlier holds (about 15..16 frames at 1.2 s). */
+__attribute__((noinline, noreturn)) void mk_ckpt_hold(const struct mk_ckpt *r)
+{
+	uint64_t id = mk_cnt();
+	uint32_t prev = mk_frame(MK_STAGE, 0, MK_ST_CKPT);
+	ld_mask |= 1u << ld_bit(MK_ST_CKPT);
+	mk_draw(prev, 0, 1);
+	ld_after_draw();
+	for (;;) {
+		show(&prev, mk_frame(MK_STAGE, 1, ld_mask), &ld_k);
+		show(&prev, mk_frame(MK_CKPT, MK_CK_REGS, ck_regs(r)), &ld_k);
+		show(&prev, mk_frame(MK_CKPT, MK_CK_MASK, r->mask), &ld_k);
+		show(&prev, mk_frame(MK_CKPT, MK_CK_ARRIVALS, r->arrivals), &ld_k);
+		if ((r->x2 & 0xff) == 1) {
+			for (uint32_t i = 0; i < 4; i++) show(&prev, mk_frame(MK_ESR, i, (uint32_t)(r->esr >> (48 - 16 * i))), &ld_k);
+			for (uint32_t i = 0; i < 4; i++) show(&prev, mk_frame(MK_ELR, i, (uint32_t)(r->elr >> (48 - 16 * i))), &ld_k);
+			for (uint32_t i = 0; i < 4; i++) show(&prev, mk_frame(MK_FAR, i, (uint32_t)(r->far >> (48 - 16 * i))), &ld_k);
+		} else {
+			show(&prev, mk_frame(MK_CKPT, MK_CK_SCTLR_LO, (uint32_t)r->sctlr), &ld_k);
+			show(&prev, mk_frame(MK_CKPT, MK_CK_SCTLR_HI, (uint32_t)(r->sctlr >> 16)), &ld_k);
+			show(&prev, mk_frame(MK_CKPT, MK_CK_TTBR1_2, (uint32_t)(r->ttbr1 >> 32)), &ld_k);
+			show(&prev, mk_frame(MK_CKPT, MK_CK_TTBR1_1, (uint32_t)(r->ttbr1 >> 16)), &ld_k);
+			show(&prev, mk_frame(MK_CKPT, MK_CK_TTBR1_0, (uint32_t)r->ttbr1), &ld_k);
+			show(&prev, mk_frame(MK_CKPT, MK_CK_VBAR, (uint32_t)r->vbar), &ld_k);
+			show(&prev, mk_frame(MK_CKPT, MK_CK_TCR_LO, (uint32_t)r->tcr), &ld_k);
+			show(&prev, mk_frame(MK_CKPT, MK_CK_TCR_HI, (uint32_t)(r->tcr >> 16)), &ld_k);
+		}
+		show(&prev, mk_frame(MK_BOOTID, 0, (uint32_t)id), &ld_k);
+		show(&prev, mk_frame(MK_BOOTID, 1, (uint32_t)(id >> 16)), &ld_k);
+		show(&prev, mk_frame(MK_STAGE, 0, MK_ST_CKPT), &ld_k);
+		show_kick_report(&prev, &ld_k);
+	}
+}
 #endif
 
 static inline int overlaps(uint64_t a0, uint64_t a1)

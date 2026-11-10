@@ -412,7 +412,7 @@ class Sim:
             self._taint_reads(i)
         nxt = self.pc + 4
         g, s, v = self.get, self.set, self.val
-        if mn in ("isb", "dsb", "dmb", "tlbi", "ic", "nop"):
+        if mn in ("isb", "dsb", "dmb", "tlbi", "ic", "dc", "nop"):   # no caches are modelled: cache maintenance is a no-op
             pass
         elif mn == "msr":
             tgt = ops[0].strip()
