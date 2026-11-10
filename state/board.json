@@ -1,14 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T10:40:27+00:00",
-  "ledger_updated_at": "2026-11-10T10:39:49+00:00",
-  "registry_sha256": "9383c0094f769b875d2089f472ec6881b1fb9893d7cdd060df4af9e4cbfac032",
+  "generated_at": "2026-11-10T10:44:39+00:00",
+  "ledger_updated_at": "2026-11-10T10:44:21+00:00",
+  "registry_sha256": "668734da2950d74fd5be10483aa23863aec37a2537983b9ff39264b53718a50a",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [],
-    "in_progress": [
-      "NAT-016"
-    ],
+    "in_progress": [],
     "blocked": [
       "INT-002",
       "INT-003",
@@ -176,6 +174,7 @@
       "KRN-037",
       "VM-008",
       "NAT-015",
+      "NAT-016",
       "USB-001",
       "RES-008",
       "KRN-002",
@@ -5055,8 +5054,7 @@
       ],
       "column": "gated",
       "reasons": [
-        "Scope not authorized: native",
-        "Dependencies: NAT-016"
+        "Scope not authorized: native"
       ],
       "card_path": "planning/tasks/NAT-017.md"
     },
@@ -5363,7 +5361,7 @@
     {
       "id": "NAT-016",
       "title": "Implement append-only host early-log archive with separate boot records and loss reporting",
-      "status": "in_progress",
+      "status": "done",
       "priority": 96,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -5389,12 +5387,19 @@
       ],
       "owner": "codex-earlylogs-20261110-r3",
       "started_at": "2026-11-10T10:36:03+00:00",
-      "last_heartbeat": "2026-11-10T10:36:03+00:00",
-      "updated_at": "2026-11-10T10:36:03+00:00",
-      "column": "in_progress",
+      "last_heartbeat": "2026-11-10T10:43:30+00:00",
+      "updated_at": "2026-11-10T10:44:21+00:00",
+      "progress_note": "Append-only host archive implemented. 9 real pipe/process controls pass, including fragmented/repeated boots, malformed streams, SIGKILL and 80 boots under 32 FDs. make check passed 210 tests. No phone operation or qualified native channel.",
+      "next_step": "Close host implementation with evidence; NAT-017 must establish board-specific early transport and reset retention before any native experiment",
+      "handoff": "docs/procedures/nat-016/README.md",
+      "branch": "main",
+      "worktree": "/home/egor/dev/pet/s24-ios-exynos",
+      "evidence": "docs/procedures/nat-016/evidence.json",
+      "evidence_sha256": "c922c1c41016d0f52e977cc260fb368c1781f40667b88a23872f719820ac9182",
+      "finished_at": "2026-11-10T10:44:21+00:00",
+      "column": "done",
       "reasons": [],
-      "card_path": "planning/tasks/NAT-016.md",
-      "report_health": "recent"
+      "card_path": "planning/tasks/NAT-016.md"
     },
     {
       "id": "USB-001",
@@ -12656,7 +12661,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-016"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -12695,7 +12700,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-016"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -13646,19 +13651,6 @@
         "worktree": "worktrees/krn-026-20261105"
       }
     ],
-    "codex-earlylogs-20261110-r3": [
-      {
-        "id": "NAT-016",
-        "status": "in_progress",
-        "last_heartbeat": "2026-11-10T10:36:03+00:00",
-        "report_health": "recent",
-        "progress_note": null,
-        "next_step": null,
-        "handoff": null,
-        "branch": null,
-        "worktree": null
-      }
-    ],
     "codex-e1s-dependencies-20261105-k": [
       {
         "id": "KRN-003",
@@ -13700,16 +13692,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-10T10:13:58+00:00",
-      "action": "experiment.record:NAT012-STOCK-RESTORE-001",
-      "owner": "codex-stock-rescue-20261110-r2"
-    },
-    {
-      "at": "2026-11-10T10:14:21+00:00",
-      "action": "experiment.record:NAT012-STOCK-RESTORE-002",
-      "owner": "codex-stock-rescue-20261110-r2"
-    },
     {
       "at": "2026-11-10T10:15:41+00:00",
       "action": "task.add:NAT-013",
@@ -13952,11 +13934,49 @@
           "handoff": "docs/procedures/nat-009/README.md"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T10:43:30+00:00",
+      "action": "task.update:NAT-016",
+      "owner": "codex-earlylogs-20261110-r3",
+      "tasks": [
+        {
+          "id": "NAT-016",
+          "status": "in_progress",
+          "owner": "codex-earlylogs-20261110-r3",
+          "priority": 96,
+          "progress_note": "Append-only host archive implemented. 9 real pipe/process controls pass, including fragmented/repeated boots, malformed streams, SIGKILL and 80 boots under 32 FDs. make check passed 210 tests. No phone operation or qualified native channel.",
+          "next_step": "Close host implementation with evidence; NAT-017 must establish board-specific early transport and reset retention before any native experiment",
+          "last_heartbeat": "2026-11-10T10:43:30+00:00",
+          "branch": "main",
+          "worktree": "/home/egor/dev/pet/s24-ios-exynos",
+          "handoff": "docs/procedures/nat-016/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T10:44:21+00:00",
+      "action": "task.done:NAT-016",
+      "owner": "codex-earlylogs-20261110-r3",
+      "tasks": [
+        {
+          "id": "NAT-016",
+          "status": "done",
+          "owner": "codex-earlylogs-20261110-r3",
+          "priority": 96,
+          "progress_note": "Append-only host archive implemented. 9 real pipe/process controls pass, including fragmented/repeated boots, malformed streams, SIGKILL and 80 boots under 32 FDs. make check passed 210 tests. No phone operation or qualified native channel.",
+          "next_step": "Close host implementation with evidence; NAT-017 must establish board-specific early transport and reset retention before any native experiment",
+          "last_heartbeat": "2026-11-10T10:43:30+00:00",
+          "branch": "main",
+          "worktree": "/home/egor/dev/pet/s24-ios-exynos",
+          "handoff": "docs/procedures/nat-016/README.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "d27d283611067bdc606c2570c67b8a5ddbd5e8fe9df4f9e1471457bf8512fcf1",
-    "BOARD.md": "bc718052b71a763ff6f22b98398975efa3e1b163b820a352c4b3a0fac1ab5135",
+    "STATUS.md": "61d75cf2eaaf60a21251fcd08414dc619cd74b378550ee7787ef089644cf8e72",
+    "BOARD.md": "0eb815d636ffb60769772b66f0f9ada5baf2b179aad096547b9cd6b6c49666c1",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -14063,7 +14083,7 @@
     "planning/tasks/REV-009.md": "88b28ac896c5615f69c1ffb4715e88285d7a3b59bc3fdf967d4674cca5835f6e",
     "planning/tasks/REV-015.md": "84076ee6c39ee7f9f07a3039a2f9035a9bb7ed6993a9449c4e948c879c37fb6e",
     "planning/tasks/VM-007.md": "cc3b0371dde27da4854d9f1f989289328970ae84f3c9c4429fda2bcdd403761f",
-    "planning/tasks/NAT-017.md": "67978488f011cef36a689e0a26b6d752aa94f3ffe5843ac0574b1d09159d0225",
+    "planning/tasks/NAT-017.md": "44ba4989437a4baf7399488bbf4f0dbf893079dfcc00500dfa86a2f0686be690",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/REV-004.md": "8c7b273845208b121b2d6d1f05038b627689d3f97b766a765a91cdf23082bdb1",
     "planning/tasks/REV-011.md": "5ea2857fe5caca100edd1f7f53667f0b2a27de4b576000ecd14e2a55f1e7d51b",
@@ -14071,7 +14091,7 @@
     "planning/tasks/KRN-037.md": "22c7de3e8ba69554cc1ab4d2209cb21cc7591527eecd27cfb020e312c5afa5c9",
     "planning/tasks/VM-008.md": "48718704e8c7ce104a5e4091bc1e9be010b98b3813d25f7d606caec915e81807",
     "planning/tasks/NAT-015.md": "d3da9cca6b7204c40dc5da311ee0db2d14b789dccfff79164de319a5fda88da5",
-    "planning/tasks/NAT-016.md": "4c6b6e71adfe308f3edc36dd0af0d78a45882ce829af612f316706a8c584b163",
+    "planning/tasks/NAT-016.md": "350b04ef3ef0a663ab06e442d39f7032f39f6cbf1d31690badef2340a5448d37",
     "planning/tasks/USB-001.md": "19299959cb09f2aa3b00ffa299face5e25f485c75dfcc2e5f1879b39d435471a",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
@@ -14231,8 +14251,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "4f19bbce247fae7103ffe6e67c4996303b9ebe60c53e47473518fc128d7ecab6",
-    "planning/tasks/DRV-003.md": "e60fb438831d1ec3dcba417794e08d3e66fa1821ac65d0500afacb780a4380d2",
+    "planning/tasks/NAT-003.md": "9341029ff34cc3aec9ddc62b5cb4e42d17116107b8ff3c6c52ceddbf52ea2ab3",
+    "planning/tasks/DRV-003.md": "6881042802bf82a300861ba4c840590f86cb99cdb5dd226e89bce81b823f5c13",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",

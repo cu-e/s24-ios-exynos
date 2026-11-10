@@ -1,0 +1,87 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-10T10:43:25.208185+00:00",
+  "summary": "Host archive preserves exact received bytes with fsync and receive times, separate ordinal/boot-ID records including repeated IDs, explicit sequence/loss/bound errors, exclusive paths and SHA-256 manifests. Nine real pipe/subprocess host controls pass, including killed collector and 80 boots under a 32-FD limit. Shared make check passed 210 tests. No phone execution or qualified transport claimed.",
+  "commit": "7ca6763d4374e429206deaa4f5215eb9af060d31",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/nat-016/test_archive.py",
+        "-v"
+      ],
+      "started_at": "2026-11-10T10:42:46.357008+00:00",
+      "pid": 4157787,
+      "exit_code": 0,
+      "finished_at": "2026-11-10T10:42:47.009578+00:00"
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/nat-016/archive.py",
+        "--out",
+        "artifacts/nat-016/demo-002",
+        "--input",
+        "artifacts/nat-016/demo-input.jsonl",
+        "--channel",
+        "fixture",
+        "--provenance",
+        "synthetic"
+      ],
+      "started_at": "2026-11-10T10:42:47.032374+00:00",
+      "pid": 4157802,
+      "exit_code": 0,
+      "finished_at": "2026-11-10T10:42:47.144377+00:00"
+    },
+    {
+      "argv": [
+        "make",
+        "check"
+      ],
+      "started_at": "2026-11-10T10:40:34.837711+00:00",
+      "pid": 4149284,
+      "exit_code": 0,
+      "finished_at": "2026-11-10T10:40:57.402675+00:00"
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/nat-016/archive.py",
+    "docs/procedures/nat-016/test_archive.py",
+    "docs/procedures/nat-016/README.md",
+    "artifacts/nat-016/tests-004/command.json",
+    "artifacts/nat-016/tests-004/output.log",
+    "artifacts/nat-016/demo-run-002/command.json",
+    "artifacts/nat-016/demo-002/manifest.json",
+    "artifacts/nat-016/demo-002/received.bin",
+    "artifacts/nat-016/make-check-001/command.json",
+    "artifacts/nat-016/make-check-001/output.log"
+  ],
+  "sha256": {
+    "docs/procedures/nat-016/archive.py": "73cdf55e282c488feee470420d733f4734d84ab15ba5e77863170e5d897c6196",
+    "docs/procedures/nat-016/test_archive.py": "c50b9966c266352fb2ae549592a62004eaa362c16f52552b6e6f64283d79493a",
+    "docs/procedures/nat-016/README.md": "7115de0d086dc8d3f3b79b0524e740caccbffbe5289c3f2df10fb9a54dfdd87c",
+    "artifacts/nat-016/tests-004/command.json": "8e66ab8477de1571d432b21d5ce5112ce7635aba6246a0ab63562d448efbcfbb",
+    "artifacts/nat-016/tests-004/output.log": "c44e60ffce3cfbcece6254034643ea18675b3db7ba2d8aaa7ff4d68876f31505",
+    "artifacts/nat-016/demo-run-002/command.json": "e3e764ac3ceba85232c2dd78af074f87de73e393ae521fd38a8208956da2ec22",
+    "artifacts/nat-016/demo-002/manifest.json": "a478861dab5e9cb9d285013ead28d199f8eddcff4bea6e65df50410c173cfab4",
+    "artifacts/nat-016/demo-002/received.bin": "8b386ae75cc0fe223f2348e83f27f105b0d7162d8e0cdc4d5066f259f1261161",
+    "artifacts/nat-016/make-check-001/command.json": "183c667eb04bf5c9fc9e27d9bbc243aa14666e9885434e1310f6099ee65fe4bd",
+    "artifacts/nat-016/make-check-001/output.log": "15cf8857ae0bc5750d6f436533cabe8d3a71a3672fd134ad90858e012d459a35"
+  },
+  "acceptance_assessment": [
+    "Existing output paths are refused without mutation. New boot markers use distinct host ordinals even when producer IDs repeat; reuse is flagged.",
+    "Raw bytes precede parsing/fsync. Fragmented, invalid, oversize and truncated data remain in received.bin; gaps/drop/timeout/size/interruption prevent a clean verdict.",
+    "Crash test retains fsynced raw bytes with no success manifest; restarting the collector uses another directory.",
+    "Final tests-004 and demo-002 match committed collector behavior; earlier test/demo runs are retained, not overwritten."
+  ],
+  "limitations": [
+    "Synthetic producers and host controls only. Native producer/physical early-log transport not implemented or qualified.",
+    "Complete received stream is not complete hardware execution or successful iOS boot.",
+    "NAT-017 remains pending: board-specific channel and canary/reset retention need qualification and a new image-specific decision. Current Android was not rebooted or flashed.",
+    "Time and byte bounds stop collection explicitly; bytes never received or made durable cannot be guaranteed."
+  ]
+}
