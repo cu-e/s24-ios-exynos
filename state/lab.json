@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T21:08:10+00:00",
+  "updated_at": "2026-11-10T21:40:23+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -12884,6 +12884,46 @@
       "evidence": "docs/procedures/nat-033/evidence.json",
       "evidence_sha256": "35724759e41a4bd638940979224b645c2be4760afa036d89086a8d63b4cce8a4",
       "finished_at": "2026-11-10T21:08:10+00:00"
+    },
+    {
+      "id": "NAT-034",
+      "status": "done",
+      "owner": "claude-nat034-20261111-ckpt2",
+      "title": "Prepare the NAT-022 loader-diag-xnu-ckpt2 image: resume the kernel at assembly checkpoint 5 (slot[2]=11, MMU-off branch to site5-28), stop at C checkpoint 11 with a C-arrival prologue, report x0/x1/x5/TTBR0; host-tested and held for an image-specific owner decision (0017)",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 98,
+      "depends_on": [
+        "NAT-033"
+      ],
+      "paths": [
+        "docs/procedures/nat-022",
+        "artifacts/nat-022",
+        "artifacts/nat-034"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "New loader sources (ckpt2.c/.h, ckpt2_stub.S) and macro-gated additions (markerlib.c MK_XNU_CKPT2, marker.h kind 12, patch_loader --ckpt2, build.py image loader-diag-xnu-ckpt2) keep every earlier image and payload byte-identical to the NAT-031 builds; the new image fills the slot as NAT-031 does, resumes 1..4 as in decision 0016 and at 5 writes slot[2]=11 with the NAT-032 cache order and branches MMU-off to site5-28.",
+        "The compiled aarch64 stub (as the loader builds it) runs in the NAT-030/033 model chain entry -> 1..5 -> resume -> C stop at 11: the prologue clears SCTLR_EL1.M and C when set and leaves them alone when clear, the registers x0..x3/x5/x10 and the arrival SCTLR are reported, the kernel's registers are restored at every resume (hostile C callee), and every unexpected arrival holds. Mutation checks on the new sources are killed.",
+        "A new marker kind carries x0 (log PA), x1 (log length), x5 (stub PA), TTBR0 at the C stop; the held report fits the display budget; the independent decoder decodes it; the existing tests still pass.",
+        "Reproducible build (twice), package, gated session driver (no decision 0017 = no adb in any mode), README and evidence; an image-specific decision request is put to the owner. Nothing is flashed, run on the phone or jumped to before that decision."
+      ],
+      "steps": [
+        "Write ckpt2 sources, marker additions, patch/build integration",
+        "Host-check with the compiled chain, marker decode, mutation, byte-identity",
+        "Build twice, package, gate the driver",
+        "Document and put the decision question to the owner"
+      ],
+      "started_at": "2026-11-10T21:13:26+00:00",
+      "last_heartbeat": "2026-11-10T21:40:13+00:00",
+      "updated_at": "2026-11-10T21:40:23+00:00",
+      "progress_note": "Host work finished: image loader-diag-xnu-ckpt2 built (reproducible x3), 31 tests + 26 mutants pass, driver gated; owner accepted one native run in decision 0017. No phone action taken.",
+      "next_step": "Native run under decision 0017 as a separate task (NAT-035), then NAT-013 restore + Android check",
+      "evidence": "docs/procedures/nat-022/evidence-nat034.json",
+      "evidence_sha256": "a84ff1c25f0b9ddf324a70d54808c5e1905b8c6cce8baa9ca9749dc32f3a5c98",
+      "finished_at": "2026-11-10T21:40:23+00:00"
     }
   ],
   "experiments": [
@@ -56711,6 +56751,65 @@
           "progress_note": "Host-test done: SIMD forms (16) cross-checked vs Unicorn on 86 words; model reaches C checkpoint 11 from entry and from the NAT-032 resume with identical state; README/evidence written",
           "next_step": "task done after make status; then NAT-034 proposal needs its own task and decision 0017",
           "last_heartbeat": "2026-11-10T21:07:54+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T21:13:17+00:00",
+      "action": "task.add:NAT-034",
+      "owner": "claude-nat034-20261111-ckpt2",
+      "tasks": [
+        {
+          "id": "NAT-034",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T21:13:26+00:00",
+      "action": "task.claim:NAT-034",
+      "owner": "claude-nat034-20261111-ckpt2",
+      "tasks": [
+        {
+          "id": "NAT-034",
+          "status": "in_progress",
+          "owner": "claude-nat034-20261111-ckpt2",
+          "priority": 98,
+          "last_heartbeat": "2026-11-10T21:13:26+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T21:40:13+00:00",
+      "action": "task.update:NAT-034",
+      "owner": "claude-nat034-20261111-ckpt2",
+      "tasks": [
+        {
+          "id": "NAT-034",
+          "status": "in_progress",
+          "owner": "claude-nat034-20261111-ckpt2",
+          "priority": 98,
+          "progress_note": "Host work finished: image loader-diag-xnu-ckpt2 built (reproducible x3), 31 tests + 26 mutants pass, driver gated; owner accepted one native run in decision 0017. No phone action taken.",
+          "next_step": "Native run under decision 0017 as a separate task (NAT-035), then NAT-013 restore + Android check",
+          "last_heartbeat": "2026-11-10T21:40:13+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T21:40:23+00:00",
+      "action": "task.done:NAT-034",
+      "owner": "claude-nat034-20261111-ckpt2",
+      "tasks": [
+        {
+          "id": "NAT-034",
+          "status": "done",
+          "owner": "claude-nat034-20261111-ckpt2",
+          "priority": 98,
+          "progress_note": "Host work finished: image loader-diag-xnu-ckpt2 built (reproducible x3), 31 tests + 26 mutants pass, driver gated; owner accepted one native run in decision 0017. No phone action taken.",
+          "next_step": "Native run under decision 0017 as a separate task (NAT-035), then NAT-013 restore + Android check",
+          "last_heartbeat": "2026-11-10T21:40:13+00:00"
         }
       ]
     }

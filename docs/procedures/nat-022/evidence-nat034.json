@@ -1,0 +1,253 @@
+{
+ "kind": "host-test",
+ "also": [
+  "source-review"
+ ],
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-10T21:39:30+00:00",
+ "commit": "6c992d75336bab27195b7c7c968743539dfaad22",
+ "tree_state": "sources, tests and README committed in 6c992d7; decision 0017, this record and the task transition are committed with it",
+ "owner": "claude-nat034-20261111-ckpt2",
+ "summary": "Host only: nothing was flashed to, run on or read from the phone by this task (it is in normal Android with stock RECOVERY). Run 008 stopped at assembly checkpoint 5 because the loader could not resume there; NAT-032/033 designed and modelled a resume. NAT-034 builds that as the new image loader-diag-xnu-ckpt2: checkpoints 1..4 as before, at 5 slot[2]=11 under dc civac, restore all registers, branch MMU-off to site5-28, the kernel runs to C checkpoint 11 where a stub prologue clears SCTLR_EL1.M and C and a new marker kind CKPT2 (12) reports x0, x1, x5 and TTBR0 beside the NAT-031 block; the stop is final. Every earlier image and payload is byte-identical; the build, the RECOVERY package and a third build from the committed tree are reproducible; 31 new tests (including the compiled aarch64 stub run by the NAT-033 model from the kernel entry) and 26 mutants (all killed) pass; the NAT-031/022 suites and make check pass. The owner accepted exactly one native run in decision 0017 (2026-11-11, asked in Russian; hashes, access as 0016, the unanalysed panic-path hazard, recovery and the Not granted list were stated); no phone action was taken in this task.",
+ "acceptance": {
+  "1_sources_and_byte_identity": "src/ckpt2.c, ckpt2.h, ckpt2_stub.S, markerlib.c MK_XNU_CKPT2, marker.h kind 12, patch_loader.py --ckpt2, build.py image loader-diag-xnu-ckpt2. test_nat034.py Build: every earlier image and payload equals the NAT-031 build-002 record; loader.c differs from the NAT-031 ckpt image's only by the include and the install call; no SIMD in nat034_*; scan_unaligned 0; only the ckpt2 image references nat034_stub/mk_ckpt2_hold.",
+  "2_compiled_chain": "test_nat034.py C11Chain: the zig-built stub runs in the NAT-033 SimdSim from the kernel entry: 1..5, resume, C hold; arrival equals the NAT-033 reference; final state equals a never-stopped run; the prologue clears M|C (mutants that remove the msr or copy instead of bic fault); hostile-callee restore of every live register; unexpected arrivals hold; the C stop is final; a changed site is refused. mutate_nat034.py: 26 mutants killed (mutation-002.log).",
+  "3_marker_and_decoder": "test_nat034.py Ckpt2Marker: kind 12 frames decode through the independent decoder (describe()['ckpt2']), order of the report, a non-zero x1 sentinel, display budget (passes end ~35 s, x0/x1/x5/TTBR0 once by ~52 s, one held report by ~78 s, display ends ~83 s); test_nat031.py and test_nat022.py still pass.",
+  "4_reproducible_package_gate_docs_decision": "build-001 vs build-001-repro vs build-001-final and package-001 vs -repro vs -final are identical; session_xnu_ckpt2.py stops before any adb call in every mode when decision 0017 does not exist (SessionGate, fake adb: 0 invocations; the test now skips itself because the file exists) and pins the package hashes; README section 'loader-diag-xnu-ckpt2'; decision 0017 written after the owner's explicit acceptance of exactly one run of this image. Nothing was flashed, run on the phone or jumped to."
+ },
+ "established": [
+  "Host-test: the NAT-034 image's stub, decision logic, marker report and build behave as designed in the NAT-030/033 model on the real payload bytes, and the tests discriminate (26 mutants killed, 31 tests).",
+  "The build and the RECOVERY package are reproducible; every earlier image is unchanged.",
+  "The owner accepted a single native run of this image on 2026-11-11 (decision 0017); the driver is gated on that file, writes only RECOVERY and has its own one-shot marker."
+ ],
+ "not_established": [
+  "Anything about the phone after assembly checkpoint 5: the model has no caches, TLB, exception model, timers or devices; the cache-maintenance order in nat034_set_next is checked only as text.",
+  "That the S24 core executes the resumed kernel as the model: the kernel's second MMU enable, TLB after the MMU-off branch, exceptions and vectors, boot_args/ADT as passed, the SCTLR bit 5/7 cause.",
+  "The panic path (loader_return, psci_smp_stop_others, redwood_*_quiesce) was not analysed and may touch device registers: the disclosed new hazard of decision 0017.",
+  "The stub/stack/loader_log placement against loader_jump's private 2 MiB block on the phone (recorded for the two S-Boot bases seen, 0x800a0000 and 0x801a0000; the prologue clears the MMU first either way).",
+  "The native outcome: the run has not been made."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-022/build.py",
+    "--out",
+    "artifacts/nat-034/build-001",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0,
+   "note": "11 images, 7 payloads; log artifacts/nat-034/logs/build-001.stdout; the zig commands with exit codes are in build.json"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/build.py",
+    "--out",
+    "artifacts/nat-034/build-001-repro",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0,
+   "note": "images, image_payloads and payload_fixes equal to build-001"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/package.py",
+    "--image",
+    "artifacts/nat-034/build-001/loader-diag-xnu-ckpt2/Image.payload",
+    "--out",
+    "artifacts/nat-034/package-001"
+   ],
+   "exit_code": 0,
+   "note": "RECOVERY image 56f06e25…, payload verbatim at offset 2048, 19634 pages differ from stock"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/package.py",
+    "--image",
+    "artifacts/nat-034/build-001-repro/loader-diag-xnu-ckpt2/Image.payload",
+    "--out",
+    "artifacts/nat-034/package-001-repro"
+   ],
+   "exit_code": 0,
+   "note": "recovery.img identical (cmp 0)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/build.py",
+    "--out",
+    "artifacts/nat-034/build-001-final",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0,
+   "note": "third build from the committed tree (6c992d7): build.json images/image_payloads/payload_fixes equal; loader-diag-xnu-ckpt2 and loader-diag-xnu-ckpt Image, Image.payload and loader.elf cmp-identical to build-001"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/package.py",
+    "--image",
+    "artifacts/nat-034/build-001-final/loader-diag-xnu-ckpt2/Image.payload",
+    "--out",
+    "artifacts/nat-034/package-001-final"
+   ],
+   "exit_code": 0,
+   "note": "recovery.img identical (cmp 0)"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-022/test_nat034.py",
+    "-v"
+   ],
+   "exit_code": 0,
+   "note": "31 tests OK (capstone + unicorn + gcc + zig); log artifacts/nat-034/logs/test_nat034-venv.log",
+   "log": "artifacts/nat-034/logs/test_nat034-venv.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-022/test_nat034.py",
+    "-v"
+   ],
+   "exit_code": 0,
+   "note": "31 tests OK, 12 skipped (no capstone/unicorn in the system python)",
+   "log": "artifacts/nat-034/logs/test_nat034-system.log"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-022/test_nat031.py",
+    "-v"
+   ],
+   "exit_code": 0,
+   "note": "27 tests OK, 1 skipped (SessionGate no-decision test skips itself because decision 0016 exists); two assertions were adapted for the NAT-034 extension (mk_ckpt_hold also in the ckpt2 image; MK_ST_CKPT counted in the NAT-031 part of markerlib.c)",
+   "log": "artifacts/nat-034/logs/test_nat031-venv.log"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-022/test_nat022.py",
+    "-v"
+   ],
+   "exit_code": 0,
+   "note": "45 tests OK, 2 skipped",
+   "log": "artifacts/nat-034/logs/test_nat022-venv.log"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-022/test_support/mutate_nat034.py"
+   ],
+   "exit_code": 0,
+   "note": "26 mutations, all killed, 0 survived (mutation-002.log); the first run (mutation.log) had two survivors (x2 reason not compared at 5; x1 high half = low half), closed by new tests that fail on the mutants, and one mutant that only broke the build was rewritten to compile",
+   "log": "artifacts/nat-034/logs/mutation-002.log"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "214 tests OK",
+   "log": "artifacts/nat-034/logs/make-check.log"
+  }
+ ],
+ "sha256": {
+  "artifacts/nat-034/task.json": "e82334bf9b34f03dadcf4f5283c9192c5ea1b10126000a23b542f0a2b95d91a6",
+  "artifacts/nat-034/build-001/build.json": "3a18c77d12b2445591d84f9565580ae6620b231c5d9bdadb0f28a5095c7810e4",
+  "artifacts/nat-034/build-001-repro/build.json": "3bc35380b431af968763325107f474f11d81643594defdf6099d9c86f39c4977",
+  "artifacts/nat-034/build-001-final/build.json": "6316cf83b35318b5719b080c9c6fbf94b75ad3029fb4b238b6ad0b88b0d74a75",
+  "artifacts/nat-034/build-001/loader-diag-xnu-ckpt2/Image": "c27e1c66c381976edb32af89bc5574142ead55b115206b917793dece31d9f16e",
+  "artifacts/nat-034/build-001/loader-diag-xnu-ckpt2/Image.payload": "27d5c0075d28bde69ee8a172d2cc34f4c3b98957d562ae1e7b70e914c8684a77",
+  "artifacts/nat-034/build-001/loader-diag-xnu-ckpt2/loader.elf": "d13cebb30fac7c6762634df78bd675a36611dac11c958f64095f16ff825b3696",
+  "artifacts/nat-034/package-001/recovery.img": "56f06e2582a4692f3f40d0d1ef3fb46633799fd9bc107e963d38731150961f59",
+  "artifacts/nat-034/package-001/package.json": "3bcb2570a76f410af8079d203166091c649d60c5ba88647a424f2f68e56c0191",
+  "artifacts/nat-034/package-001-repro/recovery.img": "56f06e2582a4692f3f40d0d1ef3fb46633799fd9bc107e963d38731150961f59",
+  "artifacts/nat-034/package-001-final/recovery.img": "56f06e2582a4692f3f40d0d1ef3fb46633799fd9bc107e963d38731150961f59",
+  "artifacts/nat-034/logs/build-001.stdout": "6b1cb09868363b04dae161397c274bac40ff35cea42ed345bf0b8b6e6f989557",
+  "artifacts/nat-034/logs/build-001.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-034/logs/build-001-repro.stdout": "6b1cb09868363b04dae161397c274bac40ff35cea42ed345bf0b8b6e6f989557",
+  "artifacts/nat-034/logs/build-final.stdout": "6b1cb09868363b04dae161397c274bac40ff35cea42ed345bf0b8b6e6f989557",
+  "artifacts/nat-034/logs/package-001.stdout": "ba2cebbe6f226d052cfdfbb95013d3c219b21f80ff053ca0ebfe4e19a13be5f2",
+  "artifacts/nat-034/logs/package-001-repro.stdout": "ba2cebbe6f226d052cfdfbb95013d3c219b21f80ff053ca0ebfe4e19a13be5f2",
+  "artifacts/nat-034/logs/package-final.stdout": "ba2cebbe6f226d052cfdfbb95013d3c219b21f80ff053ca0ebfe4e19a13be5f2",
+  "artifacts/nat-034/logs/mutation.log": "9643099a49b3369b28ca8a687706c804325add8a0ed371aa37a23973f1654e8b",
+  "artifacts/nat-034/logs/mutation-002.log": "10d14f85b9bd176b04dbb464a7b4ded49b74c157a3c718f1433c868687df775f",
+  "artifacts/nat-034/logs/test_nat034-venv.log": "391d0390222cf222369dc561991e95ae446f65efb181dfaabf1aa29ca261c6d7",
+  "artifacts/nat-034/logs/test_nat034-system.log": "ef13d51a6190e8d7a6c97bce0cea32cb0def70bb485b7fafc06a6da25bc3540b",
+  "artifacts/nat-034/logs/test_nat031-venv.log": "6f44e1e9b9fbdffb2eb6632c55f7a1fdb922ee1eea860496125669f41caf134f",
+  "artifacts/nat-034/logs/test_nat022-venv.log": "cb6c623284a9353ef86b60b6ad69c6024e30ff769d9af97c4f1c33d705479b56",
+  "artifacts/nat-034/logs/make-check.log": "4453d193fc6aa77887d66758466bcc0c2260a5032a3b79e013f5f46a8e89d97c",
+  "docs/procedures/nat-022/README.md": "691ef7ce7cc09cb03616bcc8ad82bb607c1db73466a232edefd4c93f97e8e9bb",
+  "docs/procedures/nat-022/src/ckpt2.c": "f8452fa49e1632a11cb802e65fc692ef0450b675e1b919b23742ddc13df11ebc",
+  "docs/procedures/nat-022/src/ckpt2.h": "17f07c1fea89a0ec4f3f1baae58257eb5e57491fc50b1f74c64933ecf4c4114c",
+  "docs/procedures/nat-022/src/ckpt2_stub.S": "bb9f17ca2410d38ee131ece3ae9556b4685182b4e25733ff67986989536485a4",
+  "docs/procedures/nat-022/src/markerlib.c": "41f8e583f4fcdafd3969e5d63d3a12eaad5e63a638d2eeefe46fd6f45bb1ff5f",
+  "docs/procedures/nat-022/src/marker.h": "ea7a5ee603953e9ae2390959f1be645a92902c5b2d5cee58472a40f49b86441e",
+  "docs/procedures/nat-022/test_nat034.py": "f686e54dcdfd203b0b65fe40b4f8fa93ae37f6af6f573be7c5f4b85efd549e34",
+  "docs/procedures/nat-022/test_support/mutate_nat034.py": "cec1b2f6e0de66ac5d6ebf8f115fe312107fd309f7a67120e69aaba3a3cdacc5",
+  "docs/procedures/nat-022/session_xnu_ckpt2.py": "1b26ff4a9b61c2d83f1b3e649302162d4da018c0371a04203f3dcd6478214a97",
+  "docs/decisions/0017-nat034-loader-diag-xnu-ckpt2-single-run-2026-11-11.md": "02996d9abd420cdc3f2cd719653686c0e7e7f4ecc07fe181f9aacff19798adbb"
+ },
+ "artifacts": [
+  "artifacts/nat-034/task.json",
+  "artifacts/nat-034/build-001/build.json",
+  "artifacts/nat-034/build-001-repro/build.json",
+  "artifacts/nat-034/build-001-final/build.json",
+  "artifacts/nat-034/build-001/loader-diag-xnu-ckpt2/Image",
+  "artifacts/nat-034/build-001/loader-diag-xnu-ckpt2/Image.payload",
+  "artifacts/nat-034/build-001/loader-diag-xnu-ckpt2/loader.elf",
+  "artifacts/nat-034/package-001/recovery.img",
+  "artifacts/nat-034/package-001/package.json",
+  "artifacts/nat-034/package-001-repro/recovery.img",
+  "artifacts/nat-034/package-001-final/recovery.img",
+  "artifacts/nat-034/logs/build-001.stdout",
+  "artifacts/nat-034/logs/build-001.stderr",
+  "artifacts/nat-034/logs/build-001-repro.stdout",
+  "artifacts/nat-034/logs/build-final.stdout",
+  "artifacts/nat-034/logs/package-001.stdout",
+  "artifacts/nat-034/logs/package-001-repro.stdout",
+  "artifacts/nat-034/logs/package-final.stdout",
+  "artifacts/nat-034/logs/mutation.log",
+  "artifacts/nat-034/logs/mutation-002.log",
+  "artifacts/nat-034/logs/test_nat034-venv.log",
+  "artifacts/nat-034/logs/test_nat034-system.log",
+  "artifacts/nat-034/logs/test_nat031-venv.log",
+  "artifacts/nat-034/logs/test_nat022-venv.log",
+  "artifacts/nat-034/logs/make-check.log",
+  "docs/procedures/nat-022/README.md",
+  "docs/procedures/nat-022/src/ckpt2.c",
+  "docs/procedures/nat-022/src/ckpt2.h",
+  "docs/procedures/nat-022/src/ckpt2_stub.S",
+  "docs/procedures/nat-022/src/markerlib.c",
+  "docs/procedures/nat-022/src/marker.h",
+  "docs/procedures/nat-022/test_nat034.py",
+  "docs/procedures/nat-022/test_support/mutate_nat034.py",
+  "docs/procedures/nat-022/session_xnu_ckpt2.py",
+  "docs/decisions/0017-nat034-loader-diag-xnu-ckpt2-single-run-2026-11-11.md"
+ ]
+}

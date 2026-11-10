@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-10T21:08:25+00:00",
-  "ledger_updated_at": "2026-11-10T21:08:10+00:00",
-  "registry_sha256": "7f8089c8c6664107eedc2689e981e0e0842071bf90c020a3cfe19b489484cc02",
+  "generated_at": "2026-11-10T21:40:55+00:00",
+  "ledger_updated_at": "2026-11-10T21:40:23+00:00",
+  "registry_sha256": "f74a8d96b45cdb9f2271cabae3a8366fd2e9dcfd7855777b6061d794a3531f7a",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [],
@@ -170,6 +170,7 @@
       "NAT-031",
       "NAT-032",
       "NAT-033",
+      "NAT-034",
       "KRN-006",
       "KRN-014",
       "KRN-015",
@@ -5108,6 +5109,49 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-033.md"
+    },
+    {
+      "id": "NAT-034",
+      "status": "done",
+      "owner": "claude-nat034-20261111-ckpt2",
+      "title": "Prepare the NAT-022 loader-diag-xnu-ckpt2 image: resume the kernel at assembly checkpoint 5 (slot[2]=11, MMU-off branch to site5-28), stop at C checkpoint 11 with a C-arrival prologue, report x0/x1/x5/TTBR0; host-tested and held for an image-specific owner decision (0017)",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 98,
+      "depends_on": [
+        "NAT-033"
+      ],
+      "paths": [
+        "docs/procedures/nat-022",
+        "artifacts/nat-022",
+        "artifacts/nat-034"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "New loader sources (ckpt2.c/.h, ckpt2_stub.S) and macro-gated additions (markerlib.c MK_XNU_CKPT2, marker.h kind 12, patch_loader --ckpt2, build.py image loader-diag-xnu-ckpt2) keep every earlier image and payload byte-identical to the NAT-031 builds; the new image fills the slot as NAT-031 does, resumes 1..4 as in decision 0016 and at 5 writes slot[2]=11 with the NAT-032 cache order and branches MMU-off to site5-28.",
+        "The compiled aarch64 stub (as the loader builds it) runs in the NAT-030/033 model chain entry -> 1..5 -> resume -> C stop at 11: the prologue clears SCTLR_EL1.M and C when set and leaves them alone when clear, the registers x0..x3/x5/x10 and the arrival SCTLR are reported, the kernel's registers are restored at every resume (hostile C callee), and every unexpected arrival holds. Mutation checks on the new sources are killed.",
+        "A new marker kind carries x0 (log PA), x1 (log length), x5 (stub PA), TTBR0 at the C stop; the held report fits the display budget; the independent decoder decodes it; the existing tests still pass.",
+        "Reproducible build (twice), package, gated session driver (no decision 0017 = no adb in any mode), README and evidence; an image-specific decision request is put to the owner. Nothing is flashed, run on the phone or jumped to before that decision."
+      ],
+      "steps": [
+        "Write ckpt2 sources, marker additions, patch/build integration",
+        "Host-check with the compiled chain, marker decode, mutation, byte-identity",
+        "Build twice, package, gate the driver",
+        "Document and put the decision question to the owner"
+      ],
+      "started_at": "2026-11-10T21:13:26+00:00",
+      "last_heartbeat": "2026-11-10T21:40:13+00:00",
+      "updated_at": "2026-11-10T21:40:23+00:00",
+      "progress_note": "Host work finished: image loader-diag-xnu-ckpt2 built (reproducible x3), 31 tests + 26 mutants pass, driver gated; owner accepted one native run in decision 0017. No phone action taken.",
+      "next_step": "Native run under decision 0017 as a separate task (NAT-035), then NAT-013 restore + Android check",
+      "evidence": "docs/procedures/nat-022/evidence-nat034.json",
+      "evidence_sha256": "a84ff1c25f0b9ddf324a70d54808c5e1905b8c6cce8baa9ca9749dc32f3a5c98",
+      "finished_at": "2026-11-10T21:40:23+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-034.md"
     },
     {
       "id": "KRN-006",
@@ -14428,65 +14472,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-10T17:01:30+00:00",
-      "action": "task.update:NAT-028",
-      "owner": "claude-nat028-20261110-xnuentry",
-      "tasks": [
-        {
-          "id": "NAT-028",
-          "status": "in_progress",
-          "owner": "claude-nat028-20261110-xnuentry",
-          "priority": 98,
-          "progress_note": "Host work complete and committed (606528b); evidence docs/procedures/nat-022/evidence-nat028.json. Putting the image-specific decision request for 0015 to the owner; no jump or device action before it.",
-          "next_step": "After the owner's answer: record decision 0015 only if accepted, then mark NAT-028 done and follow the decision-0014 run sequence",
-          "last_heartbeat": "2026-11-10T17:01:30+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T17:04:59+00:00",
-      "action": "task.done:NAT-028",
-      "owner": "claude-nat028-20261110-xnuentry",
-      "tasks": [
-        {
-          "id": "NAT-028",
-          "status": "done",
-          "owner": "claude-nat028-20261110-xnuentry",
-          "priority": 98,
-          "progress_note": "Host work complete and committed (606528b); evidence docs/procedures/nat-022/evidence-nat028.json. Putting the image-specific decision request for 0015 to the owner; no jump or device action before it.",
-          "next_step": "After the owner's answer: record decision 0015 only if accepted, then mark NAT-028 done and follow the decision-0014 run sequence",
-          "last_heartbeat": "2026-11-10T17:01:30+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T17:48:38+00:00",
-      "action": "task.add:NAT-029",
-      "owner": "claude-nat029-20261110-krnret",
-      "tasks": [
-        {
-          "id": "NAT-029",
-          "status": "pending",
-          "owner": null,
-          "priority": 98
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T17:49:06+00:00",
-      "action": "task.claim:NAT-029",
-      "owner": "claude-nat029-20261110-krnret",
-      "tasks": [
-        {
-          "id": "NAT-029",
-          "status": "in_progress",
-          "owner": "claude-nat029-20261110-krnret",
-          "priority": 98,
-          "last_heartbeat": "2026-11-10T17:49:06+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-10T18:11:51+00:00",
       "action": "task.done:NAT-029",
       "owner": "claude-nat029-20261110-krnret",
@@ -14720,11 +14705,70 @@
           "last_heartbeat": "2026-11-10T21:07:54+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-10T21:13:17+00:00",
+      "action": "task.add:NAT-034",
+      "owner": "claude-nat034-20261111-ckpt2",
+      "tasks": [
+        {
+          "id": "NAT-034",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T21:13:26+00:00",
+      "action": "task.claim:NAT-034",
+      "owner": "claude-nat034-20261111-ckpt2",
+      "tasks": [
+        {
+          "id": "NAT-034",
+          "status": "in_progress",
+          "owner": "claude-nat034-20261111-ckpt2",
+          "priority": 98,
+          "last_heartbeat": "2026-11-10T21:13:26+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T21:40:13+00:00",
+      "action": "task.update:NAT-034",
+      "owner": "claude-nat034-20261111-ckpt2",
+      "tasks": [
+        {
+          "id": "NAT-034",
+          "status": "in_progress",
+          "owner": "claude-nat034-20261111-ckpt2",
+          "priority": 98,
+          "progress_note": "Host work finished: image loader-diag-xnu-ckpt2 built (reproducible x3), 31 tests + 26 mutants pass, driver gated; owner accepted one native run in decision 0017. No phone action taken.",
+          "next_step": "Native run under decision 0017 as a separate task (NAT-035), then NAT-013 restore + Android check",
+          "last_heartbeat": "2026-11-10T21:40:13+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T21:40:23+00:00",
+      "action": "task.done:NAT-034",
+      "owner": "claude-nat034-20261111-ckpt2",
+      "tasks": [
+        {
+          "id": "NAT-034",
+          "status": "done",
+          "owner": "claude-nat034-20261111-ckpt2",
+          "priority": 98,
+          "progress_note": "Host work finished: image loader-diag-xnu-ckpt2 built (reproducible x3), 31 tests + 26 mutants pass, driver gated; owner accepted one native run in decision 0017. No phone action taken.",
+          "next_step": "Native run under decision 0017 as a separate task (NAT-035), then NAT-013 restore + Android check",
+          "last_heartbeat": "2026-11-10T21:40:13+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "df1c090f24688a8be04936cffef766d21b49e58e1c21e192a9f90052dfbc437d",
-    "BOARD.md": "3dafbb0ceacdc24dce97b16f598447ddd966bae074810a36148ac7f720504db8",
+    "STATUS.md": "d5fbe9b3ea1716ea0ef42b64a43d949fb98941d994c91773afcce740c6d7acf2",
+    "BOARD.md": "fb469f91a292575350f10cfbb759c340a585aa59ad49a0e788fc37c4c236bc5d",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -14833,6 +14877,7 @@
     "planning/tasks/NAT-031.md": "c6448051d086e0db4de11f11c1182d0f1f9f4f4176a58f95fbb788b064f6c2b1",
     "planning/tasks/NAT-032.md": "00815c12e6fbf296ddd41b0d1475e35e18eb211254e4ed0d6e2f9bdb2fb7632e",
     "planning/tasks/NAT-033.md": "d0bb7900f60f042c1041f2227a5a090ae752976884f42f383976903cc78d1479",
+    "planning/tasks/NAT-034.md": "9ab0d17a38a617dce664c8033f055e4f2e34f7edf42223b7e233312e4d0c807f",
     "planning/tasks/KRN-006.md": "17787b37e62d7cb230c248532450af8108a583aca6b6e955cee29637f8e981a1",
     "planning/tasks/KRN-014.md": "373bcf06587ce0b77bbacdfa023baa6c9b888953717dafa33267ff49a60ea753",
     "planning/tasks/KRN-015.md": "28783b6b5313987331209c84d30f10ddeab6ee7f41bf6bf1d963790545460926",

@@ -2,13 +2,13 @@
 
 > Generated from state/lab.json. Use the CLI; do not edit this board or its task cards.
 
-Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-10T21:08:25+00:00.
+Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-10T21:40:55+00:00.
 
-Registry SHA256: `7f8089c8c6664107eedc2689e981e0e0842071bf90c020a3cfe19b489484cc02`. Run `python3 tools/lab.py board --check` to detect stale files.
+Registry SHA256: `f74a8d96b45cdb9f2271cabae3a8366fd2e9dcfd7855777b6061d794a3531f7a`. Run `python3 tools/lab.py board --check` to detect stale files.
 
 [Workflow](docs/planning.md) · [All task details](planning/README.md) · [Machine view](state/board.json) · [Status](STATUS.md)
 
-| Ready (0) | In progress (0) | Blocked (16) | Waiting (15) | Needs authorization (22) | Done (263) |
+| Ready (0) | In progress (0) | Blocked (16) | Waiting (15) | Needs authorization (22) | Done (264) |
 | --- | --- | --- | --- | --- | --- |
 | — | — | [**INT-002**](planning/tasks/INT-002.md) · P100<br>Coordinate kernel build boot and virtualization integration<br>host · claude-takeover-20261110-6c8f<br>Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance (its handoff says the role continues after the gate review). Its gate tool is in main (tools/integration_gate.py, docs/integration/kernel/test_gate.py). The work it waited for has since reached main by direct merges under decision 0002 (STR-024, STR-037, STR-041 1042-body link; VM-047 and REV-047 on 2026-11-10). Without root approval and the multi-integrator protocol it cannot pass its own acceptance. | [**NAT-011**](planning/tasks/NAT-011.md) · P89<br>Trigger S5E9945 PMU SWRESET with SEC_RESET_REASON_UNKNOWN on RECOVERY loader exit/halt so S-Boot clears persistent param(0) REBOOT_MODE=4<br>host · unassigned<br>Dependencies: NAT-009 | [**NAT-017**](planning/tasks/NAT-017.md) · P97<br>Qualify an independent early-log canary and per-reset retention before any further XNU attempt<br>native · unassigned<br>Scope not authorized: native | [**KRN-009**](planning/tasks/KRN-009.md) · P100<br>Implement actual atomic type metadata for genuine selected XNU allocator uses<br>host · codex-compiler-atomics-20261105-t |
 | — | — | [**INT-003**](planning/tasks/INT-003.md) · P100<br>Coordinate crypto drivers and platform integration<br>host · claude-takeover-20261110-6c8f<br>Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance. It depends on the stopped root/CM approval protocol, so its acceptance (serialized grants, original owners closing their tasks) cannot be met any more. Remaining component work (provider TUs, archives, link and private ABI) belongs to those component tasks. Handoff: worktrees/int-platform-20261106/docs/integration/platform/native-provider-headers98-review/handoff.md. | [**GPU-007**](planning/tasks/GPU-007.md) · P70<br>Implement and build the Xclipse native kernel backend<br>host · unassigned<br>Dependencies: KRN-001; Paths reserved by: GPU-012 | [**NAT-003**](planning/tasks/NAT-003.md) · P50<br>Run the first native BOOT session with logs and recovery<br>native · unassigned<br>Scope not authorized: native; Dependencies: NAT-004, KRN-001; Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001 | [**KRN-025**](planning/tasks/KRN-025.md) · P100<br>Build and qualify genuine selected cc_kext compiler runtime<br>host · codex-team-cc-runtime-20261105-az |
@@ -113,6 +113,7 @@ Registry SHA256: `7f8089c8c6664107eedc2689e981e0e0842071bf90c020a3cfe19b489484cc
 | — | — | — | — | — | [**NAT-031**](planning/tasks/NAT-031.md) · P98<br>Prepare the NAT-022 loader-diag-xnu-ckpt image: fill the kernel&#x27;s XNULDRST slot, jump to the real entry, a return stub that reports checkpoints and exceptions, host-tested and held for an image-specific owner decision<br>host · claude-nat031-20261111-ckpt |
 | — | — | — | — | — | [**NAT-032**](planning/tasks/NAT-032.md) · P98<br>Review what the payload kernel executes after asm checkpoint 5 up to the first safe C checkpoint, and design the resume past checkpoint 5 (host source-review; no image built, nothing run on the phone)<br>host · claude-nat032-20261111-cpath |
 | — | — | — | — | — | [**NAT-033**](planning/tasks/NAT-033.md) · P98<br>Run the real payload kernel in the NAT-030 model from the NAT-032 resume at asm checkpoint 5 to C checkpoint 11 (SIMD forms of the cp10-cp11 path added and checked against Unicorn; host-test; nothing run on the phone)<br>host · claude-nat033-20261111-simd |
+| — | — | — | — | — | [**NAT-034**](planning/tasks/NAT-034.md) · P98<br>Prepare the NAT-022 loader-diag-xnu-ckpt2 image: resume the kernel at assembly checkpoint 5 (slot[2]=11, MMU-off branch to site5-28), stop at C checkpoint 11 with a C-arrival prologue, report x0/x1/x5/TTBR0; host-tested and held for an image-specific owner decision (0017)<br>host · claude-nat034-20261111-ckpt2 |
 | — | — | — | — | — | [**KRN-006**](planning/tasks/KRN-006.md) · P97<br>Harden experimental XNU compiler AST and whole-kernel expression coverage<br>host · codex-compiler-hardening-20261105-q |
 | — | — | — | — | — | [**KRN-014**](planning/tasks/KRN-014.md) · P97<br>Qualify genuine kernel firehose header exports against the selected archive profile<br>host · codex-firehose-headers-20261105-y |
 | — | — | — | — | — | [**KRN-015**](planning/tasks/KRN-015.md) · P97<br>Generate matched experimental compiler ARM NEON resource headers for genuine APFS code<br>host · codex-resource-headers-20261105-z |
@@ -299,14 +300,6 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 
 ## Recent activity
 
-- 2026-11-10T17:01:30+00:00 · claude-nat028-20261110-xnuentry · task.update:NAT-028
-  - NAT-028: Host work complete and committed (606528b); evidence docs/procedures/nat-022/evidence-nat028.json. Putting the image-specific decision request for 0015 to the owner; no jump or device action before it.
-- 2026-11-10T17:04:59+00:00 · claude-nat028-20261110-xnuentry · task.done:NAT-028
-  - NAT-028: Host work complete and committed (606528b); evidence docs/procedures/nat-022/evidence-nat028.json. Putting the image-specific decision request for 0015 to the owner; no jump or device action before it.
-- 2026-11-10T17:48:38+00:00 · claude-nat029-20261110-krnret · task.add:NAT-029
-  - NAT-029: pending
-- 2026-11-10T17:49:06+00:00 · claude-nat029-20261110-krnret · task.claim:NAT-029
-  - NAT-029: in_progress
 - 2026-11-10T18:11:51+00:00 · claude-nat029-20261110-krnret · task.done:NAT-029
   - NAT-029: done
 - 2026-11-10T18:12:59+00:00 · claude-nat029-20261110-krnret · task.add:NAT-030
@@ -339,6 +332,14 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
   - NAT-033: Host-test done: SIMD forms (16) cross-checked vs Unicorn on 86 words; model reaches C checkpoint 11 from entry and from the NAT-032 resume with identical state; README/evidence written
 - 2026-11-10T21:08:10+00:00 · claude-nat033-20261111-simd · task.done:NAT-033
   - NAT-033: Host-test done: SIMD forms (16) cross-checked vs Unicorn on 86 words; model reaches C checkpoint 11 from entry and from the NAT-032 resume with identical state; README/evidence written
+- 2026-11-10T21:13:17+00:00 · claude-nat034-20261111-ckpt2 · task.add:NAT-034
+  - NAT-034: pending
+- 2026-11-10T21:13:26+00:00 · claude-nat034-20261111-ckpt2 · task.claim:NAT-034
+  - NAT-034: in_progress
+- 2026-11-10T21:40:13+00:00 · claude-nat034-20261111-ckpt2 · task.update:NAT-034
+  - NAT-034: Host work finished: image loader-diag-xnu-ckpt2 built (reproducible x3), 31 tests + 26 mutants pass, driver gated; owner accepted one native run in decision 0017. No phone action taken.
+- 2026-11-10T21:40:23+00:00 · claude-nat034-20261111-ckpt2 · task.done:NAT-034
+  - NAT-034: Host work finished: image loader-diag-xnu-ckpt2 built (reproducible x3), 31 tests + 26 mutants pass, driver gated; owner accepted one native run in decision 0017. No phone action taken.
 
 Use a unique owner per agent session. Atomically take ready work:
 
