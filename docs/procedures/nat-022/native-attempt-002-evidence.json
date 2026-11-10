@@ -1,0 +1,271 @@
+{
+ "kind": "native-device",
+ "origin": "owner-attended-run",
+ "outcome": "pass",
+ "criterion": "At least one CRC-valid marker frame, containing values only canary code could draw, decoded from an independent recording of the screen.",
+ "recorded_at": "2026-11-10T13:28:20.051701+00:00",
+ "decision": "docs/decisions/0010-nat022-canary-trig-single-run-2026-11-10.md",
+ "summary": "One native run of NAT-022 canary-trig (RECOVERY image sha256 f2cc234a70e7b4f54eb3469567d523233e70f486a220005cb36da47c00bcec64, canary Image 572ebd0f33a03a7d07f663267301f97661f4e3f0051e0d9e8c3597b06385f89b) under decision 0010: full-hash write to /dev/block/sda18 with readback match, one adb reboot recovery at 2026-11-10T12:34:31Z, owner-filmed screen, stock RECOVERY restored by one NAT-013 session (full hash equals stock 96620b8b..., check_android pass, sys.boot_completed=1, user 0 present). The owner reported seeing stripes and a video was supplied. Host decoding (docs/procedures/nat-022/decode_video.py, an observation of a phone camera recording, not a console): between 2.1 s and 61.8 s of the recording 857 sampled frames decode as CRC-valid marker frames, no frame has two different values within a round, and the sequence is exactly the canary-trig loop order (CHECK, ENTRY, BOOTID0, BOOTID1, STAGE, REG0..9; four rounds of ~18.3 s). The screen goes dark at ~61.9 s. Decoded fields: CHECK 0xA5A5 (stack round trip ok), ENTRY 0x8900 = entry at EL2 with SCTLR M=0, C=0, I=1 (current EL) and EL1 SCTLR M=0, C=0, I=1, BOOTID CNTVCT[31:0]=0x1AE1D195 constant across rounds, STAGE 0x10 (canary C reached via call). DECON0 report (REG frames): GLOBAL_CON 0x113 at kick 6 and 0x133 at kicks 21 and 36 (bits 0, 1, 8 set: enabled, command mode, as the DT says; other bits not interpreted), TRIG_CON 0x3063->0x3062 across the SW-form kick and 0x3062->0x3063 across the HW-form kick (readback follows our writes: HW_TRIG_EN toggles, mask bit 4 clear, SW_TRIG_EN bit 8 not set in the readback), FRAME_COUNT (low 16 bits) 163->314 over the interval before kick 6, 1358->1358 before kick 21, 2407->2557 before kick 36; kick counts 6, 21, 36, matching the loop. Not established: that the DECON0 kick (rather than S-Boot's own refresh) made the markers visible (no control with identical decoding; the canary-plain run 001 had no camera decode and the owner's report there was only 'seemingly no stripes'), why FRAME_COUNT advances ~150 per ~1.2 s interval after HW-form kicks but 0 after the SW-form kick while SW-form frames were still displayed, the framebuffer stride/format (the visible band height of ~59 +/- 3 screen rows is consistent with the hypothesised 4320 B/row, an uncalibrated camera estimate not a measurement), the exception handler path (canary-fault not run), anything about XNU or the loader (not run). The host USB observer saw ADB vanish ~10.6 s and SEC_UPLOAD enumerate ~95 s after observer start with no command sent, the same pattern as run 001; the recording's clock was not aligned to it.",
+ "commands": [
+  {
+   "argv": [
+    "adb",
+    "get-state"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop ro.product.model"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop ro.product.device"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop ro.build.PDA"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "getprop sys.boot_completed"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'readlink -f /dev/block/by-name/recovery; blockdev --getsize64 /dev/block/sda18; test -b /dev/block/sda18 && echo block_device'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'if pidof dd >/dev/null; then echo busy; else echo idle; fi'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'sha256sum /dev/block/sda18'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "dumpsys battery | toybox sed -n 's/^  level: /level=/p;s/^  temperature: /temperature=/p'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'if pidof dd >/dev/null; then echo busy; else echo idle; fi'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'test -b /dev/block/sda18 && dd of=/dev/block/sda18 bs=1048576 count=100663296 iflag=count_bytes conv=notrunc,fsync'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "shell",
+    "-T",
+    "su -c 'sha256sum /dev/block/sda18'"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "adb",
+    "reboot",
+    "recovery"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "artifacts/nat-022/video-attempt-002/camera.mp4",
+    "--out",
+    "artifacts/nat-022/video-attempt-002/decoded-frames.json",
+    "--step",
+    "2"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/decode_video.py",
+    "artifacts/nat-022/video-attempt-002/camera.mp4",
+    "--out",
+    "artifacts/nat-022/video-attempt-002/decoded-frames-tail.json",
+    "--step",
+    "2",
+    "--t0",
+    "51",
+    "--umin",
+    "15",
+    "--umax",
+    "24",
+    "--y0",
+    "100",
+    "--y1",
+    "1000",
+    "--max-rms",
+    "3.5"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "docs/procedures/nat-022/test_nat022.py"
+   ],
+   "exit_code": 0
+  }
+ ],
+ "usb_events": [
+  {
+   "at": "2026-11-10T12:34:24.358777+00:00",
+   "elapsed_seconds": 0.001311,
+   "devices": [
+    [
+     "6860",
+     "SAMSUNG_Android"
+    ]
+   ]
+  },
+  {
+   "at": "2026-11-10T12:34:34.934994+00:00",
+   "elapsed_seconds": 10.577532,
+   "devices": []
+  },
+  {
+   "at": "2026-11-10T12:35:59.707749+00:00",
+   "elapsed_seconds": 95.350289,
+   "devices": [
+    [
+     "685d",
+     "SEC_UPLOAD"
+    ]
+   ]
+  },
+  {
+   "at": "2026-11-10T12:37:20.499619+00:00",
+   "elapsed_seconds": 176.142159,
+   "devices": []
+  },
+  {
+   "at": "2026-11-10T12:37:26.273872+00:00",
+   "elapsed_seconds": 181.916415,
+   "devices": [
+    [
+     "685d",
+     "SEC_UPLOAD"
+    ]
+   ]
+  },
+  {
+   "at": "2026-11-10T12:38:47.076925+00:00",
+   "elapsed_seconds": 262.719465,
+   "devices": []
+  },
+  {
+   "at": "2026-11-10T12:38:53.117296+00:00",
+   "elapsed_seconds": 268.759836,
+   "devices": [
+    [
+     "685d",
+     "SEC_UPLOAD"
+    ]
+   ]
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-022/package-002/recovery.img",
+  "artifacts/nat-022/package-002/package.json",
+  "artifacts/nat-022/attempt-002/report.json",
+  "artifacts/nat-022/preflight-002/report.json",
+  "artifacts/nat-022/stock-restore-002/report.json",
+  "artifacts/nat-022/android-after-stock-002.json",
+  "artifacts/nat-022/native-attempt-trig-used.json",
+  "artifacts/nat-022/build-002/canary-trig/Image",
+  "artifacts/nat-022/video-attempt-002/camera.mp4",
+  "artifacts/nat-022/video-attempt-002/decoded-frames.json",
+  "artifacts/nat-022/video-attempt-002/decoded-frames-tail.json",
+  "artifacts/nat-022/video-attempt-002/summary.json",
+  "artifacts/nat-022/usb-attempt-002/000000.json",
+  "artifacts/nat-022/usb-attempt-002/000001.json",
+  "artifacts/nat-022/usb-attempt-002/000002.json",
+  "artifacts/nat-022/usb-attempt-002/000003.json",
+  "artifacts/nat-022/usb-attempt-002/000004.json",
+  "artifacts/nat-022/usb-attempt-002/000005.json",
+  "artifacts/nat-022/usb-attempt-002/000006.json"
+ ],
+ "sha256": {
+  "artifacts/nat-022/package-002/recovery.img": "f2cc234a70e7b4f54eb3469567d523233e70f486a220005cb36da47c00bcec64",
+  "artifacts/nat-022/package-002/package.json": "a186922be6c18866dc1b69ee2b5e51173d3fb7fbe8f0ec897f095e8b070ad66d",
+  "artifacts/nat-022/attempt-002/report.json": "6e820fb7e2218655dfe8e929146764f7b51939f07ddfea7f07dbf116ecea1398",
+  "artifacts/nat-022/preflight-002/report.json": "d9458c2c3842ff9b73da883bde1f1a4cda82fc4efbdf312c8177e78a0e10b1cc",
+  "artifacts/nat-022/stock-restore-002/report.json": "f8a4808bc9e5fe2ef67b61a1e098c879c7b992a866ac29e28c23ba76aecc0259",
+  "artifacts/nat-022/android-after-stock-002.json": "0a63813d9d8fc167dc8463dcee83baa0a02fb1392f9b36002bb2befcc8925e5c",
+  "artifacts/nat-022/native-attempt-trig-used.json": "ef0eaa60b583810715a14575fa4e607a3c801605f1a98cdec94b5437d73f3f8e",
+  "artifacts/nat-022/build-002/canary-trig/Image": "572ebd0f33a03a7d07f663267301f97661f4e3f0051e0d9e8c3597b06385f89b",
+  "artifacts/nat-022/video-attempt-002/camera.mp4": "56dc948a7ee3e28222a3b2eedf9f61645f65f4bd28f431ea1193eca90ec58855",
+  "artifacts/nat-022/video-attempt-002/decoded-frames.json": "3a2012a033954318a75439f7c0d3f20e059bc6b388af1a0a61057060bae6c9ca",
+  "artifacts/nat-022/video-attempt-002/decoded-frames-tail.json": "953bbdc922b2873faea753838107309df5ca03d19ba6c02a25d203425468926b",
+  "artifacts/nat-022/video-attempt-002/summary.json": "683e4de3f86c474b1628688329893bebc286532e920ae1411e5258dd1aa9333c",
+  "artifacts/nat-022/usb-attempt-002/000000.json": "c2760baab4907e01a01a551a918dc553a6cd57fabf30de9ddcad624424bfa064",
+  "artifacts/nat-022/usb-attempt-002/000001.json": "710d292b438b190664f9c5c33fdec27f0a468171448e9ec8a8c7d9b7c607f7b1",
+  "artifacts/nat-022/usb-attempt-002/000002.json": "d234fc37091e666b255d26649425049826075d8e9c9f7a9fc8c5b4cb48cf8271",
+  "artifacts/nat-022/usb-attempt-002/000003.json": "1c5237b0a51f3a235c13b74ecab64449f56ee1a19f71c6464bf594739d689d06",
+  "artifacts/nat-022/usb-attempt-002/000004.json": "264a2eca47cd34bcfa08e198743aa1e253773f90fd11f72285bc884b26910709",
+  "artifacts/nat-022/usb-attempt-002/000005.json": "b3531c9030a8972ae3032099a2bed702a31f990bb93bbd746b4d46b4a3b706f8",
+  "artifacts/nat-022/usb-attempt-002/000006.json": "179409a6f2d96e4bf5b224cd585e46f43ddb716c76050b88e834c102eaa5bf54"
+ }
+}

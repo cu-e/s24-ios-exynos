@@ -168,6 +168,60 @@ class Trigger(unittest.TestCase):
             _, frames = self.trig(40, *args)
             self.assertIn(text, dec.describe([dec.parse_frame(w) for w in frames])["decon"]["kick_status"])
 
+try:
+    import numpy as np
+    HAVE_NP = True
+except ImportError:            # decode_video.py needs numpy only for the host analysis
+    HAVE_NP = False
+
+
+@unittest.skipUnless(HAVE_NP, "numpy missing")
+class VideoDecode(unittest.TestCase):
+    """decode_video.analyse against synthetic camera frames: a forward model (perspective, bloom,
+    blur, noise) that does not share code with the fit. It checks the geometric fit, not the phone."""
+    @classmethod
+    def setUpClass(cls):
+        spec = importlib.util.spec_from_file_location("decode_video", HERE / "decode_video.py")
+        cls.dv = importlib.util.module_from_spec(spec); spec.loader.exec_module(cls.dv)
+        cls.cfg = dict(x0=230, x1=360, y0=60, y1=1100, umin=21.0, umax=29.0, ustep=0.05,
+                       qs=[x for x in np.arange(-0.012, 0.0121, 0.001)], blooms=[0.0, 1.0, 2.0, 3.0, 4.0], max_rms=3.0)
+
+    @staticmethod
+    def render(word, u, q, y0, bloom, noise, seed=1):
+        bits = [1, 0] + [(word >> (31 - i)) & 1 for i in range(32)]
+        rng = np.random.default_rng(seed)
+        ys = (np.arange(1280 * 8) + 0.5) / 8.0
+        d = ys - y0
+        K = d / (u - q * d)                      # band coordinate of every sub-row
+        sub = np.zeros_like(ys)
+        ok = (K >= 0) & (K < len(bits))
+        sub[ok] = np.array(bits, float)[K[ok].astype(int)]
+        sub = sub.reshape(1280, 8).mean(axis=1)
+        ker = np.exp(-0.5 * (np.arange(-6, 7) / 1.3) ** 2); ker /= ker.sum()
+        prof = np.clip(np.convolve(sub, ker, mode="same") * (1.0 + 0.15 * bloom), 0, 1)   # white blooms wider
+        img = np.tile((25 + 200 * prof)[:, None], (1, 720))
+        img += rng.normal(0, noise, img.shape)
+        return np.clip(img, 0, 255).astype(np.uint8)
+
+    def test_decodes_frames_under_perspective_and_bloom(self):
+        words = [dec.make_frame(8, 0, 0xA5A5), dec.make_frame(3, 0, 0x10), dec.make_frame(9, 4, 0x3063),
+                 dec.make_frame(2, 1, 0x1AE1), dec.make_frame(1, 0, 0x8900)]
+        for i, w in enumerate(words):
+            for u, q, y0, bloom in ((21.6, -0.003, 105, 2.0), (23.5, 0.002, 98, 1.0), (22.4, -0.006, 111, 3.0)):
+                r = self.dv.analyse(self.render(w, u, q, y0, bloom, 3.0, seed=i), self.cfg)
+                self.assertEqual(r["status"], "ok", (hex(w), u, q, r))
+                self.assertEqual(dec.make_frame(r["frame"]["kind"], r["frame"]["idx"], r["frame"]["data"]), w)
+
+    def test_never_guesses(self):
+        img = self.render(dec.make_frame(3, 0, 0x10), 22.0, -0.003, 105, 2.0, 3.0)
+        flat = np.full_like(img, 90)
+        self.assertNotEqual(self.dv.analyse(flat, self.cfg)["status"], "ok")
+        # a band flipped in the payload or in the CRC byte must be rejected, never "repaired"
+        for flip in (1 << 20, 1 << 9, 0x01):
+            bad = dec.make_frame(3, 0, 0x10) ^ flip
+            r = self.dv.analyse(self.render(bad, 22.0, -0.003, 105, 2.0, 3.0), self.cfg)
+            self.assertEqual(r["status"], "sync-or-crc-fail", hex(flip))
+
 class Aarch64Build(unittest.TestCase):
     def test_images_build_with_arm64_header(self):
         import shutil

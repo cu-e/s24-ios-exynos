@@ -1,8 +1,10 @@
 # NAT-022: framebuffer-marker canary and instrumented loader (host work only)
 
-Evidence kind: **host-test**. Nothing here was flashed or run on the phone. No
-marker has been seen on hardware, so every statement about the phone's behaviour
-below is an open question, not a result.
+Evidence kind: **host-test** for the build and the tests; **native-device** for the two
+owner-attended runs recorded below (`native-attempt-001-evidence.json`, inconclusive;
+`native-attempt-002-evidence.json`, the first decoded on-device markers). Sections written
+before a run describe the plan, not the outcome; read the dated result sections for what the
+phone did.
 
 ## Why
 
@@ -135,7 +137,7 @@ The register that triggers a frame transfer was then pinned from the BSP:
 trigger" wording above was an assumption. Writing it from the canary is MMIO and
 is outside decision 0009; see "canary-trig" below.
 
-## canary-trig: DECON0 kick variant (host-tested only; NOT run)
+## canary-trig: DECON0 kick variant (host-tested; run once under decision 0010, result below)
 
 `build.py` also builds `canary-trig` (`markerlib.c` with `-DMK_TRIG=1`). It is the
 `canary-plain` loop plus, after every drawn frame, one DECON0 kick
@@ -168,7 +170,70 @@ points at `0xFA200000`, or that the SysMMU lets it scan that address. A visible
 result would be the first independent marker; a blank result stays inconclusive
 for the same reasons as run 001.
 
-Decision request: put to the owner in the session with the exact SHA-256. The record
-`docs/decisions/0010-nat022-canary-trig-single-run-2026-11-10.md` exists only if the
-owner accepts; `session_trig.py` refuses to run without it (and writes its own
-one-shot marker `artifacts/nat-022/native-attempt-trig-used.json`).
+Decision: put to the owner with the exact SHA-256 and accepted as
+`docs/decisions/0010-nat022-canary-trig-single-run-2026-11-10.md`; `session_trig.py` refuses to
+run without it and wrote its own one-shot marker `artifacts/nat-022/native-attempt-trig-used.json`.
+That decision is consumed; another run needs a new one.
+
+## Native result 002, 2026-11-10 (decision 0010): markers decoded from the owner's recording
+
+`canary-trig` (canary Image `572ebd0f…`, RECOVERY image `f2cc234a…`) was written to RECOVERY with a
+matching readback and booted once (`adb reboot recovery` at 12:34:31Z). The owner filmed the screen
+and reported seeing stripes. Stock RECOVERY was restored with one NAT-013 session; the hash equals
+stock (`96620b8b…`) and Android booted (`check_android` pass). Record:
+`native-attempt-002-evidence.json`.
+
+`decode_video.py` (host analysis of the recording, not a console) decodes the video: from 2.1 s to
+61.8 s, 857 sampled frames are CRC-valid, no frame has two different values within a round, and
+the order is exactly the canary-trig loop (CHECK, ENTRY, BOOTID 0/1, STAGE, REG 0..9; four rounds
+of about 18.3 s). The screen goes dark at about 61.9 s. The decoder fits `y = y0 + u K/(1 + q K)`
+with bloom to the sub-pixel transitions, so camera perspective and white-run bloom are handled and
+the framebuffer stride is not assumed; a frame is accepted only on sync plus CRC-8.
+
+| Field | Decoded | Meaning |
+| --- | --- | --- |
+| CHECK | `0xA5A5` | stack round trip in the canary succeeded |
+| ENTRY | `0x8900` | entry at **EL2**; current-EL SCTLR M=0 C=0 I=1; EL1 SCTLR M=0 C=0 I=1 |
+| BOOTID | `0x1AE1D195` | CNTVCT[31:0] when the loop started, constant across rounds |
+| STAGE | `0x10` | canary stage C reached via a call |
+| REG GLOBAL_CON | `0x113` (kick 6), `0x133` (kicks 21, 36) | bits 0, 1 (DECON enabled) and 8 (command mode) set, as in the DT; the other bits are not interpreted |
+| REG TRIG_CON | `0x3063→0x3062` (SW-form kick), `0x3062→0x3063` (HW-form kick) | readback follows our writes; mask bit 4 clear, bit 8 not set in the readback; bits 5, 6, 12, 13 set before and after |
+| REG FRAME_COUNT (low 16 bits) | 163→314, 1358→1358, 2407→2557 | interval before kick 6 / 21 / 36 (kicks 5→6, 20→21, 35→36) |
+| REG kicks | 6, 21, 36 | matches the loop |
+
+What this establishes (observation of the screen, decoded independently of the C encoder): our
+XNU-free code ran on the phone, at EL2 with the MMU and D-cache off, with a working stack; DECON0
+was enabled and in command mode at the reported kicks (6, 21 and 36, between about 7 s and 40 s after
+entry; `GLOBAL_CON` bit 5 changed between kick 6 and kick 21, so the block is not static); reads and
+writes to the four DECON0 registers completed without a fault (no exception record appeared); the display scans our buffer starting at `0xFA200000` with all-ones
+shown as white and zero as black. It is the first independent on-device marker of the project and
+satisfies step 3 of the diagnostic-loader plan except the exception-handler part, which only
+`canary-fault` can show (not run).
+
+Consistent with the counts but not proven: `FRAME_COUNT` grew by about 150 in each interval after a
+HW-form kick (kicks 5→6: 151; kicks 6→20 over 7 such intervals: 1044; kicks 21→35: 1049; kicks
+35→36: 150) and by 0 in the interval after the SW-form kick (20→21), i.e. the engine appears to be
+frame-clocked at about 120 per second while `HW_TRIG_EN` is set. The value 163 at kick 5, with two
+earlier HW-form kicks, is not explained.
+
+Not established:
+
+* That the DECON0 kick, not S-Boot's own refresh, made the markers visible. The `canary-plain`
+  run (decision 0009) wrote the same bands without any DECON access and the owner reported only
+  "seemingly no stripes", with no decoded recording; that is suggestive, not a controlled
+  comparison. The registers at the first kick (what S-Boot left behind) were not captured.
+* Why frames drawn before SW-form kicks were displayed although `FRAME_COUNT` did not move after
+  them.
+* Stride and pixel format. The band height on screen is about 59 ± 3 screen rows by an uncalibrated
+  camera estimate, consistent with the hypothesised 4320 B/row (60.7 rows) but not a measurement.
+* The exception path (ESR/ELR/FAR on hardware), the loader, memory preparation, the handoff and
+  anything inside XNU. A pre-jump marker would still not prove kernel entry.
+* The cause of the screen going dark at about 61.9 s. The host USB observer saw ADB vanish about
+  10.6 s and `SEC_UPLOAD` about 95 s after the observer started, with no command sent, the same
+  pattern as run 001; the recording's clock was not aligned with it, so no cause is claimed.
+
+Next steps and the decisions they need (none authorised): `canary-fault` for the exception path
+(BRK #0x1234, expected EC 0x3c, ISS 0x1234) is the smallest remaining step; `loader-diag`
+with the existing payload would show stages up to pre-jump; both need an image-specific decision
+like 0010. The recording and decoded frames stay local under `artifacts/nat-022/video-attempt-002/`
+(the video contains the owner's room and is not committed).
