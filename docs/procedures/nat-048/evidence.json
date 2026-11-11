@@ -1,0 +1,78 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T03:19:33+00:00",
+ "commit": "dde1fbb5596f32457f8cec5eec276c4170cac68f",
+ "tree_state": "the files listed under sha256 are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat048-20261111-driver",
+ "summary": "Host USB event logger (usb_watch.py: sysfs polling, fsynced JSONL, never opens a device or reads a serial), verdict analyzer for the reset canary (analyze_reset.py: U1+U2 / U3-U4 supported|refuted|undetermined from the host log, per the NAT-044 decision wording) and the gated session driver of the NAT-044 package-002 candidates (session_reset_canary.py: NAT-037 driver pinned to both images, agent-written decision-file gate, one-shot marker per image, watcher self-test, watcher started detached and awaited between the full readback and the single reboot). python3 -I docs/procedures/nat-048/test_nat048.py: Ran 65 tests, OK (about 34 s); 68/68 mutants killed. Nothing was run on the phone.",
+ "evidence_category": "host-test (fake adb, fake sysfs tree, synthetic USB event logs); not a measurement of the S24",
+ "acceptance": {
+  "1_driver": "session_reset_canary.py: pins both package-002 candidates (RECOVERY, Image.payload and its length, offset 2048) per --image; in the real tree, with no docs/decisions/*-nat046-<image>-single-run-*.md, every mode (preflight, --execute, --restore) and both images stop before the first adb call (RealTreeGate); the gate requires exactly one decision file naming both hashes and decision 0019 and never creates it; with a decision file in a scratch tree: read-only preflight writes nothing, --execute writes, reads back in full, starts the watcher and waits for its start record, then sends one `adb reboot recovery` (the fake adb checks the watcher log at the moment of the reboot, with a deliberately slow watcher too), leaves a one-shot marker per image, readback mismatch and a watcher that cannot start restore stock and never reboot; the driver differs from the NAT-037 driver in exactly the 13 enumerated lines and keeps its safety lines.",
+  "2_watcher": "usb_watch.py: appear/disappear/re-enumeration (devnum change)/string change, vendor filter, root hubs and interfaces skipped, partial enumeration deferred, no serial in the log, no device-node access (static + attribute-read spy), one fsync per line, existing log refused, SIGTERM stop record, SIGKILL leaves whole lines; the detached watcher outlives the driver and sees later events.",
+  "3_analyzer": "analyze_reset.py: the verdict table with every boundary (deadline, split point 95-(wdt-deadline)/2, baseline 95 +- 10 s, coverage 120 s), refusal to judge without T0 or a covering log, other vendors ignored, baseline constants tied to the nat-022 README text, CLI reads the real build-002 record.",
+  "4_mutation": "mutate_nat048.py: 68 mutants of the three scripts in a mirror tree (private artifacts/nat-022 and nat-048 so parallel mutants do not share the driver's flock); 68 killed, 0 survived, 0 invalid. The first attempt shared the lock and every mutant 'died' of a crashed driver: the false kills were found by reading the first kill reason, and the mirror tree was fixed before the run recorded here."
+ },
+ "established": [
+  "The driver pins loader-diag-reset RECOVERY a3189ca7914b48b0b5d3a575c2936b6425bccdafde16e66c34fedf1f3d1ea34e / payload b79aeecc689c02c7a95ee487fb4a4b808ef8915292e0888122de9be983acaa14 and loader-diag-reset-bl RECOVERY d4e1454c198379328c91fc63a5aaf26e58c1747e2b696ca1b92719211bedfebd / payload b05349eb5bc048c3b78694c3f14b3e58def30a7f74b45bd0f3b6d229fb6ef936 (NAT-044 package-002).",
+  "Control flow of the driver against a fake adb and the verdict rules of the analyzer on synthetic logs, as listed in acceptance."
+ ],
+ "not_established": [
+  "Any behaviour of the S24. Whether /sys/bus/usb/devices shows Download Mode and SEC_UPLOAD devices as the fake tree does (assumed from lsusb observations of runs 001-009; the first native run tests it).",
+  "That a second Samsung USB device on the host can be told apart from the phone; that the 240 s watcher window covers every outcome (a Download Mode entered by an owner key press comes later by design)."
+ ],
+ "findings": [
+  "A shared driver lock made parallel mutants crash before writing a report, which a naive kill criterion counts as killed; fixed with a mirror tree and verified by the first mutant's kill reason.",
+  "Two driver checks (payload at offset 2048, package stock hash) are redundant with the full-image hash pin and are not mutated; the property they protect is tested directly."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-048/test_nat048.py"
+   ],
+   "exit_code": 0,
+   "note": "python3 -I docs/procedures/nat-048/test_nat048.py: Ran 65 tests, OK (about 34 s)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-048/mutate_nat048.py",
+    "--out",
+    "artifacts/nat-048/mutation-002",
+    "--jobs",
+    "4"
+   ],
+   "exit_code": 0,
+   "note": "killed 68 of 68, invalid 0"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "make check: exit 0 (214 repository tests OK); NAT procedure tests are run separately"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-048/mutation-002/summary.json",
+  "artifacts/nat-048/mutation-002.log",
+  "docs/procedures/nat-048/README.md"
+ ],
+ "sha256": {
+  "docs/procedures/nat-048/README.md": "e5e0db5081d6a015334ad16b65c8b12d62be002ff73cb5c08bda51adda134a3b",
+  "docs/procedures/nat-048/usb_watch.py": "0f7cd1a757721e58a7db7bd51e05f400ceeb54c52cfe0a5ffa0e981f4fcbd18d",
+  "docs/procedures/nat-048/analyze_reset.py": "c2142bc4c2f4cc5d5c6a621b5377956996a9c49a992c18a6d65d22aad9f7542b",
+  "docs/procedures/nat-048/session_reset_canary.py": "df54eef7a309d1d3b72337f0f293cdc7d53b98499bdee8a2ee8eea93b83d88a3",
+  "docs/procedures/nat-048/test_nat048.py": "514b72a1bfba081a7ff93a8de23da159ebc8984d7bdace7c165af2cdbc363789",
+  "docs/procedures/nat-048/mutate_nat048.py": "08c5481af12c795b2b708600f4d81aba4b3cfd5b8cf7acbc1d3bf6f2af92e9ad",
+  "artifacts/nat-048/mutation-002/summary.json": "cfc258bfa1f8ea372d2eb27cd95e92718c750924574da436886044380f59681c",
+  "artifacts/nat-048/mutation-002.log": "61808c83cc13e830a8aedb12087df1de511aeb06c126e079e5c2d7066f4c14af"
+ },
+ "device_used": false,
+ "flashed": false
+}
