@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-11T15:05:24+00:00",
+  "updated_at": "2026-11-11T16:01:41+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -104,6 +104,20 @@
         "decision": "docs/decisions/0021-nat046-loader-diag-reset-single-run-2026-11-11.md",
         "owner": "claude-nat046-20261111-session",
         "at": "2026-11-11T14:13:28+00:00"
+      },
+      {
+        "scope": "native",
+        "value": true,
+        "decision": "docs/decisions/0022-nat043-loader-diag-usbmon-single-run-2026-11-11.md",
+        "owner": "claude-nat043-20261111-session",
+        "at": "2026-11-11T15:40:18+00:00"
+      },
+      {
+        "scope": "native",
+        "value": false,
+        "decision": "docs/decisions/0022-nat043-loader-diag-usbmon-single-run-2026-11-11.md",
+        "owner": "claude-nat043-20261111-session",
+        "at": "2026-11-11T15:43:14+00:00"
       }
     ]
   },
@@ -13255,8 +13269,13 @@
         "Run under the 0019 protocol with the collector",
         "Restore stock and verify Android; record the outcome"
       ],
-      "status": "pending",
-      "owner": null
+      "status": "in_progress",
+      "owner": "claude-nat043-20261111-session",
+      "started_at": "2026-11-11T15:40:29+00:00",
+      "last_heartbeat": "2026-11-11T16:01:41+00:00",
+      "updated_at": "2026-11-11T16:01:41+00:00",
+      "progress_note": "Run 001 of loader-diag-usbmon (decision 0022) done: host collector received 148 frames (146 records, 1 boot, 8 stage records, ladder R/W err=0, HOLD stage=0x40), 0 drops; analyser PASS; stock RECOVERY restored (assess pass), Android verified; native permit closed. Exception frame on hardware (loader-diag-usbmon-fault) not yet run.",
+      "next_step": "Decision 0023 for loader-diag-usbmon-fault (one run, own owner confirmation), then final evidence and task done"
     },
     {
       "id": "NAT-044",
@@ -58617,6 +58636,58 @@
           "progress_note": "Image loader-diag-xnu-ckpt3-usb built (build-003, reproducible) and packaged (package-002, RECOVERY a8161ccc...); 45 host tests pass (Decode/Patch/Build/Chain/Usb layers incl. 22 notes through 8 s no-poll gaps with the unmodified collector); mutation run 1 found a dead counter (removed) and a missing setups-delta test (added); rerun in progress; README and decision-draft written; nothing run on the phone",
           "next_step": "finish mutation rerun, write evidence.json, make check, commit, task done; then NAT-057 (session driver + analyser for this image)",
           "last_heartbeat": "2026-11-11T15:00:06+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T15:40:18+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-nat043-20261111-session",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-11T15:40:29+00:00",
+      "action": "task.claim:NAT-043",
+      "owner": "claude-nat043-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-043",
+          "status": "in_progress",
+          "owner": "claude-nat043-20261111-session",
+          "priority": 96,
+          "last_heartbeat": "2026-11-11T15:40:29+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T15:43:14+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-nat043-20261111-session",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
+    },
+    {
+      "at": "2026-11-11T16:01:41+00:00",
+      "action": "task.update:NAT-043",
+      "owner": "claude-nat043-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-043",
+          "status": "in_progress",
+          "owner": "claude-nat043-20261111-session",
+          "priority": 96,
+          "progress_note": "Run 001 of loader-diag-usbmon (decision 0022) done: host collector received 148 frames (146 records, 1 boot, 8 stage records, ladder R/W err=0, HOLD stage=0x40), 0 drops; analyser PASS; stock RECOVERY restored (assess pass), Android verified; native permit closed. Exception frame on hardware (loader-diag-usbmon-fault) not yet run.",
+          "next_step": "Decision 0023 for loader-diag-usbmon-fault (one run, own owner confirmation), then final evidence and task done",
+          "last_heartbeat": "2026-11-11T16:01:41+00:00"
         }
       ]
     }
