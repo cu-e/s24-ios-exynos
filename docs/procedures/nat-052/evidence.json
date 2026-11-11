@@ -1,0 +1,136 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T15:04:48+00:00",
+ "commit": "535deeac8760393970d56c8126b1624d1f59b02a",
+ "tree_state": "the files listed under sha256 are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat052-20261111-session",
+ "summary": "The image loader-diag-xnu-ckpt3-usb was built on the host from the committed NAT-036 resumable-checkpoint and NAT-047 USB-log patch pipelines plus a new glue (patch_ckpt52.py, src/glue52*.h): at each of the 22 arrivals of nat036_ckpt_c the stub installs the loader's vectors, queues one 'CK ...' text record (stop index, kernel state, esr/elr/far for an early exception), services the NAT-041 EP0 engine for 0.3 s and restores the kernel's vectors; the final hold announces itself with a HOLD record. In unicorn, against the NAT-041 DWC3 model and the unmodified s24_logd collector, all 22 notes arrive complete and in order through kernel gaps with no polling (up to 8 s), an early exception arrives with esr/elr/far, an engine that never came up leaves the kernel path unchanged, and the model chain's end state equals an uninterrupted run. 45 tests pass; the mutation check kills 14 of 15 mutants and documents 1 as equivalent. One RECOVERY candidate (hashes only) is packaged and a decision draft for one future run is written. Nothing ran on the phone and nothing was flashed.",
+ "evidence_category": "host-test (patch/build checks, aarch64 instruction-level model chain, unicorn run of the built loader against NAT-041's DWC3 model and collector); not a measurement of the S24",
+ "acceptance": {
+  "1_image": "build-003 of docs/procedures/nat-052/build.py: Image d9a630042097249bae7cb3be6a87cf64af01c78aebd38ac3911d04260728c18a, Image.payload 9d9cb972496807177771febf819d783f0823ecd2fb44fad2f9fadbfc3027440e, RECOVERY candidate a8161cccddb4282796a848b2c5b464d5457dcc0bb9bc2e0c1fa9cb1014967d97 (artifacts/nat-052/package-002). The glue services the engine only from the loader's stub at nat036_ckpt_c (never from XNU), writes one record per arrival and one HOLD record. DEVIATION from the wording: the record carries the NAT-035 resume state (x2, x3, mask, sctlr, sp, kttbr0, vbar, and esr/elr/far for an early exception) and not SPSR/ELR of a return, because a resumable return is not an exception return; the boot id is the collector's BOOT record.",
+  "2_host_tests": "test_nat052.py: 45 tests, all pass, nothing skipped (artifacts/nat-052/test-full-002.log). Layers Decode, Patch, Build, Chain, UsbFull (22 stops, GAPS_S with an 8 s no-poll gap, a bounded 0.3 s service per pass, the hold before the 60 s deadline), UsbException (esr/elr/far), UsbEngineDown, UsbShort. mutants.py: 15 mutants, 14 killed, 1 documented equivalent, survived: none, 219 s",
+  "3_decision_draft": "docs/procedures/nat-052/decision-draft.md: hashes, the unchanged NAT-043 MMIO table (none added), pass/fail fixed in advance, not granted, known limits; not a decision, not executed, no number assigned, no question asked."
+ },
+ "established": [
+  "Source/host-test: the glue patches apply exactly once each, all-or-nothing, and only the intended hunks change; the build is reproducible, has no SIMD or misaligned access, and fits the 2 MiB block at each known S-Boot base.",
+  "Host-test: with the unmodified NAT-041 collector, the 22 notes of a run with kernel gaps without polling reach the archive complete, in order, with zero drops, and the earlier loader log precedes them.",
+  "Host-test: the loader's vectors are in place while the engine is serviced and the kernel's are back afterwards, also when the engine never came up."
+ ],
+ "not_established": [
+  "Anything about the real S24: DWC3 behaviour after a stretch with no polling, cache coherence of the engine DMA block with the kernel's caches, the fixed 0.3 s service window, the time budget of real kernel gaps and draws, and the NAT-045 HSI0 sequence itself (first tested by NAT-043).",
+  "That a host sees any of it: the udev rule for 1209:0001 is not installed (NAT-050 blocked on the owner's root) and NAT-043 has not run.",
+  "The simulation has no caches, MMU, interrupts or real controller; the model is one reading of the databook and the vendor driver, and a shared misreading is invisible to the tests.",
+  "Kernel execution past C checkpoint 16; x0..x30 at an exception; SPSR of the stopped context."
+ ],
+ "findings": [
+  "Mutant M10 (counter incremented only while the engine is up) is a documented equivalent: n->up is 0 until nat047_bringup, becomes 1 once, and can only go back to 0 on a poll fault; notes are written only while it is 1.",
+  "The first mutation run (artifacts/nat-052/mutants-001.log) found two things: g_nat052_depth was written but never read (removed; the image changed, build-003 supersedes build-001/002), and nothing checked that setups= is a delta since the previous note (test added: test_setups_is_what_the_engine_served_since_the_previous_note_not_a_running_total). The 15-mutant run recorded here is the rerun after both.",
+  "NAT-047's decode47.py names frame kind 13 for the USB report; in this image kind 13 is MK_CKPT3 and the USB report is 15 (MK_USB moved). decode47.py must not be used on this image's frames."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-052/build.py",
+    "--out",
+    "artifacts/nat-052/build-003",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0,
+   "note": "build-003; build-001 and build-002 (before the dead counter was removed) were byte-identical to each other"
+  },
+  {
+   "argv": [
+    "<venv with unicorn+capstone>/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-052/test_nat052.py"
+   ],
+   "exit_code": 0,
+   "note": "Ran 45 tests in 64.892s, OK (artifacts/nat-052/test-full-002.log)"
+  },
+  {
+   "argv": [
+    "<venv with unicorn+capstone>/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-052/mutants.py",
+    "--json",
+    "artifacts/nat-052/mutants-002.json"
+   ],
+   "exit_code": 0,
+   "note": "15 mutants, 14 killed, 1 documented equivalent, survived: none, 219 s"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-047/package.py",
+    "--build",
+    "artifacts/nat-052/build-003",
+    "--out",
+    "artifacts/nat-052/package-002"
+   ],
+   "exit_code": 0,
+   "note": "one RECOVERY candidate, hashes in package.json"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "Ran 214 tests in 13.156s OK make_check_exit=0"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-052/build-003/build.json",
+  "artifacts/nat-052/package-002/package.json",
+  "artifacts/nat-052/test-full-002.log",
+  "artifacts/nat-052/mutants-002.json",
+  "artifacts/nat-052/mutants-002.log",
+  "artifacts/nat-052/mutants-001.log",
+  "docs/procedures/nat-052/README.md",
+  "docs/procedures/nat-052/decision-draft.md",
+  "artifacts/nat-052/make-check.log"
+ ],
+ "images": {
+  "loader-diag-xnu-ckpt3-usb": {
+   "recovery_sha256": "a8161cccddb4282796a848b2c5b464d5457dcc0bb9bc2e0c1fa9cb1014967d97",
+   "recovery_bytes": 100663296,
+   "payload_sha256": "9d9cb972496807177771febf819d783f0823ecd2fb44fad2f9fadbfc3027440e",
+   "payload_bytes": 21857888,
+   "payload_offset": 2048,
+   "loader_image_sha256": "d9a630042097249bae7cb3be6a87cf64af01c78aebd38ac3911d04260728c18a",
+   "differing_4k_pages": 19634
+  }
+ },
+ "stock_recovery_sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+ "sha256": {
+  "docs/procedures/nat-052/README.md": "c4918128814d2dfcfca48f006aa2bb5cf8aee9013239ec983c8efb98e5090328",
+  "docs/procedures/nat-052/decision-draft.md": "40ad0049b802596b8f6dc4a418f3e107b77a56df4eedf5588a2022f7f2f23893",
+  "docs/procedures/nat-052/build.py": "4cbc521e1b35e15d02993c95739794d5cca336b0d5a986424086d8c83e3194cd",
+  "docs/procedures/nat-052/decode52.py": "4ed23cad03fce8ba824536ff6f6cf781556bc83319da23764e55738e3f36973e",
+  "docs/procedures/nat-052/patch_ckpt52.py": "732bcf9ec53b73687d10c1096966d1fc3e6c0e94d4e9c9417c98fe2fcde1d60f",
+  "docs/procedures/nat-052/mutants.py": "761e34b9e91595a1859a17504a33fa20ba226bb9f7767b960ad51806374d447d",
+  "docs/procedures/nat-052/test_nat052.py": "35fc3ba3f4de813fe74349f0a1ace90029a89303ca308341bccc7898cd72c774",
+  "docs/procedures/nat-052/src/glue52.h": "ef4c55e9b45d3e940eede78912f7c07169bfe8ffa73895e350859bf9842e2a9d",
+  "docs/procedures/nat-052/src/glue52_impl.h": "2b11850d5972f080ea938b3abbd6a6a66b34c47df4bcf9cedd15aaa7b5f8a192",
+  "docs/procedures/nat-052/test_support/nat052_mock.c": "685defb35f9c5ac074fcc3687c77abea818304df32662d8cb20531182ec2eb47",
+  "docs/procedures/nat-052/test_support/sim52.py": "2776a2c50e5f2d8275a200cc1019d03cc5937536e66cf748b56d6f7dc9c02392"
+ },
+ "artifact_sha256": {
+  "artifacts/nat-052/build-003/build.json": "30330672e2da448eeb84c1cf9fdafd705122da76cd41d76ec82cf3447ad57119",
+  "artifacts/nat-052/package-002/package.json": "98277e823428296965ba8b8d885cfa669170d21b1addf4cad6f0e19040598579",
+  "artifacts/nat-052/test-full-002.log": "0fe1cb06feccd416df835a03eb87a69f377392e6bbca96d969ed30155ad36172",
+  "artifacts/nat-052/mutants-002.json": "172a2e7c2ec1f2b21e3e6e43eaae842c40d273dc68ba77a9593aa880cedeae3d"
+ },
+ "device_used": false,
+ "flashed": false
+}
