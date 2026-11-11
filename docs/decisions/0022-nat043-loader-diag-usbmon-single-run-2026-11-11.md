@@ -71,6 +71,22 @@ those of `docs/procedures/nat-049/analyze_usblog.py`, unchanged after the run.
 The return path (reset at 45 s, then NAT-013 restore) is judged as in NAT-046; its failure does not change the log verdict. Nothing is retried within
 the run. A result other than PASS is evidence, not a reason to run again.
 
+## Addendum 2026-11-11 (before the run): what the NAT-053 audit changes for this run
+
+The independent audit NAT-053 found that no native EP0 record has ever reached the host (NAT-046 saw USB enumeration only, with no collector
+running). For this run that means, with no change to the image, the hashes or the granted access above:
+
+* Coverage is shown, not assumed: the driver starts the USB watcher and the collector after the readback and before the reboot and refuses to
+  reboot unless the watcher logged `start` and the collector logged its first `poll` of the bus (`collector-heartbeat.jsonl`). After the run the
+  verdict uses those files, the collector's raw transfers and its terminal process status together; a collector that died early, or a USB log
+  that does not cover the window, makes the run undetermined.
+* Observation and inference stay separate. The USB return timing alone (the phone leaving the bus and coming back as `SAMSUNG USB`, or as
+  `SEC_UPLOAD`) does not show that the loader executed, and the 95 s +/- 10 s `SEC_UPLOAD` band is a heuristic that attempt 007 (109.8 s) already
+  broke. Only a valid `S24L` record in the archive is a message from the real run. Enumeration of 1209:0001 with no valid record is
+  reported by what the collector saw (device absent, `EACCES`, timeout/STALL, or a record that fails validation), never as success.
+* The analyser rules (`analyze_usblog.py`) are used as committed; its known overstatement (NAT-055) is corrected by reading the raw files, not by
+  changing the rules after the run.
+
 ## Not granted
 
 Any other image or partition, a second run, the fault image, HSI0 or other MMIO beyond the table above, the ACPM or any SMC call, GPU bring-up,
