@@ -1,12 +1,14 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-11T14:17:13+00:00",
-  "ledger_updated_at": "2026-11-11T14:17:02+00:00",
-  "registry_sha256": "f5e9dadc7a48ab7094cbdf2027785d2967d72beac74bce6a51e7781a7ac59638",
+  "generated_at": "2026-11-11T15:05:54+00:00",
+  "ledger_updated_at": "2026-11-11T15:05:24+00:00",
+  "registry_sha256": "dd6bfa5037f874fee5d7ba4887cf2d21293888fb6cef05e067a3457273bb155d",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
-      "NAT-052"
+      "NAT-054",
+      "NAT-055",
+      "NAT-057"
     ],
     "in_progress": [],
     "blocked": [
@@ -30,6 +32,7 @@
       "GPU-005"
     ],
     "waiting": [
+      "NAT-056",
       "NAT-011",
       "GPU-007",
       "GPU-009",
@@ -239,6 +242,7 @@
       "NAT-036",
       "NAT-045",
       "NAT-047",
+      "NAT-053",
       "DRV-001",
       "KRN-023",
       "REV-012",
@@ -246,6 +250,7 @@
       "VM-021",
       "VM-022",
       "NAT-037",
+      "NAT-052",
       "ESIM-001",
       "VM-004",
       "SEN-001",
@@ -8201,6 +8206,43 @@
       "card_path": "planning/tasks/NAT-047.md"
     },
     {
+      "id": "NAT-053",
+      "title": "Independently audit existing native S24 USB and Download Mode artifacts without device access",
+      "status": "done",
+      "owner": "codex-usb-audit-20261111-r1",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "depends_on": [],
+      "paths": [
+        "docs/procedures/nat-053",
+        "artifacts/nat-053"
+      ],
+      "acceptance": [
+        "A sanitized independent report cites existing artifacts and timestamped records for real run timelines, collector coverage, USB enumeration and received payloads; missing files are explicit.",
+        "Synthetic and Android-userland evidence are separated from native-device observations; hypotheses have minimal discriminating checks and concrete new defects have narrowly scoped follow-up tasks.",
+        "Dated provenance, source hashes and host check results are preserved; no phone, USB session or other agent process is accessed or changed."
+      ],
+      "sources": [],
+      "steps": [
+        "Read task evidence and locate original run artifacts",
+        "Reconcile timestamps and collector/archive coverage against source",
+        "Publish report, evidence and narrow defect follow-ups if needed"
+      ],
+      "started_at": "2026-11-11T14:45:37+00:00",
+      "last_heartbeat": "2026-11-11T14:50:06+00:00",
+      "updated_at": "2026-11-11T14:51:23+00:00",
+      "progress_note": "Reviewed original native reports, USB events and empty smoke archives; no native EP0 receipt found. Identified mutable NAT-051 log hash, analyzer causal overstatement and capture false-success status; follow-ups registered.",
+      "next_step": "Finish provenance snapshot and repository checks; publish independent audit evidence.",
+      "handoff": "docs/procedures/nat-053/README.md",
+      "evidence": "docs/procedures/nat-053/evidence.json",
+      "evidence_sha256": "f2561750e711954b681523b3d3d8f9cc404dad96b38eab34765aa0b4f74552fd",
+      "finished_at": "2026-11-11T14:51:23+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-053.md"
+    },
+    {
       "id": "DRV-001",
       "title": "Prepare an STM SPI touch driver and host adapter",
       "status": "done",
@@ -8525,11 +8567,114 @@
         "Implement the glue and the combined build",
         "Host tests, mutants, decision draft"
       ],
-      "status": "pending",
-      "owner": null,
-      "column": "ready",
+      "status": "done",
+      "owner": "claude-nat052-20261111-session",
+      "started_at": "2026-11-11T14:18:30+00:00",
+      "last_heartbeat": "2026-11-11T15:00:06+00:00",
+      "updated_at": "2026-11-11T15:05:24+00:00",
+      "progress_note": "Image loader-diag-xnu-ckpt3-usb built (build-003, reproducible) and packaged (package-002, RECOVERY a8161ccc...); 45 host tests pass (Decode/Patch/Build/Chain/Usb layers incl. 22 notes through 8 s no-poll gaps with the unmodified collector); mutation run 1 found a dead counter (removed) and a missing setups-delta test (added); rerun in progress; README and decision-draft written; nothing run on the phone",
+      "next_step": "finish mutation rerun, write evidence.json, make check, commit, task done; then NAT-057 (session driver + analyser for this image)",
+      "evidence": "docs/procedures/nat-052/evidence.json",
+      "evidence_sha256": "7298764c3a37e3c51453c1ba9848235ea6a8c265d5e64a9ac12fd029c4584a57",
+      "finished_at": "2026-11-11T15:05:24+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-052.md"
+    },
+    {
+      "id": "NAT-054",
+      "title": "Publish a sealed corrective supplement for the NAT-051 USB observer log whose recorded hash covers only its initial prefix",
+      "paths": [
+        "docs/procedures/nat-054",
+        "artifacts/nat-054"
+      ],
+      "acceptance": [
+        "Preserve docs/procedures/nat-051/evidence.json and its original hash unchanged; a separate dated supplement records original expected SHA-256, the matching first-two-line 396-byte prefix, final full-file SHA-256 and observed time interval.",
+        "Hash a sealed snapshot only after its terminal stop record; describe original mutable-log timing without claiming a missing SEC_UPLOAD event was captured.",
+        "Offline verification checks the snapshot, original prefix and full-file hashes; no phone or process action is performed."
+      ],
+      "steps": [
+        "Read NAT-053 provenance finding and NAT-051 originals",
+        "Create a sealed copy/supplement without altering immutable evidence",
+        "Verify hashes and publish evidence"
+      ],
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 94,
+      "depends_on": [
+        "NAT-053"
+      ],
+      "sources": [],
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-054.md"
+    },
+    {
+      "id": "NAT-055",
+      "title": "Separate measured USB observations from inferred loader execution in the NAT-049 verdict analyzer",
+      "paths": [
+        "docs/procedures/nat-049/analyze_usblog.py",
+        "docs/procedures/nat-049/test_nat049.py",
+        "docs/procedures/nat-055",
+        "artifacts/nat-055"
+      ],
+      "acceptance": [
+        "The analyzer reports USB return identity/time as observations and labels any reset/loader inference explicitly; absence of 1209:0001 plus Samsung re-enumeration never proves loader or XNU execution.",
+        "Retained NAT-046 helper replay and the 88.601/94.692/94.886/109.763 s historical SEC_UPLOAD observations exercise and document the limits of the existing 95 +/- 10 s heuristic without rewriting historical verdicts.",
+        "Existing transport success/partial/integrity/provenance behavior remains checked by appropriate host-only tests; no phone access or NAT-052 changes."
+      ],
+      "steps": [
+        "Read NAT-053 analysis/source findings",
+        "Make minimal verdict wording/evidence distinction changes",
+        "Add offline regression checks and dated evidence"
+      ],
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 94,
+      "depends_on": [
+        "NAT-053"
+      ],
+      "sources": [],
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-055.md"
+    },
+    {
+      "id": "NAT-056",
+      "title": "Make NAT-051 capture report failed reads and failed cleanup as a nonzero overall process outcome using host-only checks",
+      "paths": [
+        "docs/procedures/nat-051/capture.py",
+        "docs/procedures/nat-056",
+        "artifacts/nat-056"
+      ],
+      "acceptance": [
+        "New host-only fake-ADB tests verify a required read exit 255, cleanup failure, and post-check failure produce a nonzero overall status and explicit failed outcome while preserving each command result.",
+        "No live capture, clk_summary read, mount, reboot or USB operation is performed; historical NAT-051 evidence and captures are preserved.",
+        "Coordinate with the blocked NAT-051 reservation owner before any edit to capture.py; if it remains reserved this task waits rather than taking over."
+      ],
+      "steps": [
+        "Read the NAT-053/NAT-051 recorded status mismatch",
+        "Coordinate the narrow capture.py edit with its existing owner",
+        "Implement and verify aggregate failure reporting under fake ADB only"
+      ],
+      "status": "pending",
+      "owner": null,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 94,
+      "depends_on": [
+        "NAT-053"
+      ],
+      "sources": [],
+      "column": "waiting",
+      "reasons": [
+        "Paths reserved by: NAT-051"
+      ],
+      "card_path": "planning/tasks/NAT-056.md"
     },
     {
       "id": "ESIM-001",
@@ -8617,6 +8762,39 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/VM-004.md"
+    },
+    {
+      "id": "NAT-057",
+      "title": "Session driver and analyser for the NAT-052 image loader-diag-xnu-ckpt3-usb: the NAT-049 gates bound to the NAT-052 package hashes, and a verdict (PASS/PARTIAL/EXCEPTION/FAIL/undetermined) from the collector archive's CK notes through decode52; host-test only, nothing run on the phone",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 93,
+      "depends_on": [
+        "NAT-052",
+        "NAT-049"
+      ],
+      "paths": [
+        "docs/procedures/nat-057",
+        "artifacts/nat-057"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "A session driver for the one image loader-diag-xnu-ckpt3-usb derived from docs/procedures/nat-049/session_usblog.py: pinned RECOVERY/Image.payload hashes of the NAT-052 package, a decision-file gate (exactly one docs/decisions/*-nat052-loader-diag-xnu-ckpt3-usb-single-run-*.md naming both hashes and decision 0019), a registry gate (native permit citing that file; NAT-039, NAT-046, NAT-043 and NAT-052 done), the udev gate, collector and watcher self-tests, one-shot marker, full-hash write and readback of RECOVERY only, restore of the pinned stock image, one reboot. Host tests with a fake adb and fake collector prove: no device command before every gate is open, a failed write/readback/watcher/collector restores and never reboots, the marker prevents a second run, and mutation testing of the gates leaves no survivor without a documented equivalent.",
+        "An analyser that applies the NAT-049 archive integrity, T0, boot-id and USB-log coverage rules by importing docs/procedures/nat-049/analyze_usblog.py (read only: NAT-055 owns edits to it)  and then reads the CK notes (decode52.progress): PASS only for a live archive with one boot of this image, consecutive notes, the final stop or the announced HOLD, no drops; PARTIAL names the last stop; EXCEPTION carries esr/elr/far; FAIL and undetermined as in the decision draft of NAT-052. Tested on archives produced by the NAT-052 simulation (full, exception, short, engine-down, corrupted); a synthetic archive never yields a plain PASS.",
+        "No device access, no native run and no claim of hardware behaviour; the driver is not executed against the phone and its preflight is not run before NAT-043 is done."
+      ],
+      "steps": [
+        "Read NAT-049's driver, analyser and tests, and NAT-052's decision draft",
+        "Implement the driver and the analyser as thin layers over NAT-049's code",
+        "Host tests with fakes, mutants, evidence"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-057.md"
     },
     {
       "id": "SEN-001",
@@ -15224,160 +15402,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-11T05:46:59+00:00",
-      "action": "task.update:NAT-047",
-      "owner": "claude-nat047-20261111-usbmon-image",
-      "tasks": [
-        {
-          "id": "NAT-047",
-          "status": "in_progress",
-          "owner": "claude-nat047-20261111-usbmon-image",
-          "priority": 95,
-          "progress_note": "68 host/simulator tests green; 123-mutant run in progress (first run aborted at baseline: scratch tree lacked nat-016, fixed); README and NAT-043 decision template written; NAT-049 (session driver + archive analyzer for NAT-043) added as the follow-up. Nothing run on the phone.",
-          "next_step": "Triage mutation survivors/INVALID, add package.py + Package tests, package hashes, evidence.json, task done",
-          "last_heartbeat": "2026-11-11T05:46:59+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T08:30:38+00:00",
-      "action": "task.done:NAT-047",
-      "owner": "claude-nat047-20261111-usbmon-image",
-      "tasks": [
-        {
-          "id": "NAT-047",
-          "status": "done",
-          "owner": "claude-nat047-20261111-usbmon-image",
-          "priority": 95,
-          "progress_note": "68 host/simulator tests green; 123-mutant run in progress (first run aborted at baseline: scratch tree lacked nat-016, fixed); README and NAT-043 decision template written; NAT-049 (session driver + archive analyzer for NAT-043) added as the follow-up. Nothing run on the phone.",
-          "next_step": "Triage mutation survivors/INVALID, add package.py + Package tests, package hashes, evidence.json, task done",
-          "last_heartbeat": "2026-11-11T05:46:59+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T08:31:26+00:00",
-      "action": "task.claim:NAT-049",
-      "owner": "claude-nat049-20261111-session",
-      "tasks": [
-        {
-          "id": "NAT-049",
-          "status": "in_progress",
-          "owner": "claude-nat049-20261111-session",
-          "priority": 96,
-          "last_heartbeat": "2026-11-11T08:31:26+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T09:52:51+00:00",
-      "action": "task.done:NAT-049",
-      "owner": "claude-nat049-20261111-session",
-      "tasks": [
-        {
-          "id": "NAT-049",
-          "status": "done",
-          "owner": "claude-nat049-20261111-session",
-          "priority": 96,
-          "last_heartbeat": "2026-11-11T08:31:26+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T09:53:46+00:00",
-      "action": "task.add:NAT-050",
-      "owner": "claude-nat049-20261111-session",
-      "tasks": [
-        {
-          "id": "NAT-050",
-          "status": "pending",
-          "owner": null,
-          "priority": 97
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T09:53:54+00:00",
-      "action": "task.claim:NAT-050",
-      "owner": "claude-nat050-20261111-session",
-      "tasks": [
-        {
-          "id": "NAT-050",
-          "status": "in_progress",
-          "owner": "claude-nat050-20261111-session",
-          "priority": 97,
-          "last_heartbeat": "2026-11-11T09:53:54+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T09:54:07+00:00",
-      "action": "task.block:NAT-050",
-      "owner": "claude-nat050-20261111-session",
-      "tasks": [
-        {
-          "id": "NAT-050",
-          "status": "blocked",
-          "owner": "claude-nat050-20261111-session",
-          "priority": 97,
-          "blocked_reason": "Specific missing external fact: the host owner's root. Installing /etc/udev/rules.d/70-s24-usbmon.rules and reloading udev needs sudo, which asks for a password the agent does not have (checked 2026-11-11: 'sudo: a password is required'); using the docker group as a root bypass is not done, and 04e8/18d1 cannot stand in because the NAT-041 collector refuses them by design. The rule text, the install commands and the check (host_access.py --check) are in docs/procedures/nat-049/README.md. Resume when the owner runs the two sudo commands (or provides a non-interactive root path), then run the check and save evidence.",
-          "last_heartbeat": "2026-11-11T09:54:07+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T12:17:29+00:00",
-      "action": "task.claim:NAT-039",
-      "owner": "claude-nat039-20261111-session",
-      "tasks": [
-        {
-          "id": "NAT-039",
-          "status": "in_progress",
-          "owner": "claude-nat039-20261111-session",
-          "priority": 97,
-          "last_heartbeat": "2026-11-11T12:17:29+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T12:34:14+00:00",
-      "action": "task.add:NAT-051",
-      "owner": "claude-nat039-20261111-session",
-      "tasks": [
-        {
-          "id": "NAT-051",
-          "status": "pending",
-          "owner": null,
-          "priority": 60
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T12:36:41+00:00",
-      "action": "task.done:NAT-039",
-      "owner": "claude-nat039-20261111-session",
-      "tasks": [
-        {
-          "id": "NAT-039",
-          "status": "done",
-          "owner": "claude-nat039-20261111-session",
-          "priority": 97,
-          "last_heartbeat": "2026-11-11T12:17:29+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T12:43:36+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-nat046-20261111-session",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
       "at": "2026-11-11T12:43:44+00:00",
       "action": "task.claim:NAT-046",
       "owner": "claude-nat046-20261111-session",
@@ -15504,11 +15528,170 @@
           "priority": 94
         }
       ]
+    },
+    {
+      "at": "2026-11-11T14:18:30+00:00",
+      "action": "task.claim:NAT-052",
+      "owner": "claude-nat052-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-052",
+          "status": "in_progress",
+          "owner": "claude-nat052-20261111-session",
+          "priority": 94,
+          "last_heartbeat": "2026-11-11T14:18:30+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T14:45:18+00:00",
+      "action": "task.add:NAT-053",
+      "owner": "codex-usb-audit-20261111-r1",
+      "tasks": [
+        {
+          "id": "NAT-053",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T14:45:37+00:00",
+      "action": "task.claim:NAT-053",
+      "owner": "codex-usb-audit-20261111-r1",
+      "tasks": [
+        {
+          "id": "NAT-053",
+          "status": "in_progress",
+          "owner": "codex-usb-audit-20261111-r1",
+          "priority": 95,
+          "last_heartbeat": "2026-11-11T14:45:37+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T14:49:32+00:00",
+      "action": "task.add:NAT-054",
+      "owner": "codex-usb-audit-20261111-r1",
+      "tasks": [
+        {
+          "id": "NAT-054",
+          "status": "pending",
+          "owner": null,
+          "priority": 94
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T14:49:42+00:00",
+      "action": "task.add:NAT-055",
+      "owner": "codex-usb-audit-20261111-r1",
+      "tasks": [
+        {
+          "id": "NAT-055",
+          "status": "pending",
+          "owner": null,
+          "priority": 94
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T14:49:52+00:00",
+      "action": "task.add:NAT-056",
+      "owner": "codex-usb-audit-20261111-r1",
+      "tasks": [
+        {
+          "id": "NAT-056",
+          "status": "pending",
+          "owner": null,
+          "priority": 94
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T14:50:06+00:00",
+      "action": "task.update:NAT-053",
+      "owner": "codex-usb-audit-20261111-r1",
+      "tasks": [
+        {
+          "id": "NAT-053",
+          "status": "in_progress",
+          "owner": "codex-usb-audit-20261111-r1",
+          "priority": 95,
+          "progress_note": "Reviewed original native reports, USB events and empty smoke archives; no native EP0 receipt found. Identified mutable NAT-051 log hash, analyzer causal overstatement and capture false-success status; follow-ups registered.",
+          "next_step": "Finish provenance snapshot and repository checks; publish independent audit evidence.",
+          "last_heartbeat": "2026-11-11T14:50:06+00:00",
+          "handoff": "docs/procedures/nat-053/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T14:51:23+00:00",
+      "action": "task.done:NAT-053",
+      "owner": "codex-usb-audit-20261111-r1",
+      "tasks": [
+        {
+          "id": "NAT-053",
+          "status": "done",
+          "owner": "codex-usb-audit-20261111-r1",
+          "priority": 95,
+          "progress_note": "Reviewed original native reports, USB events and empty smoke archives; no native EP0 receipt found. Identified mutable NAT-051 log hash, analyzer causal overstatement and capture false-success status; follow-ups registered.",
+          "next_step": "Finish provenance snapshot and repository checks; publish independent audit evidence.",
+          "last_heartbeat": "2026-11-11T14:50:06+00:00",
+          "handoff": "docs/procedures/nat-053/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T14:58:13+00:00",
+      "action": "task.add:NAT-057",
+      "owner": "claude-nat052-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-057",
+          "status": "pending",
+          "owner": null,
+          "priority": 93
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T15:00:06+00:00",
+      "action": "task.update:NAT-052",
+      "owner": "claude-nat052-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-052",
+          "status": "in_progress",
+          "owner": "claude-nat052-20261111-session",
+          "priority": 94,
+          "progress_note": "Image loader-diag-xnu-ckpt3-usb built (build-003, reproducible) and packaged (package-002, RECOVERY a8161ccc...); 45 host tests pass (Decode/Patch/Build/Chain/Usb layers incl. 22 notes through 8 s no-poll gaps with the unmodified collector); mutation run 1 found a dead counter (removed) and a missing setups-delta test (added); rerun in progress; README and decision-draft written; nothing run on the phone",
+          "next_step": "finish mutation rerun, write evidence.json, make check, commit, task done; then NAT-057 (session driver + analyser for this image)",
+          "last_heartbeat": "2026-11-11T15:00:06+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T15:05:24+00:00",
+      "action": "task.done:NAT-052",
+      "owner": "claude-nat052-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-052",
+          "status": "done",
+          "owner": "claude-nat052-20261111-session",
+          "priority": 94,
+          "progress_note": "Image loader-diag-xnu-ckpt3-usb built (build-003, reproducible) and packaged (package-002, RECOVERY a8161ccc...); 45 host tests pass (Decode/Patch/Build/Chain/Usb layers incl. 22 notes through 8 s no-poll gaps with the unmodified collector); mutation run 1 found a dead counter (removed) and a missing setups-delta test (added); rerun in progress; README and decision-draft written; nothing run on the phone",
+          "next_step": "finish mutation rerun, write evidence.json, make check, commit, task done; then NAT-057 (session driver + analyser for this image)",
+          "last_heartbeat": "2026-11-11T15:00:06+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "d410481b824d13b999887a5ee1072edd60607e350daa4a3da197e4f57210f9a8",
-    "BOARD.md": "2fadb3a817b8b73f0c22e6bf2d13d157583b695b6f1376ac55d072be9b3fb65c",
+    "STATUS.md": "176ba3a0e98916e98e5d3969307f373f8a65984a5a51735c19e357398aade59a",
+    "BOARD.md": "ae840fd51ab7529b39c4515b79795ae2a5b0307cb958f082f70139a37014d745",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -15686,6 +15869,7 @@
     "planning/tasks/NAT-036.md": "cbe203575b4527767856c4aa43254e6ca8cb0108376ae896c67a12c7181cdab2",
     "planning/tasks/NAT-045.md": "e76172c29c8ba70c3e2edca2e11dd259194579cda7da6e56c5afb2ce4c454fd8",
     "planning/tasks/NAT-047.md": "0be2a8e7ab7ead36a149aa77fed39b977d1a3b1dd82d2a8e5a9814b281aa6795",
+    "planning/tasks/NAT-053.md": "6cedf998d274379aa9a95c685f38ebe03a3066762dfb28b5c831c08d809269a8",
     "planning/tasks/DRV-001.md": "eaac786b5ca6d0640d7a9bea43bf42424662189e0f9f44baaa6b6ad049f10f17",
     "planning/tasks/KRN-023.md": "a95e56ff9ef7bfa3ff55cf11a48d0bba892cc95ab504b367bc3e9d4490ecdd51",
     "planning/tasks/REV-012.md": "99bf82028acd252050bbe595c74c47d22013dfccb4d261b32b98825471ce86ea",
@@ -15693,9 +15877,13 @@
     "planning/tasks/VM-021.md": "a1a9f4da2c86949455b9066fe6a30153a1551b50493392059889f67d05de29b4",
     "planning/tasks/VM-022.md": "5e265c630c64245bf89eaeb881448f65a6334fe1ae91544194c3b2d74936dd93",
     "planning/tasks/NAT-037.md": "aba1d316a00adda3ee65e66afc2aa1d5e4212a0c045a92b2c0d5f31758bfda83",
-    "planning/tasks/NAT-052.md": "39e797478b44c952fcbd5e62de7d05fa80a9b9623001eb7e1550585f0e617590",
+    "planning/tasks/NAT-052.md": "4f5b6ab4097de6c3c00949e35ca758abd2d11a7f22e4e6c7208d8f74fe6affdd",
+    "planning/tasks/NAT-054.md": "2d81a641dd8250941abd3cf325e34eadb090c143f87bfe0edbbde0ca3adf6661",
+    "planning/tasks/NAT-055.md": "95f712901913a5039cca686b3a3b1d777937167c26178f1d76532119c594aa0e",
+    "planning/tasks/NAT-056.md": "b63eb108dff6eab09ecf6e6780d1de65936399bab295b60c043b1bedb41e9478",
     "planning/tasks/ESIM-001.md": "4ff5511bf1b91ec562d46b9fa0fdbc4dc3ffd12af187060e75777f8fcde71bb6",
     "planning/tasks/VM-004.md": "e60d0c34c4cbc0e4c68b4a74b97657a569fe4a12f25e16efc01dcaa45ccc2b15",
+    "planning/tasks/NAT-057.md": "587f06008fee31de39a7c60df2f2debca5ad0400561d1dd01d89b6f4084a475b",
     "planning/tasks/SEN-001.md": "3c54f6f748160ba9c5b4c4f27f41576ddb90a5c2f73f0243805e189091695d2d",
     "planning/tasks/ODIN-001.md": "ac0ee966c510177f407059b9a1c47e89df084a5b1c873bb7eea122547f1d4f0a",
     "planning/tasks/NAT-013.md": "b211a32160f7a1711f4cdfb1218280216622baf34bd7fdfcfdf7b259ce4b12a9",
