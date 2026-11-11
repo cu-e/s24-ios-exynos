@@ -1,0 +1,123 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-11T22:07:50+00:00",
+  "commit": "732f371ddbf96c034ae9ec405b564fe670850612",
+  "tree_state": "the files listed under sha256 are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+  "owner": "claude-nat065-20261112-ramdisk",
+  "summary": "The image loader-diag-xnu-ne1-usb: NAT-065's md0 image (same loader, kernel, ADT and probe-init ramdisk) with the tag NAT067-md0 and the boot-args e1stouch=0 e1sbattery=0 appended, so that the e1s touch and battery drivers return before they map any register (NAT-066 died in _e1s_touch_init on a physical-address GPIO read). Its derived driver and analyser, 24 host tests, 36/37 mutants killed (1 equivalent), decision 0028 drafted. Nothing ran on the phone.",
+  "evidence_category": "host-test (derivation by asserted text substitution, static reads of the real payload, the pinned e1s patches and the pinned kernel's Mach-O symbol table, the derived driver/analyser against temporary trees and the real NAT-066 kernel log). No android-userland and no native-device evidence.",
+  "acceptance": {
+    "1_build": "build.py loads NAT-065's build and replaces the image name, the nat_attempt tag and the appended boot-args; two builds (build-001, build-002) give identical hashes; the command line is NAT-065's with NAT065-md0 -> NAT067-md0 and ' e1stouch=0 e1sbattery=0' appended (227 bytes, under the 256-byte field); every input is pinned by SHA-256 (build.json nat065_pins, carried unchanged); the build refuses a command line that already has the new boot-args.",
+    "2_tests": "test_nat067.py (24 tests, 0 skipped: Build, Payload, Kernel, Package, Driver, Analyser): the loader Image differs from NAT-065's in exactly six boot-id/name immediate words, the XNU payload only in the command-line field, the ramdisk is NAT-065's; both boot-arg names are parsed by the pinned e1s patches and both drivers return at the check before mapping a register; the NAT-066 abort address lies in _e1s_touch_init in the pinned kernel's symbols; the committed driver equals derive.py's output and the derivation changes exactly seven listed lines; the gates refuse a missing/ambiguous decision file, a missing hash or 'decision 0019', native unset or citing another file, and each undone required task; the analyser reads the real NAT-066 log as other-panic and a probe exit as probe-ran-to-exit, and does not accept another image's boot.",
+    "3_mutants": "mutants.py: 37 mutants (command line, tags, pins, derivation, driver, analyser); 36 killed, 1 equivalent (D9, reason in mutants.py), none survived, none invalid.",
+    "4_decision_draft": "decision-draft.md names both hashes (RECOVERY ae946b4b..., Image.payload 9fd29fb9...), decision 0019, what the kernel may now touch beyond NAT-066 (the rest of bsd_init, load_init_program, exec of a user-mode Mach-O, scheduler and syscalls, unbounded reach), what stays unknown, the pass rule root.outcome == probe-ran-to-exit and the informative outcomes; it records no run-specific owner confirmation (standing statements of decisions 0025/0026 cited) and nothing ran on the phone; every 64-hex string in it was checked against the build/package records or the files."
+  },
+  "established": [
+    "Host-test: the image is reproducible (two builds identical) and differs from the one that ran in NAT-066 only in the six boot-id immediates of the loader and the command-line field of the XNU payload (ADT, kernel and ramdisk unchanged).",
+    "Host-test: the boot-arg names e1stouch and e1sbattery are the ones the pinned patches parse with PE_parse_boot_argn, and the early return precedes any ml_io_map or register access in both drivers.",
+    "Host-test: the NAT-066 data abort (pc 0xfffffff0074a1444) lies inside _e1s_touch_init in the pinned kernel's Mach-O symbols, and the patch reads GPIO through physical-address macros.",
+    "Host-test: the derived driver and analyser cannot be used for another image or without the decision file naming both hashes and decision 0019, and the analyser keeps the NAT-066 outcome distinct from a pass."
+  ],
+  "not_established": [
+    "That e1stouch=0 e1sbattery=0 is sufficient: other drivers or services may fault later in bsd_init (nothing after _e1s_touch_init has run on this phone).",
+    "That mockfs serves the ramdisk bytes as /sbin/launchd, that exec of the ad-hoc-signed probe is permitted with cs_enforcement_disable=1 (rd=md0 skips FSIOC_KERNEL_ROOTAUTH per NAT-064's source review), that PID 1's console text reaches loader_log.",
+    "That the timed loader_return_after=8 return works (NAT-063 and NAT-066 both returned through the panic path)."
+  ],
+  "findings": [
+    "A same-length image name keeps the loader layout: the first attempt with a longer name moved the loader (40007 differing bytes); the same-length name differs in 14 bytes (six immediate words).",
+    "The analyser wrapper must restore the patched NAT-065 entry point in a finally block, or the wrapper calls itself.",
+    "A derived value that is identical to the base's (CANARY_LEN) is invisible to a test that feeds the real pins; the derivation test also feeds different pin values (mutant D8)."
+  ],
+  "commands": [
+    {
+      "argv": [
+        "<venv>/bin/python",
+        "-W",
+        "ignore",
+        "-I",
+        "docs/procedures/nat-067/test_nat067.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "note": "Ran 24 tests, OK (artifacts/nat-067/test-final.log)"
+    },
+    {
+      "argv": [
+        "<venv>/bin/python",
+        "-W",
+        "ignore",
+        "-I",
+        "docs/procedures/nat-067/mutants.py",
+        "--json",
+        "artifacts/nat-067/mutants-001.json"
+      ],
+      "exit_code": 0,
+      "note": "36/37 killed, D9 equivalent, none survived, none invalid (artifacts/nat-067/mutants-001.log)"
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/nat-067/derive.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "note": "the committed session_nat067.py equals the derivation from NAT-065's driver"
+    },
+    {
+      "argv": [
+        "make",
+        "check"
+      ],
+      "exit_code": 0,
+      "note": "TMPDIR outside artifacts/; artifacts/nat-067/make-check.log"
+    }
+  ],
+  "artifacts": [
+    "artifacts/nat-067/test-final.log",
+    "artifacts/nat-067/mutants-001.json",
+    "artifacts/nat-067/mutants-001.log",
+    "artifacts/nat-067/make-check.log",
+    "artifacts/nat-067/build-001/build.json",
+    "artifacts/nat-067/build-002/build.json",
+    "artifacts/nat-067/package-001/package.json",
+    "artifacts/nat-067/package-001/loader-diag-xnu-ne1-usb/package.json"
+  ],
+  "images": {
+    "loader-diag-xnu-ne1-usb": {
+      "recovery_sha256": "ae946b4be577b8179ad55f8c43bc4c9ca8afc50c25c131f6823f99d98ea2552d",
+      "payload_sha256": "9fd29fb999dab902f63f04d9f01313be9171c55d539de86cf4dd20c3f18c9cda",
+      "payload_bytes": 21878704,
+      "payload_offset": 2048,
+      "loader_image_sha256": "5c11c7477bb2dd285b5081bbeb01ce97bf0cc1725d0c41b8b3cbef707a13a99e",
+      "xnu_payload_sha256": "8e333b896beb7adc9835a350b75a14858d73e379e38f9ac0f3f917e5ba1294da",
+      "ramdisk_sha256": "b3decc846877fb1de608fcd2734e9c3cb5d2d4ed9e3388bf99d303a45e4761a6",
+      "cmdline": "rd=md0 e1sufs=0 e1sufs_probe=0 ufsrw=0 ufs_write=0 sweethw=0 e1s.hold=0 nat_attempt=NAT067-md0 debug=0xc serial=3 cpus=1 keepsyms=1 -v loader_return_after=8 launchdsuffix=release cs_enforcement_disable=1 e1stouch=0 e1sbattery=0"
+    }
+  },
+  "stock_recovery_sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+  "sha256": {
+    "docs/procedures/nat-067/README.md": "d5c9e4214e6fcc43e4dce6212408140a000ce451d72af72b912aacbd714ccdaa",
+    "docs/procedures/nat-067/decision-draft.md": "655696120ba3b4069c6ae57ac946d351413377308722b70e1a600e6678100d48",
+    "docs/procedures/nat-067/build.py": "bbc882c282fd4543f46981e35c178b9e1e0d4e6bf45528f0b53c02dd19c68230",
+    "docs/procedures/nat-067/derive.py": "ada61a2c4374304fdabe1b2573541fe96af250652f14a8c1066912cf41459984",
+    "docs/procedures/nat-067/session_nat067.py": "937978d2bc10e680139e15a97eb605c2f29c0c55a8f757721d51daea352332c4",
+    "docs/procedures/nat-067/analyze_nat067.py": "a8c068c72384886f7aa99da7c9c8d4e2c4f9563536771420c65ac160801c8b3f",
+    "docs/procedures/nat-067/test_nat067.py": "3b34188ece2beecd170cbd799f7de74cd92b9530ba899181ba319277f33ffa8e",
+    "docs/procedures/nat-067/mutants.py": "ac64304fa2178b3bb3c57fdd1c95bea352a685bf9b7f7fc61d714d3738a1842b"
+  },
+  "artifact_sha256": {
+    "artifacts/nat-067/test-final.log": "c0ed8851702111f67774dba487ae5a849cf4e09551a4fcce88af598ed9475616",
+    "artifacts/nat-067/mutants-001.json": "6abbec7768984edc1eaf281d4b203cfbd23cc78b805650c071689867684b6a23",
+    "artifacts/nat-067/mutants-001.log": "8dd5c23edfcf689b95beeb686c8499a62678ae028ffde4b63a05c7ab96da0cb6",
+    "artifacts/nat-067/make-check.log": "cce8280f9a5df62f6e89ac4796faa2e13902c4171df0acaf0bf770e9ebc5cc6c",
+    "artifacts/nat-067/build-001/build.json": "529d743e3c1c3d3b13e685757a4ead888bfbf1a9e8cc18f700d4fa0b17c0b0e9",
+    "artifacts/nat-067/build-002/build.json": "434e34177f02993c1ba58ec61fcee12bd90b06d2efd03f03c23cc6e8d775857e",
+    "artifacts/nat-067/package-001/package.json": "aa547063d81205987a36f41251e3e7b9ac0be4294089533a9b4c55e34edf87e9",
+    "artifacts/nat-067/package-001/loader-diag-xnu-ne1-usb/package.json": "53c14ffd3886d23ee1d35ad7c6447ad9f88408a15e4336457becd8b86c5ca540"
+  },
+  "device_used": false,
+  "flashed": false
+}

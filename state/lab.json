@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-11T21:50:59+00:00",
+  "updated_at": "2026-11-11T22:08:02+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -14159,6 +14159,70 @@
       "evidence": "docs/procedures/nat-066/evidence.json",
       "evidence_sha256": "917d27351a3fb496c3545161b0196cefd7a1be79e77c78b5faa12ae6b03c59e5",
       "finished_at": "2026-11-11T21:50:45+00:00"
+    },
+    {
+      "id": "NAT-067",
+      "title": "After NAT-066: derive the md0 image with the e1s optional drivers that touch hardware switched off on the command line (e1stouch=0 e1sbattery=0) so that bsd_init can reach load_init_program; build, host tests, decision draft; no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [
+        "NAT-066"
+      ],
+      "paths": [
+        "docs/procedures/nat-067",
+        "artifacts/nat-067"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "A build script in docs/procedures/nat-067 derives one RECOVERY image from NAT-065's build (same loader, kernel, ADT and ramdisk) under a new image name, whose command line differs from NAT-065's only by the nat_attempt tag and the appended boot-args e1stouch=0 e1sbattery=0; two builds give identical hashes, every input is pinned by SHA-256.",
+        "Host tests (no phone): the payload differs from NAT-065's only in the command-line field (and the boot id words of the loader), the command line stays under the kernel's BOOT_LINE_LENGTH, the e1s boot-arg names are the ones the pinned patches parse (checked on the patch sources), the driver and analyser differ from NAT-065's only in the pinned image name, hashes, package and marker paths, and decision glob; the analyser still separates probe-ran-to-exit from the NAT-066 abort (real NAT-066 kernel log).",
+        "A decision draft names both image hashes, decision 0019, what the kernel may now touch beyond NAT-066 (it can proceed past the e1s driver init to load_init_program, exec a user-mode program and run the scheduler), what stays unknown, the pass/fail rule; no owner confirmation is recorded and nothing runs on the phone."
+      ],
+      "steps": [
+        "Derive the build from NAT-065 with the new name and command line",
+        "Derived driver/analyser, host tests against the real build and the NAT-066 log",
+        "Decision draft, evidence"
+      ],
+      "status": "done",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-11T21:54:27+00:00",
+      "last_heartbeat": "2026-11-11T21:54:27+00:00",
+      "updated_at": "2026-11-11T22:08:02+00:00",
+      "evidence": "docs/procedures/nat-067/evidence.json",
+      "evidence_sha256": "586e8e316b9052b60afe4971bdaa66a318974def4cf64b4d4fdfeb679905172f",
+      "finished_at": "2026-11-11T22:08:02+00:00"
+    },
+    {
+      "id": "NAT-068",
+      "title": "Native run of the NAT-067 image (decision per image): does the kernel exec the probe /sbin/launchd as PID 1 once the e1s touch and battery drivers are off, and what text reaches the host; stock restore and Android check",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 95,
+      "depends_on": [
+        "NAT-067"
+      ],
+      "paths": [
+        "docs/procedures/nat-068",
+        "artifacts/nat-068"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "One run of the single image named in its decision file under the decision 0019 run protocol (decision file committed before the run, native permit opened citing it and closed after the task is done; no retry); the NAT-067 driver is the only launcher.",
+        "The host collector archives the records of the real run; the analyser gives a verdict from the archive and the USB log; a run in which the host receives no kernel text is recorded as inconclusive or FAIL with the observations that exist.",
+        "Stock RECOVERY (96620b8b...) is restored with a full-hash readback and Android is verified unchanged; data, apps and settings untouched; evidence.json with hashes and exit codes is saved."
+      ],
+      "steps": [
+        "Write the decision file, commit, run preflight",
+        "Single run, restore stock RECOVERY, verify Android",
+        "Analyse, write evidence and update the registry"
+      ],
+      "status": "pending",
+      "owner": null
     }
   ],
   "experiments": [
@@ -59630,6 +59694,60 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-11T21:53:51+00:00",
+      "action": "task.add:NAT-067",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-067",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T21:54:09+00:00",
+      "action": "task.add:NAT-068",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-068",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T21:54:27+00:00",
+      "action": "task.claim:NAT-067",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-067",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 96,
+          "last_heartbeat": "2026-11-11T21:54:27+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:08:02+00:00",
+      "action": "task.done:NAT-067",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-067",
+          "status": "done",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 96,
+          "last_heartbeat": "2026-11-11T21:54:27+00:00"
+        }
+      ]
     }
   ]
 }

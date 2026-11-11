@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-11T21:51:15+00:00",
-  "ledger_updated_at": "2026-11-11T21:50:59+00:00",
-  "registry_sha256": "394dbbd9ccc33af4fe7f7441cbc8cc31555191acf1c7b89136c6d6643f48b8ff",
+  "generated_at": "2026-11-11T22:08:13+00:00",
+  "ledger_updated_at": "2026-11-11T22:08:02+00:00",
+  "registry_sha256": "767fe9b77bd144bdb026b9eeb1576cc3d73fd70ab89fe03be68efd0398d24504",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -50,6 +50,7 @@
     ],
     "gated": [
       "NAT-017",
+      "NAT-068",
       "NAT-003",
       "DRV-003",
       "NAT-004",
@@ -212,6 +213,7 @@
       "NAT-049",
       "NAT-064",
       "NAT-065",
+      "NAT-067",
       "USB-001",
       "RES-008",
       "KRN-002",
@@ -6708,6 +6710,44 @@
       "card_path": "planning/tasks/NAT-065.md"
     },
     {
+      "id": "NAT-067",
+      "title": "After NAT-066: derive the md0 image with the e1s optional drivers that touch hardware switched off on the command line (e1stouch=0 e1sbattery=0) so that bsd_init can reach load_init_program; build, host tests, decision draft; no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [
+        "NAT-066"
+      ],
+      "paths": [
+        "docs/procedures/nat-067",
+        "artifacts/nat-067"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "A build script in docs/procedures/nat-067 derives one RECOVERY image from NAT-065's build (same loader, kernel, ADT and ramdisk) under a new image name, whose command line differs from NAT-065's only by the nat_attempt tag and the appended boot-args e1stouch=0 e1sbattery=0; two builds give identical hashes, every input is pinned by SHA-256.",
+        "Host tests (no phone): the payload differs from NAT-065's only in the command-line field (and the boot id words of the loader), the command line stays under the kernel's BOOT_LINE_LENGTH, the e1s boot-arg names are the ones the pinned patches parse (checked on the patch sources), the driver and analyser differ from NAT-065's only in the pinned image name, hashes, package and marker paths, and decision glob; the analyser still separates probe-ran-to-exit from the NAT-066 abort (real NAT-066 kernel log).",
+        "A decision draft names both image hashes, decision 0019, what the kernel may now touch beyond NAT-066 (it can proceed past the e1s driver init to load_init_program, exec a user-mode program and run the scheduler), what stays unknown, the pass/fail rule; no owner confirmation is recorded and nothing runs on the phone."
+      ],
+      "steps": [
+        "Derive the build from NAT-065 with the new name and command line",
+        "Derived driver/analyser, host tests against the real build and the NAT-066 log",
+        "Decision draft, evidence"
+      ],
+      "status": "done",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-11T21:54:27+00:00",
+      "last_heartbeat": "2026-11-11T21:54:27+00:00",
+      "updated_at": "2026-11-11T22:08:02+00:00",
+      "evidence": "docs/procedures/nat-067/evidence.json",
+      "evidence_sha256": "586e8e316b9052b60afe4971bdaa66a318974def4cf64b4d4fdfeb679905172f",
+      "finished_at": "2026-11-11T22:08:02+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-067.md"
+    },
+    {
       "id": "USB-001",
       "title": "Implement host-buildable native USB and block-transport adapters",
       "status": "done",
@@ -8605,6 +8645,40 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-066.md"
+    },
+    {
+      "id": "NAT-068",
+      "title": "Native run of the NAT-067 image (decision per image): does the kernel exec the probe /sbin/launchd as PID 1 once the e1s touch and battery drivers are off, and what text reaches the host; stock restore and Android check",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 95,
+      "depends_on": [
+        "NAT-067"
+      ],
+      "paths": [
+        "docs/procedures/nat-068",
+        "artifacts/nat-068"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "One run of the single image named in its decision file under the decision 0019 run protocol (decision file committed before the run, native permit opened citing it and closed after the task is done; no retry); the NAT-067 driver is the only launcher.",
+        "The host collector archives the records of the real run; the analyser gives a verdict from the archive and the USB log; a run in which the host receives no kernel text is recorded as inconclusive or FAIL with the observations that exist.",
+        "Stock RECOVERY (96620b8b...) is restored with a full-hash readback and Android is verified unchanged; data, apps and settings untouched; evidence.json with hashes and exit codes is saved."
+      ],
+      "steps": [
+        "Write the decision file, commit, run preflight",
+        "Single run, restore stock RECOVERY, verify Android",
+        "Analyse, write evidence and update the registry"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-068.md"
     },
     {
       "id": "DRV-001",
@@ -15772,61 +15846,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-11T19:22:44+00:00",
-      "action": "task.add:NAT-063",
-      "owner": "claude-nat061-20261112-klog",
-      "tasks": [
-        {
-          "id": "NAT-063",
-          "status": "pending",
-          "owner": null,
-          "priority": 95
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T19:22:56+00:00",
-      "action": "task.claim:NAT-061",
-      "owner": "claude-nat061-20261112-klog",
-      "tasks": [
-        {
-          "id": "NAT-061",
-          "status": "in_progress",
-          "owner": "claude-nat061-20261112-klog",
-          "priority": 95,
-          "last_heartbeat": "2026-11-11T19:22:56+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T19:25:00+00:00",
-      "action": "task.done:NAT-061",
-      "owner": "claude-nat061-20261112-klog",
-      "tasks": [
-        {
-          "id": "NAT-061",
-          "status": "done",
-          "owner": "claude-nat061-20261112-klog",
-          "priority": 95,
-          "last_heartbeat": "2026-11-11T19:22:56+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T19:25:10+00:00",
-      "action": "task.claim:NAT-062",
-      "owner": "claude-nat061-20261112-klog",
-      "tasks": [
-        {
-          "id": "NAT-062",
-          "status": "in_progress",
-          "owner": "claude-nat061-20261112-klog",
-          "priority": 95,
-          "last_heartbeat": "2026-11-11T19:25:10+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-11T20:07:51+00:00",
       "action": "task.done:NAT-062",
       "owner": "claude-nat061-20261112-klog",
@@ -16034,11 +16053,65 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-11T21:53:51+00:00",
+      "action": "task.add:NAT-067",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-067",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T21:54:09+00:00",
+      "action": "task.add:NAT-068",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-068",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T21:54:27+00:00",
+      "action": "task.claim:NAT-067",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-067",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 96,
+          "last_heartbeat": "2026-11-11T21:54:27+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:08:02+00:00",
+      "action": "task.done:NAT-067",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-067",
+          "status": "done",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 96,
+          "last_heartbeat": "2026-11-11T21:54:27+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "bc1437a3be195e205e8bb89b7691445cc1329a298dc7a7541d7257124e91744e",
-    "BOARD.md": "b943addbb738cd9a06147b79110a1879296084a97e049606f8544eea9e80dc4d",
+    "STATUS.md": "401d975de3b034cfc572e1f649a406e8e1a48a6be3438868b02e7dc8227ebcc6",
+    "BOARD.md": "c4802f4e81c24b8809dcdd34c90202b567e07dc2992ae60a5e2f429e4c387cae",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -16185,6 +16258,7 @@
     "planning/tasks/NAT-049.md": "e878be1158abb871c957b06c6309c40c9dc28afed1ea7aae26c54c86bf5b73c0",
     "planning/tasks/NAT-064.md": "05629dd821aca5d71ad7f7f33d1520a488ec440aa2ae4dab098e4546673e0f0f",
     "planning/tasks/NAT-065.md": "e46808c49fb7888f67ca05f5f186502fe066c6fa88c596c84d333af6146ac1a0",
+    "planning/tasks/NAT-067.md": "e4ba0decee57e5e187eaf810a70aff8f9098b389c9a24e7576403c9c757da6f0",
     "planning/tasks/USB-001.md": "19299959cb09f2aa3b00ffa299face5e25f485c75dfcc2e5f1879b39d435471a",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
@@ -16226,6 +16300,7 @@
     "planning/tasks/NAT-062.md": "dfcb6c43038dbe1417ea6e9efe8f9e11fb0bc9c4f7c8c031930407d1cabfab7f",
     "planning/tasks/NAT-063.md": "a161aace0f7d5778d3e9b80ae65aff8bd0d1681d178956ce66c9089fcf1e3ae5",
     "planning/tasks/NAT-066.md": "784cc72a8e51f9468d9252d787f1d43b3d45072d72cfd8b0d45854c5ecdc95ff",
+    "planning/tasks/NAT-068.md": "eee70ffe03f38fdde9204b84f5532ac267b95da9f7371a43c377d3ac5424b3a9",
     "planning/tasks/DRV-001.md": "eaac786b5ca6d0640d7a9bea43bf42424662189e0f9f44baaa6b6ad049f10f17",
     "planning/tasks/KRN-023.md": "a95e56ff9ef7bfa3ff55cf11a48d0bba892cc95ab504b367bc3e9d4490ecdd51",
     "planning/tasks/REV-012.md": "99bf82028acd252050bbe595c74c47d22013dfccb4d261b32b98825471ce86ea",
