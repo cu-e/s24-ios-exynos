@@ -329,7 +329,9 @@ class Der(unittest.TestCase):
         self.assertFalse(parsed["key_bag"])
 
     def test_non_im4p_input_is_refused(self):
-        for blob in (b"", b"\x30\x00", der(0x30, der(0x16, b"IM4R") + der(0x16, b"a") + der(0x16, b"b") + der(0x04, b"")),
+        valid_body = der(0x16, b"IM4P") + der(0x16, b"krnl") + der(0x16, b"d") + der(0x04, b"p")
+        self.assertEqual(ins.parse_im4p(der(0x30, valid_body))["kind"], "krnl")
+        for blob in (der(0x31, valid_body), b"", b"\x30\x00", der(0x30, der(0x16, b"IM4R") + der(0x16, b"a") + der(0x16, b"b") + der(0x04, b"")),
                      der(0x04, b"IM4P"), der(0x30, der(0x16, b"IM4P") + der(0x16, b"a") + der(0x16, b"b") + der(0x05, b""))):
             with self.subTest(blob=blob[:12]):
                 with self.assertRaises(ins.InspectError):
