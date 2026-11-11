@@ -1,0 +1,2015 @@
+{
+ "schema_version": 1,
+ "kind": "source-review",
+ "task": "NAT-040",
+ "source": {
+  "id": "s24-linux",
+  "revision": "417484173abc2c4fa93e738ea82ad9f2e84911b1",
+  "access": "git show <revision>:<path> in references/s24-linux (sparse tree)"
+ },
+ "live_firmware_equivalence_qualified": false,
+ "class_legend": {
+  "V": "vendor step kept in the minimal HS-only subset",
+  "M-omit": "vendor step omitted from the minimal subset (reason in omitted)",
+  "U": "platform state or step the loader cannot know; listed in unknowns",
+  "I": "informational citation (constant, config, evidence)"
+ },
+ "steps": [
+  {
+   "id": "0.01",
+   "phase": "0 platform",
+   "class": "U",
+   "what": "pd_hsi0 power domain node: PMU window 0x12862000 (0x20 bytes), CMU 0x17800000, DTZPC SMC register 0x17810204",
+   "source": {
+    "file": "arch/arm64/boot/dts/exynos/s5e9945-pm-domains.dtsi",
+    "text": "pd_hsi0: pd_hsi0@12862000 {"
+   },
+   "registers": [
+    "PMU+0x2000 domain window (0x12862000)",
+    "cmu_id 0x17800000",
+    "need_smc 0x17810204"
+   ]
+  },
+  {
+   "id": "0.02",
+   "phase": "0 platform",
+   "class": "U",
+   "what": "DTZPC restore SMC after the domain power-on sequence (needs EL3 service; CONFIG_EXYNOS_PD_EL3=m in the vendor config)",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/pmucal/pmucal_local.c",
+    "text": "ret = exynos_pd_tz_restore(pmucal_pd_list[pd_id].need_smc);",
+    "count": 3
+   },
+   "after": "0.22"
+  },
+  {
+   "id": "0.03",
+   "phase": "0 platform",
+   "class": "I",
+   "what": "vendor config: PD EL3 restore and CMU init are built (EL3 module, CMU init built in)",
+   "source": {
+    "file": "arch/arm64/configs/e1s_defconfig",
+    "text": "CONFIG_EXYNOS_PD_EL3=m"
+   }
+  },
+  {
+   "id": "0.04",
+   "phase": "0 platform",
+   "class": "U",
+   "what": "four USB supplies: vdd075 = s5_l2, vdd12 = s4_l4, vdd18 = l7, vdd33 = l11 (regulators of the board's PMICs, switched outside the USB block)",
+   "source": {
+    "file": "arch/arm64/boot/dts/samsung/e1s/s5e9945-e1s_common.dtsi",
+    "text": "vdd075_usb-supply = <&s5_l2_reg>;",
+    "count": 2
+   }
+  },
+  {
+   "id": "0.05",
+   "phase": "0 platform",
+   "class": "U",
+   "what": "vendor LDO order when it controls them: vdd075, vdd12, vdd18, vdd33 (enable); not called from the utmi_init path",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+    "text": "ret1 = regulator_enable(phy_drd->vdd075_usb);",
+    "func": "exynos_usbdrd_ldo_control"
+   }
+  },
+  {
+   "id": "0.06",
+   "phase": "0 platform",
+   "class": "I",
+   "what": "the call to exynos_usbdrd_ldo_control in the PHY probe/ init path is commented out; it runs only via exynos_usbdrd_ldo_external_control/manual_control",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+    "text": "//exynos_usbdrd_ldo_control(phy_drd, 1);"
+   }
+  },
+  {
+   "id": "0.07",
+   "phase": "0 platform",
+   "class": "U",
+   "what": "CMU_TOP base 0x22b20000 (the only CMU_TOP base constant in the pinned tree)",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/cal_data.c",
+    "text": "#define S5E9945_CMU_TOP_BASE\t\t(0x22b20000)"
+   }
+  },
+  {
+   "id": "0.08",
+   "phase": "0 platform",
+   "class": "U",
+   "what": "CMU_TOP mux CLKCMU_HSI0_USB32DRD select at CMU_TOP+0x10c8",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/cmucal/cmucal-sfr.c",
+    "text": "SFR(CMU_TOP_CLK_CON_MUX_CLKCMU_HSI0_USB32DRD, 0x10c8, CMU_TOP)"
+   },
+   "registers": [
+    "0x22b20000+0x10c8"
+   ]
+  },
+  {
+   "id": "0.09",
+   "phase": "0 platform",
+   "class": "U",
+   "what": "CMU_TOP gate CLKCMU_HSI0_USB32DRD at CMU_TOP+0x20c4",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/cmucal/cmucal-sfr.c",
+    "text": "SFR(CMU_TOP_CLK_CON_GAT_GATE_CLKCMU_HSI0_USB32DRD, 0x20c4, CMU_TOP)"
+   },
+   "registers": [
+    "0x22b20000+0x20c4"
+   ]
+  },
+  {
+   "id": "0.10",
+   "phase": "0 platform",
+   "class": "U",
+   "what": "CMU_TOP divider CLKCMU_HSI0_USB32DRD at CMU_TOP+0x18a8",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/cmucal/cmucal-sfr.c",
+    "text": "SFR(CMU_TOP_CLK_CON_DIV_CLKCMU_HSI0_USB32DRD, 0x18a8, CMU_TOP)"
+   },
+   "registers": [
+    "0x22b20000+0x18a8"
+   ]
+  },
+  {
+   "id": "0.11",
+   "phase": "0 platform",
+   "class": "I",
+   "what": "CMU_HSI0 user mux for the TOP clock (PLL_CON0 at +0x640): the controller's sclk/ref path",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/cmucal/cmucal-sfr.c",
+    "text": "SFR(CMU_HSI0_PLL_CON0_MUX_CLKCMU_HSI0_USB32DRD_USER, 0x640, CMU_HSI0)"
+   },
+   "registers": [
+    "0x17800000+0x640"
+   ]
+  },
+  {
+   "id": "0.12",
+   "phase": "0 platform",
+   "class": "I",
+   "what": "CMU_HSI0 mux CLK_HSI0_USB32DRD (the DT's MOUT_CLK_HSI0_USB32DRD = ref and ext_xtal clock) at +0x1008",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/cmucal/cmucal-sfr.c",
+    "text": "SFR(CMU_HSI0_CLK_CON_MUX_CLK_HSI0_USB32DRD, 0x1008, CMU_HSI0)"
+   },
+   "registers": [
+    "0x17800000+0x1008"
+   ]
+  },
+  {
+   "id": "0.13",
+   "phase": "0 platform",
+   "class": "I",
+   "what": "CMU_HSI0 divider CLK_HSI0_EUSB (eUSB APB/PHY control clock) at +0x1800",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/cmucal/cmucal-sfr.c",
+    "text": "SFR(CMU_HSI0_CLK_CON_DIV_CLK_HSI0_EUSB, 0x1800, CMU_HSI0)"
+   },
+   "registers": [
+    "0x17800000+0x1800"
+   ]
+  },
+  {
+   "id": "0.14",
+   "phase": "0 platform",
+   "class": "I",
+   "what": "CMU_HSI0 gate EUSB_APB_CLK at +0x2010",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/cmucal/cmucal-sfr.c",
+    "text": "SFR(CMU_HSI0_CLK_CON_GAT_BLK_HSI0_UID_USB32DRD_IPCLKPORT_I_EUSB_APB_CLK, 0x2010, CMU_HSI0)"
+   },
+   "registers": [
+    "0x17800000+0x2010"
+   ]
+  },
+  {
+   "id": "0.15",
+   "phase": "0 platform",
+   "class": "V",
+   "what": "Q-channel LINK (the DT 'aclk' gate GATE_USB32DRD_QCH_S_LINK) at +0x305c; QCH_EN is bit 0, CLK_REQ bit 1",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/cmucal/cmucal-sfr.c",
+    "text": "SFR(CMU_HSI0_QCH_CON_USB32DRD_QCH_S_LINK, 0x305c, CMU_HSI0)"
+   },
+   "registers": [
+    "0x17800000+0x305c"
+   ]
+  },
+  {
+   "id": "0.16",
+   "phase": "0 platform",
+   "class": "V",
+   "what": "Q-channel CTRL (+0x3054), EUSBCTL (+0x3058), EUSBPHY (+0x300c), SUBCTRL (+0x3060): USBCON/eUSB control blocks",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/cmucal/cmucal-sfr.c",
+    "text": "SFR(CMU_HSI0_QCH_CON_USB32DRD_QCH_S_CTRL, 0x3054, CMU_HSI0)"
+   },
+   "registers": [
+    "0x17800000+0x3054",
+    "+0x3058 EUSBCTL",
+    "+0x300c EUSBPHY",
+    "+0x3060 SUBCTRL"
+   ]
+  },
+  {
+   "id": "0.17",
+   "phase": "0 platform",
+   "class": "I",
+   "what": "QCH bit layout: LINK QCH_EN bit 0",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/cmucal/cmucal-sfr.c",
+    "text": "SFR_ACCESS(USB32DRD_QCH_S_LINK__QCH_EN, 0, 1, CMU_HSI0_QCH_CON_USB32DRD_QCH_S_LINK)"
+   }
+  },
+  {
+   "id": "0.18",
+   "phase": "0 platform",
+   "class": "U",
+   "what": "S2MPU in front of HSI0 DMA masters (stage-2 memory protection; CMU gate exists, configuration lives in the secure/hypervisor world)",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/cmucal/cmucal-sfr.c",
+    "text": "SFR(CMU_HSI0_CLK_CON_GAT_BLK_HSI0_UID_S2MPU_S0_HSI0_IPCLKPORT_CLK, 0x2034, CMU_HSI0)"
+   }
+  },
+  {
+   "id": "0.19",
+   "phase": "0 platform",
+   "class": "V",
+   "what": "read pd_hsi0 status: PMU 0x12860000 + 0x2004, bit 0 = domain on (vendor hsi0_status sequence). Always-on PMU, safe to read",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "text": "PMUCAL_SEQ_DESC(PMUCAL_READ, \"HSI0_STATUS\", 0x12860000, 0x2004, (0x1 << 0), 0, 0, 0, 0xffffffff, 0),"
+   },
+   "registers": [
+    "PMU 0x12862004 bit0 (read)"
+   ]
+  },
+  {
+   "id": "0.20",
+   "phase": "0 platform",
+   "class": "V",
+   "what": "only if the domain is off: power on by writing HSI0_CONFIGURATION (PMU 0x12862000 bit 0 = 1)",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "text": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"HSI0_CONFIGURATION\", 0x12860000, 0x2000, (0x1 << 0), (0x1 << 0), 0, 0, 0xffffffff, 0),"
+   },
+   "registers": [
+    "PMU 0x12862000 bit0 = 1"
+   ]
+  },
+  {
+   "id": "0.21",
+   "phase": "0 platform",
+   "class": "V",
+   "what": "then wait for HSI0_STATUS bit 0 = 1 (bounded wait in the loader)",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "text": "PMUCAL_SEQ_DESC(PMUCAL_WAIT, \"HSI0_STATUS\", 0x12860000, 0x2004, (0x1 << 0), (0x1 << 0), 0, 0, 0xffffffff, 0),"
+   },
+   "after": "0.20",
+   "registers": [
+    "PMU 0x12862004 bit0 == 1"
+   ]
+  },
+  {
+   "id": "0.22",
+   "phase": "0 platform",
+   "class": "I",
+   "what": "vendor order in pmucal_local_enable: the on sequence first",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/pmucal/pmucal_local.c",
+    "text": "ret = pmucal_rae_handle_seq(pmucal_pd_list[pd_id].on,",
+    "func": "pmucal_local_enable"
+   }
+  },
+  {
+   "id": "0.23",
+   "phase": "0 platform",
+   "class": "I",
+   "what": "then (first power-on after boot) the DTZPC SMC (0.02) and the cmu_init sequence below; later power-ons restore the saved registers instead (the 'save' sequence)",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/pmucal/pmucal_local.c",
+    "text": "ret = pmucal_rae_handle_seq(pmucal_pd_list[pd_id].cmu_init,",
+    "func": "pmucal_local_enable"
+   },
+   "after": "0.02"
+  },
+  {
+   "id": "0.24",
+   "phase": "0 platform",
+   "class": "V",
+   "what": "cmu_init: CLK_HSI0_NOC mux (CMU_HSI0 + 0x1000) bit 4 = 0",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "text": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"CLK_CON_MUX_CLK_HSI0_NOC\", 0x17800000, 0x1000, (0x1 << 4), (0x0 << 4), 0, 0, 0xffffffff, 0),"
+   },
+   "registers": [
+    "0x17801000 bit4 = 0"
+   ]
+  },
+  {
+   "id": "0.25",
+   "phase": "0 platform",
+   "class": "V",
+   "what": "cmu_init: CLK_HSI0_RTCCLK mux (+0x1004) bit 4 = 0",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "text": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"CLK_CON_MUX_CLK_HSI0_RTCCLK\", 0x17800000, 0x1004, (0x1 << 4), (0x0 << 4), 0, 0, 0xffffffff, 0),"
+   },
+   "after": "0.24",
+   "registers": [
+    "0x17801004 bit4 = 0"
+   ]
+  },
+  {
+   "id": "0.26",
+   "phase": "0 platform",
+   "class": "V",
+   "what": "cmu_init: CLK_HSI0_USB32DRD mux (+0x1008, the DT's MOUT_CLK_HSI0_USB32DRD = DWC3 ref and PHY ext_xtal) bit 4 = 1",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "text": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"CLK_CON_MUX_CLK_HSI0_USB32DRD\", 0x17800000, 0x1008, (0x1 << 4), (0x1 << 4), 0, 0, 0xffffffff, 0),"
+   },
+   "after": "0.25",
+   "registers": [
+    "0x17801008 bit4 = 1"
+   ]
+  },
+  {
+   "id": "0.27",
+   "phase": "0 platform",
+   "class": "V",
+   "what": "cmu_init: CLK_HSI0_EUSB divider (+0x1800) low 5 bits = 1",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "text": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"CLK_CON_DIV_CLK_HSI0_EUSB\", 0x17800000, 0x1800, (0x1f << 0), (0x1 << 0), 0, 0, 0xffffffff, 0),"
+   },
+   "after": "0.26",
+   "registers": [
+    "0x17801800 [4:0] = 1"
+   ]
+  },
+  {
+   "id": "0.28",
+   "phase": "0 platform",
+   "class": "V",
+   "what": "cmu_init: HSI0_NOC user mux (+0x630, the DT 'bus' clock UMUX_CLKCMU_HSI0_NOC) bit 4 = 1",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "text": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"PLL_CON0_MUX_CLKCMU_HSI0_NOC_USER\", 0x17800000, 0x0630, (0x1 << 4), (0x1 << 4), 0, 0, 0xffffffff, 0),"
+   },
+   "after": "0.27",
+   "registers": [
+    "0x17800630 bit4 = 1"
+   ]
+  },
+  {
+   "id": "0.29",
+   "phase": "0 platform",
+   "class": "M-omit",
+   "what": "cmu_init: DP GTC user mux (+0x610) bit 4 = 1 (DisplayPort clock, not USB)",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "text": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"PLL_CON0_MUX_CLKCMU_HSI0_DPGTC_USER\", 0x17800000, 0x0610, (0x1 << 4), (0x1 << 4), 0, 0, 0xffffffff, 0),"
+   },
+   "after": "0.28"
+  },
+  {
+   "id": "0.30",
+   "phase": "0 platform",
+   "class": "M-omit",
+   "what": "cmu_init: DP OSC user mux (+0x620) bit 4 = 1 (DisplayPort clock, not USB)",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "text": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"PLL_CON0_MUX_CLKCMU_HSI0_DPOSC_USER\", 0x17800000, 0x0620, (0x1 << 4), (0x1 << 4), 0, 0, 0xffffffff, 0),"
+   },
+   "after": "0.29"
+  },
+  {
+   "id": "0.31",
+   "phase": "0 platform",
+   "class": "V",
+   "what": "cmu_init: HSI0_USB32DRD user mux (+0x640, the clock coming from CMU_TOP's CLKCMU_HSI0_USB32DRD) bit 4 = 1",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "text": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"PLL_CON0_MUX_CLKCMU_HSI0_USB32DRD_USER\", 0x17800000, 0x0640, (0x1 << 4), (0x1 << 4), 0, 0, 0xffffffff, 0),"
+   },
+   "after": "0.30",
+   "registers": [
+    "0x17800640 bit4 = 1"
+   ]
+  },
+  {
+   "id": "0.32",
+   "phase": "0 platform",
+   "class": "V",
+   "what": "cmu_init: HSI0 controller option 0 (+0x800) bits [31:24] = 0xf1",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "text": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"HSI0_CONTROLLER_OPTION0_CMU_CTRL\", 0x17800000, 0x0800, (0xff << 24), (0xf1 << 24), 0, 0, 0xffffffff, 0),"
+   },
+   "after": "0.31",
+   "registers": [
+    "0x17800800 [31:24] = 0xf1"
+   ]
+  },
+  {
+   "id": "0.33",
+   "phase": "0 platform",
+   "class": "V",
+   "what": "cmu_init: SYSREG_HSI0 BUS_COMPONENT_DRCG_EN (0x17820000 + 0x104) = 0xffffffff",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "text": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"BUS_COMPONENT_DRCG_EN\", 0x17820000, 0x0104, (0xffffffff << 0), (0xffffffff << 0), 0, 0, 0xffffffff, 0),"
+   },
+   "after": "0.32",
+   "registers": [
+    "0x17820104 = 0xffffffff"
+   ]
+  },
+  {
+   "id": "0.34",
+   "phase": "0 platform",
+   "class": "I",
+   "what": "power off sequence (for the record): clears CONTROLLER_OPTION0 bit 24 first, then HSI0_CONFIGURATION bit 0",
+   "source": {
+    "file": "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "text": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"HSI0_CONTROLLER_OPTION0_CMU_CTRL\", 0x17800000, 0x0800, (0x1 << 24), (0x0 << 24), 0, 0, 0xffffffff, 0),"
+   }
+  },
+  {
+   "id": "1.01",
+   "phase": "1 PHY order",
+   "class": "U",
+   "what": "repeater_enable(true) first: calls the single registered repeater driver (I2C hsi2c_34): TUSB2E11 0x3e or PTN3222 0x4f",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+    "text": "repeater_enable(true);",
+    "func": "exynos_usbdrd_utmi_init"
+   }
+  },
+  {
+   "id": "1.02",
+   "phase": "1 PHY order",
+   "class": "V",
+   "what": "release PHY isolation: PMU 0x61c bit 0 set (pmu_offset 0x61c, mask BIT(0)); TCXO buffer mask only if DT gives one (it does not)",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+    "text": "exynos_usbdrd_utmi_phy_isol(&phy_drd->phys[0], 0,",
+    "func": "exynos_usbdrd_utmi_init"
+   },
+   "after": "1.01",
+   "registers": [
+    "PMU 0x12860000+0x61c bit0 = 1"
+   ]
+  },
+  {
+   "id": "1.03",
+   "phase": "1 PHY order",
+   "class": "V",
+   "what": "enable the PHY clocks (DT clocks ext_xtal = MOUT_CLK_HSI0_USB32DRD and aclk = GATE_USB32DRD_QCH_S_LINK)",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+    "text": "ret = exynos_usbdrd_clk_enable(phy_drd, false);",
+    "func": "exynos_usbdrd_utmi_init"
+   },
+   "after": "1.02"
+  },
+  {
+   "id": "1.04",
+   "phase": "1 PHY order",
+   "class": "V",
+   "what": "USBCON link wrapper init (see 2.xx)",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+    "text": "exynos_usbcon_init_link(&phy_drd->usbphy_blkcon_info);",
+    "func": "exynos_usbdrd_utmi_init"
+   },
+   "after": "1.03"
+  },
+  {
+   "id": "1.05",
+   "phase": "1 PHY order",
+   "class": "I",
+   "what": "vendor comment: pipe3 detach 'should not be called for super-speed and doesn't seem to affect high-speed'; the call is commented out in utmi_init",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+    "text": "//exynos_usbcon_detach_pipe3_phy(&phy_drd->usbphy_blkcon_info);",
+    "func": "exynos_usbdrd_utmi_init"
+   },
+   "after": "1.04"
+  },
+  {
+   "id": "1.06",
+   "phase": "1 PHY order",
+   "class": "V",
+   "what": "eUSB2 PHY initiation (see 3.xx)",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+    "text": "phy_exynos_eusb_initiate(&phy_drd->usbphy_info);",
+    "func": "exynos_usbdrd_utmi_init"
+   },
+   "after": "1.05"
+  },
+  {
+   "id": "1.07",
+   "phase": "1 PHY order",
+   "class": "I",
+   "what": "DT: PMU offset 0x61c, DP offset 0x620, mask index 0 (BIT(0) set by the driver)",
+   "source": {
+    "file": "arch/arm64/boot/dts/exynos/s5e9945-usb.dtsi",
+    "text": "pmu_offset = <0x61c>;"
+   }
+  },
+  {
+   "id": "1.08",
+   "phase": "1 PHY order",
+   "class": "I",
+   "what": "driver turns the DT mask index into BIT()",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+    "text": "pmu_mask = (u32)BIT(pmu_mask);"
+   }
+  },
+  {
+   "id": "1.09",
+   "phase": "1 PHY order",
+   "class": "I",
+   "what": "phy_power_on and power_off bodies are compiled out (SKIP_DWC3_CORE_POWER_CONTROL is never defined): power_on is a no-op that returns 0",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+    "text": "#ifdef SKIP_DWC3_CORE_POWER_CONTROL",
+    "count": 2
+   }
+  },
+  {
+   "id": "2.01",
+   "phase": "2 USBCON",
+   "class": "I",
+   "what": "USBCON offsets: LINKCTRL 0x04",
+   "source": {
+    "file": "drivers/phy/samsung/exynos-usb-blkcon-sfr.h",
+    "text": "#define USBCON_REG_LINKCTRL\t\t0x0004"
+   }
+  },
+  {
+   "id": "2.02",
+   "phase": "2 USBCON",
+   "class": "I",
+   "what": "USBCON offsets: LINK_CLKRST 0x0c",
+   "source": {
+    "file": "drivers/phy/samsung/exynos-usb-blkcon-sfr.h",
+    "text": "#define USBCON_REG_LINK_CLKRST\t\t0x000C"
+   }
+  },
+  {
+   "id": "2.03",
+   "phase": "2 USBCON",
+   "class": "I",
+   "what": "USBCON offsets: UTMI_CTRL 0x10",
+   "source": {
+    "file": "drivers/phy/samsung/exynos-usb-blkcon-sfr.h",
+    "text": "#define USBCON_REG_UTMI_CTRL\t\t0x0010"
+   }
+  },
+  {
+   "id": "2.04",
+   "phase": "2 USBCON",
+   "class": "I",
+   "what": "USBCON offsets: HSP_MISC 0x114",
+   "source": {
+    "file": "drivers/phy/samsung/exynos-usb-blkcon-sfr.h",
+    "text": "#define USBCON_REG_HSP_MISC\t 0x0114"
+   }
+  },
+  {
+   "id": "2.10",
+   "phase": "2 USBCON",
+   "class": "V",
+   "what": "LINKCTRL: disable q-channel qact for id0, bvalid, vbusvalid, linkgate; write after 500 us",
+   "source": {
+    "file": "drivers/phy/samsung/exynos-usb-blkcon.c",
+    "text": "((USBCON_REG_LINKCTRL_p) (&reg))->b.dis_linkgate_qact = 1;",
+    "func": "exynos_usbcon_init_link"
+   },
+   "registers": [
+    "USBCON+0x04"
+   ]
+  },
+  {
+   "id": "2.11",
+   "phase": "2 USBCON",
+   "class": "V",
+   "what": "LINKCTRL second write: force_qact = 1, bus_filter_bypass 0xf, sel_sof 1",
+   "source": {
+    "file": "drivers/phy/samsung/exynos-usb-blkcon.c",
+    "text": "((USBCON_REG_LINKCTRL_p) (&reg))->b.bus_filter_bypass = 0xf;",
+    "func": "exynos_usbcon_init_link"
+   },
+   "after": "2.10",
+   "registers": [
+    "USBCON+0x04"
+   ]
+  },
+  {
+   "id": "2.12",
+   "phase": "2 USBCON",
+   "class": "V",
+   "what": "pulse link_sw_rst (assert, 10 us, deassert)",
+   "source": {
+    "file": "drivers/phy/samsung/exynos-usb-blkcon.c",
+    "text": "((USBCON_REG_LINK_CLKRST_p) (&reg))->b.link_sw_rst = 1;",
+    "func": "exynos_usbcon_init_link"
+   },
+   "after": "2.11",
+   "registers": [
+    "USBCON+0x0c"
+   ]
+  },
+  {
+   "id": "2.13",
+   "phase": "2 USBCON",
+   "class": "V",
+   "what": "UTMI_CTRL: force_bvalid and force_vbusvalid (device mode needs VBUS valid forced because the pad is not wired: is_not_vbus_pad = 1)",
+   "source": {
+    "file": "drivers/phy/samsung/exynos-usb-blkcon.c",
+    "text": "((USBCON_REG_UTMI_CTRL_p) (&reg))->b.force_vbusvalid = 1;",
+    "func": "exynos_usbcon_init_link"
+   },
+   "after": "2.12",
+   "registers": [
+    "USBCON+0x10"
+   ]
+  },
+  {
+   "id": "2.14",
+   "phase": "2 USBCON",
+   "class": "I",
+   "what": "DT: is_not_vbus_pad = 1",
+   "source": {
+    "file": "arch/arm64/boot/dts/exynos/s5e9945-usb.dtsi",
+    "text": "is_not_vbus_pad = <1>;"
+   }
+  },
+  {
+   "id": "3.01",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "hold phy_reset and utmi_port_reset with their override enables (RST_CTRL at eUSB ctrl+0x0000)",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "((EUSBPHY_REG_RST_CTRL_p) (&reg))->b.phy_reset_ovrd_en = 1;",
+    "func": "phy_exynos_eusb_initiate"
+   },
+   "registers": [
+    "EUSBCON+0x00"
+   ]
+  },
+  {
+   "id": "3.02",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "CMN_CTRL phy_cfg_rptr_mode = 1 (PHY expects an eUSB2 repeater on the pins)",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "((EUSBPHY_REG_CMN_CTRL_p) (&reg))->b.phy_cfg_rptr_mode = 1;",
+    "func": "phy_exynos_eusb_initiate"
+   },
+   "after": "3.01",
+   "registers": [
+    "EUSBCON+0x04"
+   ]
+  },
+  {
+   "id": "3.03",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "19.2 MHz reference: ref_freq_sel = 0",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "((EUSBPHY_REG_CMN_CTRL_p) (&reg))->b.ref_freq_sel = 0;",
+    "func": "phy_exynos_eusb_initiate"
+   },
+   "after": "3.02",
+   "registers": [
+    "EUSBCON+0x04"
+   ]
+  },
+  {
+   "id": "3.04",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "19.2 MHz reference: pll_fb_div = 368 (PLLCFG0 at +0x08), pll_ref_div = 0 (PLLCFG1 at +0x0c)",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "((EUSBPHY_REG_PLLCFG0_p) (&reg))->b.pll_fb_div = 368;",
+    "func": "phy_exynos_eusb_initiate"
+   },
+   "after": "3.03",
+   "registers": [
+    "EUSBCON+0x08",
+    "EUSBCON+0x0c"
+   ]
+  },
+  {
+   "id": "3.05",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "yield workaround: pll_cpbias_cntrl = 0",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "((EUSBPHY_REG_PLLCFG0_p) (&reg))->b.pll_cpbias_cntrl = 0;",
+    "func": "phy_exynos_eusb_initiate"
+   },
+   "after": "3.04",
+   "registers": [
+    "EUSBCON+0x08"
+   ]
+  },
+  {
+   "id": "3.06",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "TXTUNE fsls_vref_tune = 0 (EOP egress feature off)",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "((EUSBPHY_REG_TXTUNE_p) (&reg))->b.fsls_vref_tune = 0;",
+    "func": "phy_exynos_eusb_initiate"
+   },
+   "after": "3.05",
+   "registers": [
+    "EUSBCON+0x14"
+   ]
+  },
+  {
+   "id": "3.07",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "phy_exynos_eusb_tune (DT hs_tune_param is status = disabled, so defaults)",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "phy_exynos_eusb_tune(info);",
+    "func": "phy_exynos_eusb_initiate"
+   },
+   "after": "3.06"
+  },
+  {
+   "id": "3.08",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "TESTSE test_iddq = 0",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "((EUSBPHY_REG_TESTSE_p) (&reg))->b.test_iddq = 0;",
+    "func": "phy_exynos_eusb_initiate"
+   },
+   "after": "3.07",
+   "registers": [
+    "EUSBCON+0x20"
+   ]
+  },
+  {
+   "id": "3.09",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "phy_enable = 0 before the reset release",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "((EUSBPHY_REG_CMN_CTRL_p) (&reg))->b.phy_enable = 0;",
+    "func": "phy_exynos_eusb_initiate"
+   },
+   "after": "3.08",
+   "registers": [
+    "EUSBCON+0x04"
+   ]
+  },
+  {
+   "id": "3.10",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "delay 10 us twice (after test_iddq release; after phy_reset release for REXT calibration)",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "udelay(10);",
+    "func": "phy_exynos_eusb_initiate",
+    "count": 2
+   },
+   "after": "3.09"
+  },
+  {
+   "id": "3.11",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "release phy_reset",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "((EUSBPHY_REG_RST_CTRL_p) (&reg))->b.phy_reset = 0;",
+    "func": "phy_exynos_eusb_initiate"
+   },
+   "after": "3.09",
+   "registers": [
+    "EUSBCON+0x00"
+   ]
+  },
+  {
+   "id": "3.12",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "phy_enable = 1, then 1000 us, 28 us, 2500 us (T4/T5: PHY up, port reset sent on the eUSB lines)",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "((EUSBPHY_REG_CMN_CTRL_p) (&reg))->b.phy_enable = 1;",
+    "func": "phy_exynos_eusb_initiate"
+   },
+   "after": "3.11",
+   "registers": [
+    "EUSBCON+0x04"
+   ]
+  },
+  {
+   "id": "3.13",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "wait 1000 us",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "value = 1000;",
+    "func": "phy_exynos_eusb_initiate"
+   },
+   "after": "3.12"
+  },
+  {
+   "id": "3.14",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "wait 28 us",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "udelay(28);",
+    "func": "phy_exynos_eusb_initiate"
+   },
+   "after": "3.13"
+  },
+  {
+   "id": "3.15",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "wait 2500 us",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "udelay(2500);",
+    "func": "phy_exynos_eusb_initiate"
+   },
+   "after": "3.14"
+  },
+  {
+   "id": "3.16",
+   "phase": "3 eUSB2 PHY",
+   "class": "V",
+   "what": "release utmi_port_reset and its override",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "text": "((EUSBPHY_REG_RST_CTRL_p) (&reg))->b.utmi_port_reset_ovrd_en = 0;",
+    "func": "phy_exynos_eusb_initiate"
+   },
+   "after": "3.15",
+   "registers": [
+    "EUSBCON+0x00"
+   ]
+  },
+  {
+   "id": "3.17",
+   "phase": "3 eUSB2 PHY",
+   "class": "I",
+   "what": "eUSB ctrl offsets: RST_CTRL 0, CMN_CTRL 4, PLLCFG0 8, PLLCFG1 0xc, TXTUNE 0x14, TESTSE 0x20",
+   "source": {
+    "file": "drivers/phy/samsung/eusb-con-reg.h",
+    "text": "#define EUSBCON_REG_TESTSE\t0x0020"
+   }
+  },
+  {
+   "id": "3.18",
+   "phase": "3 eUSB2 PHY",
+   "class": "I",
+   "what": "DT: USBCON 0x178a0000, eUSB ctrl 0x178b0000, eUSB phy 0x178c0000, USBDP ctrl 0x178d0000, TCA 0x178e0000, DWC3 0x17900000",
+   "source": {
+    "file": "arch/arm64/boot/dts/exynos/s5e9945-usb.dtsi",
+    "text": "reg = <0x0 0x178A0000 0x200>,"
+   }
+  },
+  {
+   "id": "4.01",
+   "phase": "4 HS-only",
+   "class": "M-omit",
+   "what": "full vendor path for the SuperSpeed PHY: PIPE3 isolation release (PMU 0x61c as well, and 0x620 for DP), ready_to_pipe3, USBDP enable",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+    "text": "phy_exynos_snps_usbdp_phy_enable(&phy_drd->usbphy_sub_info);",
+    "func": "exynos_usbdrd_pipe3_init"
+   },
+   "registers": [
+    "USBDP ctrl 0x178d0000",
+    "TCA 0x178e0000"
+   ]
+  },
+  {
+   "id": "4.02",
+   "phase": "4 HS-only",
+   "class": "M-omit",
+   "what": "ready_to_pipe3: force_pipe_en = 0, HSP_MISC set, link_pclk_sel = 1 (link pclk from the USBDP pipe clock)",
+   "source": {
+    "file": "drivers/phy/samsung/exynos-usb-blkcon.c",
+    "text": "((USBCON_REG_LINK_CLKRST_p) (&reg))->b.link_pclk_sel = 1;",
+    "func": "exynos_usbcon_ready_to_pipe3_phy"
+   },
+   "registers": [
+    "USBCON+0x0c",
+    "USBCON+0x114"
+   ]
+  },
+  {
+   "id": "4.03",
+   "phase": "4 HS-only",
+   "class": "M-omit",
+   "what": "USBDP enable in RAM mode downloads firmware to SRAM (snps-usbdp-ram-code.h), then sets sram_ext_ld_done",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-snps-usbdp.c",
+    "text": "update_fw_to_sram(info);",
+    "func": "phy_exynos_snps_usbdp_phy_enable"
+   }
+  },
+  {
+   "id": "4.04",
+   "phase": "4 HS-only",
+   "class": "I",
+   "what": "DT: combo PHY version 0x801, RAM mode",
+   "source": {
+    "file": "arch/arm64/boot/dts/exynos/s5e9945-usb.dtsi",
+    "text": "snps_usbdp_ram_mode = <1>;"
+   }
+  },
+  {
+   "id": "4.05",
+   "phase": "4 HS-only",
+   "class": "V",
+   "what": "detach pipe3: force_pipe_en = 1, force_phystatus = 0, force_rxelecidle = 1 (LINKCTRL) and link_pclk_sel = 0 (link pclk from the suspend clock): the link then runs without a SuperSpeed PHY",
+   "source": {
+    "file": "drivers/phy/samsung/exynos-usb-blkcon.c",
+    "text": "((USBCON_REG_LINKCTRL_p) (&reg))->b.force_pipe_en = 1;",
+    "func": "exynos_usbcon_detach_pipe3_phy"
+   },
+   "registers": [
+    "USBCON+0x04",
+    "USBCON+0x0c"
+   ]
+  },
+  {
+   "id": "4.06",
+   "phase": "4 HS-only",
+   "class": "V",
+   "what": "detach pipe3 clock select",
+   "source": {
+    "file": "drivers/phy/samsung/exynos-usb-blkcon.c",
+    "text": "((USBCON_REG_LINK_CLKRST_p) (&reg))->b.link_pclk_sel = 0;",
+    "func": "exynos_usbcon_detach_pipe3_phy"
+   },
+   "after": "4.05",
+   "registers": [
+    "USBCON+0x0c"
+   ]
+  },
+  {
+   "id": "4.07",
+   "phase": "4 HS-only",
+   "class": "I",
+   "what": "vendor-evidenced HS operation with the pipe3 PHY off: usb3_phy_control(off) calls pipe3_disable (detach + USBDP disable) while the USB2 port stays in use",
+   "source": {
+    "file": "drivers/usb/dwc3/dwc3-exynos-otg.c",
+    "text": "exynos_usbdrd_pipe3_disable(dwc->usb3_generic_phy);",
+    "func": "usb3_phy_control"
+   }
+  },
+  {
+   "id": "4.08",
+   "phase": "4 HS-only",
+   "class": "I",
+   "what": "pipe3_disable body: detach then USBDP disable",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+    "text": "exynos_usbcon_detach_pipe3_phy(&phy_drd->usbphy_blkcon_info);",
+    "func": "exynos_usbdrd_pipe3_disable"
+   }
+  },
+  {
+   "id": "4.09",
+   "phase": "4 HS-only",
+   "class": "I",
+   "what": "DisplayPort 4-lane mode takes the combo PHY lanes: the xHCI glue calls dp_use_notice, which detaches pipe3, and USB continues on the USB2 port",
+   "source": {
+    "file": "drivers/usb/host/xhci-exynos.c",
+    "text": "exynos_usbdrd_dp_use_notice(lane_cnt);",
+    "func": "xhci_exynos_inform_dp_use"
+   }
+  },
+  {
+   "id": "4.10",
+   "phase": "4 HS-only",
+   "class": "I",
+   "what": "dp_use_notice body is exactly the detach call",
+   "source": {
+    "file": "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+    "text": "exynos_usbcon_detach_pipe3_phy(&phy_drd->usbphy_blkcon_info);",
+    "func": "exynos_usbdrd_dp_use_notice"
+   }
+  },
+  {
+   "id": "4.11",
+   "phase": "4 HS-only",
+   "class": "I",
+   "what": "the vendor DWC3 core always runs phy_init on the USB3 PHY too; skipping it is a deviation to be measured, not a vendor mode",
+   "source": {
+    "file": "drivers/usb/dwc3/core.c",
+    "text": "ret = phy_init(dwc->usb3_generic_phy);",
+    "func": "dwc3_core_init"
+   }
+  },
+  {
+   "id": "5.00",
+   "phase": "5 DWC3 core",
+   "class": "V",
+   "what": "first DWC3 register read: GSNPSID at DWC3 + 0xc120; the upper half is the IP id: 0x5533 (DWC3) or 0x3331 (DWC31/32), anything else is not a valid core",
+   "source": {
+    "file": "drivers/usb/dwc3/core.c",
+    "text": "reg = dwc3_readl(dwc->regs, DWC3_GSNPSID);",
+    "func": "dwc3_core_is_valid"
+   },
+   "registers": [
+    "DWC3 0x1790c120 (read)"
+   ]
+  },
+  {
+   "id": "5.00a",
+   "phase": "5 DWC3 core",
+   "class": "I",
+   "what": "GSNPSID offset and IP-id constants",
+   "source": {
+    "file": "drivers/usb/dwc3/core.h",
+    "text": "#define DWC3_GSNPSID\t\t0xc120"
+   }
+  },
+  {
+   "id": "5.01",
+   "phase": "5 DWC3 core",
+   "class": "V",
+   "what": "GUID, then dwc3_phy_setup: GUSB2PHYCFG SUSPHY cleared, ENBLSLPM per quirk (before the PHY init)",
+   "source": {
+    "file": "drivers/usb/dwc3/core.c",
+    "text": "ret = dwc3_phy_setup(dwc);",
+    "func": "dwc3_core_init"
+   }
+  },
+  {
+   "id": "5.02",
+   "phase": "5 DWC3 core",
+   "class": "V",
+   "what": "GUSB2PHYCFG: clear SUSPHY",
+   "source": {
+    "file": "drivers/usb/dwc3/core.c",
+    "text": "reg &= ~DWC3_GUSB2PHYCFG_SUSPHY;",
+    "func": "dwc3_hs_phy_setup"
+   }
+  },
+  {
+   "id": "5.03",
+   "phase": "5 DWC3 core",
+   "class": "V",
+   "what": "PHY init calls (the UTMI/eUSB sequence of phase 1-3 runs here, inside phy_init(usb2))",
+   "source": {
+    "file": "drivers/usb/dwc3/core.c",
+    "text": "ret = phy_init(dwc->usb2_generic_phy);",
+    "func": "dwc3_core_init"
+   },
+   "after": "5.01"
+  },
+  {
+   "id": "5.04",
+   "phase": "5 DWC3 core",
+   "class": "V",
+   "what": "soft reset: DCTL.CSFTRST = 1, RUN_STOP = 0, poll CSFTRST clear (1 us steps, 1000 tries; later IP versions 10 tries x 20 ms)",
+   "source": {
+    "file": "drivers/usb/dwc3/core.c",
+    "text": "ret = dwc3_core_soft_reset(dwc);",
+    "func": "dwc3_core_init"
+   },
+   "after": "5.03"
+  },
+  {
+   "id": "5.05",
+   "phase": "5 DWC3 core",
+   "class": "V",
+   "what": "soft reset body: set CSFTRST, clear RUN_STOP",
+   "source": {
+    "file": "drivers/usb/dwc3/core.c",
+    "text": "reg |= DWC3_DCTL_CSFTRST;",
+    "func": "dwc3_core_soft_reset"
+   }
+  },
+  {
+   "id": "5.06",
+   "phase": "5 DWC3 core",
+   "class": "V",
+   "what": "soft reset returns immediately if the controller role is host (current_dr_role)",
+   "source": {
+    "file": "drivers/usb/dwc3/core.c",
+    "text": "if (dwc->current_dr_role == DWC3_GCTL_PRTCAP_HOST)",
+    "func": "dwc3_core_soft_reset"
+   }
+  },
+  {
+   "id": "5.07",
+   "phase": "5 DWC3 core",
+   "class": "V",
+   "what": "global control: GCTL scale-down cleared, clock gating per PWROPT",
+   "source": {
+    "file": "drivers/usb/dwc3/core.c",
+    "text": "dwc3_core_setup_global_control(dwc);",
+    "func": "dwc3_core_init"
+   },
+   "after": "5.04"
+  },
+  {
+   "id": "5.08",
+   "phase": "5 DWC3 core",
+   "class": "V",
+   "what": "frame length adjustment (DT snps,quirk-frame-length-adjustment = 0x20 -> GFLADJ), reference clock period",
+   "source": {
+    "file": "drivers/usb/dwc3/core.c",
+    "text": "dwc3_frame_length_adjustment(dwc);",
+    "func": "dwc3_core_init"
+   },
+   "after": "5.07"
+  },
+  {
+   "id": "5.09",
+   "phase": "5 DWC3 core",
+   "class": "V",
+   "what": "reference clock period into GUCTL.REFCLKPER and GFLADJ (clock rate from the DT 'ref' clock)",
+   "source": {
+    "file": "drivers/usb/dwc3/core.c",
+    "text": "dwc3_ref_clk_period(dwc);",
+    "func": "dwc3_core_init"
+   },
+   "after": "5.08"
+  },
+  {
+   "id": "5.10",
+   "phase": "5 DWC3 core",
+   "class": "I",
+   "what": "phy_power_on for usb2 and usb3 (no-ops in the vendor PHY, see 1.09)",
+   "source": {
+    "file": "drivers/usb/dwc3/core.c",
+    "text": "ret = phy_power_on(dwc->usb2_generic_phy);",
+    "func": "dwc3_core_init"
+   },
+   "after": "5.09"
+  },
+  {
+   "id": "5.11",
+   "phase": "5 DWC3 core",
+   "class": "V",
+   "what": "event buffer: GEVNTADRLO/HI = DMA address of the buffer",
+   "source": {
+    "file": "drivers/usb/dwc3/core.c",
+    "text": "dwc3_writel(dwc->regs, DWC3_GEVNTADRLO(0),",
+    "func": "dwc3_event_buffers_setup"
+   }
+  },
+  {
+   "id": "5.12",
+   "phase": "5 DWC3 core",
+   "class": "V",
+   "what": "event buffer: GEVNTSIZ = byte length",
+   "source": {
+    "file": "drivers/usb/dwc3/core.c",
+    "text": "dwc3_writel(dwc->regs, DWC3_GEVNTSIZ(0),",
+    "func": "dwc3_event_buffers_setup"
+   },
+   "after": "5.11"
+  },
+  {
+   "id": "5.13",
+   "phase": "5 DWC3 core",
+   "class": "V",
+   "what": "event buffer: write back GEVNTCOUNT to clear stale events",
+   "source": {
+    "file": "drivers/usb/dwc3/core.c",
+    "text": "dwc3_writel(dwc->regs, DWC3_GEVNTCOUNT(0), reg);",
+    "func": "dwc3_event_buffers_setup"
+   },
+   "after": "5.12"
+  },
+  {
+   "id": "5.14",
+   "phase": "5 DWC3 core",
+   "class": "V",
+   "what": "Exynos glue GSBUSCFG0: INCR burst enable plus AXI cache types (Cacheable/Modifiable) for descriptor and data reads/writes (DWC3 >= 2.20a)",
+   "source": {
+    "file": "drivers/usb/dwc3/dwc3-exynos.c",
+    "text": "reg |= DWC3_GSBUSCFG0_INCRBRSTEN;",
+    "func": "dwc3_core_config"
+   }
+  },
+  {
+   "id": "5.15",
+   "phase": "5 DWC3 core",
+   "class": "V",
+   "what": "Exynos glue GCTL: SOFITPSYNC is set if the u2 free-clock quirk applies, else cleared; and cleared again when adj_sof_accuracy is set (DT exynos,adj-sof-accuracy)",
+   "source": {
+    "file": "drivers/usb/dwc3/dwc3-exynos.c",
+    "text": "if (exynos->config.adj_sof_accuracy)",
+    "func": "dwc3_exynos_core_init"
+   }
+  },
+  {
+   "id": "5.16",
+   "phase": "5 DWC3 core",
+   "class": "I",
+   "what": "DT controller quirks: frame length 0x20, no U1/U2 entry, no u2 freeclk exists, GFLADJ refclk LPM sel",
+   "source": {
+    "file": "arch/arm64/boot/dts/exynos/s5e9945-usb.dtsi",
+    "text": "snps,quirk-frame-length-adjustment = <0x20>;"
+   }
+  },
+  {
+   "id": "5.17",
+   "phase": "5 DWC3 core",
+   "class": "I",
+   "what": "board DT limits maximum-speed to super-speed; a HS-only monitor would set the DCFG speed itself",
+   "source": {
+    "file": "arch/arm64/boot/dts/samsung/e1s/s5e9945-e1s_common.dtsi",
+    "text": "maximum-speed = \"super-speed\";"
+   }
+  },
+  {
+   "id": "5.18",
+   "phase": "5 DWC3 core",
+   "class": "I",
+   "what": "the glue's sysreg-usb sharability (IO coherency) configuration is behind `#ifdef USB_USE_IOCOHERENCY`, a macro the pinned tree never defines (absence A2); only the unrelated config symbol CONFIG_USB_USE_IOCOHERENCY=m exists",
+   "source": {
+    "file": "drivers/usb/dwc3/dwc3-exynos.c",
+    "text": "#ifdef USB_USE_IOCOHERENCY",
+    "count": 2
+   }
+  },
+  {
+   "id": "6.01",
+   "phase": "6 device start",
+   "class": "V",
+   "what": "DCFG.NUMP from RAM2 depth; DCFG.IGNSTRMPP set",
+   "source": {
+    "file": "drivers/usb/dwc3/gadget.c",
+    "text": "reg |= DWC3_DCFG_IGNSTRMPP;",
+    "func": "__dwc3_gadget_start"
+   }
+  },
+  {
+   "id": "6.02",
+   "phase": "6 device start",
+   "class": "V",
+   "what": "DEPSTARTCFG on ep0 (resource index 0): DEPCMD at ep regs, parameter via DWC3_DEPCMD_PARAM",
+   "source": {
+    "file": "drivers/usb/dwc3/gadget.c",
+    "text": "cmd = DWC3_DEPCMD_DEPSTARTCFG;",
+    "func": "dwc3_gadget_start_config"
+   }
+  },
+  {
+   "id": "6.03",
+   "phase": "6 device start",
+   "class": "V",
+   "what": "ep0 OUT and IN enable with DEPCFG action INIT then DEPXFERCFG (1 transfer resource)",
+   "source": {
+    "file": "drivers/usb/dwc3/gadget.c",
+    "text": "ret = __dwc3_gadget_ep_enable(dep, DWC3_DEPCFG_ACTION_INIT);",
+    "func": "__dwc3_gadget_start",
+    "count": 2
+   },
+   "after": "6.01"
+  },
+  {
+   "id": "6.04",
+   "phase": "6 device start",
+   "class": "V",
+   "what": "DEPCFG for control endpoints: XFER_COMPLETE_EN, ep0 also XFER_NOT_READY_EN",
+   "source": {
+    "file": "drivers/usb/dwc3/gadget.c",
+    "text": "params.param1 = DWC3_DEPCFG_XFER_COMPLETE_EN;",
+    "func": "dwc3_gadget_set_ep_config"
+   }
+  },
+  {
+   "id": "6.05",
+   "phase": "6 device start",
+   "class": "V",
+   "what": "DEPXFERCFG: NUM_XFER_RES = 1",
+   "source": {
+    "file": "drivers/usb/dwc3/gadget.c",
+    "text": "params.param0 = DWC3_DEPXFERCFG_NUM_XFER_RES(1);",
+    "func": "dwc3_gadget_set_xfer_resource"
+   }
+  },
+  {
+   "id": "6.06",
+   "phase": "6 device start",
+   "class": "V",
+   "what": "DEPCMD issue: write DEPCMDPAR0/1/2, then DEPCMD with CMDACT and poll until it clears (5000 tries); for HS the PHY suspend/LPM bits are cleared around it",
+   "source": {
+    "file": "drivers/usb/dwc3/gadget.c",
+    "text": "dwc3_writel(dep->regs, DWC3_DEPCMDPAR0, params->param0);",
+    "func": "dwc3_send_gadget_ep_cmd"
+   }
+  },
+  {
+   "id": "6.07",
+   "phase": "6 device start",
+   "class": "V",
+   "what": "SETUP TRB armed on ep0 OUT (8 bytes, CONTROL_SETUP), then DEPSTARTXFER with the TRB address in PAR0 (high) and PAR1 (low)",
+   "source": {
+    "file": "drivers/usb/dwc3/ep0.c",
+    "text": "dwc3_ep0_prepare_one_trb(dep, dwc->ep0_trb_addr, 8,",
+    "func": "dwc3_ep0_out_start"
+   }
+  },
+  {
+   "id": "6.08",
+   "phase": "6 device start",
+   "class": "V",
+   "what": "DEPSTARTXFER parameters",
+   "source": {
+    "file": "drivers/usb/dwc3/ep0.c",
+    "text": "params.param0 = upper_32_bits(dwc->ep0_trb_addr);",
+    "func": "dwc3_ep0_start_trans"
+   }
+  },
+  {
+   "id": "6.09",
+   "phase": "6 device start",
+   "class": "V",
+   "what": "device interrupt enables: connect done, USB reset, disconnect, command complete, event overflow, error tick, wake, U3/L2 suspend",
+   "source": {
+    "file": "drivers/usb/dwc3/gadget.c",
+    "text": "DWC3_DEVTEN_CONNECTDONEEN |",
+    "func": "dwc3_gadget_enable_irq"
+   }
+  },
+  {
+   "id": "6.10",
+   "phase": "6 device start",
+   "class": "V",
+   "what": "run: DCFG speed field from the maximum speed (HS = DWC3_DCFG_HIGHSPEED), then DCTL.RUN_STOP = 1, poll DSTS.DEVCTRLHLT clear",
+   "source": {
+    "file": "drivers/usb/dwc3/gadget.c",
+    "text": "reg |= DWC3_DCFG_HIGHSPEED;",
+    "func": "__dwc3_gadget_set_speed"
+   }
+  },
+  {
+   "id": "6.11",
+   "phase": "6 device start",
+   "class": "V",
+   "what": "DCTL.RUN_STOP set (with KEEP_CONNECT cleared)",
+   "source": {
+    "file": "drivers/usb/dwc3/gadget.c",
+    "text": "reg |= DWC3_DCTL_RUN_STOP;",
+    "func": "dwc3_gadget_run_stop"
+   }
+  },
+  {
+   "id": "6.12",
+   "phase": "6 device start",
+   "class": "V",
+   "what": "after run the host's reset appears as USBRST event (clear device address in DCFG, stop active transfers) then CONNECTDONE (DSTS.CONNECTSPD): HS and FS use ep0 maxpacket 64",
+   "source": {
+    "file": "drivers/usb/dwc3/gadget.c",
+    "text": "dwc3_gadget_ep0_desc.wMaxPacketSize = cpu_to_le16(64);",
+    "func": "dwc3_gadget_conndone_interrupt",
+    "count": 2
+   }
+  },
+  {
+   "id": "6.13",
+   "phase": "6 device start",
+   "class": "V",
+   "what": "on USB reset the device address is cleared",
+   "source": {
+    "file": "drivers/usb/dwc3/gadget.c",
+    "text": "reg &= ~(DWC3_DCFG_DEVADDR_MASK);",
+    "func": "dwc3_gadget_reset_interrupt"
+   }
+  },
+  {
+   "id": "7.01",
+   "phase": "7 repeater",
+   "class": "U",
+   "what": "one global repeater slot: the last registered driver wins (TUSB2E11 or PTN3222)",
+   "source": {
+    "file": "drivers/phy/common/repeater_core.c",
+    "text": "gdata = _data;",
+    "func": "repeater_core_register"
+   }
+  },
+  {
+   "id": "7.02",
+   "phase": "7 repeater",
+   "class": "U",
+   "what": "TUSB2E11: delay 3 ms, read REV_ID, write UART_PORT1_INIT, then the DT tune list (reg/value pairs)",
+   "source": {
+    "file": "drivers/phy/ti/tusb2e11/tusb2e11_repeater.c",
+    "text": "write_data = TUSB2E11_UART_PORT1_INIT;",
+    "func": "tusb2e11_power"
+   }
+  },
+  {
+   "id": "7.03",
+   "phase": "7 repeater",
+   "class": "U",
+   "what": "TUSB2E11 tune: 0x70 = 0x5d, 0x71 = 0x2e, 0x73 = 0x86, 0x79 = 0x40, 0x76 = 0x27 (board r17 DTS; the eusb_ctrl GPIO is in a disabled #if 0 branch)",
+   "source": {
+    "file": "arch/arm64/boot/dts/samsung/e1s/e1s_eur_openx_w01_r17.dts",
+    "text": "tune_value = /bits/ 8 <0x70 0x5d>;"
+   }
+  },
+  {
+   "id": "7.04",
+   "phase": "7 repeater",
+   "class": "U",
+   "what": "PTN3222: delay 3 ms, read REV_ID, DT tune list",
+   "source": {
+    "file": "drivers/phy/nxp/ptn3222/ptn3222_repeater.c",
+    "text": "mdelay(3);",
+    "func": "ptn3222_power"
+   }
+  },
+  {
+   "id": "7.05",
+   "phase": "7 repeater",
+   "class": "U",
+   "what": "PTN3222 tune: 0x06 = 0x30, 0x07 = 0x21, 0x08 = 0x62, 0x09 = 0x02, 0x0a = 0x00, 0x17 = 0x5d (board r17 DTS)",
+   "source": {
+    "file": "arch/arm64/boot/dts/samsung/e1s/e1s_eur_openx_w01_r17.dts",
+    "text": "tune_value = /bits/ 8 <0x06 0x30>;"
+   }
+  },
+  {
+   "id": "7.06",
+   "phase": "7 repeater",
+   "class": "U",
+   "what": "I2C controller hsi2c_34 at 0x110B0000 (PERIC1 USI: usi sysreg offset 0x4c, pins gpc10 0/1)",
+   "source": {
+    "file": "arch/arm64/boot/dts/exynos/s5e9945-usi.dtsi",
+    "text": "hsi2c_34: hsi2c@110B0000 {"
+   }
+  }
+ ],
+ "minimal_subset": [
+  {
+   "step": "Domain and clocks: read pd_hsi0 status; if off, the vendor power-on (CONFIGURATION bit, status wait) and the vendor cmu_init writes (HSI0 muxes, EUSB divider, user muxes, controller option, DRCG enable); enable the LINK and control Q-channels.",
+   "ids": [
+    "0.15",
+    "0.16",
+    "0.19",
+    "0.20",
+    "0.21",
+    "0.24",
+    "0.25",
+    "0.26",
+    "0.27",
+    "0.28",
+    "0.31",
+    "0.32",
+    "0.33"
+   ]
+  },
+  {
+   "step": "Vendor wrapper order for the USB2 PHY: release isolation (PMU 0x61c bit 0), enable clocks, USBCON link init, then the eUSB2 PHY initiate.",
+   "ids": [
+    "1.02",
+    "1.03",
+    "1.04",
+    "1.06"
+   ]
+  },
+  {
+   "step": "USBCON init_link: qact disables, force_qact, link_sw_rst pulse, force bvalid and vbusvalid.",
+   "ids": [
+    "2.10",
+    "2.11",
+    "2.12",
+    "2.13"
+   ]
+  },
+  {
+   "step": "Detach pipe3 (force_pipe_en, force_phystatus, force_rxelecidle, link_pclk_sel = 0) in place of the USBDP enable.",
+   "ids": [
+    "4.05",
+    "4.06"
+   ]
+  },
+  {
+   "step": "eUSB2 PHY initiate at 19.2 MHz verbatim (resets held, rptr mode, PLL dividers, tune, iddq/enable order, 10/1000/28/2500 us waits, port reset release).",
+   "ids": [
+    "3.01",
+    "3.02",
+    "3.03",
+    "3.04",
+    "3.05",
+    "3.06",
+    "3.07",
+    "3.08",
+    "3.09",
+    "3.10",
+    "3.11",
+    "3.12",
+    "3.13",
+    "3.14",
+    "3.15",
+    "3.16"
+   ]
+  },
+  {
+   "step": "DWC3 core: GUSB2PHYCFG setup, PHY init call, soft reset, GCTL/frame length/refclk, glue GSBUSCFG0 and GCTL, event buffer.",
+   "ids": [
+    "5.00",
+    "5.01",
+    "5.02",
+    "5.03",
+    "5.04",
+    "5.05",
+    "5.06",
+    "5.07",
+    "5.08",
+    "5.09",
+    "5.11",
+    "5.12",
+    "5.13",
+    "5.14",
+    "5.15"
+   ]
+  },
+  {
+   "step": "Device start: DCFG, ep0 DEPSTARTCFG/DEPCFG/DEPXFERCFG, SETUP TRB + DEPSTARTXFER, DEVTEN, speed, DCTL.RUN_STOP; then service USBRST/CONNECTDONE.",
+   "ids": [
+    "6.01",
+    "6.02",
+    "6.03",
+    "6.04",
+    "6.05",
+    "6.06",
+    "6.07",
+    "6.08",
+    "6.09",
+    "6.10",
+    "6.11",
+    "6.12",
+    "6.13"
+   ]
+  }
+ ],
+ "omitted": [
+  {
+   "ids": [
+    "4.01",
+    "4.02",
+    "4.03"
+   ],
+   "reason": "SuperSpeed PHY (USBDP combo, RAM-mode firmware download): not needed for HS EP0; the pipe3 detach replaces it. Risk U6."
+  },
+  {
+   "ids": [
+    "1.01",
+    "7.01",
+    "7.02",
+    "7.03",
+    "7.04",
+    "7.05",
+    "7.06"
+   ],
+   "reason": "Repeater I2C tuning: the eUSB2 PHY expects a repeater on its pins but the tune registers only adjust eye quality; first attempt skips them (U4)."
+  },
+  {
+   "ids": [
+    "0.29",
+    "0.30"
+   ],
+   "reason": "DisplayPort user muxes in the vendor cmu_init: not needed for USB, left at their state."
+  },
+  {
+   "ids": [
+    "0.02"
+   ],
+   "reason": "DTZPC SMC needs an EL3 service call; not attempted unless U2 shows the domain off."
+  },
+  {
+   "ids": [
+    "5.18"
+   ],
+   "reason": "DMA coherency is handled by placing the shared structures in non-cacheable memory (U5)."
+  }
+ ],
+ "absences": [
+  {
+   "id": "A1",
+   "word": "SKIP_DWC3_CORE_POWER_CONTROL",
+   "claim": "the macro that compiles out the vendor PHY power_on/power_off bodies is only ever tested with #ifdef and never defined in the pinned tree (so power_on is a no-op, step 1.09)",
+   "expected_hits": [
+    {
+     "file": "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+     "count": 2
+    },
+    {
+     "file": "drivers/phy/samsung/phy-exynos-usbdrd.c",
+     "count": 2
+    }
+   ],
+   "hit_prefix": "#ifdef "
+  },
+  {
+   "id": "A2",
+   "word": "USB_USE_IOCOHERENCY",
+   "claim": "the IO-coherency macro is only tested with #ifdef and never defined in the pinned tree (step 5.18)",
+   "expected_hits": [
+    {
+     "file": "drivers/usb/dwc3/dwc3-exynos.c",
+     "count": 2
+    }
+   ],
+   "hit_prefix": "#ifdef "
+  }
+ ],
+ "ladder": [
+  {
+   "id": "L0",
+   "action": "identity: touch nothing, print the run id and the rung list",
+   "steps": [],
+   "reads": [],
+   "writes": [],
+   "resolves": [],
+   "stop_if": "never; this is the existing stage-marker path"
+  },
+  {
+   "id": "L1",
+   "action": "read the pd_hsi0 power state (always-on PMU): HSI0_STATUS bit 0 and the configuration word",
+   "steps": [
+    "0.19"
+   ],
+   "reads": [
+    "PMU 0x12862000",
+    "PMU 0x12862004"
+   ],
+   "writes": [],
+   "resolves": [
+    "U2"
+   ],
+   "stop_if": "read faults or hangs (the 83 s watchdog ends the run); nothing in the HSI0 block has been touched yet"
+  },
+  {
+   "id": "L2",
+   "action": "read the always-on CMU_TOP registers that feed HSI0 (mux, gate, divider of CLKCMU_HSI0_USB32DRD)",
+   "steps": [
+    "0.08",
+    "0.09",
+    "0.10"
+   ],
+   "reads": [
+    "0x22b210c8",
+    "0x22b220c4",
+    "0x22b218a8"
+   ],
+   "writes": [],
+   "resolves": [
+    "U3"
+   ],
+   "stop_if": "a faulting read ends the ladder with CMU_TOP unreadable from the loader"
+  },
+  {
+   "id": "L3",
+   "action": "domain on: read the CMU_HSI0 muxes/divider/QCH and SYSREG_HSI0 (read-only); domain off: vendor power-on, bounded wait, DTZPC SMC attempt, cmu_init writes, then the same reads",
+   "steps": [
+    "0.20",
+    "0.21",
+    "0.02",
+    "0.24",
+    "0.25",
+    "0.26",
+    "0.27",
+    "0.28",
+    "0.31",
+    "0.32",
+    "0.33",
+    "0.15",
+    "0.16"
+   ],
+   "reads": [
+    "CMU_HSI0 0x17801008",
+    "0x17801800",
+    "0x17800640",
+    "0x17800630",
+    "0x17800800",
+    "0x1780305c",
+    "0x17803054",
+    "0x17803058",
+    "0x1780300c",
+    "0x17803060",
+    "0x17820104"
+   ],
+   "writes": [
+    "only when HSI0_STATUS bit 0 read 0: PMU 0x12862000, then the vendor cmu_init writes"
+   ],
+   "resolves": [
+    "U2",
+    "U3"
+   ],
+   "stop_if": "status never reads 1 within the bounded wait: no USB register is touched"
+  },
+  {
+   "id": "L4",
+   "action": "liveness of the DWC3 block: read GSNPSID",
+   "steps": [
+    "5.00"
+   ],
+   "reads": [
+    "0x1790c120"
+   ],
+   "writes": [],
+   "resolves": [
+    "U6"
+   ],
+   "stop_if": "not 0x5533xxxx / 0x3331xxxx, or a fault/hang: the block is not alive; stop"
+  },
+  {
+   "id": "L5",
+   "action": "HS-only PHY bring-up: isolation release, USBCON init, pipe3 detach, eUSB2 PHY initiate; read back RST_CTRL/CMN_CTRL/LINKCTRL/LINK_CLKRST/UTMI_CTRL",
+   "steps": [
+    "1.02",
+    "1.03",
+    "1.04",
+    "1.06",
+    "2.10",
+    "2.11",
+    "2.12",
+    "2.13",
+    "4.05",
+    "4.06",
+    "3.01",
+    "3.02",
+    "3.03",
+    "3.04",
+    "3.05",
+    "3.06",
+    "3.07",
+    "3.08",
+    "3.09",
+    "3.10",
+    "3.11",
+    "3.12",
+    "3.13",
+    "3.14",
+    "3.15",
+    "3.16"
+   ],
+   "reads": [
+    "USBCON 0x178a0004",
+    "0x178a000c",
+    "0x178a0010",
+    "eUSB 0x178b0000",
+    "0x178b0004"
+   ],
+   "writes": [
+    "PMU 0x1286061c bit 0",
+    "USBCON, eUSB control registers per the listed steps"
+   ],
+   "resolves": [
+    "U1",
+    "U6"
+   ],
+   "stop_if": "readbacks differ from what was written (a stuck bit points to a gated clock or an unpowered rail)"
+  },
+  {
+   "id": "L6",
+   "action": "DWC3 core: GUSB2PHYCFG, soft reset, global control, frame length/refclk, GSBUSCFG0, event buffer in loader-owned non-cacheable memory",
+   "steps": [
+    "5.01",
+    "5.02",
+    "5.03",
+    "5.04",
+    "5.05",
+    "5.06",
+    "5.07",
+    "5.08",
+    "5.09",
+    "5.11",
+    "5.12",
+    "5.13",
+    "5.14",
+    "5.15"
+   ],
+   "reads": [
+    "DCTL (CSFTRST self-clears)",
+    "DSTS.DEVCTRLHLT = 1 (halted)",
+    "GEVNTCOUNT"
+   ],
+   "writes": [
+    "DWC3 global registers per the listed steps"
+   ],
+   "resolves": [
+    "U5",
+    "U6"
+   ],
+   "stop_if": "CSFTRST does not clear within the bounded poll"
+  },
+  {
+   "id": "L7",
+   "action": "device start: DCFG high speed, ep0 configuration, SETUP TRB, DEVTEN, DCTL.RUN_STOP; with a host cable attached, observe USBRST then CONNECTDONE in the event buffer",
+   "steps": [
+    "6.01",
+    "6.02",
+    "6.03",
+    "6.04",
+    "6.05",
+    "6.06",
+    "6.07",
+    "6.08",
+    "6.09",
+    "6.10",
+    "6.11",
+    "6.12",
+    "6.13"
+   ],
+   "reads": [
+    "DSTS (DEVCTRLHLT, CONNECTSPD)",
+    "event buffer words"
+   ],
+   "writes": [
+    "DWC3 device registers per the listed steps"
+   ],
+   "resolves": [
+    "U4",
+    "U5",
+    "U6"
+   ],
+   "stop_if": "no event with a host attached for a bounded time: record the DSTS and event-buffer state; do not add repeater I2C in the same run"
+  },
+  {
+   "id": "L8",
+   "action": "EP0 vendor requests of the NAT-041 monitor: GET_INFO returns the magic and the boot id the host did not choose",
+   "steps": [],
+   "reads": [],
+   "writes": [],
+   "resolves": [
+    "U8"
+   ],
+   "stop_if": "host does not see the device: the run ends by the watchdog and the screen markers of L1-L7 carry the result"
+  }
+ ],
+ "unknowns": [
+  {
+   "id": "U1",
+   "steps": [
+    "0.04",
+    "0.05"
+   ],
+   "what": "State of the four USB supplies (vdd075 s5_l2, vdd12 s4_l4, vdd18 l7, vdd33 l11) when the loader runs on the RECOVERY path.",
+   "matters": "A PHY started with an unpowered rail never leaves reset; there is no register in the USB block that says so.",
+   "resolve": [
+    {
+     "task": "NAT-039",
+     "how": "Read /sys/class/regulator/*/{name,state,microvolt} on Android (read-only) to see whether the rails are on in normal Android; Android is not the loader state."
+    },
+    {
+     "task": "NAT-043",
+     "how": "Loader reports PHY/PLL ready bits after the init; a not-ready PHY with correct clocks points to the rails."
+    }
+   ]
+  },
+  {
+   "id": "U2",
+   "steps": [
+    "0.01",
+    "0.02",
+    "0.19"
+   ],
+   "what": "pd_hsi0 state at loader entry and whether it needs the DTZPC SMC (need_smc 0x17810204) after power-on.",
+   "matters": "Reading any CMU_HSI0/USB register of a powered-off domain can stall the bus; the PMU domain window 0x12862000 sits in the always-on PMU.",
+   "resolve": [
+    {
+     "task": "NAT-043",
+     "how": "First loader step reads only PMU 0x12862000..0x1286201c and logs it; USB registers are touched only if the status says on. Writing the domain-on sequence is a later, separate step."
+    }
+   ]
+  },
+  {
+   "id": "U3",
+   "steps": [
+    "0.07",
+    "0.08",
+    "0.09",
+    "0.10"
+   ],
+   "what": "CMU_TOP state of the CLKCMU_HSI0_USB32DRD mux/gate/divider (0x22b20000 + 0x10c8/0x20c4/0x18a8) and the CMU_HSI0 muxes and QCH gates.",
+   "matters": "DWC3 and the PHY clock inputs come from these; the vendor driver relies on cal-if having programmed them.",
+   "resolve": [
+    {
+     "task": "NAT-039",
+     "how": "Read the same registers on Android through the vendor clock debug interface or a root read (inventory, read-only) to learn the running values."
+    },
+    {
+     "task": "NAT-043",
+     "how": "Loader reads the CMU_HSI0 registers once the domain is on and logs them before changing anything."
+    }
+   ]
+  },
+  {
+   "id": "U4",
+   "steps": [
+    "1.01",
+    "7.01",
+    "7.02",
+    "7.03",
+    "7.04",
+    "7.05",
+    "7.06"
+   ],
+   "what": "Which repeater is fitted on this board revision and whether the default (no I2C) configuration passes HS traffic.",
+   "matters": "Both TUSB2E11 (0x3e) and PTN3222 (0x4f) nodes are enabled in every board DTS and share one global slot; the DT tune values only tune signal quality.",
+   "resolve": [
+    {
+     "task": "NAT-039",
+     "how": "Check the Android I2C bus hsi2c_34 (which address answers, and the driver bound) read-only."
+    },
+    {
+     "task": "NAT-043",
+     "how": "First attempt runs without repeater I2C; if no enumeration, a later image adds a polled hsi2c_34 master (needs the USI sysreg and pins)."
+    }
+   ]
+  },
+  {
+   "id": "U5",
+   "steps": [
+    "0.18"
+   ],
+   "what": "DMA path: S2MPU_S0_HSI0 and the PMMU in front of the DWC3 DMA, cache coherency of the loader's MMU state, 36-bit address width.",
+   "matters": "DWC3 needs DRAM for the event buffer, TRBs and data; a blocked or incoherent DMA hangs or corrupts silently.",
+   "resolve": [
+    {
+     "task": "NAT-041",
+     "how": "Place event buffer, TRBs and rings in one non-cacheable, loader-owned page below 4 GiB or with explicit cache maintenance; host-model it."
+    },
+    {
+     "task": "NAT-043",
+     "how": "Loader checks the event buffer receives the first event (USBRST/CONNECTDONE) and the SETUP TRB completes; a missing event with a connected host means DMA or coherency."
+    }
+   ]
+  },
+  {
+   "id": "U6",
+   "steps": [
+    "4.11"
+   ],
+   "what": "Whether the USB link works with the pipe3 PHY detached when the USB3 PHY was never initialised (cold), and the reference clock rate (19.2 MHz used by the vendor PHY constants; DWC3 'ref' clock rate).",
+   "matters": "The vendor core inits both PHYs always; the detach function is evidenced only for DP/USB3-off states that began with the PHY on.",
+   "resolve": [
+    {
+     "task": "NAT-043",
+     "how": "Run the minimal subset and read GSNPSID, GHWPARAMS, GUSB2PHYCFG, DSTS, then DCTL.RUN_STOP and the events; record exactly which step first fails."
+    }
+   ]
+  },
+  {
+   "id": "U7",
+   "steps": [],
+   "what": "PHY port selection (DT phy,gpio_phy_port = gpc7 1) and the used_phy_port the USBDP/TCA uses; irrelevant to the eUSB2 path if the combo PHY stays off.",
+   "matters": "Only the Type-C orientation for the SuperSpeed lanes.",
+   "resolve": [
+    {
+     "task": "NAT-039",
+     "how": "Read the GPIO state on Android (read-only) for the record; not needed for the HS-only subset."
+    }
+   ]
+  },
+  {
+   "id": "U8",
+   "steps": [],
+   "what": "How the run ends: the host monitor reads until the watchdog fires; a reboot reason into Download Mode is NAT-042.",
+   "matters": "An unattended run must end without the owner's hands.",
+   "resolve": [
+    {
+     "task": "NAT-042",
+     "how": "Reboot-reason protocol (exynos-reboot node at PMU 0x3c00 / 0x190) specified and host-modelled."
+    }
+   ]
+  }
+ ]
+}

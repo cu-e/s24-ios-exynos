@@ -1,12 +1,17 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-11T00:17:04+00:00",
-  "ledger_updated_at": "2026-11-11T00:14:34+00:00",
-  "registry_sha256": "12dccf0147306af619831aecd251bca5125dc1ab3dd40bb82c46e9ed7a97bc23",
+  "generated_at": "2026-11-11T01:12:18+00:00",
+  "ledger_updated_at": "2026-11-11T01:11:25+00:00",
+  "registry_sha256": "7cd9629e8ddf72c120de2a8a9aa80febd84a59ad92cd2c4b623cc87db98a3dc6",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
-    "ready": [],
-    "in_progress": [],
+    "ready": [
+      "NAT-039",
+      "NAT-042"
+    ],
+    "in_progress": [
+      "NAT-041"
+    ],
     "blocked": [
       "INT-002",
       "INT-003",
@@ -44,6 +49,7 @@
     ],
     "gated": [
       "NAT-017",
+      "NAT-043",
       "NAT-003",
       "DRV-003",
       "NAT-004",
@@ -171,6 +177,7 @@
       "NAT-032",
       "NAT-033",
       "NAT-034",
+      "NAT-038",
       "KRN-006",
       "KRN-014",
       "KRN-015",
@@ -184,6 +191,7 @@
       "NAT-024",
       "NAT-025",
       "NAT-026",
+      "NAT-040",
       "KRN-005",
       "REV-004",
       "REV-011",
@@ -5157,6 +5165,45 @@
       "card_path": "planning/tasks/NAT-034.md"
     },
     {
+      "id": "NAT-038",
+      "title": "Early-log channel without manual filming: assess reuse of existing Exynos/DWC3 USB code and choose the minimal text-and-exception transport (a return to the bootloader is not a log channel)",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 98,
+      "depends_on": [
+        "NAT-037"
+      ],
+      "paths": [
+        "docs/procedures/nat-038",
+        "artifacts/nat-038"
+      ],
+      "sources": [
+        "s24-linux",
+        "s24-port"
+      ],
+      "acceptance": [
+        "An inventory of every existing USB/DWC3/Exynos-PHY code base reachable from this repository (pinned vendor kernel s24-linux and s24-bsp-reference: dwc3 core and Exynos wrappers, eUSB2/USBDP PHY drivers and repeaters; the upstream s24-port sweet DWC3 patches 0072-0077/0081; the USB-001 read-only block adapter and its S24 source profile; the NAT-016 host archive; S-Boot Download Mode) with pin, licence, what is reusable as is, as a port, as a reference or not at all, and why; nothing is copied without attribution.",
+        "A comparison of candidate channels (EP0 control-pull gadget, bulk-IN push gadget, CDC-ACM, ECM/UDP as in the sweet patches, S-Boot USB reuse, RAM retention read from Android, UFS write into the RECOVERY tail, UART) against: independent of a return to the bootloader, what must be brought up, risk to Android and data, number of unknowns, code size. A channel that needs the phone to return to S-Boot/Android before the host can read anything is recorded as retention, not as the log channel.",
+        "The chosen minimal channel with its wire format for text and for an exception frame, the host collector design (reuse of NAT-016 archive.py), the verification criterion (the host, unattended, receives and stores a message from a real native run with a boot ID that cannot come from a previous run) and the child tasks that resolve each remaining unknown, created with dependencies."
+      ],
+      "steps": [
+        "Inventory the existing code and its licences",
+        "Compare channels",
+        "Choose the channel and wire format; create the child tasks"
+      ],
+      "status": "done",
+      "owner": "claude-nat038-20261111-usblog",
+      "started_at": "2026-11-11T00:21:47+00:00",
+      "last_heartbeat": "2026-11-11T00:21:47+00:00",
+      "updated_at": "2026-11-11T00:25:51+00:00",
+      "evidence": "docs/procedures/nat-038/evidence.json",
+      "evidence_sha256": "8f08407c7eded334d34e9618425c70ad55dc41af709b1d24b0c7f90e38f37bf8",
+      "finished_at": "2026-11-11T00:25:51+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-038.md"
+    },
+    {
       "id": "KRN-006",
       "title": "Harden experimental XNU compiler AST and whole-kernel expression coverage",
       "priority": 97,
@@ -5733,6 +5780,113 @@
       "card_path": "planning/tasks/NAT-026.md"
     },
     {
+      "id": "NAT-039",
+      "title": "Inventory the live USB stack of the running Android read-only (dmesg lines, iomem, clock and regulator summaries, DWC3/PHY debugfs register dump, UDC and repeater state) to cross-check the vendor-source bring-up plan",
+      "scope": "android-readonly",
+      "evidence_kind": "android-userland",
+      "priority": 97,
+      "depends_on": [
+        "NAT-038"
+      ],
+      "paths": [
+        "docs/procedures/nat-039",
+        "artifacts/nat-039"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "Sanitized dated captures (no serials, IMEIs, MACs, accounts) from the connected S24 through ADB/su read-only commands: dwc3/usbdrd/eusb/usbdp/repeater lines of dmesg, /proc/iomem entries for 0x17820000-0x1790ffff, the HSI0 clock and USB regulator lines of the clk and regulator summaries, /sys/class/udc and the controller debugfs regdump when it exists. No write to any node, no settings change.",
+        "Each captured value is compared with the vendor-source expectation of NAT-040 (controller version, speed, clock rates, PHY version, repeater address) and every mismatch is listed; the controller base 0x17900000 and the HSI0 sysreg base are confirmed or corrected.",
+        "If the phone is not attached the task states that as its only blocker; it is resumed when `adb devices` lists the S24."
+      ],
+      "steps": [
+        "Wait for the device and capture read-only",
+        "Sanitize and compare with the source plan"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-039.md"
+    },
+    {
+      "id": "NAT-040",
+      "title": "Extract the S5E9945 USB2 device-mode bring-up from the pinned vendor kernel as an ordered register-operation plan (HSI0 power, CMU clocks, SYSREG, eUSB2 PHY, repeater, USBDP combo PHY dependency, DWC3 core) and decide what high-speed EP0 needs",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 97,
+      "depends_on": [
+        "NAT-038"
+      ],
+      "paths": [
+        "docs/procedures/nat-040",
+        "artifacts/nat-040"
+      ],
+      "sources": [
+        "s24-linux",
+        "s24-bsp-reference"
+      ],
+      "acceptance": [
+        "An ordered plan, each step with its source file and line at the pinned commit, of what the vendor driver writes between a cold HSI0 and a DWC3 device that runs: power domain (PMU offsets 0x61c/0x620), CMU_HSI0 clocks, SYSREG_HSI0 USB configuration, eUSB2 PHY init, repeater I2C writes (TUSB2E11 0x3e / PTN3222 0x4f), USBDP combo PHY (version 0x801, RAM mode) including whether high-speed device mode needs its pipe clock or RAM code, DWC3 soft reset, GCTL/GUSB2PHYCFG/GUSB3PIPECTL/DCFG, event buffer, endpoint 0 commands, run/stop.",
+        "The minimal subset for a high-speed-only EP0 device is separated from the full vendor sequence with the reason for each omitted step; every step the loader cannot know (regulators, PMIC, GPIO, repeater selection) is listed as an unknown with the measurement that resolves it (NAT-039 on Android, NAT-043 in the loader).",
+        "Register addresses are computed from the pinned DT and driver sources and cross-checked against the USB-001 profile; nothing is claimed about the live firmware."
+      ],
+      "steps": [
+        "Read dwc3-exynos, phy-exynos-usbdrd-eusb, phy-exynos-eusb, snps-usbdp and repeater drivers",
+        "Write the ordered plan and the minimal subset",
+        "List unknowns with their resolving measurement"
+      ],
+      "status": "done",
+      "owner": "claude-nat040-20261111-usbplan",
+      "started_at": "2026-11-11T00:26:22+00:00",
+      "last_heartbeat": "2026-11-11T00:26:22+00:00",
+      "updated_at": "2026-11-11T01:11:25+00:00",
+      "evidence": "docs/procedures/nat-040/evidence.json",
+      "evidence_sha256": "2a86e4d19e64bb6239ca44a7da91cdb84d2feca2a69cbbe824abeaa774eee274",
+      "finished_at": "2026-11-11T01:11:25+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-040.md"
+    },
+    {
+      "id": "NAT-041",
+      "title": "EP0-only polled DWC3 device engine for the loader (enumeration, vendor control-IN log ring and exception frame, memory peek), its framing, a DWC3 device model and the unattended host collector feeding the NAT-016 archive; host tests only",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "NAT-038"
+      ],
+      "paths": [
+        "docs/procedures/nat-041",
+        "artifacts/nat-041"
+      ],
+      "sources": [
+        "s24-port",
+        "s24-linux"
+      ],
+      "acceptance": [
+        "A freestanding C engine (no interrupts, no allocation, one event ring, one TRB per control stage) that enumerates as a vendor-specific full device (pid.codes test VID/PID, no class), answers GET_DESCRIPTOR/SET_CONFIGURATION and vendor control-IN requests that read a RAM log ring by offset and a fixed exception frame, plus a reserved boot-ID field; DWC3 register and TRB layouts follow the pinned vendor core and databook usage in Linux, with attribution (GPL-2.0, per-file licence kept).",
+        "A host model of the DWC3 device side (register file, event buffer, TRB processing for control transfers) and a USB host stub drive the engine in host tests: descriptor reads, partial reads, ring wrap/overrun markers, an exception frame, requests arriving while the engine is in its hold loop, malformed SETUP packets; mutation checks show the tests fail on seeded defects.",
+        "tools/s24_logd.py (or equivalent under docs/procedures/nat-041) waits unattended for the device, pulls the ring with libusb control transfers, converts it to NAT-016 JSON frames, writes them through archive.py with a host nonce that makes the boot ID unique, and survives device disappearance; tested against a fake libusb layer and the model. No phone is touched."
+      ],
+      "steps": [
+        "Write the engine and frame format",
+        "Write the DWC3 model and engine tests with mutation checks",
+        "Write the collector and its tests"
+      ],
+      "status": "in_progress",
+      "owner": "claude-nat041-20261111-ep0engine",
+      "started_at": "2026-11-11T00:58:03+00:00",
+      "last_heartbeat": "2026-11-11T00:58:03+00:00",
+      "updated_at": "2026-11-11T00:58:03+00:00",
+      "column": "in_progress",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-041.md",
+      "report_health": "recent"
+    },
+    {
       "id": "KRN-005",
       "title": "Qualify real selected XNU allocator type compiler metadata",
       "priority": 96,
@@ -6158,6 +6312,77 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-035.md"
+    },
+    {
+      "id": "NAT-042",
+      "title": "Autonomous return from the loader: reset into Download Mode (or normal boot) through the documented Samsung reboot-reason protocol so a native run ends without the owner holding keys, from the pinned vendor reboot code",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 96,
+      "depends_on": [
+        "NAT-038"
+      ],
+      "paths": [
+        "docs/procedures/nat-042",
+        "artifacts/nat-042"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "From the pinned vendor kernel (exynos-reboot, sec_reboot, PMU INFORM/SYSIP_DAT definitions and the Samsung reboot-reason constants) the register, offset and value the Android kernel writes before a warm reset for reboot-to-download and reboot-to-system are listed with file and line, and compared with what the existing loader already writes (PMU INFORM 0xbc, one-shot recovery-reason clearing, watchdog 83 s).",
+        "A host-testable patch design for the loader (and its decision text) makes the end of a bounded run reset into Download Mode so NAT-013 can restore stock unattended; the unknown of whether S-Boot honours the reason while its persistent REBOOT_MODE=4 parameter is set is stated and gets its own measurement in the native run.",
+        "No S-Boot disassembly or static review is used (classifier stop recorded in NAT-009); only the open vendor kernel source and the already measured behaviour of runs 001-009."
+      ],
+      "steps": [
+        "Read the vendor reboot code",
+        "Compare with the loader and runs 001-009",
+        "Write the patch design and test plan"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-042.md"
+    },
+    {
+      "id": "NAT-043",
+      "title": "First native USB log channel run: read-only HSI0/USB state probe, bring-up, enumeration and EP0 log pull received and archived by the host collector without a camera; stock restore",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 96,
+      "depends_on": [
+        "NAT-039",
+        "NAT-040",
+        "NAT-041",
+        "NAT-042"
+      ],
+      "paths": [
+        "docs/procedures/nat-043",
+        "artifacts/nat-043"
+      ],
+      "sources": [
+        "s24-linux",
+        "s24-port"
+      ],
+      "acceptance": [
+        "A decision file written under decision 0019 before the run names the exact image hashes (RECOVERY only, stock restore pinned), the MMIO the image touches (HSI0 PMU/CMU/SYSREG, DWC3, PHY, repeater I2C) and what is not granted; the run follows the run protocol of 0019.",
+        "The host collector, started before the reboot and unattended, receives and archives at least one message of the real run (a boot ID that is new for this run, stage markers, and an exception frame in a controlled-fault variant); the archive manifest and the lsusb/USB descriptor capture are saved.",
+        "Stock RECOVERY is restored and Android is verified; a run in which the host receives nothing is recorded as inconclusive with the display/Download Mode observations that exist, never as success."
+      ],
+      "steps": [
+        "Build and host-test the image from NAT-040/041/042",
+        "Run under the 0019 protocol with the collector",
+        "Restore stock and verify Android; record the outcome"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native",
+        "Dependencies: NAT-039, NAT-041, NAT-042"
+      ],
+      "card_path": "planning/tasks/NAT-043.md"
     },
     {
       "id": "USB-001",
@@ -13537,7 +13762,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-041"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -13576,7 +13801,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-041"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -14551,6 +14776,19 @@
         "worktree": "worktrees/krn-026-20261105"
       }
     ],
+    "claude-nat041-20261111-ep0engine": [
+      {
+        "id": "NAT-041",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-11T00:58:03+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": null,
+        "worktree": null
+      }
+    ],
     "codex-e1s-dependencies-20261105-k": [
       {
         "id": "KRN-003",
@@ -14592,167 +14830,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-10T20:51:14+00:00",
-      "action": "task.done:NAT-032",
-      "owner": "claude-nat032-20261111-cpath",
-      "tasks": [
-        {
-          "id": "NAT-032",
-          "status": "done",
-          "owner": "claude-nat032-20261111-cpath",
-          "priority": 98,
-          "progress_note": "README + evidence written; 15 host tests pass; resume at asm checkpoint 5 designed (MMU-off branch to site5-28, no trampoline) and differential-checked in the NAT-030 model; static reach after cp5 listed; unknowns and NAT-033 proposal recorded; nothing built or run on the phone",
-          "next_step": "complete with docs/procedures/nat-032/evidence.json; NAT-033 and decision 0017 are separate",
-          "last_heartbeat": "2026-11-10T20:50:38+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T20:57:36+00:00",
-      "action": "task.add:NAT-033",
-      "owner": "claude-nat033-20261111-simd",
-      "tasks": [
-        {
-          "id": "NAT-033",
-          "status": "pending",
-          "owner": null,
-          "priority": 98
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T20:57:45+00:00",
-      "action": "task.claim:NAT-033",
-      "owner": "claude-nat033-20261111-simd",
-      "tasks": [
-        {
-          "id": "NAT-033",
-          "status": "in_progress",
-          "owner": "claude-nat033-20261111-simd",
-          "priority": 98,
-          "last_heartbeat": "2026-11-10T20:57:45+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T21:07:54+00:00",
-      "action": "task.update:NAT-033",
-      "owner": "claude-nat033-20261111-simd",
-      "tasks": [
-        {
-          "id": "NAT-033",
-          "status": "in_progress",
-          "owner": "claude-nat033-20261111-simd",
-          "priority": 98,
-          "progress_note": "Host-test done: SIMD forms (16) cross-checked vs Unicorn on 86 words; model reaches C checkpoint 11 from entry and from the NAT-032 resume with identical state; README/evidence written",
-          "next_step": "task done after make status; then NAT-034 proposal needs its own task and decision 0017",
-          "last_heartbeat": "2026-11-10T21:07:54+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T21:08:10+00:00",
-      "action": "task.done:NAT-033",
-      "owner": "claude-nat033-20261111-simd",
-      "tasks": [
-        {
-          "id": "NAT-033",
-          "status": "done",
-          "owner": "claude-nat033-20261111-simd",
-          "priority": 98,
-          "progress_note": "Host-test done: SIMD forms (16) cross-checked vs Unicorn on 86 words; model reaches C checkpoint 11 from entry and from the NAT-032 resume with identical state; README/evidence written",
-          "next_step": "task done after make status; then NAT-034 proposal needs its own task and decision 0017",
-          "last_heartbeat": "2026-11-10T21:07:54+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T21:13:17+00:00",
-      "action": "task.add:NAT-034",
-      "owner": "claude-nat034-20261111-ckpt2",
-      "tasks": [
-        {
-          "id": "NAT-034",
-          "status": "pending",
-          "owner": null,
-          "priority": 98
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T21:13:26+00:00",
-      "action": "task.claim:NAT-034",
-      "owner": "claude-nat034-20261111-ckpt2",
-      "tasks": [
-        {
-          "id": "NAT-034",
-          "status": "in_progress",
-          "owner": "claude-nat034-20261111-ckpt2",
-          "priority": 98,
-          "last_heartbeat": "2026-11-10T21:13:26+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T21:40:13+00:00",
-      "action": "task.update:NAT-034",
-      "owner": "claude-nat034-20261111-ckpt2",
-      "tasks": [
-        {
-          "id": "NAT-034",
-          "status": "in_progress",
-          "owner": "claude-nat034-20261111-ckpt2",
-          "priority": 98,
-          "progress_note": "Host work finished: image loader-diag-xnu-ckpt2 built (reproducible x3), 31 tests + 26 mutants pass, driver gated; owner accepted one native run in decision 0017. No phone action taken.",
-          "next_step": "Native run under decision 0017 as a separate task (NAT-035), then NAT-013 restore + Android check",
-          "last_heartbeat": "2026-11-10T21:40:13+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T21:40:23+00:00",
-      "action": "task.done:NAT-034",
-      "owner": "claude-nat034-20261111-ckpt2",
-      "tasks": [
-        {
-          "id": "NAT-034",
-          "status": "done",
-          "owner": "claude-nat034-20261111-ckpt2",
-          "priority": 98,
-          "progress_note": "Host work finished: image loader-diag-xnu-ckpt2 built (reproducible x3), 31 tests + 26 mutants pass, driver gated; owner accepted one native run in decision 0017. No phone action taken.",
-          "next_step": "Native run under decision 0017 as a separate task (NAT-035), then NAT-013 restore + Android check",
-          "last_heartbeat": "2026-11-10T21:40:13+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T21:56:13+00:00",
-      "action": "task.add:NAT-035",
-      "owner": "claude-nat035-20261111-cresume",
-      "tasks": [
-        {
-          "id": "NAT-035",
-          "status": "pending",
-          "owner": null,
-          "priority": 96
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T21:56:28+00:00",
-      "action": "task.claim:NAT-035",
-      "owner": "claude-nat035-20261111-cresume",
-      "tasks": [
-        {
-          "id": "NAT-035",
-          "status": "in_progress",
-          "owner": "claude-nat035-20261111-cresume",
-          "priority": 96,
-          "last_heartbeat": "2026-11-10T21:56:28+00:00"
-        }
-      ]
-    },
     {
       "at": "2026-11-10T22:34:56+00:00",
       "action": "task.add:NAT-036",
@@ -14882,11 +14959,159 @@
           "last_heartbeat": "2026-11-11T00:05:35+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-11T00:20:46+00:00",
+      "action": "task.add:NAT-038",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-038",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:20:57+00:00",
+      "action": "task.add:NAT-039",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-039",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:21:09+00:00",
+      "action": "task.add:NAT-040",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-040",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:21:18+00:00",
+      "action": "task.add:NAT-041",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-041",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:21:28+00:00",
+      "action": "task.add:NAT-042",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-042",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:21:38+00:00",
+      "action": "task.add:NAT-043",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-043",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:21:47+00:00",
+      "action": "task.claim:NAT-038",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-038",
+          "status": "in_progress",
+          "owner": "claude-nat038-20261111-usblog",
+          "priority": 98,
+          "last_heartbeat": "2026-11-11T00:21:47+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:25:51+00:00",
+      "action": "task.done:NAT-038",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-038",
+          "status": "done",
+          "owner": "claude-nat038-20261111-usblog",
+          "priority": 98,
+          "last_heartbeat": "2026-11-11T00:21:47+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:26:22+00:00",
+      "action": "task.claim:NAT-040",
+      "owner": "claude-nat040-20261111-usbplan",
+      "tasks": [
+        {
+          "id": "NAT-040",
+          "status": "in_progress",
+          "owner": "claude-nat040-20261111-usbplan",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T00:26:22+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:58:03+00:00",
+      "action": "task.claim:NAT-041",
+      "owner": "claude-nat041-20261111-ep0engine",
+      "tasks": [
+        {
+          "id": "NAT-041",
+          "status": "in_progress",
+          "owner": "claude-nat041-20261111-ep0engine",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T00:58:03+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T01:11:25+00:00",
+      "action": "task.done:NAT-040",
+      "owner": "claude-nat040-20261111-usbplan",
+      "tasks": [
+        {
+          "id": "NAT-040",
+          "status": "done",
+          "owner": "claude-nat040-20261111-usbplan",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T00:26:22+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "0cd816ba114430cbeb394c338473cadd9fbba57fc8531c9dcca8cf96f0731d1f",
-    "BOARD.md": "821085916049b1c37650346f0d15dda2d1ed220b814e95a64b356686f97d305d",
+    "STATUS.md": "37003b20da9babd6e75b97fdb20ad1ae1ed0b593d6ce360f279f458198c021f3",
+    "BOARD.md": "00e7089eda2c852e303cdde68095be4a617c7a9e8ce5c2b9a670e34e4b8147a1",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -14996,6 +15221,7 @@
     "planning/tasks/NAT-032.md": "00815c12e6fbf296ddd41b0d1475e35e18eb211254e4ed0d6e2f9bdb2fb7632e",
     "planning/tasks/NAT-033.md": "d0bb7900f60f042c1041f2227a5a090ae752976884f42f383976903cc78d1479",
     "planning/tasks/NAT-034.md": "9ab0d17a38a617dce664c8033f055e4f2e34f7edf42223b7e233312e4d0c807f",
+    "planning/tasks/NAT-038.md": "9c3907d3c8652343cf3a424867a47b7426bc6b37e9f1a3517c8131eac1c75f1b",
     "planning/tasks/KRN-006.md": "17787b37e62d7cb230c248532450af8108a583aca6b6e955cee29637f8e981a1",
     "planning/tasks/KRN-014.md": "373bcf06587ce0b77bbacdfa023baa6c9b888953717dafa33267ff49a60ea753",
     "planning/tasks/KRN-015.md": "28783b6b5313987331209c84d30f10ddeab6ee7f41bf6bf1d963790545460926",
@@ -15010,6 +15236,9 @@
     "planning/tasks/NAT-024.md": "10bde102216adebc51d1565be90df70cb2b646c764ea667e6a0472b93d210e22",
     "planning/tasks/NAT-025.md": "e958e1e30a03146a49c07bbeece17b3c5da7421daba0c5f051311ea83bc44afc",
     "planning/tasks/NAT-026.md": "acb70ae2478f94833a09a44e0f65181af1036223d44b1a27d294bda689f10a12",
+    "planning/tasks/NAT-039.md": "6a1bfefe71953e3827bf0a66d6b2894292d0021661fe3e57fc90775452364dca",
+    "planning/tasks/NAT-040.md": "d2a424f16c6665ca3836862097f55524ec7f0bbf53241b330e89e57648563897",
+    "planning/tasks/NAT-041.md": "a30947c245a2eb998b41f6e73f6d5d7ad5c6906c2f9868e8c306280b6bdb4c7b",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/REV-004.md": "8c7b273845208b121b2d6d1f05038b627689d3f97b766a765a91cdf23082bdb1",
     "planning/tasks/REV-011.md": "5ea2857fe5caca100edd1f7f53667f0b2a27de4b576000ecd14e2a55f1e7d51b",
@@ -15020,6 +15249,8 @@
     "planning/tasks/NAT-016.md": "350b04ef3ef0a663ab06e442d39f7032f39f6cbf1d31690badef2340a5448d37",
     "planning/tasks/NAT-018.md": "99ed6f18b19d229ab18943b58d41e54e62b137950c525a3c408119e479c590cb",
     "planning/tasks/NAT-035.md": "df46e6b02ce966e9cdef479dca3452834653951b87029bc481cb00ffcaa27113",
+    "planning/tasks/NAT-042.md": "2781f82e574fff33578f845d2c1b7e3c4cf129ccdc73b7a34099f33ef85f1507",
+    "planning/tasks/NAT-043.md": "c23bd54ae5bf9e2352b609152551f8bd1510bab46c8e46bfa6b2ad1b88e2b6b5",
     "planning/tasks/USB-001.md": "19299959cb09f2aa3b00ffa299face5e25f485c75dfcc2e5f1879b39d435471a",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
@@ -15182,8 +15413,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "1fb347d1ef1be0ab49f2b0eac0ebdd8f04ee5b772f0f0c5dcec4ecc691b0a7b1",
-    "planning/tasks/DRV-003.md": "2441ae0f13e91e3d4e322df4cb71f0d4eae6fb2f54017dcb2234af8b4aaae598",
+    "planning/tasks/NAT-003.md": "8d0c0ed2444e25c30f9f622aea012a297e0ed745b2cf9ce7dc36d38950cb4407",
+    "planning/tasks/DRV-003.md": "a52687480eef7c479e520995721a8edc622bb786258e0f480b9512deb4ffaf50",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",

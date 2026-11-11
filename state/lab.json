@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-11T00:14:34+00:00",
+  "updated_at": "2026-11-11T01:11:25+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -13033,6 +13033,201 @@
       "evidence": "docs/procedures/nat-037/evidence.json",
       "evidence_sha256": "07d84b2c673bea8db5b945de9bafe45c136163118a33fdbe4602deef95bcc799",
       "finished_at": "2026-11-11T00:14:34+00:00"
+    },
+    {
+      "id": "NAT-038",
+      "title": "Early-log channel without manual filming: assess reuse of existing Exynos/DWC3 USB code and choose the minimal text-and-exception transport (a return to the bootloader is not a log channel)",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 98,
+      "depends_on": [
+        "NAT-037"
+      ],
+      "paths": [
+        "docs/procedures/nat-038",
+        "artifacts/nat-038"
+      ],
+      "sources": [
+        "s24-linux",
+        "s24-port"
+      ],
+      "acceptance": [
+        "An inventory of every existing USB/DWC3/Exynos-PHY code base reachable from this repository (pinned vendor kernel s24-linux and s24-bsp-reference: dwc3 core and Exynos wrappers, eUSB2/USBDP PHY drivers and repeaters; the upstream s24-port sweet DWC3 patches 0072-0077/0081; the USB-001 read-only block adapter and its S24 source profile; the NAT-016 host archive; S-Boot Download Mode) with pin, licence, what is reusable as is, as a port, as a reference or not at all, and why; nothing is copied without attribution.",
+        "A comparison of candidate channels (EP0 control-pull gadget, bulk-IN push gadget, CDC-ACM, ECM/UDP as in the sweet patches, S-Boot USB reuse, RAM retention read from Android, UFS write into the RECOVERY tail, UART) against: independent of a return to the bootloader, what must be brought up, risk to Android and data, number of unknowns, code size. A channel that needs the phone to return to S-Boot/Android before the host can read anything is recorded as retention, not as the log channel.",
+        "The chosen minimal channel with its wire format for text and for an exception frame, the host collector design (reuse of NAT-016 archive.py), the verification criterion (the host, unattended, receives and stores a message from a real native run with a boot ID that cannot come from a previous run) and the child tasks that resolve each remaining unknown, created with dependencies."
+      ],
+      "steps": [
+        "Inventory the existing code and its licences",
+        "Compare channels",
+        "Choose the channel and wire format; create the child tasks"
+      ],
+      "status": "done",
+      "owner": "claude-nat038-20261111-usblog",
+      "started_at": "2026-11-11T00:21:47+00:00",
+      "last_heartbeat": "2026-11-11T00:21:47+00:00",
+      "updated_at": "2026-11-11T00:25:51+00:00",
+      "evidence": "docs/procedures/nat-038/evidence.json",
+      "evidence_sha256": "8f08407c7eded334d34e9618425c70ad55dc41af709b1d24b0c7f90e38f37bf8",
+      "finished_at": "2026-11-11T00:25:51+00:00"
+    },
+    {
+      "id": "NAT-039",
+      "title": "Inventory the live USB stack of the running Android read-only (dmesg lines, iomem, clock and regulator summaries, DWC3/PHY debugfs register dump, UDC and repeater state) to cross-check the vendor-source bring-up plan",
+      "scope": "android-readonly",
+      "evidence_kind": "android-userland",
+      "priority": 97,
+      "depends_on": [
+        "NAT-038"
+      ],
+      "paths": [
+        "docs/procedures/nat-039",
+        "artifacts/nat-039"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "Sanitized dated captures (no serials, IMEIs, MACs, accounts) from the connected S24 through ADB/su read-only commands: dwc3/usbdrd/eusb/usbdp/repeater lines of dmesg, /proc/iomem entries for 0x17820000-0x1790ffff, the HSI0 clock and USB regulator lines of the clk and regulator summaries, /sys/class/udc and the controller debugfs regdump when it exists. No write to any node, no settings change.",
+        "Each captured value is compared with the vendor-source expectation of NAT-040 (controller version, speed, clock rates, PHY version, repeater address) and every mismatch is listed; the controller base 0x17900000 and the HSI0 sysreg base are confirmed or corrected.",
+        "If the phone is not attached the task states that as its only blocker; it is resumed when `adb devices` lists the S24."
+      ],
+      "steps": [
+        "Wait for the device and capture read-only",
+        "Sanitize and compare with the source plan"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "NAT-040",
+      "title": "Extract the S5E9945 USB2 device-mode bring-up from the pinned vendor kernel as an ordered register-operation plan (HSI0 power, CMU clocks, SYSREG, eUSB2 PHY, repeater, USBDP combo PHY dependency, DWC3 core) and decide what high-speed EP0 needs",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 97,
+      "depends_on": [
+        "NAT-038"
+      ],
+      "paths": [
+        "docs/procedures/nat-040",
+        "artifacts/nat-040"
+      ],
+      "sources": [
+        "s24-linux",
+        "s24-bsp-reference"
+      ],
+      "acceptance": [
+        "An ordered plan, each step with its source file and line at the pinned commit, of what the vendor driver writes between a cold HSI0 and a DWC3 device that runs: power domain (PMU offsets 0x61c/0x620), CMU_HSI0 clocks, SYSREG_HSI0 USB configuration, eUSB2 PHY init, repeater I2C writes (TUSB2E11 0x3e / PTN3222 0x4f), USBDP combo PHY (version 0x801, RAM mode) including whether high-speed device mode needs its pipe clock or RAM code, DWC3 soft reset, GCTL/GUSB2PHYCFG/GUSB3PIPECTL/DCFG, event buffer, endpoint 0 commands, run/stop.",
+        "The minimal subset for a high-speed-only EP0 device is separated from the full vendor sequence with the reason for each omitted step; every step the loader cannot know (regulators, PMIC, GPIO, repeater selection) is listed as an unknown with the measurement that resolves it (NAT-039 on Android, NAT-043 in the loader).",
+        "Register addresses are computed from the pinned DT and driver sources and cross-checked against the USB-001 profile; nothing is claimed about the live firmware."
+      ],
+      "steps": [
+        "Read dwc3-exynos, phy-exynos-usbdrd-eusb, phy-exynos-eusb, snps-usbdp and repeater drivers",
+        "Write the ordered plan and the minimal subset",
+        "List unknowns with their resolving measurement"
+      ],
+      "status": "done",
+      "owner": "claude-nat040-20261111-usbplan",
+      "started_at": "2026-11-11T00:26:22+00:00",
+      "last_heartbeat": "2026-11-11T00:26:22+00:00",
+      "updated_at": "2026-11-11T01:11:25+00:00",
+      "evidence": "docs/procedures/nat-040/evidence.json",
+      "evidence_sha256": "2a86e4d19e64bb6239ca44a7da91cdb84d2feca2a69cbbe824abeaa774eee274",
+      "finished_at": "2026-11-11T01:11:25+00:00"
+    },
+    {
+      "id": "NAT-041",
+      "title": "EP0-only polled DWC3 device engine for the loader (enumeration, vendor control-IN log ring and exception frame, memory peek), its framing, a DWC3 device model and the unattended host collector feeding the NAT-016 archive; host tests only",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "NAT-038"
+      ],
+      "paths": [
+        "docs/procedures/nat-041",
+        "artifacts/nat-041"
+      ],
+      "sources": [
+        "s24-port",
+        "s24-linux"
+      ],
+      "acceptance": [
+        "A freestanding C engine (no interrupts, no allocation, one event ring, one TRB per control stage) that enumerates as a vendor-specific full device (pid.codes test VID/PID, no class), answers GET_DESCRIPTOR/SET_CONFIGURATION and vendor control-IN requests that read a RAM log ring by offset and a fixed exception frame, plus a reserved boot-ID field; DWC3 register and TRB layouts follow the pinned vendor core and databook usage in Linux, with attribution (GPL-2.0, per-file licence kept).",
+        "A host model of the DWC3 device side (register file, event buffer, TRB processing for control transfers) and a USB host stub drive the engine in host tests: descriptor reads, partial reads, ring wrap/overrun markers, an exception frame, requests arriving while the engine is in its hold loop, malformed SETUP packets; mutation checks show the tests fail on seeded defects.",
+        "tools/s24_logd.py (or equivalent under docs/procedures/nat-041) waits unattended for the device, pulls the ring with libusb control transfers, converts it to NAT-016 JSON frames, writes them through archive.py with a host nonce that makes the boot ID unique, and survives device disappearance; tested against a fake libusb layer and the model. No phone is touched."
+      ],
+      "steps": [
+        "Write the engine and frame format",
+        "Write the DWC3 model and engine tests with mutation checks",
+        "Write the collector and its tests"
+      ],
+      "status": "in_progress",
+      "owner": "claude-nat041-20261111-ep0engine",
+      "started_at": "2026-11-11T00:58:03+00:00",
+      "last_heartbeat": "2026-11-11T00:58:03+00:00",
+      "updated_at": "2026-11-11T00:58:03+00:00"
+    },
+    {
+      "id": "NAT-042",
+      "title": "Autonomous return from the loader: reset into Download Mode (or normal boot) through the documented Samsung reboot-reason protocol so a native run ends without the owner holding keys, from the pinned vendor reboot code",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 96,
+      "depends_on": [
+        "NAT-038"
+      ],
+      "paths": [
+        "docs/procedures/nat-042",
+        "artifacts/nat-042"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "From the pinned vendor kernel (exynos-reboot, sec_reboot, PMU INFORM/SYSIP_DAT definitions and the Samsung reboot-reason constants) the register, offset and value the Android kernel writes before a warm reset for reboot-to-download and reboot-to-system are listed with file and line, and compared with what the existing loader already writes (PMU INFORM 0xbc, one-shot recovery-reason clearing, watchdog 83 s).",
+        "A host-testable patch design for the loader (and its decision text) makes the end of a bounded run reset into Download Mode so NAT-013 can restore stock unattended; the unknown of whether S-Boot honours the reason while its persistent REBOOT_MODE=4 parameter is set is stated and gets its own measurement in the native run.",
+        "No S-Boot disassembly or static review is used (classifier stop recorded in NAT-009); only the open vendor kernel source and the already measured behaviour of runs 001-009."
+      ],
+      "steps": [
+        "Read the vendor reboot code",
+        "Compare with the loader and runs 001-009",
+        "Write the patch design and test plan"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "NAT-043",
+      "title": "First native USB log channel run: read-only HSI0/USB state probe, bring-up, enumeration and EP0 log pull received and archived by the host collector without a camera; stock restore",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 96,
+      "depends_on": [
+        "NAT-039",
+        "NAT-040",
+        "NAT-041",
+        "NAT-042"
+      ],
+      "paths": [
+        "docs/procedures/nat-043",
+        "artifacts/nat-043"
+      ],
+      "sources": [
+        "s24-linux",
+        "s24-port"
+      ],
+      "acceptance": [
+        "A decision file written under decision 0019 before the run names the exact image hashes (RECOVERY only, stock restore pinned), the MMIO the image touches (HSI0 PMU/CMU/SYSREG, DWC3, PHY, repeater I2C) and what is not granted; the run follows the run protocol of 0019.",
+        "The host collector, started before the reboot and unattended, receives and archives at least one message of the real run (a boot ID that is new for this run, stage markers, and an exception frame in a controlled-fault variant); the archive manifest and the lsusb/USB descriptor capture are saved.",
+        "Stock RECOVERY is restored and Android is verified; a run in which the host receives nothing is recorded as inconclusive with the display/Download Mode observations that exist, never as success."
+      ],
+      "steps": [
+        "Build and host-test the image from NAT-040/041/042",
+        "Run under the 0019 protocol with the collector",
+        "Restore stock and verify Android; record the outcome"
+      ],
+      "status": "pending",
+      "owner": null
     }
   ],
   "experiments": [
@@ -57076,6 +57271,154 @@
           "owner": "claude-nat036-20261111-cstub",
           "priority": 94,
           "last_heartbeat": "2026-11-11T00:05:35+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:20:46+00:00",
+      "action": "task.add:NAT-038",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-038",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:20:57+00:00",
+      "action": "task.add:NAT-039",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-039",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:21:09+00:00",
+      "action": "task.add:NAT-040",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-040",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:21:18+00:00",
+      "action": "task.add:NAT-041",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-041",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:21:28+00:00",
+      "action": "task.add:NAT-042",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-042",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:21:38+00:00",
+      "action": "task.add:NAT-043",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-043",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:21:47+00:00",
+      "action": "task.claim:NAT-038",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-038",
+          "status": "in_progress",
+          "owner": "claude-nat038-20261111-usblog",
+          "priority": 98,
+          "last_heartbeat": "2026-11-11T00:21:47+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:25:51+00:00",
+      "action": "task.done:NAT-038",
+      "owner": "claude-nat038-20261111-usblog",
+      "tasks": [
+        {
+          "id": "NAT-038",
+          "status": "done",
+          "owner": "claude-nat038-20261111-usblog",
+          "priority": 98,
+          "last_heartbeat": "2026-11-11T00:21:47+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:26:22+00:00",
+      "action": "task.claim:NAT-040",
+      "owner": "claude-nat040-20261111-usbplan",
+      "tasks": [
+        {
+          "id": "NAT-040",
+          "status": "in_progress",
+          "owner": "claude-nat040-20261111-usbplan",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T00:26:22+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:58:03+00:00",
+      "action": "task.claim:NAT-041",
+      "owner": "claude-nat041-20261111-ep0engine",
+      "tasks": [
+        {
+          "id": "NAT-041",
+          "status": "in_progress",
+          "owner": "claude-nat041-20261111-ep0engine",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T00:58:03+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T01:11:25+00:00",
+      "action": "task.done:NAT-040",
+      "owner": "claude-nat040-20261111-usbplan",
+      "tasks": [
+        {
+          "id": "NAT-040",
+          "status": "done",
+          "owner": "claude-nat040-20261111-usbplan",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T00:26:22+00:00"
         }
       ]
     }

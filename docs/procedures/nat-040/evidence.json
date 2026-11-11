@@ -1,0 +1,68 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T06:20:00+00:00",
+ "commit": "e7f1a4d2e8b4581e67f61112e668b5daaca6e80d",
+ "tree_state": "README, plan.json, verify_plan.py, test_nat040.py and this record are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat040-20261111-usbplan",
+ "summary": "Ordered register-operation plan for HS-only USB2 device-mode bring-up of the S5E9945 DWC3 from the pinned vendor kernel (s24-linux 417484173abc2c4fa93e738ea82ad9f2e84911b1): every step cites a literal line at the pin, the order is checked against the source, the minimal subset and a nine-rung ladder are derived, eight unknowns each name the measurement that resolves them. No phone used.",
+ "acceptance": {
+  "1_ordered_plan": "plan.json lists every step (class V/M-omit/U/I) with its register effect and a literal citation; verify_plan.py resolved 120/120 citations at the pin with exact occurrence counts and source order (artifacts/nat-040/verify-001/resolved.json).",
+  "2_minimal_subset": "The minimal subset is exactly the set of V steps (checked: every V step belongs to a ladder rung, every M-omit has a stated reason); the USBDP combo-PHY enable is replaced by the vendor's own pipe3-detach routine, recorded as an inference (U6), not as a fact.",
+  "3_absence_claims": "Two whole-tree word searches at the pin (A1 SKIP_DWC3_CORE_POWER_CONTROL, A2 USB_USE_IOCOHERENCY: only #ifdef uses, never defined) hold.",
+  "4_unknowns_and_ladder": "U1-U8 each name the resolving measurement and task (NAT-039/041/042/043); ladder L0-L8 starts with read-only rungs and no rung touches an HSI0 register before the pd_hsi0 state has been read.",
+  "5_verifier_strength": "test_nat040.py (39 tests: hermetic cases on a scratch git repo, the real plan, deliberate plan corruptions each rejected for the intended reason with exact error counts) passes; a 23-mutant run against verify_plan.py (artifacts/nat-040/mutation/run.py) killed 23 of 23."
+ },
+ "established": [
+  "Each cited line exists verbatim at the pinned vendor revision, in the stated order, and the addresses, suppliers and repeater addresses the prose repeats agree with the USB-001 profile (13/13 profile checks).",
+  "SKIP_DWC3_CORE_POWER_CONTROL and USB_USE_IOCOHERENCY are never defined anywhere in the pinned tree (word search over the whole tree).",
+  "The vendor sequence for pd_hsi0 power, CMU_HSI0 replay, PMU isolation release, USBCON init, eUSB2 PHY initiate, DWC3 core and device start is fully specified by the pinned source, with the register addresses listed in the README."
+ ],
+ "not_established": [
+  "That the HS-only subset (pipe3 detach with the USBDP combo PHY never initialised, device mode) works: the vendor uses the detach routine only after the combo PHY was up (U6).",
+  "That the running firmware S921BXXS9BYH3 matches the pinned vendor tree (live_firmware_equivalence_qualified = false).",
+  "The state S-Boot leaves pd_hsi0, the CMU muxes, the repeater and the DMA path (S2MPU/coherency) in (U1-U5): these need NAT-039 and the NAT-043 ladder.",
+  "That any prose sentence correctly describes the line it cites (the verifier proves existence and order, not meaning).",
+  "Anything about hardware behaviour: nothing here ran on the phone."
+ ],
+ "commands": [
+  {
+   "argv": ["python3", "docs/procedures/nat-040/verify_plan.py"],
+   "exit_code": 0,
+   "note": "stdout artifacts/nat-040/logs/verify-001.stdout: 120/120 citations resolved; 13/13 profile checks hold; 2/2 absence claims hold"
+  },
+  {
+   "argv": ["python3", "docs/procedures/nat-040/test_nat040.py"],
+   "exit_code": 0,
+   "note": "stderr artifacts/nat-040/logs/test-001.stderr: Ran 39 tests, OK"
+  },
+  {
+   "argv": ["python3", "artifacts/nat-040/mutation/run.py"],
+   "exit_code": 0,
+   "note": "artifacts/nat-040/mutation/summary.txt: killed 23 of 23 (the runner was executed from the session scratch directory and copied here unchanged)"
+  }
+ ],
+ "sha256": {
+  "docs/procedures/nat-040/README.md": "0d32af6b941ca744e444d63abae728f27384699077c2b5f555b514fddf3efa29",
+  "docs/procedures/nat-040/plan.json": "1b86d7dae337e7e936699f950663018007608dbf115ca50e97e0eb1205b35671",
+  "docs/procedures/nat-040/verify_plan.py": "2149fffdce18d2675aa02add394720fb4dbf47903827d50711892554ef9ce196",
+  "docs/procedures/nat-040/test_nat040.py": "73cc642ec550f7f6096cbf85218fb8ce477682a15532a515c97b2c9d553c5618",
+  "artifacts/nat-040/verify-001/resolved.json": "97fb8c1f2ad7b79ce643d3493ba8a2600a52edd61b84c039bc47dc650dd8b652",
+  "artifacts/nat-040/logs/verify-001.stdout": "f243ba52adea83e4aa2371a3ce3a1b2234b7dd727d426e7e02c82587948af85e",
+  "artifacts/nat-040/logs/test-001.stderr": "4dab4e9243c39def319ecf96b62ecd127d3b70c63a48c6083b3fdccc7c68bb4e",
+  "artifacts/nat-040/mutation/summary.txt": "9efe8460816726531f7aaf40b2ae90369e31376b4fcf3fac8c8a37ce4703e736",
+  "artifacts/nat-040/mutation/run.py": "4761949d79bcf7419a8180e8fc939158606d44b07d67ba794fe03c98250978d0"
+ },
+ "artifacts": [
+  "docs/procedures/nat-040/README.md",
+  "docs/procedures/nat-040/plan.json",
+  "docs/procedures/nat-040/verify_plan.py",
+  "docs/procedures/nat-040/test_nat040.py",
+  "artifacts/nat-040/verify-001/resolved.json",
+  "artifacts/nat-040/logs/verify-001.stdout",
+  "artifacts/nat-040/logs/test-001.stderr",
+  "artifacts/nat-040/mutation/summary.txt",
+  "artifacts/nat-040/mutation/run.py"
+ ]
+}
