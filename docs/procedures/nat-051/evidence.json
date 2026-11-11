@@ -1,0 +1,83 @@
+{
+ "kind": "android-userland",
+ "origin": "local-device",
+ "outcome": "fail",
+ "recorded_at": "2026-11-11T12:58:00+00:00",
+ "commit": "31cd52760d555b95195279fa491e5f4326c86531",
+ "tree_state": "the files listed under sha256 are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat051-20261111-session",
+ "summary": "Mounted debugfs on the running Android, read regulator_summary and pm_genpd_summary (pd_hsi0 on, four USB rails enabled with one user each), then clk_summary: the read returned 255 after 0.23 s, adb vanished, the host saw SEC_UPLOAD and then Android again after about 47 s without owner action. clk_summary was not obtained and must not be repeated without a new decision; the mount was removed by the restart, not by the capture script.",
+ "evidence_category": "android-userland: read-only software state of the running Android on this S24 (one reverted-by-reboot debugfs mount); not loader-entry state and not native-device evidence",
+ "acceptance": {
+  "1_mount_and_revert": "not met as written: /proc/mounts and /sys/kernel/debug were recorded before; the mount was done; the umount in the finally block failed because adb had lost the device; debugfs is not mounted after the restart (checked /proc/mounts: tracefs only); getenforce Enforcing, sys.usb.config adb, adb connectivity restored.",
+  "2_reads": "partly met: regulator_summary and pm_genpd_summary read; clk_summary last, under timeout 20, returned 255 after 0.23 s and the phone left Android; no regdump, no gpio, no write to a debugfs node.",
+  "3_comparison": "partly met: pd_hsi0 state and the four rails are compared with NAT-039 (agree, the domain state is now read rather than inferred); the HSI0/USB clock rates (C11d) were not obtained."
+ },
+ "established": [
+  "pd_hsi0 is on in Android; 17900000.usb is runtime-active, 178a0000.phy and 17880000.drmdp are runtime-suspended, dbgdev-pd-hsi0 suspended.",
+  "vdd075_usb 750 mV, vdd12_usb 1200 mV, vdd18_usb 1800 mV, vdd33_usb 3100 mV: use 1, open 1, consumer 178a0000.phy; 17900000.dwc3-dwc3-vbus use 0.",
+  "Order of events at 2026-11-11T12:48:16Z: debugfs mount, two summaries read, clk_summary start, adb lost; SEC_UPLOAD seen on the host at about 12:48:30Z; Android and adb back at about 12:49:03Z; no owner action."
+ ],
+ "not_established": [
+  "The cause of the restart (no pstore, last_kmsg or reset_reason content: all empty); it is a single observation, not a reproduced fault.",
+  "Any clock rate or gate; the loader-entry state of rails, domain, clocks or repeater."
+ ],
+ "findings": [
+  "Reading clk_summary on this kernel is not safe on this phone: do not repeat it. A bus/register fault from a read in an unpowered clock domain is a plausible mechanism and is an inference, not a measurement.",
+  "The capture plan check passed and the timeout protected nothing: the failure took the kernel down in under a second."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-051/capture.py",
+    "--out",
+    "artifacts/nat-051/capture-001"
+   ],
+   "exit_code": 0,
+   "note": "script exit 0; per-command exit codes in capture-001/index.json: clk-summary 255, umount and all later 1 (adb: no devices/emulators found)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-048/usb_watch.py",
+    "--out",
+    "artifacts/nat-051/usb-after-clk-crash.jsonl",
+    "--seconds",
+    "1500"
+   ],
+   "exit_code": 0,
+   "note": "started 12:48:58Z after SEC_UPLOAD had already left the bus; first record: appear 04e8:6860 at about 12:49:03Z"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-051/capture-001/index.json",
+  "artifacts/nat-051/capture-001/regulator-summary.txt",
+  "artifacts/nat-051/capture-001/pm-genpd-summary.txt",
+  "artifacts/nat-051/capture-001/clk-summary.txt",
+  "artifacts/nat-051/capture-001/mounts-before.txt",
+  "artifacts/nat-051/usb-after-clk-crash.jsonl"
+ ],
+ "sha256": {
+  "docs/procedures/nat-051/README.md": "3e340130022ef607c7af9b1dfaefe202c97c56532cad96d18982863ea0c21384",
+  "docs/procedures/nat-051/capture.py": "914ca6ba48113730b53c0c2fc04cce58039208882c05fd8ad600cf8130566f4b",
+  "docs/procedures/nat-051/capture-extract/debugfs-dir-before.txt": "3574b3ebe35735889de217b3d8e3e3a4c10718a326c9139df0c4e6fb0e1153bd",
+  "docs/procedures/nat-051/capture-extract/filesystems.txt": "4f9b8570c9f6e76ee3c1389559bc4effbc25eadeedfc19d5eae62a0bfb33aeb0",
+  "docs/procedures/nat-051/capture-extract/genpd-hsi0.txt": "0e96779f134a1bf58ede897159dce5a21ad10d65c1564ba1beeaf6d7c965a972",
+  "docs/procedures/nat-051/capture-extract/identity.txt": "af2071dd6878c521d8c3dc902aa6ec03b0cd33ddca0a073bbf50979421f48764",
+  "docs/procedures/nat-051/capture-extract/mounts-before.txt": "b586885edcd5c45d4669c422bfec67777256eeb3669d543988b5dc9ef97fc16d",
+  "docs/procedures/nat-051/capture-extract/regulator-usb.txt": "2fe87432a851905b29f4d2157d3dcf13da2f18369e3c4c653583239c1efcd904",
+  "docs/procedures/nat-051/capture-extract/selinux-before.txt": "4fefafd0dcddf54b31a0fef448083e7b77576d86a9ec97c14bfd92479c404290",
+  "artifacts/nat-051/capture-001/index.json": "983276d733a55e6a17aca1a0faf928551df67c4a7b2bed4f7e403a791aa65064",
+  "artifacts/nat-051/capture-001/regulator-summary.txt": "5027b65d45a2d28e79b3aa4e3887addcc95ac6429766908782f1fd583d0df7b2",
+  "artifacts/nat-051/capture-001/pm-genpd-summary.txt": "c41889f19da827189c04b5b6e68a3feb342b832f6242d22912ddb64f97b4b880",
+  "artifacts/nat-051/capture-001/clk-summary.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-051/capture-001/mounts-before.txt": "b586885edcd5c45d4669c422bfec67777256eeb3669d543988b5dc9ef97fc16d",
+  "artifacts/nat-051/usb-after-clk-crash.jsonl": "1cfb004b668d6b21eb52a15d6f593fe3e082c2ceaf5fe12e729cf7b53a745c14"
+ },
+ "device_used": true,
+ "flashed": false,
+ "device_inventory": "devices/local-2026-11-11-nat051.json"
+}

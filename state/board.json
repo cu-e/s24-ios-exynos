@@ -1,14 +1,13 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-11T12:45:16+00:00",
-  "ledger_updated_at": "2026-11-11T12:45:07+00:00",
-  "registry_sha256": "4f5ef512b4bbefd80faaed2aef8958b7c2cbd1e369918350104e9b9d7f8394e4",
+  "generated_at": "2026-11-11T12:52:06+00:00",
+  "ledger_updated_at": "2026-11-11T12:51:53+00:00",
+  "registry_sha256": "059747b6a0b8de48b19edebc8e8d3765675778cd764706301831360c1284f4e6",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
       "NAT-017",
       "NAT-043",
-      "NAT-051",
       "NAT-004"
     ],
     "in_progress": [],
@@ -30,6 +29,7 @@
       "ESIM-004",
       "KRN-043",
       "GPU-012",
+      "NAT-051",
       "GPU-005"
     ],
     "waiting": [
@@ -13353,11 +13353,20 @@
         "Record mounts, mount debugfs, read the three summaries with the timeout, unmount, verify",
         "Extend the NAT-039 comparison rows and write evidence.json"
       ],
-      "status": "pending",
-      "owner": null,
-      "column": "ready",
-      "reasons": [],
-      "card_path": "planning/tasks/NAT-051.md"
+      "status": "blocked",
+      "owner": "claude-nat051-20261111-session",
+      "started_at": "2026-11-11T12:47:19+00:00",
+      "last_heartbeat": "2026-11-11T12:51:53+00:00",
+      "updated_at": "2026-11-11T12:51:53+00:00",
+      "progress_note": "debugfs mounted, regulator and pm_genpd summaries read (pd_hsi0 on; four USB rails enabled), clk_summary read ended with the phone leaving Android into SEC_UPLOAD and restarting by itself (back in ~47 s). Evidence fail recorded in docs/procedures/nat-051/evidence.json",
+      "next_step": "Do not repeat clk_summary; decide in a new task whether clock rates are needed at all",
+      "blocked_reason": "Acceptance not met: reading debugfs clk_summary on the running Android ended with the phone leaving Android (SEC_UPLOAD, automatic restart, back in about 47 s, no data touched). Cause not established (no pstore/last_kmsg). Must not be repeated without a new owner decision; regulator and genpd summaries were obtained. Evidence (fail): docs/procedures/nat-051/evidence.json",
+      "column": "blocked",
+      "reasons": [
+        "Acceptance not met: reading debugfs clk_summary on the running Android ended with the phone leaving Android (SEC_UPLOAD, automatic restart, back in about 47 s, no data touched). Cause not established (no pstore/last_kmsg). Must not be repeated without a new owner decision; regulator and genpd summaries were obtained. Evidence (fail): docs/procedures/nat-051/evidence.json"
+      ],
+      "card_path": "planning/tasks/NAT-051.md",
+      "report_health": "recent"
     },
     {
       "id": "CELL-011",
@@ -14092,7 +14101,7 @@
       "column": "waiting",
       "reasons": [
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-046, NAT-050"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-046, NAT-050, NAT-051"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -14130,7 +14139,7 @@
       "column": "waiting",
       "reasons": [
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-046, NAT-050"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-046, NAT-050, NAT-051"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -15149,51 +15158,22 @@
         "branch": "main",
         "worktree": null
       }
+    ],
+    "claude-nat051-20261111-session": [
+      {
+        "id": "NAT-051",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-11T12:51:53+00:00",
+        "report_health": "recent",
+        "progress_note": "debugfs mounted, regulator and pm_genpd summaries read (pd_hsi0 on; four USB rails enabled), clk_summary read ended with the phone leaving Android into SEC_UPLOAD and restarting by itself (back in ~47 s). Evidence fail recorded in docs/procedures/nat-051/evidence.json",
+        "next_step": "Do not repeat clk_summary; decide in a new task whether clock rates are needed at all",
+        "handoff": null,
+        "branch": null,
+        "worktree": null
+      }
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-11T02:44:02+00:00",
-      "action": "task.reopen:NAT-044",
-      "owner": "claude-nat044-20261111-resetimg",
-      "tasks": [
-        {
-          "id": "NAT-044",
-          "status": "in_progress",
-          "owner": "claude-nat044-20261111-resetimg",
-          "priority": 96,
-          "last_heartbeat": "2026-11-11T02:44:02+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T02:52:47+00:00",
-      "action": "task.done:NAT-044",
-      "owner": "claude-nat044-20261111-resetimg",
-      "tasks": [
-        {
-          "id": "NAT-044",
-          "status": "done",
-          "owner": "claude-nat044-20261111-resetimg",
-          "priority": 96,
-          "last_heartbeat": "2026-11-11T02:44:02+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T03:09:51+00:00",
-      "action": "task.claim:NAT-045",
-      "owner": "claude-nat045-20261111-usbladder",
-      "tasks": [
-        {
-          "id": "NAT-045",
-          "status": "in_progress",
-          "owner": "claude-nat045-20261111-usbladder",
-          "priority": 95,
-          "last_heartbeat": "2026-11-11T03:09:51+00:00"
-        }
-      ]
-    },
     {
       "at": "2026-11-11T03:19:38+00:00",
       "action": "task.done:NAT-048",
@@ -15431,11 +15411,58 @@
           "last_heartbeat": "2026-11-11T12:45:07+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-11T12:47:19+00:00",
+      "action": "task.claim:NAT-051",
+      "owner": "claude-nat051-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-051",
+          "status": "in_progress",
+          "owner": "claude-nat051-20261111-session",
+          "priority": 60,
+          "last_heartbeat": "2026-11-11T12:47:19+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T12:51:26+00:00",
+      "action": "task.update:NAT-051",
+      "owner": "claude-nat051-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-051",
+          "status": "in_progress",
+          "owner": "claude-nat051-20261111-session",
+          "priority": 60,
+          "progress_note": "debugfs mounted, regulator and pm_genpd summaries read (pd_hsi0 on; four USB rails enabled), clk_summary read ended with the phone leaving Android into SEC_UPLOAD and restarting by itself (back in ~47 s). Evidence fail recorded in docs/procedures/nat-051/evidence.json",
+          "next_step": "Do not repeat clk_summary; decide in a new task whether clock rates are needed at all",
+          "last_heartbeat": "2026-11-11T12:51:26+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T12:51:53+00:00",
+      "action": "task.block:NAT-051",
+      "owner": "claude-nat051-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-051",
+          "status": "blocked",
+          "owner": "claude-nat051-20261111-session",
+          "priority": 60,
+          "progress_note": "debugfs mounted, regulator and pm_genpd summaries read (pd_hsi0 on; four USB rails enabled), clk_summary read ended with the phone leaving Android into SEC_UPLOAD and restarting by itself (back in ~47 s). Evidence fail recorded in docs/procedures/nat-051/evidence.json",
+          "next_step": "Do not repeat clk_summary; decide in a new task whether clock rates are needed at all",
+          "blocked_reason": "Acceptance not met: reading debugfs clk_summary on the running Android ended with the phone leaving Android (SEC_UPLOAD, automatic restart, back in about 47 s, no data touched). Cause not established (no pstore/last_kmsg). Must not be repeated without a new owner decision; regulator and genpd summaries were obtained. Evidence (fail): docs/procedures/nat-051/evidence.json",
+          "last_heartbeat": "2026-11-11T12:51:53+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "810afea86598f2c324b9448ca05855fed5c4e4f05a094435d34f7398a8b5e5ff",
-    "BOARD.md": "d29a7730529133c4651a652893ea458a41cd822d05f2a4b227da504e8daad7dd",
+    "STATUS.md": "253d481775ace51f3d4e39a879d427e34dfdba1b8805d35209cd01be097f2af3",
+    "BOARD.md": "bad9d04a9a20fa6d54f8a0298b0749cd89c1446da9747161fd73e52d2c3af54e",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -15729,7 +15756,7 @@
     "planning/tasks/KRN-040.md": "3078f05d1553121a53783a5f8e7d073b93d9c2917afb3e2ef72f381a782e9d70",
     "planning/tasks/DRV-007.md": "3d06e2678a4b40a3bcfa3cef7473f73c9c6edf9a7084945294f6b98a6951a007",
     "planning/tasks/KRN-042.md": "9a4c9f3acb9abc5a938b6fcfa99883a550a3c9f2df3e6ddf687f9aa26c8b1231",
-    "planning/tasks/NAT-051.md": "a5432d3b2646e394dad54cd1e290d1bcd5cd2c56a5b6372ae335933e638a5364",
+    "planning/tasks/NAT-051.md": "c6f3c7009a238a10a8b955314fa730840f4b5cb7735b4b1b796f8bdbe340faa4",
     "planning/tasks/CELL-011.md": "aab6d3d32eec01b9cf0d5004a01000984ffd490a36161a7c56fd92d0359ef932",
     "planning/tasks/FND-001.md": "ee81357df48cbcec414e6dc2f58f1325d8936e16bbbe8022d8b771c316d6b0f8",
     "planning/tasks/RES-001.md": "956b0cf0fe59602b13d98565c02c1486438c7f0451c2800e8d5c1a77e8e1d9fe",
@@ -15745,8 +15772,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "0dd5f8f2120e3212af8f233a527ef5a4692937b56506083c704ec83725d08a66",
-    "planning/tasks/DRV-003.md": "ac1359978d746e80b0c557d3a3650be7302525d03569a228d752ba353dca8330",
+    "planning/tasks/NAT-003.md": "bacd6aeeae0e8b7e50a800d05410b2ea29da5e07de80985bd3f3c1136f9cc8c7",
+    "planning/tasks/DRV-003.md": "5ce98c56e01bdf01cadf2fe98c967d4b293ea77e53612b1deeb436ed17b0c6ed",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-11T12:45:07+00:00",
+  "updated_at": "2026-11-11T12:51:53+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -13534,8 +13534,14 @@
         "Record mounts, mount debugfs, read the three summaries with the timeout, unmount, verify",
         "Extend the NAT-039 comparison rows and write evidence.json"
       ],
-      "status": "pending",
-      "owner": null
+      "status": "blocked",
+      "owner": "claude-nat051-20261111-session",
+      "started_at": "2026-11-11T12:47:19+00:00",
+      "last_heartbeat": "2026-11-11T12:51:53+00:00",
+      "updated_at": "2026-11-11T12:51:53+00:00",
+      "progress_note": "debugfs mounted, regulator and pm_genpd summaries read (pd_hsi0 on; four USB rails enabled), clk_summary read ended with the phone leaving Android into SEC_UPLOAD and restarting by itself (back in ~47 s). Evidence fail recorded in docs/procedures/nat-051/evidence.json",
+      "next_step": "Do not repeat clk_summary; decide in a new task whether clock rates are needed at all",
+      "blocked_reason": "Acceptance not met: reading debugfs clk_summary on the running Android ended with the phone leaving Android (SEC_UPLOAD, automatic restart, back in about 47 s, no data touched). Cause not established (no pstore/last_kmsg). Must not be repeated without a new owner decision; regulator and genpd summaries were obtained. Evidence (fail): docs/procedures/nat-051/evidence.json"
     }
   ],
   "experiments": [
@@ -58156,6 +58162,53 @@
           "priority": 96,
           "blocked_reason": "Claude Code auto-mode classifier refused the single native run command (session_reset_canary.py --execute) at 2026-11-11T12:44Z; nothing reached the phone. Needs the owner to run it with ! or to allow it by a permission rule. Handoff: docs/procedures/nat-046/handoff-2026-11-11.md",
           "last_heartbeat": "2026-11-11T12:45:07+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T12:47:19+00:00",
+      "action": "task.claim:NAT-051",
+      "owner": "claude-nat051-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-051",
+          "status": "in_progress",
+          "owner": "claude-nat051-20261111-session",
+          "priority": 60,
+          "last_heartbeat": "2026-11-11T12:47:19+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T12:51:26+00:00",
+      "action": "task.update:NAT-051",
+      "owner": "claude-nat051-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-051",
+          "status": "in_progress",
+          "owner": "claude-nat051-20261111-session",
+          "priority": 60,
+          "progress_note": "debugfs mounted, regulator and pm_genpd summaries read (pd_hsi0 on; four USB rails enabled), clk_summary read ended with the phone leaving Android into SEC_UPLOAD and restarting by itself (back in ~47 s). Evidence fail recorded in docs/procedures/nat-051/evidence.json",
+          "next_step": "Do not repeat clk_summary; decide in a new task whether clock rates are needed at all",
+          "last_heartbeat": "2026-11-11T12:51:26+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T12:51:53+00:00",
+      "action": "task.block:NAT-051",
+      "owner": "claude-nat051-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-051",
+          "status": "blocked",
+          "owner": "claude-nat051-20261111-session",
+          "priority": 60,
+          "progress_note": "debugfs mounted, regulator and pm_genpd summaries read (pd_hsi0 on; four USB rails enabled), clk_summary read ended with the phone leaving Android into SEC_UPLOAD and restarting by itself (back in ~47 s). Evidence fail recorded in docs/procedures/nat-051/evidence.json",
+          "next_step": "Do not repeat clk_summary; decide in a new task whether clock rates are needed at all",
+          "blocked_reason": "Acceptance not met: reading debugfs clk_summary on the running Android ended with the phone leaving Android (SEC_UPLOAD, automatic restart, back in about 47 s, no data touched). Cause not established (no pstore/last_kmsg). Must not be repeated without a new owner decision; regulator and genpd summaries were obtained. Evidence (fail): docs/procedures/nat-051/evidence.json",
+          "last_heartbeat": "2026-11-11T12:51:53+00:00"
         }
       ]
     }
