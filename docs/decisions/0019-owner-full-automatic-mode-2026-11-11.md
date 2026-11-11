@@ -1,0 +1,22 @@
+# 0019 — Owner instruction: full automatic mode (2026-11-11)
+
+Status: in force. Recorded by `claude-nat038-20261111-usblog` from the owner's `/goal` message of 2026-11-11 (after run 009, NAT-036 and NAT-037). The original is in Russian; the English text is a translation of the owner's sentences and adds nothing.
+
+## Source (owner's words)
+
+"После завершения NAT-037 выдели отдельную задачу на получение ранних логов компьютером без ручной съёмки. Сначала оцени повторное использование существующего USB-кода для Exynos/DWC3 и выбери минимальный способ передачи текста и исключений. Не считай возврат в загрузчик готовым каналом логирования. Нужен проверяемый результат: компьютер самостоятельно получает и сохраняет сообщения реального нативного запуска."
+
+"потом бери следющие задачи, отвечать е смогу на вопросы делай все сам автомтически без моего вмешательства, сам бери изкрывай созавай задачи что бы приблизить нас как можо сокрее к хапуску с gpu и тд"
+
+"полностью сам в автоматическом режиме елси не хнаешь можно или нет то я разрешаю делай не ограничиваю ни в чем телефон досупен пока не будет"
+
+Translation of the substance: after NAT-037, open a separate task for getting early logs onto the computer without manual filming; first assess reuse of existing Exynos/DWC3 USB code and choose the minimal way to carry text and exceptions; a return to the bootloader is not a ready log channel; the verifiable result is that the computer itself receives and stores the messages of a real native run. Then take the next tasks; the owner cannot answer questions; work fully automatically, taking, closing and creating tasks to reach a GPU launch as fast as possible; where it is unclear whether something is allowed, it is allowed; no restriction; the phone is available ("until there is none" — the last sentence is cut off in the original).
+
+## How this record is applied
+
+1. **No more questions to the owner.** Per-image native-run decisions (0016, 0017, ...) were requested one by one. From now on the agent decides them itself under this record and writes the decision file for the image (named as before, `docs/decisions/00NN-...`), stating in it that it was made under 0019 and the owner was not asked. A run is made only for an image that meets the run protocol of runs 001-009: only RECOVERY (`/dev/block/sda18`) is written; the pinned stock RECOVERY (SHA-256 `96620b8b…babf67`) is restored afterwards; full-hash readback; one-shot marker; bounded display/watchdog; image built and host-tested with hashes recorded; the disclosure of what the image touches is written before the run. The decision file is written before the run and never after it.
+2. **Unclear means allowed.** Where AGENTS.md or an older decision says "not authorized" only because the question was never asked (MMIO probes by the loader, an intentional reboot into RECOVERY for a test image, running a kernel past a checkpoint, native-scope tasks, USB/PMU/CMU register access in the loader), this record is the owner's decision and the registry's `native` permission may follow it.
+3. **What stays out, because the owner prohibited it explicitly and has not revoked it in these words** (decision 0002): erasing data, factory reset, unlocking the bootloader with a reset, flashing or replacing any Android partition other than the RECOVERY slot used by the test images, GPT changes, touching EFS, keys or encryption. The mandatory boundary stands: the existing Android, apps, settings, accounts and user data stay intact; a backup does not relax it. If a step would need one of these, it is not taken and the owner is told in the report.
+4. **Safety-classifier stops stay stops.** The Claude Code classifier stopped the S-Boot static review (NAT-009, NAT-008..011 line) and the odin4 harness; those are not owner decisions and are not retried, reworded or delegated around by this record.
+5. **Physical limits.** The agent cannot press hardware keys. When a run leaves the phone in a state that needs the owner's hands (Download Mode keys, cable), work continues on host tasks and the restore is done when the device is present; the phone's absence is recorded, not guessed around. A task is blocked only by a specific missing external fact such as "the phone is not connected".
+6. **Evidence rules unchanged.** Simulations and builds are not hardware evidence; every claim keeps its evidence kind; a native result is recorded only from what the host actually received.
