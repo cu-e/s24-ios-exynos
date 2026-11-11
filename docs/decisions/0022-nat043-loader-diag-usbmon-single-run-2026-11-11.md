@@ -106,3 +106,12 @@ intact.
   `SEC_UPLOAD` and, as on 2026-11-11, restarted into Android by itself after about 47 s (one observation); Download Mode by keys is the fallback.
 * x0..x30 are not captured by the loader's exception vectors.
 * A run with no host observation is inconclusive. RAM contents are volatile.
+
+## Owner confirmation of the run (recorded before the launch)
+
+At 2026-11-11T15:40:10Z the owner answered the question "Запускаю ОДИН нативный запуск образа loader-diag-usbmon (NAT-043, решение 0022) прямо сейчас?" with
+"Да, один запуск loader-diag-usbmon (Recommended)". The question named the RECOVERY SHA-256 `c6802dea4682a4bc993885bf525e2907e42e4eeebb964310da82ed79fef7212d`,
+the only partition written (RECOVERY, `/dev/block/sda18`), the pinned stock restore (`96620b8b...`, full-hash readback), the HSI0 register
+blocks (PMU `pd_hsi0`, CMU_HSI0 `0x17800000`, SYSREG_HSI0 `0x17820000`, USB control/PHY `0x178a0000-0x178e0000`, DWC3 `0x17900000`, the
+111-operation table with a read-back per step), that XNU is not started, the 45 s reset into Download Mode followed by the NAT-013 restore,
+and the risk (a hung bus: the 83 s watchdog, `SEC_UPLOAD` and an automatic restart as on 2026-11-11, or Download Mode by keys). One run, no retry.
