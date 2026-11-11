@@ -96,7 +96,14 @@ and user data stay intact.
   RAM contents are volatile. A pass frame says the kernel's code ran up to that checkpoint; it does not say XNU boots.
 * NAT-043 `done` is recorded under this run's window (see the preconditions); that bookkeeping is not part of the device protocol.
 
-## Owner confirmation of the run (to be recorded before the launch)
+## Owner confirmation of the run (recorded before the launch)
 
-`<to be added: one narrowly scoped question naming this image's RECOVERY hash, the single RECOVERY write, the kernel start through 22 stops, the engine unattended between stops,
-the reset at the deadline, the 83 s watchdog, the stock restore, the bookkeeping step for NAT-043, and that data/apps/settings are untouched; the owner's answer quoted>`
+At 2026-11-11T17:18:04Z the owner answered the question "Запускаю ОДИН нативный запуск образа loader-diag-xnu-ckpt3-usb (решение 0024, коммит 7681f98), чтобы компьютер получил по USB
+сообщения самого ядра XNU (22 контрольные точки)…" with "Да, один запуск loader-diag-xnu-ckpt3-usb (Recommended)". The question named the RECOVERY SHA-256 prefix `a8161ccc…7d97`
+(full hash in this file), the only partition written (RECOVERY, `/dev/block/sda18`, full readback), the single `adb reboot recovery`, the same USB monitor 1209:0001 and the same
+111-operation HSI0 table as NAT-043 (nothing new), the start of the XNU kernel with a short text record received at each of 22 stops, that the kernel passes for the first
+time beyond C checkpoint 11 (to 16, not further) with USB unpolled between the stops, the reset into Download Mode after 60 s, the restore of the stock RECOVERY (`96620b8b…`,
+full-hash readback) and the Android check, that data, apps and settings are untouched, one run and no retry, the risk (a hang of the kernel or loader: a partial log, the 83 s
+watchdog with `SEC_UPLOAD` and an automatic restart after about 47 s as on 2026-11-11, or Download Mode by keys), and the bookkeeping step: because the driver requires NAT-043
+`done` and `task done` is possible only with the `native` permission open, in the same window, after the answer, the agent opens `native` citing this file, marks NAT-043 done
+(evidence already committed in fa32ec6), claims the run's task, runs the driver, and closes `native` after the run's task is done.
