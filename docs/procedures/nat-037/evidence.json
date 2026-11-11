@@ -1,0 +1,59 @@
+{
+ "kind": "host-test",
+ "also": [
+  "source-review"
+ ],
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T00:14:27+00:00",
+ "commit": "62cbfb9c09b9b85db7c0f74566f8dd783f877bcd",
+ "tree_state": "driver, tests and question text committed in 62cbfb9; this record and the task transition are committed afterwards",
+ "owner": "claude-nat036-20261111-cstub",
+ "summary": "Gated session driver for the NAT-036 loader-diag-xnu-ckpt3 image: session_xnu_ckpt3.py is the run-009 driver with only the pinned names changed (candidate package, RECOVERY/payload hashes and length, decision-0018 file, one-shot marker). 14 host tests against a fake adb. Nothing was written to a device and no phone was contacted.",
+ "acceptance": {
+  "1_driver_diff": "test_the_driver_differs_from_the_run_009_driver_only_in_pinned_names_and_the_docstring: outside the docstring the driver and session_xnu_ckpt2.py have the same number of lines and differ only in the CANDIDATE, NEW_SHA, CANARY_SHA, decision-file and marker lines; no nat-034/ckpt2/0017 name is left in the live code.",
+  "2_gate_and_surface": "RealTreeGate: with no decision file (the real tree) preflight, --execute and --restore stop before the first adb call with \"owner decision 0018 is missing\" (fake adb on PATH records no call; no marker is left); pinned hashes and CANARY_LEN equal package.json and the build-001 Image.payload; exactly one `reboot recovery`, no fastboot/bootloader/odin/heimdall command, /dev/block/sda18 is the only block device named; the driver never writes the decision file; the marker is opened with open(x). OpenGateFlow (scratch tree with a fake decision file and a fake adb that models the RECOVERY block): preflight writes nothing; --execute writes the candidate, reads it back in full, then sends exactly one reboot and leaves the marker; a second --execute is refused before any write; a corrupted readback restores stock and never reboots; --restore writes stock and never reboots; busy dd, a non-stock RECOVERY and a low battery each stop with no write and no reboot.",
+  "3_question_text": "docs/procedures/nat-036/decision-0018-question.md names the driver, its test and the three usage forms; its @@COMMIT@@ placeholder is filled (46826cb)."
+ },
+ "established": [
+  "Host-test: the driver gate and the one-write/one-reboot control flow behave as listed against a fake adb; the driver logic outside the pinned names is the run-009 driver, which ran on the phone in session 009."
+ ],
+ "not_established": [
+  "Anything about the phone: the fake adb is not a device, the driver was not executed against one. The candidate image has not run on hardware. Decision 0018 does not exist and was not requested in this task.",
+  "Mutation strength of test_nat037.py was not measured (a run was started and stopped by the owner); the driver logic is pinned to the hardware-proven run-009 driver by the diff test."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-W",
+    "ignore",
+    "-m",
+    "unittest",
+    "-v",
+    "test_nat037"
+   ],
+   "cwd": "docs/procedures/nat-037",
+   "exit_code": 0,
+   "note": "14 tests OK in 7.7 s; log artifacts/nat-037/logs/test_nat037.log"
+  }
+ ],
+ "sha256": {
+  "docs/procedures/nat-037/session_xnu_ckpt3.py": "be54bdaa5e00939ad0f093bd0fb1ec06f983605b4eb23c502f4d24345b5c0eb8",
+  "docs/procedures/nat-037/test_nat037.py": "e4d4e3ac782e739e05e0da33416954d80333b633f322fdf3d3359a3c2c287734",
+  "artifacts/nat-037/logs/test_nat037.log": "cbaa9ae0c653a2791c898d860fa3a7d89e46ecca98cb4230c4d0d949b46c55d3",
+  "artifacts/nat-037/task.json": "1dc4f07c5105743bd4e95347124f057e4d8948712db620789129fbe1780efe3c",
+  "artifacts/nat-036/package-001/package.json": "bc12e39c5f926ba691e74dc43c1c280eec82bec77401ca1239b91bfeb8acde04",
+  "artifacts/nat-036/package-001/recovery.img": "c61165cb0264388098705deea0421e12d77f612791c3b2d579e46bf40abd4f0b",
+  "docs/procedures/nat-036/decision-0018-question.md": "a4fb475f104294942a68fbcbc4e745f4dd59037f00b5c6424a2555faf117b2d2"
+ },
+ "artifacts": [
+  "docs/procedures/nat-037/session_xnu_ckpt3.py",
+  "docs/procedures/nat-037/test_nat037.py",
+  "artifacts/nat-037/logs/test_nat037.log",
+  "artifacts/nat-037/task.json",
+  "artifacts/nat-036/package-001/package.json",
+  "artifacts/nat-036/package-001/recovery.img",
+  "docs/procedures/nat-036/decision-0018-question.md"
+ ]
+}

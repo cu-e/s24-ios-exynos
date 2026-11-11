@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-10T22:35:57+00:00",
+  "updated_at": "2026-11-11T00:14:34+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -12988,8 +12988,51 @@
         "Pick the stop list and the report that fit the display budget",
         "Package a candidate image on the host (hashes only) and write the decision question"
       ],
-      "status": "pending",
-      "owner": null
+      "status": "done",
+      "owner": "claude-nat036-20261111-cstub",
+      "started_at": "2026-11-10T22:36:38+00:00",
+      "last_heartbeat": "2026-11-10T23:26:40+00:00",
+      "updated_at": "2026-11-11T00:04:50+00:00",
+      "progress_note": "Mutation check: 81 textual mutants; first partial run had 5 survivors (block-size straddle test was vacuous; stub frame size, prologue C-bit, x28 slot and kernel-TTBR0 frame piece were not covered): tests strengthened (53+1 tests), survivors re-run, full clean re-run of all 81 pending. Nothing run on the phone.",
+      "next_step": "Full clean mutation re-run, commit sources, build-001/repro/final, RECOVERY package hashes, decision-0018 question text, evidence.json, task done",
+      "evidence": "docs/procedures/nat-036/evidence.json",
+      "evidence_sha256": "1361ccbe641ea0178357890c891c3c04ee74754232ff2a5ebc8e80813e509887",
+      "finished_at": "2026-11-11T00:04:50+00:00"
+    },
+    {
+      "id": "NAT-037",
+      "title": "Gated session driver for the NAT-036 loader-diag-xnu-ckpt3 image (decision 0018 not requested): a copy of the NAT-034 driver pinned to the NAT-036 candidate package and its own one-shot marker, with host tests that it touches nothing without the decision file; no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 94,
+      "depends_on": [
+        "NAT-036"
+      ],
+      "paths": [
+        "docs/procedures/nat-037",
+        "artifacts/nat-037"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "docs/procedures/nat-037/session_xnu_ckpt3.py is session_xnu_ckpt2.py with only the pinned constants and names changed (candidate package artifacts/nat-036/package-001, RECOVERY/Image.payload hashes and length of the 9-stop candidate, the decision-0018 file name, a one-shot marker native-attempt-xnuckpt3-used.json); a test shows the diff against the NAT-034 driver is exactly those lines.",
+        "Host tests (fake adb that records calls): without the owner decision file the driver stops before any adb call in every mode (preflight, --execute, --restore) with the pinned hashes checked; the pinned hashes equal the package.json of the NAT-036 candidate and the stock backup; exactly one `adb reboot recovery`; no fastboot/odin/heimdall; the driver never creates the decision file; the marker is opened exclusively.",
+        "The decision-0018 question text in docs/procedures/nat-036/decision-0018-question.md names this driver and its usage. Nothing is written to a device, nothing is run: the driver is not executed against a phone and decision 0018 is not requested inside this task."
+      ],
+      "steps": [
+        "Copy and pin the driver",
+        "Write the gate tests",
+        "Update the question text with the driver name and usage"
+      ],
+      "status": "done",
+      "owner": "claude-nat036-20261111-cstub",
+      "started_at": "2026-11-11T00:05:35+00:00",
+      "last_heartbeat": "2026-11-11T00:05:35+00:00",
+      "updated_at": "2026-11-11T00:14:34+00:00",
+      "evidence": "docs/procedures/nat-037/evidence.json",
+      "evidence_sha256": "07d84b2c673bea8db5b945de9bafe45c136163118a33fdbe4602deef95bcc799",
+      "finished_at": "2026-11-11T00:14:34+00:00"
     }
   ],
   "experiments": [
@@ -56930,6 +56973,109 @@
           "owner": "claude-nat035-20261111-cresume",
           "priority": 96,
           "last_heartbeat": "2026-11-10T21:56:28+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T22:36:38+00:00",
+      "action": "task.claim:NAT-036",
+      "owner": "claude-nat036-20261111-cstub",
+      "tasks": [
+        {
+          "id": "NAT-036",
+          "status": "in_progress",
+          "owner": "claude-nat036-20261111-cstub",
+          "priority": 95,
+          "last_heartbeat": "2026-11-10T22:36:38+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T23:18:09+00:00",
+      "action": "task.update:NAT-036",
+      "owner": "claude-nat036-20261111-cstub",
+      "tasks": [
+        {
+          "id": "NAT-036",
+          "status": "in_progress",
+          "owner": "claude-nat036-20261111-cstub",
+          "priority": 95,
+          "progress_note": "Host work in progress (nothing run on the phone): ckpt3 sources, patch_loader3 (ADT reg & 0xffff), build.py, decode3.py and test_nat036.py written; 51 tests pass (Words, Ckpt3Host, C3Chain/C3Controls/AdtMask in the NAT-035 model, Ckpt3Marker, Build); gated 17-stop run to checkpoint 16 with hostile registers equals an uninterrupted run (116 s). Mutation run, README, evidence, build/package records and the decision-0018 text remain.",
+          "next_step": "Mutation results, README, evidence.json, artifacts/nat-036/build-001 (+repro) and RECOVERY package hashes, decision-0018 question text, then task done",
+          "last_heartbeat": "2026-11-10T23:18:09+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-10T23:26:40+00:00",
+      "action": "task.update:NAT-036",
+      "owner": "claude-nat036-20261111-cstub",
+      "tasks": [
+        {
+          "id": "NAT-036",
+          "status": "in_progress",
+          "owner": "claude-nat036-20261111-cstub",
+          "priority": 95,
+          "progress_note": "Mutation check: 81 textual mutants; first partial run had 5 survivors (block-size straddle test was vacuous; stub frame size, prologue C-bit, x28 slot and kernel-TTBR0 frame piece were not covered): tests strengthened (53+1 tests), survivors re-run, full clean re-run of all 81 pending. Nothing run on the phone.",
+          "next_step": "Full clean mutation re-run, commit sources, build-001/repro/final, RECOVERY package hashes, decision-0018 question text, evidence.json, task done",
+          "last_heartbeat": "2026-11-10T23:26:40+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:04:50+00:00",
+      "action": "task.done:NAT-036",
+      "owner": "claude-nat036-20261111-cstub",
+      "tasks": [
+        {
+          "id": "NAT-036",
+          "status": "done",
+          "owner": "claude-nat036-20261111-cstub",
+          "priority": 95,
+          "progress_note": "Mutation check: 81 textual mutants; first partial run had 5 survivors (block-size straddle test was vacuous; stub frame size, prologue C-bit, x28 slot and kernel-TTBR0 frame piece were not covered): tests strengthened (53+1 tests), survivors re-run, full clean re-run of all 81 pending. Nothing run on the phone.",
+          "next_step": "Full clean mutation re-run, commit sources, build-001/repro/final, RECOVERY package hashes, decision-0018 question text, evidence.json, task done",
+          "last_heartbeat": "2026-11-10T23:26:40+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:05:26+00:00",
+      "action": "task.add:NAT-037",
+      "owner": "claude-nat036-20261111-cstub",
+      "tasks": [
+        {
+          "id": "NAT-037",
+          "status": "pending",
+          "owner": null,
+          "priority": 94
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:05:35+00:00",
+      "action": "task.claim:NAT-037",
+      "owner": "claude-nat036-20261111-cstub",
+      "tasks": [
+        {
+          "id": "NAT-037",
+          "status": "in_progress",
+          "owner": "claude-nat036-20261111-cstub",
+          "priority": 94,
+          "last_heartbeat": "2026-11-11T00:05:35+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T00:14:34+00:00",
+      "action": "task.done:NAT-037",
+      "owner": "claude-nat036-20261111-cstub",
+      "tasks": [
+        {
+          "id": "NAT-037",
+          "status": "done",
+          "owner": "claude-nat036-20261111-cstub",
+          "priority": 94,
+          "last_heartbeat": "2026-11-11T00:05:35+00:00"
         }
       ]
     }
