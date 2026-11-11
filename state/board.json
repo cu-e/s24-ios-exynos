@@ -1,13 +1,17 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-11T22:20:16+00:00",
-  "ledger_updated_at": "2026-11-11T22:20:05+00:00",
-  "registry_sha256": "4aa8af4ab41bbddd101bd89815917040fce4e2e986f842cdce73c77e70ee1ef9",
+  "generated_at": "2026-11-11T22:57:36+00:00",
+  "ledger_updated_at": "2026-11-11T22:56:47+00:00",
+  "registry_sha256": "31480da783cc53aee5b1885528b1c0dce3f88bd0fcf16c2e577165272cfca970",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
+      "IOS-002",
+      "NAT-071",
       "NAT-054",
-      "NAT-055"
+      "NAT-055",
+      "IOS-003",
+      "NAT-073"
     ],
     "in_progress": [],
     "blocked": [
@@ -17,6 +21,7 @@
       "KRN-008",
       "KRN-026",
       "NAT-050",
+      "IOS-001",
       "KRN-003",
       "KRN-004",
       "ODIN-001",
@@ -50,6 +55,8 @@
     ],
     "gated": [
       "NAT-017",
+      "NAT-070",
+      "NAT-072",
       "NAT-003",
       "DRV-003",
       "NAT-004",
@@ -253,6 +260,7 @@
       "NAT-063",
       "NAT-066",
       "NAT-068",
+      "NAT-069",
       "DRV-001",
       "KRN-023",
       "REV-012",
@@ -5957,6 +5965,39 @@
       "report_health": "stale"
     },
     {
+      "id": "IOS-001",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 97,
+      "depends_on": [],
+      "title": "EXTERNAL INPUT (owner): place the iPhone X (iPhone10,3 / D22AP) iOS 16.5 build 20F66 restore image under artifacts/apple-inputs/ (git-ignored) - the only source of Apple's rootfs, dyld, shared cache, launchd, backboardd and SpringBoard; milestone 2-7 of docs/strategy/2026-11-12-ios-critical-path.md cannot start without it",
+      "paths": [
+        "artifacts/apple-inputs"
+      ],
+      "sources": [],
+      "acceptance": [
+        "The file artifacts/apple-inputs/<name>_Restore.ipsw exists locally (never committed) and tools/ios/ipsw_inspect.py (IOS-002) accepts it: ProductBuildVersion 20F66, iPhone10,3 among SupportedProductTypes, SHA-256 of the archive and of each restore image (OS, SystemOS, AppOS disk images, DeviceTree, kernelcache) recorded in a local, uncommitted inventory.",
+        "The inspector output states the kernelcache's Darwin/xnu version string so that the match with the project kernel (Darwin 22.5.0, xnu-8796.121.2) is a recorded comparison, not an assumption.",
+        "No Apple binary, image or key is added to Git; only the sanitized inspector summary (versions, sizes, hashes of public Apple files) may be committed."
+      ],
+      "steps": [
+        "Owner downloads the IPSW from Apple's update CDN (licence terms are the owner's responsibility), places it at artifacts/apple-inputs/",
+        "Run the IOS-002 inspector; record the summary"
+      ],
+      "status": "blocked",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-11T22:41:24+00:00",
+      "last_heartbeat": "2026-11-11T22:41:40+00:00",
+      "updated_at": "2026-11-11T22:41:40+00:00",
+      "blocked_reason": "Missing external file: the iPhone X (iPhone10,3/D22AP) iOS 16.5 build 20F66 restore image (*_Restore.ipsw, several GB; Apple publishes it on its update CDN) must be downloaded by the owner into artifacts/apple-inputs/ (git-ignored). It is the only source of Apple's OS/SystemOS/AppOS images (rootfs, dyld, shared cache, launchd, backboardd, SpringBoard), the D22AP DeviceTree and the kernelcache version string. Nothing local contains any of it (search 2026-11-12: repo, references/, artifacts/, home to depth 4). See docs/strategy/2026-11-12-ios-critical-path.md section 4. Check with tools/ios/ipsw_inspect.py (IOS-002) once it exists.",
+      "column": "blocked",
+      "reasons": [
+        "Missing external file: the iPhone X (iPhone10,3/D22AP) iOS 16.5 build 20F66 restore image (*_Restore.ipsw, several GB; Apple publishes it on its update CDN) must be downloaded by the owner into artifacts/apple-inputs/ (git-ignored). It is the only source of Apple's OS/SystemOS/AppOS images (rootfs, dyld, shared cache, launchd, backboardd, SpringBoard), the D22AP DeviceTree and the kernelcache version string. Nothing local contains any of it (search 2026-11-12: repo, references/, artifacts/, home to depth 4). See docs/strategy/2026-11-12-ios-critical-path.md section 4. Check with tools/ios/ipsw_inspect.py (IOS-002) once it exists."
+      ],
+      "card_path": "planning/tasks/IOS-001.md",
+      "report_health": "recent"
+    },
+    {
       "id": "KRN-005",
       "title": "Qualify real selected XNU allocator type compiler metadata",
       "priority": 96,
@@ -6746,6 +6787,68 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-067.md"
+    },
+    {
+      "id": "IOS-002",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [],
+      "title": "Implement tools/ios/ipsw_inspect.py: an offline, read-only inspector for an iPhone10,3 iOS 16.5 (20F66) restore image that checks BuildManifest.plist, product type/build, the restore-image set (OS/SystemOS/AppOS, DeviceTree, kernelcache) and hashes, and extracts nothing outside a given empty directory; tested on synthetic archives, never on invented Apple data",
+      "paths": [
+        "tools/ios",
+        "tests/test_ipsw_inspect.py"
+      ],
+      "sources": [],
+      "acceptance": [
+        "The inspector opens a zip with zipfile only (no extraction by default), parses BuildManifest.plist (plistlib), and reports ProductBuildVersion, ProductVersion, SupportedProductTypes, each BuildIdentity's device class and the manifest paths of OS/SystemOS/AppOS/Cryptex disk images, DeviceTree and KernelCache; with --sha256 it hashes members by streaming.",
+        "Verdicts are exactly: accepted (build 20F66 and iPhone10,3/D22AP present, all images listed in the manifest present in the archive), wrong-build, wrong-device, missing-member, not-an-ipsw, with the missing/foreign item named; it never reports compatibility from the presence of file names.",
+        "Host tests on synthetic zips built in a temp dir (accepted case, each rejecting case, zip-slip member names refused, absent file, a member listed but absent); no Apple data is invented as a fixture beyond the minimum manifest keys, and the test says so."
+      ],
+      "steps": [
+        "Write the inspector",
+        "Synthetic-archive tests",
+        "make check"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/IOS-002.md"
+    },
+    {
+      "id": "NAT-071",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [
+        "NAT-068"
+      ],
+      "title": "Milestone 1 remainder (host): make a run last long enough to observe more than the kernel's boot - decide and build the cheapest verified bound (longer loader watchdog cap with a fixed hard deadline vs kernel-side keepalive), a stay-alive PID 1 with a periodic heartbeat, and the first exercise of the timed loader_return_after path; image, host tests, analyser, decision draft; no phone action",
+      "paths": [
+        "docs/procedures/nat-071",
+        "artifacts/nat-071"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "A written feasibility note (README) compares (A) a derived loader that arms the CL0 watchdog for a longer fixed cap and raises its software deadline, and (B) a kernel keepalive patch with a boot-arg deadline, using the measured NAT-068 timeline (kernel clock 48.6 s to PID 1; watchdog armed 83 s; enumeration at +26.7 s) and the loader source's real constants; it picks the option that needs no new unverified hardware access and keeps one verified stop (the watchdog cap itself).",
+        "The chosen change is built reproducibly (two identical builds, pins by SHA-256) as a new same-length-named image whose differences from NAT-067's are listed and tested; the heartbeat PID 1 is built from the project's probe source with periodic console lines and an exit after a fixed total time; nothing is claimed about Apple userland.",
+        "Host tests include: payload/loader diffs limited to the listed changes, the cap and deadline constants read back from the built loader, a heartbeat-bearing synthetic log classified by the analyser with the new verdicts (heartbeat-n, timed-return, watchdog-reset, panic-return), and mutation checks of the new analyser rules.",
+        "A decision draft states the new run length, the hardware watchdog cap, what ends the run if the kernel hangs (the cap), what stays unknown, and the pass rule (at least 3 heartbeat lines at least 4 s apart on the kernel stamp clock, the loader's return reason timed-return, the log chain PASS)."
+      ],
+      "steps": [
+        "Feasibility from the loader source and NAT-068 timeline",
+        "Derive image and driver",
+        "Heartbeat init",
+        "Tests, mutants, decision draft"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-071.md"
     },
     {
       "id": "USB-001",
@@ -8685,6 +8788,46 @@
       "card_path": "planning/tasks/NAT-068.md"
     },
     {
+      "id": "NAT-069",
+      "title": "After NAT-068 (PID 1 ran): derive the image with the kernel's own read-only display-pipeline dump switched on (boot-arg e1sdisp=2: DECON/RDMA/DSIM/DCPHY state, frame counters, the framebuffer address the display engine scans out) so that one native run can tell whether the loader's framebuffer is the one the hardware shows; build, host tests, analyser reading of the display lines, decision draft; no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "depends_on": [
+        "NAT-068"
+      ],
+      "paths": [
+        "docs/procedures/nat-069",
+        "artifacts/nat-069"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "A build script in docs/procedures/nat-069 derives one RECOVERY image from NAT-067's build (same loader, kernel, ADT and ramdisk) under a new same-length image name, whose command line differs from NAT-067's only by the nat_attempt tag and the appended boot-arg e1sdisp=2; two builds give identical hashes, every input is pinned by SHA-256, the command line stays under BOOT_LINE_LENGTH.",
+        "Host tests (no phone): the payload differs from NAT-067's only in the command-line field (and the loader's boot-id words); e1sdisp and the DECON/RDMA/DSIM/DCPHY message formats are in the pinned kernel binary and in the 0010 patch source; the pinned patch's pipeline function only reads (no store through any mapped display pointer); the driver and analyser derive from NAT-067's with only the pinned image name, hashes, package and marker paths and decision glob changed; the analyser parses the display lines (formats taken from the patch's printf strings) into a structured reading and still gives the NAT-068 verdict (probe-ran-to-exit) on the real NAT-068 log.",
+        "A decision draft names both image hashes, decision 0019, every display MMIO window the kernel will now read (physical bases and sizes from the patch), what may go wrong (an abort, or a hang that only the 83 s watchdog ends), what stays unknown, the pass/fail rule; no owner confirmation is recorded and nothing runs on the phone."
+      ],
+      "steps": [
+        "Derive the build from NAT-067 with the new name and command line",
+        "Derived driver/analyser with display reading, host tests against the real build, kernel and NAT-068 log",
+        "Decision draft, evidence"
+      ],
+      "status": "done",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-11T22:24:19+00:00",
+      "last_heartbeat": "2026-11-11T22:41:51+00:00",
+      "updated_at": "2026-11-11T22:56:47+00:00",
+      "progress_note": "Serves critical-path milestone 4 (docs/strategy/2026-11-12-ios-critical-path.md section 3): the question is whether the display engine scans out the loader's framebuffer (phys 0xfa200000, 1080x2340, stride 4320). Observable: parsed e1s-display pipeline lines. Decision it feeds: enabled RDMA reading that buffer -> copy-into-bootloader-framebuffer path, UI-003 stays off the critical path; idle or other buffer -> UI-003 (real DECON/DSIM driver) moves ahead of milestone 5; fault/hang -> loader-side power-domain task. Build, package, derived driver done; analyser/tests/mutants/decision draft remain.",
+      "next_step": "write analyze_nat069.py, test_nat069.py, mutants.py, decision-draft.md, evidence.json",
+      "evidence": "docs/procedures/nat-069/evidence.json",
+      "evidence_sha256": "b896da5d0d597b6fe705d2837880836aa73d01667318233f7703904a6b2d1a6e",
+      "finished_at": "2026-11-11T22:56:47+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-069.md"
+    },
+    {
       "id": "DRV-001",
       "title": "Prepare an STM SPI touch driver and host adapter",
       "status": "done",
@@ -9119,6 +9262,40 @@
       "card_path": "planning/tasks/NAT-056.md"
     },
     {
+      "id": "NAT-070",
+      "title": "Native run of the NAT-069 image (decision per image): what do the DECON/RDMA/DSIM registers say about the display pipeline the loader left running, and does PID 1 still run; stock restore and Android check",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 94,
+      "depends_on": [
+        "NAT-069"
+      ],
+      "paths": [
+        "docs/procedures/nat-070",
+        "artifacts/nat-070"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "One run of the single image named in its decision file under the decision 0019 run protocol (decision file committed before the run, native permit opened citing it and closed after the task is done; no retry); the NAT-069 driver is the only launcher.",
+        "The host collector archives the records of the real run; the analyser gives a verdict from the archive and the USB log and a display reading from the kernel text; a run in which the host receives no kernel text is recorded as inconclusive or FAIL with the observations that exist.",
+        "Stock RECOVERY (96620b8b...) is restored with a full-hash readback and Android is verified unchanged; data, apps and settings untouched; evidence.json with hashes and exit codes is saved."
+      ],
+      "steps": [
+        "Write the decision file, commit, run preflight",
+        "Single run, restore stock RECOVERY, verify Android",
+        "Analyse, write evidence and update the registry"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-070.md"
+    },
+    {
       "id": "ESIM-001",
       "title": "Specify eUICC logical channels and LPA integration",
       "status": "done",
@@ -9245,6 +9422,42 @@
       "card_path": "planning/tasks/NAT-057.md"
     },
     {
+      "id": "NAT-072",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 93,
+      "depends_on": [
+        "NAT-071",
+        "NAT-070"
+      ],
+      "title": "Single native run of the NAT-071 image under its own decision file: does the payload kernel stay alive for the new bound with PID 1 printing heartbeats, and does the timed loader_return path hand the log back; restore stock RECOVERY, verify Android, analyse",
+      "paths": [
+        "docs/procedures/nat-072",
+        "artifacts/nat-072"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "Decision file for this image committed before the run; native permit opened citing it and closed after; preflight and restore by the decision-0019 protocol; stock RECOVERY hash verified after, Android booted, data intact.",
+        "Evidence reports the analyser verdict and the measured heartbeat times, the return reason, and the decision it feeds (milestone 1 closed, or the exact missing piece); no claim about Apple userland."
+      ],
+      "steps": [
+        "Promote decision",
+        "One launch",
+        "Restore and verify",
+        "Analyse and record"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native",
+        "Dependencies: NAT-071, NAT-070"
+      ],
+      "card_path": "planning/tasks/NAT-072.md"
+    },
+    {
       "id": "SEN-001",
       "title": "Specify sensor-hub and GNSS transport adapters",
       "status": "done",
@@ -9327,6 +9540,35 @@
       "report_health": "stale"
     },
     {
+      "id": "IOS-003",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 92,
+      "depends_on": [],
+      "title": "Kernel readiness matrix for Apple launchd/backboardd/SpringBoard: fetch the donor kernel/userland trees at pinned SHAs (hakios-xnu-kernel, ios-lemonadep, ios-apollo, y2sios, s24-port) and map every kernel-side requirement the donors needed for 16.5/16.7 userland (AMFI/sandbox/trust-cache policy, keystore selectors, root FS driver, IOSurface/IOMobileFramebuffer, boot-args, syscalls, Mach services) to present/missing/unknown in the project tree and the S24 kernel log",
+      "paths": [
+        "research/notes/IOS-003-kernel-readiness-matrix.md"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "Donor sources are fetched with tools/sources.py at full pinned SHAs under references/ (no install/flash script executed); the note names each pin and licence.",
+        "A table with one row per requirement: what the donor needed, the donor file/patch (path and SHA) that shows it, the project's state (present in the S24 kernel log, present in source but not run, absent, unknown) with the file or log line, and the owner-facing consequence; no row says compatible from a symbol name or a successful build.",
+        "A short ordered list of the kernel items that block the first Apple launchd run (milestone 3) and the ones that can wait, with the evidence for the order."
+      ],
+      "steps": [
+        "Fetch the pinned donor trees",
+        "Extract the requirement list per donor",
+        "Map against the project kernel and the NAT-068 log"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/IOS-003.md"
+    },
+    {
       "id": "NAT-013",
       "title": "Harden stock restore tooling against ended-session resume and premature success reporting",
       "scope": "host",
@@ -9363,6 +9605,35 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-013.md"
+    },
+    {
+      "id": "NAT-073",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 91,
+      "depends_on": [],
+      "title": "Root delivery design without Android partitions: how a roughly 2-3 GiB iOS root and a writable RAM overlay reach the payload kernel - (a) loader-staged RAM root received over a new DWC3 bulk-OUT endpoint with the watchdog bounded, (b) kernel USB block device, (c) smaller root plus on-demand paging; sizes, throughput, RAM budget from the live DTB/log, watchdog and driver cost, host test plan and one recommendation",
+      "paths": [
+        "docs/strategy/2026-11-12-root-delivery.md"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "RAM budget computed from the memory ranges the kernel log / ADT report on this S24 (kernel, framebuffer, carve-outs, ramdisk window) and from a trimmed-root size estimate stated as an estimate until IOS-001 gives real sizes.",
+        "Throughput and time estimates for each option from the project's measured USB facts (NAT-041: HS only, control endpoint only, 1517 transfers for 185 KB in NAT-068) with the watchdog bound from NAT-071; each option lists what must be written, what can be host-tested with a fake device, and the failure mode.",
+        "One recommendation, the first implementation task with its acceptance criteria, and the exact boot-args / loader changes it needs; no Android partition is part of any option."
+      ],
+      "steps": [
+        "Measure budget from existing logs",
+        "Evaluate options",
+        "Recommend and spawn the implementation task"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-073.md"
     },
     {
       "id": "PLN-001",
@@ -14768,7 +15039,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-001"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -14807,7 +15078,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-001"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -15795,6 +16066,19 @@
         "worktree": null
       }
     ],
+    "claude-nat065-20261112-ramdisk": [
+      {
+        "id": "IOS-001",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-11T22:41:40+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": null,
+        "worktree": null
+      }
+    ],
     "codex-e1s-dependencies-20261105-k": [
       {
         "id": "KRN-003",
@@ -15849,175 +16133,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-11T20:39:23+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-nat061-20261112-klog",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-11T20:42:59+00:00",
-      "action": "task.add:NAT-064",
-      "owner": "claude-nat061-20261112-klog",
-      "tasks": [
-        {
-          "id": "NAT-064",
-          "status": "pending",
-          "owner": null,
-          "priority": 96
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T20:43:08+00:00",
-      "action": "task.add:NAT-065",
-      "owner": "claude-nat061-20261112-klog",
-      "tasks": [
-        {
-          "id": "NAT-065",
-          "status": "pending",
-          "owner": null,
-          "priority": 96
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T20:43:16+00:00",
-      "action": "task.add:NAT-066",
-      "owner": "claude-nat061-20261112-klog",
-      "tasks": [
-        {
-          "id": "NAT-066",
-          "status": "pending",
-          "owner": null,
-          "priority": 95
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T20:43:25+00:00",
-      "action": "task.claim:NAT-064",
-      "owner": "claude-nat064-20261112-rootdev",
-      "tasks": [
-        {
-          "id": "NAT-064",
-          "status": "in_progress",
-          "owner": "claude-nat064-20261112-rootdev",
-          "priority": 96,
-          "last_heartbeat": "2026-11-11T20:43:25+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T21:02:27+00:00",
-      "action": "task.done:NAT-064",
-      "owner": "claude-nat064-20261112-rootdev",
-      "tasks": [
-        {
-          "id": "NAT-064",
-          "status": "done",
-          "owner": "claude-nat064-20261112-rootdev",
-          "priority": 96,
-          "last_heartbeat": "2026-11-11T20:43:25+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T21:03:53+00:00",
-      "action": "task.claim:NAT-065",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "NAT-065",
-          "status": "in_progress",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 96,
-          "last_heartbeat": "2026-11-11T21:03:53+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T21:35:30+00:00",
-      "action": "task.done:NAT-065",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "NAT-065",
-          "status": "done",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 96,
-          "last_heartbeat": "2026-11-11T21:03:53+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T21:36:57+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-11T21:37:07+00:00",
-      "action": "task.claim:NAT-066",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "NAT-066",
-          "status": "in_progress",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 95,
-          "last_heartbeat": "2026-11-11T21:37:07+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T21:50:45+00:00",
-      "action": "task.done:NAT-066",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "NAT-066",
-          "status": "done",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 95,
-          "last_heartbeat": "2026-11-11T21:37:07+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T21:50:59+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-11T21:53:51+00:00",
-      "action": "task.add:NAT-067",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "NAT-067",
-          "status": "pending",
-          "owner": null,
-          "priority": 96
-        }
-      ]
-    },
     {
       "at": "2026-11-11T21:54:09+00:00",
       "action": "task.add:NAT-068",
@@ -16108,11 +16223,190 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-11T22:24:01+00:00",
+      "action": "task.add:NAT-069",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-069",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:24:10+00:00",
+      "action": "task.add:NAT-070",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-070",
+          "status": "pending",
+          "owner": null,
+          "priority": 94
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:24:19+00:00",
+      "action": "task.claim:NAT-069",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-069",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 95,
+          "last_heartbeat": "2026-11-11T22:24:19+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:39:46+00:00",
+      "action": "task.add:IOS-002",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-002",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:40:07+00:00",
+      "action": "task.add:IOS-001",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-001",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:40:25+00:00",
+      "action": "task.add:IOS-003",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-003",
+          "status": "pending",
+          "owner": null,
+          "priority": 92
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:40:36+00:00",
+      "action": "task.add:NAT-071",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-071",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:40:46+00:00",
+      "action": "task.add:NAT-072",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-072",
+          "status": "pending",
+          "owner": null,
+          "priority": 93
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:40:58+00:00",
+      "action": "task.add:NAT-073",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-073",
+          "status": "pending",
+          "owner": null,
+          "priority": 91
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:41:24+00:00",
+      "action": "task.claim:IOS-001",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-001",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T22:41:24+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:41:40+00:00",
+      "action": "task.block:IOS-001",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-001",
+          "status": "blocked",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 97,
+          "blocked_reason": "Missing external file: the iPhone X (iPhone10,3/D22AP) iOS 16.5 build 20F66 restore image (*_Restore.ipsw, several GB; Apple publishes it on its update CDN) must be downloaded by the owner into artifacts/apple-inputs/ (git-ignored). It is the only source of Apple's OS/SystemOS/AppOS images (rootfs, dyld, shared cache, launchd, backboardd, SpringBoard), the D22AP DeviceTree and the kernelcache version string. Nothing local contains any of it (search 2026-11-12: repo, references/, artifacts/, home to depth 4). See docs/strategy/2026-11-12-ios-critical-path.md section 4. Check with tools/ios/ipsw_inspect.py (IOS-002) once it exists.",
+          "last_heartbeat": "2026-11-11T22:41:40+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:41:51+00:00",
+      "action": "task.update:NAT-069",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-069",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 95,
+          "progress_note": "Serves critical-path milestone 4 (docs/strategy/2026-11-12-ios-critical-path.md section 3): the question is whether the display engine scans out the loader's framebuffer (phys 0xfa200000, 1080x2340, stride 4320). Observable: parsed e1s-display pipeline lines. Decision it feeds: enabled RDMA reading that buffer -> copy-into-bootloader-framebuffer path, UI-003 stays off the critical path; idle or other buffer -> UI-003 (real DECON/DSIM driver) moves ahead of milestone 5; fault/hang -> loader-side power-domain task. Build, package, derived driver done; analyser/tests/mutants/decision draft remain.",
+          "next_step": "write analyze_nat069.py, test_nat069.py, mutants.py, decision-draft.md, evidence.json",
+          "last_heartbeat": "2026-11-11T22:41:51+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:56:47+00:00",
+      "action": "task.done:NAT-069",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-069",
+          "status": "done",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 95,
+          "progress_note": "Serves critical-path milestone 4 (docs/strategy/2026-11-12-ios-critical-path.md section 3): the question is whether the display engine scans out the loader's framebuffer (phys 0xfa200000, 1080x2340, stride 4320). Observable: parsed e1s-display pipeline lines. Decision it feeds: enabled RDMA reading that buffer -> copy-into-bootloader-framebuffer path, UI-003 stays off the critical path; idle or other buffer -> UI-003 (real DECON/DSIM driver) moves ahead of milestone 5; fault/hang -> loader-side power-domain task. Build, package, derived driver done; analyser/tests/mutants/decision draft remain.",
+          "next_step": "write analyze_nat069.py, test_nat069.py, mutants.py, decision-draft.md, evidence.json",
+          "last_heartbeat": "2026-11-11T22:41:51+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "3784a80a559ade15220f539948a3ce80bf0ce8bb8403cdc76e5f102873a1f69b",
-    "BOARD.md": "030eccd6b4d1bd8f27e4035a8c65955f683b8eb979dc6e0674b500a99e11b531",
+    "STATUS.md": "824224df310406e18dc1398fc11b74572e0f904f38c492ad4fdc20be019ea4a1",
+    "BOARD.md": "0f9209ec2bfa5e474519adc9e35e53815b4b0fe06319648749e07ff8bcdea435",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -16241,6 +16535,7 @@
     "planning/tasks/NAT-040.md": "d2a424f16c6665ca3836862097f55524ec7f0bbf53241b330e89e57648563897",
     "planning/tasks/NAT-041.md": "a3421dc1c461e0ce04af4851d361af8888a14702f98652555347c1bfc5cae630",
     "planning/tasks/NAT-050.md": "3aa5fc869a2e660813bf581fad15a20e073f1fa817104f9f9d36ae2e38a45953",
+    "planning/tasks/IOS-001.md": "183b167b4cec79f04df3211a6f84e68ba869622fb286c6cdc68c5509e53c1709",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/REV-004.md": "8c7b273845208b121b2d6d1f05038b627689d3f97b766a765a91cdf23082bdb1",
     "planning/tasks/REV-011.md": "5ea2857fe5caca100edd1f7f53667f0b2a27de4b576000ecd14e2a55f1e7d51b",
@@ -16260,6 +16555,8 @@
     "planning/tasks/NAT-064.md": "05629dd821aca5d71ad7f7f33d1520a488ec440aa2ae4dab098e4546673e0f0f",
     "planning/tasks/NAT-065.md": "e46808c49fb7888f67ca05f5f186502fe066c6fa88c596c84d333af6146ac1a0",
     "planning/tasks/NAT-067.md": "e4ba0decee57e5e187eaf810a70aff8f9098b389c9a24e7576403c9c757da6f0",
+    "planning/tasks/IOS-002.md": "422bf985f9f7eff776e277d1251a1a8c954857c062d35785d5a3f112a61848a2",
+    "planning/tasks/NAT-071.md": "134aa9042ed8970145b748856d6832ec50412d6b3f80ea437c12721fd4be178d",
     "planning/tasks/USB-001.md": "19299959cb09f2aa3b00ffa299face5e25f485c75dfcc2e5f1879b39d435471a",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
@@ -16302,6 +16599,7 @@
     "planning/tasks/NAT-063.md": "a161aace0f7d5778d3e9b80ae65aff8bd0d1681d178956ce66c9089fcf1e3ae5",
     "planning/tasks/NAT-066.md": "784cc72a8e51f9468d9252d787f1d43b3d45072d72cfd8b0d45854c5ecdc95ff",
     "planning/tasks/NAT-068.md": "63ac39bfc290b650ecdf1d5e546a4dd64bd59e618178a376f2a1d88d8b37349a",
+    "planning/tasks/NAT-069.md": "dc88da36b861f2658df9ea2d1587a3aff3467385871912fa3645c77a2c535a41",
     "planning/tasks/DRV-001.md": "eaac786b5ca6d0640d7a9bea43bf42424662189e0f9f44baaa6b6ad049f10f17",
     "planning/tasks/KRN-023.md": "a95e56ff9ef7bfa3ff55cf11a48d0bba892cc95ab504b367bc3e9d4490ecdd51",
     "planning/tasks/REV-012.md": "99bf82028acd252050bbe595c74c47d22013dfccb4d261b32b98825471ce86ea",
@@ -16313,12 +16611,16 @@
     "planning/tasks/NAT-054.md": "2d81a641dd8250941abd3cf325e34eadb090c143f87bfe0edbbde0ca3adf6661",
     "planning/tasks/NAT-055.md": "95f712901913a5039cca686b3a3b1d777937167c26178f1d76532119c594aa0e",
     "planning/tasks/NAT-056.md": "b63eb108dff6eab09ecf6e6780d1de65936399bab295b60c043b1bedb41e9478",
+    "planning/tasks/NAT-070.md": "516af46a1f09322ecd9c6c5ee7891661051816494b096a772648c18c7b482ae2",
     "planning/tasks/ESIM-001.md": "4ff5511bf1b91ec562d46b9fa0fdbc4dc3ffd12af187060e75777f8fcde71bb6",
     "planning/tasks/VM-004.md": "e60d0c34c4cbc0e4c68b4a74b97657a569fe4a12f25e16efc01dcaa45ccc2b15",
     "planning/tasks/NAT-057.md": "5a5cfb72e8e8b6bf01995892e27a8f23c02e6de2f5ea24330a780c8dc156837a",
+    "planning/tasks/NAT-072.md": "fff59baf9a7bc876e8fb126b4286ef33084d3b8d8fc73c8bfd9ae2474d6c8037",
     "planning/tasks/SEN-001.md": "3c54f6f748160ba9c5b4c4f27f41576ddb90a5c2f73f0243805e189091695d2d",
     "planning/tasks/ODIN-001.md": "ac0ee966c510177f407059b9a1c47e89df084a5b1c873bb7eea122547f1d4f0a",
+    "planning/tasks/IOS-003.md": "8e77fbdd97b812e9520a9978915461b4d76cc5478c74e7b85afad6d7a112f23b",
     "planning/tasks/NAT-013.md": "b211a32160f7a1711f4cdfb1218280216622baf34bd7fdfcfdf7b259ce4b12a9",
+    "planning/tasks/NAT-073.md": "2cd3118c7a7726d927f2ab869bc7675200eaaa00f1d075bb9b645183ffe005af",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
     "planning/tasks/INT-001.md": "9d68fa75fae4c21f31f5ea4734c3f592ed0b41c6ed897d7b045a892c63549760",
@@ -16439,8 +16741,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "900c9899f056f923a302eefcd803e5614e23ba4cd956b217a3299a49c572a47e",
-    "planning/tasks/DRV-003.md": "9cc6f782ab4b835cb0dedba9881bf8c175a6cd88b96a4243572f754d8c44465a",
+    "planning/tasks/NAT-003.md": "36015bf4a8c991d54652147b609cf923c5534c265fc8af40c39b322a2fac40db",
+    "planning/tasks/DRV-003.md": "8e0e95caee5f3d20c217469e50755ed1b9e49f1d52c444d1373d47c65f4d4ed4",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",

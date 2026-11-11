@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-11T22:20:05+00:00",
+  "updated_at": "2026-11-11T22:56:47+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -14243,6 +14243,237 @@
       "evidence": "docs/procedures/nat-068/evidence.json",
       "evidence_sha256": "ca3d8419e0ba3622d3b7f3ae807d1c244a95ce318370f6246b860a0f11a4c6ae",
       "finished_at": "2026-11-11T22:19:56+00:00"
+    },
+    {
+      "id": "NAT-069",
+      "title": "After NAT-068 (PID 1 ran): derive the image with the kernel's own read-only display-pipeline dump switched on (boot-arg e1sdisp=2: DECON/RDMA/DSIM/DCPHY state, frame counters, the framebuffer address the display engine scans out) so that one native run can tell whether the loader's framebuffer is the one the hardware shows; build, host tests, analyser reading of the display lines, decision draft; no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "depends_on": [
+        "NAT-068"
+      ],
+      "paths": [
+        "docs/procedures/nat-069",
+        "artifacts/nat-069"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "A build script in docs/procedures/nat-069 derives one RECOVERY image from NAT-067's build (same loader, kernel, ADT and ramdisk) under a new same-length image name, whose command line differs from NAT-067's only by the nat_attempt tag and the appended boot-arg e1sdisp=2; two builds give identical hashes, every input is pinned by SHA-256, the command line stays under BOOT_LINE_LENGTH.",
+        "Host tests (no phone): the payload differs from NAT-067's only in the command-line field (and the loader's boot-id words); e1sdisp and the DECON/RDMA/DSIM/DCPHY message formats are in the pinned kernel binary and in the 0010 patch source; the pinned patch's pipeline function only reads (no store through any mapped display pointer); the driver and analyser derive from NAT-067's with only the pinned image name, hashes, package and marker paths and decision glob changed; the analyser parses the display lines (formats taken from the patch's printf strings) into a structured reading and still gives the NAT-068 verdict (probe-ran-to-exit) on the real NAT-068 log.",
+        "A decision draft names both image hashes, decision 0019, every display MMIO window the kernel will now read (physical bases and sizes from the patch), what may go wrong (an abort, or a hang that only the 83 s watchdog ends), what stays unknown, the pass/fail rule; no owner confirmation is recorded and nothing runs on the phone."
+      ],
+      "steps": [
+        "Derive the build from NAT-067 with the new name and command line",
+        "Derived driver/analyser with display reading, host tests against the real build, kernel and NAT-068 log",
+        "Decision draft, evidence"
+      ],
+      "status": "done",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-11T22:24:19+00:00",
+      "last_heartbeat": "2026-11-11T22:41:51+00:00",
+      "updated_at": "2026-11-11T22:56:47+00:00",
+      "progress_note": "Serves critical-path milestone 4 (docs/strategy/2026-11-12-ios-critical-path.md section 3): the question is whether the display engine scans out the loader's framebuffer (phys 0xfa200000, 1080x2340, stride 4320). Observable: parsed e1s-display pipeline lines. Decision it feeds: enabled RDMA reading that buffer -> copy-into-bootloader-framebuffer path, UI-003 stays off the critical path; idle or other buffer -> UI-003 (real DECON/DSIM driver) moves ahead of milestone 5; fault/hang -> loader-side power-domain task. Build, package, derived driver done; analyser/tests/mutants/decision draft remain.",
+      "next_step": "write analyze_nat069.py, test_nat069.py, mutants.py, decision-draft.md, evidence.json",
+      "evidence": "docs/procedures/nat-069/evidence.json",
+      "evidence_sha256": "b896da5d0d597b6fe705d2837880836aa73d01667318233f7703904a6b2d1a6e",
+      "finished_at": "2026-11-11T22:56:47+00:00"
+    },
+    {
+      "id": "NAT-070",
+      "title": "Native run of the NAT-069 image (decision per image): what do the DECON/RDMA/DSIM registers say about the display pipeline the loader left running, and does PID 1 still run; stock restore and Android check",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 94,
+      "depends_on": [
+        "NAT-069"
+      ],
+      "paths": [
+        "docs/procedures/nat-070",
+        "artifacts/nat-070"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "One run of the single image named in its decision file under the decision 0019 run protocol (decision file committed before the run, native permit opened citing it and closed after the task is done; no retry); the NAT-069 driver is the only launcher.",
+        "The host collector archives the records of the real run; the analyser gives a verdict from the archive and the USB log and a display reading from the kernel text; a run in which the host receives no kernel text is recorded as inconclusive or FAIL with the observations that exist.",
+        "Stock RECOVERY (96620b8b...) is restored with a full-hash readback and Android is verified unchanged; data, apps and settings untouched; evidence.json with hashes and exit codes is saved."
+      ],
+      "steps": [
+        "Write the decision file, commit, run preflight",
+        "Single run, restore stock RECOVERY, verify Android",
+        "Analyse, write evidence and update the registry"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "IOS-002",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [],
+      "title": "Implement tools/ios/ipsw_inspect.py: an offline, read-only inspector for an iPhone10,3 iOS 16.5 (20F66) restore image that checks BuildManifest.plist, product type/build, the restore-image set (OS/SystemOS/AppOS, DeviceTree, kernelcache) and hashes, and extracts nothing outside a given empty directory; tested on synthetic archives, never on invented Apple data",
+      "paths": [
+        "tools/ios",
+        "tests/test_ipsw_inspect.py"
+      ],
+      "sources": [],
+      "acceptance": [
+        "The inspector opens a zip with zipfile only (no extraction by default), parses BuildManifest.plist (plistlib), and reports ProductBuildVersion, ProductVersion, SupportedProductTypes, each BuildIdentity's device class and the manifest paths of OS/SystemOS/AppOS/Cryptex disk images, DeviceTree and KernelCache; with --sha256 it hashes members by streaming.",
+        "Verdicts are exactly: accepted (build 20F66 and iPhone10,3/D22AP present, all images listed in the manifest present in the archive), wrong-build, wrong-device, missing-member, not-an-ipsw, with the missing/foreign item named; it never reports compatibility from the presence of file names.",
+        "Host tests on synthetic zips built in a temp dir (accepted case, each rejecting case, zip-slip member names refused, absent file, a member listed but absent); no Apple data is invented as a fixture beyond the minimum manifest keys, and the test says so."
+      ],
+      "steps": [
+        "Write the inspector",
+        "Synthetic-archive tests",
+        "make check"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "IOS-001",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 97,
+      "depends_on": [],
+      "title": "EXTERNAL INPUT (owner): place the iPhone X (iPhone10,3 / D22AP) iOS 16.5 build 20F66 restore image under artifacts/apple-inputs/ (git-ignored) - the only source of Apple's rootfs, dyld, shared cache, launchd, backboardd and SpringBoard; milestone 2-7 of docs/strategy/2026-11-12-ios-critical-path.md cannot start without it",
+      "paths": [
+        "artifacts/apple-inputs"
+      ],
+      "sources": [],
+      "acceptance": [
+        "The file artifacts/apple-inputs/<name>_Restore.ipsw exists locally (never committed) and tools/ios/ipsw_inspect.py (IOS-002) accepts it: ProductBuildVersion 20F66, iPhone10,3 among SupportedProductTypes, SHA-256 of the archive and of each restore image (OS, SystemOS, AppOS disk images, DeviceTree, kernelcache) recorded in a local, uncommitted inventory.",
+        "The inspector output states the kernelcache's Darwin/xnu version string so that the match with the project kernel (Darwin 22.5.0, xnu-8796.121.2) is a recorded comparison, not an assumption.",
+        "No Apple binary, image or key is added to Git; only the sanitized inspector summary (versions, sizes, hashes of public Apple files) may be committed."
+      ],
+      "steps": [
+        "Owner downloads the IPSW from Apple's update CDN (licence terms are the owner's responsibility), places it at artifacts/apple-inputs/",
+        "Run the IOS-002 inspector; record the summary"
+      ],
+      "status": "blocked",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-11T22:41:24+00:00",
+      "last_heartbeat": "2026-11-11T22:41:40+00:00",
+      "updated_at": "2026-11-11T22:41:40+00:00",
+      "blocked_reason": "Missing external file: the iPhone X (iPhone10,3/D22AP) iOS 16.5 build 20F66 restore image (*_Restore.ipsw, several GB; Apple publishes it on its update CDN) must be downloaded by the owner into artifacts/apple-inputs/ (git-ignored). It is the only source of Apple's OS/SystemOS/AppOS images (rootfs, dyld, shared cache, launchd, backboardd, SpringBoard), the D22AP DeviceTree and the kernelcache version string. Nothing local contains any of it (search 2026-11-12: repo, references/, artifacts/, home to depth 4). See docs/strategy/2026-11-12-ios-critical-path.md section 4. Check with tools/ios/ipsw_inspect.py (IOS-002) once it exists."
+    },
+    {
+      "id": "IOS-003",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 92,
+      "depends_on": [],
+      "title": "Kernel readiness matrix for Apple launchd/backboardd/SpringBoard: fetch the donor kernel/userland trees at pinned SHAs (hakios-xnu-kernel, ios-lemonadep, ios-apollo, y2sios, s24-port) and map every kernel-side requirement the donors needed for 16.5/16.7 userland (AMFI/sandbox/trust-cache policy, keystore selectors, root FS driver, IOSurface/IOMobileFramebuffer, boot-args, syscalls, Mach services) to present/missing/unknown in the project tree and the S24 kernel log",
+      "paths": [
+        "research/notes/IOS-003-kernel-readiness-matrix.md"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "Donor sources are fetched with tools/sources.py at full pinned SHAs under references/ (no install/flash script executed); the note names each pin and licence.",
+        "A table with one row per requirement: what the donor needed, the donor file/patch (path and SHA) that shows it, the project's state (present in the S24 kernel log, present in source but not run, absent, unknown) with the file or log line, and the owner-facing consequence; no row says compatible from a symbol name or a successful build.",
+        "A short ordered list of the kernel items that block the first Apple launchd run (milestone 3) and the ones that can wait, with the evidence for the order."
+      ],
+      "steps": [
+        "Fetch the pinned donor trees",
+        "Extract the requirement list per donor",
+        "Map against the project kernel and the NAT-068 log"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "NAT-071",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [
+        "NAT-068"
+      ],
+      "title": "Milestone 1 remainder (host): make a run last long enough to observe more than the kernel's boot - decide and build the cheapest verified bound (longer loader watchdog cap with a fixed hard deadline vs kernel-side keepalive), a stay-alive PID 1 with a periodic heartbeat, and the first exercise of the timed loader_return_after path; image, host tests, analyser, decision draft; no phone action",
+      "paths": [
+        "docs/procedures/nat-071",
+        "artifacts/nat-071"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "A written feasibility note (README) compares (A) a derived loader that arms the CL0 watchdog for a longer fixed cap and raises its software deadline, and (B) a kernel keepalive patch with a boot-arg deadline, using the measured NAT-068 timeline (kernel clock 48.6 s to PID 1; watchdog armed 83 s; enumeration at +26.7 s) and the loader source's real constants; it picks the option that needs no new unverified hardware access and keeps one verified stop (the watchdog cap itself).",
+        "The chosen change is built reproducibly (two identical builds, pins by SHA-256) as a new same-length-named image whose differences from NAT-067's are listed and tested; the heartbeat PID 1 is built from the project's probe source with periodic console lines and an exit after a fixed total time; nothing is claimed about Apple userland.",
+        "Host tests include: payload/loader diffs limited to the listed changes, the cap and deadline constants read back from the built loader, a heartbeat-bearing synthetic log classified by the analyser with the new verdicts (heartbeat-n, timed-return, watchdog-reset, panic-return), and mutation checks of the new analyser rules.",
+        "A decision draft states the new run length, the hardware watchdog cap, what ends the run if the kernel hangs (the cap), what stays unknown, and the pass rule (at least 3 heartbeat lines at least 4 s apart on the kernel stamp clock, the loader's return reason timed-return, the log chain PASS)."
+      ],
+      "steps": [
+        "Feasibility from the loader source and NAT-068 timeline",
+        "Derive image and driver",
+        "Heartbeat init",
+        "Tests, mutants, decision draft"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "NAT-072",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 93,
+      "depends_on": [
+        "NAT-071",
+        "NAT-070"
+      ],
+      "title": "Single native run of the NAT-071 image under its own decision file: does the payload kernel stay alive for the new bound with PID 1 printing heartbeats, and does the timed loader_return path hand the log back; restore stock RECOVERY, verify Android, analyse",
+      "paths": [
+        "docs/procedures/nat-072",
+        "artifacts/nat-072"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "Decision file for this image committed before the run; native permit opened citing it and closed after; preflight and restore by the decision-0019 protocol; stock RECOVERY hash verified after, Android booted, data intact.",
+        "Evidence reports the analyser verdict and the measured heartbeat times, the return reason, and the decision it feeds (milestone 1 closed, or the exact missing piece); no claim about Apple userland."
+      ],
+      "steps": [
+        "Promote decision",
+        "One launch",
+        "Restore and verify",
+        "Analyse and record"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "NAT-073",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 91,
+      "depends_on": [],
+      "title": "Root delivery design without Android partitions: how a roughly 2-3 GiB iOS root and a writable RAM overlay reach the payload kernel - (a) loader-staged RAM root received over a new DWC3 bulk-OUT endpoint with the watchdog bounded, (b) kernel USB block device, (c) smaller root plus on-demand paging; sizes, throughput, RAM budget from the live DTB/log, watchdog and driver cost, host test plan and one recommendation",
+      "paths": [
+        "docs/strategy/2026-11-12-root-delivery.md"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "RAM budget computed from the memory ranges the kernel log / ADT report on this S24 (kernel, framebuffer, carve-outs, ramdisk window) and from a trimmed-root size estimate stated as an estimate until IOS-001 gives real sizes.",
+        "Throughput and time estimates for each option from the project's measured USB facts (NAT-041: HS only, control endpoint only, 1517 transfers for 185 KB in NAT-068) with the watchdog bound from NAT-071; each option lists what must be written, what can be host-tested with a fake device, and the failure mode.",
+        "One recommendation, the first implementation task with its acceptance criteria, and the exact boot-args / loader changes it needs; no Android partition is part of any option."
+      ],
+      "steps": [
+        "Measure budget from existing logs",
+        "Evaluate options",
+        "Recommend and spawn the implementation task"
+      ],
+      "status": "pending",
+      "owner": null
     }
   ],
   "experiments": [
@@ -59818,6 +60049,185 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-11T22:24:01+00:00",
+      "action": "task.add:NAT-069",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-069",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:24:10+00:00",
+      "action": "task.add:NAT-070",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-070",
+          "status": "pending",
+          "owner": null,
+          "priority": 94
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:24:19+00:00",
+      "action": "task.claim:NAT-069",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-069",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 95,
+          "last_heartbeat": "2026-11-11T22:24:19+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:39:46+00:00",
+      "action": "task.add:IOS-002",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-002",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:40:07+00:00",
+      "action": "task.add:IOS-001",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-001",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:40:25+00:00",
+      "action": "task.add:IOS-003",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-003",
+          "status": "pending",
+          "owner": null,
+          "priority": 92
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:40:36+00:00",
+      "action": "task.add:NAT-071",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-071",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:40:46+00:00",
+      "action": "task.add:NAT-072",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-072",
+          "status": "pending",
+          "owner": null,
+          "priority": 93
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:40:58+00:00",
+      "action": "task.add:NAT-073",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-073",
+          "status": "pending",
+          "owner": null,
+          "priority": 91
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:41:24+00:00",
+      "action": "task.claim:IOS-001",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-001",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T22:41:24+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:41:40+00:00",
+      "action": "task.block:IOS-001",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-001",
+          "status": "blocked",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 97,
+          "blocked_reason": "Missing external file: the iPhone X (iPhone10,3/D22AP) iOS 16.5 build 20F66 restore image (*_Restore.ipsw, several GB; Apple publishes it on its update CDN) must be downloaded by the owner into artifacts/apple-inputs/ (git-ignored). It is the only source of Apple's OS/SystemOS/AppOS images (rootfs, dyld, shared cache, launchd, backboardd, SpringBoard), the D22AP DeviceTree and the kernelcache version string. Nothing local contains any of it (search 2026-11-12: repo, references/, artifacts/, home to depth 4). See docs/strategy/2026-11-12-ios-critical-path.md section 4. Check with tools/ios/ipsw_inspect.py (IOS-002) once it exists.",
+          "last_heartbeat": "2026-11-11T22:41:40+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:41:51+00:00",
+      "action": "task.update:NAT-069",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-069",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 95,
+          "progress_note": "Serves critical-path milestone 4 (docs/strategy/2026-11-12-ios-critical-path.md section 3): the question is whether the display engine scans out the loader's framebuffer (phys 0xfa200000, 1080x2340, stride 4320). Observable: parsed e1s-display pipeline lines. Decision it feeds: enabled RDMA reading that buffer -> copy-into-bootloader-framebuffer path, UI-003 stays off the critical path; idle or other buffer -> UI-003 (real DECON/DSIM driver) moves ahead of milestone 5; fault/hang -> loader-side power-domain task. Build, package, derived driver done; analyser/tests/mutants/decision draft remain.",
+          "next_step": "write analyze_nat069.py, test_nat069.py, mutants.py, decision-draft.md, evidence.json",
+          "last_heartbeat": "2026-11-11T22:41:51+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:56:47+00:00",
+      "action": "task.done:NAT-069",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-069",
+          "status": "done",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 95,
+          "progress_note": "Serves critical-path milestone 4 (docs/strategy/2026-11-12-ios-critical-path.md section 3): the question is whether the display engine scans out the loader's framebuffer (phys 0xfa200000, 1080x2340, stride 4320). Observable: parsed e1s-display pipeline lines. Decision it feeds: enabled RDMA reading that buffer -> copy-into-bootloader-framebuffer path, UI-003 stays off the critical path; idle or other buffer -> UI-003 (real DECON/DSIM driver) moves ahead of milestone 5; fault/hang -> loader-side power-domain task. Build, package, derived driver done; analyser/tests/mutants/decision draft remain.",
+          "next_step": "write analyze_nat069.py, test_nat069.py, mutants.py, decision-draft.md, evidence.json",
+          "last_heartbeat": "2026-11-11T22:41:51+00:00"
+        }
+      ]
     }
   ]
 }
