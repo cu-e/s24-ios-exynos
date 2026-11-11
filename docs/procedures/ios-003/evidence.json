@@ -1,0 +1,44 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T00:20:00+00:00",
+ "commit": "473eaf9ffcdb45e121d3e96cbb6e9ea4a02db867",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "tree_state": "all listed files are committed at the recorded commit",
+ "summary": "research/notes/IOS-003-kernel-readiness-matrix.md: 21-row matrix (R01-R21) of what the donor projects needed in the kernel/root to run iOS 16.x userland, against the project kernel (xnu-8796.121.2 DEVELOPMENT_ARM64_E1S + HackiOS redwood.patch + files/ overlay + e1s patches). Five donors pinned at full SHAs and read at the file level (ios-apollo, s24-port, hakios, y2sios, ios-lemonadep); y2sios (same xnu-8796.121.2, iOS 16.5 userland, Exynos 990, recovery-partition boot, 2.32 GiB resident APFS root) is the closest donor. Project state per row uses only: in S24 log / in image / in source / absent / unknown. Ordered list: (1) a listable Apple root on the host, (2) a way to deliver a ~2.3 GB root into RAM without an Android partition (project loader has no host-to-device bulk path), (3) a session longer than ~8 s (watchdog), (4) kernel mounting the root, (5) stand-ins answering Apple's launchd. The note says nowhere that Apple's launchd, dyld or any iOS root runs on the S24.",
+ "evidence_category": "source-review. Donor statements are claims about other phones and other builds (ios-apollo 16.7.16, y2sios 16.5 on Exynos 990, ios-lemonadep on SM8350); none was reproduced. Two kinds of local observation are labelled where used: log lines of the one native run that exists (NAT-068 kernel log, native-device) and strings counted in the built NAT-069 image (host inspection: a string says the text is present, not that code runs). No donor code was built or executed and no upstream script was run.",
+ "acceptance": {
+  "1_pins_and_licences": "Section 2 of the note names each pin (full SHA) and licence for ios-apollo, s24-port, hakios, y2sios and ios-lemonadep; `tools/sources.py verify` exits 0 and reports clean=true for each at the recorded revision (commands below). review_files in research/sources.json were extended only by appending; sparse checkouts were widened, never narrowed (see limits). iosplus10 is explicitly listed as not reviewed.",
+  "2_table_without_symbol_compatibility": "Section 3: R01-R21, each with the donor requirement, donor path @ blob id, the project state in the five-word vocabulary with file or log line, and the consequence. No row asserts compatibility from a symbol name or a successful build; rows whose only evidence is a string in the image say 'in image' and 'no evidence it registered' (R08), and R09/R12 are recorded as absent from the image (docs/procedures/ios-003/image-scan.json).",
+  "3_ordered_blockers": "Section 4 orders five items blocking the first Apple launchd run and four that can wait, each with the evidence for the order (R01/R19 for the listable root, R17 for the watchdog budget, donor delivery figures for the root size). Section 6 turns the first blockers into tasks IOS-004/005/006 (child tasks added separately)."
+ },
+ "commands": [
+  {"cmd": "python3 tools/sources.py verify s24-port", "exit": 0, "result": "revision c8860decc62c6d6180e609036d027a2997972420 clean=true"},
+  {"cmd": "python3 tools/sources.py verify ios-apollo", "exit": 0, "result": "revision b5ac6999c65b03c432139af99cf47ab84eefd4e8 clean=true"},
+  {"cmd": "python3 tools/sources.py verify hakios", "exit": 0, "result": "revision 87bf4851bcc9cbb24fd79997820aa3661abe4ea5 clean=true"},
+  {"cmd": "python3 tools/sources.py verify y2sios", "exit": 0, "result": "revision 68fe2e922a52917ed851c1499e394fe5436365b5 clean=true; 11 review files hashed"},
+  {"cmd": "python3 tools/sources.py verify ios-lemonadep", "exit": 0, "result": "revision d952f7d97ea075de9f6686cbbafbd55db6517e65 clean=true"},
+  {"cmd": "python3 -I docs/procedures/ios-003/image_scan.py artifacts/nat-069/package-001/loader-diag-xnu-ne2-usb/recovery.img > docs/procedures/ios-003/image-scan.json", "exit": 0, "result": "image sha256 5abd8943...48c5b0de; 176 distinct apfs_ symbols, 28 mockfs_, 8 MiniAppleKeyStore occurrences, 42 MiniIOSurface strings, 17 trust_cache strings; 0 occurrences of launchd_unsecure_cache, ignition_level, purplebuddy, 'Apple File System'"}
+ ],
+ "sha256": {
+  "research/notes/IOS-003-kernel-readiness-matrix.md": "115e2a33160835596101ad702418acf5a2560644de3f99199b5a40b14329898d",
+  "research/sources.json": "d3fe5434842048b1914fee0a79b48f84674f691acbfc48e234e4026d11af3924",
+  "docs/procedures/ios-003/image_scan.py": "f3e63c0ed5ddf8ad5a1cfc81e3d0060a9fd8d327b945616e9b347afd4a2150af",
+  "docs/procedures/ios-003/image-scan.json": "e8ef0fd6d576303218a4e5ba07805876cb88a6b5fb665aa5390b60fc8cf71b19"
+ },
+ "limits": [
+  "Donor claims are not reproduced. The 2.32 GiB root (y2sios) and the ~2.5 GB in ~90 s RAM staging (ios-lemonadep) come from other hardware and other loaders; whether either applies to the S24 is open. ios-lemonadep's README names both 16.5 and 16.7.16 for its userland; which build the measurement used is not stated.",
+  "The donor selection script (ios165/select-system.py) that decides which files of iOS 16.5 enter the pruned root is not in the pinned y2sios tree; the HackiOS userland repository (hackios-xnu-userland) is not a pinned project source (new task).",
+  "Syscall/Mach-trap equality between the 16.5 kernelcache (xnu-8796.122.4~1 RELEASE_ARM64_T8015) and the project kernel (xnu-8796.121.2) is unknown; only 101.5, 121.2 and 141.3 are public tags. Needs the shared cache (IOS-005 follow-on).",
+  "A first attempt to narrow the sparse checkout of references/s24-port removed files outside the review list (a later 'task show' failed on a missing artifact). Repaired with 'git sparse-checkout disable' (full tree, superset); sources.py verify is clean for every source touched.",
+  "No donor code was built or executed. A command that would have regenerated the IOS-002 LZFSE test vectors with the compiled reference encoder was refused by the auto-mode classifier at 2026-11-11T23:05Z (session 6d8d2b72, reason 'Code from External'); it was not retried, and the fixture from the earlier run is used as is."
+ ],
+ "artifacts": [
+  "research/notes/IOS-003-kernel-readiness-matrix.md",
+  "research/sources.json",
+  "docs/procedures/ios-003/image_scan.py",
+  "docs/procedures/ios-003/image-scan.json",
+  "docs/procedures/nat-068/run-001-kernel-log.txt"
+ ]
+}
