@@ -1,0 +1,152 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T01:38:03+00:00",
+ "commit": "8c4cf7adfe988bfc9d852131cd7620343941e1c3",
+ "tree_state": "all files listed under artifacts are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat041-20261111-ep0engine",
+ "summary": "EP0-only polled DWC3 device engine (freestanding C, 11026 bytes of text for aarch64), a DWC3 + non-coherent-cache + USB-host model, 54 engine tests with 13 seeded engine defects, and the unattended collector s24_logd.py writing NAT-016 archives, with 46 tests and a 43/43 mutation check. Nothing was run on the phone; the model is a reading of the vendor driver.",
+ "acceptance": {
+  "1_engine": "engine/usbmon.c compiles for aarch64-freestanding with -Wall -Wextra -Werror (aarch64-build exit 0, 11026 bytes text, no undefined symbols checked by test_engine.test_the_engine_is_freestanding_aarch64_code); no interrupts, no allocation, one event buffer, at most two TRBs; descriptors for VID 0x1209/PID 0x0001, vendor class, no endpoints; vendor control-IN GET_INFO/READ_RING/GET_EXC, SET_NONCE; register/TRB constants cross-checked against the pinned vendor core.h/gadget.h by test_engine (GPL-2.0, attribution in dwc3_regs.h).",
+  "2_model_and_tests": "model/model.c simulates register file, endpoint commands, event buffer, TRB processing, cache and a USB host stub; test_engine.py (54 tests, exit 0) covers descriptor reads, partial reads, ring wrap/overrun markers, an exception frame, requests while holding, malformed SETUPs, resets in every stage; 13 seeded engine defects are each caught (SeededDefectTests).",
+  "3_collector": "s24_logd.py waits unattended, sends a fresh nonce, pulls the ring and the exception frame, writes NAT-016 frames through archive.py with boot_id = host nonce + device boot block, bridges short disconnects, and records every loss as a named drop; test_logd.py (46 tests, exit 0) runs it against the model and the real archive; mutate_logd.py killed 43 of 43 seeded collector defects; the CLI with real pyusb and no device ends outcome incomplete with exit 2 (cli-smoke)."
+ },
+ "established": [
+  "The engine, the protocol constants in usbmon_proto.py and engine/usbmon.h, the register constants in dwc3_regs.h and the vendor core.h/gadget.h at the pin agree (tests fail on any differing value).",
+  "Against the model the engine enumerates, serves GET_INFO/READ_RING/GET_EXC/SET_NONCE, keeps the stream consistent through wraps, 32-bit offset boundaries, interrupted appends and bus resets, and obeys the DMA discipline under a worst-case prefetcher; each of 13 seeded defects is detected.",
+  "The collector turns the engine's stream into NAT-016 frames without loss or duplication on the good path, names every kind of loss it can see, detects a device restart without a disconnect, bridges short disconnects, never opens a Samsung vendor id, and every one of 43 seeded collector defects makes its tests fail.",
+  "The model tests found one real engine defect: the vendor-request type constant (0x20 class instead of 0x40 vendor), now fixed and guarded."
+ ],
+ "not_established": [
+  "Anything about the real S24: that the DWC3 at 0x17900000 answers this register sequence, that PHY/repeater/clock prerequisites (NAT-040 U1-U8) can be met by the loader, that dc civac is the right cache maintenance for the loader's mapping, that libusb accepts a device with no interface endpoints, that the host sees 1209:0001.",
+  "That the model is faithful: it encodes one reading of the vendor dwc3 driver; a misreading shared by engine and model is invisible to these tests.",
+  "Unattended retrieval of a real native run (NAT-043's criterion); the collector has not seen real USB hardware, only pyusb's error mapping through a fake usb.core and a no-device run.",
+  "That the stop-reason mapping (a deliberate deadline passed to archive.finish as eof) is the right long-term semantics for NAT-016 consumers; it is documented, and the true reason is in events.jsonl and collector-summary.json.",
+  "PEEK is reserved and unimplemented; polling stops once XNU runs unless the kernel keeps calling the engine."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-041/test_engine.py"
+   ],
+   "exit_code": 0,
+   "note": "stderr artifacts/nat-041/logs/test-engine.stderr: Ran 54 tests, OK"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-041/test_logd.py"
+   ],
+   "exit_code": 0,
+   "note": "stderr artifacts/nat-041/logs/test-logd.stderr: Ran 46 tests, OK"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-041/mutate_logd.py",
+    "--out",
+    "artifacts/nat-041/mutation-logd"
+   ],
+   "exit_code": 0,
+   "note": "artifacts/nat-041/mutation-logd/summary.json: killed 43 of 43, survived 0"
+  },
+  {
+   "argv": [
+    "zig",
+    "cc",
+    "-target",
+    "aarch64-freestanding",
+    "-ffreestanding",
+    "-fno-builtin",
+    "-fno-stack-protector",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-c",
+    "-Idocs/procedures/nat-041/engine",
+    "docs/procedures/nat-041/engine/usbmon.c",
+    "-o",
+    "artifacts/nat-041/build/usbmon.o"
+   ],
+   "exit_code": 0,
+   "note": "freestanding aarch64 object, -Werror clean: artifacts/nat-041/build/usbmon.o (11026 bytes text)"
+  },
+  {
+   "argv": [
+    "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+    "-I",
+    "docs/procedures/nat-041/s24_logd.py",
+    "--out",
+    "artifacts/nat-041/smoke-002",
+    "--provenance",
+    "synthetic",
+    "--seconds",
+    "2"
+   ],
+   "exit_code": 2,
+   "note": "exit 2 is the expected result for a run with no device: stop deadline, outcome incomplete, no boots (artifacts/nat-041/smoke-002/manifest.json)"
+  }
+ ],
+ "sha256": {
+  "docs/procedures/nat-041/README.md": "dc864929b926a023f25a69239d2ed74c63f2ef425e15250049835d7020c62f3d",
+  "docs/procedures/nat-041/engine/usbmon.h": "37fafc1fc9b23f0ff0c0512fecc6c162bd457d1edcff3eeaf78af904af3d48dc",
+  "docs/procedures/nat-041/engine/usbmon.c": "37a53cbaa8887958107693f87e27e43c70b64a66ea791e10993d8f163fcdd205",
+  "docs/procedures/nat-041/engine/usbmon_port.h": "d05ecb27424d56ead1996ee42e870834823e3ae8529686138fa419682439400d",
+  "docs/procedures/nat-041/engine/port_aarch64.h": "caff95c195dcdfbbfd41a6404323efe6f132e0de753011866040b859933d2bbd",
+  "docs/procedures/nat-041/engine/dwc3_regs.h": "59df66e2e79ec306ba82ef4ae4cd2852ed7b3f5b93e6a178cc661a2b04cd0662",
+  "docs/procedures/nat-041/model/model.c": "b66fe37d72df50b0f05dc79170300dc1ff474c5180759ba9a0aa66f87052e92c",
+  "docs/procedures/nat-041/model/host_port.h": "cfc1e10949923dd5bcfc4b0d551625158dc7f355c9bcc8d5cf89cbc0c3057ace",
+  "docs/procedures/nat-041/modelhost.py": "d2450bbc2d512d914d167a96fcf058b3c7478bafb9d85d45d4123bdba9e2fc4e",
+  "docs/procedures/nat-041/usbmon_proto.py": "6da62583c74620c51f3a96b0e35ae170518d4495bce101705d08eac76eafb931",
+  "docs/procedures/nat-041/s24_logd.py": "acb5f2dc243023d2042f63c8fc59f48ec57d4f47a1c488cb18afc061ee0910cc",
+  "docs/procedures/nat-041/test_engine.py": "45dc7aa96b98503ba8dd4f50750b770796d0dbc2563bd5375e389a742f293406",
+  "docs/procedures/nat-041/test_logd.py": "20cad8880ca8e840fcc178ede98c6bb564451c69257abeaf76111b71bc9e0d3c",
+  "docs/procedures/nat-041/mutate_logd.py": "73b90216ab265400cf973fcff56334161b0977a032243a9a0ead145e6788d089",
+  "artifacts/nat-041/logs/test-engine.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-041/logs/test-engine.stderr": "ad338dcce4a4b5523976e624f192ecc28fa2314977f4baaf85d2b984a0ef45c1",
+  "artifacts/nat-041/logs/test-logd.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-041/logs/test-logd.stderr": "d8e964cc00685b0a8cbe58a95f34206a06bc1a97e565705c72cdaf9bdb7fd68e",
+  "artifacts/nat-041/logs/mutate-logd.stdout": "3765619b581035decf39c455adc066ce17315960b877b037252eba9cb6515993",
+  "artifacts/nat-041/mutation-logd/summary.json": "73a2bdb03c2ed58a228960e8e9f13ebc16c1c1e5a12ec8b49c1abc155d3d687c",
+  "artifacts/nat-041/logs/aarch64-build.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-041/build/usbmon.o": "d7d310c202545d6817c1c531ce338c89e64d56320f79fed39b95d6f56e14a66e",
+  "artifacts/nat-041/logs/cli-smoke.stdout": "0063195bf74f81e0b46bbc29a2b9f851a44aca224d09f56505fc01b4df9764e6",
+  "artifacts/nat-041/smoke-002/manifest.json": "7f6fe0e5531d45056316ffd0c51f54425359622ebcb7c962ad9ffc72d9c3e100",
+  "artifacts/nat-041/smoke-002/collector-summary.json": "b139a2de75ba792cb23208350142e4bcc9d4d90000e4e778a7f6ac0b8487b63f",
+  "artifacts/nat-041/logs/exit-codes.tsv": "8e5ed250a520d1dbe9eaf4a6eaf21d2d96f2fee97c6b1547481014d3607dd29f"
+ },
+ "artifacts": [
+  "docs/procedures/nat-041/README.md",
+  "docs/procedures/nat-041/engine/usbmon.h",
+  "docs/procedures/nat-041/engine/usbmon.c",
+  "docs/procedures/nat-041/engine/usbmon_port.h",
+  "docs/procedures/nat-041/engine/port_aarch64.h",
+  "docs/procedures/nat-041/engine/dwc3_regs.h",
+  "docs/procedures/nat-041/model/model.c",
+  "docs/procedures/nat-041/model/host_port.h",
+  "docs/procedures/nat-041/modelhost.py",
+  "docs/procedures/nat-041/usbmon_proto.py",
+  "docs/procedures/nat-041/s24_logd.py",
+  "docs/procedures/nat-041/test_engine.py",
+  "docs/procedures/nat-041/test_logd.py",
+  "docs/procedures/nat-041/mutate_logd.py",
+  "artifacts/nat-041/logs/test-engine.stdout",
+  "artifacts/nat-041/logs/test-engine.stderr",
+  "artifacts/nat-041/logs/test-logd.stdout",
+  "artifacts/nat-041/logs/test-logd.stderr",
+  "artifacts/nat-041/logs/mutate-logd.stdout",
+  "artifacts/nat-041/mutation-logd/summary.json",
+  "artifacts/nat-041/logs/aarch64-build.stderr",
+  "artifacts/nat-041/build/usbmon.o",
+  "artifacts/nat-041/logs/cli-smoke.stdout",
+  "artifacts/nat-041/smoke-002/manifest.json",
+  "artifacts/nat-041/smoke-002/collector-summary.json",
+  "artifacts/nat-041/logs/exit-codes.tsv"
+ ]
+}
