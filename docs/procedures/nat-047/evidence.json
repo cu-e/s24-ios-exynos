@@ -1,0 +1,151 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T08:29:02+00:00",
+ "commit": "abd80524dec63618adb0756cb274adfa045f3469",
+ "tree_state": "the files listed under sha256 are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat047-20261111-usbmon-image",
+ "summary": "Two loader images, loader-diag-usbmon and loader-diag-usbmon-fault, built on the host: the NAT-044 reset-canary loader (run-006 family, 45 s deadline inside the 83 s watchdog, NAT-042 reset at the deadline) plus an 11-hunk source patch and src/markerlib47.c that run the NAT-045 ladder (L0-L2 read-only, then L3-L8) and the NAT-041 usbmon engine (compiled unmodified from their own directories) from the loader's bounded loops, forward the loader log, stage numbers and (fault image) a CPU exception frame to the host collector s24_logd.py over EP0 vendor requests, and draw a USB status frame (kind 13) on the screen as fallback. The built loader.elf runs under unicorn against the NAT-041 DWC3 host model and the unmodified collector: a new boot id, the stage records, the ladder report, the loader log byte-exact and (fault image) the exception frame arrive in the collector archive; the no-cable, late-plug, ladder-stop, engine-start-failure, engine-fault, power-domain-already-on and connected-not-configured cases keep the reset at the deadline. 75 tests pass; the mutation check kills 119 of 125 mutants and documents the other 6 as equivalent. Two RECOVERY candidates (Image.payload, hashes only) are packaged. Nothing ran on the phone and nothing was flashed.",
+ "evidence_category": "host-test (patch/build checks, x86 harness-free unit layers, unicorn instruction-level run of the built aarch64 loader against NAT-041's DWC3 model and the NAT-041 collector); not a measurement of the S24",
+ "acceptance": {
+  "1_images_and_unmodified_engine": "docs/procedures/nat-047 builds two images with the NAT-044 builder (build.py): loader-diag-usbmon and loader-diag-usbmon-fault. Stage messages go through usbmon_stage (mk_stage hook, nat047_stage); usbmon_poll runs in mk_draw once per band, in both forms of mk_wait_tenths (so in every marker dwell and every hold-loop tenth of a second) and in the bring-up waits; the NAT-045 ladder runs before usbmon_init; the NAT-044 reset ends the run at the deadline. usbmon.c, ladder.c, ladder_usb.c and the NAT-042 module are compiled from their own directories (the Build layer checks the hashes in build.json against the pinned evidence of NAT-041, NAT-042 and NAT-045, that every unit compiles with -Werror and that no copy sits in the patched loader tree). DEVIATION from the wording: the controlled BRK's exception path ends in usbmon_stage + usbmon_fault_record, the record half of usbmon_fault, and not in usbmon_fault itself: usbmon_fault ends in usbmon_hold, which never returns, so the loader's exception loop (screen report and the NAT-044 reset at the deadline) would never run.",
+  "2_model_run_with_collector": "Aarch64 layers (Plain, Fault, NoCable, FaultNoCable, LatePlug, LadderStop, EngineStartFails, BigLog, Hooks, EngineDownException, PowerDomainWasOn, ConnectedNotConfigured, ExceptionScreen, PollFault, PollFaultScreen): s24_logd.py unmodified, started first on the simulated bus, archives one boot whose id ends with the FNV-1a-64 of the image tag and whose head is the loader's counter at bring-up, the stage records in the loader's order, the ladder summaries and one line per hardware access, the loader RAM log byte exact in 512-byte records, the HOLD note last, with no drop, fault, stall or sequence gap; in the fault image the exception record with ESR 0xF2001234, ELR in the loader, FAR, SPSR and SP and the exception text. Mutation check: mutate_nat047.py, 125 mutants of markerlib47.c, patch_loader5.py, build.py, package.py and decode47.py: 119 killed, 6 documented equivalent, 0 survived, 0 invalid (mutation-002 is the run of the recorded tree; mutation-001 found 9 survivors and 2 invalid mutants, closed by 7 new tests, one new documented equivalent and two repaired mutant definitions). Display and watchdog: every case keeps the PMU reset store at the deadline (45 s plus under 3 s; PMU_WRITES equal the NAT-044/NAT-042 sequence) with the watchdog armed before it, the hold loop polls the engine in every 0.1 s window, one status draw polls once per band, and an idle poll costs a small bounded number of register accesses (NoCable).",
+  "3_packages_and_decision_text": "package.py (NAT-044's packager, unchanged, called through a wrapper; Package layer: Image.payload verbatim at offset 2048 of the RECOVERY image, not the loader-only Image, record hashes equal file hashes, a build record with a wrong payload hash is refused and nothing is written) produced artifacts/nat-047/package-001 (hashes in package.json and in this record). decision-template.md carries the decision text for NAT-043 with its pass/fail wording; it is a template, not a decision record, and nothing was flashed or run."
+ },
+ "established": [
+  "The patch applies with each anchor exactly once or not at all, only adds lines, and touches marker.h, markerlib.c and loader.c; the build is reproducible, both images fit one mebibyte, the deadline is refused if it is within 20 s of the watchdog, and the BRK exists only in the fault image and only in the hold routine.",
+  "The compiled loader, run instruction by instruction against NAT-041's DWC3 model, brings the engine up through the NAT-045 ladder, and the NAT-041 collector, started first and using only vendor control transfers, receives and archives a new boot id, stage markers, the ladder report, the loader log byte-exact and, in the fault image, the exception frame, with no drop and no gap in the engine's record numbers.",
+  "Failure paths behave as designed on the model: no cable (connect wait of 3 s, then the hold loop; reset at the deadline unchanged), host that connects but never configures, late plug (records written long before the cable arrive the same), ladder stop at rung 3 (engine never starts, no later register access, every hook a no-op, engine memory untouched), engine start failure after a passed ladder (reported as stopped with the engine's code, not as up), CPU exception while the engine was down (engine untouched) or inside the engine's poll (engine taken out of service, never polled again), power domain already on (bit visible in both summaries and on screen).",
+  "The USB status on the screen equals the status in the loader's memory; the decoder's bits, indices and phase names are those of the compiled source.",
+  "The engine, the ladder and the reset module are the pinned NAT-041, NAT-045 and NAT-042 files compiled unmodified (hashes in build.json equal the pinned evidence).",
+  "package-001: Image.payload of each image is carried verbatim at offset 2048 of a 96 MiB RECOVERY candidate built from the pinned stock RECOVERY (SHA-256 96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67)."
+ ],
+ "not_established": [
+  "Anything about the real S24: that the HSI0 power domain, clocks, eUSB2 PHY and the DWC3 at 0x17900000 behave as the NAT-040/NAT-045 reading of the vendor driver assumes (U1-U8 stay unknowns, to be read by NAT-043), that the SMMU/DMA and cache assumptions of the engine hold on this SoC, or that the host ever enumerates the device.",
+  "The model is one reading of the databook and of the vendor driver; where it and the code share a misreading the tests cannot notice. The mutation check shows that the tests detect single changes to the NAT-047 code, not that the specification is right.",
+  "x0..x30 are not captured by the loader's exception vectors: the FAULT frame's x[] is all zero. The screen is only a fallback: after an exception its USB frames appear about 20 s later, past the 45 s deadline (visible only in a 63 s test build).",
+  "The cost of an idle poll in real time on hardware, and whether long un-polled stretches of the loader let a real host time out during enumeration (the model has no host-side timeout of that kind).",
+  "No -ro image exists and none is claimed: rungs 1-2 cannot fail in the device model, so a look-but-do-not-write variant has no measured advantage. refclk_hz is 0 in this build, so the LPM_SEL selection has no effect.",
+  "That the reset at the deadline returns the phone to Download Mode (NAT-046 measures U1-U4), and that a run is safe on this unit: the ladder writes HSI0 power-domain, clock and PHY registers for the first time from this loader.",
+  "No native run, no display capture, no flash: nothing in this record is evidence about the phone."
+ ],
+ "findings": [
+  "The first mutation run (123 mutants) aborted at its baseline because the scratch tree lacked docs/procedures/nat-016 (the archive module of the NAT-041 collector); fixed in mutate_nat047.py and repeated.",
+  "mutation-001: 9 survivors and 2 invalid mutants. Closed by tests: the engine memory stays zero after a ladder stop for the stage, hold and fault hooks; a partial line logged before bring-up must not join the first live line; a failing engine start after a passed ladder; a 20 KB log that needs more than half of the ring; -Werror on the reset module; every phase name. Documented equivalent: ladder-ro-may-power-on (the flag is read only by rung 3 and the read-only ladder stops after rung 2). Two mutant definitions did not compile (unused variable/parameter) and were rewritten. mutation-002 on the final 75-test suite is the recorded result.",
+  "A waiter shell that matched its own command line with pgrep -f would never have exited; it was killed and replaced by a file-existence wait. The mutation process itself was unaffected.",
+  "On an engine start failure the ladder record count is reported as 0 (n47_note_stop(e, 0)); the failure code and the screen are right, the count is only that of the ladder runs when the ladder itself stops. Not changed."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-047/build.py",
+    "--out",
+    "artifacts/nat-047/build-002",
+    "--loader-source",
+    "<copy of NAT-020 build-003 source>"
+   ],
+   "exit_code": 0,
+   "note": "build-002; hashes in build.json"
+  },
+  {
+   "argv": [
+    "<venv with unicorn+capstone>/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-047/test_nat047.py"
+   ],
+   "exit_code": 0,
+   "note": "Ran 75 tests, OK (artifacts/nat-047/test-final.log); unicorn, capstone and zig present, nothing skipped"
+  },
+  {
+   "argv": [
+    "<venv with unicorn+capstone>/bin/python",
+    "-I",
+    "docs/procedures/nat-047/mutate_nat047.py",
+    "--out",
+    "artifacts/nat-047/mutation-002",
+    "--jobs",
+    "5"
+   ],
+   "exit_code": 0,
+   "note": "killed 119, documented equivalent 6, survived 0, invalid 0, anchor errors 0, of 125"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-047/package.py",
+    "--build",
+    "artifacts/nat-047/build-002",
+    "--out",
+    "artifacts/nat-047/package-001"
+   ],
+   "exit_code": 0,
+   "note": "two RECOVERY candidates, hashes in package.json"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "214 tests OK (TMPDIR on the project disk)"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-047/build-002/build.json",
+  "artifacts/nat-047/package-001/package.json",
+  "artifacts/nat-047/mutation-002/summary.json",
+  "artifacts/nat-047/mutation-001/summary.json",
+  "artifacts/nat-047/test-final.log",
+  "artifacts/nat-047/make-check.log",
+  "docs/procedures/nat-047/README.md",
+  "docs/procedures/nat-047/decision-template.md"
+ ],
+ "images": {
+  "loader-diag-usbmon": {
+   "image_sha256": "3b46f4e31488e7f58bf36a70fe0661d50cdae3d461877565bcbf2d5e9c529046",
+   "payload_sha256": "a90a93d77ea56d22b8af555d34bc91bf8871db8f12ed071bd534d16940d08b73",
+   "payload_bytes": 21853792,
+   "recovery_candidate_sha256": "c6802dea4682a4bc993885bf525e2907e42e4eeebb964310da82ed79fef7212d",
+   "recovery_candidate_path": "artifacts/nat-047/package-001/loader-diag-usbmon/recovery.img"
+  },
+  "loader-diag-usbmon-fault": {
+   "image_sha256": "2cb334cabd643c2f4d973e4cb5e8d46c562ea4c3e40093aa0d6cfb3a0f62d1e0",
+   "payload_sha256": "06281749f38bb6c8e944c3c82b4e77297b5749757e57b4d3c4d9f623b5025d77",
+   "payload_bytes": 21853792,
+   "recovery_candidate_sha256": "f1a193dcac776dde004a3d1a379c26a4a365a150318bbc0a6501506ad7dfa103",
+   "recovery_candidate_path": "artifacts/nat-047/package-001/loader-diag-usbmon-fault/recovery.img"
+  }
+ },
+ "stock_recovery_sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+ "sha256": {
+  "docs/procedures/nat-047/README.md": "e23a10b0860f23097a4122d280ea6ff3ce3d7c2e0245be2be8e5708716fafb88",
+  "docs/procedures/nat-047/build.py": "ad2054c331d89edb0259019c0d514c907d70d40f74688ed9913f28a721072501",
+  "docs/procedures/nat-047/decision-template.md": "ff890d6efe3f52c1e9255c865ba014f3ff52864e62c258592569cf96c8f1d6a8",
+  "docs/procedures/nat-047/decode47.py": "6ea1cc155806265f73bb188e9574745743f464fc8d7145d9633b67a69af06e66",
+  "docs/procedures/nat-047/mutate_nat047.py": "1e096319f05af972e94ff6e4aa74c5328b15d530ccb0bbe212f0a8a6865ec089",
+  "docs/procedures/nat-047/package.py": "d937c64dde3cba41b3dbd858a225ddf17e58445981c07786f19f7037ee212af5",
+  "docs/procedures/nat-047/patch_loader5.py": "4083435bc98ff8080e6c22f8ac4ae3a7d779ee8b4ef5d639cc7dc7c001204da3",
+  "docs/procedures/nat-047/src/markerlib47.c": "97fac0a7f8c8376ee4be37232cd35d468ef832463acda317d35ec2d3477feebc",
+  "docs/procedures/nat-047/src/usb47.h": "3d029820fa6680a53ef1297e96df442c297f4b4539e5cd5eb9e1ae0884cd54b1",
+  "docs/procedures/nat-047/test_nat047.py": "6dce781dc5f4abd84079f2959ae624280398773681113468a7f4b46282815e5e",
+  "docs/procedures/nat-047/test_support/glue47.c": "37b9fbcdd039402e064128675ed317f66c02a83846eee7f2bb35ed87054cabdb",
+  "docs/procedures/nat-047/test_support/rig47.py": "7b61c8d3f199424acb3c46f9dad5be786d58cdfb7f19f8b7795921f393483d53",
+  "docs/procedures/nat-047/test_support/sim47.py": "1ff2556751fa7affe70950be7fa531ec14fc12d8fc271e5d2cfcc15cc11a4a4e"
+ },
+ "artifact_sha256": {
+  "artifacts/nat-047/build-002/build.json": "4172d944022528e50ee200a07cb483f55e114a1057d3a950c58965c6dc77577a",
+  "artifacts/nat-047/package-001/package.json": "ee593fd3fe80c669ca4f6846566bd7bf5ef414d7fe7913bbf1cf7450460a5915",
+  "artifacts/nat-047/mutation-002/summary.json": "07e4d5db3f023d1f0349f9f7b706c7cdf9bc85bf7d2b6c2aef5ac5b85648ef33",
+  "artifacts/nat-047/mutation-001/summary.json": "640ccd6b6cc4ddf30fd15aba73221eb6faa22d87bfd7bc39e485cbed2a40c549",
+  "artifacts/nat-047/test-final.log": "ea06577824bb75602d7e6ca345708a985de7551a987f025d97e9d848564eaed0",
+  "artifacts/nat-047/make-check.log": "4a678da79ac9215814279babc51a4ed7d213b77495ce941caf3267dde7ee4b73"
+ },
+ "device_used": false,
+ "flashed": false
+}

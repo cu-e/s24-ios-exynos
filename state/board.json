@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-11T04:36:44+00:00",
-  "ledger_updated_at": "2026-11-11T04:36:08+00:00",
-  "registry_sha256": "175d173445e233ffcd4c50da150e2cce05a03abbc2858b769a42a353d8faa502",
+  "generated_at": "2026-11-11T08:30:49+00:00",
+  "ledger_updated_at": "2026-11-11T08:30:38+00:00",
+  "registry_sha256": "fd974f7fd1827aeecaec1876cd7598b26172e5f6dfd581aee255f8f6cd7ab30e",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
       "NAT-039",
-      "NAT-047"
+      "NAT-049"
     ],
     "in_progress": [],
     "blocked": [
@@ -235,6 +235,7 @@
       "NAT-006",
       "NAT-036",
       "NAT-045",
+      "NAT-047",
       "DRV-001",
       "KRN-023",
       "REV-012",
@@ -6520,6 +6521,39 @@
       "card_path": "planning/tasks/NAT-048.md"
     },
     {
+      "id": "NAT-049",
+      "title": "Gated session driver and archive analyzer for the NAT-043 run: decision-file gate, RECOVERY write with full readback, unattended collector (s24_logd.py) and USB watcher started and confirmed before the single reboot, verdict from the collector archive and the host USB log; host tests against the NAT-047 simulator; no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [
+        "NAT-047",
+        "NAT-048"
+      ],
+      "paths": [
+        "docs/procedures/nat-049",
+        "artifacts/nat-049"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "docs/procedures/nat-049 contains a session driver built on the NAT-048 driver (decision-file gate for `docs/decisions/*-nat043-<image>-single-run-*.md` naming the RECOVERY and Image.payload hashes and decision 0019; pinned names from the NAT-047 package record; read-only preflight by default; --execute writes only RECOVERY with full readback; one reboot; no retry; a failed write, readback or collector start restores stock and never reboots) that starts the NAT-041 collector with the pyusb venv python detached BEFORE the reboot request and proves by its first event record that it is running; every launch path stops before touching the phone unless the gate is open.",
+        "An analyzer reads the collector archive directory and the NAT-048 host USB event log and states the NAT-043 verdict (PASS / PARTIAL / FAIL / undetermined, exactly the wording of the NAT-047 decision template): boot id of the image (FNV tag of NAT047_TAG), loader log lines in order, stage records, ladder report with the stop rung, exception frame for the fault image, drop count; it never reports PASS from synthetic provenance or from an archive that does not match the packaged image's boot id.",
+        "Host tests with a mutation check: the driver with a fake adb/su/NAT-013 (no real device node is ever opened), the analyzer against archives produced by the NAT-047 simulator rig (plain, fault, no cable, ladder stop, late plug) and against corrupted archives; every refusal path tested; nothing is run on the phone."
+      ],
+      "steps": [
+        "Derive the driver from NAT-048's session_reset_canary.py with the collector start",
+        "Write the analyzer against the NAT-047 simulator archives",
+        "Tests, mutation check, evidence"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-049.md"
+    },
+    {
       "id": "USB-001",
       "title": "Implement host-buildable native USB and block-transport adapters",
       "status": "done",
@@ -8096,9 +8130,17 @@
         "Run the model harness end to end with the collector",
         "Package both images and draft the decision text"
       ],
-      "status": "pending",
-      "owner": null,
-      "column": "ready",
+      "status": "done",
+      "owner": "claude-nat047-20261111-usbmon-image",
+      "started_at": "2026-11-11T04:37:01+00:00",
+      "last_heartbeat": "2026-11-11T05:46:59+00:00",
+      "updated_at": "2026-11-11T08:30:38+00:00",
+      "progress_note": "68 host/simulator tests green; 123-mutant run in progress (first run aborted at baseline: scratch tree lacked nat-016, fixed); README and NAT-043 decision template written; NAT-049 (session driver + archive analyzer for NAT-043) added as the follow-up. Nothing run on the phone.",
+      "next_step": "Triage mutation survivors/INVALID, add package.py + Package tests, package hashes, evidence.json, task done",
+      "evidence": "docs/procedures/nat-047/evidence.json",
+      "evidence_sha256": "3e90ab4892b44d882a054146f20d5fa33c2c4fd0928d03c3fd23eb6ee0071396",
+      "finished_at": "2026-11-11T08:30:38+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-047.md"
     },
@@ -15025,62 +15067,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-11T00:25:51+00:00",
-      "action": "task.done:NAT-038",
-      "owner": "claude-nat038-20261111-usblog",
-      "tasks": [
-        {
-          "id": "NAT-038",
-          "status": "done",
-          "owner": "claude-nat038-20261111-usblog",
-          "priority": 98,
-          "last_heartbeat": "2026-11-11T00:21:47+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T00:26:22+00:00",
-      "action": "task.claim:NAT-040",
-      "owner": "claude-nat040-20261111-usbplan",
-      "tasks": [
-        {
-          "id": "NAT-040",
-          "status": "in_progress",
-          "owner": "claude-nat040-20261111-usbplan",
-          "priority": 97,
-          "last_heartbeat": "2026-11-11T00:26:22+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T00:58:03+00:00",
-      "action": "task.claim:NAT-041",
-      "owner": "claude-nat041-20261111-ep0engine",
-      "tasks": [
-        {
-          "id": "NAT-041",
-          "status": "in_progress",
-          "owner": "claude-nat041-20261111-ep0engine",
-          "priority": 97,
-          "last_heartbeat": "2026-11-11T00:58:03+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T01:11:25+00:00",
-      "action": "task.done:NAT-040",
-      "owner": "claude-nat040-20261111-usbplan",
-      "tasks": [
-        {
-          "id": "NAT-040",
-          "status": "done",
-          "owner": "claude-nat040-20261111-usbplan",
-          "priority": 97,
-          "last_heartbeat": "2026-11-11T00:26:22+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-11T01:38:15+00:00",
       "action": "task.done:NAT-041",
       "owner": "claude-nat041-20261111-ep0engine",
@@ -15298,11 +15284,70 @@
           "last_heartbeat": "2026-11-11T03:09:51+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-11T04:37:01+00:00",
+      "action": "task.claim:NAT-047",
+      "owner": "claude-nat047-20261111-usbmon-image",
+      "tasks": [
+        {
+          "id": "NAT-047",
+          "status": "in_progress",
+          "owner": "claude-nat047-20261111-usbmon-image",
+          "priority": 95,
+          "last_heartbeat": "2026-11-11T04:37:01+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T05:46:39+00:00",
+      "action": "task.add:NAT-049",
+      "owner": "claude-nat047-20261111-usbmon-image",
+      "tasks": [
+        {
+          "id": "NAT-049",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T05:46:59+00:00",
+      "action": "task.update:NAT-047",
+      "owner": "claude-nat047-20261111-usbmon-image",
+      "tasks": [
+        {
+          "id": "NAT-047",
+          "status": "in_progress",
+          "owner": "claude-nat047-20261111-usbmon-image",
+          "priority": 95,
+          "progress_note": "68 host/simulator tests green; 123-mutant run in progress (first run aborted at baseline: scratch tree lacked nat-016, fixed); README and NAT-043 decision template written; NAT-049 (session driver + archive analyzer for NAT-043) added as the follow-up. Nothing run on the phone.",
+          "next_step": "Triage mutation survivors/INVALID, add package.py + Package tests, package hashes, evidence.json, task done",
+          "last_heartbeat": "2026-11-11T05:46:59+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T08:30:38+00:00",
+      "action": "task.done:NAT-047",
+      "owner": "claude-nat047-20261111-usbmon-image",
+      "tasks": [
+        {
+          "id": "NAT-047",
+          "status": "done",
+          "owner": "claude-nat047-20261111-usbmon-image",
+          "priority": 95,
+          "progress_note": "68 host/simulator tests green; 123-mutant run in progress (first run aborted at baseline: scratch tree lacked nat-016, fixed); README and NAT-043 decision template written; NAT-049 (session driver + archive analyzer for NAT-043) added as the follow-up. Nothing run on the phone.",
+          "next_step": "Triage mutation survivors/INVALID, add package.py + Package tests, package hashes, evidence.json, task done",
+          "last_heartbeat": "2026-11-11T05:46:59+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "26c4a6d823894ffcc50fd27a71922fc310eaca7fb9ffe5935236d7962a00bc3f",
-    "BOARD.md": "982c3d57c531b410abf8e9fdc7532e3a6ca24366ddce6c0a067241db8de188f3",
+    "STATUS.md": "5e34470d9f8443cbf6fbe4ab1c4103ffc9f7c7be47fc395d7a0c664ed98fdb1d",
+    "BOARD.md": "a44c2d6dd452d748efe3d6489da88c5bbe336149b6cc9967726c3eeb64705519",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -15445,6 +15490,7 @@
     "planning/tasks/NAT-044.md": "ebe6e82d271322eba40665841d59265456760651c738681d5df0cc17d80305aa",
     "planning/tasks/NAT-046.md": "0aaea2a4708bfd98eaa14ab3db36c2eb249ab729acc7b620a76ce6734436e47e",
     "planning/tasks/NAT-048.md": "018ae63e1c1a425dcb6cab1eb1a660a6a80e87ffc0cb9502067f26ebc6e11d38",
+    "planning/tasks/NAT-049.md": "2848674db410b47c23095c75cb8b30de497458f8d10c9b10b4f574104253ca63",
     "planning/tasks/USB-001.md": "19299959cb09f2aa3b00ffa299face5e25f485c75dfcc2e5f1879b39d435471a",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
@@ -15477,7 +15523,7 @@
     "planning/tasks/NAT-006.md": "7b394e6d001a2743cb7d5c27b05d2d9fd66e3f5b2bfe6f20c9904a50535b5759",
     "planning/tasks/NAT-036.md": "cbe203575b4527767856c4aa43254e6ca8cb0108376ae896c67a12c7181cdab2",
     "planning/tasks/NAT-045.md": "e76172c29c8ba70c3e2edca2e11dd259194579cda7da6e56c5afb2ce4c454fd8",
-    "planning/tasks/NAT-047.md": "0159a07dd70c3a6aefdd20097fb9a7900f3baaa53cb53219608f51c94fa3612f",
+    "planning/tasks/NAT-047.md": "0be2a8e7ab7ead36a149aa77fed39b977d1a3b1dd82d2a8e5a9814b281aa6795",
     "planning/tasks/DRV-001.md": "eaac786b5ca6d0640d7a9bea43bf42424662189e0f9f44baaa6b6ad049f10f17",
     "planning/tasks/KRN-023.md": "a95e56ff9ef7bfa3ff55cf11a48d0bba892cc95ab504b367bc3e9d4490ecdd51",
     "planning/tasks/REV-012.md": "99bf82028acd252050bbe595c74c47d22013dfccb4d261b32b98825471ce86ea",

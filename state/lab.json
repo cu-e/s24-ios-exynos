@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-11T04:36:08+00:00",
+  "updated_at": "2026-11-11T08:30:38+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -13378,8 +13378,16 @@
         "Run the model harness end to end with the collector",
         "Package both images and draft the decision text"
       ],
-      "status": "pending",
-      "owner": null
+      "status": "done",
+      "owner": "claude-nat047-20261111-usbmon-image",
+      "started_at": "2026-11-11T04:37:01+00:00",
+      "last_heartbeat": "2026-11-11T05:46:59+00:00",
+      "updated_at": "2026-11-11T08:30:38+00:00",
+      "progress_note": "68 host/simulator tests green; 123-mutant run in progress (first run aborted at baseline: scratch tree lacked nat-016, fixed); README and NAT-043 decision template written; NAT-049 (session driver + archive analyzer for NAT-043) added as the follow-up. Nothing run on the phone.",
+      "next_step": "Triage mutation survivors/INVALID, add package.py + Package tests, package hashes, evidence.json, task done",
+      "evidence": "docs/procedures/nat-047/evidence.json",
+      "evidence_sha256": "3e90ab4892b44d882a054146f20d5fa33c2c4fd0928d03c3fd23eb6ee0071396",
+      "finished_at": "2026-11-11T08:30:38+00:00"
     },
     {
       "id": "NAT-048",
@@ -13415,6 +13423,36 @@
       "evidence": "docs/procedures/nat-048/evidence.json",
       "evidence_sha256": "92218e52afd6fbe0b0f87cfcb0cee4dd59a8ff2988d4b636ef26ba1e01464071",
       "finished_at": "2026-11-11T03:19:38+00:00"
+    },
+    {
+      "id": "NAT-049",
+      "title": "Gated session driver and archive analyzer for the NAT-043 run: decision-file gate, RECOVERY write with full readback, unattended collector (s24_logd.py) and USB watcher started and confirmed before the single reboot, verdict from the collector archive and the host USB log; host tests against the NAT-047 simulator; no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [
+        "NAT-047",
+        "NAT-048"
+      ],
+      "paths": [
+        "docs/procedures/nat-049",
+        "artifacts/nat-049"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "docs/procedures/nat-049 contains a session driver built on the NAT-048 driver (decision-file gate for `docs/decisions/*-nat043-<image>-single-run-*.md` naming the RECOVERY and Image.payload hashes and decision 0019; pinned names from the NAT-047 package record; read-only preflight by default; --execute writes only RECOVERY with full readback; one reboot; no retry; a failed write, readback or collector start restores stock and never reboots) that starts the NAT-041 collector with the pyusb venv python detached BEFORE the reboot request and proves by its first event record that it is running; every launch path stops before touching the phone unless the gate is open.",
+        "An analyzer reads the collector archive directory and the NAT-048 host USB event log and states the NAT-043 verdict (PASS / PARTIAL / FAIL / undetermined, exactly the wording of the NAT-047 decision template): boot id of the image (FNV tag of NAT047_TAG), loader log lines in order, stage records, ladder report with the stop rung, exception frame for the fault image, drop count; it never reports PASS from synthetic provenance or from an archive that does not match the packaged image's boot id.",
+        "Host tests with a mutation check: the driver with a fake adb/su/NAT-013 (no real device node is ever opened), the analyzer against archives produced by the NAT-047 simulator rig (plain, fault, no cable, ladder stop, late plug) and against corrupted archives; every refusal path tested; nothing is run on the phone."
+      ],
+      "steps": [
+        "Derive the driver from NAT-048's session_reset_canary.py with the collector start",
+        "Write the analyzer against the NAT-047 simulator archives",
+        "Tests, mutation check, evidence"
+      ],
+      "status": "pending",
+      "owner": null
     }
   ],
   "experiments": [
@@ -57825,6 +57863,65 @@
           "owner": "claude-nat045-20261111-usbladder",
           "priority": 95,
           "last_heartbeat": "2026-11-11T03:09:51+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T04:37:01+00:00",
+      "action": "task.claim:NAT-047",
+      "owner": "claude-nat047-20261111-usbmon-image",
+      "tasks": [
+        {
+          "id": "NAT-047",
+          "status": "in_progress",
+          "owner": "claude-nat047-20261111-usbmon-image",
+          "priority": 95,
+          "last_heartbeat": "2026-11-11T04:37:01+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T05:46:39+00:00",
+      "action": "task.add:NAT-049",
+      "owner": "claude-nat047-20261111-usbmon-image",
+      "tasks": [
+        {
+          "id": "NAT-049",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T05:46:59+00:00",
+      "action": "task.update:NAT-047",
+      "owner": "claude-nat047-20261111-usbmon-image",
+      "tasks": [
+        {
+          "id": "NAT-047",
+          "status": "in_progress",
+          "owner": "claude-nat047-20261111-usbmon-image",
+          "priority": 95,
+          "progress_note": "68 host/simulator tests green; 123-mutant run in progress (first run aborted at baseline: scratch tree lacked nat-016, fixed); README and NAT-043 decision template written; NAT-049 (session driver + archive analyzer for NAT-043) added as the follow-up. Nothing run on the phone.",
+          "next_step": "Triage mutation survivors/INVALID, add package.py + Package tests, package hashes, evidence.json, task done",
+          "last_heartbeat": "2026-11-11T05:46:59+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T08:30:38+00:00",
+      "action": "task.done:NAT-047",
+      "owner": "claude-nat047-20261111-usbmon-image",
+      "tasks": [
+        {
+          "id": "NAT-047",
+          "status": "done",
+          "owner": "claude-nat047-20261111-usbmon-image",
+          "priority": 95,
+          "progress_note": "68 host/simulator tests green; 123-mutant run in progress (first run aborted at baseline: scratch tree lacked nat-016, fixed); README and NAT-043 decision template written; NAT-049 (session driver + archive analyzer for NAT-043) added as the follow-up. Nothing run on the phone.",
+          "next_step": "Triage mutation survivors/INVALID, add package.py + Package tests, package hashes, evidence.json, task done",
+          "last_heartbeat": "2026-11-11T05:46:59+00:00"
         }
       ]
     }
