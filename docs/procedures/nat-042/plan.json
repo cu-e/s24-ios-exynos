@@ -1,0 +1,613 @@
+{
+ "task": "NAT-042",
+ "evidence_kind": "source-review",
+ "note": "Every value is read from the pinned open vendor kernel (and, where marked, from the device's own runtime DTB). No S-Boot disassembly or static review was used. Nothing here ran on the phone.",
+ "pin": {
+  "source_id": "s24-linux",
+  "repo_path": "references/s24-linux",
+  "sha": "417484173abc2c4fa93e738ea82ad9f2e84911b1"
+ },
+ "citations": [
+  {
+   "id": "R01",
+   "file": "arch/arm64/boot/dts/exynos/s5e9945.dts",
+   "line": 204,
+   "text": "compatible = \"samsung,exynos-reboot\";",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "the SoC DT node that configures the restart handler"
+  },
+  {
+   "id": "R02",
+   "file": "arch/arm64/boot/dts/exynos/s5e9945.dts",
+   "line": 209,
+   "text": "reboot-offset = <0x3C00>;",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "PMU offset written to trigger the warm reset"
+  },
+  {
+   "id": "R03",
+   "file": "arch/arm64/boot/dts/exynos/s5e9945.dts",
+   "line": 210,
+   "text": "reboot-trigger = <0x2>;",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "value written there"
+  },
+  {
+   "id": "R04",
+   "file": "arch/arm64/boot/dts/exynos/s5e9945.dts",
+   "line": 211,
+   "text": "reboot-cmd-offset = <0x0190>;",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "PMU offset that carries the generic reboot mode"
+  },
+  {
+   "id": "R05",
+   "file": "arch/arm64/boot/dts/exynos/s5e9945.dts",
+   "line": 207,
+   "text": "shutdown-offset = <0x3F90>;",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "PS_HOLD power-off register (not used by this design)"
+  },
+  {
+   "id": "R06",
+   "file": "arch/arm64/boot/dts/exynos/s5e9945.dts",
+   "line": 166,
+   "text": "compatible = \"samsung,exynos991-pmu\", \"syscon\";",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "the PMU node is a plain syscon at 0x12860000 (next line: reg)"
+  },
+  {
+   "id": "R07",
+   "file": "arch/arm64/boot/dts/samsung/e1s/e1s_eur_openx_w01_r13.dts",
+   "line": 1255,
+   "text": "compatible = \"samsung,sec-reboot\";",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "the board overlay node of the model e1s_eur_openx_w01_r13"
+  },
+  {
+   "id": "R08",
+   "file": "arch/arm64/boot/dts/samsung/e1s/e1s_eur_openx_w01_r13.dts",
+   "line": 1259,
+   "text": "magic-inform = <0x00B8>; /* INFORM2 */",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "PMU offset of the magic/mode word"
+  },
+  {
+   "id": "R09",
+   "file": "arch/arm64/boot/dts/samsung/e1s/e1s_eur_openx_w01_r13.dts",
+   "line": 1260,
+   "text": "panic-inform = <0x00BC>; /* INFORM3 */",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "PMU offset of the reset-reason word"
+  },
+  {
+   "id": "E01",
+   "file": "drivers/power/reset/exynos/exynos-reboot.c",
+   "line": 171,
+   "text": "#define REBOOT_MODE_NORMAL\t\t(0x00)",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "generic reboot-mode values"
+  },
+  {
+   "id": "E02",
+   "file": "drivers/power/reset/exynos/exynos-reboot.c",
+   "line": 176,
+   "text": "#define REBOOT_MODE_RECOVERY\t\t(0x01)",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "generic reboot-mode: recovery"
+  },
+  {
+   "id": "E03",
+   "file": "drivers/power/reset/exynos/exynos-reboot.c",
+   "line": 177,
+   "text": "#define REBOOT_MODE_MASK\t\t((1 << 3) - 1)",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "the mode is the low three bits of reboot-cmd-offset"
+  },
+  {
+   "id": "E04",
+   "file": "drivers/power/reset/exynos/exynos-reboot.c",
+   "line": 190,
+   "text": "else if (!strcmp((char *)cmd, \"recovery\"))",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "the commands this handler knows (no 'download')"
+  },
+  {
+   "id": "E05",
+   "file": "drivers/power/reset/exynos/exynos-reboot.c",
+   "line": 195,
+   "text": "regmap_update_bits(pmureg, reboot_cmd_offset, REBOOT_MODE_MASK, REBOOT_MODE_NORMAL);",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "every other command, including 'download', stores mode 0"
+  },
+  {
+   "id": "E06",
+   "file": "drivers/power/reset/exynos/exynos-reboot.c",
+   "line": 202,
+   "text": "if (exynos_reboot_ops.acpm_reboot)",
+   "occurrence": 2,
+   "total_occurrences": 2,
+   "claim": "the first thing the restart handler does is the ACPM stop call"
+  },
+  {
+   "id": "E07",
+   "file": "drivers/power/reset/exynos/exynos-reboot.c",
+   "line": 207,
+   "text": "exynos_reboot_parse(cmd);",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "then the command is parsed into reboot-cmd-offset"
+  },
+  {
+   "id": "E08",
+   "file": "drivers/power/reset/exynos/exynos-reboot.c",
+   "line": 212,
+   "text": "regmap_write(pmureg, reboot_offset, reboot_trigger);",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "then the software reset is triggered"
+  },
+  {
+   "id": "E09",
+   "file": "drivers/power/reset/exynos/exynos-reboot.c",
+   "line": 215,
+   "text": "wfi();",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "and the CPU waits for the reset"
+  },
+  {
+   "id": "E10",
+   "file": "drivers/power/reset/exynos/exynos-reboot.c",
+   "line": 228,
+   "text": ".priority = 128,",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "restart notifier priority (runs after sec_reboot's 130)"
+  },
+  {
+   "id": "E11",
+   "file": "drivers/power/reset/exynos/exynos-reboot.c",
+   "line": 278,
+   "text": "register_restart_handler(&exynos_restart_nb);",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "registration"
+  },
+  {
+   "id": "E12",
+   "file": "drivers/power/reset/exynos/exynos-reboot.c",
+   "line": 181,
+   "text": "if (cmd) {",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "exynos_reboot_parse acts only when a command string is given"
+  },
+  {
+   "id": "E13",
+   "file": "drivers/power/reset/exynos/exynos-reboot.c",
+   "line": 174,
+   "text": "#define REBOOT_MODE_FASTBOOT\t\t(0x03)",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "generic reboot-mode: fastboot"
+  },
+  {
+   "id": "E14",
+   "file": "drivers/power/reset/exynos/exynos-reboot.c",
+   "line": 187,
+   "text": "regmap_update_bits(pmureg, reboot_cmd_offset, REBOOT_MODE_MASK, REBOOT_MODE_FASTBOOT);",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "cmd 'bootloader'/'bl' stores mode 3"
+  },
+  {
+   "id": "S01",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 88,
+   "text": "SEC_RESET_REASON_PREFIX\t\t0x12345600",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "prefix of the Samsung reset-reason words"
+  },
+  {
+   "id": "S02",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 92,
+   "text": "SEC_RESET_REASON_UNKNOWN   = (SEC_RESET_REASON_PREFIX | 0x0),",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "normal restart"
+  },
+  {
+   "id": "S03",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 93,
+   "text": "SEC_RESET_REASON_DOWNLOAD  = (SEC_RESET_REASON_PREFIX | 0x1),",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "reboot to download"
+  },
+  {
+   "id": "S04",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 96,
+   "text": "SEC_RESET_REASON_RECOVERY  = (SEC_RESET_REASON_PREFIX | 0x4),",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "reboot to recovery"
+  },
+  {
+   "id": "S05",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 102,
+   "text": "SEC_RESET_REASON_BOOTLOADER   = (SEC_RESET_REASON_PREFIX | 0xd), /* go to download mode */",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "'bootloader' is also documented as download mode"
+  },
+  {
+   "id": "S06",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 81,
+   "text": "SEC_REBOOT_NORMAL = 0x4E,",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "value written to the INFORM2 byte"
+  },
+  {
+   "id": "S07",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 77,
+   "text": "#define SEC_REBOOT_END_OFFSET\t\t(16)",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "bit position of that byte"
+  },
+  {
+   "id": "S08",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 317,
+   "text": "sec_set_reboot_magic(SEC_REBOOT_NORMAL, SEC_REBOOT_END_OFFSET, 0xFF);",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "INFORM2[23:16] = 0x4E before the reason is written (LPM prevention); the byte is cleared with mask 0xFF first (sec_set_reboot_magic, lines 234-246)"
+  },
+  {
+   "id": "S09",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 328,
+   "text": "regmap_write(pmureg, panic_inform, SEC_RESET_REASON_DOWNLOAD);",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "'download' writes INFORM3 = 0x12345601"
+  },
+  {
+   "id": "S10",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 331,
+   "text": "regmap_write(pmureg, panic_inform, SEC_RESET_REASON_BOOTLOADER);",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "'bootloader' writes INFORM3 = 0x1234560d"
+  },
+  {
+   "id": "S11",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 326,
+   "text": "regmap_write(pmureg, panic_inform, SEC_RESET_REASON_RECOVERY);",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "'recovery' writes INFORM3 = 0x12345604"
+  },
+  {
+   "id": "S12",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 428,
+   "text": "regmap_write(pmureg, panic_inform, SEC_RESET_REASON_UNKNOWN);",
+   "occurrence": 1,
+   "total_occurrences": 2,
+   "claim": "unknown command: INFORM3 = 0x12345600"
+  },
+  {
+   "id": "S13",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 430,
+   "text": "regmap_write(pmureg, panic_inform, SEC_RESET_REASON_UNKNOWN);",
+   "occurrence": 2,
+   "total_occurrences": 2,
+   "claim": "no command: INFORM3 = 0x12345600"
+  },
+  {
+   "id": "S14",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 433,
+   "text": "cache_flush_all();",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "caches flushed after the writes"
+  },
+  {
+   "id": "S15",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 454,
+   "text": ".priority = 130,",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "runs before exynos-reboot"
+  },
+  {
+   "id": "S16",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 238,
+   "text": "regmap_read(pmureg, magic_inform, &tmp);",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "INFORM2 is read-modify-write"
+  },
+  {
+   "id": "S17",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 242,
+   "text": "tmp |= magic << offset;",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "only the selected byte changes"
+  },
+  {
+   "id": "S18",
+   "file": "drivers/samsung/sec_reboot.c",
+   "line": 435,
+   "text": "return NOTIFY_DONE;",
+   "occurrence": 1,
+   "total_occurrences": 2,
+   "claim": "sec_reboot returns NOTIFY_DONE so the chain continues to exynos-reboot"
+  },
+  {
+   "id": "A01",
+   "file": "drivers/soc/samsung/acpm/acpm.c",
+   "line": 345,
+   "text": "acpm_enter_wfi();",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "exynos_acpm_reboot only sends the ACPM STOP request"
+  },
+  {
+   "id": "A02",
+   "file": "drivers/soc/samsung/acpm/acpm.c",
+   "line": 314,
+   "text": "config.cmd[0] = 1 << ACPM_IPC_PROTOCOL_STOP;",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "the request"
+  },
+  {
+   "id": "Y01",
+   "file": "drivers/mfd/syscon.c",
+   "line": 41,
+   "text": ".reg_bits = 32,",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "generic syscon regmap: 32-bit registers"
+  },
+  {
+   "id": "Y02",
+   "file": "drivers/mfd/syscon.c",
+   "line": 113,
+   "text": "regmap = regmap_init_mmio(NULL, base, &syscon_config);",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "plain MMIO: a regmap_write is one store"
+  },
+  {
+   "id": "T01",
+   "file": "arch/arm64/boot/dts/samsung/e1s/e1s_eur_openx_w01_r13.dts",
+   "line": 778,
+   "text": "\"CLUSTER0_WDTRESET\", \"CLUSTER2_WDTRESET\", \"AUD_CPU0_WDTRESET\", \"SSS_CPU_WDTRESET\",",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "RST_STAT bit names 24..27 (bit 24 = cluster 0 watchdog)"
+  },
+  {
+   "id": "T02",
+   "file": "arch/arm64/boot/dts/samsung/e1s/e1s_eur_openx_w01_r13.dts",
+   "line": 779,
+   "text": "\"DBGC_CPU_WDTRESET\", \"WRESET\", \"SWRESET\", \"PORESET\";",
+   "occurrence": 1,
+   "total_occurrences": 1,
+   "claim": "RST_STAT bit names 28..31 (bit 30 = software reset)"
+  }
+ ],
+ "values": {
+  "pmu_base": "0x12860000",
+  "inform2": "0xb8",
+  "inform3": "0xbc",
+  "reboot_cmd": "0x190",
+  "reboot": "0x3c00",
+  "reboot_trigger": "0x2",
+  "reason_normal": "0x12345600",
+  "reason_download": "0x12345601",
+  "reason_bootloader": "0x1234560d",
+  "reason_recovery": "0x12345604",
+  "inform2_byte_shift": 16,
+  "inform2_byte_mask": "0xff",
+  "inform2_normal": "0x4e",
+  "mode_mask": "0x7",
+  "mode_normal": "0x0",
+  "mode_recovery": "0x1",
+  "mode_fastboot": "0x3"
+ },
+ "vendor_sequence_download": [
+  {
+   "step": 1,
+   "actor": "sec_reboot (notifier priority 130)",
+   "op": "read-modify-write",
+   "register": "INFORM2 (+0xb8)",
+   "effect": "bits 23:16 := 0x4e",
+   "cites": [
+    "S06",
+    "S07",
+    "S08",
+    "S16",
+    "S17",
+    "R08"
+   ]
+  },
+  {
+   "step": 2,
+   "actor": "sec_reboot",
+   "op": "write",
+   "register": "INFORM3 (+0xbc)",
+   "effect": "= 0x12345601 for cmd 'download' (0x1234560d for 'bootloader')",
+   "cites": [
+    "S03",
+    "S05",
+    "S09",
+    "S10",
+    "R09"
+   ]
+  },
+  {
+   "step": 3,
+   "actor": "sec_reboot",
+   "op": "cache flush",
+   "register": "-",
+   "effect": "cache_flush_all()",
+   "cites": [
+    "S14",
+    "S15",
+    "S18"
+   ]
+  },
+  {
+   "step": 4,
+   "actor": "exynos-reboot (priority 128)",
+   "op": "IPC",
+   "register": "ACPM",
+   "effect": "ACPM STOP request (acpm_enter_wfi); NOT replayed by the loader",
+   "cites": [
+    "E06",
+    "A01",
+    "A02"
+   ]
+  },
+  {
+   "step": 5,
+   "actor": "exynos-reboot",
+   "op": "read-modify-write",
+   "register": "reboot-cmd (+0x190)",
+   "effect": "bits 2:0 := 0 for 'download' and every unknown command, := 3 for 'bootloader'",
+   "cites": [
+    "E03",
+    "E05",
+    "E07",
+    "E12",
+    "E13",
+    "E14",
+    "R04"
+   ]
+  },
+  {
+   "step": 6,
+   "actor": "exynos-reboot",
+   "op": "write",
+   "register": "reboot (+0x3c00)",
+   "effect": "= 0x2 (software reset), then wfi",
+   "cites": [
+    "E08",
+    "E09",
+    "R02",
+    "R03"
+   ]
+  }
+ ],
+ "loader_replay": "module/s5e9945_reset.c replays steps 1, 2, 5, 6 in this order with a dsb and a read-back after each of 1, 2 and 5; step 3 is a no-op for the loader (no cacheable state is needed by the reset) and step 4 cannot be replayed (unknown U2).",
+ "absence_claims": [
+  {
+   "id": "AB1",
+   "claim": "Within the Samsung/Exynos driver directories (drivers/power/reset/exynos, drivers/samsung, drivers/soc/samsung, drivers/watchdog, drivers/mfd) exactly one C file reads reboot-offset, so the vendor kernel has one software-reset trigger path for this SoC (drivers/power/reset/hisi-reboot.c, a HiSilicon driver, uses the same property name and is unrelated)",
+   "pattern": "\"reboot-offset\"",
+   "pathspec": [
+    "drivers/power/reset/exynos/*.c",
+    "drivers/samsung/*.c",
+    "drivers/soc/samsung/*.c",
+    "drivers/watchdog/*.c",
+    "drivers/mfd/*.c"
+   ],
+   "expect_files": [
+    "drivers/power/reset/exynos/exynos-reboot.c"
+   ]
+  },
+  {
+   "id": "AB2",
+   "claim": "No driver matches the PMU compatible 'samsung,exynos991-pmu': the node is served by the generic syscon driver, so a PMU regmap write is one plain 32-bit MMIO store",
+   "pattern": "exynos991-pmu",
+   "pathspec": [
+    ":(exclude)*.dts",
+    ":(exclude)*.dtsi",
+    ":(exclude)*.dtso"
+   ],
+   "expect_files": []
+  },
+  {
+   "id": "AB3",
+   "claim": "exynos-reboot.c does not know the command 'download' (it falls into the NORMAL-mode branch); sec_reboot.c does",
+   "pattern": "\"download\"",
+   "pathspec": [
+    "drivers/power/reset/exynos/exynos-reboot.c",
+    "drivers/samsung/sec_reboot.c"
+   ],
+   "expect_files": [
+    "drivers/samsung/sec_reboot.c"
+   ]
+  }
+ ],
+ "runtime_dtb": {
+  "note": "/sys/firmware/fdt of the phone (S-Boot runtime DTB, normal boot, firmware S921BXXS9BYH3), copied read-only by NAT-005. The file is local (devices/ is gitignored); the check is skipped, and reported as skipped, when it is absent.",
+  "path": "devices/e1s-fdt/2026-11-10/runtime.dtb",
+  "sha256": "95fa811abca3f5f8889705add485f94c4490c57a853bded10539d4631bef46c3",
+  "u32": {
+   "/exynos-reboot": {
+    "reboot-offset": "0x3c00",
+    "reboot-trigger": "0x2",
+    "reboot-cmd-offset": "0x190",
+    "shutdown-offset": "0x3f90",
+    "shutdown-trigger": "0x100"
+   },
+   "/sec-reboot": {
+    "magic-inform": "0xb8",
+    "panic-inform": "0xbc"
+   },
+   "/system-controller@12860000": {}
+  },
+  "reg": {
+   "/system-controller@12860000": [
+    "0x0",
+    "0x12860000",
+    "0x10000"
+   ]
+  },
+  "strings": {
+   "/system-controller@12860000": {
+    "compatible": [
+     "samsung,exynos991-pmu",
+     "syscon"
+    ]
+   }
+  }
+ }
+}

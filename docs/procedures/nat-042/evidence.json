@@ -1,0 +1,115 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T01:58:14+00:00",
+ "commit": "253c89dd31fc69e84110803b7cb39d4ffbe5d33a",
+ "tree_state": "all listed files are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat042-20261111-reboot",
+ "summary": "Vendor reboot-to-download sequence (INFORM2 byte, INFORM3 reason, reboot-cmd mode bits, PMU 0x3c00 software reset) extracted from the pinned open vendor kernel with 47 literal citations and cross-checked against the device's measured runtime DTB; a freestanding replay module with a PMU model, 13 tests and a 27/27 mutation check; a decision-text template. Nothing ran on the phone; no S-Boot disassembly was used.",
+ "acceptance": {
+  "1_vendor_registers": "plan.json lists file, line and exact text for every register/offset/value (47 citations at pin 417484173abc2c4fa93e738ea82ad9f2e84911b1); verify_plan.py re-reads them and re-derives 16 of the 17 values from the cited text (pmu_base is checked against the runtime DTB reg); README.md compares vendor, existing loader (recovery_guard.c: INFORM3 read/clear, WDT 83 s, no INFORM2/0x190/0x3c00 writes) and the module; the NAT-004/NAT-011 SWRESET offsets conflict with the vendor 0x3c00 and are recorded as unreconciled and unused.",
+  "2_patch_design_and_decision_text": "module/s5e9945_reset.{h,c} (aarch64 freestanding build clean, dsb sy + wfi) with host model tests; README.md 'Design for the loader' and 'Native test plan'; decision-template.md for the agent-written decision under 0019. U1-U4 (PMU stores effective, SWRESET without ACPM STOP, S-Boot honouring INFORM3 with persistent REBOOT_MODE=4, DOWNLOAD vs BOOTLOADER word) are stated and are measurements of the native run.",
+  "3_no_sboot_review": "No S-Boot disassembly or static review was used; sources are the open vendor kernel, the measured runtime DTB and the measured behaviour of runs 001-009."
+ },
+ "established": [
+  "At the pin, the Android kernel's reboot-to-download path writes INFORM2 byte [23:16]=0x4e, INFORM3=0x12345601, reboot-cmd bits[2:0]=0 and PMU+0x3c00=2 (priority 130 sec_reboot then 128 exynos-reboot, with an ACPM STOP request between); 'download' is unknown to exynos-reboot and handled only by sec_reboot (verifier: 105/105).",
+  "The device's own runtime DTB (sha256 95fa811a...46c3) carries the same reboot-offset/trigger/cmd-offset and magic/panic inform offsets and the PMU reg 0x12860000.",
+  "The module writes exactly those registers in that order with read-backs, refuses other reasons, never triggers after a failed read-back (13 model tests); 27/27 seeded defects are killed; negative controls for the verifier (tampered line, text, pin, values, absence claims, DTB) fail as they should."
+ ],
+ "not_established": [
+  "U1: that the loader's PMU stores take effect. U2: that a software reset works without the ACPM STOP request. U3: that S-Boot honours INFORM3=DOWNLOAD while its persistent REBOOT_MODE=4. U4: DOWNLOAD (0x12345601) vs BOOTLOADER (0x1234560d) word.",
+  "That the phone resets, enters Download Mode or returns to Android through this path. Nothing was run on the phone; the PMU model is my reading of the vendor driver."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-042/verify_plan.py",
+    "--json",
+    "artifacts/nat-042/verify.json"
+   ],
+   "exit_code": 0,
+   "note": "OK: 105 checks, 105 passed, 0 failed, 0 skipped"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-042/test_nat042.py"
+   ],
+   "exit_code": 0,
+   "note": "OK"
+  },
+  {
+   "argv": [
+    "sh",
+    "-c",
+    "cc -std=c11 -Wall -Wextra -Werror -I docs/procedures/nat-042/module docs/procedures/nat-042/test/host_test.c -o artifacts/nat-042/host_test && artifacts/nat-042/host_test"
+   ],
+   "exit_code": 0,
+   "note": "all checks passed"
+  },
+  {
+   "argv": [
+    "sh",
+    "-c",
+    "rm -rf artifacts/nat-042/mutation && python3 -I docs/procedures/nat-042/mutate_reset.py --out artifacts/nat-042/mutation"
+   ],
+   "exit_code": 0,
+   "note": "killed 27 of 27"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "OK"
+  }
+ ],
+ "verifier": {
+  "checks": 105,
+  "passed": 105,
+  "failed": 0,
+  "skipped": 0
+ },
+ "mutation": {
+  "total": 27,
+  "killed": 27,
+  "not_killed": 0
+ },
+ "artifacts": [
+  "docs/procedures/nat-042/README.md",
+  "docs/procedures/nat-042/plan.json",
+  "docs/procedures/nat-042/verify_plan.py",
+  "docs/procedures/nat-042/module/s5e9945_reset.h",
+  "docs/procedures/nat-042/module/s5e9945_reset.c",
+  "docs/procedures/nat-042/test/host_test.c",
+  "docs/procedures/nat-042/mutate_reset.py",
+  "docs/procedures/nat-042/test_nat042.py",
+  "docs/procedures/nat-042/decision-template.md",
+  "artifacts/nat-042/verify.json",
+  "artifacts/nat-042/mutation/summary.json"
+ ],
+ "next": [
+  "NAT-044: link the reset module into the loader-diag image builder with a host verifier and the decision text",
+  "NAT-045: link the NAT-041 usbmon engine and the NAT-040 ladder into the loader image",
+  "NAT-043: first unattended native USB-log run, decision file written before the run, NAT-013 restore after"
+ ],
+ "supporting_kind": "host-test (PMU model tests, mutation check, aarch64 build) \u2014 authored-code checks, not source review and not hardware evidence",
+ "sha256": {
+  "docs/procedures/nat-042/README.md": "043b09e42035d5adf481544be0cf4073f73a55898004b710d1b74ffbd70857af",
+  "docs/procedures/nat-042/plan.json": "dcdff55fe08886eac569bfd5aa968c2d599de41376360d6c6d2143ce04ff3e4b",
+  "docs/procedures/nat-042/verify_plan.py": "d70a27d061e30b91df2463353a95ee44b26672290b58b9d5abb5916bc4cf61c0",
+  "docs/procedures/nat-042/module/s5e9945_reset.h": "05d7a85802cdceb59c2c168dc9ae8bf00b4edaf8c7f24bf9e113e233cc932352",
+  "docs/procedures/nat-042/module/s5e9945_reset.c": "6be65500f2e4661b80f70b73c0c2bb21d5797a38257c6ec0ecaef7fcf307b391",
+  "docs/procedures/nat-042/test/host_test.c": "3c5431b7027dfd000d1556d653589f9300e473b04f7a18f4f4374c0ec4222fb5",
+  "docs/procedures/nat-042/mutate_reset.py": "0a25914f5bc36b80aafb7e9779eb9ee3bf26ee9a71805b08b14be8a7ee137861",
+  "docs/procedures/nat-042/test_nat042.py": "bf4a73fc92a9d34d941232f09d6ef7fc89dafcdeddd9c4b7c3e6e1e00d2b33e0",
+  "docs/procedures/nat-042/decision-template.md": "8ebc02ad6db1057c060744fdfcca3a4750cc571436757d7a00dfbceb3cde880b",
+  "artifacts/nat-042/verify.json": "88af82c8f7870f0441556001a4ae64cd49a63eb3a18368a55414cf06cdb0ef7b",
+  "artifacts/nat-042/mutation/summary.json": "f39cbcce835c63d4644b5e9a5a1917b5d93d9ad575409b90b5f5738b510c82ff"
+ }
+}
