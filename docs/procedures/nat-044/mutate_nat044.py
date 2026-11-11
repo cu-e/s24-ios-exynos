@@ -72,6 +72,10 @@ MUTANTS = [
     ("build-images-get-each-other-s-reason", "build.py", 'f"-DNAT044_REASON={reason_name}"', 'f"-DNAT044_REASON={REASONS[[k for k in REASONS if k != name][0]][0]}"'),
     ("build-record-states-the-wrong-reason", "build.py", 'meta[name] = {"reason": f"{reason:#010x}",', 'meta[name] = {"reason": f"{reason + 1:#010x}",'),
     ("build-deadline-not-passed-to-the-glue", "build.py", 'f"-DNAT044_DEADLINE_S={deadline_s}", ', 'f"-DNAT044_DEADLINE_S=44", '),
+    # --- the package
+    ("package-takes-the-loader-image-alone", "package.py", 'payload = a.build / meta["path"]', 'payload = a.build / build["images"][name]["path"]'),
+    ("package-records-the-wrong-offset", "package.py", "payload_offset=off,", "payload_offset=off + 4,"),
+    ("package-records-the-wrong-size", "package.py", "payload_bytes=len(data),", "payload_bytes=len(data) - 1,"),
     # --- the decoder
     ("decoder-inform3-halves-swapped", "decode44.py", "R_INFORM3 = (0, 1)", "R_INFORM3 = (1, 0)"),
     ("decoder-status-armed-bit-wrong", "decode44.py", "ST_RC_MASK, ST_FIRED, ST_ARMED, ST_CLEARED, ST_CLEARFAIL = 0x00FF, 0x1000, 0x2000, 0x4000, 0x8000",
@@ -87,6 +91,9 @@ def make_tree(dst, mutated=None):
     for n in ("nat-022", "nat-042", "nat-044"):
         shutil.copytree(ROOT / "docs/procedures" / n, base / n, ignore=shutil.ignore_patterns("__pycache__", "evidence.json", "summary.json", "mutation*"))
     os.symlink(ROOT / "artifacts", Path(dst) / "artifacts")
+    for extra in ("tools", "devices"):                       # read-only inputs of the NAT-022 packager (NAT-006 builder, pinned stock RECOVERY)
+        if (ROOT / extra).exists():
+            os.symlink(ROOT / extra, Path(dst) / extra)
     if mutated:
         f = base / "nat-044" / mutated[0]
         f.write_text(f.read_text().replace(mutated[1], mutated[2]))

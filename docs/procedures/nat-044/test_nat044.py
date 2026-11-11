@@ -64,6 +64,9 @@ have_loader = LOADER_SRC.exists() and PAYLOAD.exists()
 needs_loader = unittest.skipUnless(have_loader, "the local NAT-020 build-003 loader source/payload are missing")
 needs_build = unittest.skipUnless(have_loader and have_zig, "zig or the local NAT-020 build-003 artifacts are missing")
 needs_cc = unittest.skipUnless(have_cc, "cc is missing")
+STOCK_IMG = ROOT / "devices/recovery/backups/2026-11-10/recovery.img"
+needs_package = unittest.skipUnless(have_loader and have_zig and STOCK_IMG.exists() and (ROOT / "tools/build/e1s_recovery.py").exists(),
+                                    "zig, the local NAT-020 artifacts, the pinned stock RECOVERY or the NAT-006 builder are missing")
 needs_sim = unittest.skipUnless(have_loader and have_zig and HAVE_UNICORN, "unicorn, zig or the local NAT-020 artifacts are missing")
 
 NORMAL, DOWNLOAD, BOOTLOADER, RECOVERY = 0x12345600, 0x12345601, 0x1234560D, 0x12345604
@@ -443,6 +446,56 @@ class Build(unittest.TestCase):
             hits = [k for k in range(len(seq) - 2) if seq[k][0] == "str" and seq[k][1].endswith("#0xbc]")
                     and seq[k + 1] == ("dsb", "sy") and seq[k + 2][0] == "ldr" and seq[k + 2][1].endswith("#0xbc]")]
             self.assertEqual(len(hits), 1, "%s: INFORM3 store; dsb sy; INFORM3 load not found once in %r" % (name, seq))
+
+
+# ------------------------------------------------------------------------------------------------------------------------ Package
+@needs_package
+class Package(unittest.TestCase):
+    """package.py: the RECOVERY candidate carries Image.payload (loader + XNU payload), not the loader-only Image. (This layer was
+    missing when NAT-044 was first closed: the package of the loader alone went unnoticed; decision 0020.)"""
+    def test_the_recovery_candidate_carries_the_payload_image_verbatim_and_not_the_loader_alone(self):
+        import hashlib
+        import json
+        out = built()
+        with tempfile.TemporaryDirectory() as tmp:
+            r = sh([sys.executable, "-I", HERE / "package.py", "--build", out, "--out", Path(tmp) / "pkg", "--only", "loader-diag-reset"])
+            self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
+            rec = json.loads((Path(tmp) / "pkg/package.json").read_text())
+            self.assertEqual(list(rec["images"]), ["loader-diag-reset"])
+            s = rec["images"]["loader-diag-reset"]
+            img = (Path(tmp) / "pkg/loader-diag-reset/recovery.img").read_bytes()
+            payload = (out / "loader-diag-reset/Image.payload").read_bytes()
+            loader = (out / "loader-diag-reset/Image").read_bytes()
+            self.assertGreater(len(payload), 10 * len(loader))                      # the XNU payload and ADT are the bulk of it
+            self.assertEqual((payload[:16], payload[20:len(loader)]), (loader[:16], loader[20:]))      # append_payload.py only rewrites the
+            self.assertEqual(struct.unpack_from("<Q", payload, 16)[0], len(payload))                    # image-size field (bytes 16..19)
+            off = s["payload_offset"]
+            self.assertEqual(img[off:off + len(payload)], payload)                  # verbatim, from the loader to the end of the ADT
+            tail = img[off + len(loader):off + len(loader) + 65536]
+            self.assertEqual(tail, payload[len(loader):len(loader) + 65536])
+            self.assertNotEqual(tail, b"\0" * len(tail))                            # the bytes after the loader are the payload, not stock/zero
+            self.assertEqual((s["recovery_sha256"], s["payload_sha256"], s["loader_image_sha256"], s["recovery_bytes"], s["payload_bytes"]),
+                             (hashlib.sha256(img).hexdigest(), hashlib.sha256(payload).hexdigest(), hashlib.sha256(loader).hexdigest(),
+                              len(img), len(payload)))
+            self.assertEqual(len(img), 100663296)
+
+    def test_a_build_record_that_does_not_match_its_payload_is_refused_and_nothing_is_packaged(self):
+        import json
+        out = built()
+        with tempfile.TemporaryDirectory() as tmp:
+            b = Path(tmp) / "b"
+            b.mkdir()
+            os.symlink(out / "loader-diag-reset", b / "loader-diag-reset")
+            rec = json.loads((out / "build.json").read_text())
+            sha0 = rec["image_payloads"]["loader-diag-reset"]["sha256"]
+            rec["image_payloads"]["loader-diag-reset"]["sha256"] = ("0" if sha0[0] != "0" else "1") + sha0[1:]
+            (b / "build.json").write_text(json.dumps(rec))
+            r = sh([sys.executable, "-I", HERE / "package.py", "--build", b, "--out", Path(tmp) / "pkg", "--only", "loader-diag-reset"])
+            self.assertNotEqual(r.returncode, 0)
+            self.assertIn("does not match the build record", r.stderr + r.stdout)
+            self.assertFalse((Path(tmp) / "pkg/loader-diag-reset/recovery.img").exists())
+            r = sh([sys.executable, "-I", HERE / "package.py", "--build", out, "--out", Path(tmp) / "pkg2", "--only", "no-such-image"])
+            self.assertNotEqual(r.returncode, 0)
 
 
 # --------------------------------------------------------------------------------------------------------------------- aarch64

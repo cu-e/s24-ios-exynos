@@ -12,8 +12,9 @@ Status: recorded by the agent under decision 0019 (owner full-automatic mode) be
 
 ## Scope
 Exactly one image: `loader-diag-reset` (or `loader-diag-reset-bl` for the second, U4 run, only if the first showed a reset that
-did not reach Download Mode), RECOVERY SHA-256 <sha>, loader Image SHA-256 <sha>, payload SHA-256 <sha>, built by NAT-044
-(`artifacts/nat-044/<build>/build.json`, source commit <sha>). The image is the run-006 loader (NAT-020 build-003 +
+did not reach Download Mode), RECOVERY SHA-256 <sha> (`artifacts/nat-044/package-002/<image>/recovery.img`), the packaged
+`Image.payload` (loader + XNU payload + ADT, as in runs 001-009) SHA-256 <sha> at offset 2048, loader-only `Image` SHA-256 <sha>, built by
+NAT-044 (`artifacts/nat-044/<build>/build.json`, packaged by `package.py`, source commit <sha>). The image is the run-006 loader (NAT-020 build-003 +
 NAT-022 markers + NAT-027 aligned ADT + NAT-026 payload fix) plus the NAT-044 patch and the unmodified NAT-042 module
 (`s5e9945_reset.{h,c}` SHA-256 <sha>, <sha>). The kernel is not started: the run ends in the loader's hold loop.
 

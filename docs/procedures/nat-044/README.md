@@ -63,8 +63,9 @@ Two images, differing only in the reason word and reboot-cmd mode:
 | `src/reset44.h`, `src/markerlib4.c` | the new code (snapshot, arm, tick, show) |
 | `decode44.py` | decoder for kind 14 and stage 0x41 on top of NAT-022's `decode.py` |
 | `test_support/host_mk4.c`, `test_support/reset_host.c` | x86 harness: the real patched `markerlib.c` + `markerlib4.c` + the NAT-042 module against a PMU register model |
-| `test_nat044.py` | 46 tests: Patch, HostReset, Build, Aarch64 (unicorn) layers; layers skip themselves with a reason when `unicorn`/`capstone`/`zig` are missing |
-| `mutate_nat044.py` | 46 mutants of the new code, the patch hunks and the build rules; each must fail a test (a mutant that does not build is INVALID, not killed) |
+| `package.py` | packages `Image.payload` (never the loader-only `Image`) of each image into a RECOVERY candidate with NAT-022's packager and checks it: build-record hash, payload verbatim at the recorded offset, RECOVERY hash |
+| `test_nat044.py` | 48 tests: Patch, HostReset, Build, Package, Aarch64 (unicorn) layers; layers skip themselves with a reason when `unicorn`/`capstone`/`zig` are missing |
+| `mutate_nat044.py` | 49 mutants of the new code, the patch hunks and the build rules; each must fail a test (a mutant that does not build is INVALID, not killed) |
 | `decision-template.md` | the decision text the agent fills in under decision 0019 before the native run (NAT-046); not a decision record |
 | `evidence.json` | the task's evidence record |
 
@@ -73,9 +74,9 @@ Build and test (host only; needs `cc`, `zig`, the loader source copy of NAT-020 
 ```sh
 python3 -I docs/procedures/nat-044/build.py --out artifacts/nat-044/build-001 --loader-source <copy of the run-006 loader source tree>
 python3 -I docs/procedures/nat-044/test_nat044.py                      # system python: the layers that need no unicorn run, the rest skip
-<venv with unicorn+capstone>/bin/python -I docs/procedures/nat-044/test_nat044.py   # all 46 tests
+<venv with unicorn+capstone>/bin/python -I docs/procedures/nat-044/test_nat044.py   # all 48 tests
 <venv with unicorn+capstone>/bin/python -I docs/procedures/nat-044/mutate_nat044.py --out artifacts/nat-044/mutation-001 --jobs 4
-python3 -I docs/procedures/nat-022/package.py --image artifacts/nat-044/build-001/loader-diag-reset/Image --out artifacts/nat-044/package-001
+python3 -I docs/procedures/nat-044/package.py --build artifacts/nat-044/build-001 --out artifacts/nat-044/package-002   # needs the pinned stock RECOVERY (local, not committed)
 ```
 
 (`-I` matters: an interpreter run from a directory containing a `dis.py` shadows the standard library.)
@@ -114,7 +115,12 @@ Not established, and not claimed:
 * The first mutation run (45 mutants) found two survivors: the CLEARFAIL status bit (the test computed the expected status itself
   instead of decoding what the loader draws: tautological) and the `dsb sy` between the INFORM3 clearing store and its read-back
   (nothing looked at the compiled code). Both tests were rewritten to check the real output; a mutant that only the build
-  refused (`wdt` parsed as one digit) was INVALID and was replaced by one that builds. The final run is `mutation-002`.
+  refused (`wdt` parsed as one digit) was INVALID and was replaced by one that builds. The final run is `mutation-003` (49 mutants, after the package layer was added).
+
+* **Reopened by decision 0020.** NAT-044 was first closed (`evidence.json`) with a package of the loader-only `Image` instead of
+  `Image.payload`; no test looked at the package. `package.py`, a `Package` test layer and three mutants were added, the package was
+  rebuilt as `artifacts/nat-044/package-002`, and `evidence-002.json` supersedes `evidence.json` (kept unchanged). `package-001` is
+  the wrong package and must not be used.
 
 ## Next
 

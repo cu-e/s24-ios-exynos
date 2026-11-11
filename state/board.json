@@ -1,15 +1,17 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-11T02:41:42+00:00",
-  "ledger_updated_at": "2026-11-11T02:41:34+00:00",
-  "registry_sha256": "cf5ccc1f99d35d63c8a2adb3910dc8a4233355a6d803622d305427a3c3c8b6ce",
+  "generated_at": "2026-11-11T02:52:55+00:00",
+  "ledger_updated_at": "2026-11-11T02:52:47+00:00",
+  "registry_sha256": "163572f8a941c02e966d2f728d88b83afe42c2a0f682c46bbcf317bc02520446",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
       "NAT-039",
       "NAT-045"
     ],
-    "in_progress": [],
+    "in_progress": [
+      "NAT-048"
+    ],
     "blocked": [
       "INT-002",
       "INT-003",
@@ -6424,12 +6426,24 @@
       ],
       "status": "done",
       "owner": "claude-nat044-20261111-resetimg",
-      "started_at": "2026-11-11T02:02:41+00:00",
-      "last_heartbeat": "2026-11-11T02:02:41+00:00",
-      "updated_at": "2026-11-11T02:41:34+00:00",
-      "evidence": "docs/procedures/nat-044/evidence.json",
-      "evidence_sha256": "7463377a9b50aefcf7e3603523675366229723206df85531da05e44c8a75e0f0",
-      "finished_at": "2026-11-11T02:41:34+00:00",
+      "started_at": "2026-11-11T02:44:02+00:00",
+      "last_heartbeat": "2026-11-11T02:44:02+00:00",
+      "updated_at": "2026-11-11T02:52:47+00:00",
+      "reopen_history": [
+        {
+          "from_owner": "claude-nat044-20261111-resetimg",
+          "evidence": "docs/procedures/nat-044/evidence.json",
+          "evidence_sha256": "7463377a9b50aefcf7e3603523675366229723206df85531da05e44c8a75e0f0",
+          "finished_at": "2026-11-11T02:41:34+00:00",
+          "reason": "The RECOVERY candidate packaged the loader-only Image instead of Image.payload (loader + XNU payload) as runs 001-009 and NAT-036 do; no test covered the package. Add a packaging script, a test and a mutant; rebuild the package; write evidence-002.json.",
+          "decision": "docs/decisions/0020-nat044-reopen-package-correction-2026-11-11.md",
+          "by": "claude-nat044-20261111-resetimg",
+          "at": "2026-11-11T02:44:02+00:00"
+        }
+      ],
+      "evidence": "docs/procedures/nat-044/evidence-002.json",
+      "evidence_sha256": "77dda052e24a64ec98538398a20148288776656335cac9deafcfd94805658fa4",
+      "finished_at": "2026-11-11T02:52:47+00:00",
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-044.md"
@@ -6467,6 +6481,42 @@
         "Scope not authorized: native"
       ],
       "card_path": "planning/tasks/NAT-046.md"
+    },
+    {
+      "id": "NAT-048",
+      "title": "Gated session driver and host USB event logger for the reset canary run: session_reset_canary.py (copy of the NAT-037 driver pinned to the NAT-044 package, decision-file gate, own one-shot marker per image), usb_watch.py (timestamped sysfs enumeration events, never opens a device) started before the reboot, and analyze_reset.py (U1-U4 verdict from the host log per the NAT-044 decision wording); fake-adb and fake-sysfs host tests; no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [
+        "NAT-044"
+      ],
+      "paths": [
+        "docs/procedures/nat-048",
+        "artifacts/nat-048"
+      ],
+      "sources": [],
+      "acceptance": [
+        "docs/procedures/nat-048/session_reset_canary.py follows the NAT-037 driver (preflight read-only by default, --execute one RECOVERY write with full-hash readback and one `adb reboot recovery`, --restore stock without reboot) but is pinned to the NAT-044 package-001 hashes for the selected image (loader-diag-reset or loader-diag-reset-bl), refuses every adb call unless the agent-written decision file for that image exists, and uses its own one-shot marker per image. It differs from the NAT-037 driver only in the pinned names, the image selection and the watcher start (a host test diffs the two).",
+        "docs/procedures/nat-048/usb_watch.py records every USB device appearance/disappearance (VID:PID, iProduct/iManufacturer from sysfs strings, bus path, CLOCK_MONOTONIC and UTC timestamps, poll interval) as fsynced JSONL from before the reboot until a stop time; it reads sysfs only and never opens a USB device or sends a request; the driver starts it before `adb reboot recovery` and records its path and start time in report.json.",
+        "docs/procedures/nat-048/analyze_reset.py reads the watcher log, the driver report (reboot request time) and the NAT-044 build record and states for U1+U2 (a re-enumeration at the deadline, before the watchdog time) and U3/U4 (enumerates as Download Mode, iProduct SAMSUNG USB, without an owner action) one of supported / refuted / undetermined with the timestamps used, never inferring from missing data (no log = undetermined); the baseline of runs 001-009 (SEC_UPLOAD about +95 s after the reboot request) is a stated constant with its source.",
+        "Host tests with a fake adb and a fake sysfs tree cover the open-gate flow, the closed gate (no adb call), a readback mismatch (stock restored, no reboot), the one-shot marker, the watcher's event stream (appear, disappear, re-enumerate, strings) and the analyzer's verdicts on synthetic logs for every outcome including no log; a mutation check on the driver and analyzer. Nothing talks to a phone."
+      ],
+      "steps": [
+        "Copy the NAT-037 driver and pin it to the NAT-044 package",
+        "Write the sysfs USB watcher and the analyzer",
+        "Host tests with fake adb/sysfs and a mutation check",
+        "Document the run order for NAT-046"
+      ],
+      "status": "in_progress",
+      "owner": "claude-nat048-20261111-driver",
+      "started_at": "2026-11-11T02:43:01+00:00",
+      "last_heartbeat": "2026-11-11T02:43:01+00:00",
+      "updated_at": "2026-11-11T02:43:01+00:00",
+      "column": "in_progress",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-048.md",
+      "report_health": "recent"
     },
     {
       "id": "USB-001",
@@ -13914,7 +13964,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-048"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -13953,7 +14003,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-048"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -14928,6 +14978,19 @@
         "worktree": "worktrees/krn-026-20261105"
       }
     ],
+    "claude-nat048-20261111-driver": [
+      {
+        "id": "NAT-048",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-11T02:43:01+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": null,
+        "worktree": null
+      }
+    ],
     "codex-e1s-dependencies-20261105-k": [
       {
         "id": "KRN-003",
@@ -14969,58 +15032,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-11T00:20:46+00:00",
-      "action": "task.add:NAT-038",
-      "owner": "claude-nat038-20261111-usblog",
-      "tasks": [
-        {
-          "id": "NAT-038",
-          "status": "pending",
-          "owner": null,
-          "priority": 98
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T00:20:57+00:00",
-      "action": "task.add:NAT-039",
-      "owner": "claude-nat038-20261111-usblog",
-      "tasks": [
-        {
-          "id": "NAT-039",
-          "status": "pending",
-          "owner": null,
-          "priority": 97
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T00:21:09+00:00",
-      "action": "task.add:NAT-040",
-      "owner": "claude-nat038-20261111-usblog",
-      "tasks": [
-        {
-          "id": "NAT-040",
-          "status": "pending",
-          "owner": null,
-          "priority": 97
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T00:21:18+00:00",
-      "action": "task.add:NAT-041",
-      "owner": "claude-nat038-20261111-usblog",
-      "tasks": [
-        {
-          "id": "NAT-041",
-          "status": "pending",
-          "owner": null,
-          "priority": 97
-        }
-      ]
-    },
     {
       "at": "2026-11-11T00:21:28+00:00",
       "action": "task.add:NAT-042",
@@ -15238,11 +15249,66 @@
           "last_heartbeat": "2026-11-11T02:02:41+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-11T02:42:53+00:00",
+      "action": "task.add:NAT-048",
+      "owner": "claude-nat048-20261111-driver",
+      "tasks": [
+        {
+          "id": "NAT-048",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T02:43:01+00:00",
+      "action": "task.claim:NAT-048",
+      "owner": "claude-nat048-20261111-driver",
+      "tasks": [
+        {
+          "id": "NAT-048",
+          "status": "in_progress",
+          "owner": "claude-nat048-20261111-driver",
+          "priority": 96,
+          "last_heartbeat": "2026-11-11T02:43:01+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T02:44:02+00:00",
+      "action": "task.reopen:NAT-044",
+      "owner": "claude-nat044-20261111-resetimg",
+      "tasks": [
+        {
+          "id": "NAT-044",
+          "status": "in_progress",
+          "owner": "claude-nat044-20261111-resetimg",
+          "priority": 96,
+          "last_heartbeat": "2026-11-11T02:44:02+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T02:52:47+00:00",
+      "action": "task.done:NAT-044",
+      "owner": "claude-nat044-20261111-resetimg",
+      "tasks": [
+        {
+          "id": "NAT-044",
+          "status": "done",
+          "owner": "claude-nat044-20261111-resetimg",
+          "priority": 96,
+          "last_heartbeat": "2026-11-11T02:44:02+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "aa9e8804ae0e51cec3c6e82589488e9230692bbad17fe1c8fc9cb605bd2cffc7",
-    "BOARD.md": "bc6960e005feb006f830d9abadb944b2bd08a89a2bb35e3a4b527691340a4b51",
+    "STATUS.md": "562078f9342cef805e61d95085938abd7f7594c0240bc7b0d332ee6767dcfecd",
+    "BOARD.md": "29f7f4bcaea4d3cf116aa3ed06ddc76c6a5d323acfda4b12dfe1c8b0f84f1309",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -15382,8 +15448,9 @@
     "planning/tasks/NAT-035.md": "df46e6b02ce966e9cdef479dca3452834653951b87029bc481cb00ffcaa27113",
     "planning/tasks/NAT-042.md": "93fed97a38306f556c45cae537c69262efde6ea20e64834048a2672611aab75f",
     "planning/tasks/NAT-043.md": "e316b33a327b1fdd634251a09c02da6968ce377c1c9a206c430cb7bd27f6559f",
-    "planning/tasks/NAT-044.md": "09336cc98a9d0b7bd2c975c351f34f82d3337eb6d3eb9840b336806d8b4db550",
+    "planning/tasks/NAT-044.md": "ebe6e82d271322eba40665841d59265456760651c738681d5df0cc17d80305aa",
     "planning/tasks/NAT-046.md": "0aaea2a4708bfd98eaa14ab3db36c2eb249ab729acc7b620a76ce6734436e47e",
+    "planning/tasks/NAT-048.md": "b65969ab4f10d29e0eb380d70ec1737120232d5c587968407c19eddf126a919f",
     "planning/tasks/USB-001.md": "19299959cb09f2aa3b00ffa299face5e25f485c75dfcc2e5f1879b39d435471a",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
@@ -15548,8 +15615,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "1fb347d1ef1be0ab49f2b0eac0ebdd8f04ee5b772f0f0c5dcec4ecc691b0a7b1",
-    "planning/tasks/DRV-003.md": "2441ae0f13e91e3d4e322df4cb71f0d4eae6fb2f54017dcb2234af8b4aaae598",
+    "planning/tasks/NAT-003.md": "cfe41776d2a2f0fbaf0dbf030db6c6e164fc7357b9dc64bcad5c06660b9a8ec4",
+    "planning/tasks/DRV-003.md": "d35d486537eeec3def7a52117e5211d3c53d5a98a24bf02b0f8ed479ce4ac05e",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",
