@@ -2,7 +2,7 @@
 
 Status: recorded by `claude-nat043-20261111-session` under decision 0019 (owner full-automatic mode) before the run. The file is committed before
 any device access; an owner confirmation for the run itself is appended to it before the launch (the auto-mode classifier refused the unconfirmed
-launch of NAT-046 on 2026-11-11, see decision 0021). Nothing here is run until the udev gate below is open.
+launch of NAT-046 on 2026-11-11, see decision 0021). Nothing here is run until the owner confirmation below is recorded.
 
 ## Preconditions checked when this file was written
 
@@ -11,9 +11,11 @@ launch of NAT-046 on 2026-11-11, see decision 0021). Nothing here is run until t
 * NAT-039 is done (9aa15ea): the live USB stack of the running Android was inventoried read-only and agrees with the NAT-040 plan (39 rows, 0
   mismatches); NAT-051 added that `pd_hsi0` is `on` in Android and that a debugfs `clk_summary` read restarted the phone through `SEC_UPLOAD`
   (disclosed below).
-* **Not met yet:** the udev rule for the monitor identity 1209:0001 (`docs/procedures/nat-049/70-s24-usbmon.rules`, task NAT-050) is not installed;
-  `docs/procedures/nat-049/host_access.py --check` exits 2. The NAT-049 driver refuses to start while that is so. The registry `native`
-  permission is closed (false) after NAT-046 and is set again, citing this file, only when the run is about to start.
+* **Met since (2026-11-11, file written by the owner at 20:33 local):** the udev rule for the monitor identity 1209:0001
+  (`docs/procedures/nat-049/70-s24-usbmon.rules`, task NAT-050) is installed as `/etc/udev/rules.d/70-s24-usbmon.rules`;
+  `docs/procedures/nat-049/host_access.py --check` exits 0 and the driver's read-only preflight (`session_usblog.py --image loader-diag-usbmon`,
+  no device write) ends `ready-read-only-registry-closed`. The registry `native` permission is closed (false) after NAT-046 and is set again,
+  citing this file, only when the run is about to start.
 
 ## Scope
 
