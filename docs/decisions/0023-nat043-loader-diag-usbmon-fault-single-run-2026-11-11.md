@@ -73,3 +73,13 @@ boundary of decision 0002 is unchanged: Android, apps, settings, accounts and us
   the simulator. If the exception path faults the engine, the log is PARTIAL; the 83 s watchdog is the failsafe (SEC_UPLOAD and an automatic
   restart after about 47 s as on 2026-11-11, one observation), the 45 s deadline reset is the normal exit; Download Mode by keys is the fallback.
 * x0..x30 are not captured by the loader's exception vectors. A run with no host observation is inconclusive. RAM contents are volatile.
+
+## Owner confirmation of the run (recorded before the launch)
+
+At 2026-11-11T16:10:08Z the owner answered the question "Запускаю ещё ОДИН нативный запуск образа loader-diag-usbmon-fault (решение 0023), чтобы проверить на железе
+передачу исключения?" with "Да, один запуск loader-diag-usbmon-fault (Recommended)". The question named the RECOVERY SHA-256
+`f1a193dcac776dde004a3d1a379c26a4a365a150318bbc0a6501506ad7dfa103`, the only partition written (RECOVERY, `/dev/block/sda18`), the pinned stock restore
+(`96620b8b...`, full-hash readback), that the image does what the first run did (same HSI0 table of 111 operations, XNU not started, reset into
+Download Mode at 45 s, Android restored), plus one controlled `brk #0x1234` in the loader with the expected exception frame (ESR `0xF2001234`),
+and the risk (the exception path is untested on hardware: an incomplete log, the 45 s reset or the 83 s watchdog with `SEC_UPLOAD` and an automatic
+restart, or Download Mode by keys). One run, no retry.
