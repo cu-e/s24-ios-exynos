@@ -1,12 +1,14 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-11T01:59:15+00:00",
-  "ledger_updated_at": "2026-11-11T01:59:06+00:00",
-  "registry_sha256": "fd6f6d307dfa9c3b59cdff463f7f49795f6e7a478a8e88ca42d73cbe9bd8ccc2",
+  "generated_at": "2026-11-11T02:02:27+00:00",
+  "ledger_updated_at": "2026-11-11T02:02:14+00:00",
+  "registry_sha256": "af051e5b44abd070f8f4f4355a46ce14a00ae0eff92d78c28e47a3d57cd4bb0c",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
-      "NAT-039"
+      "NAT-039",
+      "NAT-044",
+      "NAT-045"
     ],
     "in_progress": [],
     "blocked": [
@@ -28,6 +30,7 @@
       "GPU-005"
     ],
     "waiting": [
+      "NAT-047",
       "NAT-011",
       "GPU-007",
       "GPU-009",
@@ -47,6 +50,7 @@
     "gated": [
       "NAT-017",
       "NAT-043",
+      "NAT-046",
       "NAT-003",
       "DRV-003",
       "NAT-004",
@@ -6392,6 +6396,74 @@
       "card_path": "planning/tasks/NAT-043.md"
     },
     {
+      "id": "NAT-044",
+      "title": "Build the reset canary image loader-diag-reset on the host: the run-006 loader family (loader-diag-trig-hold-adt8-aln: reached PRE_JUMP and held) plus the NAT-042 reset module, entry PMU snapshot on screen, and an end-of-run reset into Download Mode at a deadline before the 83 s watchdog; compiled, host-tested, packaged (hashes only), agent-written decision text; no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [
+        "NAT-042"
+      ],
+      "paths": [
+        "docs/procedures/nat-044",
+        "artifacts/nat-044"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "docs/procedures/nat-044 builds the image with the existing NAT-022/NAT-036 build helpers: the loader source is the run-006 image's source plus small patches (base SHA, GPL-2.0, explanation) that (a) take s5e_reset_snapshot at entry and show INFORM2/INFORM3/0x190 in the held report, (b) if INFORM3 reads 0x12345601 at entry, write S5E_REASON_NORMAL through s5e_reset_prepare, (c) at a deadline (default 45 s, below the 83 s WDT) draw a RESET stage marker and call s5e_reset_to(PMU, 0x12345601); the NAT-042 module is linked unmodified (hash equal to NAT-042's evidence).",
+        "Host tests with the compiled aarch64 objects: the patched loader sources equal the run-006 sources except the named hunks; the reset call sits after the last marker draw and before the WDT deadline by a stated margin computed from the measured frame costs; the module's PMU writes occur in the NAT-042 order in an instruction-level run of the linked objects against the NAT-042 PMU model; the WDT stays armed as failsafe; a mutation check on the patch hunks (each must fail a test).",
+        "A candidate RECOVERY package is built on the host (hashes only, payload verbatim per NAT-006 builder), and the decision text for the native run is written under decision 0019 with pass/fail wording for U1-U4 (docs/procedures/nat-042/decision-template.md) but NOT dated as a decision record. Nothing is flashed or run."
+      ],
+      "steps": [
+        "Select and copy the run-006 build inputs",
+        "Write the loader patches and the reset-stage glue",
+        "Host tests with the compiled objects and a mutation check",
+        "Package the candidate image and draft the decision text"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-044.md"
+    },
+    {
+      "id": "NAT-046",
+      "title": "Native run of the reset canary loader-diag-reset: measure U1-U4 (PMU INFORM2/INFORM3/0x190 at entry, whether the loader's reset at the deadline happens, host enumeration after it, unattended NAT-013 stock restore) under decision 0019; one run, RECOVERY only",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 96,
+      "depends_on": [
+        "NAT-044"
+      ],
+      "paths": [
+        "docs/procedures/nat-046",
+        "artifacts/nat-046"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "A decision file written under decision 0019 BEFORE the run names the exact RECOVERY/loader/payload hashes of NAT-044's candidate, the PMU registers touched (0xb8, 0xbc, 0x190, 0x3c00 of 0x12860000), the pass/fail wording for U1-U4, and what is not granted; the run follows the run protocol of 0019 (RECOVERY only, pinned stock restore, full-hash readback, one-shot marker, bounded display/watchdog).",
+        "The host records, without the owner's hands, what happens after the deadline: USB enumeration events with timestamps (the host sees SAMSUNG USB, SEC_UPLOAD or nothing), compared with the deadline and the 83 s WDT; the PMU snapshot shown on screen is captured by whatever the host can observe (display capture is not required); each of U1-U4 is stated as supported, refuted or undetermined, never inferred.",
+        "Stock RECOVERY is restored and verified by full hash and Android is verified (or the missing-device state is recorded as the specific external fact); a run with no host observation is inconclusive."
+      ],
+      "steps": [
+        "Write the decision file and check preconditions",
+        "Run the image under the 0019 protocol with a host-side USB event logger",
+        "Restore stock RECOVERY and verify Android; record the outcome"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native",
+        "Dependencies: NAT-044"
+      ],
+      "card_path": "planning/tasks/NAT-046.md"
+    },
+    {
       "id": "USB-001",
       "title": "Implement host-buildable native USB and block-transport adapters",
       "status": "done",
@@ -7901,6 +7973,74 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-036.md"
+    },
+    {
+      "id": "NAT-045",
+      "title": "USB bring-up platform code for the loader from the NAT-040 ladder (HSI0 power/clock/PHY, DWC3 clock and core reset up to the point where usbmon_init may run), as freestanding C with a register-level model, read-only L0-L2 probe first; host-tested, no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "depends_on": [
+        "NAT-040",
+        "NAT-041"
+      ],
+      "paths": [
+        "docs/procedures/nat-045",
+        "artifacts/nat-045"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "docs/procedures/nat-045 implements ladder steps L0-L8 of docs/procedures/nat-040 as C (one function per rung, each returning a distinct error and logging a stage), with every MMIO address, value, and ordering taken from the NAT-040 plan.json citations (the file re-reads the citations and fails if a constant in the code differs from the pinned vendor source); rungs L0-L2 are read-only probes whose results are logged before any write; the default image path stops after L2 unless a build flag enables the writing rungs.",
+        "A register-level model (clock/PMU/SYSREG/PHY/DWC3 access recorder with the vendor ordering rules from NAT-040) runs the compiled aarch64 objects; tests show the writing rungs happen only when enabled, in the cited order, with the stated delays, and that a failed readback stops the ladder; the unknowns U1-U8 of NAT-040 are carried into the code as named probe results rather than guessed; a mutation check on the sequences.",
+        "The module links with the NAT-041 usbmon engine (usbmon_init after the last rung) in a host build; nothing here runs on the phone."
+      ],
+      "steps": [
+        "Translate the L0-L8 rungs into C with the citation check",
+        "Write the register-level model and tests",
+        "Link with the NAT-041 engine in a host build"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-045.md"
+    },
+    {
+      "id": "NAT-047",
+      "title": "Build the loader-diag-usbmon image on the host: NAT-044 base plus the NAT-045 USB platform code, the NAT-041 usbmon engine polled from the held loop and the exception path, a controlled-fault variant, and the NAT-042 reset at the end; collector smoke against the model; hashes and decision text; no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "depends_on": [
+        "NAT-044",
+        "NAT-045"
+      ],
+      "paths": [
+        "docs/procedures/nat-047",
+        "artifacts/nat-047"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "docs/procedures/nat-047 builds two images from the NAT-044 builder: loader-diag-usbmon (stage messages through usbmon_stage, usbmon_poll in every wait loop and marker dwell, the NAT-045 ladder before usbmon_init, reset at the deadline) and loader-diag-usbmon-fault (adds a controlled BRK whose exception path ends in usbmon_fault); the engine and platform code are linked unmodified (hashes equal NAT-041/NAT-045 evidence).",
+        "Host tests: the compiled loader objects run the engine against the NAT-041 model in the instruction-level harness so that the NAT-041 collector, started first, archives a new boot ID, the stage messages of the new image and in the fault variant an exception frame (NAT-043's criterion, on the model); a mutation check on the glue; the display budget still holds with the extra polling; the WDT stays armed.",
+        "Candidate RECOVERY packages (hashes only) and the decision text for NAT-043 are written under decision 0019 with the NAT-043 pass/fail wording; nothing is flashed or run."
+      ],
+      "steps": [
+        "Add usbmon glue to the NAT-044 loader",
+        "Run the model harness end to end with the collector",
+        "Package both images and draft the decision text"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: NAT-044, NAT-045"
+      ],
+      "card_path": "planning/tasks/NAT-047.md"
     },
     {
       "id": "DRV-001",
@@ -14825,67 +14965,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-10T23:18:09+00:00",
-      "action": "task.update:NAT-036",
-      "owner": "claude-nat036-20261111-cstub",
-      "tasks": [
-        {
-          "id": "NAT-036",
-          "status": "in_progress",
-          "owner": "claude-nat036-20261111-cstub",
-          "priority": 95,
-          "progress_note": "Host work in progress (nothing run on the phone): ckpt3 sources, patch_loader3 (ADT reg & 0xffff), build.py, decode3.py and test_nat036.py written; 51 tests pass (Words, Ckpt3Host, C3Chain/C3Controls/AdtMask in the NAT-035 model, Ckpt3Marker, Build); gated 17-stop run to checkpoint 16 with hostile registers equals an uninterrupted run (116 s). Mutation run, README, evidence, build/package records and the decision-0018 text remain.",
-          "next_step": "Mutation results, README, evidence.json, artifacts/nat-036/build-001 (+repro) and RECOVERY package hashes, decision-0018 question text, then task done",
-          "last_heartbeat": "2026-11-10T23:18:09+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-10T23:26:40+00:00",
-      "action": "task.update:NAT-036",
-      "owner": "claude-nat036-20261111-cstub",
-      "tasks": [
-        {
-          "id": "NAT-036",
-          "status": "in_progress",
-          "owner": "claude-nat036-20261111-cstub",
-          "priority": 95,
-          "progress_note": "Mutation check: 81 textual mutants; first partial run had 5 survivors (block-size straddle test was vacuous; stub frame size, prologue C-bit, x28 slot and kernel-TTBR0 frame piece were not covered): tests strengthened (53+1 tests), survivors re-run, full clean re-run of all 81 pending. Nothing run on the phone.",
-          "next_step": "Full clean mutation re-run, commit sources, build-001/repro/final, RECOVERY package hashes, decision-0018 question text, evidence.json, task done",
-          "last_heartbeat": "2026-11-10T23:26:40+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T00:04:50+00:00",
-      "action": "task.done:NAT-036",
-      "owner": "claude-nat036-20261111-cstub",
-      "tasks": [
-        {
-          "id": "NAT-036",
-          "status": "done",
-          "owner": "claude-nat036-20261111-cstub",
-          "priority": 95,
-          "progress_note": "Mutation check: 81 textual mutants; first partial run had 5 survivors (block-size straddle test was vacuous; stub frame size, prologue C-bit, x28 slot and kernel-TTBR0 frame piece were not covered): tests strengthened (53+1 tests), survivors re-run, full clean re-run of all 81 pending. Nothing run on the phone.",
-          "next_step": "Full clean mutation re-run, commit sources, build-001/repro/final, RECOVERY package hashes, decision-0018 question text, evidence.json, task done",
-          "last_heartbeat": "2026-11-10T23:26:40+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T00:05:26+00:00",
-      "action": "task.add:NAT-037",
-      "owner": "claude-nat036-20261111-cstub",
-      "tasks": [
-        {
-          "id": "NAT-037",
-          "status": "pending",
-          "owner": null,
-          "priority": 94
-        }
-      ]
-    },
-    {
       "at": "2026-11-11T00:05:35+00:00",
       "action": "task.claim:NAT-037",
       "owner": "claude-nat036-20261111-cstub",
@@ -15102,11 +15181,63 @@
           "last_heartbeat": "2026-11-11T01:40:19+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-11T02:01:50+00:00",
+      "action": "task.add:NAT-044",
+      "owner": "claude-nat042-20261111-reboot",
+      "tasks": [
+        {
+          "id": "NAT-044",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T02:01:58+00:00",
+      "action": "task.add:NAT-045",
+      "owner": "claude-nat042-20261111-reboot",
+      "tasks": [
+        {
+          "id": "NAT-045",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T02:02:06+00:00",
+      "action": "task.add:NAT-046",
+      "owner": "claude-nat042-20261111-reboot",
+      "tasks": [
+        {
+          "id": "NAT-046",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T02:02:14+00:00",
+      "action": "task.add:NAT-047",
+      "owner": "claude-nat042-20261111-reboot",
+      "tasks": [
+        {
+          "id": "NAT-047",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "31216f0a87ffc2403d04156249a79bd496730cc69d6648367a58f8451826ad0d",
-    "BOARD.md": "7d10416446d48587ff86927b83132d3ada8fa294c22c263d5bab9dfb1ae5e382",
+    "STATUS.md": "0d69419f15753116cfa747d4df74e847aca6ce9c4d8358ddf3de84db2ba44747",
+    "BOARD.md": "87d8024cfed41d08566e07ea499d32ca8324c4db1d1655d62482d641440087fa",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -15246,6 +15377,8 @@
     "planning/tasks/NAT-035.md": "df46e6b02ce966e9cdef479dca3452834653951b87029bc481cb00ffcaa27113",
     "planning/tasks/NAT-042.md": "93fed97a38306f556c45cae537c69262efde6ea20e64834048a2672611aab75f",
     "planning/tasks/NAT-043.md": "e316b33a327b1fdd634251a09c02da6968ce377c1c9a206c430cb7bd27f6559f",
+    "planning/tasks/NAT-044.md": "1b286374bd4af7ec3b23d37c9256e48df986cfc818ce2a2d524e956b37c8b15c",
+    "planning/tasks/NAT-046.md": "4f662df33317d688c6570ced7f95fc9f340e443f5e0f28fcfe6eff5e85a62b7c",
     "planning/tasks/USB-001.md": "19299959cb09f2aa3b00ffa299face5e25f485c75dfcc2e5f1879b39d435471a",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
@@ -15277,6 +15410,8 @@
     "planning/tasks/NAT-005.md": "b078a916eab662fb839780a4d34f4ce047cd47c6c35fe60a6ea80764b7ce4041",
     "planning/tasks/NAT-006.md": "7b394e6d001a2743cb7d5c27b05d2d9fd66e3f5b2bfe6f20c9904a50535b5759",
     "planning/tasks/NAT-036.md": "cbe203575b4527767856c4aa43254e6ca8cb0108376ae896c67a12c7181cdab2",
+    "planning/tasks/NAT-045.md": "d1a5a6dcf670370dbaed8ec9e8266c453c822277cf8994b86700f12c8f9d249f",
+    "planning/tasks/NAT-047.md": "90c86c445a15c88e89515f0bd255a496960a300c5b8052257176963316d85e4a",
     "planning/tasks/DRV-001.md": "eaac786b5ca6d0640d7a9bea43bf42424662189e0f9f44baaa6b6ad049f10f17",
     "planning/tasks/KRN-023.md": "a95e56ff9ef7bfa3ff55cf11a48d0bba892cc95ab504b367bc3e9d4490ecdd51",
     "planning/tasks/REV-012.md": "99bf82028acd252050bbe595c74c47d22013dfccb4d261b32b98825471ce86ea",

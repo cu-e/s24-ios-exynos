@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-11T01:59:06+00:00",
+  "updated_at": "2026-11-11T02:02:14+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -13234,6 +13234,125 @@
         "Build and host-test the image from NAT-040/041/042",
         "Run under the 0019 protocol with the collector",
         "Restore stock and verify Android; record the outcome"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "NAT-044",
+      "title": "Build the reset canary image loader-diag-reset on the host: the run-006 loader family (loader-diag-trig-hold-adt8-aln: reached PRE_JUMP and held) plus the NAT-042 reset module, entry PMU snapshot on screen, and an end-of-run reset into Download Mode at a deadline before the 83 s watchdog; compiled, host-tested, packaged (hashes only), agent-written decision text; no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [
+        "NAT-042"
+      ],
+      "paths": [
+        "docs/procedures/nat-044",
+        "artifacts/nat-044"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "docs/procedures/nat-044 builds the image with the existing NAT-022/NAT-036 build helpers: the loader source is the run-006 image's source plus small patches (base SHA, GPL-2.0, explanation) that (a) take s5e_reset_snapshot at entry and show INFORM2/INFORM3/0x190 in the held report, (b) if INFORM3 reads 0x12345601 at entry, write S5E_REASON_NORMAL through s5e_reset_prepare, (c) at a deadline (default 45 s, below the 83 s WDT) draw a RESET stage marker and call s5e_reset_to(PMU, 0x12345601); the NAT-042 module is linked unmodified (hash equal to NAT-042's evidence).",
+        "Host tests with the compiled aarch64 objects: the patched loader sources equal the run-006 sources except the named hunks; the reset call sits after the last marker draw and before the WDT deadline by a stated margin computed from the measured frame costs; the module's PMU writes occur in the NAT-042 order in an instruction-level run of the linked objects against the NAT-042 PMU model; the WDT stays armed as failsafe; a mutation check on the patch hunks (each must fail a test).",
+        "A candidate RECOVERY package is built on the host (hashes only, payload verbatim per NAT-006 builder), and the decision text for the native run is written under decision 0019 with pass/fail wording for U1-U4 (docs/procedures/nat-042/decision-template.md) but NOT dated as a decision record. Nothing is flashed or run."
+      ],
+      "steps": [
+        "Select and copy the run-006 build inputs",
+        "Write the loader patches and the reset-stage glue",
+        "Host tests with the compiled objects and a mutation check",
+        "Package the candidate image and draft the decision text"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "NAT-045",
+      "title": "USB bring-up platform code for the loader from the NAT-040 ladder (HSI0 power/clock/PHY, DWC3 clock and core reset up to the point where usbmon_init may run), as freestanding C with a register-level model, read-only L0-L2 probe first; host-tested, no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "depends_on": [
+        "NAT-040",
+        "NAT-041"
+      ],
+      "paths": [
+        "docs/procedures/nat-045",
+        "artifacts/nat-045"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "docs/procedures/nat-045 implements ladder steps L0-L8 of docs/procedures/nat-040 as C (one function per rung, each returning a distinct error and logging a stage), with every MMIO address, value, and ordering taken from the NAT-040 plan.json citations (the file re-reads the citations and fails if a constant in the code differs from the pinned vendor source); rungs L0-L2 are read-only probes whose results are logged before any write; the default image path stops after L2 unless a build flag enables the writing rungs.",
+        "A register-level model (clock/PMU/SYSREG/PHY/DWC3 access recorder with the vendor ordering rules from NAT-040) runs the compiled aarch64 objects; tests show the writing rungs happen only when enabled, in the cited order, with the stated delays, and that a failed readback stops the ladder; the unknowns U1-U8 of NAT-040 are carried into the code as named probe results rather than guessed; a mutation check on the sequences.",
+        "The module links with the NAT-041 usbmon engine (usbmon_init after the last rung) in a host build; nothing here runs on the phone."
+      ],
+      "steps": [
+        "Translate the L0-L8 rungs into C with the citation check",
+        "Write the register-level model and tests",
+        "Link with the NAT-041 engine in a host build"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "NAT-046",
+      "title": "Native run of the reset canary loader-diag-reset: measure U1-U4 (PMU INFORM2/INFORM3/0x190 at entry, whether the loader's reset at the deadline happens, host enumeration after it, unattended NAT-013 stock restore) under decision 0019; one run, RECOVERY only",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 96,
+      "depends_on": [
+        "NAT-044"
+      ],
+      "paths": [
+        "docs/procedures/nat-046",
+        "artifacts/nat-046"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "A decision file written under decision 0019 BEFORE the run names the exact RECOVERY/loader/payload hashes of NAT-044's candidate, the PMU registers touched (0xb8, 0xbc, 0x190, 0x3c00 of 0x12860000), the pass/fail wording for U1-U4, and what is not granted; the run follows the run protocol of 0019 (RECOVERY only, pinned stock restore, full-hash readback, one-shot marker, bounded display/watchdog).",
+        "The host records, without the owner's hands, what happens after the deadline: USB enumeration events with timestamps (the host sees SAMSUNG USB, SEC_UPLOAD or nothing), compared with the deadline and the 83 s WDT; the PMU snapshot shown on screen is captured by whatever the host can observe (display capture is not required); each of U1-U4 is stated as supported, refuted or undetermined, never inferred.",
+        "Stock RECOVERY is restored and verified by full hash and Android is verified (or the missing-device state is recorded as the specific external fact); a run with no host observation is inconclusive."
+      ],
+      "steps": [
+        "Write the decision file and check preconditions",
+        "Run the image under the 0019 protocol with a host-side USB event logger",
+        "Restore stock RECOVERY and verify Android; record the outcome"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "NAT-047",
+      "title": "Build the loader-diag-usbmon image on the host: NAT-044 base plus the NAT-045 USB platform code, the NAT-041 usbmon engine polled from the held loop and the exception path, a controlled-fault variant, and the NAT-042 reset at the end; collector smoke against the model; hashes and decision text; no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "depends_on": [
+        "NAT-044",
+        "NAT-045"
+      ],
+      "paths": [
+        "docs/procedures/nat-047",
+        "artifacts/nat-047"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "docs/procedures/nat-047 builds two images from the NAT-044 builder: loader-diag-usbmon (stage messages through usbmon_stage, usbmon_poll in every wait loop and marker dwell, the NAT-045 ladder before usbmon_init, reset at the deadline) and loader-diag-usbmon-fault (adds a controlled BRK whose exception path ends in usbmon_fault); the engine and platform code are linked unmodified (hashes equal NAT-041/NAT-045 evidence).",
+        "Host tests: the compiled loader objects run the engine against the NAT-041 model in the instruction-level harness so that the NAT-041 collector, started first, archives a new boot ID, the stage messages of the new image and in the fault variant an exception frame (NAT-043's criterion, on the model); a mutation check on the glue; the display budget still holds with the extra polling; the WDT stays armed.",
+        "Candidate RECOVERY packages (hashes only) and the decision text for NAT-043 are written under decision 0019 with the NAT-043 pass/fail wording; nothing is flashed or run."
+      ],
+      "steps": [
+        "Add usbmon glue to the NAT-044 loader",
+        "Run the model harness end to end with the collector",
+        "Package both images and draft the decision text"
       ],
       "status": "pending",
       "owner": null
@@ -57470,6 +57589,58 @@
           "owner": "claude-nat042-20261111-reboot",
           "priority": 96,
           "last_heartbeat": "2026-11-11T01:40:19+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T02:01:50+00:00",
+      "action": "task.add:NAT-044",
+      "owner": "claude-nat042-20261111-reboot",
+      "tasks": [
+        {
+          "id": "NAT-044",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T02:01:58+00:00",
+      "action": "task.add:NAT-045",
+      "owner": "claude-nat042-20261111-reboot",
+      "tasks": [
+        {
+          "id": "NAT-045",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T02:02:06+00:00",
+      "action": "task.add:NAT-046",
+      "owner": "claude-nat042-20261111-reboot",
+      "tasks": [
+        {
+          "id": "NAT-046",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T02:02:14+00:00",
+      "action": "task.add:NAT-047",
+      "owner": "claude-nat042-20261111-reboot",
+      "tasks": [
+        {
+          "id": "NAT-047",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
         }
       ]
     }
