@@ -1,0 +1,29 @@
+{
+ "id": "IOS-008",
+ "title": "Design the project's pruned-root composer: from the three IPSW images (via IOS-004/005) to one image of at most ~2.5 GB that the payload kernel can mount from RAM with a writable RAM overlay and no Android partition: closure of Mach-O dependencies from /sbin/launchd and the job set, hard-link/cryptex-graft handling, pre-seeded data volume (no first-boot migration), output format the in-kernel APFS driver can mount read-only (or an alternative), size and delivery-time budget against the 83 s loader watchdog. Host prototype that writes a manifest only; the image writer comes after the format decision.",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 89,
+ "depends_on": [
+  "IOS-005",
+  "IOS-007"
+ ],
+ "paths": [
+  "docs/procedures/ios-008",
+  "tools/ios/root_plan.py",
+  "tests/test_root_plan.py"
+ ],
+ "sources": [],
+ "acceptance": [
+  "root_plan.py computes, from the IOS-005 reader, the dynamic-library closure of launchd and of the minimal service set from LC_LOAD_DYLIB and the shared cache's own image list, and writes a manifest (path, size, source image, origin, hash) with the total uncompressed and best-estimate compressed size; tests use synthetic Mach-O headers built from the public format, and the real closure is checked against the real images.",
+  "A design note states which output format the kernel mounts (APFS written by a project tool, a different read-only filesystem the kernel already has, or an HFS+ variant) with the evidence for each option's driver state from IOS-003 R02/R03, and the RAM and USB budget against NAT-071/NAT-073.",
+  "It lists what is not yet decided and which observation (not a guess) decides it."
+ ],
+ "steps": [
+  "Closure and manifest",
+  "Format decision note",
+  "Budget against watchdog and USB rate"
+ ],
+ "status": "pending",
+ "owner": null
+}

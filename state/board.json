@@ -1,19 +1,19 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-11T23:23:06+00:00",
-  "ledger_updated_at": "2026-11-11T23:17:33+00:00",
-  "registry_sha256": "b13cd49b96aae788c0bf45301b991ad3c4940ada28c9a96bf56efa6313e33f22",
+  "generated_at": "2026-11-11T23:46:14+00:00",
+  "ledger_updated_at": "2026-11-11T23:45:45+00:00",
+  "registry_sha256": "c6c49e84c6ac2c7f12e6549a5c0d547be626e527a42396988ec2e6ce61e67d36",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
+      "IOS-004",
       "NAT-071",
       "NAT-054",
       "NAT-055",
-      "NAT-073"
+      "NAT-073",
+      "IOS-007"
     ],
-    "in_progress": [
-      "IOS-003"
-    ],
+    "in_progress": [],
     "blocked": [
       "INT-002",
       "INT-003",
@@ -35,8 +35,11 @@
       "GPU-005"
     ],
     "waiting": [
+      "IOS-005",
       "NAT-056",
+      "IOS-006",
       "NAT-011",
+      "IOS-008",
       "GPU-007",
       "GPU-009",
       "AUD-001",
@@ -274,6 +277,7 @@
       "VM-004",
       "NAT-057",
       "SEN-001",
+      "IOS-003",
       "NAT-013",
       "PLN-001",
       "SRC-001",
@@ -5998,6 +6002,38 @@
       "card_path": "planning/tasks/IOS-001.md"
     },
     {
+      "id": "IOS-004",
+      "title": "Own read-only UDIF (.dmg) reader for the IPSW rootfs image: koly trailer, XML plist with blkx/mish tables, random reads and bounded streaming over zero/raw/ignore/comment/zlib/bzip2/LZFSE/LZMA chunks (ADC refused by name unless implemented); host-tested on synthetic images and smoke-checked on the local 096-04088-077.dmg. Purpose: the earliest unsolved blocker for Apple launchd is that nothing on the host can list the iOS 16.5 root (IOS-003 R01/R19).",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "IOS-002",
+        "IOS-003"
+      ],
+      "paths": [
+        "tools/ios/udif.py",
+        "tests/test_udif.py",
+        "docs/procedures/ios-004"
+      ],
+      "sources": [],
+      "acceptance": [
+        "tools/ios/udif.py parses the 512-byte koly trailer, the XML property list and every blkx/mish table with bounds checks (sector counts, data offsets and lengths inside the file, no allocation of the size a header claims before it is checked); exposes info(), read(offset, length) across chunk boundaries, and a streaming iterator with a fixed memory bound; LZFSE chunks use tools/ios/lzfse_py.py. Every damaged input ends in UdifError, never IndexError/struct.error/unbounded loop. No upstream code is compiled or executed (y2sios dmg.py is a reference for the format description only).",
+        "tests/test_udif.py builds UDIF images in the test (all supported chunk types, multi-partition, chunk boundary reads, zero-length, truncated and corrupted trailers/tables) from the public format description, not from the reader's own helper; a mutation pass over the reader (as for IOS-002) kills every chosen mutant or lists survivors.",
+        "Smoke check on the local rootfs image artifacts/apple-inputs/.../096-04088-077.dmg: info lists partitions, chunk-type histogram and decompressed size; the decompressed bytes at the start of the APFS partition carry the container magic NXSB at offset 32; time and memory per MiB decompressed are recorded. Only counts, hashes and sizes are committed; no Apple data is copied into Git."
+      ],
+      "steps": [
+        "Write the reader from the format description",
+        "Synthetic-image tests and mutants",
+        "Smoke check on the local image, record throughput"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/IOS-004.md"
+    },
+    {
       "id": "KRN-005",
       "title": "Qualify real selected XNU allocator type compiler metadata",
       "priority": 96,
@@ -6855,6 +6891,40 @@
       "column": "ready",
       "reasons": [],
       "card_path": "planning/tasks/NAT-071.md"
+    },
+    {
+      "id": "IOS-005",
+      "title": "Own read-only APFS reader (from the public Apple File System Reference, apfs_format.h as cross-reference) over a UDIF/raw container: NXSB, checkpoint, object map, volume superblock, filesystem tree (inode, drec, file extent, xattr incl. com.apple.decmpfs), sealed-volume metadata ignored not verified; plus an inventory of rootfs 096-04088-077 + SystemOS 096-04666-078 + AppOS 096-03536-083: where /sbin/launchd, dyld, the shared cache, backboardd, SpringBoard, launchd job plists and the LaunchDaemons the minimal set needs are, sizes per directory.",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [
+        "IOS-004"
+      ],
+      "paths": [
+        "tools/ios/apfs_read.py",
+        "tests/test_apfs_read.py",
+        "docs/procedures/ios-005"
+      ],
+      "sources": [],
+      "acceptance": [
+        "The reader lists directories, stats files and reads file data (plain extents; decmpfs compressed files for the types present in the images, LZFSE via tools/ios/lzfse_py.py; any type not implemented is reported by name with its file count, not skipped silently) on the real rootfs and both cryptexes; unsupported or damaged structures end in ApfsError.",
+        "Tests use small APFS-shaped containers written in the test from the specification (a node split, a hard link, an xattr-stored and a resource-fork compressed file, a snapshot-less volume), plus structure-level checks on the real images (every file extent inside the container; sizes sum to the volume's recorded usage within a stated tolerance). Not a mirror of the implementation: expected values come from the specification or from the image's own recorded totals.",
+        "docs/procedures/ios-005/inventory.json (paths, sizes, file types, sha256 of nothing but our own tool outputs) answers: the path and size of launchd, dyld, the dyld shared cache (arm64e/arm64?) and its location relative to the cryptex graft; the executable and library closure of backboardd and SpringBoard by LC_LOAD_DYLIB names; the launchd job plists under /System/Library/LaunchDaemons that a minimal set needs; total bytes of a pruned root. No Apple file content is committed."
+      ],
+      "steps": [
+        "Container, omap and fs-tree walker",
+        "File data and decmpfs",
+        "Inventory of the three images",
+        "Tests"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: IOS-004"
+      ],
+      "card_path": "planning/tasks/IOS-005.md"
     },
     {
       "id": "USB-001",
@@ -9568,15 +9638,17 @@
         "Extract the requirement list per donor",
         "Map against the project kernel and the NAT-068 log"
       ],
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude-nat065-20261112-ramdisk",
       "started_at": "2026-11-11T22:58:29+00:00",
       "last_heartbeat": "2026-11-11T22:58:29+00:00",
-      "updated_at": "2026-11-11T22:58:29+00:00",
-      "column": "in_progress",
+      "updated_at": "2026-11-11T23:39:13+00:00",
+      "evidence": "docs/procedures/ios-003/evidence.json",
+      "evidence_sha256": "7e9ecef10ebeae699158ffe4e6d95beb2f6223e229d60b6fd755e17da6047694",
+      "finished_at": "2026-11-11T23:39:13+00:00",
+      "column": "done",
       "reasons": [],
-      "card_path": "planning/tasks/IOS-003.md",
-      "report_health": "recent"
+      "card_path": "planning/tasks/IOS-003.md"
     },
     {
       "id": "NAT-013",
@@ -10763,6 +10835,41 @@
       "card_path": "planning/tasks/VM-055.md"
     },
     {
+      "id": "IOS-006",
+      "title": "Can the iOS 16.5 graphics stack present a first frame without a full GPU driver? Host analysis of the real backboardd/QuartzCore/IOMobileFramebuffer/IOSurface client code from the IPSW (shared cache + binaries) after IOS-005: what happens when no IOAccelerator service matches, which user-client selectors backboardd needs from IOMobileFramebuffer and IOSurface to commit a frame, whether CoreAnimation has a CPU renderer path in 16.5 and what selects it. No promise of software rendering until a run proves it.",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 90,
+      "depends_on": [
+        "IOS-005"
+      ],
+      "paths": [
+        "research/notes/IOS-006-first-frame-without-gpu.md"
+      ],
+      "sources": [
+        "ios-apollo",
+        "y2sios"
+      ],
+      "acceptance": [
+        "The note separates (a) what the real 16.5 binaries show (selector numbers, class and service-name strings, control flow around a failed accelerator match, quoted by address and image hash) from (b) donor claims (ios-apollo sweetgl=0 software path; y2sios GPU stack) from (c) unknown.",
+        "It states the minimal IOMFB/IOSurface contract needed to commit one frame and compares it with MiniIOMobileFramebuffer/MiniIOSurface in the project kernel, row by row, in the five-word vocabulary of IOS-003 (no row says compatible from a symbol name).",
+        "It ends with a decision: either a defined first-frame experiment (question, observable, pass/fail rule) for a later native run, or the statement that a GPU path is on the critical chain, with the minimal GPU work it implies."
+      ],
+      "steps": [
+        "Locate the client code in the shared cache",
+        "Selector and failure-path analysis",
+        "Compare with the project stand-ins",
+        "Experiment definition"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: IOS-005"
+      ],
+      "card_path": "planning/tasks/IOS-006.md"
+    },
+    {
       "id": "KRN-033",
       "title": "Implement source-qualified AES-GCM streaming modes and managed nonce helpers",
       "priority": 89,
@@ -10879,6 +10986,40 @@
       "card_path": "planning/tasks/NAT-014.md"
     },
     {
+      "id": "IOS-008",
+      "title": "Design the project's pruned-root composer: from the three IPSW images (via IOS-004/005) to one image of at most ~2.5 GB that the payload kernel can mount from RAM with a writable RAM overlay and no Android partition: closure of Mach-O dependencies from /sbin/launchd and the job set, hard-link/cryptex-graft handling, pre-seeded data volume (no first-boot migration), output format the in-kernel APFS driver can mount read-only (or an alternative), size and delivery-time budget against the 83 s loader watchdog. Host prototype that writes a manifest only; the image writer comes after the format decision.",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 89,
+      "depends_on": [
+        "IOS-005",
+        "IOS-007"
+      ],
+      "paths": [
+        "docs/procedures/ios-008",
+        "tools/ios/root_plan.py",
+        "tests/test_root_plan.py"
+      ],
+      "sources": [],
+      "acceptance": [
+        "root_plan.py computes, from the IOS-005 reader, the dynamic-library closure of launchd and of the minimal service set from LC_LOAD_DYLIB and the shared cache's own image list, and writes a manifest (path, size, source image, origin, hash) with the total uncompressed and best-estimate compressed size; tests use synthetic Mach-O headers built from the public format, and the real closure is checked against the real images.",
+        "A design note states which output format the kernel mounts (APFS written by a project tool, a different read-only filesystem the kernel already has, or an HFS+ variant) with the evidence for each option's driver state from IOS-003 R02/R03, and the RAM and USB budget against NAT-071/NAT-073.",
+        "It lists what is not yet decided and which observation (not a guess) decides it."
+      ],
+      "steps": [
+        "Closure and manifest",
+        "Format decision note",
+        "Budget against watchdog and USB rate"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: IOS-005, IOS-007"
+      ],
+      "card_path": "planning/tasks/IOS-008.md"
+    },
+    {
       "id": "KRN-034",
       "title": "Implement source-qualified ChaCha20-Poly1305 streaming function table",
       "priority": 88,
@@ -10986,6 +11127,36 @@
       ],
       "card_path": "planning/tasks/NAT-009.md",
       "report_health": "stale"
+    },
+    {
+      "id": "IOS-007",
+      "title": "Pin and review the HackiOS userland repository (oosexgang/hackios-xnu-userland: init, injected libraries, launchd job definitions, APFS image builder, IPSW extractor) as a research source at a full SHA; extract what it does to the iOS 16.5 root and which launchd jobs it keeps. Two donors (y2sios, ios-lemonadep) derive their userland from it, but its content is only known from their notices.",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 88,
+      "depends_on": [
+        "IOS-003"
+      ],
+      "paths": [
+        "research/notes/IOS-007-hackios-userland-review.md",
+        "research/sources.json"
+      ],
+      "sources": [],
+      "acceptance": [
+        "research/sources.json gets a hackios-userland entry pinned to a full SHA with its licence notes (clone via tools/sources.py into references/, no script from it executed); sources.py verify is clean.",
+        "The note lists, with path @ blob id, the root-preparation steps, the init program, injected libraries and launchd job set, the root builder's inputs and outputs, and for each whether the project already has an equivalent; donor claims stay claims.",
+        "It names what a project-owned root composer (IOS-008) must reproduce versus what can be omitted."
+      ],
+      "steps": [
+        "Pin and fetch",
+        "Read the builder and job list",
+        "Write the note"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/IOS-007.md"
     },
     {
       "id": "KRN-035",
@@ -15049,7 +15220,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-003"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -15088,7 +15259,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-003"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -16089,19 +16260,6 @@
         "worktree": null
       }
     ],
-    "claude-nat065-20261112-ramdisk": [
-      {
-        "id": "IOS-003",
-        "status": "in_progress",
-        "last_heartbeat": "2026-11-11T22:58:29+00:00",
-        "report_health": "recent",
-        "progress_note": null,
-        "next_step": null,
-        "handoff": null,
-        "branch": null,
-        "worktree": null
-      }
-    ],
     "codex-team-crypto-chacha-20261105-bu": [
       {
         "id": "KRN-034",
@@ -16143,84 +16301,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-11T22:19:56+00:00",
-      "action": "task.done:NAT-068",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "NAT-068",
-          "status": "done",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 95,
-          "last_heartbeat": "2026-11-11T22:10:12+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T22:20:05+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-11T22:24:01+00:00",
-      "action": "task.add:NAT-069",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "NAT-069",
-          "status": "pending",
-          "owner": null,
-          "priority": 95
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T22:24:10+00:00",
-      "action": "task.add:NAT-070",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "NAT-070",
-          "status": "pending",
-          "owner": null,
-          "priority": 94
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T22:24:19+00:00",
-      "action": "task.claim:NAT-069",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "NAT-069",
-          "status": "in_progress",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 95,
-          "last_heartbeat": "2026-11-11T22:24:19+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T22:39:46+00:00",
-      "action": "task.add:IOS-002",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-002",
-          "status": "pending",
-          "owner": null,
-          "priority": 96
-        }
-      ]
-    },
     {
       "at": "2026-11-11T22:40:07+00:00",
       "action": "task.add:IOS-001",
@@ -16416,11 +16496,90 @@
           "last_heartbeat": "2026-11-11T22:58:10+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-11T23:39:13+00:00",
+      "action": "task.done:IOS-003",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-003",
+          "status": "done",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 92,
+          "last_heartbeat": "2026-11-11T22:58:29+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T23:45:05+00:00",
+      "action": "task.add:IOS-004",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-004",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T23:45:14+00:00",
+      "action": "task.add:IOS-005",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-005",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T23:45:23+00:00",
+      "action": "task.add:IOS-006",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-006",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T23:45:33+00:00",
+      "action": "task.add:IOS-007",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-007",
+          "status": "pending",
+          "owner": null,
+          "priority": 88
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T23:45:45+00:00",
+      "action": "task.add:IOS-008",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-008",
+          "status": "pending",
+          "owner": null,
+          "priority": 89
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "16d5a4124ece0dd8f55decf51cb4d30d75ab42ca9d5e3a5fef75ee06e5e8f338",
-    "BOARD.md": "2808f2e22002cae417d881df80bfc1dc90969716f835aa87d3fe2f0d7a51e9c4",
+    "STATUS.md": "240376d3ac28b95b1a285038752f95e77974d689a73072fce0354f1cf691592a",
+    "BOARD.md": "c92a4f2add9afc8318c518102f769a485bbb95b708fe36d31f0618a2db8eb046",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -16550,6 +16709,7 @@
     "planning/tasks/NAT-041.md": "a3421dc1c461e0ce04af4851d361af8888a14702f98652555347c1bfc5cae630",
     "planning/tasks/NAT-050.md": "3aa5fc869a2e660813bf581fad15a20e073f1fa817104f9f9d36ae2e38a45953",
     "planning/tasks/IOS-001.md": "dbdfb1339de19dd1230932bcca18ccb449c4ab1ff6efaa4e20344d8980873bad",
+    "planning/tasks/IOS-004.md": "d698fcf93dce751394e7c7c98e865207aea18aae2742adfddbcfcc4a0d78324c",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/REV-004.md": "8c7b273845208b121b2d6d1f05038b627689d3f97b766a765a91cdf23082bdb1",
     "planning/tasks/REV-011.md": "5ea2857fe5caca100edd1f7f53667f0b2a27de4b576000ecd14e2a55f1e7d51b",
@@ -16571,6 +16731,7 @@
     "planning/tasks/NAT-067.md": "e4ba0decee57e5e187eaf810a70aff8f9098b389c9a24e7576403c9c757da6f0",
     "planning/tasks/IOS-002.md": "5bf4ead31f8c9e395260b578f5c5b541754ed539c591df88faf833dc2d6d6520",
     "planning/tasks/NAT-071.md": "134aa9042ed8970145b748856d6832ec50412d6b3f80ea437c12721fd4be178d",
+    "planning/tasks/IOS-005.md": "281a07f8543611be47bd0237182c4c20638a1c33a033b26252c12662bdacd841",
     "planning/tasks/USB-001.md": "19299959cb09f2aa3b00ffa299face5e25f485c75dfcc2e5f1879b39d435471a",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
@@ -16632,7 +16793,7 @@
     "planning/tasks/NAT-072.md": "fff59baf9a7bc876e8fb126b4286ef33084d3b8d8fc73c8bfd9ae2474d6c8037",
     "planning/tasks/SEN-001.md": "3c54f6f748160ba9c5b4c4f27f41576ddb90a5c2f73f0243805e189091695d2d",
     "planning/tasks/ODIN-001.md": "ac0ee966c510177f407059b9a1c47e89df084a5b1c873bb7eea122547f1d4f0a",
-    "planning/tasks/IOS-003.md": "efa52a6e891f255cfe90a8baf63ee34ed5def84eb4a77b93482f5ec048d8193a",
+    "planning/tasks/IOS-003.md": "59ae2b6225dc73ce34729b9d7c5f86da9e4a34b474f578db13a29a02187c6d8a",
     "planning/tasks/NAT-013.md": "b211a32160f7a1711f4cdfb1218280216622baf34bd7fdfcfdf7b259ce4b12a9",
     "planning/tasks/NAT-073.md": "2cd3118c7a7726d927f2ab869bc7675200eaaa00f1d075bb9b645183ffe005af",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
@@ -16660,11 +16821,14 @@
     "planning/tasks/UI-007.md": "a7b5bb6464c8544f80983813d920bc66655a5e68963adfda226f871154b588a5",
     "planning/tasks/NAT-008.md": "0c608898e59aa41112423e268085e55a1010b958e7ac36e7ee64211ccc82a0a3",
     "planning/tasks/VM-055.md": "fe28b385b930f00cd778325365baf0ac4f48ec8512078e17196762089ecc652a",
+    "planning/tasks/IOS-006.md": "3bb2991ec29be38928d0445b6a38a5e5a7e68b097a093e9a5efb15f4fe51de92",
     "planning/tasks/KRN-033.md": "65895b5673cb8432d904647391ec6378b6eafcac42e79bfd6cef92a0dcc4b83f",
     "planning/tasks/NAT-011.md": "13d5b59a05e410c27749dd20732dbe9312dda69ca349e32845cd4b144be9aaa3",
     "planning/tasks/NAT-014.md": "8ab44f96da942083ed04d834447e25cd58e8ddda08c83b2f1ca4e44327720c71",
+    "planning/tasks/IOS-008.md": "88e853e93b86ad0d1bff04b257002fc9a9af199f1d2c6356d1a496630a9e084a",
     "planning/tasks/KRN-034.md": "216955769016c966a7b2ed1191501a2967d901d5371a7e1ec31f2230896ac5cc",
     "planning/tasks/NAT-009.md": "7fcd0c6655888c3515a10871a2f5a8f5c0455ef3e61c149f65b42f7ebd9d5f3b",
+    "planning/tasks/IOS-007.md": "8435cdfa0fcafe3cba0bf911b75468e129763fcb4cb9d751a5fe216973533db0",
     "planning/tasks/KRN-035.md": "73d3fdfa9f6c3f1f76fe0f244208e46b40bf7343bf78e2f78223ea9c1c7a98a7",
     "planning/tasks/KRN-036.md": "43b1fb9c66ca2aa223235ea38bf2e400888380c3822a4aca35e67b96cd532020",
     "planning/tasks/KRN-001.md": "554587c78270501a0d958373741a231572c7bb821291875740611622113b3242",
@@ -16755,8 +16919,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "77e18f9eb04b32dfde34a0c92290e34bec0d25d50c9b83130df727f7c8071342",
-    "planning/tasks/DRV-003.md": "09fb0220946793d1de006d2640cb9a36c0487bad7a9acdf3f7e347f530d73a6f",
+    "planning/tasks/NAT-003.md": "900c9899f056f923a302eefcd803e5614e23ba4cd956b217a3299a49c572a47e",
+    "planning/tasks/DRV-003.md": "9cc6f782ab4b835cb0dedba9881bf8c175a6cd88b96a4243572f754d8c44465a",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",

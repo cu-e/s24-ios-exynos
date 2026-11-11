@@ -1,0 +1,29 @@
+{
+ "id": "IOS-005",
+ "title": "Own read-only APFS reader (from the public Apple File System Reference, apfs_format.h as cross-reference) over a UDIF/raw container: NXSB, checkpoint, object map, volume superblock, filesystem tree (inode, drec, file extent, xattr incl. com.apple.decmpfs), sealed-volume metadata ignored not verified; plus an inventory of rootfs 096-04088-077 + SystemOS 096-04666-078 + AppOS 096-03536-083: where /sbin/launchd, dyld, the shared cache, backboardd, SpringBoard, launchd job plists and the LaunchDaemons the minimal set needs are, sizes per directory.",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 96,
+ "depends_on": [
+  "IOS-004"
+ ],
+ "paths": [
+  "tools/ios/apfs_read.py",
+  "tests/test_apfs_read.py",
+  "docs/procedures/ios-005"
+ ],
+ "sources": [],
+ "acceptance": [
+  "The reader lists directories, stats files and reads file data (plain extents; decmpfs compressed files for the types present in the images, LZFSE via tools/ios/lzfse_py.py; any type not implemented is reported by name with its file count, not skipped silently) on the real rootfs and both cryptexes; unsupported or damaged structures end in ApfsError.",
+  "Tests use small APFS-shaped containers written in the test from the specification (a node split, a hard link, an xattr-stored and a resource-fork compressed file, a snapshot-less volume), plus structure-level checks on the real images (every file extent inside the container; sizes sum to the volume's recorded usage within a stated tolerance). Not a mirror of the implementation: expected values come from the specification or from the image's own recorded totals.",
+  "docs/procedures/ios-005/inventory.json (paths, sizes, file types, sha256 of nothing but our own tool outputs) answers: the path and size of launchd, dyld, the dyld shared cache (arm64e/arm64?) and its location relative to the cryptex graft; the executable and library closure of backboardd and SpringBoard by LC_LOAD_DYLIB names; the launchd job plists under /System/Library/LaunchDaemons that a minimal set needs; total bytes of a pruned root. No Apple file content is committed."
+ ],
+ "steps": [
+  "Container, omap and fs-tree walker",
+  "File data and decmpfs",
+  "Inventory of the three images",
+  "Tests"
+ ],
+ "status": "pending",
+ "owner": null
+}
