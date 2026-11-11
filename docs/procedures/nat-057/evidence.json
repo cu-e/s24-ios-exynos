@@ -1,0 +1,95 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T16:49:31+00:00",
+ "commit": "92e47922a2e22ecd43de8d33987199c780bfd099",
+ "tree_state": "the files listed under sha256 are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat057-20261111-session",
+ "summary": "A session driver (session_nat052.py) and a verdict analyser (analyze_nat052.py) for the one image loader-diag-xnu-ckpt3-usb of NAT-052. The driver is the NAT-049 driver with only the image pins (RECOVERY a8161ccc..., Image.payload 9d9cb972...), the package path, the decision glob *-nat052-<image>-single-run-*.md, the one-shot marker and two more registry preconditions (NAT-043 and NAT-052 done) changed; the analyser imports NAT-049's integrity/T0/boot-id/USB-log rules read-only and reads the CK stop notes through NAT-052's decode52. 45 tests pass (driver gates and flow against a fake adb in a scratch tree; verdicts on archives written by the real NAT-041 collector from the DWC3 model; the real NAT-052 loader in unicorn); the mutation check kills 56 of 56 mutants. Nothing ran on the phone, nothing was flashed, and the driver was not run against a device.",
+ "evidence_category": "host-test (driver control flow against a fake adb and a fake sysfs, analyser against model-written archives and a unicorn simulation of the loader); not a measurement of the S24",
+ "acceptance": {
+  "1_driver": "docs/procedures/nat-057/session_nat052.py: derived from session_usblog.py (diff pinned by test_the_driver_differs_from_the_nat049_driver_only_where_the_task_says); pinned RECOVERY/Image.payload hashes of package-002; decision-file gate (exactly one *-nat052-loader-diag-xnu-ckpt3-usb-single-run-*.md naming both hashes and decision 0019; while the driver was written none existed and every mode stopped before any adb call, and decision 0024, drafted afterwards and committed with this evidence, is the file the glob now finds, with the owner's confirmation still unrecorded); registry gate (native permit citing that file; NAT-039, NAT-046, NAT-043, NAT-052 done); udev check, collector self-test and watcher self-test before the first write; the one-shot marker artifacts/nat-057/native-attempt-<image>-used.json; restore-on-abort; watcher and collector confirmed before the single adb reboot recovery. The driver never creates the decision file and never writes the registry.",
+  "2_analyser": "docs/procedures/nat-057/analyze_nat052.py imports analyze_usblog.py (read only) and decode52.progress: PASS only for a live archive with one boot of this image, the banner, both ladder summaries, contiguous frames and notes n=1..22 with this image's checkpoint values, the final stop at n=22 and the HOLD record, no drops, nothing unread; PARTIAL names the last note; EXCEPTION carries esr/elr/far; FAIL and undetermined as NAT-049; a synthetic archive never gets a plain verdict. A final-stop bit before n=22 (found by the first run of the simulator layer, where the NAT-052 scenario 'short' ends its own list early) and a wrong checkpoint value were added as PARTIAL reasons after that finding.",
+  "3_no_device": "No device access and no claim of hardware behaviour. The driver's preflight was not run in the real tree; RealTreeGate runs it with a fake adb on PATH and shows an empty call log: stopped at the decision gate in every mode while no decision file existed, and, with decision 0024 present, --execute stopped at the real registry gate (native closed, NAT-043 not done)."
+ },
+ "established": [
+  "Host-test: every gate of the driver (decision file, registry incl. NAT-043 and NAT-052 done, udev check, collector self-test, watcher self-test, device checks) stops the launch before the first write, and a bad readback, a dead watcher or a dead collector restores stock and never reboots, in a scratch tree with a fake adb.",
+  "Host-test: the analyser separates PASS, PARTIAL, EXCEPTION, FAIL and undetermined on archives written by the real NAT-041 collector, and on the archives of the compiled NAT-052 loader run in unicorn (verdicts labelled simulated-*).",
+  "Host-test: the mutation check kills every one of the 56 mutants of the gates and verdict rules."
+ ],
+ "not_established": [
+  "Anything about the real phone: the fake adb models the RECOVERY block only as a file; the udev check and the collector launcher are stand-ins in the scratch tree (NAT-049 tests them).",
+  "That the image's notes arrive on the S24: the Simulated layer uses the NAT-041 DWC3 model, not the S5E9945 controller (NAT-043 showed the engine and collector work for the loader's own text; the kernel stops are untested on hardware).",
+  "That NAT-043 is done in the registry: it is not (the native permit is closed and opening it for bookkeeping was refused by the auto-mode classifier). The driver therefore refuses a launch."
+ ],
+ "findings": [
+  "The NAT-052 simulation scenario 'short' (three C stops) sets the final-stop bit on its own last arrival, so its archive looked like a complete run to the first version of the analyser. The analyser now requires the final-stop bit at n=22 (checkpoint 16) and the image's checkpoint value at every position.",
+  "The user's /tmp quota (11.9 GB, nearly used by other projects) made the 96 MiB RECOVERY copies of the flow tests fail with ENOSPC-like 'Disk quota exceeded'; the flow tests now use the gitignored artifacts/nat-057/tmp."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "<venv with unicorn+capstone>/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-057/test_nat057.py"
+   ],
+   "exit_code": 0,
+   "note": "Ran 45 tests in 63.108s, OK, nothing skipped (artifacts/nat-057/test-full-002.log)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-057/mutants.py",
+    "--json",
+    "artifacts/nat-057/mutants-001.json",
+    "--jobs",
+    "4"
+   ],
+   "exit_code": 0,
+   "note": "mutants: 56, killed: 56, equivalent: 0, survived: 0"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "Ran 214 tests in 15.954s OK make_check_exit=0"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-057/test-full-002.log",
+  "artifacts/nat-057/mutants-001.json",
+  "artifacts/nat-057/mutants-001.log",
+  "docs/procedures/nat-057/README.md",
+  "artifacts/nat-057/make-check.log"
+ ],
+ "images": {
+  "loader-diag-xnu-ckpt3-usb": {
+   "recovery_sha256": "a8161cccddb4282796a848b2c5b464d5457dcc0bb9bc2e0c1fa9cb1014967d97",
+   "payload_sha256": "9d9cb972496807177771febf819d783f0823ecd2fb44fad2f9fadbfc3027440e",
+   "payload_bytes": 21857888,
+   "payload_offset": 2048
+  }
+ },
+ "stock_recovery_sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+ "sha256": {
+  "docs/procedures/nat-057/README.md": "44cf3f0951ee678e2e7d74566bf28b21b742cd374499857f523816d92e5169d7",
+  "docs/procedures/nat-057/session_nat052.py": "860dffbe6ada672b822584b6c57d1e8368b02c8949121cfcb2cd1c0e1e1726cf",
+  "docs/procedures/nat-057/analyze_nat052.py": "136f76a0318c4b4222806c5a1d538cd99bf69ff126cf35437ca9a062471b7345",
+  "docs/procedures/nat-057/test_nat057.py": "fa07e19e39fa707a478e04336bec1750940087971f0816178e4aea577546c801",
+  "docs/procedures/nat-057/mutants.py": "37e563534f24dc6f18e3b59622bccf73c236129e524fa3d49522649f4ab6bb43"
+ },
+ "artifact_sha256": {
+  "artifacts/nat-057/test-full-002.log": "95f2c888d2f5a36ce2674af66593ab21c0d67ae0e6e92e4680218b802061a47b",
+  "artifacts/nat-057/mutants-001.json": "89f8dd7a61ad618d78564a54bcde2a8a486e5e486e8e3b8a4274402f03db925b"
+ },
+ "device_used": false,
+ "flashed": false
+}
