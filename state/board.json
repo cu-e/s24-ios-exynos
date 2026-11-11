@@ -1,17 +1,15 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-11T16:50:04+00:00",
-  "ledger_updated_at": "2026-11-11T16:49:52+00:00",
-  "registry_sha256": "480eff3bdb7aae957cf7a042862c56762873ee345f9dc001fbecd4b7af850e97",
+  "generated_at": "2026-11-11T17:31:52+00:00",
+  "ledger_updated_at": "2026-11-11T17:31:26+00:00",
+  "registry_sha256": "f6a57cd5b8a683d46afc2a9ad805b2ed8a58e2a2a01acf2f4c3743b8613fd2dd",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
       "NAT-054",
       "NAT-055"
     ],
-    "in_progress": [
-      "NAT-043"
-    ],
+    "in_progress": [],
     "blocked": [
       "INT-002",
       "INT-003",
@@ -207,6 +205,7 @@
       "NAT-018",
       "NAT-035",
       "NAT-042",
+      "NAT-043",
       "NAT-044",
       "NAT-046",
       "NAT-048",
@@ -243,6 +242,7 @@
       "NAT-045",
       "NAT-047",
       "NAT-053",
+      "NAT-058",
       "DRV-001",
       "KRN-023",
       "REV-012",
@@ -6441,17 +6441,19 @@
         "Run under the 0019 protocol with the collector",
         "Restore stock and verify Android; record the outcome"
       ],
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude-nat043-20261111-session",
       "started_at": "2026-11-11T15:40:29+00:00",
       "last_heartbeat": "2026-11-11T16:21:12+00:00",
-      "updated_at": "2026-11-11T16:21:12+00:00",
+      "updated_at": "2026-11-11T17:19:46+00:00",
       "progress_note": "Runs 001 (loader-diag-usbmon, decision 0022) and 002 (loader-diag-usbmon-fault, decision 0023) done: host received 148 and 153 frames by itself, 0 drops, analyser PASS both, run 002 includes the controlled BRK exception frame (ESR 0xf2001234); stock RECOVERY restored and Android verified after each; native permit closed. Evidence written and committed (fa32ec6): docs/procedures/nat-043/evidence.json, outcome pass, make check 214 OK.",
       "next_step": "task done NAT-043 is refused while native is false ('Execution scope is not authorized'); an attempt to open native for bookkeeping only was refused by the auto-mode classifier at 2026-11-11 and not retried. Needs the owner to allow it (permission rule or ! command), then: project permit native true citing decision 0023, task done NAT-043 --evidence docs/procedures/nat-043/evidence.json, project permit native false.",
-      "column": "in_progress",
+      "evidence": "docs/procedures/nat-043/evidence.json",
+      "evidence_sha256": "48ab077424ec562a51fc81f3adfa46bffd7e9648f35b017cf76e9f1e220f3d90",
+      "finished_at": "2026-11-11T17:19:46+00:00",
+      "column": "done",
       "reasons": [],
-      "card_path": "planning/tasks/NAT-043.md",
-      "report_health": "recent"
+      "card_path": "planning/tasks/NAT-043.md"
     },
     {
       "id": "NAT-044",
@@ -8246,6 +8248,46 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-053.md"
+    },
+    {
+      "id": "NAT-058",
+      "title": "First native run of the NAT-052 image loader-diag-xnu-ckpt3-usb (decision 0024): the host receives the XNU kernel's own checkpoint notes up to C checkpoint 16 by USB without a camera; stock restore and Android check",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 95,
+      "depends_on": [
+        "NAT-043",
+        "NAT-052",
+        "NAT-057"
+      ],
+      "paths": [
+        "docs/procedures/nat-058",
+        "artifacts/nat-058"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "One run of the single image named in decision 0024 under the run protocol of decision 0019 (decision file committed with the owner's confirmation before the run, native permit opened citing it, closed after the task is done; no retry); the driver docs/procedures/nat-057/session_nat052.py is the only launcher.",
+        "The host collector, started before the reboot and unattended, archives the records of the real run; the analyser docs/procedures/nat-057/analyze_nat052.py gives a verdict (PASS, PARTIAL naming the last note, EXCEPTION with esr/elr/far, FAIL or undetermined) from the archive and the USB log; a run in which the host receives nothing is recorded as inconclusive or FAIL with the observations that exist, never as success.",
+        "Stock RECOVERY (96620b8b...) is restored with a full-hash readback through the NAT-013 tool and Android is verified unchanged; data, apps and settings untouched; evidence.json with hashes and exit codes is saved."
+      ],
+      "steps": [
+        "Mark NAT-043 done and run the driver preflight, then the single run (decision 0024)",
+        "Restore stock RECOVERY, verify Android",
+        "Analyse the archive, write evidence and update the registry"
+      ],
+      "status": "done",
+      "owner": "claude-nat058-20261111-session",
+      "started_at": "2026-11-11T17:20:50+00:00",
+      "last_heartbeat": "2026-11-11T17:20:50+00:00",
+      "updated_at": "2026-11-11T17:30:54+00:00",
+      "evidence": "docs/procedures/nat-058/evidence.json",
+      "evidence_sha256": "bd53b6e91b99d22545aae51bf1cbeb102f17f686d0dac6772685b81f941db1fb",
+      "finished_at": "2026-11-11T17:30:54+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-058.md"
     },
     {
       "id": "DRV-001",
@@ -14331,7 +14373,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-043, NAT-050, NAT-051"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -14370,7 +14412,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-043, NAT-050, NAT-051"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -15358,19 +15400,6 @@
         "worktree": null
       }
     ],
-    "claude-nat043-20261111-session": [
-      {
-        "id": "NAT-043",
-        "status": "in_progress",
-        "last_heartbeat": "2026-11-11T16:21:12+00:00",
-        "report_health": "recent",
-        "progress_note": "Runs 001 (loader-diag-usbmon, decision 0022) and 002 (loader-diag-usbmon-fault, decision 0023) done: host received 148 and 153 frames by itself, 0 drops, analyser PASS both, run 002 includes the controlled BRK exception frame (ESR 0xf2001234); stock RECOVERY restored and Android verified after each; native permit closed. Evidence written and committed (fa32ec6): docs/procedures/nat-043/evidence.json, outcome pass, make check 214 OK.",
-        "next_step": "task done NAT-043 is refused while native is false ('Execution scope is not authorized'); an attempt to open native for bookkeeping only was refused by the auto-mode classifier at 2026-11-11 and not retried. Needs the owner to allow it (permission rule or ! command), then: project permit native true citing decision 0023, task done NAT-043 --evidence docs/procedures/nat-043/evidence.json, project permit native false.",
-        "handoff": null,
-        "branch": null,
-        "worktree": null
-      }
-    ],
     "codex-e1s-dependencies-20261105-k": [
       {
         "id": "KRN-003",
@@ -15425,86 +15454,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-11T14:18:30+00:00",
-      "action": "task.claim:NAT-052",
-      "owner": "claude-nat052-20261111-session",
-      "tasks": [
-        {
-          "id": "NAT-052",
-          "status": "in_progress",
-          "owner": "claude-nat052-20261111-session",
-          "priority": 94,
-          "last_heartbeat": "2026-11-11T14:18:30+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T14:45:18+00:00",
-      "action": "task.add:NAT-053",
-      "owner": "codex-usb-audit-20261111-r1",
-      "tasks": [
-        {
-          "id": "NAT-053",
-          "status": "pending",
-          "owner": null,
-          "priority": 95
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T14:45:37+00:00",
-      "action": "task.claim:NAT-053",
-      "owner": "codex-usb-audit-20261111-r1",
-      "tasks": [
-        {
-          "id": "NAT-053",
-          "status": "in_progress",
-          "owner": "codex-usb-audit-20261111-r1",
-          "priority": 95,
-          "last_heartbeat": "2026-11-11T14:45:37+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T14:49:32+00:00",
-      "action": "task.add:NAT-054",
-      "owner": "codex-usb-audit-20261111-r1",
-      "tasks": [
-        {
-          "id": "NAT-054",
-          "status": "pending",
-          "owner": null,
-          "priority": 94
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T14:49:42+00:00",
-      "action": "task.add:NAT-055",
-      "owner": "codex-usb-audit-20261111-r1",
-      "tasks": [
-        {
-          "id": "NAT-055",
-          "status": "pending",
-          "owner": null,
-          "priority": 94
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T14:49:52+00:00",
-      "action": "task.add:NAT-056",
-      "owner": "codex-usb-audit-20261111-r1",
-      "tasks": [
-        {
-          "id": "NAT-056",
-          "status": "pending",
-          "owner": null,
-          "priority": 94
-        }
-      ]
-    },
     {
       "at": "2026-11-11T14:50:06+00:00",
       "action": "task.update:NAT-053",
@@ -15701,11 +15650,90 @@
           "last_heartbeat": "2026-11-11T16:22:14+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-11T17:19:32+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-nat043-20261111-session",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-11T17:19:46+00:00",
+      "action": "task.done:NAT-043",
+      "owner": "claude-nat043-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-043",
+          "status": "done",
+          "owner": "claude-nat043-20261111-session",
+          "priority": 96,
+          "progress_note": "Runs 001 (loader-diag-usbmon, decision 0022) and 002 (loader-diag-usbmon-fault, decision 0023) done: host received 148 and 153 frames by itself, 0 drops, analyser PASS both, run 002 includes the controlled BRK exception frame (ESR 0xf2001234); stock RECOVERY restored and Android verified after each; native permit closed. Evidence written and committed (fa32ec6): docs/procedures/nat-043/evidence.json, outcome pass, make check 214 OK.",
+          "next_step": "task done NAT-043 is refused while native is false ('Execution scope is not authorized'); an attempt to open native for bookkeeping only was refused by the auto-mode classifier at 2026-11-11 and not retried. Needs the owner to allow it (permission rule or ! command), then: project permit native true citing decision 0023, task done NAT-043 --evidence docs/procedures/nat-043/evidence.json, project permit native false.",
+          "last_heartbeat": "2026-11-11T16:21:12+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T17:20:40+00:00",
+      "action": "task.add:NAT-058",
+      "owner": "claude-nat058-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-058",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T17:20:50+00:00",
+      "action": "task.claim:NAT-058",
+      "owner": "claude-nat058-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-058",
+          "status": "in_progress",
+          "owner": "claude-nat058-20261111-session",
+          "priority": 95,
+          "last_heartbeat": "2026-11-11T17:20:50+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T17:30:54+00:00",
+      "action": "task.done:NAT-058",
+      "owner": "claude-nat058-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-058",
+          "status": "done",
+          "owner": "claude-nat058-20261111-session",
+          "priority": 95,
+          "last_heartbeat": "2026-11-11T17:20:50+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T17:31:26+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-nat058-20261111-session",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
     }
   ],
   "view_sha256": {
-    "STATUS.md": "d7e7eee0062cf98346d458219b4abab71c1d62bbe238a5facf436a1d2067c57c",
-    "BOARD.md": "56a5f3d460d913647b82156ecdfd6751994302a713a0e8dd9674668151ba8dea",
+    "STATUS.md": "c527b8aa06ffc5ef29ae8fbc9b50387ed072aec983dc6058eac888af316d0d3a",
+    "BOARD.md": "6a2cb54b72d0a55f690884a98de4f776be823f77c51e41f581b38cf1150f22a3",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -15845,7 +15873,7 @@
     "planning/tasks/NAT-018.md": "99ed6f18b19d229ab18943b58d41e54e62b137950c525a3c408119e479c590cb",
     "planning/tasks/NAT-035.md": "df46e6b02ce966e9cdef479dca3452834653951b87029bc481cb00ffcaa27113",
     "planning/tasks/NAT-042.md": "93fed97a38306f556c45cae537c69262efde6ea20e64834048a2672611aab75f",
-    "planning/tasks/NAT-043.md": "c691fb0e1ef26943243d861d97a80e4949b4013c7f3d3329afdcb757dd254967",
+    "planning/tasks/NAT-043.md": "6da845a8381c2310ab8d685f4c35c79fea49ed239f47b5e773d59d8fd1b77127",
     "planning/tasks/NAT-044.md": "ebe6e82d271322eba40665841d59265456760651c738681d5df0cc17d80305aa",
     "planning/tasks/NAT-046.md": "1aec675eb8daf553a6ac9250807cf04d73ce5c49575142a081a2971878ba633b",
     "planning/tasks/NAT-048.md": "018ae63e1c1a425dcb6cab1eb1a660a6a80e87ffc0cb9502067f26ebc6e11d38",
@@ -15884,6 +15912,7 @@
     "planning/tasks/NAT-045.md": "e76172c29c8ba70c3e2edca2e11dd259194579cda7da6e56c5afb2ce4c454fd8",
     "planning/tasks/NAT-047.md": "0be2a8e7ab7ead36a149aa77fed39b977d1a3b1dd82d2a8e5a9814b281aa6795",
     "planning/tasks/NAT-053.md": "6cedf998d274379aa9a95c685f38ebe03a3066762dfb28b5c831c08d809269a8",
+    "planning/tasks/NAT-058.md": "ae159ae1652bd79b3ba958c0de69af02273c020a178302b3c5d8d3e8e8aea626",
     "planning/tasks/DRV-001.md": "eaac786b5ca6d0640d7a9bea43bf42424662189e0f9f44baaa6b6ad049f10f17",
     "planning/tasks/KRN-023.md": "a95e56ff9ef7bfa3ff55cf11a48d0bba892cc95ab504b367bc3e9d4490ecdd51",
     "planning/tasks/REV-012.md": "99bf82028acd252050bbe595c74c47d22013dfccb4d261b32b98825471ce86ea",
@@ -16021,8 +16050,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "e3125340b512df90663200c5e3b9056b1384074d2e32094e3390f4e396b2e090",
-    "planning/tasks/DRV-003.md": "28ac53f106392981347d3e9013a5cca9b648ff55e95889e74af0f599fba80276",
+    "planning/tasks/NAT-003.md": "900c9899f056f923a302eefcd803e5614e23ba4cd956b217a3299a49c572a47e",
+    "planning/tasks/DRV-003.md": "9cc6f782ab4b835cb0dedba9881bf8c175a6cd88b96a4243572f754d8c44465a",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",

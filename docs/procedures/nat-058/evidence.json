@@ -1,0 +1,220 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T17:29:57+00:00",
+ "commit": "fd5a57c9898ade74cc8803d9ba872e69bc963086",
+ "tree_state": "the files listed under sha256 under docs/ are committed in the commit that follows this record; the recorded commit is its parent (decision 0024 with the owner's confirmation, fd5a57c, was committed before the run)",
+ "owner": "claude-nat058-20261111-session",
+ "summary": "One native run of loader-diag-xnu-ckpt3-usb under decision 0024 (decision 0019 protocol). The host computer received by itself, with no camera and no owner action, all 22 stop notes of the XNU kernel's early boot code (assembly checkpoints 1-5, then C checkpoints 11, 30-35, 12, 40-44, 13-16; the last carries the final-stop bit) and the loader's HOLD record: 172 frames, 170 records, contiguous, 0 drops, nothing unread, manifest complete-received-stream; the analyser verdict is PASS. The kernel's C code was observed past C checkpoint 11 for the first time (run 009 ended there) and the NAT-035 resume sequence worked 21 times on hardware. The phone re-entered Download Mode by itself at T0 + 87.8 s (NAT-044 deadline reset, 60 s deadline); stock RECOVERY was restored with a full-hash match and Android was verified (boot_completed=1, user data directories present).",
+ "evidence_category": "native-device: one run of a RECOVERY image on this S24 observed by the host collector (EP0 records), the host USB watcher and the Download Mode / Android checks after restore. The notes are what the image reports; hardware execution of the kernel's code up to checkpoint 16 is shown by the arrival of notes that carry kernel register state, not by any other observation.",
+ "acceptance": {
+  "1_decision_and_protocol": "met: decision 0024 (image loader-diag-xnu-ckpt3-usb, both hashes, decision 0019) with the owner's recorded confirmation committed (fd5a57c) before the run; native opened citing it, task done while open, closed after; one run, no retry; the driver docs/procedures/nat-057/session_nat052.py was the only launcher (its marker artifacts/nat-057/native-attempt-loader-diag-xnu-ckpt3-usb-used.json prevents a second run).",
+  "2_host_receives": "met: collector and watcher were running before the reboot request (watcher start at T0-0.3 s, collector before T0); the collector received one boot, 172 frames, 22 CK notes n=1..22 in order, the banner, both ladder summaries (err=0), 8 stage records and HOLD stage=0x51 code=0x203e; analyser verdict PASS (docs/procedures/nat-058/run-001-analysis.json); archive manifest and the USB event log are saved.",
+  "3_restore": "met: Download Mode as 04e8:685d iProduct 'SAMSUNG USB' at T0+87.8 s without owner action; restore_stock.py restore (pyusb venv python, one session, bus 5 address 93) -> awaiting-readback; check_android.py: recovery_hash_match true, boot_completed 1, current user 0, user data directories present; assess: pass (six stages)."
+ },
+ "established": [
+  "Native-device: the host received, over the NAT-041 EP0 engine and without a camera, 22 consecutive notes from the XNU kernel's early boot code (kernel register state at each stop), ending at C checkpoint 16 with the final-stop bit and a HOLD record.",
+  "Native-device: the kernel's TTBR0 at assembly checkpoint 5 is 0x9e15ae000 (the NAT-035/036 model value, never measured before; adjacent to the measured TTBR1 0x9e15af000). With the MMU on (SCTLR 0x3454599d at every C stop, equal to run 009's value at C checkpoint 11) the kernel SP at every C stop is 0xfffffff00805fef0 and VBAR is the kernel's 0xfffffff007437000.",
+  "Native-device: the NAT-035/NAT-036 resume sequence (stub-owned save and restore of SP, x18-x28, SCTLR, the kernel TTBR0 through _set_mmu_ttb, return through loader_jump's epilogue) gives the kernel back correctly 21 times in one run: the kernel continued after each and no exception note arrived.",
+  "Native-device: the NAT-057 driver and analyser work on the phone (gates, write/readback, one reboot, restore, T0 ordering, the analyser's PASS on a live archive after the collector finished)."
+ ],
+ "not_established": [
+  "Anything about the kernel after C checkpoint 16: arm_vm_init changes the kernel's TTBR0 and the stub refuses later stops; no note exists for it.",
+  "That the kernel's state is correct: the notes say what it reported at each stop; the loader holds at checkpoint 16 by design, so whether the kernel would continue on its own is untested.",
+  "Repeatability (one run), unpolled kernel intervals longer than about 0.4 s, and anything about display, GPU, storage or other peripherals."
+ ],
+ "findings": [
+  "First messages from the XNU kernel received by a computer. The earlier kernel observations (runs 008 and 009) were photographs of the display; now the host has the register state at each stop in text and the raw frames.",
+  "The first analysis of the same received.bin gave PARTIAL (reason: no manifest.json) at 17:24Z because the collector and watcher run in a 360 s window from the reboot request and had not finished; after they ended by themselves at 17:27:21Z the analyser gave PASS on identical received data (received.bin sha256 b9444a14c196616f2daf4505c538602f79500d6ba5111ad6029fecb362e83339). The analysis procedure should say to run the analyser after both processes have exited.",
+  "Timeline (T0 = reboot request 2026-11-11T17:21:21.895Z): phone left the bus +3.8 s; 1209:0001 appeared +26.8 s; CK n=1 received +44.5 s; CK n=22 +54.3 s; HOLD +55.6 s; 1209:0001 left +84.0 s; Download Mode +87.8 s.",
+  "The next obstacle toward a running kernel is arm_vm_init: the kernel's TTBR0 changes there, so the stub's captured value is no longer valid after checkpoint 16 (NAT-035 section 2)."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-057/session_nat052.py",
+    "--image",
+    "loader-diag-xnu-ckpt3-usb",
+    "--out",
+    "artifacts/nat-058/preflight-001"
+   ],
+   "exit_code": 0,
+   "note": "ready-read-only (no write, no reboot)"
+  },
+  {
+   "argv": [
+    "python3",
+    "tools/lab.py",
+    "project",
+    "permit",
+    "--scope",
+    "native",
+    "--value",
+    "true",
+    "--decision",
+    "docs/decisions/0024-nat052-loader-diag-xnu-ckpt3-usb-single-run-2026-11-11.md"
+   ],
+   "exit_code": 0,
+   "note": "native opened for the run window"
+  },
+  {
+   "argv": [
+    "python3",
+    "tools/lab.py",
+    "task",
+    "done",
+    "NAT-043",
+    "--evidence",
+    "docs/procedures/nat-043/evidence.json"
+   ],
+   "exit_code": 0,
+   "note": "NAT-043 done (evidence fa32ec6) while native was open"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-057/session_nat052.py",
+    "--image",
+    "loader-diag-xnu-ckpt3-usb",
+    "--out",
+    "artifacts/nat-058/run-001",
+    "--execute"
+   ],
+   "exit_code": 0,
+   "note": "native-attempt-started, reboot requested 2026-11-11T17:21:21.895147+00:00"
+  },
+  {
+   "argv": [
+    "<pyusb venv>/bin/python",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "restore",
+    "--bus",
+    "5",
+    "--address",
+    "93",
+    "--out",
+    "artifacts/nat-058/restore-001"
+   ],
+   "exit_code": 0,
+   "note": "awaiting-readback"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-012/check_android.py",
+    "artifacts/nat-058/android-check-001.json"
+   ],
+   "exit_code": 0,
+   "note": "outcome pass, recovery_hash_match true, boot_completed 1"
+  },
+  {
+   "argv": [
+    "<pyusb venv>/bin/python",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "assess",
+    "--report",
+    "artifacts/nat-058/restore-001/report.json",
+    "--readback",
+    "artifacts/nat-058/restore-001/readback.json"
+   ],
+   "exit_code": 0,
+   "note": "outcome pass, six stages"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-057/analyze_nat052.py",
+    "--archive",
+    "artifacts/nat-058/run-001/archive",
+    "--events",
+    "artifacts/nat-058/run-001/usb-events.jsonl",
+    "--report",
+    "artifacts/nat-058/run-001/report.json",
+    "--out",
+    "artifacts/nat-058/run-001/analysis.json"
+   ],
+   "exit_code": 0,
+   "note": "PASS (first analysis at 17:24Z, before the collector finished: PARTIAL, one reason; the committed analysis is the second, after both processes exited)"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-058/run-001/report.json",
+  "artifacts/nat-058/run-001/usb-events.jsonl",
+  "artifacts/nat-058/run-001/usb-selftest.jsonl",
+  "artifacts/nat-058/run-001/collector-heartbeat.jsonl",
+  "artifacts/nat-058/run-001/analysis.json",
+  "artifacts/nat-058/run-001/archive/attempt.json",
+  "artifacts/nat-058/run-001/archive/received.bin",
+  "artifacts/nat-058/run-001/archive/manifest.json",
+  "artifacts/nat-058/run-001/archive/collector-summary.json",
+  "artifacts/nat-058/run-001/archive/events.jsonl",
+  "artifacts/nat-058/run-001/archive/usb-transfers.jsonl",
+  "artifacts/nat-058/run-001.driver.log",
+  "artifacts/nat-058/restore-001/report.json",
+  "artifacts/nat-058/restore-001/readback.json",
+  "artifacts/nat-058/restore-001/assess.json",
+  "artifacts/nat-058/restore-001.log",
+  "artifacts/nat-058/android-check-001.json"
+ ],
+ "images": {
+  "loader-diag-xnu-ckpt3-usb": {
+   "recovery_sha256": "a8161cccddb4282796a848b2c5b464d5457dcc0bb9bc2e0c1fa9cb1014967d97",
+   "payload_sha256": "9d9cb972496807177771febf819d783f0823ecd2fb44fad2f9fadbfc3027440e",
+   "payload_bytes": 21857888,
+   "payload_offset": 2048
+  }
+ },
+ "stock_recovery_sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+ "verdicts": {
+  "run-001": "PASS"
+ },
+ "run": {
+  "t0_utc": "2026-11-11T17:21:21.895147+00:00",
+  "frames": 172,
+  "records": 170,
+  "notes": 22,
+  "last_checkpoint": 16,
+  "hold": "HOLD stage=0x51 code=0x203e",
+  "drops": 0,
+  "bytes_received": 46810,
+  "manifest_outcome": "complete-received-stream"
+ },
+ "sha256": {
+  "docs/procedures/nat-058/README.md": "63e31ee07890cb217d61addb7fd0f418babfd1e1302968b7962e9f1b3c6a723e",
+  "docs/procedures/nat-058/run-001-analysis.json": "ec4e53b866bc0fddbed2b5a599711167c99138842c12e7a5a96f32f8e57b9f3d",
+  "docs/procedures/nat-058/run-001-usb-events.jsonl": "fded0a401bb3d0e287c661020a415a26163fb21f545e6e65bc35195a18b8b528",
+  "docs/procedures/nat-058/run-001-ck-log.txt": "2ff2eb31263ef43ce324ffe716e04cedaf1ae435e4358ae73720cffccc1b97f2",
+  "docs/decisions/0024-nat052-loader-diag-xnu-ckpt3-usb-single-run-2026-11-11.md": "806a95c60bdf74bb83d37be79a1083ad0c680685430d9a69da635c96ad1cbd21"
+ },
+ "artifact_sha256": {
+  "artifacts/nat-058/run-001/report.json": "891ad7d1632acc3840eab9d3d1e3f870e52757d0eb271282bbd23cbe8cd67a71",
+  "artifacts/nat-058/run-001/usb-events.jsonl": "fded0a401bb3d0e287c661020a415a26163fb21f545e6e65bc35195a18b8b528",
+  "artifacts/nat-058/run-001/usb-selftest.jsonl": "5e7254b812fc6ff4876c9b02eee75d9b333fcf0b6fe24f00025854a3b7393e48",
+  "artifacts/nat-058/run-001/collector-heartbeat.jsonl": "ef98f6aacf99b0e73b881592ce10cfa825ff6df6c9295f9b74b1a4fd7b3218d7",
+  "artifacts/nat-058/run-001/analysis.json": "ec4e53b866bc0fddbed2b5a599711167c99138842c12e7a5a96f32f8e57b9f3d",
+  "artifacts/nat-058/run-001/archive/attempt.json": "d84cef9700761d39ca24c8592920aed7adfb7c672dda27a15b5814bfcc50b741",
+  "artifacts/nat-058/run-001/archive/received.bin": "b9444a14c196616f2daf4505c538602f79500d6ba5111ad6029fecb362e83339",
+  "artifacts/nat-058/run-001/archive/manifest.json": "3c7ad4ca81bf15a4a43d8d1de2e64d84cbfb69c849ac038187f676a3b52ba0fa",
+  "artifacts/nat-058/run-001/archive/collector-summary.json": "e569d363ac1d7b83f5fe9199ba0428f7b75b80e67f815f6bca5342935d8ffbdc",
+  "artifacts/nat-058/run-001/archive/events.jsonl": "6abc766c299eba31c32fc487e67da98da3890cab9c3e40f37939afd4ab460c5e",
+  "artifacts/nat-058/run-001/archive/usb-transfers.jsonl": "f81f19dbbfbd5c2f25e9df2e70b5e39f741ea5da30ae571caf03a32123397032",
+  "artifacts/nat-058/run-001.driver.log": "60095a0078c1d0a3d17ddcd6b9b25e5c841e9cafbad46834409da6ee030575fd",
+  "artifacts/nat-058/restore-001/report.json": "eaf2260ea22b03b391befb1bc453fc2b002c3212da052234d3543784ff9ca255",
+  "artifacts/nat-058/restore-001/readback.json": "12327e33f3c57564f340ba0689e75870b638f21325811c8a6bbde537cf1c5960",
+  "artifacts/nat-058/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "artifacts/nat-058/restore-001.log": "ba966a8f0f2ae4f237a83a3eab97fa20d61a7c1b30154c28fb46ab59cda38418",
+  "artifacts/nat-058/android-check-001.json": "12327e33f3c57564f340ba0689e75870b638f21325811c8a6bbde537cf1c5960"
+ },
+ "device_used": true,
+ "flashed": true,
+ "flashed_note": "RECOVERY (/dev/block/sda18) only, the image above, restored to stock (96620b8b...) with full-hash readback; no other partition.",
+ "device_inventory": "devices/local-2026-11-11-nat058.json"
+}

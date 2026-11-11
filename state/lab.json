@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-11T16:49:52+00:00",
+  "updated_at": "2026-11-11T17:31:26+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -132,6 +132,20 @@
         "decision": "docs/decisions/0023-nat043-loader-diag-usbmon-fault-single-run-2026-11-11.md",
         "owner": "claude-nat043-20261111-session",
         "at": "2026-11-11T16:12:46+00:00"
+      },
+      {
+        "scope": "native",
+        "value": true,
+        "decision": "docs/decisions/0024-nat052-loader-diag-xnu-ckpt3-usb-single-run-2026-11-11.md",
+        "owner": "claude-nat043-20261111-session",
+        "at": "2026-11-11T17:19:32+00:00"
+      },
+      {
+        "scope": "native",
+        "value": false,
+        "decision": "docs/decisions/0024-nat052-loader-diag-xnu-ckpt3-usb-single-run-2026-11-11.md",
+        "owner": "claude-nat058-20261111-session",
+        "at": "2026-11-11T17:31:26+00:00"
       }
     ]
   },
@@ -13283,13 +13297,16 @@
         "Run under the 0019 protocol with the collector",
         "Restore stock and verify Android; record the outcome"
       ],
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude-nat043-20261111-session",
       "started_at": "2026-11-11T15:40:29+00:00",
       "last_heartbeat": "2026-11-11T16:21:12+00:00",
-      "updated_at": "2026-11-11T16:21:12+00:00",
+      "updated_at": "2026-11-11T17:19:46+00:00",
       "progress_note": "Runs 001 (loader-diag-usbmon, decision 0022) and 002 (loader-diag-usbmon-fault, decision 0023) done: host received 148 and 153 frames by itself, 0 drops, analyser PASS both, run 002 includes the controlled BRK exception frame (ESR 0xf2001234); stock RECOVERY restored and Android verified after each; native permit closed. Evidence written and committed (fa32ec6): docs/procedures/nat-043/evidence.json, outcome pass, make check 214 OK.",
-      "next_step": "task done NAT-043 is refused while native is false ('Execution scope is not authorized'); an attempt to open native for bookkeeping only was refused by the auto-mode classifier at 2026-11-11 and not retried. Needs the owner to allow it (permission rule or ! command), then: project permit native true citing decision 0023, task done NAT-043 --evidence docs/procedures/nat-043/evidence.json, project permit native false."
+      "next_step": "task done NAT-043 is refused while native is false ('Execution scope is not authorized'); an attempt to open native for bookkeeping only was refused by the auto-mode classifier at 2026-11-11 and not retried. Needs the owner to allow it (permission rule or ! command), then: project permit native true citing decision 0023, task done NAT-043 --evidence docs/procedures/nat-043/evidence.json, project permit native false.",
+      "evidence": "docs/procedures/nat-043/evidence.json",
+      "evidence_sha256": "48ab077424ec562a51fc81f3adfa46bffd7e9648f35b017cf76e9f1e220f3d90",
+      "finished_at": "2026-11-11T17:19:46+00:00"
     },
     {
       "id": "NAT-044",
@@ -13778,6 +13795,43 @@
       "evidence": "docs/procedures/nat-057/evidence.json",
       "evidence_sha256": "e7b69a26141f2b402ade7a858c7f1f32964b8898679a0a6a4ded585fa1039976",
       "finished_at": "2026-11-11T16:49:52+00:00"
+    },
+    {
+      "id": "NAT-058",
+      "title": "First native run of the NAT-052 image loader-diag-xnu-ckpt3-usb (decision 0024): the host receives the XNU kernel's own checkpoint notes up to C checkpoint 16 by USB without a camera; stock restore and Android check",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 95,
+      "depends_on": [
+        "NAT-043",
+        "NAT-052",
+        "NAT-057"
+      ],
+      "paths": [
+        "docs/procedures/nat-058",
+        "artifacts/nat-058"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "One run of the single image named in decision 0024 under the run protocol of decision 0019 (decision file committed with the owner's confirmation before the run, native permit opened citing it, closed after the task is done; no retry); the driver docs/procedures/nat-057/session_nat052.py is the only launcher.",
+        "The host collector, started before the reboot and unattended, archives the records of the real run; the analyser docs/procedures/nat-057/analyze_nat052.py gives a verdict (PASS, PARTIAL naming the last note, EXCEPTION with esr/elr/far, FAIL or undetermined) from the archive and the USB log; a run in which the host receives nothing is recorded as inconclusive or FAIL with the observations that exist, never as success.",
+        "Stock RECOVERY (96620b8b...) is restored with a full-hash readback through the NAT-013 tool and Android is verified unchanged; data, apps and settings untouched; evidence.json with hashes and exit codes is saved."
+      ],
+      "steps": [
+        "Mark NAT-043 done and run the driver preflight, then the single run (decision 0024)",
+        "Restore stock RECOVERY, verify Android",
+        "Analyse the archive, write evidence and update the registry"
+      ],
+      "status": "done",
+      "owner": "claude-nat058-20261111-session",
+      "started_at": "2026-11-11T17:20:50+00:00",
+      "last_heartbeat": "2026-11-11T17:20:50+00:00",
+      "updated_at": "2026-11-11T17:30:54+00:00",
+      "evidence": "docs/procedures/nat-058/evidence.json",
+      "evidence_sha256": "bd53b6e91b99d22545aae51bf1cbeb102f17f686d0dac6772685b81f941db1fb",
+      "finished_at": "2026-11-11T17:30:54+00:00"
     }
   ],
   "experiments": [
@@ -58776,6 +58830,85 @@
           "last_heartbeat": "2026-11-11T16:22:14+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-11T17:19:32+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-nat043-20261111-session",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-11T17:19:46+00:00",
+      "action": "task.done:NAT-043",
+      "owner": "claude-nat043-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-043",
+          "status": "done",
+          "owner": "claude-nat043-20261111-session",
+          "priority": 96,
+          "progress_note": "Runs 001 (loader-diag-usbmon, decision 0022) and 002 (loader-diag-usbmon-fault, decision 0023) done: host received 148 and 153 frames by itself, 0 drops, analyser PASS both, run 002 includes the controlled BRK exception frame (ESR 0xf2001234); stock RECOVERY restored and Android verified after each; native permit closed. Evidence written and committed (fa32ec6): docs/procedures/nat-043/evidence.json, outcome pass, make check 214 OK.",
+          "next_step": "task done NAT-043 is refused while native is false ('Execution scope is not authorized'); an attempt to open native for bookkeeping only was refused by the auto-mode classifier at 2026-11-11 and not retried. Needs the owner to allow it (permission rule or ! command), then: project permit native true citing decision 0023, task done NAT-043 --evidence docs/procedures/nat-043/evidence.json, project permit native false.",
+          "last_heartbeat": "2026-11-11T16:21:12+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T17:20:40+00:00",
+      "action": "task.add:NAT-058",
+      "owner": "claude-nat058-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-058",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T17:20:50+00:00",
+      "action": "task.claim:NAT-058",
+      "owner": "claude-nat058-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-058",
+          "status": "in_progress",
+          "owner": "claude-nat058-20261111-session",
+          "priority": 95,
+          "last_heartbeat": "2026-11-11T17:20:50+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T17:30:54+00:00",
+      "action": "task.done:NAT-058",
+      "owner": "claude-nat058-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-058",
+          "status": "done",
+          "owner": "claude-nat058-20261111-session",
+          "priority": 95,
+          "last_heartbeat": "2026-11-11T17:20:50+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T17:31:26+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-nat058-20261111-session",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
     }
   ]
 }
