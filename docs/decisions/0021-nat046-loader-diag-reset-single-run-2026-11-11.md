@@ -76,3 +76,11 @@ grants nothing beyond it.
 * `/sys/bus/usb/devices` showing Download Mode the way the fake tree in the NAT-048 tests does is an assumption this run tests. A second Samsung
   device on the host bus would be indistinguishable from the phone (the host has only this phone's 04e8 device attached now).
 * RAM contents are volatile; nothing about the running Android is read or changed by the image.
+
+## Owner confirmation (added before the run, 2026-11-11 ~13:00Z)
+
+After the Claude Code auto-mode classifier refused the launch at 12:44Z (not retried or worked around), the owner was asked one narrowly scoped
+question in the session, listing this image's hashes, the single RECOVERY write, the 45 s self-reset, the 83 s watchdog, the stock restore, that
+data/apps/settings are untouched, and that an unplanned restart through SEC_UPLOAD had just happened on this phone (NAT-051, `clk_summary` read).
+The owner answered (Russian, as selected): "Да, один запуск loader-diag-reset (Recommended)". This confirms exactly one run of this image and
+nothing else; the "Not granted" list above is unchanged.
