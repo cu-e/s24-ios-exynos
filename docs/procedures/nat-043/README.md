@@ -1,4 +1,4 @@
-# NAT-043: first native USB log run (loader-diag-usbmon), run 001
+# NAT-043: first native USB log runs (loader-diag-usbmon, run 001; loader-diag-usbmon-fault, run 002)
 
 Evidence kind: **native-device**. On 2026-11-11 the host computer received, by itself and without a camera, the messages of one real run of a
 loader image on the S24 (SM-S921B/e1s), through the NAT-041 EP0 log engine, the NAT-045 HSI0 ladder and the NAT-041 host collector. This is the
@@ -57,11 +57,32 @@ enumeration events only (NAT-053 audit).
 
 ## What is not established
 
-* XNU was not started; nothing here says anything about the kernel. The exception path on hardware (the `loader-diag-usbmon-fault` image) has
-  not run: this directory shows no exception frame. Decision 0022 grants one image; the fault variant needs its own decision.
+* XNU was not started in either run; nothing here says anything about the kernel. The exception path was exercised for one deliberate
+  `brk` in the loader only (run 002), not for faults in XNU or for the registers x0..x30 (the frame has ESR/ELR/FAR/SPSR/SP; `x` in the engine page is all 0).
 * The collector's own manifest keeps `transport_qualified: false` and `hardware_execution_proven: false` and the analyser labels the provenance
   `unqualified-live`: those are the tools' conservative flags for any live run; the claim here rests on the raw files and the timeline above,
   not on those flags.
-* One run: repeatability of the enumeration time (+26.8 s), of the bring-up and of the survival of longer no-poll gaps is untested. The cause of
+* Two runs: the enumeration time (+26.8 s and +26.9 s), the bring-up and the 7.19 s no-poll gap repeated, but longer gaps, other conditions
+  (cold start, battery state) and any run with the kernel are untested. The cause of
   the 3.8 s between the monitor leaving and Download Mode appearing is not established (consistent with the PMU reset of NAT-046).
 * The log is the loader's; kernel messages (NAT-052's checkpoint image) have not been sent yet.
+
+## Run 002: loader-diag-usbmon-fault (exception frame), decision 0023
+
+Same protocol and driver; RECOVERY `f1a193dcac776dde004a3d1a379c26a4a365a150318bbc0a6501506ad7dfa103`; the owner's confirmation was recorded and
+committed (151949b) before the launch; reboot requested at 2026-11-11T16:10:31.65Z. Restore from Download Mode (`SAMSUNG USB`, +72.9 s) in one
+NAT-013 session, full-hash readback equal, `assess` = pass, Android `boot_completed=1`; `native` permission closed again.
+
+* Timeline (`run-002-usb-events.jsonl`): phone left the bus +3.6 s; **1209:0001 appeared +26.9 s**; left +69.1 s; `SAMSUNG USB` +72.9 s; Android
+  back +114.6 s. The watcher started 0.3 s and the collector polled 0.1 s before the reboot request; the watcher covered 359.8 s.
+* Received (`run-002-loader-log.txt`): one boot (banner `NAT047 loader-diag-usbmon-fault deadline_s=45 fault=1`), 153 frames, 150 records, 9
+  stage records, the same ladder summaries and loader log as run 001, `HOLD stage=0x40 code=0x0`, then `controlled BRK #0x1234 follows`, stage 31
+  `exception`, `EXCEPTION slot=4 esr=0xf2001234 elr=0x8015edb0 far=0x4d7145fdd16546dd spsr=0x600003c5`, the ring's fault record and the engine's
+  exception page (`GET_EXC`, `valid=1`, `sp=0x8017cb00`) agreeing, then the end frame (`reason=disconnect`, `unread_bytes=0`,
+  `next_offset=engine_written=6211`). 0 drops, 0 stalls. The analyser verdict is **PASS** (`run-002-analysis.json`).
+* ESR `0xf2001234` is EC 0x3C (BRK instruction, AArch64) with imm16 0x1234 as the image's `brk #0x1234` produces; SPSR `0x600003c5` is EL1h with
+  DAIF masked. The FAR value is the architecturally UNKNOWN register content for a BRK and carries no information. `slot=4` is the AArch64 vector entry "current EL, SPx, synchronous", consistent with SPSR EL1h. ELR and SP are in the same `0x8010_0000..0x8018_0000`
+  region; the loader's load base is not logged in this run, so the claim "ELR inside the loader" is the analyser's rule, not separately verified here.
+* Same no-poll gap as run 001: 131 timeouts +30.8..+36.9 s, largest gap between successful transfers 7.19 s at +29.7 s (run 001: 7.19 s at +29.7 s).
+  The collector counted 2 sessions and 2 `UsbGone` at +69.0 s (run 001: 1 session, 1 `UsbGone`): consistent with one extra re-open attempt as the
+  device left the bus; the cause is not examined further.

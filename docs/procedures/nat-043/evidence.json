@@ -1,0 +1,290 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T16:18:05+00:00",
+ "commit": "151949bfec3c3a46bb1ad26d07d5f0d3dc487630",
+ "tree_state": "the files listed under sha256 under docs/ are committed in the commit that follows this record; the recorded commit is its parent (decisions 0022/0023 and the run results of run 001 were committed earlier: 6a324a2, 3e13f9c, 151949b)",
+ "owner": "claude-nat043-20261111-session",
+ "summary": "Two native runs under decisions 0022 and 0023 (decision 0019 protocol). In both, the host computer received by itself, with no camera and no owner action, the messages of the real run through the NAT-041 EP0 log engine and collector: run 001 (loader-diag-usbmon, RECOVERY c6802dea...) 148 frames of one boot (banner, 8 stage records, ladder R/W summaries err=0, the loader log up to HOLD stage=0x40), 0 drops, analyser PASS; run 002 (loader-diag-usbmon-fault, RECOVERY f1a193dc...) 153 frames including the controlled BRK exception frame (ESR 0xf2001234, ELR, FAR, SPSR, SP; ring record and GET_EXC page agree), 0 drops, analyser PASS. 1209:0001 enumerated at +26.8 s / +26.9 s, a 7.19 s no-poll gap was survived twice, the phone reset into Download Mode by itself at +72.8 s / +72.9 s and the NAT-013 restore returned stock RECOVERY (full-hash readback, assess pass, Android verified) after each run. XNU was not started.",
+ "evidence_category": "native-device: two runs of loader images on this S24 via the RECOVERY slot, observed by the host collector (EP0 records), the host USB watcher and the raw transfer log; the kernel was not started",
+ "acceptance": {
+  "1_decision_file": "met: decision 0022 (image loader-diag-usbmon) and decision 0023 (loader-diag-usbmon-fault), each written under decision 0019 and committed before its run, name the exact RECOVERY and Image.payload hashes, the MMIO (PMU pd_hsi0 window, CMU_TOP reads, CMU_HSI0, SYSREG_HSI0, USB control/PHY 0x178a0000-0x178e0000, DWC3 0x17900000, 111-op ladder table), what is not granted and the pinned stock restore; each owner confirmation was recorded before its launch (0022 in 6a324a2, 0023 in 151949b); the runs followed the 0019 protocol (RECOVERY only, one-shot marker, full-hash readback, one reboot, restore).",
+  "2_host_receives": "met: the collector, started before the reboot (watcher start at -0.3 s, collector first poll at -0.09 s / -0.1 s), received and archived in each run one boot with an id new for the run (run 001 ...892331959b92e645; run 002 dce9b63bbd0d0618080ff762f66efded-6871a719000000000858b2c55dbafc55), stage markers, the ladder summaries and, in the fault variant, the exception frame; archive manifests are saved (manifest.json, sha256 in the artifact list). DEVIATION: no separate lsusb -v / USB descriptor capture was taken (the driver does not run one); the identity 1209:0001 and the transfers (usb-transfers.jsonl, 112-byte S24L status headers) are the host-side capture.",
+  "3_restore": "met: restore_stock.py restore (one Download Mode session each: bus 5 addr 87 and bus 5 addr 90) -> awaiting-readback; check_android.py: recovery_hash_match true, boot_completed 1, user data directories present; assess: pass with all six stages, twice. Runs that received nothing would have been recorded inconclusive; both runs received."
+ },
+ "established": [
+  "Native-device: the HSI0 power/clock/PHY/DWC3 ladder of NAT-045, the NAT-041 polled EP0 engine and the host collector work on this S24 at the first attempt (ladder summaries err=0, nrec 5 and 69, gsnpsid 0x33313130), reproduced in the second run, with no hang and no SEC_UPLOAD.",
+  "Native-device: the computer received and saved, without a camera, the text log of the loader from its start to HOLD stage=0x40, the stage records and the ladder report (run 001 148 frames, run 002 153 frames; 0 drops; dev_seq and frame sequence contiguous).",
+  "Native-device: a deliberate synchronous exception in the loader (brk #0x1234) is delivered to the host as an EXCEPTION text line, a ring fault record and the engine's exception page with ESR 0xf2001234, ELR 0x8015edb0, SPSR 0x600003c5 (EL1h), SP 0x8017cb00; the three agree.",
+  "Native-device: the engine survived a 7.19 s stretch without polling (127/131 timeouts) in both runs and resumed with a contiguous sequence; the enumeration came at +26.8/+26.9 s and the phone reset into Download Mode by itself at +72.8/+72.9 s with the engine up.",
+  "Native-device: the unattended return path (reset into Download Mode, NAT-013 restore, Android verified) worked twice without owner action."
+ ],
+ "not_established": [
+  "Anything about XNU: the kernel was not started; the NAT-052 checkpoint image (XNU C checkpoints over this engine) has not been run, and no log from XNU exists yet.",
+  "x0..x30 at an exception (the engine page's register array is all zero) and faults outside a controlled BRK in loader code.",
+  "Repeatability beyond two runs, no-poll gaps longer than 7.2 s, cold-start/battery conditions, and the cause of the extra collector session (2 UsbGone) in run 002.",
+  "The collector's own manifest flags stay transport_qualified false / hardware_execution_proven false and the analyser provenance stays unqualified-live: the claims here rest on the raw files and the timeline, not on those flags.",
+  "The loader's load base in these runs is not logged, so 'ELR inside the loader' is the analyser's rule, not separately verified."
+ ],
+ "findings": [
+  "First message of a native run ever received by the host computer. The earlier native runs (001-009, NAT-046) were seen only on the display or as USB enumeration events (NAT-053).",
+  "The goal 'computer receives early logs without manual filming' now holds for the loader stage; the next real-run test of the channel is the NAT-052 image (XNU C checkpoints as TEXT records, kernel gaps up to several seconds between service windows), which needs NAT-057 (driver + analyser) first.",
+  "Run 001: reboot requested 2026-11-11T15:40:52.96Z; run 002: 2026-11-11T16:10:31.65Z. In both runs the collector stopped at its 360 s deadline and the watcher at +359.8 s."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-049/host_access.py",
+    "--check"
+   ],
+   "exit_code": 0,
+   "note": "udev rule installed by the owner"
+  },
+  {
+   "argv": [
+    "<pyusb venv>/bin/python",
+    "-I",
+    "docs/procedures/nat-049/session_usblog.py",
+    "--image",
+    "loader-diag-usbmon",
+    "--out",
+    "artifacts/nat-043/pre-002"
+   ],
+   "exit_code": 0,
+   "note": "ready-read-only-registry-closed"
+  },
+  {
+   "argv": [
+    "<pyusb venv>/bin/python",
+    "-I",
+    "docs/procedures/nat-049/session_usblog.py",
+    "--image",
+    "loader-diag-usbmon",
+    "--out",
+    "artifacts/nat-043/run-001",
+    "--execute"
+   ],
+   "exit_code": 0,
+   "note": "native-attempt-started, reboot requested 2026-11-11T15:40:52.96Z"
+  },
+  {
+   "argv": [
+    "<pyusb venv>/bin/python",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "restore",
+    "--bus",
+    "5",
+    "--address",
+    "87",
+    "--out",
+    "artifacts/nat-043/restore-001"
+   ],
+   "exit_code": 0,
+   "note": "awaiting-readback"
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-012/check_android.py",
+    "artifacts/nat-043/restore-001/readback.json"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "assess",
+    "--report",
+    "artifacts/nat-043/restore-001/report.json",
+    "--readback",
+    "artifacts/nat-043/restore-001/readback.json"
+   ],
+   "exit_code": 0,
+   "note": "pass"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-049/analyze_usblog.py",
+    "--archive",
+    "artifacts/nat-043/run-001/archive",
+    "--events",
+    "artifacts/nat-043/run-001/usb-events.jsonl",
+    "--report",
+    "artifacts/nat-043/run-001/report.json",
+    "--image",
+    "loader-diag-usbmon",
+    "--out",
+    "artifacts/nat-043/run-001/analysis.json"
+   ],
+   "exit_code": 0,
+   "note": "PASS"
+  },
+  {
+   "argv": [
+    "<pyusb venv>/bin/python",
+    "-I",
+    "docs/procedures/nat-049/session_usblog.py",
+    "--image",
+    "loader-diag-usbmon-fault",
+    "--out",
+    "artifacts/nat-043/run-002",
+    "--execute"
+   ],
+   "exit_code": 0,
+   "note": "native-attempt-started, reboot requested 2026-11-11T16:10:31.65Z"
+  },
+  {
+   "argv": [
+    "<pyusb venv>/bin/python",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "restore",
+    "--bus",
+    "5",
+    "--address",
+    "90",
+    "--out",
+    "artifacts/nat-043/restore-002"
+   ],
+   "exit_code": 0,
+   "note": "awaiting-readback"
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-012/check_android.py",
+    "artifacts/nat-043/restore-002/readback.json"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "assess",
+    "--report",
+    "artifacts/nat-043/restore-002/report.json",
+    "--readback",
+    "artifacts/nat-043/restore-002/readback.json"
+   ],
+   "exit_code": 0,
+   "note": "pass"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-049/analyze_usblog.py",
+    "--archive",
+    "artifacts/nat-043/run-002/archive",
+    "--events",
+    "artifacts/nat-043/run-002/usb-events.jsonl",
+    "--report",
+    "artifacts/nat-043/run-002/report.json",
+    "--image",
+    "loader-diag-usbmon-fault",
+    "--out",
+    "artifacts/nat-043/run-002/analysis.json"
+   ],
+   "exit_code": 0,
+   "note": "PASS"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-043/run-001/report.json",
+  "artifacts/nat-043/run-001/usb-events.jsonl",
+  "artifacts/nat-043/run-001/analysis.json",
+  "artifacts/nat-043/run-001/collector-heartbeat.jsonl",
+  "artifacts/nat-043/run-001/archive/received.bin",
+  "artifacts/nat-043/run-001/archive/manifest.json",
+  "artifacts/nat-043/run-001/archive/chunks.jsonl",
+  "artifacts/nat-043/run-001/archive/usb-transfers.jsonl",
+  "artifacts/nat-043/restore-001/report.json",
+  "artifacts/nat-043/restore-001/readback.json",
+  "artifacts/nat-043/run-002/report.json",
+  "artifacts/nat-043/run-002/usb-events.jsonl",
+  "artifacts/nat-043/run-002/analysis.json",
+  "artifacts/nat-043/run-002/collector-heartbeat.jsonl",
+  "artifacts/nat-043/run-002/archive/received.bin",
+  "artifacts/nat-043/run-002/archive/manifest.json",
+  "artifacts/nat-043/run-002/archive/chunks.jsonl",
+  "artifacts/nat-043/run-002/archive/usb-transfers.jsonl",
+  "artifacts/nat-043/restore-002/report.json",
+  "artifacts/nat-043/restore-002/readback.json",
+  "docs/procedures/nat-043/README.md",
+  "docs/procedures/nat-043/run-001-analysis.json",
+  "docs/procedures/nat-043/run-001-usb-events.jsonl",
+  "docs/procedures/nat-043/run-001-loader-log.txt",
+  "docs/procedures/nat-043/run-002-analysis.json",
+  "docs/procedures/nat-043/run-002-usb-events.jsonl",
+  "docs/procedures/nat-043/run-002-loader-log.txt"
+ ],
+ "images": {
+  "loader-diag-usbmon": {
+   "recovery_sha256": "c6802dea4682a4bc993885bf525e2907e42e4eeebb964310da82ed79fef7212d",
+   "recovery_bytes": 100663296,
+   "payload_sha256": "a90a93d77ea56d22b8af555d34bc91bf8871db8f12ed071bd534d16940d08b73",
+   "payload_bytes": 21853792,
+   "payload_offset": 2048,
+   "loader_image_sha256": "3b46f4e31488e7f58bf36a70fe0661d50cdae3d461877565bcbf2d5e9c529046",
+   "differing_4k_pages": 19634
+  },
+  "loader-diag-usbmon-fault": {
+   "recovery_sha256": "f1a193dcac776dde004a3d1a379c26a4a365a150318bbc0a6501506ad7dfa103",
+   "recovery_bytes": 100663296,
+   "payload_sha256": "06281749f38bb6c8e944c3c82b4e77297b5749757e57b4d3c4d9f623b5025d77",
+   "payload_bytes": 21853792,
+   "payload_offset": 2048,
+   "loader_image_sha256": "2cb334cabd643c2f4d973e4cb5e8d46c562ea4c3e40093aa0d6cfb3a0f62d1e0",
+   "differing_4k_pages": 19634
+  }
+ },
+ "stock_recovery_sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+ "verdicts": {
+  "run-001": "PASS",
+  "run-002": "PASS"
+ },
+ "sha256": {
+  "docs/procedures/nat-043/README.md": "c2e2d50bfcb0696d48b9e732c82354a05c7b17ad2b1196e31502ec8b5a9ed9de",
+  "docs/procedures/nat-043/run-001-analysis.json": "c9a84f409ff44d47c42ddf17a69153cbf14004fe6f91a71333d3b38997d82f69",
+  "docs/procedures/nat-043/run-001-usb-events.jsonl": "b5dc37f284e0fa9242efd62d97615d1cb97de0177662a113a88611124d2d5525",
+  "docs/procedures/nat-043/run-001-loader-log.txt": "8b72cde38196751958dd212cb6f5f485e5e11279b1b13496093caadf4212cc53",
+  "docs/procedures/nat-043/run-002-analysis.json": "c9c97502e5d0c010a2aec82aceab906c672ae52982ce74c88222c39e87fa77de",
+  "docs/procedures/nat-043/run-002-usb-events.jsonl": "4182fa6efe6bc07aff44c52b2ad97ef45fd2580a9c9f919c12397509fb6d8190",
+  "docs/procedures/nat-043/run-002-loader-log.txt": "3edddd0b0a7a388e682e1fdbbb6559a9803ed5ed3394030f9bc3946260fda248",
+  "docs/decisions/0022-nat043-loader-diag-usbmon-single-run-2026-11-11.md": "13d41cf78ce33009bfcbbc1fab773aa4e0bde30b37925c9e3ac8f5bf3c082075",
+  "docs/decisions/0023-nat043-loader-diag-usbmon-fault-single-run-2026-11-11.md": "5c80d866ba2f96222d5c6f9009fa8921e605f1ff63d54a5bccd831381ad14575",
+  "artifacts/nat-043/run-001/report.json": "824cbb7cf06a5bc9b6ce26ca67eed398fba5e7762f0ac90db64071e7aa922280",
+  "artifacts/nat-043/run-001/usb-events.jsonl": "b5dc37f284e0fa9242efd62d97615d1cb97de0177662a113a88611124d2d5525",
+  "artifacts/nat-043/run-001/analysis.json": "c9a84f409ff44d47c42ddf17a69153cbf14004fe6f91a71333d3b38997d82f69",
+  "artifacts/nat-043/run-001/collector-heartbeat.jsonl": "168be1e65173f652d1654ea72be46c969d65447ec23a9316fdfc3a9179c38cd9",
+  "artifacts/nat-043/run-001/archive/received.bin": "03d2d2562e4fe5679615e50c13704d0cfcdcc077167147d01f34a1cd4dbdc5e2",
+  "artifacts/nat-043/run-001/archive/manifest.json": "8be08c235557313158520d484c58f384a551b7fc91aba0d30e78da6bf6264d2d",
+  "artifacts/nat-043/run-001/archive/chunks.jsonl": "f2a96ea614358cc7d226fca28ff1b75ffc6778eb731c868758fd203f8e3f5c7e",
+  "artifacts/nat-043/run-001/archive/usb-transfers.jsonl": "74ee8e199e907f6f5855b7ddc99d5058305cb49171cc8bff1dfdf33ff7078fca",
+  "artifacts/nat-043/restore-001/report.json": "94688c65ebff86cdf1bbb520ed48ed9a825370f1bc930cbc18c6914adf94851c",
+  "artifacts/nat-043/restore-001/readback.json": "2914d54a1dfbfbca16965a287644b9cf719f240c87ff93abf188be16df36a6d7",
+  "artifacts/nat-043/run-002/report.json": "62a41f34a038639a32e3a6311365812aca364d53a1ec6eaa47735c5245e1f528",
+  "artifacts/nat-043/run-002/usb-events.jsonl": "4182fa6efe6bc07aff44c52b2ad97ef45fd2580a9c9f919c12397509fb6d8190",
+  "artifacts/nat-043/run-002/analysis.json": "c9c97502e5d0c010a2aec82aceab906c672ae52982ce74c88222c39e87fa77de",
+  "artifacts/nat-043/run-002/collector-heartbeat.jsonl": "b9347a982b5510c43a14a68c48c767ac93d646e4c664f744416cdede54452056",
+  "artifacts/nat-043/run-002/archive/received.bin": "51402525925381c832e85ae27d8e7b4b10b641e4d3e897b634066904b186ca75",
+  "artifacts/nat-043/run-002/archive/manifest.json": "64171f2fd7b8b55ceaefa3c69e17581354d05db8095c76524cc49199f3efca53",
+  "artifacts/nat-043/run-002/archive/chunks.jsonl": "afc21dbdf5c5cc9627be78daf832cdda2fc9580fb9ababce0397ef418b6c3599",
+  "artifacts/nat-043/run-002/archive/usb-transfers.jsonl": "347e9a1b3e2175cd4d34582f390e991ed3e4d4829a02631aee14b06c1fe7a391",
+  "artifacts/nat-043/restore-002/report.json": "9a38f5b2877cbfb7d722f1590e989beca3e2669d1a036f192b96eb07da49af85",
+  "artifacts/nat-043/restore-002/readback.json": "d12dab463b42e11cb16c7627d77801e8887fddb1ea8f0701e5c7b2e1dc22dfa0"
+ },
+ "device_used": true,
+ "flashed": true,
+ "device_inventory": "devices/local-2026-11-11-nat043.json"
+}
