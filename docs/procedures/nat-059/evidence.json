@@ -1,0 +1,133 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T18:27:22+00:00",
+ "commit": "235b7dd71702660e6d61bafbdcceebe7da46e57c",
+ "tree_state": "the files listed under sha256 are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat059-20261111-session",
+ "summary": "The image loader-diag-xnu-ckpt4-usb: NAT-052's loader-diag-xnu-ckpt3-usb with five more kernel stops, C checkpoints 17..21 (after arm_vm_init), built by build.py + patch_ckpt59.py (exact-anchor hunks over the derived ckpt3.c/ckpt3.h; the stub assembly is unchanged and pinned to NAT-052's hash). After arm_vm_init the kernel's TTBR0 becomes *_invalid_ttep; stops 17..21 resume with that table (read by physical address after dc civac), and a C resume with an implausible table holds with mask bit 12 instead of resuming. Plus a session driver (session_nat059.py), a verdict analyser (analyze_nat059.py: 27 note positions ending at checkpoint 21) and decision-draft.md for decision 0025. 20 + 21 tests pass; the mutation check kills 27 of 27 mutants. Nothing ran on the phone and nothing was flashed.",
+ "evidence_category": "host-test (derivation and static reads of the real payload, a host build of the derived C, driver flow against a fake adb, analyser on model-written archives); not a measurement of the S24",
+ "acceptance": {
+  "1_build": "docs/procedures/nat-059/build.py + patch_ckpt59.py: NAT-036/052 files untouched; two builds (build-002, build-003) give identical hashes; RECOVERY 60147f1f6190c688b89ea63ac1f56816e977db692eb3864bf2aaa404ea868dd1, Image.payload 3bb6e5d14368ef3627288f44aeff9c00c1e510915395db5988de600402b0af20, Image 4af99c079e151c446a7a3644788b00492b98910298ac68954c60707f5acc0e1b; the derived-tree install check holds against the real payload.",
+  "2_tests": "test_nat059.py (Derivation, Words, Host, Build): the TTBR0 given back is the checkpoint-5 value for every stop up to 16 and the masked *_invalid_ttep for 17..21; implausible or unreadable _invalid_ttep holds with bit 12; the list rule accepts 17..21 and refuses others; the arm_vm_init words and the _set_mmu_ttb routine are decoded from the real payload independently of the patch. The host layer found a product bug (ids 30..44 treated as post-arm_vm_init by 'id >= 17'), fixed with a range rule and a regression test.",
+  "3_driver_analyser": "session_nat059.py is NAT-057's driver with the pins, package path, decision glob, one-shot marker and registry preconditions changed (diff pinned); analyze_nat059.py judges 27 notes n=1..27 incl. the kttbr0 rule; test_nat059_run.py runs both against fake adb and collector-written archives.",
+  "4_decision_draft": "docs/procedures/nat-059/decision-draft.md names both image hashes and decision 0019; no owner confirmation is recorded in it and no native step took place."
+ },
+ "established": [
+  "Host-test: the patch applies to NAT-052's tree, only ckpt3.c/ckpt3.h differ, and the stub assembles to NAT-052's hash.",
+  "Static: the end of arm_vm_init in the real payload is set_mmu_ttb(*_invalid_ttep & 0xffffffffffff) and checkpoints 17..21 follow it in arm_init.",
+  "Host-test: the derived ckpt3.c resumes stops 17..21 with the masked _invalid_ttep and every earlier stop with the checkpoint-5 value, and refuses to resume when that value is implausible.",
+  "Host-test: the analyser separates PASS, PARTIAL, EXCEPTION, BAD_TTBR0/BAD_STATE and undetermined on collector-written archives; the mutation check kills every one of the 27 mutants."
+ ],
+ "not_established": [
+  "Anything about the real phone: what the kernel does between checkpoints 16 and 21 is not modelled (arm_vm_init, serial_init, PE_init_platform with vm_initialized, ml_map_cpu_pio, PE_init_cpu, early_random...); static reach is unbounded (3000-5900 functions, indirect calls not followed).",
+  "That nothing else changes the kernel's TTBR0 between checkpoints 17 and 21.",
+  "That the kernel does not map and access the GIC (GICD 0x10200000, GICR 0x10240000 by the ADT) or other MMIO after vm_initialized; that is disclosed in the decision draft, not excluded."
+ ],
+ "findings": [
+  "Checkpoint ids in arm_init are not numerically ordered (10,11,30-35,12,40-44,13-16,[arm_vm_init],17..21): a test 'id >= 17' for 'after arm_vm_init' is wrong for 30..44. The patch uses NAT059_POST_VM(id) = 17 <= id <= 21.",
+  "The user /tmp quota is nearly used; tests and builds use the gitignored artifacts/nat-059/tmp via TMPDIR."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "<venv with unicorn+capstone>/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-059/test_nat059.py"
+   ],
+   "exit_code": 0,
+   "note": "Ran 20 tests in 65.019s, OK, nothing skipped (artifacts/nat-059/test-patch-002.log)"
+  },
+  {
+   "argv": [
+    "<venv with unicorn+capstone>/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-059/test_nat059_run.py"
+   ],
+   "exit_code": 0,
+   "note": "Ran 21 tests in 36.922s, OK, nothing skipped (artifacts/nat-059/test-run-001.log)"
+  },
+  {
+   "argv": [
+    "<venv with unicorn+capstone>/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-059/mutants.py",
+    "--json",
+    "artifacts/nat-059/mutants-001.json"
+   ],
+   "exit_code": 1,
+   "note": "run 001: 24 of 27 killed, survivors M8, M11, M13 (artifacts/nat-059/mutants-001.log)"
+  },
+  {
+   "argv": [
+    "<venv with unicorn+capstone>/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-059/mutants.py",
+    "--only",
+    "M8,M11,M13",
+    "--json",
+    "artifacts/nat-059/mutants-002.json"
+   ],
+   "exit_code": 0,
+   "note": "after strengthening the Derivation test and rewriting the two non-behavioural mutants: 3 of 3 killed (27 of 27 in total, 0 survivors)"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "artifacts/nat-059/make-check.log"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-059/test-patch-002.log",
+  "artifacts/nat-059/test-run-001.log",
+  "artifacts/nat-059/mutants-001.json",
+  "artifacts/nat-059/mutants-001.log",
+  "artifacts/nat-059/mutants-002.json",
+  "artifacts/nat-059/build-003/build.json",
+  "artifacts/nat-059/package-003/package.json",
+  "artifacts/nat-059/make-check.log"
+ ],
+ "images": {
+  "loader-diag-xnu-ckpt4-usb": {
+   "recovery_sha256": "60147f1f6190c688b89ea63ac1f56816e977db692eb3864bf2aaa404ea868dd1",
+   "payload_sha256": "3bb6e5d14368ef3627288f44aeff9c00c1e510915395db5988de600402b0af20",
+   "payload_bytes": 21857888,
+   "payload_offset": 2048,
+   "loader_image_sha256": "4af99c079e151c446a7a3644788b00492b98910298ac68954c60707f5acc0e1b"
+  }
+ },
+ "stock_recovery_sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+ "sha256": {
+  "docs/procedures/nat-059/README.md": "2166b13ed9d21b799d525f0d084d9eb701adc8b26f4e559e27d6871b22f31f5e",
+  "docs/procedures/nat-059/decision-draft.md": "fec34f0aad3328d6da4fb7cc75e21cc8a2ab9e26479a186b4c4da8a105961b59",
+  "docs/procedures/nat-059/build.py": "ecdf3229c912af4351f7dd7a53a4107482806260de25698af9df1bba053991d9",
+  "docs/procedures/nat-059/patch_ckpt59.py": "e3a31b9293384ded995262d092939720a1c37e7922c11aa22c6565182f8ab333",
+  "docs/procedures/nat-059/session_nat059.py": "bbaa8a96462d4f6062975141185c91a0629eb3f09ab4a6dca2185390e597555d",
+  "docs/procedures/nat-059/analyze_nat059.py": "e840d68ab265d52ad857e2f528929044ba6157ff436b1e6dfdb343049c902169",
+  "docs/procedures/nat-059/test_nat059.py": "737262f80a817f09f0889221f6c4e169062d0b9d963f5307bd43eafe29eea96a",
+  "docs/procedures/nat-059/test_nat059_run.py": "590af0c855dfd5062f6fa032a258be1f96d89841fd07266572da81b580d66077",
+  "docs/procedures/nat-059/mutants.py": "88a496b3a5e56d15d236285971382b92ff05c5f5ec35571ba447cc5b55f2a0f5"
+ },
+ "artifact_sha256": {
+  "artifacts/nat-059/test-patch-002.log": "5ddccfe0f1f2f77dd0baea28bb47858594d9e7907d2f3527b02fd974b18c35fa",
+  "artifacts/nat-059/test-run-001.log": "84f6def1717b4cbce8519d80a008a5084e5db4900034c4261043398ffe3b8f7a",
+  "artifacts/nat-059/mutants-001.json": "562364755e2b297bb467359c69e0a6c3ef6ad37a5aad2310a0d83571cb4e1e81",
+  "artifacts/nat-059/mutants-002.json": "0402ec6cdefc3b8c2ffff43b32fe13b496a17e7cc4aac742abf81159ae5cadf3",
+  "artifacts/nat-059/build-003/build.json": "1866f95d76b18546c4a4cd3577a42206833db2098a6cb81e8f103afa4db4a531",
+  "artifacts/nat-059/package-003/package.json": "0ec8e73df37d55afe23a9bf2823a86b2f0e403079eab6a1e806f2f1728403420"
+ },
+ "device_used": false,
+ "flashed": false
+}
