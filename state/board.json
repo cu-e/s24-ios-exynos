@@ -1,11 +1,13 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-11T14:13:40+00:00",
-  "ledger_updated_at": "2026-11-11T14:13:28+00:00",
-  "registry_sha256": "98261ed6a5ad52df4daafe3b0a4986beba8cbd402b2e6d785bf0bd1fe6f3b240",
+  "generated_at": "2026-11-11T14:17:13+00:00",
+  "ledger_updated_at": "2026-11-11T14:17:02+00:00",
+  "registry_sha256": "f5e9dadc7a48ab7094cbdf2027785d2967d72beac74bce6a51e7781a7ac59638",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
-    "ready": [],
+    "ready": [
+      "NAT-052"
+    ],
     "in_progress": [],
     "blocked": [
       "INT-002",
@@ -8495,6 +8497,41 @@
       "card_path": "planning/tasks/NAT-037.md"
     },
     {
+      "id": "NAT-052",
+      "title": "Publish XNU C checkpoints to the host over the NAT-047 USB log engine: every NAT-036 resumable checkpoint return services the EP0 engine and emits a checkpoint record, so the computer (not a camera) receives how far the kernel got; host-test image and decision draft only",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 94,
+      "depends_on": [
+        "NAT-036",
+        "NAT-037",
+        "NAT-047",
+        "NAT-046"
+      ],
+      "paths": [
+        "docs/procedures/nat-052",
+        "artifacts/nat-052"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "A loader image built from the NAT-036 ckpt3 resumable-return family plus the NAT-047 ladder and NAT-041 engine, in which the loader's resume stub services the engine at every checkpoint return and queues a checkpoint record (index, boot id, SPSR/ELR of the return) for the EP0 collector; the engine is never serviced from XNU itself.",
+        "Host tests (unicorn, the NAT-041 DWC3 model and the NAT-035 resume model) show every selectable stop reaching the collector archive in order, a bounded service time per checkpoint, and a controlled-fault variant delivering its exception frame; mutation testing of the new glue with zero survivors or documented equivalents.",
+        "A decision-file draft in the NAT-043 form for one image (hashes, MMIO beyond NAT-043's table: none added), not executed; no native run, no claim of hardware behaviour."
+      ],
+      "steps": [
+        "Read the NAT-035 resume model and the NAT-047 patch points",
+        "Implement the glue and the combined build",
+        "Host tests, mutants, decision draft"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-052.md"
+    },
+    {
       "id": "ESIM-001",
       "title": "Specify eUICC logical channels and LPA integration",
       "status": "done",
@@ -15187,19 +15224,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-11T05:46:39+00:00",
-      "action": "task.add:NAT-049",
-      "owner": "claude-nat047-20261111-usbmon-image",
-      "tasks": [
-        {
-          "id": "NAT-049",
-          "status": "pending",
-          "owner": null,
-          "priority": 96
-        }
-      ]
-    },
-    {
       "at": "2026-11-11T05:46:59+00:00",
       "action": "task.update:NAT-047",
       "owner": "claude-nat047-20261111-usbmon-image",
@@ -15467,11 +15491,24 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-11T14:17:02+00:00",
+      "action": "task.add:NAT-052",
+      "owner": "claude-nat043-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-052",
+          "status": "pending",
+          "owner": null,
+          "priority": 94
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "5540987b527e352656c4872d5a6b8a3f2a5435cdd658b2c078959568ffd6cddd",
-    "BOARD.md": "d57f33e1871371997568f4e22a43d185ec7cf4abd9c1016f0676a0a31012fff9",
+    "STATUS.md": "d410481b824d13b999887a5ee1072edd60607e350daa4a3da197e4f57210f9a8",
+    "BOARD.md": "2fadb3a817b8b73f0c22e6bf2d13d157583b695b6f1376ac55d072be9b3fb65c",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -15656,6 +15693,7 @@
     "planning/tasks/VM-021.md": "a1a9f4da2c86949455b9066fe6a30153a1551b50493392059889f67d05de29b4",
     "planning/tasks/VM-022.md": "5e265c630c64245bf89eaeb881448f65a6334fe1ae91544194c3b2d74936dd93",
     "planning/tasks/NAT-037.md": "aba1d316a00adda3ee65e66afc2aa1d5e4212a0c045a92b2c0d5f31758bfda83",
+    "planning/tasks/NAT-052.md": "39e797478b44c952fcbd5e62de7d05fa80a9b9623001eb7e1550585f0e617590",
     "planning/tasks/ESIM-001.md": "4ff5511bf1b91ec562d46b9fa0fdbc4dc3ffd12af187060e75777f8fcde71bb6",
     "planning/tasks/VM-004.md": "e60d0c34c4cbc0e4c68b4a74b97657a569fe4a12f25e16efc01dcaa45ccc2b15",
     "planning/tasks/SEN-001.md": "3c54f6f748160ba9c5b4c4f27f41576ddb90a5c2f73f0243805e189091695d2d",
