@@ -1,0 +1,50 @@
+{
+ "image": "loader-diag-reset",
+ "reason": "0x12345601",
+ "deadline_s": 45,
+ "wdt_s": 83,
+ "early_ceiling_s": 76.0,
+ "baseline": {
+  "vanish_s": 4.0,
+  "upload_s": 95.0,
+  "source": "docs/procedures/nat-022/README.md, runs 001-009"
+ },
+ "timeline": [
+  {
+   "dt": 3.56,
+   "event": "disappear",
+   "id": "04e8:6860",
+   "product": "SAMSUNG_Android",
+   "klass": "android",
+   "path": "5-1"
+  },
+  {
+   "dt": 73.02,
+   "event": "appear",
+   "id": "04e8:685d",
+   "product": "SAMSUNG USB",
+   "klass": "download",
+   "path": "5-1"
+  }
+ ],
+ "notes": [],
+ "t0_unix": 1794405816.85409,
+ "watcher_covers_s_after_t0": 239.99,
+ "vanish_dt_s": 3.56,
+ "first_appearance": {
+  "dt": 73.02,
+  "id": "04e8:685d",
+  "product": "SAMSUNG USB",
+  "klass": "download"
+ },
+ "U1_U2": {
+  "question": "U1+U2 (the loader's PMU stores reach the hardware; 0x3c00 := 2 resets without the ACPM STOP request)",
+  "verdict": "supported",
+  "why": "re-enumeration at +73.0 s: after the 45 s deadline and before the split point 76.0 s that separates it from the baseline watchdog upload (+95 s)"
+ },
+ "U3_U4": {
+  "question": "U3 (INFORM3 = download word 0x12345601)",
+  "verdict": "supported",
+  "why": "after the reset at +73.0 s the device enumerated as SAMSUNG USB (Download Mode) with no owner action"
+ }
+}

@@ -1,0 +1,137 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T14:20:00+00:00",
+ "commit": "67b1c79b09bad9e1e24b07a6992dbdd9f90ab6dd",
+ "tree_state": "the files listed under sha256 under docs/ are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat046-20261111-session",
+ "summary": "One native run of NAT-044 loader-diag-reset (RECOVERY a3189ca7\u2026ea34e) under decision 0021/0019. The host alone recorded: phone left the bus at +3.6 s after the reboot request, and re-enumerated as 04e8:685d SAMSUNG USB (Download Mode) at +73.0 s without owner action (baseline of nine earlier runs: SEC_UPLOAD at about +95 s). U1+U2 supported, U3/U4 supported by the pre-registered rules. Stock RECOVERY restored in one NAT-013 session, full-hash readback equals stock, Android verified.",
+ "evidence_category": "native-device: one run of a loader image on this S24 via the RECOVERY slot, observed by the host USB watcher; no register values or display frames were captured",
+ "acceptance": {
+  "1_decision_file": "met: decision 0021 (committed before the run, 2438508; owner confirmation appended before the run, 3a9e62d/67b1c79) names the RECOVERY/Image.payload/loader hashes, the PMU registers 0xb8/0xbc/0x190/0x3c00 of 0x12860000, U1-U4 wording, what is not granted; run followed the 0019 protocol (RECOVERY only, pinned stock restore, full-hash readback, one-shot marker, 83 s watchdog).",
+  "2_host_observation": "met: usb-events.jsonl (fsynced, timestamps) covers T0-0.1 s to T0+240 s; disappear +3.6 s, SAMSUNG USB appear +73.0 s, no SEC_UPLOAD; analyze_reset.py verdicts U1+U2 supported, U3/U4 supported; U1-U4 states are the analyzer wording, nothing inferred beyond it. The on-screen PMU snapshot was not captured (not required).",
+  "3_restore": "met: restore_stock.py restore (one Download Mode session, bus 5 addr 75) -> awaiting-readback; check_android.py: recovery_hash_match true, boot_completed 1, user data directories present; assess: pass with all six stages."
+ },
+ "established": [
+  "After the loader ran, the phone left the bus at +3.6 s and appeared as 04e8:685d SAMSUNG USB at +73.0 s with no owner action, between the 45 s deadline and the 76 s split point to the watchdog path.",
+  "No SEC_UPLOAD was seen in the 240 s window; the device was still in Download Mode at the end of it.",
+  "The NAT-013 restore from that Download Mode state succeeded and Android returned with the stock RECOVERY (full-hash readback)."
+ ],
+ "not_established": [
+  "The register state at loader entry (INFORM2/INFORM3/0x190 values) and the loader's own read-back results: drawn on screen only, not captured.",
+  "The cause of the re-enumeration is inferred from timing and from Download Mode vs SEC_UPLOAD; one run, 3 s margin to the split point.",
+  "The Bootloader word 0x1234560d (loader-diag-reset-bl), anything about the USB controller, GPU or XNU execution."
+ ],
+ "findings": [
+  "An unattended restore path now exists: reset into Download Mode and NAT-013 restore without the owner pressing keys.",
+  "Before this run a clk_summary read (NAT-051) restarted the phone through SEC_UPLOAD by itself; the Download Mode path in this run was not that path (product SAMSUNG USB, 04e8:685d, not SEC_UPLOAD)."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-048/session_reset_canary.py",
+    "--image",
+    "loader-diag-reset",
+    "--out",
+    "artifacts/nat-046/pre-001"
+   ],
+   "exit_code": 0,
+   "note": "read-only preflight, ready-read-only"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-048/session_reset_canary.py",
+    "--image",
+    "loader-diag-reset",
+    "--out",
+    "artifacts/nat-046/run-001",
+    "--execute"
+   ],
+   "exit_code": 0,
+   "note": "first attempt refused by the auto-mode classifier at 12:44Z (nothing run); executed once at 14:03Z after the owner confirmed"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-048/analyze_reset.py",
+    "--events",
+    "artifacts/nat-046/run-001/usb-events.jsonl",
+    "--report",
+    "artifacts/nat-046/run-001/report.json",
+    "--build",
+    "artifacts/nat-044/build-002",
+    "--image",
+    "loader-diag-reset",
+    "--out",
+    "artifacts/nat-046/run-001/analysis.json"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "restore",
+    "--bus",
+    "5",
+    "--address",
+    "75",
+    "--out",
+    "artifacts/nat-046/restore-001"
+   ],
+   "exit_code": 0,
+   "note": "awaiting-readback"
+  },
+  {
+   "argv": [
+    "python3",
+    "docs/procedures/nat-012/check_android.py",
+    "artifacts/nat-046/restore-001/readback.json"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "assess",
+    "--report",
+    "artifacts/nat-046/restore-001/report.json",
+    "--readback",
+    "artifacts/nat-046/restore-001/readback.json"
+   ],
+   "exit_code": 0
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-046/run-001/report.json",
+  "artifacts/nat-046/run-001/usb-events.jsonl",
+  "artifacts/nat-046/run-001/analysis.json",
+  "artifacts/nat-046/restore-001/report.json",
+  "artifacts/nat-046/restore-001/readback.json",
+  "artifacts/nat-046/pre-001/report.json"
+ ],
+ "sha256": {
+  "docs/procedures/nat-046/README.md": "294d0d38e6f873e3e2044cc738455f0d8b2b5a160c6ed3c19d65291993841c5d",
+  "docs/procedures/nat-046/run-001-usb-events.jsonl": "c161bb1a2a5291b4e2394efaa1ae3e993997b02526401ff0c40acbe1ef793f79",
+  "docs/procedures/nat-046/run-001-analysis.json": "6d52c85169d89f25486e49ee586dcee8903c3303dcadd65836eb4199bada582c",
+  "docs/decisions/0021-nat046-loader-diag-reset-single-run-2026-11-11.md": "26fca20242e3a3aae9af33343bdc8380273ee8ab4359259532e11df9951b0e8e",
+  "artifacts/nat-046/run-001/report.json": "b5df14229bd7d3420efd2873f3721918eead425687b425fd3245e7d95ea4ec2f",
+  "artifacts/nat-046/run-001/usb-events.jsonl": "c161bb1a2a5291b4e2394efaa1ae3e993997b02526401ff0c40acbe1ef793f79",
+  "artifacts/nat-046/run-001/analysis.json": "6d52c85169d89f25486e49ee586dcee8903c3303dcadd65836eb4199bada582c",
+  "artifacts/nat-046/restore-001/report.json": "2d889c644cd13aaafe235bc340adef89b1149615b0e2b2ecfd435dc0543d0a67",
+  "artifacts/nat-046/restore-001/readback.json": "9ecb4d08d47e14682c61d110c17bf4d337ce78c0bf815b8cafeee17687efa041",
+  "artifacts/nat-046/pre-001/report.json": "d4c58a5bec6a14f7472d16d47e3f3cfd09a6198a159075b5fecbf73ee148773f"
+ },
+ "device_used": true,
+ "flashed": true,
+ "device_inventory": "devices/local-2026-11-11-nat046.json"
+}
