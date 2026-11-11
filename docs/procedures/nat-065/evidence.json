@@ -1,0 +1,144 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-11T21:35:17+00:00",
+  "commit": "2ab84d66dd10c8e5ccfd5a628d2a36e3b19fb502",
+  "tree_state": "the files listed under sha256 are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+  "owner": "claude-nat065-20261112-ramdisk",
+  "summary": "The image loader-diag-xnu-md0-usb: NAT-062's loader image family with a different XNU payload (a 16635-byte probe-init ramdisk behind rd=md0, a /chosen/memory-map RAMDisk property, the command line plus launchdsuffix=release cs_enforcement_disable=1), its driver and analyser (root reading), 24 + 52 host tests, 56/58 mutants killed (2 equivalent), decision 0027 drafted. Nothing ran on the phone.",
+  "evidence_category": "host-test (derivation, static reads of the real payload, the loader's real adt_patch.c built for the host with a C harness under ASAN/UBSAN, a unicorn simulation of the probe init with a fake syscall table, the NAT-062 driver/analyser against simulated archives, derived NAT-062 suites). No android-userland and no native-device evidence; unicorn is not an Exynos model or XNU.",
+  "acceptance": {
+    "1_build": "build.py re-derives NAT-062's loader image and rebuilds the payload with the pinned mkpayload.py --ramdisk from the pinned NAT-020 inputs and the probe init; two builds (build-001, build-002) give identical hashes and test_nat065.py rebuilds the payload and the probe byte for byte; every input is pinned by SHA-256 (build.json nat065_pins); the NAT-062 command-line patch and the NAT-022 adt_size fix are not used.",
+    "2_tests": "test_nat065.py (24 tests: Inputs, Build, Rebuild, Payload, Loader, Ramdisk, Package) and test_nat065_run.py (52 tests: own Derivation, Root, RootThroughTheAnalyser plus NAT-062's Flow, RealTreeGate and Verdicts derived by asserted text substitution): the payload differs from NAT-062's only by the segment, the property and the header fields NAT-064 lists; the loader rebase (real adt_patch.c) puts the RAMDisk range in the kernel window outside every other segment; the ramdisk is a valid static arm64 Mach-O with correct page hashes and its simulated run exits 81/96/82; the driver and analyser accept the new image name; root classification covers all outcomes.",
+    "3_mutants": "mutants.py: 58 mutants (build, probe, analyser, driver, derivation); 56 killed, 2 equivalent (M12, M13, reasons in mutants.py), none survived, none invalid; controls without mutation pass.",
+    "4_decision_draft": "decision-draft.md names both hashes (RECOVERY c6f4a6e4..., Image.payload 60ca7fc9...), decision 0019, what the kernel may now touch (mount a RAM image, exec a user-mode program, scheduler and syscalls, unbounded reach), the 83 s watchdog and deadline budget, the untested timed return, the 5 s mount-retry loop with no panic; it records no run-specific owner confirmation and nothing ran on the phone."
+  },
+  "established": [
+    "Host-test: the payload, ADT property and ramdisk are built reproducibly and match the structure NAT-064 designed (segment at the old kernel_end, RAMDisk property of 52 bytes, ADT 14008 bytes, header fields).",
+    "Host-test: the loader's real ADT code rebases the RAMDisk property by win_base - phys_base, leaves other properties alone and refuses malformed trees; the resulting range is inside the kernel window and outside every other segment.",
+    "Host-test: the probe init makes only open/write/getpid/select/exit calls, keeps SP 16-aligned at every svc and exits 0x50+pid (0x60 without a console) in a unicorn run with a fake syscall table.",
+    "Host-test: the analyser separates probe-ran-to-exit, probe-no-console, init-exited-other, init-killed, root-device-missing (the real NAT-063 kernel log), other-panic and no-panic-text, and degrades to undetermined/no-panic-text on NAT-063's foreign archive."
+  ],
+  "not_established": [
+    "Anything about the real phone: whether the ramdisk bytes land where ml_static_ptovirt expects them (the loader rebase has never run on hardware), whether vfs_mountroot accepts the raw Mach-O through the mockfs, whether exec of an ad-hoc-signed init is permitted, whether PID 1's console text reaches loader_log live.",
+    "That the timed loader_return_after=8 return works (NAT-063 returned through the panic path) or that a failed mount ends other than by the timed return or the deadline reset.",
+    "That a probe exit status of 81 appears in the panic text on the phone; the analyser's reading is of text that the simulated archives and one real log (NAT-063) exercise, not of a PID 1 run."
+  ],
+  "findings": [
+    "With the RAMDisk property the ADT is 14008 bytes, already a multiple of 8, so NAT-022's adt_size fix (13956 -> 13960) must not be applied; build.py refuses it.",
+    "A derived test suite must set the derived classes' __module__ to the module that carries the fixtures, or unittest runs tearDownModule when it switches module mid-suite and 28 tests error.",
+    "Derived texts are checked by asserted substitution counts (including the 3 legitimate NAT-062 mentions left in the registry tuples), so a drifted NAT-062 file fails loudly instead of silently testing the wrong thing.",
+    "The re-targeted Verdicts layer takes minutes and is not re-run per mutant; it runs in the full run test."
+  ],
+  "commands": [
+    {
+      "argv": [
+        "<venv with capstone+pyusb+unicorn>/bin/python",
+        "-W",
+        "ignore",
+        "-I",
+        "docs/procedures/nat-065/test_nat065.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "note": "Ran 24 tests, OK (artifacts/nat-065/test-build-final.log)"
+    },
+    {
+      "argv": [
+        "<venv with capstone+pyusb+unicorn>/bin/python",
+        "-W",
+        "ignore",
+        "-I",
+        "docs/procedures/nat-065/test_nat065_run.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "note": "Ran 52 tests, OK (artifacts/nat-065/test-run-final.log)"
+    },
+    {
+      "argv": [
+        "<venv with capstone+pyusb+unicorn>/bin/python",
+        "-W",
+        "ignore",
+        "-I",
+        "docs/procedures/nat-065/mutants.py",
+        "--json",
+        "artifacts/nat-065/mutants-001.json"
+      ],
+      "exit_code": 0,
+      "note": "56/58 killed, M12 and M13 equivalent, none survived, none invalid (artifacts/nat-065/mutants-001.log)"
+    },
+    {
+      "argv": [
+        "<venv>/bin/python",
+        "-W",
+        "ignore",
+        "-I",
+        "docs/procedures/nat-065/analyze_nat065.py",
+        "--archive",
+        "artifacts/nat-063/run-001/archive",
+        "--events",
+        "artifacts/nat-063/run-001/usb-events.jsonl",
+        "--report",
+        "artifacts/nat-063/run-001/report.json"
+      ],
+      "exit_code": 0,
+      "note": "sanity check on NAT-063's archive (a different image): verdict undetermined, root.outcome no-panic-text; output not kept"
+    },
+    {
+      "argv": [
+        "make",
+        "check"
+      ],
+      "exit_code": 0,
+      "note": "artifacts/nat-065/make-check.log"
+    }
+  ],
+  "artifacts": [
+    "artifacts/nat-065/test-build-final.log",
+    "artifacts/nat-065/test-run-final.log",
+    "artifacts/nat-065/mutants-001.json",
+    "artifacts/nat-065/mutants-001.log",
+    "artifacts/nat-065/make-check.log",
+    "artifacts/nat-065/build-001/build.json",
+    "artifacts/nat-065/build-002/build.json",
+    "artifacts/nat-065/package-001/package.json"
+  ],
+  "images": {
+    "loader-diag-xnu-md0-usb": {
+      "recovery_sha256": "c6f4a6e45806edf211ce7de16bf0882268b3f8d22f065a21e575bdb66b06f34d",
+      "payload_sha256": "60ca7fc9759efff584b9a13795a16b3a262310cd7823770a408fbac2109087ce",
+      "payload_bytes": 21878704,
+      "payload_offset": 2048,
+      "loader_image_sha256": "aa96893fb453dfee8bf2ce7f656f6ab2a94cb030aa700504d4ecf2698426d5dd",
+      "xnu_payload_sha256": "131bc977e12e0a72d8f45320e53676e7e64fada56147e753e6015fac8bbc0941",
+      "ramdisk_sha256": "b3decc846877fb1de608fcd2734e9c3cb5d2d4ed9e3388bf99d303a45e4761a6",
+      "cmdline": "rd=md0 e1sufs=0 e1sufs_probe=0 ufsrw=0 ufs_write=0 sweethw=0 e1s.hold=0 nat_attempt=NAT065-md0 debug=0xc serial=3 cpus=1 keepsyms=1 -v loader_return_after=8 launchdsuffix=release cs_enforcement_disable=1"
+    }
+  },
+  "stock_recovery_sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+  "sha256": {
+    "docs/procedures/nat-065/README.md": "78ab87b81c85367d7a6b52b53b029876d683d0140865e8368c84b280df5edb38",
+    "docs/procedures/nat-065/decision-draft.md": "b0f6be82ca796d995caa5ae8b183074df78e7287f305645e1b138532acbc5bce",
+    "docs/procedures/nat-065/build.py": "f2f964c068efa17f988752dee547d72dd1b0eaaec0d1344e924f8b13bf7698d8",
+    "docs/procedures/nat-065/src/probe-init.S": "e87b80759cb43f419e59a4370e65623634b0ad6f385f61faacefc593ae538e65",
+    "docs/procedures/nat-065/analyze_nat065.py": "b4b9d2f9440aa354dd2c8d0f1c99fe328669d92a763f4fdc3ea22e49a72c5569",
+    "docs/procedures/nat-065/session_nat065.py": "1cf8939bc75b90fbdd48b3765f1af814060ecf0d5c2d8cfc482f6d1754aa0caa",
+    "docs/procedures/nat-065/test_nat065.py": "7b462868f0389109361fec860b9f6486d6a1c963d6573bae2e65941d36ac59a4",
+    "docs/procedures/nat-065/test_nat065_run.py": "adb54b009364ad68dc195f977a5b3b2cfc52b1ece27fa717708bc3b59fe95479",
+    "docs/procedures/nat-065/mutants.py": "9b5f703bb3fd32cc838e55cd153b0d945cc9df5575275d8f45940e6b5fc4f16f"
+  },
+  "artifact_sha256": {
+    "artifacts/nat-065/test-build-final.log": "3aa8365479d0d3184ca2f6c853e447ec1daa86c2344f4b453a73f3633e3b5607",
+    "artifacts/nat-065/test-run-final.log": "f57385fed987791666810baecbcac98f3f70a78bce647693b4ee72a9e9f09107",
+    "artifacts/nat-065/mutants-001.json": "96536b975d660e1668df31b0bb8a58216e9a255a7b386744ae53cd80b38b8ab6",
+    "artifacts/nat-065/mutants-001.log": "a02cb4eb711e9f3bcf35252ee8ea8de4864be32ed0c8da77ff4a35d7066b338e",
+    "artifacts/nat-065/make-check.log": "7f4f1bb95199405c2e062fd3462143e39c61315a0e99a4296369b4f6627e3297",
+    "artifacts/nat-065/build-001/build.json": "09acd3ce050dbfa0604b871e0a6db685e937ca2a1a1a3ad21318b406eb440c72",
+    "artifacts/nat-065/build-002/build.json": "b20ab0d1ece34ffb9c10966f5923cb889f03a77d54586e8376b09a3358425d00",
+    "artifacts/nat-065/package-001/package.json": "fa64534fb74486288ac7ab123e675bd3305d8da5722b4b375c9a2a5dfffe8ef8"
+  },
+  "device_used": false,
+  "flashed": false
+}
