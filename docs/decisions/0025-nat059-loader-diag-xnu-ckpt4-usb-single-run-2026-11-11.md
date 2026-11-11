@@ -89,4 +89,15 @@ data stay intact.
 
 ## Owner confirmation of the run (recorded before the launch)
 
-Not yet recorded.
+On 2026-11-11 (late evening, host time; recorded after midnight 2026-11-12) the owner answered the question "Запускаю ОДИН нативный запуск образа loader-diag-xnu-ckpt4-usb (решение 0025, коммит 9724d0a), чтобы компьютер получил
+по USB сообщения ядра XNU уже ПОСЛЕ arm_vm_init: 27 контрольных точек, до C-точки 21…" with "да запцскай я разрешаю запускать их без разрешения окгда угодно если устройство доступно" (verbatim, typos included;
+in English: "yes, launch it, I allow launching them without asking whenever the device is available"). The question named the RECOVERY SHA-256 prefix `60147f1f…8dd1` (full hash in this file), the only partition written
+(RECOVERY, `/dev/block/sda18`, full readback), the single `adb reboot recovery`, the same USB monitor 1209:0001 and the same 111-operation HSI0 table as NAT-043/NAT-058 (nothing new from the loader), that the kernel
+passes `arm_vm_init` for the first time and runs `serial_init`, `PE_init_platform`, `ml_map_cpu_pio`, `PE_init_cpu`, `early_random` with the possibility of kernel access to interrupt-controller registers
+(GIC by the ADT: `0x10200000`/`0x10240000`; not statically bounded, disclosed here), the reset into Download Mode after about 60 s, the restore of the stock RECOVERY (`96620b8b…`, full-hash readback)
+and the Android check, that data, apps and settings are untouched, one run and no retry, the risk (hang or exception of the kernel: a partial log, the 83 s watchdog with `SEC_UPLOAD` and an automatic
+restart as on 2026-11-11, or Download Mode by keys), and the service steps in the same window: open `native` citing this decision, claim NAT-060, run the driver, close `native` after `task done`.
+
+The second half of the answer is a standing statement of the owner about such runs ("I allow launching them without asking whenever the device is available"). It is recorded here as the owner's words. It is
+read as covering runs of this kind (one native image per decision file under the protocol of decision 0019, written only to RECOVERY and restored from the pinned stock image) and does not widen the list
+of what is not granted above or the boundary of decision 0002; each run still gets its decision file naming its hashes, which the driver requires.
