@@ -1,0 +1,114 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T04:35:57+00:00",
+ "commit": "34b46ea346ee0f589ab15e3b75f9d1f0f92c054c",
+ "tree_state": "the files listed under sha256 are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat045-20261111-usbladder",
+ "summary": "USB bring-up ladder L0-L8 of the NAT-040 plan as C: a generator (derive.py) compiles the vendor function bodies at the pinned SHA 417484173abc2c4fa93e738ea82ad9f2e84911b1 into a 111-op table (src/ladder_regs.h, ladder_ops.json), cross-checked kind/mask/value-wise against the NAT-040 plan, and a small interpreter (src/ladder.c) runs it over the NAT-041 port contract; L0-L2 are read-only and the default image (no LAD_WRITING_RUNGS) has no store and no delay compiled in; L6-L8 (src/ladder_usb.c) hand over to the unmodified NAT-041 usbmon engine. test_nat045.py: Ran 77 tests, OK (Table, Generator, Ladder, DefaultBuild, Usb, Aarch64 layers; unicorn+capstone+zig present, nothing skipped); mutation check 498 killed + 5 documented-equivalent of 503, 0 survived, 0 invalid. Nothing was run on the phone.",
+ "evidence_category": "host-test (generator, x86 register-level model, unicorn instruction-level run of the compiled aarch64 ladder); not a measurement of the S24",
+ "acceptance": {
+  "1_ladder_as_c": "src/ladder.c + generated src/ladder_regs.h: one rung function per ladder rung with the distinct error codes LAD_ERR(rung, READBACK|TIMEOUT|STATE|NOTALIVE|CFG|DISABLED) and a per-op record/stage log; every address, mask, value and the delays come from derive.py re-reading the pinned vendor sources (derive.py --check exits 0; any constant that differs from the pinned text, or any vendor statement the generator cannot model, is a DeriveError, exit 2); the 22 SET rows are additionally recomputed with the C compiler's own bit-field layout of the vendor headers; the plan cross-check is kind-, mask- and value-aware; L0-L2 read-only, default build stops after L2 and has no store/delay (DefaultBuild layer, and the unicorn run of the default object shows no device store).",
+  "2_model_and_unknowns": "test_support/plat.c (register file with strict access rules, gating, follow/stuck/flip fault injection) and devmodel.py + a64sim.py run the compiled x86 and aarch64 objects; tests show the writing rungs happen only when enabled, in the cited order, with the stated virtual-time delays (500/500/10/10/10/1000/28/2500 us) and that a failed read-back stops the ladder at its row without a retry; the unknowns U1-U8 of NAT-040 are carried as named probe results in the lad_state record (README.md, section 'The unknowns of NAT-040 as probe results'), none guessed; mutation check: 503 mutants (136 C, 61 generator, 306 table fields) - 498 killed, 5 equivalent (each justified in mutate_nat045.py), 0 survived, 0 invalid, 0 anchor errors.",
+  "3_engine_link": "src/ladder_usb.c links the unmodified NAT-041 engine (usbmon.c hash below equals the file NAT-041 recorded) after the last rung in the host build (Usb layer: lad_usb_start -> usbmon_init, lad_usb_wait polling the engine for CONNECTDONE and the host nonce against the NAT-041 DWC3 model); nothing ran on the phone."
+ },
+ "established": [
+  "The generated table equals what the pinned vendor sources and the NAT-040 plan give (derive.py --check exit 0); 111 ops, rung starts 0,0,2,5,26,27,111.",
+  "The compiled ladder (x86 and aarch64 objects) performs the table's accesses in order against the strict register-file model, stops at the first failed read-back with the documented code and op, never writes in the default build, and never writes a block the PMU state says is off.",
+  "Every mutant of the ladder C, the generator and every field of every table row either makes the suite fail or is a documented equivalent; run 004 is the run of the recorded tree (runs 002 and 003 are superseded, see README).",
+  "NAT-041 engine files linked unmodified: usbmon.c 37a53cbaa8887958, usbmon.h 37fafc1fc9b23f0f."
+ ],
+ "not_established": [
+  "Anything about the real S24: that these registers behave as the vendor driver sequence assumes, that the PMU power-on of pd_hsi0 works from the loader, that the eUSB2 PHY comes up without the repeater/regulator/SMC prerequisites (U1-U8 stay unknowns; each is a named probe result for NAT-043 to read), or that the DWC3 at 0x17900000 answers.",
+  "That the register-file model is faithful: it encodes one reading of the vendor driver and of NAT-040; where the generator and the model share a misreading the tests cannot notice. The mutation check shows the tests detect single changes to the code, not that the specification is right.",
+  "The SMC step (DTZPC 0x17810204, plan 0.02) is not attempted by the ladder; a platform that needs it fails at the NOTALIVE/READBACK rung and says so.",
+  "Caches, MMU attributes, SError and real bus timing (unicorn has none of them; the virtual time of the x86 model is exact by construction)."
+ ],
+ "findings": [
+  "The plan cross-check was too lenient (a PMUCAL_WRITE row was satisfied by the ladder's read of the same register, a PMUCAL_READ row by the wait): fixed in derive.py (kind/mask/value-aware), generated header unchanged, ladder_ops.json plan annotations moved.",
+  "Tests of the L7/L8 polling were vacuous because the NAT-041 model polls the engine itself after each host step; SET masks and LOAD addresses were invisible from a zero register file; both fixed with behavioural tests (non-polling model, exact counts, C-compiler oracle, same-register invariant).",
+  "Run 003 left one survivor (plan READ row satisfied by a WAIT of equal mask and value); a test was added and run 004 recorded. A first attempt at run 004 crashed with 'Disk quota exceeded' on the shared /tmp tmpfs (unrelated projects fill it) and was repeated with TMPDIR on the project disk; no result of the crashed attempt is used."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-045/derive.py",
+    "--check"
+   ],
+   "exit_code": 0,
+   "note": "up to date"
+  },
+  {
+   "argv": [
+    "<venv with unicorn+capstone>/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-045/test_nat045.py"
+   ],
+   "exit_code": 0,
+   "note": "test_nat045.py: Ran 77 tests, OK (Table, Generator, Ladder, DefaultBuild, Usb, Aarch64 layers; unicorn+capstone+zig present, nothing skipped)"
+  },
+  {
+   "argv": [
+    "<venv>/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-045/mutate_nat045.py",
+    "--out",
+    "artifacts/nat-045/mutation-004",
+    "--jobs",
+    "10"
+   ],
+   "exit_code": 0,
+   "note": "killed 498, equivalent 5, survived 0, invalid 0, anchor errors 0, of 503"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "214 tests OK (TMPDIR on the project disk because the shared /tmp tmpfs quota was exhausted)"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-045/mutation-004/summary.json",
+  "artifacts/nat-045/mutation-004.log",
+  "artifacts/nat-045/test-final.log",
+  "artifacts/nat-045/make-check.log",
+  "docs/procedures/nat-045/README.md"
+ ],
+ "sha256": {
+  "docs/procedures/nat-045/README.md": "8d0bb42b69fb568c02c7058aedb880ee680b992e085b3cddf15b749392109c16",
+  "docs/procedures/nat-045/derive.py": "a4f2043df7c864307f96d0550fe23b166ca330f30ec3938e536433c5c6fc8edf",
+  "docs/procedures/nat-045/ladder_spec.json": "80652b5666d35852d50d0f557a14be98803a30b550a4cd9b823d1d9e35cf2fe8",
+  "docs/procedures/nat-045/ladder_ops.json": "e85465dd84639273447219bd2cf409d04c68e9a84d63b8746e092cff4d828172",
+  "docs/procedures/nat-045/src/ladder.c": "211413b8a72a74bff67389a44dd8abfe3a7808f4d1b43f7ffca0aa7474515877",
+  "docs/procedures/nat-045/src/ladder.h": "d8ff3ac7e6a085d6988d1043c523323652c35f766f7991841f509ddecfa7e817",
+  "docs/procedures/nat-045/src/ladder_regs.h": "dd51b84aebf2246834f342634d88a5eef78c2cfb30a730e173457376eca22255",
+  "docs/procedures/nat-045/src/ladder_usb.c": "eedec2487f831424c6d378a0072dc736cd5ad81ef9cdd3dd187a5a6cfe1b3dcf",
+  "docs/procedures/nat-045/test_nat045.py": "8a080dd617bc304bf23aa843d38f13d34dd05ef3dc4d3af6121207d2226f83cc",
+  "docs/procedures/nat-045/mutate_nat045.py": "22fabd163c656cf20f7900e7b05a8b16a2403e3f279cb4fe27477600e5cb5033",
+  "docs/procedures/nat-045/test_support/a64sim.py": "1206131d35abd1106719a6dc5c496b67b3462f9cd85d29c7527c951dd14647b8",
+  "docs/procedures/nat-045/test_support/devmodel.py": "34f885dfad5d460bc44bc4bf80254fbcf4b19f75583bf0d56059d5095995d5ad",
+  "docs/procedures/nat-045/test_support/plat.c": "f2e6cd923895caf0afec76386eb8fd94d825396c4ec6211538f1fb10247132ae",
+  "docs/procedures/nat-045/test_support/plat_port.h": "c7109ab242d414e564a33ef0541c06699475a7110308f5e8698ffff47b680f05",
+  "docs/procedures/nat-045/test_support/plathost.py": "e03ed06fbff88233c5d84641a7bd09ea0ded8ad2c48107a14242f00ceee08f8f",
+  "artifacts/nat-045/mutation-004/summary.json": "de19923060a59596f4534269281d726f67c75221644feaa2e078658b9263f6dc",
+  "artifacts/nat-045/mutation-004.log": "c0a2e8ae63d2354a19a78a8a79ba60cab1b7ed1839e9bd508281795882cba0f6",
+  "artifacts/nat-045/test-final.log": "c11a403e5c6a111698c7d6a50d280828e40d5fec40c8beec056081837ba1e47f",
+  "artifacts/nat-045/make-check.log": "349142f0a16a66bc30c05d47788635e027f767f3db6800516beaa0d5d7cff6c8",
+  "docs/procedures/nat-041/engine/usbmon.c": "37a53cbaa8887958107693f87e27e43c70b64a66ea791e10993d8f163fcdd205",
+  "docs/procedures/nat-041/engine/usbmon.h": "37fafc1fc9b23f0ff0c0512fecc6c162bd457d1edcff3eeaf78af904af3d48dc",
+  "docs/procedures/nat-041/engine/usbmon_port.h": "d05ecb27424d56ead1996ee42e870834823e3ae8529686138fa419682439400d",
+  "docs/procedures/nat-041/engine/port_aarch64.h": "caff95c195dcdfbbfd41a6404323efe6f132e0de753011866040b859933d2bbd",
+  "docs/procedures/nat-041/engine/dwc3_regs.h": "59df66e2e79ec306ba82ef4ae4cd2852ed7b3f5b93e6a178cc661a2b04cd0662"
+ },
+ "device_used": false,
+ "flashed": false
+}

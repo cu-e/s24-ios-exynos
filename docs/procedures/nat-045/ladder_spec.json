@@ -1,0 +1,464 @@
+{
+  "schema_version": 1,
+  "task": "NAT-045",
+  "pin": "417484173abc2c4fa93e738ea82ad9f2e84911b1",
+  "plan": "docs/procedures/nat-040/plan.json",
+  "note": "Selection data only. Every address, mask, value, delay and order of the ladder is derived by derive.py from the pinned vendor files named in `files` (git show at `pin`); nothing numeric about a register sequence is typed here except the base addresses, each of which carries the literal vendor text it comes from.",
+  "files": {
+    "pmucal": "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "cmucal": "drivers/soc/samsung/cal-if/s5e9945/cmucal/cmucal-sfr.c",
+    "cal_data": "drivers/soc/samsung/cal-if/s5e9945/cal_data.c",
+    "usb_dtsi": "arch/arm64/boot/dts/exynos/s5e9945-usb.dtsi",
+    "pd_dtsi": "arch/arm64/boot/dts/exynos/s5e9945-pm-domains.dtsi",
+    "blkcon_h": "drivers/phy/samsung/exynos-usb-blkcon-sfr.h",
+    "blkcon_c": "drivers/phy/samsung/exynos-usb-blkcon.c",
+    "eusbcon_h": "drivers/phy/samsung/eusb-con-reg.h",
+    "eusb_c": "drivers/phy/samsung/phy-exynos-eusb.c",
+    "usbdrd_c": "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+    "dwc3_core_h": "drivers/usb/dwc3/core.h",
+    "pmucal_rae": "drivers/soc/samsung/cal-if/pmucal/pmucal_rae.c"
+  },
+  "bases": {
+    "PMU": {
+      "value": "0x12860000",
+      "file": "pmucal",
+      "text": "PMUCAL_SEQ_DESC(PMUCAL_READ, \"HSI0_STATUS\", 0x12860000, 0x2004,"
+    },
+    "CMU_HSI0": {
+      "value": "0x17800000",
+      "file": "pmucal",
+      "text": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"CLK_CON_MUX_CLK_HSI0_NOC\", 0x17800000, 0x1000,"
+    },
+    "SYSREG_HSI0": {
+      "value": "0x17820000",
+      "file": "pmucal",
+      "text": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"BUS_COMPONENT_DRCG_EN\", 0x17820000, 0x0104,"
+    },
+    "CMU_TOP": {
+      "value": "0x22b20000",
+      "file": "cal_data",
+      "text": "#define S5E9945_CMU_TOP_BASE\t\t(0x22b20000)"
+    },
+    "USBCON": {
+      "value": "0x178a0000",
+      "file": "usb_dtsi",
+      "text": "reg = <0x0 0x178A0000 0x200>,"
+    },
+    "EUSBCON": {
+      "value": "0x178b0000",
+      "file": "usb_dtsi",
+      "text": "<0x0 0x178B0000 0x200>,"
+    },
+    "DWC3": {
+      "value": "0x17900000",
+      "file": "usb_dtsi",
+      "text": "reg = <0x0 0x17900000 0x10000>;"
+    }
+  },
+  "constants": {
+    "DTZPC_NEED_SMC": {
+      "value": "0x17810204",
+      "file": "pd_dtsi",
+      "text": "need_smc = <0x17810204>;"
+    },
+    "USB_ISOL_OFFSET": {
+      "value": "0x61c",
+      "file": "usb_dtsi",
+      "text": "pmu_offset = <0x61c>;"
+    }
+  },
+  "rungs": {
+    "L1": {
+      "plan_steps": [
+        "0.19"
+      ],
+      "reads": [
+        {
+          "label": "PD_CONFIG",
+          "pmucal": [
+            "hsi0_on",
+            "HSI0_CONFIGURATION"
+          ]
+        },
+        {
+          "label": "PD_STATUS",
+          "pmucal": [
+            "hsi0_on",
+            "HSI0_STATUS"
+          ]
+        }
+      ]
+    },
+    "L2": {
+      "plan_steps": [
+        "0.08",
+        "0.09",
+        "0.10"
+      ],
+      "reads": [
+        {
+          "label": "TOP_MUX",
+          "base": "CMU_TOP",
+          "sfr": "CMU_TOP_CLK_CON_MUX_CLKCMU_HSI0_USB32DRD"
+        },
+        {
+          "label": "TOP_GATE",
+          "base": "CMU_TOP",
+          "sfr": "CMU_TOP_CLK_CON_GAT_GATE_CLKCMU_HSI0_USB32DRD"
+        },
+        {
+          "label": "TOP_DIV",
+          "base": "CMU_TOP",
+          "sfr": "CMU_TOP_CLK_CON_DIV_CLKCMU_HSI0_USB32DRD"
+        }
+      ]
+    },
+    "L3": {
+      "plan_steps": [
+        "0.20",
+        "0.21",
+        "0.02",
+        "0.24",
+        "0.25",
+        "0.26",
+        "0.27",
+        "0.28",
+        "0.31",
+        "0.32",
+        "0.33",
+        "0.15",
+        "0.16"
+      ],
+      "power_on": {
+        "pmucal_seq": "hsi0_on",
+        "wait_timeout_us_from": "pmucal_rae_wait"
+      },
+      "cmu_init": {
+        "pmucal_seq": "hsi0_cmu_init",
+        "omit": [
+          {
+            "name": "PLL_CON0_MUX_CLKCMU_HSI0_DPGTC_USER",
+            "plan_step": "0.29"
+          },
+          {
+            "name": "PLL_CON0_MUX_CLKCMU_HSI0_DPOSC_USER",
+            "plan_step": "0.30"
+          }
+        ]
+      },
+      "reads": [
+        {
+          "label": "HSI0_USB32DRD_MUX",
+          "pmucal": [
+            "hsi0_cmu_init",
+            "CLK_CON_MUX_CLK_HSI0_USB32DRD"
+          ]
+        },
+        {
+          "label": "HSI0_EUSB_DIV",
+          "pmucal": [
+            "hsi0_cmu_init",
+            "CLK_CON_DIV_CLK_HSI0_EUSB"
+          ]
+        },
+        {
+          "label": "HSI0_USB32DRD_USER",
+          "pmucal": [
+            "hsi0_cmu_init",
+            "PLL_CON0_MUX_CLKCMU_HSI0_USB32DRD_USER"
+          ]
+        },
+        {
+          "label": "HSI0_NOC_USER",
+          "pmucal": [
+            "hsi0_cmu_init",
+            "PLL_CON0_MUX_CLKCMU_HSI0_NOC_USER"
+          ]
+        },
+        {
+          "label": "HSI0_OPTION0",
+          "pmucal": [
+            "hsi0_cmu_init",
+            "HSI0_CONTROLLER_OPTION0_CMU_CTRL"
+          ]
+        },
+        {
+          "label": "QCH_LINK",
+          "base": "CMU_HSI0",
+          "sfr": "CMU_HSI0_QCH_CON_USB32DRD_QCH_S_LINK"
+        },
+        {
+          "label": "QCH_CTRL",
+          "base": "CMU_HSI0",
+          "sfr": "CMU_HSI0_QCH_CON_USB32DRD_QCH_S_CTRL"
+        },
+        {
+          "label": "QCH_EUSBCTL",
+          "base": "CMU_HSI0",
+          "sfr": "CMU_HSI0_QCH_CON_USB32DRD_QCH_S_EUSBCTL"
+        },
+        {
+          "label": "QCH_EUSBPHY",
+          "base": "CMU_HSI0",
+          "sfr": "CMU_HSI0_QCH_CON_USB32DRD_QCH_S_EUSBPHY"
+        },
+        {
+          "label": "QCH_SUBCTRL",
+          "base": "CMU_HSI0",
+          "sfr": "CMU_HSI0_QCH_CON_USB32DRD_QCH_S_SUBCTRL"
+        },
+        {
+          "label": "SYSREG_DRCG",
+          "pmucal": [
+            "hsi0_cmu_init",
+            "BUS_COMPONENT_DRCG_EN"
+          ]
+        }
+      ]
+    },
+    "L4": {
+      "plan_steps": [
+        "5.00"
+      ],
+      "reads": [
+        {
+          "label": "DWC3_GSNPSID",
+          "base": "DWC3",
+          "define": [
+            "dwc3_core_h",
+            "DWC3_GSNPSID"
+          ]
+        }
+      ],
+      "ids": {
+        "mask": "DWC3_GSNPSID_MASK",
+        "accept": [
+          "DWC3_IP",
+          "DWC31_IP"
+        ],
+        "header": "dwc3_core_h",
+        "why": "core.h: GSNPSID upper half is the IP id, 0x5533 DWC3 or 0x3331 DWC31/32 (dwc3_core_is_valid; NAT-041 usbmon_init checks the same two); anything else = no DWC3 answered"
+      }
+    },
+    "L5": {
+      "plan_steps": [
+        "1.02",
+        "1.03",
+        "1.04",
+        "1.06",
+        "2.10",
+        "2.11",
+        "2.12",
+        "2.13",
+        "4.05",
+        "4.06",
+        "3.01",
+        "3.02",
+        "3.03",
+        "3.04",
+        "3.05",
+        "3.06",
+        "3.07",
+        "3.08",
+        "3.09",
+        "3.10",
+        "3.11",
+        "3.12",
+        "3.13",
+        "3.14",
+        "3.15",
+        "3.16"
+      ],
+      "isolation": {
+        "base": "PMU",
+        "offset_const": "USB_ISOL_OFFSET",
+        "bit": 0,
+        "vendor_fn": [
+          "usbdrd_c",
+          "exynos_usbdrd_utmi_phy_isol"
+        ],
+        "verify": [
+          {
+            "file": "usbdrd_c",
+            "text": "val = on ? 0 : mask;"
+          },
+          {
+            "file": "usbdrd_c",
+            "text": "pmu_mask = (u32)BIT(pmu_mask);"
+          },
+          {
+            "file": "usb_dtsi",
+            "text": "pmu_mask = <0x0>;"
+          },
+          {
+            "file": "usbdrd_c",
+            "text": "exynos_usbdrd_utmi_phy_isol(&phy_drd->phys[0], 0,"
+          }
+        ],
+        "on_arg": 0
+      },
+      "parts": [
+        {
+          "vendor_fn": [
+            "blkcon_c",
+            "exynos_usbcon_init_link"
+          ],
+          "base": "USBCON",
+          "header": "blkcon_h",
+          "prefix": "USBCON_REG_",
+          "inline_call": {
+            "call": "ready_rewa(cal_info);",
+            "fn": "ready_rewa",
+            "why": "hs_rewa = 1 is set unconditionally in exynos_usbdrd_get_phyinfo (phy-exynos-usbdrd-eusb.c), so the vendor init_link ends with ready_rewa(); the NAT-040 plan did not list it",
+            "verify": [
+              {
+                "file": "usbdrd_c",
+                "text": "phy_drd->usbphy_blkcon_info.hs_rewa = 1;"
+              }
+            ]
+          },
+          "true_conditions": [
+            "cal_info->hs_rewa"
+          ]
+        },
+        {
+          "vendor_fn": [
+            "blkcon_c",
+            "exynos_usbcon_detach_pipe3_phy"
+          ],
+          "base": "USBCON",
+          "header": "blkcon_h",
+          "prefix": "USBCON_REG_",
+          "order_note": "the vendor exynos_usbdrd_utmi_init has this call commented out (SuperSpeed PHY in use); NAT-040 plan 4.05/4.06 keep it for the HS-only bring-up because no SuperSpeed PHY is brought up (U6)",
+          "verify": [
+            {
+              "file": "usbdrd_c",
+              "text": "//exynos_usbcon_detach_pipe3_phy(&phy_drd->usbphy_blkcon_info);"
+            }
+          ]
+        },
+        {
+          "vendor_fn": [
+            "eusb_c",
+            "phy_exynos_eusb_initiate"
+          ],
+          "base": "EUSBCON",
+          "header": "eusbcon_h",
+          "prefix": "EUSBCON_REG_",
+          "drop": [
+            {
+              "from": "} else if ((info->refclk == USBPHY_REFCLK_DIFF_20MHZ)",
+              "to": "/* W/A for yield issue */",
+              "why": "only the 19.2 MHz reference branch applies (plan 3.03/3.04); the other refclk branches are not run"
+            }
+          ],
+          "no_tune": "phy_exynos_eusb_tune() returns at once when the DT gives no tune_param (plan 3.07)",
+          "true_conditions": [
+            "(info->refclk == USBPHY_REFCLK_DIFF_19_2MHZ) || (info->refclk == USBPHY_REFCLK_EXT_19P2MHZ)"
+          ],
+          "ignored_calls": [
+            "phy_exynos_eusb_tune(info)"
+          ]
+        }
+      ],
+      "pre_reads": [
+        {
+          "label": "USBCON_VERSION",
+          "base": "USBCON",
+          "header": "blkcon_h",
+          "name": "USBCON_REG_VERSION",
+          "not_alive": [
+            "0x00000000",
+            "0xffffffff"
+          ],
+          "why": "the vendor header documents the register ([7:0] USB2 PHY id, 0x42 = Synopsys eUSB PHY); all-zero or all-ones means the block does not answer, so no write follows"
+        }
+      ],
+      "final_reads": [
+        {
+          "label": "USBCON_LINKCTRL",
+          "base": "USBCON",
+          "header": "blkcon_h",
+          "name": "USBCON_REG_LINKCTRL"
+        },
+        {
+          "label": "USBCON_LINK_CLKRST",
+          "base": "USBCON",
+          "header": "blkcon_h",
+          "name": "USBCON_REG_LINK_CLKRST"
+        },
+        {
+          "label": "USBCON_UTMI_CTRL",
+          "base": "USBCON",
+          "header": "blkcon_h",
+          "name": "USBCON_REG_UTMI_CTRL"
+        },
+        {
+          "label": "EUSBCON_RST_CTRL",
+          "base": "EUSBCON",
+          "header": "eusbcon_h",
+          "name": "EUSBCON_REG_RST_CTRL"
+        },
+        {
+          "label": "EUSBCON_CMN_CTRL",
+          "base": "EUSBCON",
+          "header": "eusbcon_h",
+          "name": "EUSBCON_REG_CMN_CTRL"
+        }
+      ]
+    }
+  },
+  "usb_rungs": {
+    "L6": {
+      "plan_steps": [
+        "5.01",
+        "5.02",
+        "5.03",
+        "5.04",
+        "5.05",
+        "5.06",
+        "5.07",
+        "5.08",
+        "5.09",
+        "5.11",
+        "5.12",
+        "5.13",
+        "5.14",
+        "5.15"
+      ],
+      "engine": "usbmon_init (NAT-041): core init through RUN_STOP in one call"
+    },
+    "L7": {
+      "plan_steps": [
+        "6.01",
+        "6.02",
+        "6.03",
+        "6.04",
+        "6.05",
+        "6.06",
+        "6.07",
+        "6.08",
+        "6.09",
+        "6.10",
+        "6.11",
+        "6.12",
+        "6.13"
+      ],
+      "engine": "usbmon_poll until the bus reset and CONNECTDONE were seen"
+    },
+    "L8": {
+      "plan_steps": [],
+      "engine": "usbmon_stage/usbmon_text replay and usbmon_poll until the host set the nonce (GET_INFO answered with a boot id the host did not choose)"
+    }
+  },
+  "pmucal_semantics": {
+    "file": "pmucal_rae",
+    "verify": [
+      "if (seq->mask == U32_MAX)",
+      "if (timeout > 200000) {",
+      "udelay(1);",
+      "reg = (reg & ~seq->mask) | (seq->value & seq->mask);"
+    ],
+    "wait_timeout_us": 200000
+  }
+}

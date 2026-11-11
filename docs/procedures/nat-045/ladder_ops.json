@@ -1,0 +1,1531 @@
+{
+ "schema_version": 1,
+ "task": "NAT-045",
+ "pin": "417484173abc2c4fa93e738ea82ad9f2e84911b1",
+ "spec_sha256": "80652b5666d35852d50d0f557a14be98803a30b550a4cd9b823d1d9e35cf2fe8",
+ "plan_steps_covered": [
+  "0.19",
+  "0.20",
+  "0.21",
+  "0.24",
+  "0.25",
+  "0.26",
+  "0.27",
+  "0.28",
+  "0.31",
+  "0.32",
+  "0.33",
+  "2.10",
+  "2.11",
+  "2.12",
+  "2.13",
+  "3.01",
+  "3.02",
+  "3.03",
+  "3.04",
+  "3.05",
+  "3.06",
+  "3.07",
+  "3.08",
+  "3.09",
+  "3.10",
+  "3.11",
+  "3.12",
+  "3.13",
+  "3.14",
+  "3.15",
+  "3.16",
+  "4.05",
+  "4.06"
+ ],
+ "ops_not_in_the_plan": [
+  {
+   "i": 45,
+   "via": "ready_rewa",
+   "kind": "LOAD",
+   "source": "reg = readl(regs_base + USBCON_REG_REWA_CTL)"
+  },
+  {
+   "i": 46,
+   "via": "ready_rewa",
+   "kind": "SET",
+   "source": "((USBCON_REG_REWA_CTL_p) (&reg))->b.hsrewa_en = 0"
+  },
+  {
+   "i": 47,
+   "via": "ready_rewa",
+   "kind": "STORE",
+   "source": "writel(reg, regs_base + USBCON_REG_REWA_CTL)"
+  },
+  {
+   "i": 48,
+   "via": "ready_rewa",
+   "kind": "LOAD",
+   "source": "reg = readl(regs_base + USBCON_REG_HSREWA_CTL)"
+  },
+  {
+   "i": 49,
+   "via": "ready_rewa",
+   "kind": "SET",
+   "source": "((USBCON_REG_HSREWA_CTL_p) (&reg))->b.dpdm_mon_sel = 1 ; ((USBCON_REG_HSREWA_CTL_p) (&reg))->b.dig_bypass_con_en = 0"
+  },
+  {
+   "i": 50,
+   "via": "ready_rewa",
+   "kind": "STORE",
+   "source": "writel(reg, regs_base + USBCON_REG_HSREWA_CTL)"
+  },
+  {
+   "i": 51,
+   "via": "ready_rewa",
+   "kind": "CONST",
+   "source": "reg = 0xFF00"
+  },
+  {
+   "i": 52,
+   "via": "ready_rewa",
+   "kind": "STORE",
+   "source": "writel(reg, regs_base + USBCON_REG_HSREWA_REFTO)"
+  },
+  {
+   "i": 53,
+   "via": "ready_rewa",
+   "kind": "CONST",
+   "source": "reg = 0x1"
+  },
+  {
+   "i": 54,
+   "via": "ready_rewa",
+   "kind": "STORE",
+   "source": "writel(reg, regs_base + USBCON_REG_HSREWA_HSTK)"
+  },
+  {
+   "i": 55,
+   "via": "ready_rewa",
+   "kind": "LOAD",
+   "source": "reg = readl(regs_base + USBCON_REG_HSREWA_INTR)"
+  },
+  {
+   "i": 56,
+   "via": "ready_rewa",
+   "kind": "SET",
+   "source": "((USBCON_REG_HSREWA_INTR_p) (&reg))->b.wakeup_req_mask = 1 ; ((USBCON_REG_HSREWA_INTR_p) (&reg))->b.timeout_intr_mask = 1 ; ((USBCON_REG_HSREWA_INTR_p) (&reg))->b.event_intr_mask = 1 ; ((USBCON_REG_HSREWA_INTR_p) (&reg))->b.wakeup_intr_mask = 1"
+  },
+  {
+   "i": 57,
+   "via": "ready_rewa",
+   "kind": "STORE",
+   "source": "writel(reg, regs_base + USBCON_REG_HSREWA_INTR)"
+  },
+  {
+   "i": 58,
+   "via": "ready_rewa",
+   "kind": "LOAD",
+   "source": "reg = readl(regs_base + USBCON_REG_HSREWA_INT1_EVNT_MSK)"
+  },
+  {
+   "i": 59,
+   "via": "ready_rewa",
+   "kind": "SET",
+   "source": "((USBCON_REG_HSREWA_INT1_EVNT_MSK_p) (&reg))->b.err_sus_mask = 1 ; ((USBCON_REG_HSREWA_INT1_EVNT_MSK_p) (&reg))->b.err_dev_k_mask = 1 ; ((USBCON_REG_HSREWA_INT1_EVNT_MSK_p) (&reg))->b.discon_mask = 1 ; ((USBCON_REG_HSREWA_INT1_EVNT_MSK_p) (&reg))->b.bypass_dis_mask = 1 ; ((USBCON_REG_HSREWA_INT1_EVNT_MSK_p) (&reg))->b.ret_dis_mask = 1 ; ((USBCON_REG_HSREWA_INT1_EVNT_MSK_p) (&reg))->b.ret_en_mask = 1"
+  },
+  {
+   "i": 60,
+   "via": "ready_rewa",
+   "kind": "STORE",
+   "source": "writel(reg, regs_base + USBCON_REG_HSREWA_INT1_EVNT_MSK)"
+  }
+ ],
+ "bases": {
+  "PMU": "0x12860000",
+  "CMU_HSI0": "0x17800000",
+  "SYSREG_HSI0": "0x17820000",
+  "CMU_TOP": "0x22b20000",
+  "USBCON": "0x178a0000",
+  "EUSBCON": "0x178b0000",
+  "DWC3": "0x17900000"
+ },
+ "ops": [
+  {
+   "i": 0,
+   "rung": 1,
+   "kind": "RD",
+   "label": "PD_CONFIG",
+   "plan": [
+    "0.19"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"HSI0_CONFIGURATION\", 0x12860000, 0x2000, (0x1 << 0), (0x1 << 0), 0, 0, 0xffffffff, 0)",
+   "addr": "0x12862000"
+  },
+  {
+   "i": 1,
+   "rung": 1,
+   "kind": "RD",
+   "label": "PD_STATUS",
+   "plan": [
+    "0.19"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WAIT, \"HSI0_STATUS\", 0x12860000, 0x2004, (0x1 << 0), (0x1 << 0), 0, 0, 0xffffffff, 0)",
+   "addr": "0x12862004"
+  },
+  {
+   "i": 2,
+   "rung": 2,
+   "kind": "RD",
+   "label": "TOP_MUX",
+   "plan": [
+    "0.08",
+    "0.09",
+    "0.10"
+   ],
+   "source": "SFR(CMU_TOP_CLK_CON_MUX_CLKCMU_HSI0_USB32DRD, 0x10c8, CMU_TOP)",
+   "addr": "0x22b210c8"
+  },
+  {
+   "i": 3,
+   "rung": 2,
+   "kind": "RD",
+   "label": "TOP_GATE",
+   "plan": [
+    "0.08",
+    "0.09",
+    "0.10"
+   ],
+   "source": "SFR(CMU_TOP_CLK_CON_GAT_GATE_CLKCMU_HSI0_USB32DRD, 0x20c4, CMU_TOP)",
+   "addr": "0x22b220c4"
+  },
+  {
+   "i": 4,
+   "rung": 2,
+   "kind": "RD",
+   "label": "TOP_DIV",
+   "plan": [
+    "0.08",
+    "0.09",
+    "0.10"
+   ],
+   "source": "SFR(CMU_TOP_CLK_CON_DIV_CLKCMU_HSI0_USB32DRD, 0x18a8, CMU_TOP)",
+   "addr": "0x22b218a8"
+  },
+  {
+   "i": 5,
+   "rung": 3,
+   "kind": "WRM",
+   "label": "HSI0_CONFIGURATION",
+   "plan": [
+    "0.20"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"HSI0_CONFIGURATION\", 0x12860000, 0x2000, (0x1 << 0), (0x1 << 0), 0, 0, 0xffffffff, 0)",
+   "addr": "0x12862000",
+   "mask": "0x00000001",
+   "val": "0x00000001"
+  },
+  {
+   "i": 6,
+   "rung": 3,
+   "kind": "WAIT",
+   "label": "HSI0_STATUS",
+   "plan": [
+    "0.21"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WAIT, \"HSI0_STATUS\", 0x12860000, 0x2004, (0x1 << 0), (0x1 << 0), 0, 0, 0xffffffff, 0)",
+   "addr": "0x12862004",
+   "mask": "0x00000001",
+   "val": "0x00000001"
+  },
+  {
+   "i": 7,
+   "rung": 3,
+   "kind": "WRM",
+   "label": "CLK_CON_MUX_CLK_HSI0_NOC",
+   "plan": [
+    "0.24"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"CLK_CON_MUX_CLK_HSI0_NOC\", 0x17800000, 0x1000, (0x1 << 4), (0x0 << 4), 0, 0, 0xffffffff, 0)",
+   "addr": "0x17801000",
+   "mask": "0x00000010",
+   "val": "0x00000000"
+  },
+  {
+   "i": 8,
+   "rung": 3,
+   "kind": "WRM",
+   "label": "CLK_CON_MUX_CLK_HSI0_RTCCLK",
+   "plan": [
+    "0.25"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"CLK_CON_MUX_CLK_HSI0_RTCCLK\", 0x17800000, 0x1004, (0x1 << 4), (0x0 << 4), 0, 0, 0xffffffff, 0)",
+   "addr": "0x17801004",
+   "mask": "0x00000010",
+   "val": "0x00000000"
+  },
+  {
+   "i": 9,
+   "rung": 3,
+   "kind": "WRM",
+   "label": "CLK_CON_MUX_CLK_HSI0_USB32DRD",
+   "plan": [
+    "0.26"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"CLK_CON_MUX_CLK_HSI0_USB32DRD\", 0x17800000, 0x1008, (0x1 << 4), (0x1 << 4), 0, 0, 0xffffffff, 0)",
+   "addr": "0x17801008",
+   "mask": "0x00000010",
+   "val": "0x00000010"
+  },
+  {
+   "i": 10,
+   "rung": 3,
+   "kind": "WRM",
+   "label": "CLK_CON_DIV_CLK_HSI0_EUSB",
+   "plan": [
+    "0.27"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"CLK_CON_DIV_CLK_HSI0_EUSB\", 0x17800000, 0x1800, (0x1f << 0), (0x1 << 0), 0, 0, 0xffffffff, 0)",
+   "addr": "0x17801800",
+   "mask": "0x0000001f",
+   "val": "0x00000001"
+  },
+  {
+   "i": 11,
+   "rung": 3,
+   "kind": "WRM",
+   "label": "PLL_CON0_MUX_CLKCMU_HSI0_NOC_USER",
+   "plan": [
+    "0.28"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"PLL_CON0_MUX_CLKCMU_HSI0_NOC_USER\", 0x17800000, 0x0630, (0x1 << 4), (0x1 << 4), 0, 0, 0xffffffff, 0)",
+   "addr": "0x17800630",
+   "mask": "0x00000010",
+   "val": "0x00000010"
+  },
+  {
+   "i": 12,
+   "rung": 3,
+   "kind": "WRM",
+   "label": "PLL_CON0_MUX_CLKCMU_HSI0_USB32DRD_USER",
+   "plan": [
+    "0.31"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"PLL_CON0_MUX_CLKCMU_HSI0_USB32DRD_USER\", 0x17800000, 0x0640, (0x1 << 4), (0x1 << 4), 0, 0, 0xffffffff, 0)",
+   "addr": "0x17800640",
+   "mask": "0x00000010",
+   "val": "0x00000010"
+  },
+  {
+   "i": 13,
+   "rung": 3,
+   "kind": "WRM",
+   "label": "HSI0_CONTROLLER_OPTION0_CMU_CTRL",
+   "plan": [
+    "0.32"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"HSI0_CONTROLLER_OPTION0_CMU_CTRL\", 0x17800000, 0x0800, (0xff << 24), (0xf1 << 24), 0, 0, 0xffffffff, 0)",
+   "addr": "0x17800800",
+   "mask": "0xff000000",
+   "val": "0xf1000000"
+  },
+  {
+   "i": 14,
+   "rung": 3,
+   "kind": "WRP",
+   "label": "BUS_COMPONENT_DRCG_EN",
+   "plan": [
+    "0.33"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"BUS_COMPONENT_DRCG_EN\", 0x17820000, 0x0104, (0xffffffff << 0), (0xffffffff << 0), 0, 0, 0xffffffff, 0)",
+   "addr": "0x17820104",
+   "mask": "0xffffffff",
+   "val": "0xffffffff"
+  },
+  {
+   "i": 15,
+   "rung": 3,
+   "kind": "RD",
+   "label": "HSI0_USB32DRD_MUX",
+   "plan": [
+    "0.02",
+    "0.15",
+    "0.16",
+    "0.20",
+    "0.21",
+    "0.24",
+    "0.25",
+    "0.26",
+    "0.27",
+    "0.28",
+    "0.31",
+    "0.32",
+    "0.33"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"CLK_CON_MUX_CLK_HSI0_USB32DRD\", 0x17800000, 0x1008, (0x1 << 4), (0x1 << 4), 0, 0, 0xffffffff, 0)",
+   "addr": "0x17801008"
+  },
+  {
+   "i": 16,
+   "rung": 3,
+   "kind": "RD",
+   "label": "HSI0_EUSB_DIV",
+   "plan": [
+    "0.02",
+    "0.15",
+    "0.16",
+    "0.20",
+    "0.21",
+    "0.24",
+    "0.25",
+    "0.26",
+    "0.27",
+    "0.28",
+    "0.31",
+    "0.32",
+    "0.33"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"CLK_CON_DIV_CLK_HSI0_EUSB\", 0x17800000, 0x1800, (0x1f << 0), (0x1 << 0), 0, 0, 0xffffffff, 0)",
+   "addr": "0x17801800"
+  },
+  {
+   "i": 17,
+   "rung": 3,
+   "kind": "RD",
+   "label": "HSI0_USB32DRD_USER",
+   "plan": [
+    "0.02",
+    "0.15",
+    "0.16",
+    "0.20",
+    "0.21",
+    "0.24",
+    "0.25",
+    "0.26",
+    "0.27",
+    "0.28",
+    "0.31",
+    "0.32",
+    "0.33"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"PLL_CON0_MUX_CLKCMU_HSI0_USB32DRD_USER\", 0x17800000, 0x0640, (0x1 << 4), (0x1 << 4), 0, 0, 0xffffffff, 0)",
+   "addr": "0x17800640"
+  },
+  {
+   "i": 18,
+   "rung": 3,
+   "kind": "RD",
+   "label": "HSI0_NOC_USER",
+   "plan": [
+    "0.02",
+    "0.15",
+    "0.16",
+    "0.20",
+    "0.21",
+    "0.24",
+    "0.25",
+    "0.26",
+    "0.27",
+    "0.28",
+    "0.31",
+    "0.32",
+    "0.33"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"PLL_CON0_MUX_CLKCMU_HSI0_NOC_USER\", 0x17800000, 0x0630, (0x1 << 4), (0x1 << 4), 0, 0, 0xffffffff, 0)",
+   "addr": "0x17800630"
+  },
+  {
+   "i": 19,
+   "rung": 3,
+   "kind": "RD",
+   "label": "HSI0_OPTION0",
+   "plan": [
+    "0.02",
+    "0.15",
+    "0.16",
+    "0.20",
+    "0.21",
+    "0.24",
+    "0.25",
+    "0.26",
+    "0.27",
+    "0.28",
+    "0.31",
+    "0.32",
+    "0.33"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"HSI0_CONTROLLER_OPTION0_CMU_CTRL\", 0x17800000, 0x0800, (0xff << 24), (0xf1 << 24), 0, 0, 0xffffffff, 0)",
+   "addr": "0x17800800"
+  },
+  {
+   "i": 20,
+   "rung": 3,
+   "kind": "RD",
+   "label": "QCH_LINK",
+   "plan": [
+    "0.02",
+    "0.15",
+    "0.16",
+    "0.20",
+    "0.21",
+    "0.24",
+    "0.25",
+    "0.26",
+    "0.27",
+    "0.28",
+    "0.31",
+    "0.32",
+    "0.33"
+   ],
+   "source": "SFR(CMU_HSI0_QCH_CON_USB32DRD_QCH_S_LINK, 0x305c, CMU_HSI0)",
+   "addr": "0x1780305c"
+  },
+  {
+   "i": 21,
+   "rung": 3,
+   "kind": "RD",
+   "label": "QCH_CTRL",
+   "plan": [
+    "0.02",
+    "0.15",
+    "0.16",
+    "0.20",
+    "0.21",
+    "0.24",
+    "0.25",
+    "0.26",
+    "0.27",
+    "0.28",
+    "0.31",
+    "0.32",
+    "0.33"
+   ],
+   "source": "SFR(CMU_HSI0_QCH_CON_USB32DRD_QCH_S_CTRL, 0x3054, CMU_HSI0)",
+   "addr": "0x17803054"
+  },
+  {
+   "i": 22,
+   "rung": 3,
+   "kind": "RD",
+   "label": "QCH_EUSBCTL",
+   "plan": [
+    "0.02",
+    "0.15",
+    "0.16",
+    "0.20",
+    "0.21",
+    "0.24",
+    "0.25",
+    "0.26",
+    "0.27",
+    "0.28",
+    "0.31",
+    "0.32",
+    "0.33"
+   ],
+   "source": "SFR(CMU_HSI0_QCH_CON_USB32DRD_QCH_S_EUSBCTL, 0x3058, CMU_HSI0)",
+   "addr": "0x17803058"
+  },
+  {
+   "i": 23,
+   "rung": 3,
+   "kind": "RD",
+   "label": "QCH_EUSBPHY",
+   "plan": [
+    "0.02",
+    "0.15",
+    "0.16",
+    "0.20",
+    "0.21",
+    "0.24",
+    "0.25",
+    "0.26",
+    "0.27",
+    "0.28",
+    "0.31",
+    "0.32",
+    "0.33"
+   ],
+   "source": "SFR(CMU_HSI0_QCH_CON_USB32DRD_QCH_S_EUSBPHY, 0x300c, CMU_HSI0)",
+   "addr": "0x1780300c"
+  },
+  {
+   "i": 24,
+   "rung": 3,
+   "kind": "RD",
+   "label": "QCH_SUBCTRL",
+   "plan": [
+    "0.02",
+    "0.15",
+    "0.16",
+    "0.20",
+    "0.21",
+    "0.24",
+    "0.25",
+    "0.26",
+    "0.27",
+    "0.28",
+    "0.31",
+    "0.32",
+    "0.33"
+   ],
+   "source": "SFR(CMU_HSI0_QCH_CON_USB32DRD_QCH_S_SUBCTRL, 0x3060, CMU_HSI0)",
+   "addr": "0x17803060"
+  },
+  {
+   "i": 25,
+   "rung": 3,
+   "kind": "RD",
+   "label": "SYSREG_DRCG",
+   "plan": [
+    "0.02",
+    "0.15",
+    "0.16",
+    "0.20",
+    "0.21",
+    "0.24",
+    "0.25",
+    "0.26",
+    "0.27",
+    "0.28",
+    "0.31",
+    "0.32",
+    "0.33"
+   ],
+   "source": "PMUCAL_SEQ_DESC(PMUCAL_WRITE, \"BUS_COMPONENT_DRCG_EN\", 0x17820000, 0x0104, (0xffffffff << 0), (0xffffffff << 0), 0, 0, 0xffffffff, 0)",
+   "addr": "0x17820104"
+  },
+  {
+   "i": 26,
+   "rung": 4,
+   "kind": "RD",
+   "label": "DWC3_GSNPSID",
+   "plan": [
+    "5.00"
+   ],
+   "source": "#define DWC3_GSNPSID 0xc120",
+   "addr": "0x1790c120"
+  },
+  {
+   "i": 27,
+   "rung": 5,
+   "kind": "RD",
+   "label": "USBCON_VERSION",
+   "plan": [],
+   "source": "#define USBCON_REG_VERSION 0x0",
+   "addr": "0x178a0000"
+  },
+  {
+   "i": 28,
+   "rung": 5,
+   "kind": "WRM",
+   "label": "PHY_ISOLATION",
+   "plan": [
+    "1.02"
+   ],
+   "source": "regmap_update_bits(reg_pmu, pmu_offset, mask, val) with val = on ? 0 : mask, on = 0",
+   "addr": "0x1286061c",
+   "mask": "0x00000001",
+   "val": "0x00000001"
+  },
+  {
+   "i": 29,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "USBCON_REG_LINKCTRL",
+   "plan": [],
+   "source": "reg = readl(regs_base + USBCON_REG_LINKCTRL)",
+   "addr": "0x178a0004",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 30,
+   "rung": 5,
+   "kind": "SET",
+   "label": "dis_id0_qact+dis_bvalid_qact+dis_vbusvalid_qact+dis_linkgate_qact+force_qact",
+   "plan": [
+    "2.10"
+   ],
+   "source": "((USBCON_REG_LINKCTRL_p) (&reg))->b.dis_id0_qact = 1 ; ((USBCON_REG_LINKCTRL_p) (&reg))->b.dis_bvalid_qact = 1 ; ((USBCON_REG_LINKCTRL_p) (&reg))->b.dis_vbusvalid_qact = 1 ; ((USBCON_REG_LINKCTRL_p) (&reg))->b.dis_linkgate_qact = 1 ; ((USBCON_REG_LINKCTRL_p) (&reg))->b.force_qact = 0",
+   "mask": "0x00001f00",
+   "val": "0x00001e00",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 31,
+   "rung": 5,
+   "kind": "DELAY",
+   "label": "DELAY",
+   "plan": [],
+   "source": "udelay(500)",
+   "val": "0x000001f4",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 32,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "USBCON_REG_LINKCTRL",
+   "plan": [],
+   "source": "writel(reg, regs_base + USBCON_REG_LINKCTRL)",
+   "addr": "0x178a0004",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 33,
+   "rung": 5,
+   "kind": "DELAY",
+   "label": "DELAY",
+   "plan": [],
+   "source": "udelay(500)",
+   "val": "0x000001f4",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 34,
+   "rung": 5,
+   "kind": "SET",
+   "label": "force_qact+bus_filter_bypass+sel_sof",
+   "plan": [
+    "2.11"
+   ],
+   "source": "((USBCON_REG_LINKCTRL_p) (&reg))->b.force_qact = 1 ; ((USBCON_REG_LINKCTRL_p) (&reg))->b.bus_filter_bypass = 0xf ; ((USBCON_REG_LINKCTRL_p) (&reg))->b.sel_sof = 0x1",
+   "mask": "0x003001f0",
+   "val": "0x001001f0",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 35,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "USBCON_REG_LINKCTRL",
+   "plan": [],
+   "source": "writel(reg, regs_base + USBCON_REG_LINKCTRL)",
+   "addr": "0x178a0004",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 36,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "USBCON_REG_LINK_CLKRST",
+   "plan": [],
+   "source": "reg = readl(regs_base + USBCON_REG_LINK_CLKRST)",
+   "addr": "0x178a000c",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 37,
+   "rung": 5,
+   "kind": "SET",
+   "label": "link_sw_rst",
+   "plan": [
+    "2.12"
+   ],
+   "source": "((USBCON_REG_LINK_CLKRST_p) (&reg))->b.link_sw_rst = 1",
+   "mask": "0x00000001",
+   "val": "0x00000001",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 38,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "USBCON_REG_LINK_CLKRST",
+   "plan": [],
+   "source": "writel(reg, regs_base + USBCON_REG_LINK_CLKRST)",
+   "addr": "0x178a000c",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 39,
+   "rung": 5,
+   "kind": "DELAY",
+   "label": "DELAY",
+   "plan": [],
+   "source": "udelay(10)",
+   "val": "0x0000000a",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 40,
+   "rung": 5,
+   "kind": "SET",
+   "label": "link_sw_rst",
+   "plan": [],
+   "source": "((USBCON_REG_LINK_CLKRST_p) (&reg))->b.link_sw_rst = 0",
+   "mask": "0x00000001",
+   "val": "0x00000000",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 41,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "USBCON_REG_LINK_CLKRST",
+   "plan": [],
+   "source": "writel(reg, regs_base + USBCON_REG_LINK_CLKRST)",
+   "addr": "0x178a000c",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 42,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "USBCON_REG_UTMI_CTRL",
+   "plan": [],
+   "source": "reg = readl(regs_base + USBCON_REG_UTMI_CTRL)",
+   "addr": "0x178a0010",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 43,
+   "rung": 5,
+   "kind": "SET",
+   "label": "force_bvalid+force_vbusvalid",
+   "plan": [
+    "2.13"
+   ],
+   "source": "((USBCON_REG_UTMI_CTRL_p) (&reg))->b.force_bvalid = 1 ; ((USBCON_REG_UTMI_CTRL_p) (&reg))->b.force_vbusvalid = 1",
+   "mask": "0x00000003",
+   "val": "0x00000003",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 44,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "USBCON_REG_UTMI_CTRL",
+   "plan": [],
+   "source": "writel(reg, regs_base + USBCON_REG_UTMI_CTRL)",
+   "addr": "0x178a0010",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link"
+  },
+  {
+   "i": 45,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "USBCON_REG_REWA_CTL",
+   "plan": [],
+   "source": "reg = readl(regs_base + USBCON_REG_REWA_CTL)",
+   "addr": "0x178a0050",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 46,
+   "rung": 5,
+   "kind": "SET",
+   "label": "hsrewa_en",
+   "plan": [],
+   "source": "((USBCON_REG_REWA_CTL_p) (&reg))->b.hsrewa_en = 0",
+   "mask": "0x00000001",
+   "val": "0x00000000",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 47,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "USBCON_REG_REWA_CTL",
+   "plan": [],
+   "source": "writel(reg, regs_base + USBCON_REG_REWA_CTL)",
+   "addr": "0x178a0050",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 48,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "USBCON_REG_HSREWA_CTL",
+   "plan": [],
+   "source": "reg = readl(regs_base + USBCON_REG_HSREWA_CTL)",
+   "addr": "0x178a0058",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 49,
+   "rung": 5,
+   "kind": "SET",
+   "label": "dpdm_mon_sel+dig_bypass_con_en",
+   "plan": [],
+   "source": "((USBCON_REG_HSREWA_CTL_p) (&reg))->b.dpdm_mon_sel = 1 ; ((USBCON_REG_HSREWA_CTL_p) (&reg))->b.dig_bypass_con_en = 0",
+   "mask": "0x11000000",
+   "val": "0x01000000",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 50,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "USBCON_REG_HSREWA_CTL",
+   "plan": [],
+   "source": "writel(reg, regs_base + USBCON_REG_HSREWA_CTL)",
+   "addr": "0x178a0058",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 51,
+   "rung": 5,
+   "kind": "CONST",
+   "label": "CONST",
+   "plan": [],
+   "source": "reg = 0xFF00",
+   "val": "0x0000ff00",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 52,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "USBCON_REG_HSREWA_REFTO",
+   "plan": [],
+   "source": "writel(reg, regs_base + USBCON_REG_HSREWA_REFTO)",
+   "addr": "0x178a005c",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 53,
+   "rung": 5,
+   "kind": "CONST",
+   "label": "CONST",
+   "plan": [],
+   "source": "reg = 0x1",
+   "val": "0x00000001",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 54,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "USBCON_REG_HSREWA_HSTK",
+   "plan": [],
+   "source": "writel(reg, regs_base + USBCON_REG_HSREWA_HSTK)",
+   "addr": "0x178a0060",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 55,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "USBCON_REG_HSREWA_INTR",
+   "plan": [],
+   "source": "reg = readl(regs_base + USBCON_REG_HSREWA_INTR)",
+   "addr": "0x178a0054",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 56,
+   "rung": 5,
+   "kind": "SET",
+   "label": "wakeup_req_mask+timeout_intr_mask+event_intr_mask+wakeup_intr_mask",
+   "plan": [],
+   "source": "((USBCON_REG_HSREWA_INTR_p) (&reg))->b.wakeup_req_mask = 1 ; ((USBCON_REG_HSREWA_INTR_p) (&reg))->b.timeout_intr_mask = 1 ; ((USBCON_REG_HSREWA_INTR_p) (&reg))->b.event_intr_mask = 1 ; ((USBCON_REG_HSREWA_INTR_p) (&reg))->b.wakeup_intr_mask = 1",
+   "mask": "0x00001111",
+   "val": "0x00001111",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 57,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "USBCON_REG_HSREWA_INTR",
+   "plan": [],
+   "source": "writel(reg, regs_base + USBCON_REG_HSREWA_INTR)",
+   "addr": "0x178a0054",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 58,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "USBCON_REG_HSREWA_INT1_EVNT_MSK",
+   "plan": [],
+   "source": "reg = readl(regs_base + USBCON_REG_HSREWA_INT1_EVNT_MSK)",
+   "addr": "0x178a006c",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 59,
+   "rung": 5,
+   "kind": "SET",
+   "label": "err_sus_mask+err_dev_k_mask+discon_mask+bypass_dis_mask+ret_dis_mask+ret_en_mask",
+   "plan": [],
+   "source": "((USBCON_REG_HSREWA_INT1_EVNT_MSK_p) (&reg))->b.err_sus_mask = 1 ; ((USBCON_REG_HSREWA_INT1_EVNT_MSK_p) (&reg))->b.err_dev_k_mask = 1 ; ((USBCON_REG_HSREWA_INT1_EVNT_MSK_p) (&reg))->b.discon_mask = 1 ; ((USBCON_REG_HSREWA_INT1_EVNT_MSK_p) (&reg))->b.bypass_dis_mask = 1 ; ((USBCON_REG_HSREWA_INT1_EVNT_MSK_p) (&reg))->b.ret_dis_mask = 1 ; ((USBCON_REG_HSREWA_INT1_EVNT_MSK_p) (&reg))->b.ret_en_mask = 1",
+   "mask": "0x00070007",
+   "val": "0x00070007",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 60,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "USBCON_REG_HSREWA_INT1_EVNT_MSK",
+   "plan": [],
+   "source": "writel(reg, regs_base + USBCON_REG_HSREWA_INT1_EVNT_MSK)",
+   "addr": "0x178a006c",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_init_link",
+   "via": "ready_rewa"
+  },
+  {
+   "i": 61,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "USBCON_REG_LINKCTRL",
+   "plan": [],
+   "source": "reg = readl(regs_base + USBCON_REG_LINKCTRL)",
+   "addr": "0x178a0004",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_detach_pipe3_phy"
+  },
+  {
+   "i": 62,
+   "rung": 5,
+   "kind": "SET",
+   "label": "force_pipe_en+force_phystatus+force_rxelecidle",
+   "plan": [
+    "4.05"
+   ],
+   "source": "((USBCON_REG_LINKCTRL_p) (&reg))->b.force_pipe_en = 1 ; ((USBCON_REG_LINKCTRL_p) (&reg))->b.force_phystatus = 0 ; ((USBCON_REG_LINKCTRL_p) (&reg))->b.force_rxelecidle = 1",
+   "mask": "0x00070000",
+   "val": "0x00050000",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_detach_pipe3_phy"
+  },
+  {
+   "i": 63,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "USBCON_REG_LINKCTRL",
+   "plan": [],
+   "source": "writel(reg, regs_base + USBCON_REG_LINKCTRL)",
+   "addr": "0x178a0004",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_detach_pipe3_phy"
+  },
+  {
+   "i": 64,
+   "rung": 5,
+   "kind": "RDLOG",
+   "label": "USBCON_REG_LINKCTRL",
+   "plan": [],
+   "source": "pr_info(\"%s %d USBCON_REG_LINKCTRL: 0x %08x\\n\", __func__, __LINE__, readl(regs_base + USBCON_REG_LINKCTRL))",
+   "addr": "0x178a0004",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_detach_pipe3_phy"
+  },
+  {
+   "i": 65,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "USBCON_REG_LINK_CLKRST",
+   "plan": [],
+   "source": "reg = readl(regs_base + USBCON_REG_LINK_CLKRST)",
+   "addr": "0x178a000c",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_detach_pipe3_phy"
+  },
+  {
+   "i": 66,
+   "rung": 5,
+   "kind": "SET",
+   "label": "link_pclk_sel",
+   "plan": [
+    "4.06"
+   ],
+   "source": "((USBCON_REG_LINK_CLKRST_p) (&reg))->b.link_pclk_sel = 0",
+   "mask": "0x00000002",
+   "val": "0x00000000",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_detach_pipe3_phy"
+  },
+  {
+   "i": 67,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "USBCON_REG_LINK_CLKRST",
+   "plan": [],
+   "source": "writel(reg, regs_base + USBCON_REG_LINK_CLKRST)",
+   "addr": "0x178a000c",
+   "fn": "drivers/phy/samsung/exynos-usb-blkcon.c::exynos_usbcon_detach_pipe3_phy"
+  },
+  {
+   "i": 68,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "EUSBCON_REG_RST_CTRL",
+   "plan": [],
+   "source": "reg = readl(base + EUSBCON_REG_RST_CTRL)",
+   "addr": "0x178b0000",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 69,
+   "rung": 5,
+   "kind": "SET",
+   "label": "phy_reset+phy_reset_ovrd_en+utmi_port_reset+utmi_port_reset_ovrd_en",
+   "plan": [
+    "3.01"
+   ],
+   "source": "((EUSBPHY_REG_RST_CTRL_p) (&reg))->b.phy_reset = 1 ; ((EUSBPHY_REG_RST_CTRL_p) (&reg))->b.phy_reset_ovrd_en = 1 ; ((EUSBPHY_REG_RST_CTRL_p) (&reg))->b.utmi_port_reset = 1 ; ((EUSBPHY_REG_RST_CTRL_p) (&reg))->b.utmi_port_reset_ovrd_en = 1",
+   "mask": "0x00000033",
+   "val": "0x00000033",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 70,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "EUSBCON_REG_RST_CTRL",
+   "plan": [],
+   "source": "writel(reg, base + EUSBCON_REG_RST_CTRL)",
+   "addr": "0x178b0000",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 71,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "EUSBCON_REG_CMN_CTRL",
+   "plan": [],
+   "source": "reg = readl(base + EUSBCON_REG_CMN_CTRL)",
+   "addr": "0x178b0004",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 72,
+   "rung": 5,
+   "kind": "SET",
+   "label": "phy_cfg_rptr_mode+ref_freq_sel",
+   "plan": [
+    "3.02",
+    "3.03"
+   ],
+   "source": "((EUSBPHY_REG_CMN_CTRL_p) (&reg))->b.phy_cfg_rptr_mode = 1 ; ((EUSBPHY_REG_CMN_CTRL_p) (&reg))->b.ref_freq_sel = 0",
+   "mask": "0x00000470",
+   "val": "0x00000400",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 73,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "EUSBCON_REG_CMN_CTRL",
+   "plan": [],
+   "source": "writel(reg, base + EUSBCON_REG_CMN_CTRL)",
+   "addr": "0x178b0004",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 74,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "EUSBCON_REG_PLLCFG0",
+   "plan": [],
+   "source": "reg = readl(base + EUSBCON_REG_PLLCFG0)",
+   "addr": "0x178b0008",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 75,
+   "rung": 5,
+   "kind": "SET",
+   "label": "pll_fb_div",
+   "plan": [
+    "3.04"
+   ],
+   "source": "((EUSBPHY_REG_PLLCFG0_p) (&reg))->b.pll_fb_div = 368",
+   "mask": "0x000fff00",
+   "val": "0x00017000",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 76,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "EUSBCON_REG_PLLCFG0",
+   "plan": [],
+   "source": "writel(reg, base + EUSBCON_REG_PLLCFG0)",
+   "addr": "0x178b0008",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 77,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "EUSBCON_REG_PLLCFG1",
+   "plan": [],
+   "source": "reg = readl(base + EUSBCON_REG_PLLCFG1)",
+   "addr": "0x178b000c",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 78,
+   "rung": 5,
+   "kind": "SET",
+   "label": "pll_ref_div",
+   "plan": [],
+   "source": "((EUSBPHY_REG_PLLCFG1_p) (&reg))->b.pll_ref_div = 0",
+   "mask": "0x00000f00",
+   "val": "0x00000000",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 79,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "EUSBCON_REG_PLLCFG1",
+   "plan": [],
+   "source": "writel(reg, base + EUSBCON_REG_PLLCFG1)",
+   "addr": "0x178b000c",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 80,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "EUSBCON_REG_PLLCFG0",
+   "plan": [],
+   "source": "reg = readl(base + EUSBCON_REG_PLLCFG0)",
+   "addr": "0x178b0008",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 81,
+   "rung": 5,
+   "kind": "SET",
+   "label": "pll_cpbias_cntrl",
+   "plan": [
+    "3.05"
+   ],
+   "source": "((EUSBPHY_REG_PLLCFG0_p) (&reg))->b.pll_cpbias_cntrl = 0",
+   "mask": "0x0000007f",
+   "val": "0x00000000",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 82,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "EUSBCON_REG_PLLCFG0",
+   "plan": [],
+   "source": "writel(reg, base + EUSBCON_REG_PLLCFG0)",
+   "addr": "0x178b0008",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 83,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "EUSBCON_REG_TXTUNE",
+   "plan": [],
+   "source": "reg = readl(base + EUSBCON_REG_TXTUNE)",
+   "addr": "0x178b0014",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 84,
+   "rung": 5,
+   "kind": "SET",
+   "label": "fsls_vref_tune",
+   "plan": [
+    "3.06"
+   ],
+   "source": "((EUSBPHY_REG_TXTUNE_p) (&reg))->b.fsls_vref_tune = 0",
+   "mask": "0x00000006",
+   "val": "0x00000000",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 85,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "EUSBCON_REG_TXTUNE",
+   "plan": [],
+   "source": "writel(reg, base + EUSBCON_REG_TXTUNE)",
+   "addr": "0x178b0014",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 86,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "EUSBCON_REG_TESTSE",
+   "plan": [],
+   "source": "reg = readl(base + EUSBCON_REG_TESTSE)",
+   "addr": "0x178b0020",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 87,
+   "rung": 5,
+   "kind": "SET",
+   "label": "test_iddq",
+   "plan": [
+    "3.08"
+   ],
+   "source": "((EUSBPHY_REG_TESTSE_p) (&reg))->b.test_iddq = 0",
+   "mask": "0x00000040",
+   "val": "0x00000000",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 88,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "EUSBCON_REG_TESTSE",
+   "plan": [],
+   "source": "writel(reg, base + EUSBCON_REG_TESTSE)",
+   "addr": "0x178b0020",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 89,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "EUSBCON_REG_CMN_CTRL",
+   "plan": [],
+   "source": "reg = readl(base + EUSBCON_REG_CMN_CTRL)",
+   "addr": "0x178b0004",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 90,
+   "rung": 5,
+   "kind": "SET",
+   "label": "phy_enable",
+   "plan": [
+    "3.09"
+   ],
+   "source": "((EUSBPHY_REG_CMN_CTRL_p) (&reg))->b.phy_enable = 0",
+   "mask": "0x00000001",
+   "val": "0x00000000",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 91,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "EUSBCON_REG_CMN_CTRL",
+   "plan": [],
+   "source": "writel(reg, base + EUSBCON_REG_CMN_CTRL)",
+   "addr": "0x178b0004",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 92,
+   "rung": 5,
+   "kind": "DELAY",
+   "label": "DELAY",
+   "plan": [
+    "3.10"
+   ],
+   "source": "udelay(10)",
+   "val": "0x0000000a",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 93,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "EUSBCON_REG_RST_CTRL",
+   "plan": [],
+   "source": "reg = readl(base + EUSBCON_REG_RST_CTRL)",
+   "addr": "0x178b0000",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 94,
+   "rung": 5,
+   "kind": "SET",
+   "label": "phy_reset",
+   "plan": [
+    "3.11"
+   ],
+   "source": "((EUSBPHY_REG_RST_CTRL_p) (&reg))->b.phy_reset = 0",
+   "mask": "0x00000001",
+   "val": "0x00000000",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 95,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "EUSBCON_REG_RST_CTRL",
+   "plan": [],
+   "source": "writel(reg, base + EUSBCON_REG_RST_CTRL)",
+   "addr": "0x178b0000",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 96,
+   "rung": 5,
+   "kind": "DELAY",
+   "label": "DELAY",
+   "plan": [
+    "3.10"
+   ],
+   "source": "udelay(10)",
+   "val": "0x0000000a",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 97,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "EUSBCON_REG_CMN_CTRL",
+   "plan": [],
+   "source": "reg = readl(base + EUSBCON_REG_CMN_CTRL)",
+   "addr": "0x178b0004",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 98,
+   "rung": 5,
+   "kind": "SET",
+   "label": "phy_enable",
+   "plan": [
+    "3.12"
+   ],
+   "source": "((EUSBPHY_REG_CMN_CTRL_p) (&reg))->b.phy_enable = 1",
+   "mask": "0x00000001",
+   "val": "0x00000001",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 99,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "EUSBCON_REG_CMN_CTRL",
+   "plan": [],
+   "source": "writel(reg, base + EUSBCON_REG_CMN_CTRL)",
+   "addr": "0x178b0004",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 100,
+   "rung": 5,
+   "kind": "DELAY",
+   "label": "DELAY",
+   "plan": [],
+   "source": "udelay(value)",
+   "val": "0x000003e8",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 101,
+   "rung": 5,
+   "kind": "DELAY",
+   "label": "DELAY",
+   "plan": [
+    "3.14"
+   ],
+   "source": "udelay(28)",
+   "val": "0x0000001c",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 102,
+   "rung": 5,
+   "kind": "DELAY",
+   "label": "DELAY",
+   "plan": [
+    "3.15"
+   ],
+   "source": "udelay(2500)",
+   "val": "0x000009c4",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 103,
+   "rung": 5,
+   "kind": "LOAD",
+   "label": "EUSBCON_REG_RST_CTRL",
+   "plan": [],
+   "source": "reg = readl(base + EUSBCON_REG_RST_CTRL)",
+   "addr": "0x178b0000",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 104,
+   "rung": 5,
+   "kind": "SET",
+   "label": "utmi_port_reset+utmi_port_reset_ovrd_en",
+   "plan": [
+    "3.16"
+   ],
+   "source": "((EUSBPHY_REG_RST_CTRL_p) (&reg))->b.utmi_port_reset = 0 ; ((EUSBPHY_REG_RST_CTRL_p) (&reg))->b.utmi_port_reset_ovrd_en = 0",
+   "mask": "0x00000030",
+   "val": "0x00000000",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 105,
+   "rung": 5,
+   "kind": "STORE",
+   "label": "EUSBCON_REG_RST_CTRL",
+   "plan": [],
+   "source": "writel(reg, base + EUSBCON_REG_RST_CTRL)",
+   "addr": "0x178b0000",
+   "fn": "drivers/phy/samsung/phy-exynos-eusb.c::phy_exynos_eusb_initiate"
+  },
+  {
+   "i": 106,
+   "rung": 5,
+   "kind": "RD",
+   "label": "USBCON_LINKCTRL",
+   "plan": [
+    "4.06"
+   ],
+   "source": "#define USBCON_REG_LINKCTRL 0x4",
+   "addr": "0x178a0004"
+  },
+  {
+   "i": 107,
+   "rung": 5,
+   "kind": "RD",
+   "label": "USBCON_LINK_CLKRST",
+   "plan": [
+    "4.06"
+   ],
+   "source": "#define USBCON_REG_LINK_CLKRST 0xc",
+   "addr": "0x178a000c"
+  },
+  {
+   "i": 108,
+   "rung": 5,
+   "kind": "RD",
+   "label": "USBCON_UTMI_CTRL",
+   "plan": [
+    "4.06"
+   ],
+   "source": "#define USBCON_REG_UTMI_CTRL 0x10",
+   "addr": "0x178a0010"
+  },
+  {
+   "i": 109,
+   "rung": 5,
+   "kind": "RD",
+   "label": "EUSBCON_RST_CTRL",
+   "plan": [
+    "4.06"
+   ],
+   "source": "#define EUSBCON_REG_RST_CTRL 0x0",
+   "addr": "0x178b0000"
+  },
+  {
+   "i": 110,
+   "rung": 5,
+   "kind": "RD",
+   "label": "EUSBCON_CMN_CTRL",
+   "plan": [
+    "4.06"
+   ],
+   "source": "#define EUSBCON_REG_CMN_CTRL 0x4",
+   "addr": "0x178b0004"
+  }
+ ]
+}
