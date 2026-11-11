@@ -2,9 +2,9 @@
 
 > Generated from state/lab.json. Use the CLI; do not edit this board or its task cards.
 
-Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-11T16:01:59+00:00.
+Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-11T16:21:15+00:00.
 
-Registry SHA256: `e729d94b70220730606629c2137bd3828eec9477b3538a26ad1fdcea55ceb895`. Run `python3 tools/lab.py board --check` to detect stale files.
+Registry SHA256: `c4b9ef0b300d3f112c206239ddbcfa51c94b5f348a7ceb9e7b57fd88e4f5f1b7`. Run `python3 tools/lab.py board --check` to detect stale files.
 
 [Workflow](docs/planning.md) · [All task details](planning/README.md) · [Machine view](state/board.json) · [Status](STATUS.md)
 
@@ -297,7 +297,7 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 
 | Owner | Task | State | Last heartbeat (UTC) | Report | Progress / next step | Context |
 |---|---|---|---|---|---|---|
-| claude-nat043-20261111-session | NAT-043 | in_progress | 2026-11-11T16:01:41+00:00 | recent | Run 001 of loader-diag-usbmon (decision 0022) done: host collector received 148 frames (146 records, 1 boot, 8 stage records, ladder R/W err=0, HOLD stage=0x40), 0 drops; analyser PASS; stock RECOVERY restored (assess pass), Android verified; native permit closed. Exception frame on hardware (loader-diag-usbmon-fault) not yet run. / Decision 0023 for loader-diag-usbmon-fault (one run, own owner confirmation), then final evidence and task done | — |
+| claude-nat043-20261111-session | NAT-043 | in_progress | 2026-11-11T16:21:12+00:00 | recent | Runs 001 (loader-diag-usbmon, decision 0022) and 002 (loader-diag-usbmon-fault, decision 0023) done: host received 148 and 153 frames by itself, 0 drops, analyser PASS both, run 002 includes the controlled BRK exception frame (ESR 0xf2001234); stock RECOVERY restored and Android verified after each; native permit closed. Evidence written and committed (fa32ec6): docs/procedures/nat-043/evidence.json, outcome pass, make check 214 OK. / task done NAT-043 is refused while native is false (&#x27;Execution scope is not authorized&#x27;); an attempt to open native for bookkeeping only was refused by the auto-mode classifier at 2026-11-11 and not retried. Needs the owner to allow it (permission rule or ! command), then: project permit native true citing decision 0023, task done NAT-043 --evidence docs/procedures/nat-043/evidence.json, project permit native false. | — |
 | claude-nat050-20261111-session | NAT-050 | blocked | 2026-11-11T09:54:07+00:00 | stale | No progress note / Next step not reported | — |
 | claude-nat051-20261111-session | NAT-051 | blocked | 2026-11-11T12:51:53+00:00 | stale | debugfs mounted, regulator and pm_genpd summaries read (pd_hsi0 on; four USB rails enabled), clk_summary read ended with the phone leaving Android into SEC_UPLOAD and restarting by itself (back in ~47 s). Evidence fail recorded in docs/procedures/nat-051/evidence.json / Do not repeat clk_summary; decide in a new task whether clock rates are needed at all | — |
 | claude-takeover-20261110-6c8f | INT-002 | blocked | 2026-11-10T08:46:05+00:00 | stale | ROOT126 provider+036commonPASS MAIN5e1f;024126 is only remaining actualbody/root125running, no provisionalcredit. Runtime002PASS recordonceCLI0 capsule36e1/Misc0fa78;3programcurrentruntime c5bc exactld10+ROOT91clang5/setseg2, frozen4a8e/no loaderreplay. Immutable916index5e23/126ABSENT,035overrides explicit. Runtime001preparationFAIL retained; future3runtimecommits combinewithfinal024only. / Await ROOT125 terminal and ownerfinal024packet for independentactual126/join1042; then fresh minimalcandidate with exactruntimeb6d4/e663/4a8e source/evidence, rootgrantpub/common only. STR037consumer runtimec5bc/index916 delivered; no source/helper/flags changes/no target/common replay or foreignclosures. | branch: team/int-e1s-profile-20261106; worktree: worktrees/int-e1s-profile-20261106; handoff: worktrees/int-history-iokit-20261106/artifacts/integration-gate/handoff.md |
@@ -319,12 +319,6 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 
 ## Recent activity
 
-- 2026-11-11T12:51:53+00:00 · claude-nat051-20261111-session · task.block:NAT-051
-  - NAT-051: debugfs mounted, regulator and pm_genpd summaries read (pd_hsi0 on; four USB rails enabled), clk_summary read ended with the phone leaving Android into SEC_UPLOAD and restarting by itself (back in ~47 s). Evidence fail recorded in docs/procedures/nat-051/evidence.json
-- 2026-11-11T14:12:57+00:00 · claude-nat046-20261111-session · task.resume:NAT-046
-  - NAT-046: in_progress
-- 2026-11-11T14:13:08+00:00 · claude-nat046-20261111-session · task.done:NAT-046
-  - NAT-046: done
 - 2026-11-11T14:13:28+00:00 · claude-nat046-20261111-session · project.permit:native
 - 2026-11-11T14:17:02+00:00 · claude-nat043-20261111-session · task.add:NAT-052
   - NAT-052: pending
@@ -356,6 +350,10 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 - 2026-11-11T15:43:14+00:00 · claude-nat043-20261111-session · project.permit:native
 - 2026-11-11T16:01:41+00:00 · claude-nat043-20261111-session · task.update:NAT-043
   - NAT-043: Run 001 of loader-diag-usbmon (decision 0022) done: host collector received 148 frames (146 records, 1 boot, 8 stage records, ladder R/W err=0, HOLD stage=0x40), 0 drops; analyser PASS; stock RECOVERY restored (assess pass), Android verified; native permit closed. Exception frame on hardware (loader-diag-usbmon-fault) not yet run.
+- 2026-11-11T16:10:19+00:00 · claude-nat043-20261111-session · project.permit:native
+- 2026-11-11T16:12:46+00:00 · claude-nat043-20261111-session · project.permit:native
+- 2026-11-11T16:21:12+00:00 · claude-nat043-20261111-session · task.update:NAT-043
+  - NAT-043: Runs 001 (loader-diag-usbmon, decision 0022) and 002 (loader-diag-usbmon-fault, decision 0023) done: host received 148 and 153 frames by itself, 0 drops, analyser PASS both, run 002 includes the controlled BRK exception frame (ESR 0xf2001234); stock RECOVERY restored and Android verified after each; native permit closed. Evidence written and committed (fa32ec6): docs/procedures/nat-043/evidence.json, outcome pass, make check 214 OK.
 
 Use a unique owner per agent session. Atomically take ready work:
 
