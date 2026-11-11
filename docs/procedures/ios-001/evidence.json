@@ -1,0 +1,35 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T23:17:30+00:00",
+ "commit": "287a2dfa3883b933a1c4af430fb13ff1764b5165",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "tree_state": "ipsw-summary.json and README.md are committed at the recorded commit; the archive and the full inventory are local, gitignored files under artifacts/apple-inputs",
+ "summary": "The iPhone10,3/10,6 iOS 16.5 (20F66) restore archive is present, hashed (SHA-256 c1091c40\u2026d52f2, re-hashed independently of the acquisition record) and accepted by tools/ios/ipsw_inspect.py: build 20F66, iPhone10,3 supported, D22AP identities (Erase, Update), every manifest path present. SHA-256 of the archive and of each restore image, trust cache, the DeviceTree and the kernelcache are in the local inventory and, as hashes of Apple's public files, in the committed sanitized summary. The kernelcache banner is Darwin 22.5.0, xnu-8796.122.4~1, RELEASE_ARM64_T8015: the Darwin release equals the project kernel's, the xnu revision does not (project source base 8796.121.2; the public repository has only 101.5, 121.2 and 141.3), so ABI equality is unknown, not assumed.",
+ "evidence_category": "source-review of an Apple-signed archive's metadata via a host-tested tool. No android-userland or native-device evidence; nothing from the archive ran anywhere. The contents of the disk images are not yet read (no APFS/UDIF reader on the host), so dyld, the shared cache, launchd and SpringBoard are unlocated.",
+ "acceptance": {
+  "1_ipsw_present_and_accepted": "verdict accepted for build 20F66 / iPhone10,3 / d22ap; archive sha256 c1091c401f67e3aa7cdfeb2cc19e6c79be3c957aae4e097a019e9ccea07d52f2; per-member hashes in docs/procedures/ios-001/ipsw-summary.json (committed) and artifacts/apple-inputs/ios-16.5-20F66-inventory.json (local, complete report).",
+  "2_kernel_version_comparison": "recorded in docs/procedures/ios-001/README.md and ipsw-summary.json (comparison_with_project_kernel): Darwin 22.5.0 vs 22.5.0 equal; xnu 8796.122.4~1 vs 8796.121.2 different; arch plain arm64 (cputype 0x0100000c, cpusubtype 0), MH_EXECUTE, 25 load commands.",
+  "3_nothing_apple_in_git": "git tracks only ipsw-summary.json (versions, sizes, hashes of public Apple files); artifacts/ is gitignored (git check-ignore confirms the inventory and the work/ decoded kernelcache are ignored)."
+ },
+ "commands": [
+  {
+   "cmd": "python3 -I tools/ios/ipsw_inspect.py <ipsw> --kernel",
+   "exit": 0,
+   "result": "accepted, banner printed (0.27 s)"
+  },
+  {
+   "cmd": "python3 -I tools/ios/ipsw_inspect.py <ipsw> --kernel --sha256 --json > artifacts/apple-inputs/ios-16.5-20F66-inventory.json",
+   "exit": 0,
+   "result": "accepted, 24 s"
+  }
+ ],
+ "sha256": {
+  "docs/procedures/ios-001/ipsw-summary.json": "e4452f18360ada52558be96e9cdd9a189386eb0c676d11ed3858e63ade7900e0"
+ },
+ "artifacts": [
+  "docs/procedures/ios-001/ipsw-summary.json",
+  "docs/procedures/ios-001/README.md"
+ ]
+}

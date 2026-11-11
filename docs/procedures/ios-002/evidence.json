@@ -1,0 +1,51 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T23:17:00+00:00",
+ "commit": "287a2dfa3883b933a1c4af430fb13ff1764b5165",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "tree_state": "all listed files are committed at the recorded commit",
+ "summary": "tools/ios/ipsw_inspect.py: an offline, read-only IPSW inspector (zipfile + plistlib + a DER reader + the pure-Python LZFSE decoder tools/ios/lzfse_py.py, a port of lzfse/lzfse e634ca58). Five verdicts (accepted, wrong-build, wrong-device, missing-member, not-an-ipsw) with the offending item named; zip-slip and unsafe manifest paths refused; streaming SHA-256 (CRC-checked reads); kernelcache IM4P parse and Darwin banner without decoding the whole image; the report always says compatibility not-assessed. Nothing is extracted. 53 inspector tests on synthetic archives and 14 decoder tests on encoder-made vectors; 25 hand-chosen inspector mutants all killed (one survivor found and fixed on the way).",
+ "evidence_category": "host-test. Synthetic archives carry only the minimal manifest keys; no Apple data is invented or embedded (the test file says so). The decoder was additionally compared byte for byte with the pinned reference C decoder on the real iPhone10,3 16.5 kernelcache (50,888,732 bytes, equal to the IM4P trailer size); that comparison needs the local Apple file and is not repeatable from the repository. The decoder tests are not mutation-tested; the inspector tests are.",
+ "acceptance": {
+  "1_zipfile_plistlib_no_extraction": "inspect() opens the archive with zipfile, parses BuildManifest.plist with plistlib, reports ProductBuildVersion, ProductVersion, SupportedProductTypes, device classes, the paths of OS/Cryptex1,SystemOS/Cryptex1,AppOS, DeviceTree, KernelCache (and restore variants, ramdisk, trust caches); nothing is written to disk (test_unsafe_names_never_reach_the_filesystem); --sha256 hashes members by 1 MiB streaming reads and a corrupted stored member fails the CRC check (test_corrupted_member_data_is_detected_when_hashing).",
+  "2_verdicts": "VERDICTS is exactly the five names (test_verdict_vocabulary_is_exactly_the_five); wrong-build names the found build, wrong-device the supported list or the classes found, missing-member the absent path, not-an-ipsw the unsafe/absent/foreign item; `compatibility` is the constant not-assessed (a mutant that changes it is killed).",
+  "3_synthetic_tests": "tests/test_ipsw_inspect.py: accepted, each rejecting case, zip-slip names (../, nested .., absolute, drive letter, backslash; NUL checked on unsafe_member directly because zipfile itself truncates NULs), unsafe manifest paths, an absent file, a directory, an empty file, a listed-but-absent member, a component with differing per-identity paths (the real D22AP Erase/Update RestoreRamDisk case)."
+ },
+ "commands": [
+  {
+   "cmd": "python3 -m unittest discover -s tests -p test_ipsw_inspect.py",
+   "exit": 0,
+   "result": "Ran 53 tests OK"
+  },
+  {
+   "cmd": "python3 -m unittest discover -s tests -p test_lzfse_py.py",
+   "exit": 0,
+   "result": "Ran 14 tests OK"
+  },
+  {
+   "cmd": "TMPDIR=/home/egor/.cache/nat059-tmp make check",
+   "exit": 0,
+   "result": "Ran 281 tests OK"
+  }
+ ],
+ "sha256": {
+  "tools/ios/ipsw_inspect.py": "a6bc2b9d2d319984f68c391af355258a48cf79d22d2d21edd5af61eeff49ee80",
+  "tools/ios/lzfse_py.py": "e17bda150620d94b5f5754da0b3e8d4a57bcbe91bc728ffb94aceef42825980b",
+  "tests/test_ipsw_inspect.py": "711b9847a8d031e52526882ece1d3fe3034f4628b37cd992a78ce5128f37b9ea",
+  "tests/test_lzfse_py.py": "e7f4476b85f41877cccd6adb3513f1aadd09a38f03bd086682fd133abfe71024",
+  "tests/fixtures/lzfse_vectors.json": "02e4c04a8464238bc1961ee45ae2005f17d4935e19466f325daadff91396cfb3"
+ },
+ "limits": [
+  "The vector fixture was not regenerated after a shrink was attempted: auto mode stopped that command (2026-11-11T23:05Z, reason 'Code from External'); the fixture from the earlier run is used as is (205,158 bytes, six vectors, no 'bvx-' vector from the encoder; that block type is covered by hand-built streams).",
+  "'bvx1' LZFSE blocks are refused by name: the reference encoder never writes them and no sample exists to test against."
+ ],
+ "artifacts": [
+  "tools/ios/ipsw_inspect.py",
+  "tools/ios/lzfse_py.py",
+  "tests/test_ipsw_inspect.py",
+  "tests/test_lzfse_py.py",
+  "tests/fixtures/lzfse_vectors.json"
+ ]
+}

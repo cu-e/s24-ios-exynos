@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-11T22:56:47+00:00",
+  "updated_at": "2026-11-11T23:17:33+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -14332,8 +14332,14 @@
         "Synthetic-archive tests",
         "make check"
       ],
-      "status": "pending",
-      "owner": null
+      "status": "done",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-11T22:58:20+00:00",
+      "last_heartbeat": "2026-11-11T22:58:20+00:00",
+      "updated_at": "2026-11-11T23:17:22+00:00",
+      "evidence": "docs/procedures/ios-002/evidence.json",
+      "evidence_sha256": "937ddfcc8d6f3606addf19fe63d97fdaeb0d7e6b6af8f52d69ec219a0102a69b",
+      "finished_at": "2026-11-11T23:17:22+00:00"
     },
     {
       "id": "IOS-001",
@@ -14355,12 +14361,14 @@
         "Owner downloads the IPSW from Apple's update CDN (licence terms are the owner's responsibility), places it at artifacts/apple-inputs/",
         "Run the IOS-002 inspector; record the summary"
       ],
-      "status": "blocked",
+      "status": "done",
       "owner": "claude-nat065-20261112-ramdisk",
       "started_at": "2026-11-11T22:41:24+00:00",
-      "last_heartbeat": "2026-11-11T22:41:40+00:00",
-      "updated_at": "2026-11-11T22:41:40+00:00",
-      "blocked_reason": "Missing external file: the iPhone X (iPhone10,3/D22AP) iOS 16.5 build 20F66 restore image (*_Restore.ipsw, several GB; Apple publishes it on its update CDN) must be downloaded by the owner into artifacts/apple-inputs/ (git-ignored). It is the only source of Apple's OS/SystemOS/AppOS images (rootfs, dyld, shared cache, launchd, backboardd, SpringBoard), the D22AP DeviceTree and the kernelcache version string. Nothing local contains any of it (search 2026-11-12: repo, references/, artifacts/, home to depth 4). See docs/strategy/2026-11-12-ios-critical-path.md section 4. Check with tools/ios/ipsw_inspect.py (IOS-002) once it exists."
+      "last_heartbeat": "2026-11-11T22:58:10+00:00",
+      "updated_at": "2026-11-11T23:17:33+00:00",
+      "evidence": "docs/procedures/ios-001/evidence.json",
+      "evidence_sha256": "d6994fa320677b54500c1a4c74e78cfa79a688e9b3ca4578ca4643b19d9e5976",
+      "finished_at": "2026-11-11T23:17:33+00:00"
     },
     {
       "id": "IOS-003",
@@ -14385,8 +14393,11 @@
         "Extract the requirement list per donor",
         "Map against the project kernel and the NAT-068 log"
       ],
-      "status": "pending",
-      "owner": null
+      "status": "in_progress",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-11T22:58:29+00:00",
+      "last_heartbeat": "2026-11-11T22:58:29+00:00",
+      "updated_at": "2026-11-11T22:58:29+00:00"
     },
     {
       "id": "NAT-071",
@@ -60226,6 +60237,76 @@
           "progress_note": "Serves critical-path milestone 4 (docs/strategy/2026-11-12-ios-critical-path.md section 3): the question is whether the display engine scans out the loader's framebuffer (phys 0xfa200000, 1080x2340, stride 4320). Observable: parsed e1s-display pipeline lines. Decision it feeds: enabled RDMA reading that buffer -> copy-into-bootloader-framebuffer path, UI-003 stays off the critical path; idle or other buffer -> UI-003 (real DECON/DSIM driver) moves ahead of milestone 5; fault/hang -> loader-side power-domain task. Build, package, derived driver done; analyser/tests/mutants/decision draft remain.",
           "next_step": "write analyze_nat069.py, test_nat069.py, mutants.py, decision-draft.md, evidence.json",
           "last_heartbeat": "2026-11-11T22:41:51+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:58:10+00:00",
+      "action": "task.resume:IOS-001",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-001",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T22:58:10+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:58:20+00:00",
+      "action": "task.claim:IOS-002",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-002",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 96,
+          "last_heartbeat": "2026-11-11T22:58:20+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T22:58:29+00:00",
+      "action": "task.claim:IOS-003",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-003",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 92,
+          "last_heartbeat": "2026-11-11T22:58:29+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T23:17:22+00:00",
+      "action": "task.done:IOS-002",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-002",
+          "status": "done",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 96,
+          "last_heartbeat": "2026-11-11T22:58:20+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T23:17:33+00:00",
+      "action": "task.done:IOS-001",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-001",
+          "status": "done",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T22:58:10+00:00"
         }
       ]
     }
