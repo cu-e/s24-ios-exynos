@@ -1,0 +1,140 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T09:52:36+00:00",
+ "commit": "a6677253f01dde1a3824f6ef9de577d29a22e9d7",
+ "tree_state": "the files listed under sha256 are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat049-20261111-session",
+ "summary": "Session driver (session_usblog.py: NAT-048 driver pinned to NAT-047 package-001, agent-written decision-file gate for the NAT-043 image, registry gate, udev check, collector self-test, RECOVERY-only write with full readback, USB watcher AND the NAT-041 collector started detached and confirmed before the single reboot), collector launcher with an fsynced heartbeat around the unmodified s24_logd.py, udev-rule reader (host_access.py) with the shipped rule, and the verdict analyzer (analyze_usblog.py: PASS / PARTIAL / FAIL / undetermined in the wording of the NAT-047 decision template, never PASS from a synthetic archive). Tests: 142 (HostAccess 18, Launcher 17, Verdicts 49, Simulated 8 = the analyzer on the archives of the compiled NAT-047 loader run in unicorn, RealTreeGate 15, OpenGateFlow 35); mutation check: 195 mutants, 193 killed by behaviour, 2 only by a source pin (documented redundant), 0 survived. Nothing was run on the phone.",
+ "evidence_category": "host-test (fake adb, fake sysfs tree, fake usb.core, NAT-041 DWC3 model and NAT-047 loader in unicorn); not a measurement of the S24",
+ "acceptance": {
+  "1_driver": "session_usblog.py: pins both NAT-047 package-001 images (RECOVERY, Image.payload, length, offset 2048); in the real tree, with no docs/decisions/*-nat043-<image>-single-run-*.md, every mode and both images stop before the first adb call (RealTreeGate); the gate requires exactly one decision file naming both hashes and decision 0019, and never creates it; registry gate (native permitted by a decision that cites that file, NAT-039 and NAT-046 done); udev check; collector self-test; in the scratch tree (OpenGateFlow) --execute writes RECOVERY, reads it back in full, starts the watcher and the collector and awaits the watcher's start record and the collector's first poll BEFORE the one reboot (the fake adb checks both logs at that moment); every failed step restores stock and never reboots; a second execute is refused by the marker; an output directory and a held recovery-write lock are refused.",
+  "2_analyzer": "analyze_usblog.py: PASS / PARTIAL / FAIL / undetermined from the collector archive, the host USB event log and report.json; boot id tail = FNV-1a-64 of the image name; banner, device record numbers from 0, stage order, both ladder summaries and their line counts, end record without unread bytes, manifest and collector drops, the controlled exception (ESR 0xF2001234, EXCEPTION text, engine exception page, exception stage last) for the fault image and none for the plain one; synthetic provenance never gives PASS (undetermined, or simulated-* with allow_synthetic); an archive of the other image is no evidence; every PARTIAL reason and every undetermined path has its own test.",
+  "3_tests": "Archives from the real NAT-041 collector against the NAT-041 DWC3 model (plain, fault, no cable, ladder stop, late plug, drops, corrupted archives of every kind), and from the compiled NAT-047 loader.elf of both images run in unicorn (Simulated); fake adb/su/NAT-013; no device node is opened; mutation check as stated in the summary."
+ },
+ "established": [
+  "The driver pins NAT-047 package-001: loader-diag-usbmon RECOVERY c6802dea4682a4bc993885bf525e2907e42e4eeebb964310da82ed79fef7212d payload a90a93d77ea56d22b8af555d34bc91bf8871db8f12ed071bd534d16940d08b73; loader-diag-usbmon-fault RECOVERY f1a193dcac776dde004a3d1a379c26a4a365a150318bbc0a6501506ad7dfa103 payload 06281749f38bb6c8e944c3c82b4e77297b5749757e57b4d3c4d9f623b5025d77.",
+  "Control flow of the driver under fakes: the watcher and the collector are running and confirmed before the reboot is sent, every gate and every failure path never reboots, the stock RECOVERY is written back after a failed launch step.",
+  "The analyzer's verdict rules, each by a test that a mutation of the rule fails; and that its expectations equal what the compiled NAT-047 loader emits in the unicorn simulation.",
+  "host_access.py reads the udev(7) rule directories and recognises the shipped rule 70-s24-usbmon.rules as a grant for group adbusers; the user is in adbusers (checked 2026-11-11)."
+ ],
+ "not_established": [
+  "Any behaviour of the S24 or of the S5E9945 USB block; that the phone enumerates 1209:0001; that the reset at the deadline returns the phone to Download Mode (NAT-046).",
+  "That the udev rule is installed (needs the owner's root, NAT-050) or works: host_access.py reads rule text only, not later-file overrides, name masking or udevadm; the first real open of the node is the proof.",
+  "That usb.core + libusb behave on this host as the fake does; anything the NAT-041 DWC3 model does not model; the simulated loader's thread is a queue of calls, not S-Boot.",
+  "That the 360 s watcher and collector windows cover every outcome; that the NAT-043 image runs at all (no native run happened)."
+ ],
+ "findings": [
+  "Mutation run 001 found 41 survivors: udev(7) names /usr/local/lib/udev/rules.d and /lib/udev/rules.d, which host_access.py did not read (fixed); the OSError handler around Path.glob was dead code (removed); the rest were analyzer, launcher and access checks the scenario tests did not isolate (25 tests added); D17 is behaviourally redundant and is pinned by source text.",
+  "The first analyzer judged a fault-image archive PARTIAL for its own exception stage (the stage list was checked as if the plain image's); fixed before the first mutation run.",
+  "D16 and D17 (the failure paths' own terminate()) cannot be told from the abort handler's cleanup by behaviour; D18 kills the handler's removal."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-049/test_nat049.py"
+   ],
+   "exit_code": 0,
+   "note": "system python: Ran 134 tests, OK (skipped=1: the Simulated layer needs unicorn), about 111 s"
+  },
+  {
+   "argv": [
+    "<venv with unicorn + capstone>/bin/python",
+    "-I",
+    "docs/procedures/nat-049/test_nat049.py",
+    "-v"
+   ],
+   "exit_code": 0,
+   "note": "Ran 142 tests, OK, none skipped, about 141 s; log artifacts/nat-049/test-final.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-049/mutate_nat049.py",
+    "--out",
+    "artifacts/nat-049/mutation-001",
+    "--jobs",
+    "4"
+   ],
+   "exit_code": 0,
+   "note": "193 mutants of the first version: 148 killed, 4 only by a source pin, 41 survived"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-049/mutate_nat049.py",
+    "--out",
+    "artifacts/nat-049/mutation-002",
+    "--jobs",
+    "4",
+    "--prefix",
+    "H",
+    "--prefix",
+    "L",
+    "--prefix",
+    "A",
+    "--prefix",
+    "D17"
+   ],
+   "exit_code": 0,
+   "note": "132 mutants on the final host_access/launcher/analyzer: 131 killed, D17 only by a source pin, 0 survived"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-049/mutate_nat049.py",
+    "--out",
+    "artifacts/nat-049/mutation-003",
+    "--jobs",
+    "4",
+    "--only",
+    "D04-glob-matches-the-other-image",
+    "--only",
+    "D47-report-dir-reusable",
+    "--only",
+    "D63-flock-not-taken"
+   ],
+   "exit_code": 0,
+   "note": "3 of 3 killed by behaviour tests added after run 001"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "214 repository tests OK; procedure tests are run separately; log artifacts/nat-049/make-check.log"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-049/mutation-001/summary.json",
+  "artifacts/nat-049/mutation-002/summary.json",
+  "artifacts/nat-049/mutation-003/summary.json",
+  "artifacts/nat-049/test-final.log",
+  "artifacts/nat-049/make-check.log",
+  "docs/procedures/nat-049/README.md"
+ ],
+ "sha256": {
+  "docs/procedures/nat-049/README.md": "deb808edaa9f5715d7d9cdc32c970f9a78546ffd0c4b4bca6c1d7f1c1004aeb1",
+  "docs/procedures/nat-049/70-s24-usbmon.rules": "7386392386e3bc3fceddc754148c2c6088d5cbb6ace98ec8d85247120dd2dcec",
+  "docs/procedures/nat-049/host_access.py": "109291ebe91a6c543fc2155630d5971ec841cc3c02945b561d3e15d0b549b472",
+  "docs/procedures/nat-049/collector_launch.py": "014cb34a47becc22a73c61af1b39aed97b32e42c2a912a9e9e88a3e44f27056e",
+  "docs/procedures/nat-049/analyze_usblog.py": "470fa06c853168e09607378bbdd87228b9377445dbe594ad6862c1f77b477a76",
+  "docs/procedures/nat-049/session_usblog.py": "a67bf6231ae8700e840c0a48bbb45f2dcc219eb8b5fc9c4d408268416563b14a",
+  "docs/procedures/nat-049/test_nat049.py": "f6646ea8564fb2e26294c6e6d8b5adad68516354929451b6f555307e5248daa0",
+  "docs/procedures/nat-049/mutate_nat049.py": "9e5b5593eb9a1739b69e0143591e8955f4570ab9af3dc564466cb4507d38374d",
+  "artifacts/nat-049/mutation-001/summary.json": "aad04a1a7561645c5743433cea7fd12deafc8599c4173552e957196176f98dcb",
+  "artifacts/nat-049/mutation-002/summary.json": "5be6ee63de4aa5f3448cc5d6cecfabf6da0191dea0340760a42629c65daf0778",
+  "artifacts/nat-049/mutation-003/summary.json": "65ec63ae30e08a703f3aeabbe5be928e9d13c86bd8a8d4823ab3d14a9885ae34",
+  "artifacts/nat-049/test-final.log": "02c469fb73d41b5e00d7695ff0c39daaf8340155238ace8c7b818d2dd9a2854a",
+  "artifacts/nat-049/make-check.log": "9b9c165fe1f8fbc953ec053186a1c1c7732f24a9572f0c06d8ee1cd86648d2a6"
+ },
+ "device_used": false,
+ "flashed": false
+}

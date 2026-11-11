@@ -1,0 +1,13 @@
+# NAT-049: access to the NAT-041 EP0 log monitor for the owner's group.
+#
+# The loader-diag-usbmon images (NAT-047) enumerate as USB 1209:0001 (the pid.codes test identity) while the phone runs the
+# diagnostic loader. The collector s24_logd.py (NAT-041) opens only that identity with libusb, which needs write access to the
+# device's usbfs node; without a rule udev creates it root:root 0664 and the collector gets EACCES ("device-access-denied").
+# The existing 51-android.rules covers 04e8 and 18d1 only, and the collector refuses 04e8 by design.
+#
+# Install (needs root; nothing in the project does it):
+#   sudo install -m 0644 docs/procedures/nat-049/70-s24-usbmon.rules /etc/udev/rules.d/70-s24-usbmon.rules
+#   sudo udevadm control --reload
+# Check (reads the rule text only):  python3 -I docs/procedures/nat-049/host_access.py --check
+# Remove:  sudo rm /etc/udev/rules.d/70-s24-usbmon.rules && sudo udevadm control --reload
+SUBSYSTEM=="usb", ATTR{idVendor}=="1209", ATTR{idProduct}=="0001", MODE="0660", GROUP="adbusers"
