@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-11T20:39:23+00:00",
+  "updated_at": "2026-11-11T21:02:27+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -14038,6 +14038,101 @@
       "evidence": "docs/procedures/nat-063/evidence.json",
       "evidence_sha256": "6987d883f2f07dea243346c85bb6977475351387e9850d8e883974a88cd2e0c4",
       "finished_at": "2026-11-11T20:39:00+00:00"
+    },
+    {
+      "id": "NAT-064",
+      "title": "After the NAT-063 run: how the payload kernel gets a root device (rd=md0 -> /chosen/memory-map RAMDisk, mkpayload.py --ramdisk, the loader's adt_rebase_ramdisk, mockfs /sbin/launchd) and why waitForMatchingService(30 s) returned after about 0.1 s",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 96,
+      "depends_on": [
+        "NAT-063"
+      ],
+      "paths": [
+        "docs/procedures/nat-064",
+        "artifacts/nat-064"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "A source-review note in docs/procedures/nat-064 names, with file and line from the pinned sources (artifacts/nat-020/build-003/source and the XNU tree it patches), the whole path from the boot-arg rd=md0 to a mounted root: IOFindBSDRoot, the /chosen/memory-map RAMDisk property, mdevadd, mdevlookup, mockfs and the exec of /sbin/launchd, what mkpayload.py --ramdisk and mkinit.py/sweet-init.S produce, what the loader does with the extra segment (adt_rebase_ramdisk, relocation, memory layout), and whether the NAT-052/059/062 loader tree contains those parts unchanged.",
+        "The note states whether a rebuild of the existing payload from kernel.no-storage + e1s.adt with mkpayload.py (no ramdisk, the NAT-020 command line) is byte-equal to artifacts/nat-020/build-003/Image.payload (a host check, run and recorded), and what a ramdisk changes in the payload (segments, ADT properties, size).",
+        "The note explains the observed `!BSD` line of NAT-063 (IOService::waitForMatchingService with a 30 s timeout returned NULL about 0.1 s after cpu_start) from the kernel sources: which timer, thread_call and deadline paths the wait uses, what the observation implies for timer interrupts and for loader_return_after, and the cheapest checks that resolve it; unknowns are labelled.",
+        "The note ends with a concrete, minimal design for the implementation task (what to build, the host tests that would show it right, the risks, the items the next decision file must name); nothing is run on the phone."
+      ],
+      "steps": [
+        "Read IOFindBSDRoot, memdev, mockfs and the loader ADT/ramdisk code",
+        "Rebuild the payload without ramdisk and compare",
+        "Read the wait/timer path behind !BSD",
+        "Write the note and the design, save evidence"
+      ],
+      "status": "done",
+      "owner": "claude-nat064-20261112-rootdev",
+      "started_at": "2026-11-11T20:43:25+00:00",
+      "last_heartbeat": "2026-11-11T20:43:25+00:00",
+      "updated_at": "2026-11-11T21:02:27+00:00",
+      "evidence": "docs/procedures/nat-064/evidence.json",
+      "evidence_sha256": "0c5defd2dfdaed7e2d04fadfeba61eb5152cd4eadac4910de488f034ab13ac3b",
+      "finished_at": "2026-11-11T21:02:27+00:00"
+    },
+    {
+      "id": "NAT-065",
+      "title": "Build the payload with a stage-0 ramdisk (md0) for the NAT-062 loader image family: sweet-init test /sbin/launchd, payload rebuilt with mkpayload.py --ramdisk, command line kept, derived image with host tests and mutation check; no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [
+        "NAT-064"
+      ],
+      "paths": [
+        "docs/procedures/nat-065",
+        "artifacts/nat-065"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "A build script in docs/procedures/nat-065 derives one RECOVERY image from the NAT-062 image's loader and the NAT-020 kernel and ADT with the stage-0 ramdisk added exactly as NAT-064 designs it (payload built by the pinned mkpayload.py, ramdisk from the pinned sweet-init sources; the NAT-062 command line and stub unchanged); two builds give identical hashes, and every input is pinned by SHA-256.",
+        "Host tests (no phone): the payload differs from the NAT-020/NAT-062 payload only by the added segment, the ADT RAMDisk property and the header fields NAT-064 lists; the ramdisk is a valid static arm64 Mach-O of the expected size; the loader's relocation and the ADT rebase put the RAMDisk range inside RAM the kernel can map and outside every other segment (checked on the real build, not only by reading); the driver and analyser of NAT-062 accept the new image name; a mutation check of the new derivation steps with equivalent mutants explained.",
+        "A decision draft names both image hashes, decision 0019, what the kernel may now touch (it can run /sbin/launchd test code in user mode), the 83 s watchdog and deadline budget; no owner confirmation is recorded and nothing runs on the phone."
+      ],
+      "steps": [
+        "Derive the build from NAT-062 and NAT-064's design",
+        "Host tests with the real build outputs, mutation check",
+        "Decision draft, evidence"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "NAT-066",
+      "title": "Native run of the stage-0 ramdisk image (decision per image): does the kernel mount md0 and exec the test /sbin/launchd, and what text reaches the host; stock restore and Android check",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 95,
+      "depends_on": [
+        "NAT-065"
+      ],
+      "paths": [
+        "docs/procedures/nat-066",
+        "artifacts/nat-066"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "One run of the single image named in its decision file under the decision 0019 run protocol (decision file committed before the run, native permit opened citing it and closed after the task is done; no retry); the NAT-062-family driver is the only launcher.",
+        "The host collector archives the records of the real run; the analyser gives a verdict from the archive and the USB log; a run in which the host receives no kernel text is recorded as inconclusive or FAIL with the observations that exist.",
+        "Stock RECOVERY (96620b8b...) is restored with a full-hash readback and Android is verified unchanged; data, apps and settings untouched; evidence.json with hashes and exit codes is saved."
+      ],
+      "steps": [
+        "Write the decision file, commit, run preflight",
+        "Single run, restore stock RECOVERY, verify Android",
+        "Analyse, write evidence and update the registry"
+      ],
+      "status": "pending",
+      "owner": null
     }
   ],
   "experiments": [
@@ -59364,6 +59459,73 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-11T20:42:59+00:00",
+      "action": "task.add:NAT-064",
+      "owner": "claude-nat061-20261112-klog",
+      "tasks": [
+        {
+          "id": "NAT-064",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T20:43:08+00:00",
+      "action": "task.add:NAT-065",
+      "owner": "claude-nat061-20261112-klog",
+      "tasks": [
+        {
+          "id": "NAT-065",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T20:43:16+00:00",
+      "action": "task.add:NAT-066",
+      "owner": "claude-nat061-20261112-klog",
+      "tasks": [
+        {
+          "id": "NAT-066",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T20:43:25+00:00",
+      "action": "task.claim:NAT-064",
+      "owner": "claude-nat064-20261112-rootdev",
+      "tasks": [
+        {
+          "id": "NAT-064",
+          "status": "in_progress",
+          "owner": "claude-nat064-20261112-rootdev",
+          "priority": 96,
+          "last_heartbeat": "2026-11-11T20:43:25+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T21:02:27+00:00",
+      "action": "task.done:NAT-064",
+      "owner": "claude-nat064-20261112-rootdev",
+      "tasks": [
+        {
+          "id": "NAT-064",
+          "status": "done",
+          "owner": "claude-nat064-20261112-rootdev",
+          "priority": 96,
+          "last_heartbeat": "2026-11-11T20:43:25+00:00"
+        }
+      ]
     }
   ]
 }

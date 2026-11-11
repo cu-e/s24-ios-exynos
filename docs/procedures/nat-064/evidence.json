@@ -1,0 +1,95 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T21:02:21+00:00",
+ "commit": "559326c11799c422e632e9eb1383f65c587a9bdf",
+ "tree_state": "docs/procedures/nat-064/ and docs/procedures/nat-063/ERRATA.md are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat064-20261112-rootdev",
+ "summary": "Source review of how rd=md0 reaches PID 1 in the payload kernel (IOFindBSDRoot -> mdevadd from /chosen/memory-map RAMDisk -> vfs_mountroot/mockfs -> load_init_program -> init exit panic), a host rebuild comparison of the payload with the pinned mkpayload.py, and the explanation of the !BSD line of NAT-063. Findings: (1) !BSD is the project's own 100 ms wait for rd=md*, not a 30 s timeout (the task premise was wrong); measured about 102.5 ms of kernel time after correcting the 1.024 microsecond-field inflation, which shows a deadline wake worked; (2) the NAT-063 panic is the missing RAMDisk property; (3) mkpayload.py --ramdisk adds one segment and one 52-byte ADT property, the rebuild of the existing payload is byte-equal and reproducible, and with a ramdisk adt_size becomes 14008 (a multiple of 8) so the NAT-062 adt_size header fix must not be carried over; (4) the loader's RAMDisk rebase code exists but has never executed on the phone; (5) the NAT-063 README's 1.7 s kernel interval is a host receive-time gap (errata added). A minimal NAT-065 design (probe init that exits with a status so the run ends in a panic that carries a verdict) with host tests, mutants and decision-file items is specified. No hardware claim; nothing ran on the phone.",
+ "evidence_category": "source-review of pinned XNU 22.5.0 originals plus project patches and the NAT-052 loader tree, and a host-test (payload rebuild/compare); not a measurement of the S24. The 102.5 ms figure is derived from the NAT-063 native-device log stamps and the cited rtclock code.",
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-064/compare_payloads.py",
+    "--out",
+    "artifacts/nat-064/compare",
+    "--json",
+    "artifacts/nat-064/compare/result.json"
+   ],
+   "exit_code": 0,
+   "note": "run twice (compare, compare2): all three rebuilt payload hashes identical between runs; step exit codes 0/0/0"
+  },
+  {
+   "argv": [
+    "grep/sed reads of the XNU originals, hackios/redwood.patch, loader_return.c, the NAT-052 loader.c/adt_patch.c, mkpayload.py, mkinit.py, sweet-init.S (read-only)"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3 (inline) Image.payload[-21554784:] == artifacts/nat-020/build-003/payload.bin"
+   ],
+   "exit_code": 0,
+   "note": "True; Image.payload = loader Image 204800 bytes + payload.bin"
+  },
+  {
+   "argv": [
+    "clang -target arm64-apple-ios16.0 ... (tools/e1s/mkinit.py) -> artifacts/nat-064/stage0/sweet-init"
+   ],
+   "exit_code": 0,
+   "note": "static ad-hoc-signed test init, 16635 bytes; used only as compare_payloads.py input"
+  }
+ ],
+ "sha256": {
+  "docs/procedures/nat-064/README.md": "e3ae881eb5e5b4c203c974c3434abb11a245186f9335591078b86f4380c2483f",
+  "docs/procedures/nat-064/compare_payloads.py": "dc99535f9252e761a403151a2b63965abc7a126acbd2ddc9a37244068007288f",
+  "docs/procedures/nat-064/compare-result.json": "72716f349ee61062e3d3aa26b7804ec37c76dafc85d066d55e1de87e5bd27a85",
+  "docs/procedures/nat-063/ERRATA.md": "fa283ce7f96b97a7e4e0bece1f1e3ff5e4d507ec5ad7957793834d9c9cf130e3",
+  "artifacts/nat-020/build-003/source/xnu/hackios/redwood.patch": "ac3b2b578a6d1d480079557a576bf1bb4155082d4ee2958373c18f5d78b8e89b",
+  "artifacts/nat-020/build-003/source/xnu/hackios/files/osfmk/arm64/loader_return.c": "fec6b318f80e4f0d618ebc6339fd523a7daf9536019626ceafda1bb37cfad684",
+  "artifacts/nat-052/build-003/loader-diag-xnu-ckpt3-usb/source/shim/e1s-xnu/loader.c": "074766c669dafc40f8300ab5256a70b52584d485f8d6ef5d7a16606abad40dc8",
+  "artifacts/nat-052/build-003/loader-diag-xnu-ckpt3-usb/source/shim/e1s-xnu/adt_patch.c": "9e860ca30a8022942df3f979946a70a07388816d360e8e64bfd20531b63d52e9",
+  "artifacts/nat-020/build-003/source/tools/e1s/xnu/mkpayload.py": "50c043e4033ceea682bd20134b5283c1abec51985d49609a3bce5ea0a4013ed7",
+  "artifacts/nat-020/build-003/payload.bin": "071bc632f7af0a6aa9b11a679c1d5a951ee80943be11669326949d0725caf544",
+  "artifacts/nat-020/build-003/kernel.no-storage": "7ceda59bdbedba4d32b80c319e35ec51fe766cf61daa648f80a0c42bbca3e407",
+  "artifacts/nat-020/build-003/e1s.adt": "1ef36896e28d30ebd76e94b2f2c4074ae75f5cf860360d9c6b401673ab2dbd0e",
+  "artifacts/nat-064/rebuild/nat062-payload.bin": "a0562ac40a25449de0a3b81767dadb4f0a2f1a65ef3e693f67509a323b5023ea",
+  "artifacts/nat-064/stage0/sweet-init": "93041871cea969e53211ffede941a7ca31bc666cf20faffd1d47dde6a84f0104",
+  "artifacts/nat-020/build-003/Image.payload": "2b51c7910714f72fab00fd117a6697e806dbd80a42d9c0cdf1491e494c63e729",
+  "artifacts/nat-064/compare/rebuild-ramdisk.bin": "679ed440f2dffaa9f4d2715c53b0f7d053ca3af408c80eff82f86d21781d599f",
+  "docs/procedures/nat-063/run-001-kernel-log.txt": "c994718e68a7c45a754c362c824b13f2e2a5b5dc263c2534cd8c27b3d043d264",
+  "worktrees/vm-007-20261105/artifacts/avf-kernel-source/cache/originals/xnu/iokit/bsddev/IOKitBSDInit.cpp": "e35916c887ad13109b8a40b6cddb2d3381407e945a2ad587585beb64dcfebd27",
+  "worktrees/vm-007-20261105/artifacts/avf-kernel-source/cache/originals/xnu/bsd/kern/bsd_init.c": "92ad5e66379c735878bd3d9822fe4916008447e60b4355300116e098208af630",
+  "worktrees/vm-007-20261105/artifacts/avf-kernel-source/cache/originals/xnu/bsd/kern/kern_exec.c": "c37e719cd04db514df8738af17c58ad310791abad2a73b7bd58828976b03a524",
+  "worktrees/vm-007-20261105/artifacts/avf-kernel-source/cache/originals/xnu/bsd/kern/kern_exit.c": "16e9f12bcc556be123353136770b1318d5a2b6718c2bf602290a427f18183296",
+  "worktrees/vm-007-20261105/artifacts/avf-kernel-source/cache/originals/xnu/bsd/dev/memdev.c": "1caae0b366a8d7d254222cbf1433134b0e925e1114898822a145237a8dc5011a",
+  "worktrees/vm-007-20261105/artifacts/avf-kernel-source/cache/originals/xnu/iokit/Kernel/IOService.cpp": "7e8d76ad1b3e1564a6ce2290435689981dae2fcd384514a269c3b31960857519",
+  "worktrees/vm-007-20261105/artifacts/avf-kernel-source/cache/originals/xnu/iokit/Kernel/IOLocks.cpp": "3db2faaadd51e91e6dcca4007e59530725eeed118218a6327dba41f8cb8ab1e3",
+  "worktrees/vm-007-20261105/artifacts/avf-kernel-source/cache/originals/xnu/osfmk/kern/locks.c": "764788114792238d8c221b483f8c4bf998fac9c2bf4200df7463cc9e7145a88e",
+  "worktrees/vm-007-20261105/artifacts/avf-kernel-source/cache/originals/xnu/osfmk/kern/clock.c": "001630fcf2089f7f8df7c39ee79f8ba9279b84aa06ec5d8883b016eb15fdc5b1",
+  "worktrees/vm-007-20261105/artifacts/avf-kernel-source/cache/originals/xnu/osfmk/arm/rtclock.c": "fe73cdccc1b4e5b952ff28bbe6eb107811f33983a41f0e6528bcde927003154b",
+  "worktrees/vm-007-20261105/artifacts/avf-kernel-source/cache/originals/xnu/osfmk/arm64/machine_routines.c": "0064d9e4dd2cbde3200564b2f03cadeb30afb97942a1f6a3475862ddefda9d67",
+  "worktrees/vm-007-20261105/artifacts/avf-kernel-source/cache/originals/xnu/osfmk/kern/timer_call.c": "b49a384b7efe29d1705df0619f70de14e158420cf19a17196a127c50a1fc77e4",
+  "worktrees/vm-007-20261105/artifacts/avf-kernel-source/cache/originals/xnu/osfmk/kern/startup.c": "5247178d4525c857e11f8ce960d5776c6ae136bb1307d97f97908440abcb5eff",
+  "worktrees/vm-007-20261105/artifacts/avf-kernel-source/cache/originals/xnu/bsd/kern/kern_cs.c": "c193adbaee11db32bb53e4744e6957f8fc793fc70d5040e5bf8f7e0972179ad0"
+ },
+ "artifacts": [
+  "docs/procedures/nat-064/README.md",
+  "docs/procedures/nat-064/compare_payloads.py",
+  "docs/procedures/nat-064/compare-result.json",
+  "docs/procedures/nat-063/ERRATA.md",
+  "artifacts/nat-064/compare/rebuild-noramdisk.bin",
+  "artifacts/nat-064/compare/rebuild-nat062-cmdline.bin",
+  "artifacts/nat-064/compare/rebuild-ramdisk.bin",
+  "artifacts/nat-064/stage0/sweet-init"
+ ],
+ "not_established": [
+  "that the ramdisk bytes arrive at ml_static_ptovirt(phys) on the phone (by construction yes; the loader code never ran with the property)",
+  "that vfs_mountroot accepts the raw Mach-O via mockfs and that exec of the ad-hoc-signed init is allowed on this kernel (never executed)",
+  "whether PID 1 console text reaches loader_log live (NAT-063's first dump was empty; unexplained)",
+  "the absolute clock rate against real time; the thread-call timed return and the redwood_*_stop quiesce path"
+ ]
+}
