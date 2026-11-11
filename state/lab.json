@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-11T09:52:51+00:00",
+  "updated_at": "2026-11-11T09:54:07+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -13459,6 +13459,38 @@
       "evidence": "docs/procedures/nat-049/evidence.json",
       "evidence_sha256": "65e4ec56c84079a60888ed7239262c94ada9ae5fc412a88c2ac79609a41950f2",
       "finished_at": "2026-11-11T09:52:51+00:00"
+    },
+    {
+      "id": "NAT-050",
+      "title": "Install the udev rule that lets the host user open the NAT-041 monitor device 1209:0001 (the collector's only device): one-time root step on this host, verified by host_access.py --check and udevadm; no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "NAT-049"
+      ],
+      "paths": [
+        "docs/procedures/nat-050",
+        "artifacts/nat-050"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "docs/procedures/nat-049/70-s24-usbmon.rules is installed as /etc/udev/rules.d/70-s24-usbmon.rules by the host owner (root) and udev has reloaded its rules; the file's SHA-256 equals the repository copy's.",
+        "`python3 -I docs/procedures/nat-049/host_access.py --check` exits 0 and names the installed rule; `udevadm verify` reports no error for the file; `udevadm test` of a synthetic usb device path (or `udevadm trigger --dry-run` listing) shows MODE 0660 and GROUP adbusers for ATTR{idVendor}==1209, ATTR{idProduct}==0001 and nothing for 04e8/18d1.",
+        "No other udev rule, group membership or device permission on this host is changed; the evidence records the command output and the file hash. The first real open of the node happens in NAT-043 and is not claimed here."
+      ],
+      "steps": [
+        "Owner (or an agent run with the owner's explicit root) installs the rule: sudo install -m 0644 docs/procedures/nat-049/70-s24-usbmon.rules /etc/udev/rules.d/70-s24-usbmon.rules; sudo udevadm control --reload",
+        "Run host_access.py --check and the udevadm checks; save evidence.json"
+      ],
+      "status": "blocked",
+      "owner": "claude-nat050-20261111-session",
+      "started_at": "2026-11-11T09:53:54+00:00",
+      "last_heartbeat": "2026-11-11T09:54:07+00:00",
+      "updated_at": "2026-11-11T09:54:07+00:00",
+      "blocked_reason": "Specific missing external fact: the host owner's root. Installing /etc/udev/rules.d/70-s24-usbmon.rules and reloading udev needs sudo, which asks for a password the agent does not have (checked 2026-11-11: 'sudo: a password is required'); using the docker group as a root bypass is not done, and 04e8/18d1 cannot stand in because the NAT-041 collector refuses them by design. The rule text, the install commands and the check (host_access.py --check) are in docs/procedures/nat-049/README.md. Resume when the owner runs the two sudo commands (or provides a non-interactive root path), then run the check and save evidence."
     }
   ],
   "experiments": [
@@ -57956,6 +57988,48 @@
           "owner": "claude-nat049-20261111-session",
           "priority": 96,
           "last_heartbeat": "2026-11-11T08:31:26+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T09:53:46+00:00",
+      "action": "task.add:NAT-050",
+      "owner": "claude-nat049-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-050",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T09:53:54+00:00",
+      "action": "task.claim:NAT-050",
+      "owner": "claude-nat050-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-050",
+          "status": "in_progress",
+          "owner": "claude-nat050-20261111-session",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T09:53:54+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T09:54:07+00:00",
+      "action": "task.block:NAT-050",
+      "owner": "claude-nat050-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-050",
+          "status": "blocked",
+          "owner": "claude-nat050-20261111-session",
+          "priority": 97,
+          "blocked_reason": "Specific missing external fact: the host owner's root. Installing /etc/udev/rules.d/70-s24-usbmon.rules and reloading udev needs sudo, which asks for a password the agent does not have (checked 2026-11-11: 'sudo: a password is required'); using the docker group as a root bypass is not done, and 04e8/18d1 cannot stand in because the NAT-041 collector refuses them by design. The rule text, the install commands and the check (host_access.py --check) are in docs/procedures/nat-049/README.md. Resume when the owner runs the two sudo commands (or provides a non-interactive root path), then run the check and save evidence.",
+          "last_heartbeat": "2026-11-11T09:54:07+00:00"
         }
       ]
     }

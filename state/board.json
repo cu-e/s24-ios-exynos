@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-11T09:52:54+00:00",
-  "ledger_updated_at": "2026-11-11T09:52:51+00:00",
-  "registry_sha256": "300c3fbae9d77a919dbbea68d521a99eb36d829f79bdfb6796077bdf73f1eb1e",
+  "generated_at": "2026-11-11T09:54:09+00:00",
+  "ledger_updated_at": "2026-11-11T09:54:07+00:00",
+  "registry_sha256": "542ef2d124875264bc5511537aaf16c09d808282d8b3cad955edb0837c4588ae",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -15,6 +15,7 @@
       "NAT-021",
       "KRN-008",
       "KRN-026",
+      "NAT-050",
       "KRN-003",
       "KRN-004",
       "ODIN-001",
@@ -5892,6 +5893,44 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-041.md"
+    },
+    {
+      "id": "NAT-050",
+      "title": "Install the udev rule that lets the host user open the NAT-041 monitor device 1209:0001 (the collector's only device): one-time root step on this host, verified by host_access.py --check and udevadm; no phone action",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "NAT-049"
+      ],
+      "paths": [
+        "docs/procedures/nat-050",
+        "artifacts/nat-050"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "docs/procedures/nat-049/70-s24-usbmon.rules is installed as /etc/udev/rules.d/70-s24-usbmon.rules by the host owner (root) and udev has reloaded its rules; the file's SHA-256 equals the repository copy's.",
+        "`python3 -I docs/procedures/nat-049/host_access.py --check` exits 0 and names the installed rule; `udevadm verify` reports no error for the file; `udevadm test` of a synthetic usb device path (or `udevadm trigger --dry-run` listing) shows MODE 0660 and GROUP adbusers for ATTR{idVendor}==1209, ATTR{idProduct}==0001 and nothing for 04e8/18d1.",
+        "No other udev rule, group membership or device permission on this host is changed; the evidence records the command output and the file hash. The first real open of the node happens in NAT-043 and is not claimed here."
+      ],
+      "steps": [
+        "Owner (or an agent run with the owner's explicit root) installs the rule: sudo install -m 0644 docs/procedures/nat-049/70-s24-usbmon.rules /etc/udev/rules.d/70-s24-usbmon.rules; sudo udevadm control --reload",
+        "Run host_access.py --check and the udevadm checks; save evidence.json"
+      ],
+      "status": "blocked",
+      "owner": "claude-nat050-20261111-session",
+      "started_at": "2026-11-11T09:53:54+00:00",
+      "last_heartbeat": "2026-11-11T09:54:07+00:00",
+      "updated_at": "2026-11-11T09:54:07+00:00",
+      "blocked_reason": "Specific missing external fact: the host owner's root. Installing /etc/udev/rules.d/70-s24-usbmon.rules and reloading udev needs sudo, which asks for a password the agent does not have (checked 2026-11-11: 'sudo: a password is required'); using the docker group as a root bypass is not done, and 04e8/18d1 cannot stand in because the NAT-041 collector refuses them by design. The rule text, the install commands and the check (host_access.py --check) are in docs/procedures/nat-049/README.md. Resume when the owner runs the two sudo commands (or provides a non-interactive root path), then run the check and save evidence.",
+      "column": "blocked",
+      "reasons": [
+        "Specific missing external fact: the host owner's root. Installing /etc/udev/rules.d/70-s24-usbmon.rules and reloading udev needs sudo, which asks for a password the agent does not have (checked 2026-11-11: 'sudo: a password is required'); using the docker group as a root bypass is not done, and 04e8/18d1 cannot stand in because the NAT-041 collector refuses them by design. The rule text, the install commands and the check (host_access.py --check) are in docs/procedures/nat-049/README.md. Resume when the owner runs the two sudo commands (or provides a non-interactive root path), then run the check and save evidence."
+      ],
+      "card_path": "planning/tasks/NAT-050.md",
+      "report_health": "recent"
     },
     {
       "id": "KRN-005",
@@ -14017,7 +14056,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -14056,7 +14095,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -15031,6 +15070,19 @@
         "worktree": "worktrees/krn-026-20261105"
       }
     ],
+    "claude-nat050-20261111-session": [
+      {
+        "id": "NAT-050",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-11T09:54:07+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": null,
+        "worktree": null
+      }
+    ],
     "codex-e1s-dependencies-20261105-k": [
       {
         "id": "KRN-003",
@@ -15072,46 +15124,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-11T01:59:06+00:00",
-      "action": "task.done:NAT-042",
-      "owner": "claude-nat042-20261111-reboot",
-      "tasks": [
-        {
-          "id": "NAT-042",
-          "status": "done",
-          "owner": "claude-nat042-20261111-reboot",
-          "priority": 96,
-          "last_heartbeat": "2026-11-11T01:40:19+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T02:01:50+00:00",
-      "action": "task.add:NAT-044",
-      "owner": "claude-nat042-20261111-reboot",
-      "tasks": [
-        {
-          "id": "NAT-044",
-          "status": "pending",
-          "owner": null,
-          "priority": 96
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T02:01:58+00:00",
-      "action": "task.add:NAT-045",
-      "owner": "claude-nat042-20261111-reboot",
-      "tasks": [
-        {
-          "id": "NAT-045",
-          "status": "pending",
-          "owner": null,
-          "priority": 95
-        }
-      ]
-    },
     {
       "at": "2026-11-11T02:02:06+00:00",
       "action": "task.add:NAT-046",
@@ -15349,11 +15361,53 @@
           "last_heartbeat": "2026-11-11T08:31:26+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-11T09:53:46+00:00",
+      "action": "task.add:NAT-050",
+      "owner": "claude-nat049-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-050",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T09:53:54+00:00",
+      "action": "task.claim:NAT-050",
+      "owner": "claude-nat050-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-050",
+          "status": "in_progress",
+          "owner": "claude-nat050-20261111-session",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T09:53:54+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T09:54:07+00:00",
+      "action": "task.block:NAT-050",
+      "owner": "claude-nat050-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-050",
+          "status": "blocked",
+          "owner": "claude-nat050-20261111-session",
+          "priority": 97,
+          "blocked_reason": "Specific missing external fact: the host owner's root. Installing /etc/udev/rules.d/70-s24-usbmon.rules and reloading udev needs sudo, which asks for a password the agent does not have (checked 2026-11-11: 'sudo: a password is required'); using the docker group as a root bypass is not done, and 04e8/18d1 cannot stand in because the NAT-041 collector refuses them by design. The rule text, the install commands and the check (host_access.py --check) are in docs/procedures/nat-049/README.md. Resume when the owner runs the two sudo commands (or provides a non-interactive root path), then run the check and save evidence.",
+          "last_heartbeat": "2026-11-11T09:54:07+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "6826c73c03820ddc186d784514b2c86e1fa4a6b1c6ec25c077675ec586e42dbd",
-    "BOARD.md": "289427de6d80ff66b1dbba26bc2afd722126ebb05cbf7715ef53ffb7b0a19e31",
+    "STATUS.md": "f734c5dc0347de95dc9dd7ecb62943736e8c0c5919f60a97cfa396f7369d0b99",
+    "BOARD.md": "5afb4d4002339de42badf438ac5bc8e82e420d4a64bd8356418614aa85caf0e9",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -15481,6 +15535,7 @@
     "planning/tasks/NAT-039.md": "6a1bfefe71953e3827bf0a66d6b2894292d0021661fe3e57fc90775452364dca",
     "planning/tasks/NAT-040.md": "d2a424f16c6665ca3836862097f55524ec7f0bbf53241b330e89e57648563897",
     "planning/tasks/NAT-041.md": "a3421dc1c461e0ce04af4851d361af8888a14702f98652555347c1bfc5cae630",
+    "planning/tasks/NAT-050.md": "21a26fb61b5e2be4ee47167de3d1b03a851a34c2714961a2a0bfc3c7ff3baf12",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/REV-004.md": "8c7b273845208b121b2d6d1f05038b627689d3f97b766a765a91cdf23082bdb1",
     "planning/tasks/REV-011.md": "5ea2857fe5caca100edd1f7f53667f0b2a27de4b576000ecd14e2a55f1e7d51b",
@@ -15661,8 +15716,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "1fb347d1ef1be0ab49f2b0eac0ebdd8f04ee5b772f0f0c5dcec4ecc691b0a7b1",
-    "planning/tasks/DRV-003.md": "2441ae0f13e91e3d4e322df4cb71f0d4eae6fb2f54017dcb2234af8b4aaae598",
+    "planning/tasks/NAT-003.md": "f382091b1ddae08ee2148df60973b3dce75994b17bcd3aa6256d82965de93ba1",
+    "planning/tasks/DRV-003.md": "072c45d0bf1182a143e93ecd6916b82108ccc0e2e882ae56a4644e4207f76954",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",
