@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-11T19:14:43+00:00",
+  "updated_at": "2026-11-11T20:07:51+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -13920,6 +13920,104 @@
       "evidence": "docs/procedures/nat-060/evidence.json",
       "evidence_sha256": "ada9c3df5e7375939b4de3f1b040227b1f21a89b4e57d826bcf3c4d2d834f8dd",
       "finished_at": "2026-11-11T19:14:34+00:00"
+    },
+    {
+      "id": "NAT-061",
+      "title": "What follows C checkpoint 21: the payload kernel's own return-to-loader and log paths (loader_log, loader_return, loader_return_after) and the cheapest way to get its console text to the host",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 95,
+      "depends_on": [
+        "NAT-060"
+      ],
+      "paths": [
+        "docs/procedures/nat-061",
+        "artifacts/nat-061"
+      ],
+      "acceptance": [
+        "A dated README states, from the NAT-020 build-003 source and payload bytes, what the kernel does with its console output (loader_log, its head/ring layout, what loader_jump hands the stub in x0/x1 for a checkpoint and for the orderly end), what boot-args start a timed return, what the kernel can reach after checkpoint 21 through the ADT nodes, and which observation (log at the last stop, timed return, panic return) needs which kernel facility; unknowns are listed, no hardware claim is made.",
+        "The chosen minimal design (dump the kernel's loader_log through the NAT-047 engine at the last stop and at the orderly return; resume the kernel after checkpoint 21 with a timed return boot-arg) is written with its limits and the check that would resolve each unknown."
+      ],
+      "steps": [
+        "Read loader_return.c, the payload analysis of NAT-029 and the ADT nodes",
+        "Write the README with facts, unknowns and the design"
+      ],
+      "status": "done",
+      "owner": "claude-nat061-20261112-klog",
+      "sources": [
+        "s24-port"
+      ],
+      "started_at": "2026-11-11T19:22:56+00:00",
+      "last_heartbeat": "2026-11-11T19:22:56+00:00",
+      "updated_at": "2026-11-11T19:25:00+00:00",
+      "evidence": "docs/procedures/nat-061/evidence.json",
+      "evidence_sha256": "36e82b9656267131d4e74eac45b62cd02f55d52d67fb01b253864abcd21daf83",
+      "finished_at": "2026-11-11T19:25:00+00:00"
+    },
+    {
+      "id": "NAT-062",
+      "title": "Image loader-diag-xnu-run-usb (host-test): dump the kernel's log over USB at checkpoint 21 and at the orderly return, run the kernel on after checkpoint 21 with loader_return_after, plus driver and analyser",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "depends_on": [
+        "NAT-060",
+        "NAT-061"
+      ],
+      "paths": [
+        "docs/procedures/nat-062",
+        "artifacts/nat-062"
+      ],
+      "acceptance": [
+        "A reproducible build (two builds, same hashes) of the NAT-059 image plus exact-anchor patch hunks and a payload cmdline change, with every changed source and payload hash recorded; the stub resumes after the last stop with no further stop, and an arrival with reason 0 dumps the log and holds.",
+        "Host tests exercise the new log-dump code (chunking, escaping, bounds, the PA/length check, pacing), the derivation (each anchor once, only intended files change), the payload cmdline change, and a session driver and analyser that turn an archive into a kernel log text and a verdict; mutants of the new code are killed or explained.",
+        "Nothing is run on the phone; a decision draft names the hashes and what the kernel may touch."
+      ],
+      "steps": [
+        "Derive the patch over the NAT-059 tree",
+        "Write the dump code and host tests",
+        "Write driver, analyser, decision draft; build twice; mutants; make check"
+      ],
+      "status": "done",
+      "owner": "claude-nat061-20261112-klog",
+      "sources": [
+        "s24-port"
+      ],
+      "started_at": "2026-11-11T19:25:10+00:00",
+      "last_heartbeat": "2026-11-11T19:25:10+00:00",
+      "updated_at": "2026-11-11T20:07:51+00:00",
+      "evidence": "docs/procedures/nat-062/evidence.json",
+      "evidence_sha256": "55c995f96b39639e6e3fc2002871cc53b4d4ad15ee98abbccfe7eb1cdc35a21a",
+      "finished_at": "2026-11-11T20:07:51+00:00"
+    },
+    {
+      "id": "NAT-063",
+      "title": "First native run of loader-diag-xnu-run-usb (decision 0026): the host receives the kernel's own console text by USB at checkpoint 21 and after the kernel runs on; stock restore and Android check",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 95,
+      "depends_on": [
+        "NAT-062"
+      ],
+      "paths": [
+        "docs/procedures/nat-063",
+        "artifacts/nat-063"
+      ],
+      "acceptance": [
+        "One run of the single image named in decision 0026 under the run protocol of decision 0019 (decision file committed with the owner's confirmation before the run, native permit opened citing it and closed after the task is done; no retry); the NAT-062 driver is the only launcher.",
+        "The host collector archives the records of the real run; the NAT-062 analyser gives a verdict from the archive and the USB log, and a run in which the host receives no kernel text is recorded as inconclusive or FAIL with the observations that exist.",
+        "Stock RECOVERY (96620b8b...) is restored with a full-hash readback (NAT-013 tool, or the driver's --restore if the phone returns to Android by itself) and Android is verified unchanged; data, apps and settings untouched; evidence.json with hashes and exit codes is saved."
+      ],
+      "steps": [
+        "Run the driver preflight, then the single run (decision 0026)",
+        "Restore stock RECOVERY, verify Android",
+        "Analyse the archive, write evidence and update the registry"
+      ],
+      "status": "pending",
+      "owner": null,
+      "sources": [
+        "s24-port"
+      ]
     }
   ],
   "experiments": [
@@ -59101,6 +59199,101 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-11T19:22:27+00:00",
+      "action": "task.add:NAT-061",
+      "owner": "claude-nat061-20261112-klog",
+      "tasks": [
+        {
+          "id": "NAT-061",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T19:22:36+00:00",
+      "action": "task.add:NAT-062",
+      "owner": "claude-nat061-20261112-klog",
+      "tasks": [
+        {
+          "id": "NAT-062",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T19:22:44+00:00",
+      "action": "task.add:NAT-063",
+      "owner": "claude-nat061-20261112-klog",
+      "tasks": [
+        {
+          "id": "NAT-063",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T19:22:56+00:00",
+      "action": "task.claim:NAT-061",
+      "owner": "claude-nat061-20261112-klog",
+      "tasks": [
+        {
+          "id": "NAT-061",
+          "status": "in_progress",
+          "owner": "claude-nat061-20261112-klog",
+          "priority": 95,
+          "last_heartbeat": "2026-11-11T19:22:56+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T19:25:00+00:00",
+      "action": "task.done:NAT-061",
+      "owner": "claude-nat061-20261112-klog",
+      "tasks": [
+        {
+          "id": "NAT-061",
+          "status": "done",
+          "owner": "claude-nat061-20261112-klog",
+          "priority": 95,
+          "last_heartbeat": "2026-11-11T19:22:56+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T19:25:10+00:00",
+      "action": "task.claim:NAT-062",
+      "owner": "claude-nat061-20261112-klog",
+      "tasks": [
+        {
+          "id": "NAT-062",
+          "status": "in_progress",
+          "owner": "claude-nat061-20261112-klog",
+          "priority": 95,
+          "last_heartbeat": "2026-11-11T19:25:10+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T20:07:51+00:00",
+      "action": "task.done:NAT-062",
+      "owner": "claude-nat061-20261112-klog",
+      "tasks": [
+        {
+          "id": "NAT-062",
+          "status": "done",
+          "owner": "claude-nat061-20261112-klog",
+          "priority": 95,
+          "last_heartbeat": "2026-11-11T19:25:10+00:00"
+        }
+      ]
     }
   ]
 }

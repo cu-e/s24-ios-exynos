@@ -1,0 +1,26 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T19:24:44+00:00",
+ "commit": "78ebfed9692d0debfde6d2bf85106d3cb139e29e",
+ "tree_state": "docs/procedures/nat-061/README.md is uncommitted at recording time and is committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat061-20261112-klog",
+ "summary": "Source review of what the payload kernel already offers a loader after C checkpoint 21: its console text is collected in loader_log (serial_putc_crlf and kmoutput call loader_log_putc), loader_jump hands the stub the log's PA and length in x0/x1 at every stop and at the orderly end, the kernel returns by itself on panic or on boot-arg loader_return_after (absent from the payload cmdline), storage entry points are the 29 register-only stubs, and the engine can carry a paced log. The README fixes the minimal design (dump at the last stop, run on, dump at the reason-0 return) and lists the unknowns with the check that resolves each. No hardware claim.",
+ "evidence_category": "source-review of the NAT-020 build-003 source tree and the NAT-029 payload analysis; not a measurement of the S24",
+ "commands": [
+  {
+   "argv": [
+    "grep/sed reads of artifacts/nat-020/build-003/source/xnu/hackios/files/osfmk/arm64/loader_return.c, hackios/redwood.patch, e1s/patches/0011..0015, bsd/dev/redwood_ufs.c, storage-patches.json, e1s.adt (read-only)"
+   ],
+   "exit_code": 0
+  }
+ ],
+ "sha256": {
+  "docs/procedures/nat-061/README.md": "0a15e127918a79cf15e502bd4f34b42a543e92412d992e2953bdea13460ec0ad"
+ },
+ "artifacts": [
+  "docs/procedures/nat-061/README.md",
+  "artifacts/nat-020/build-003/source/xnu/hackios/files/osfmk/arm64/loader_return.c"
+ ]
+}

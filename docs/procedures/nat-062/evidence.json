@@ -1,0 +1,129 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T20:07:45+00:00",
+ "commit": "78ebfed9692d0debfde6d2bf85106d3cb139e29e",
+ "tree_state": "the files listed under sha256 are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat061-20261112-klog",
+ "summary": "The image loader-diag-xnu-run-usb: NAT-059's loader-diag-xnu-ckpt4-usb whose stub, at the last stop (C checkpoint 21), sends the payload kernel's own console log (loader_log) to the host over the NAT-047 USB engine as TEXT records, then resumes the kernel with no further stop; the payload command line gets loader_return_after=8 so that the kernel can hand control back by itself, and a reason-0 arrival sends the log again and holds. Built by docs/procedures/nat-062/build.py + patch_run62.py (two builds, identical hashes); session driver session_nat062.py, analyser analyze_nat062.py (reconstructs and saves the kernel text), decision draft for decision 0026. Nothing ran on the phone.",
+ "evidence_category": "host-test (derivation, static reads of the real payload, a host build of the dump code with a C harness cross-checked against the Python parser, driver flow against a fake adb, analyser on model-written archives); not source-review of the kernel (NAT-061 is that), not android-userland, not native-device",
+ "acceptance": {
+  "1_build": "build.py runs NAT-059's build, patch_run62.py (exact-anchor hunks, each once) and the command-line patch; the NAT-036 stub, the stop list and the NAT-059 resume rules are unchanged; two builds (build-001, build-002) give identical hashes; RECOVERY a618b98c..., Image.payload c7863c99..., loader Image 1abdaf3a...; every changed source hash is in build.json.",
+  "2_tests": "test_nat062.py (32 tests: Derivation, Cmdline, Host, Parser, Payload, Build): chunking, escaping of all 256 byte values, bounds, the PA/length check, pacing, wait length, derivation, the command-line field, the payload symbols; test_nat062_run.py (24 tests: Derivation, RealTreeGate, Flow, Verdicts): driver pins and gates, PASS only for the complete chain, NO RETURN/refused/cut/damaged/ordering/exception/synthetic/old-image verdicts, the text file written byte-exact.",
+  "3_mutants": "mutants.py: 69 mutants of the patch, the build, the dump code, the analyser and the driver; 68 killed, 1 equivalent (M32, explained in mutants.py), none survived, none invalid. Run 1 counted three glue mutants (M15, M16, M22) as killed although they did not compile; the detector for non-compiling mutants was added and the three were rewritten and killed.",
+  "4_decision_draft": "docs/procedures/nat-062/decision-draft.md names both image hashes and decision 0019, what the kernel may touch, the 83 s watchdog / unobserved-hang limit and the deadline budget; no owner confirmation is recorded in it and no native step took place."
+ },
+ "established": [
+  "Host-test: the patch applies once per anchor to NAT-059's tree, only ckpt3.c and markerlib52.c differ (plus the two new files), the stub assembles to NAT-052's hash and the payload differs from NAT-059's only in the command-line field.",
+  "Host-test: the C dump code, built on the host, sends every byte value as printable ASCII that the Python parser inverts exactly, reads only the announced head and tail, refuses any x0 other than loader_log's PA and any length beyond the array before reading, sends nothing while the engine is down and never puts more than a third of the 32 KiB ring between two polls.",
+  "Host-test: the analyser separates PASS (27 notes, one complete final dump, one reason-0 note, one complete return dump, HOLD) from NO RETURN, refused, cut, damaged and misordered dumps, exceptions, synthetic archives and old-image boots; the log file carries the received text byte for byte.",
+  "Static: loader_log is at 0xfffffff007b90a00 and its array ends where loader_log_len begins (size 0x180000) in the real payload; loader_jump passes the log's PA and length in x0/x1."
+ ],
+ "not_established": [
+  "Anything about the real phone: whether kprintf text reaches loader_log on this SoC, whether the kernel runs on after arm_init, whether timer interrupts and the GIC work, what MMIO the kernel touches in the 8 s, whether loader_return() hands control back, and the behaviour of the 83 s watchdog on a hung kernel.",
+  "That the kernel resumes cleanly after the last stop in the same way as after the earlier ones (the model of NAT-036/059 is a model; NAT-060 showed 26 resumes on hardware).",
+  "That the dump finishes before the loader's own deadline reset: the budget (about 1.5 s + 8 s + 4 s) is an estimate from the host's 17 ms per transfer and the 0.5 s polls."
+ ],
+ "findings": [
+  "The mutation harness must reject mutants that do not compile: -Werror on the C harness turned three mutants (unused parameter/variable after the mutation) into false kills in the first run.",
+  "Reading the log file back with universal newlines hides the kernel's CR LF line ends: the text is written with newline='' and the test reads bytes.",
+  "The user /tmp quota is nearly used; tests and builds use the gitignored artifacts/nat-062/tmp via TMPDIR (make check needs a TMPDIR outside artifacts/)."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "<venv with capstone+pyusb>/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-062/test_nat062.py",
+    "-v"
+   ],
+   "exit_code": 0,
+   "note": "Ran 32 tests, OK, nothing skipped (artifacts/nat-062/test-patch-final.log)"
+  },
+  {
+   "argv": [
+    "<venv with capstone+pyusb>/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-062/test_nat062_run.py",
+    "-v"
+   ],
+   "exit_code": 0,
+   "note": "Ran 24 tests, OK, nothing skipped (artifacts/nat-062/test-run-final.log)"
+  },
+  {
+   "argv": [
+    "<venv with capstone+pyusb>/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-062/mutants.py",
+    "--json",
+    "artifacts/nat-062/mutants-final.json"
+   ],
+   "exit_code": 0,
+   "note": "68/69 killed, M32 equivalent, none survived, none invalid"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "artifacts/nat-062/make-check.log"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-062/test-patch-final.log",
+  "artifacts/nat-062/test-run-final.log",
+  "artifacts/nat-062/mutants-final.json",
+  "artifacts/nat-062/mutants-final.log",
+  "artifacts/nat-062/mutants-run1.log",
+  "artifacts/nat-062/mutants-run2.log",
+  "artifacts/nat-062/build-001/build.json",
+  "artifacts/nat-062/build-002/build.json",
+  "artifacts/nat-062/package-001/package.json",
+  "artifacts/nat-062/make-check.log"
+ ],
+ "images": {
+  "loader-diag-xnu-run-usb": {
+   "recovery_sha256": "a618b98ccbbc655ca20db2dfac033274582ccdc89d8f8b6128a635b8d48392ff",
+   "payload_sha256": "c7863c99b2448dd1ea518a83dcfa90cb4e405b6445ddf3d4718e2c9be7e0aadd",
+   "payload_bytes": 21861984,
+   "payload_offset": 2048,
+   "loader_image_sha256": "1abdaf3a4716dc45f6828092c1e058a1a10f07bc4af6c473eff45cc7a28dd29a"
+  }
+ },
+ "stock_recovery_sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+ "sha256": {
+  "docs/procedures/nat-062/README.md": "22f1d24d87b3bc17e166aa1d671dd93960a2cfbc13a42d6832ec3477a8dec229",
+  "docs/procedures/nat-062/decision-draft.md": "aeda965b5d3688c497c3c299bef39a4986c3e1f66b466fb5d40ee152c9da9b29",
+  "docs/procedures/nat-062/build.py": "2acef6448d9207c4143e0fa73bc1d420fbb5a28fb89a07e01499bad97bf36b24",
+  "docs/procedures/nat-062/patch_run62.py": "b51f9d2f3306cbb5b686fcb0b8552218cee3c84f11efd74ff301c52e8955337a",
+  "docs/procedures/nat-062/src/glue62.h": "6d903add9b84dbdee16035ea296acd9f13aa94929814eaf85eb6a7dff2867473",
+  "docs/procedures/nat-062/src/glue62_impl.h": "6bc5898470d0c2933f4de95fa093932a6b25cf2160b3850cd94ac1e8d00aa688",
+  "docs/procedures/nat-062/session_nat062.py": "85efb57cf1b1caf40bd79729c00d92fa090f59d39ab818b8aa9dc4feb6123b3f",
+  "docs/procedures/nat-062/analyze_nat062.py": "32343921482250dd40bcfaf960bb05cac9697a3d1a7f86213e0402efa27af551",
+  "docs/procedures/nat-062/test_nat062.py": "1e3534660ccf868b5acd49f97971b89762bdb36b163d4d3a20ecd2795b8a5d33",
+  "docs/procedures/nat-062/test_nat062_run.py": "e0d43bc22d32790499ba171bb0aa5b9c8b9f82e5bd28b9fb30609677eb7f4a89",
+  "docs/procedures/nat-062/mutants.py": "32269e0a58818a12ea04ed2026a42cb98cf168f321f8a4f5fc847e41b597fe53"
+ },
+ "artifact_sha256": {
+  "artifacts/nat-062/test-patch-final.log": "aa6e7c0613a0855f67b8e65347e69f933fc4721728546e91cfc4ecb8a60ef990",
+  "artifacts/nat-062/test-run-final.log": "fcdb6e19cf790eb7c98eb088e19161a66609edb191fa13bfce00621c375511ff",
+  "artifacts/nat-062/mutants-final.json": "25b07370970af75e0f43299ab0e4131f39d11e50af9be6d23c626e6378dc71af",
+  "artifacts/nat-062/mutants-final.log": "e19d10b1a61d41a2f01fde69046bd176f560c00b07b9f7752886afabd21e0cdb",
+  "artifacts/nat-062/mutants-run1.log": "e02a2c180a70041fed33bbc60a4cabc373f72d5601617187897fe0c8f1d57e76",
+  "artifacts/nat-062/mutants-run2.log": "4c3fd958915ac3e5bc5de2630470b03958184bd74160e3c709dbb23e5f04b9ba",
+  "artifacts/nat-062/build-001/build.json": "a8ab8726d7cb8aa35b328e8227b24867b368202f150ad7dbc1575279bfdaee76",
+  "artifacts/nat-062/build-002/build.json": "ce118adc76dab81493864c144118a7df0613f781bdca01a0cd40614d556ef86e",
+  "artifacts/nat-062/package-001/package.json": "7bbd282633aaec01ee6a560450902e8d21174f4bd07ca5e6b02a73609ae0e8e6",
+  "artifacts/nat-062/make-check.log": "d247076abc581e9bb6a169878b2a28fb4c6a00ca8025794a488f9bc6b25e8b4b"
+ },
+ "device_used": false,
+ "flashed": false
+}
