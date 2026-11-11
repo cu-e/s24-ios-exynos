@@ -3,7 +3,8 @@
 Status: **draft text, not a decision and not a request.** Decision 0018 does not exist. Per AGENTS.md and decision 0002 each native
 image needs its own owner decision; "decide yourself" and standing autonomy name no image. This text is to be asked (in Russian, with
 the choice labels below) only after (a) the NAT-036 tests and build records are committed, and (b) a session driver for this image
-exists, gated on the decision file like `session_xnu_ckpt2.py` (a separate host task, NAT-037; not part of NAT-036). Hashes below are
+exists, gated on the decision file like `session_xnu_ckpt2.py` (a separate host task, NAT-037; not part of NAT-036): it is
+`docs/procedures/nat-037/session_xnu_ckpt3.py`, host-tested by `docs/procedures/nat-037/test_nat037.py`. Hashes below are
 those of the committed-tree builds; they must be re-checked against `artifacts/nat-036/build-001-final` before asking.
 
 ## Reason for the image
@@ -38,10 +39,19 @@ NAT-022 `loader-diag-xnu-ckpt3` built with `--stops 11,30,35,12,44,13,14,15,16`:
 * `Image.payload` SHA-256 `0e556d94b9921ba4cdc426d89e613dbd4e0c694391c220c9429958aae631911a` (`artifacts/nat-036/build-001/...`)
 * RECOVERY image SHA-256 `c61165cb0264388098705deea0421e12d77f612791c3b2d579e46bf40abd4f0b` (`artifacts/nat-036/package-001/`, payload
   verbatim at offset 2048, 19634 pages differ from stock)
-* source commit `@@COMMIT@@`; evidence `docs/procedures/nat-036/evidence.json`
+* source commit `46826cb64fe7c2a8cbde90300e464f2299a329ce`; evidence `docs/procedures/nat-036/evidence.json`
 
 The 17-stop alternative (every C checkpoint of `arm_init` up to 16) was also built: `Image` `d2b97542…`, payload `da372479…`, RECOVERY
 `1654834b…` (`package-002-17stop`). It is **not** proposed: its report ends 5.5 s before the watchdog.
+
+Driver and usage (nothing is run before the decision file `docs/decisions/0018-nat036-loader-diag-xnu-ckpt3-single-run-2026-11-11.md`
+exists; the driver never creates it; one-shot marker `artifacts/nat-022/native-attempt-xnuckpt3-used.json`):
+
+```
+python3 docs/procedures/nat-037/session_xnu_ckpt3.py --out artifacts/nat-037/session-NNN            # read-only preflight
+python3 docs/procedures/nat-037/session_xnu_ckpt3.py --out artifacts/nat-037/session-NNN --execute  # write, readback, one reboot
+python3 docs/procedures/nat-037/session_xnu_ckpt3.py --out artifacts/nat-037/session-NNN --restore  # pinned stock, no reboot
+```
 
 Sequence, as for runs 008-009: full-hash write to RECOVERY (`/dev/block/sda18`) only, full readback, one `adb reboot recovery`,
 owner-operated camera recording (about 2 minutes), then restore of the pinned stock RECOVERY (`96620b8b…babf67`; through the driver if

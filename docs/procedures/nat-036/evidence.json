@@ -1,0 +1,340 @@
+{
+ "kind": "host-test",
+ "also": [
+  "source-review"
+ ],
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T00:04:23+00:00",
+ "commit": "46826cb64fe7c2a8cbde90300e464f2299a329ce",
+ "tree_state": "sources, tests and README committed in 46826cb; this record, the README timing line and the task transition are committed afterwards. Builds build-001 and build-001-final (from the committed tree) are byte-identical.",
+ "owner": "claude-nat036-20261111-cstub",
+ "summary": "Host work for the next NAT-022 image `loader-diag-xnu-ckpt3`: the ADT boot-CPU reg fix (MPIDR & 0xffff), a compiled resumable C-checkpoint stub with a selectable stop list, a one-frame-per-pass report with a decoder, host tests against the NAT-033/035 instruction-level model, a mutation check, builds and RECOVERY packages for two stop lists (hashes only) and the draft text of the decision-0018 question. Nothing was flashed, run or sent to the phone; decision 0018 was not requested.",
+ "acceptance": {
+  "1_adt_reg_patch": "patch_loader3.py changes `adt_set_boot_cpu_mpidr(..., (uint32_t)gi.mpidr)` to `(uint32_t)(gi.mpidr & 0xffff)` with an exact-match replacement (base: NAT-020 build-003 loader source, GPL-2.0). test_nat036.py AdtMask compiles the patched expression, evaluates it for a raw MPIDR with bit 31 set, and feeds the value to the kernel's own ml_get_cpu_number_local() in the model: the patched ADT finds CPU 0; the loader as built does not (the NAT-035 finding).",
+  "2_compiled_resumable_stub": "ckpt3_stub.S + ckpt3.c compiled with the project toolchain (zig cc, the loader flags) run in the NAT-033/035 model on the real payload bytes: C3Chain (stops 1-5, the cp5 resume, 11,30-35,12) and C3LongChain (NAT036_LONG=1: all 17 stops, and the 9-stop candidate list 11,30,35,12,44,13,14,15,16, to checkpoint 16) end in the same kernel state, RAM and system registers as an uninterrupted run with every register the stub does not restore overwritten and tainted (no read of a clobbered register, DAIF masked at every entry). Negative controls on the compiled stub: each of the 13 restore/set-up instructions of the C tail replaced by a nop is detected; x18..x28 injected with distinct values come back; the frame layout; 81 textual mutants of the decision code, the stub and the report all killed on the final tests (six weak tests found by the mutation runs were strengthened and the mutants re-run).",
+  "3_report_budget_list_hashes_hazards_question": "Per-stop report: one kind-13 frame per pass (arrivals, last checkpoint), values-first final report; the framebuffer after every draw decodes to the frame drawn. Budget (README table, pinned by Ckpt3Marker tests): 9-stop list passes end 45 s, values 67 s, margin 13-16 s to the 83 s watchdog; 17-stop list margin 2.9-5.5 s. Candidate list 11,30,35,12,44,13,14,15,16; hashes of the loader Image, Image.payload and RECOVERY image for both lists; hazard list in README (never run on hardware, caches/TLB/barriers unmodelled, DAIF, unanalysed panic path, stops 17-21 refused, captured TTBR0 a model value); the question text in decision-0018-question.md (draft, not requested). Nothing was flashed, run or jumped to on the phone."
+ },
+ "established": [
+  "Host-test: the NAT-036 stub, decision code, report and build behave as designed in the instruction-level model on the real payload bytes, and the tests discriminate (81 mutants, all killed on the final tests; the one survivor of the last full run, a pass that did not redraw in full, was killed after a framebuffer-level test was added).",
+  "The 9-stop candidate list (11,30,35,12,44,13,14,15,16) resumed by the compiled stub reaches checkpoint 16 in the model with the same state as an uninterrupted run; model final record x0 0x9e1f90a00, x1 0, SP 0xfffffff00805fef0, kernel TTBR0 0x9e15ae000, SCTLR 0x3454593d, TTBR1 0x9e15af000, TCR 0x22a51a251a, VBAR 0xfffffff007437000, 14 arrivals.",
+  "Candidate (9 stops): loader Image 6072f8e4b0215e195d5c8e5ad29f6ecdd28d41277d3dbf2e9c6ce354404ad0e0, Image.payload 0e556d94b9921ba4cdc426d89e613dbd4e0c694391c220c9429958aae631911a (21784160 B), RECOVERY c61165cb0264388098705deea0421e12d77f612791c3b2d579e46bf40abd4f0b; three builds (working tree, repro, committed tree) and three packages are byte-identical. Alternative (17 stops): Image d2b97542e3b584541626daed676e6a1f4a0ff111de59f500f6a0d2fdad5de1a8, payload da3724791d0ebe7159b68f3315e43df6428e0fb8b98f85bcf8f4b6f4110532ce, RECOVERY 1654834b8fb06a434c2ef0e5e24350250bc9045fdb3c3c9b73a47f6b8968deb1.",
+  "The image differs from loader-diag-xnu-ckpt2 only in three loader.c hunks and four new files; the stub, stack, log and _end fit one 2 MiB block at the three S-Boot bases seen (0x800a0000, 0x80180000, 0x801a0000)."
+ ],
+ "not_established": [
+  "Anything on the phone: the compiled C tail has never run on hardware. The model has no caches, TLB, barriers, exception model, timers or devices; the dc civac order, tlbi, dsb and isb sequence of the stub is checked only as text (removing the barriers changes nothing in the model).",
+  "That the S24 behaves as the model through the nine stops: the real ID registers, MPIDR, counter and timers are assumed in the model; the kernel TTBR0 value 0x9e15ae000 is a model value until the phone reports it; the SCTLR bit 5/7 difference is unexplained.",
+  "The panic path (PE_panic_hook, loader_return, psci_smp_stop_others, redwood_*_quiesce) is still not analysed and may write device registers; DAIF is not restored by any primitive.",
+  "Checkpoints 17-21 (the model blocks at cnt v0.8b; the kernel TTBR0 changes in arm_vm_init) and anything after checkpoint 16.",
+  "The display budget is computed from the frame counts and the costs measured in runs 006-009; it is not a measurement of this image.",
+  "Decision 0018 has not been requested: a session driver for this image (NAT-037) does not exist yet. A report frame will say the kernel code ran up to that checkpoint, not that XNU boots."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-036/build.py",
+    "--out",
+    "artifacts/nat-036/build-001",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source",
+    "--stops",
+    "11,30,35,12,44,13,14,15,16"
+   ],
+   "exit_code": 0,
+   "note": "9-stop candidate; log artifacts/nat-036/logs/build-001.stdout"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-036/build.py",
+    "--out",
+    "artifacts/nat-036/build-001-repro",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source",
+    "--stops",
+    "11,30,35,12,44,13,14,15,16"
+   ],
+   "exit_code": 0,
+   "note": "Image, Image.payload, loader.elf cmp-identical to build-001"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-036/build.py",
+    "--out",
+    "artifacts/nat-036/build-002-17stop",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source"
+   ],
+   "exit_code": 0,
+   "note": "17-stop alternative (default list)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-036/build.py",
+    "--out",
+    "artifacts/nat-036/build-001-final",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source",
+    "--stops",
+    "11,30,35,12,44,13,14,15,16"
+   ],
+   "exit_code": 0,
+   "note": "from the committed tree 46826cb; cmp-identical to build-001"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/package.py",
+    "--image",
+    "artifacts/nat-036/build-001/loader-diag-xnu-ckpt3/Image.payload",
+    "--out",
+    "artifacts/nat-036/package-001"
+   ],
+   "exit_code": 0,
+   "note": "RECOVERY c61165cb\u2026, payload verbatim at offset 2048, 19634 pages differ from stock; host only, nothing written to a device"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/package.py",
+    "--image",
+    "artifacts/nat-036/build-001-repro/loader-diag-xnu-ckpt3/Image.payload",
+    "--out",
+    "artifacts/nat-036/package-001-repro"
+   ],
+   "exit_code": 0,
+   "note": "recovery.img identical (cmp 0)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/package.py",
+    "--image",
+    "artifacts/nat-036/build-001-final/loader-diag-xnu-ckpt3/Image.payload",
+    "--out",
+    "artifacts/nat-036/package-001-final"
+   ],
+   "exit_code": 0,
+   "note": "recovery.img identical (cmp 0)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-P",
+    "docs/procedures/nat-022/package.py",
+    "--image",
+    "artifacts/nat-036/build-002-17stop/loader-diag-xnu-ckpt3/Image.payload",
+    "--out",
+    "artifacts/nat-036/package-002-17stop"
+   ],
+   "exit_code": 0,
+   "note": "RECOVERY 1654834b\u2026"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-036/test_nat036.py",
+    "-v"
+   ],
+   "exit_code": 0,
+   "note": "56 tests OK, 2 skipped (the NAT036_LONG chains), 61 s",
+   "log": "artifacts/nat-036/logs/test_nat036-venv.log"
+  },
+  {
+   "argv": [
+    "env",
+    "NAT036_LONG=1",
+    "<scratchpad>/capvenv/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-036/test_nat036.py",
+    "-v"
+   ],
+   "exit_code": 0,
+   "note": "56 tests OK, 441 s (run before the commit on the same test file and sources; includes the 17-stop and the 9-stop chains)",
+   "log": "artifacts/nat-036/logs/test_nat036-venv-long.log"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-W",
+    "ignore",
+    "docs/procedures/nat-036/test_support/mutate_nat036.py",
+    "<indices>"
+   ],
+   "exit_code": 1,
+   "note": "full run in 12 parallel chunks on the final tests minus the framebuffer test: 81 results, 80 killed, 1 survived (77, the pass that did not redraw in full); one chunk exited 1 for that reason. Two chunks were relaunched after two mutation texts with wrong indentation (26, 30) were fixed; all 81 texts were validated to match exactly once",
+   "log": "artifacts/nat-036/logs/mutation-full.log"
+  },
+  {
+   "argv": [
+    "<scratchpad>/capvenv/bin/python",
+    "-W",
+    "ignore",
+    "docs/procedures/nat-036/test_support/mutate_nat036.py",
+    "77",
+    "5",
+    "56",
+    "57",
+    "61",
+    "72"
+   ],
+   "exit_code": 0,
+   "note": "after the framebuffer test: the six mutants that survived at some stage are all killed; the final text checks pass",
+   "log": "artifacts/nat-036/logs/mutation-rerun-survivors.log"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "214 tests OK (does not run docs/procedures tests)",
+   "log": "artifacts/nat-036/logs/make-check.log"
+  }
+ ],
+ "sha256": {
+  "artifacts/nat-036/task.json": "2e9336afccbbf30916f892cd592280509bd1c1700cb8c8230cc85cb05c0e2277",
+  "artifacts/nat-036/build-001/build.json": "31d02a544d788979e1d7c6d7e993bacd04262da5d5e3629a66d0830f0fd2cd3f",
+  "artifacts/nat-036/build-001/loader-diag-xnu-ckpt3/Image": "6072f8e4b0215e195d5c8e5ad29f6ecdd28d41277d3dbf2e9c6ce354404ad0e0",
+  "artifacts/nat-036/build-001/loader-diag-xnu-ckpt3/Image.payload": "0e556d94b9921ba4cdc426d89e613dbd4e0c694391c220c9429958aae631911a",
+  "artifacts/nat-036/build-001/loader-diag-xnu-ckpt3/loader.elf": "b60d7f5077fa4b94bf5c65ad94dff02b447c901694bcd36b308d54eefbcf7f24",
+  "artifacts/nat-036/build-001-repro/build.json": "c0ee69597166379d85a5fd7044aa9f38541199814874954d879c0bf9f2e5e09e",
+  "artifacts/nat-036/build-001-repro/loader-diag-xnu-ckpt3/Image": "6072f8e4b0215e195d5c8e5ad29f6ecdd28d41277d3dbf2e9c6ce354404ad0e0",
+  "artifacts/nat-036/build-001-repro/loader-diag-xnu-ckpt3/Image.payload": "0e556d94b9921ba4cdc426d89e613dbd4e0c694391c220c9429958aae631911a",
+  "artifacts/nat-036/build-001-repro/loader-diag-xnu-ckpt3/loader.elf": "b60d7f5077fa4b94bf5c65ad94dff02b447c901694bcd36b308d54eefbcf7f24",
+  "artifacts/nat-036/build-001-final/build.json": "e1ef3119d3c9a32f932215c7bb0f748f02a4a106cb5b4437eb5d3a61e840c682",
+  "artifacts/nat-036/build-001-final/loader-diag-xnu-ckpt3/Image": "6072f8e4b0215e195d5c8e5ad29f6ecdd28d41277d3dbf2e9c6ce354404ad0e0",
+  "artifacts/nat-036/build-001-final/loader-diag-xnu-ckpt3/Image.payload": "0e556d94b9921ba4cdc426d89e613dbd4e0c694391c220c9429958aae631911a",
+  "artifacts/nat-036/build-001-final/loader-diag-xnu-ckpt3/loader.elf": "b60d7f5077fa4b94bf5c65ad94dff02b447c901694bcd36b308d54eefbcf7f24",
+  "artifacts/nat-036/build-002-17stop/build.json": "da72d85a07c898a8f77ac5af67f7b71717432eff59d4d310f901738ebd53801e",
+  "artifacts/nat-036/build-002-17stop/loader-diag-xnu-ckpt3/Image": "d2b97542e3b584541626daed676e6a1f4a0ff111de59f500f6a0d2fdad5de1a8",
+  "artifacts/nat-036/build-002-17stop/loader-diag-xnu-ckpt3/Image.payload": "da3724791d0ebe7159b68f3315e43df6428e0fb8b98f85bcf8f4b6f4110532ce",
+  "artifacts/nat-036/build-002-17stop/loader-diag-xnu-ckpt3/loader.elf": "c71fafe7f14823f56f23b54cc02ce5eb14c0ab2d308ef9578642476140811b47",
+  "artifacts/nat-036/package-001/recovery.img": "c61165cb0264388098705deea0421e12d77f612791c3b2d579e46bf40abd4f0b",
+  "artifacts/nat-036/package-001/package.json": "bc12e39c5f926ba691e74dc43c1c280eec82bec77401ca1239b91bfeb8acde04",
+  "artifacts/nat-036/package-001-repro/recovery.img": "c61165cb0264388098705deea0421e12d77f612791c3b2d579e46bf40abd4f0b",
+  "artifacts/nat-036/package-001-repro/package.json": "67a8df55412e97e2c5aa3a49f0a4bb6c0db8077b251fcd66b3db7e57338912c0",
+  "artifacts/nat-036/package-001-final/recovery.img": "c61165cb0264388098705deea0421e12d77f612791c3b2d579e46bf40abd4f0b",
+  "artifacts/nat-036/package-001-final/package.json": "99576cfb8eebdf41ef8e6781abd7f1fd4517198071d5481b735776db49be9827",
+  "artifacts/nat-036/package-002-17stop/recovery.img": "1654834b8fb06a434c2ef0e5e24350250bc9045fdb3c3c9b73a47f6b8968deb1",
+  "artifacts/nat-036/package-002-17stop/package.json": "6ce0cd7ff3c2d6012e60918a6f328a8baf87d34c4e12bc7eb278af4dc880f608",
+  "artifacts/nat-036/logs/.stderr": "682ce849d93cc9b685d7907b122df6133f6fd4a935720757c054ca3a19cc9564",
+  "artifacts/nat-036/logs/.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-036/logs/build-001-repro.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-036/logs/build-001-repro.stdout": "0a6832a1fbc7c501910c8b583335045b337e1c1685fd9edc3de815bcd056308e",
+  "artifacts/nat-036/logs/build-001.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-036/logs/build-001.stdout": "0a6832a1fbc7c501910c8b583335045b337e1c1685fd9edc3de815bcd056308e",
+  "artifacts/nat-036/logs/build-002-17stop.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-036/logs/build-002-17stop.stdout": "f18e5077660d2f921d41399f9670350a5325b40ffb0e9317222aa7a38eb43aad",
+  "artifacts/nat-036/logs/build-final.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-036/logs/build-final.stdout": "0a6832a1fbc7c501910c8b583335045b337e1c1685fd9edc3de815bcd056308e",
+  "artifacts/nat-036/logs/make-check.log": "62515260bd41ec39d27e34a812c32d8045f9b5fdf440ce438ebf98904095c95d",
+  "artifacts/nat-036/logs/mutation-full.log": "d13de8c5065269e73087d6325149da51beb9cee457f03b2f8c410407ff909a9d",
+  "artifacts/nat-036/logs/mutation-rerun-survivors.log": "0204d3094a96dd3d8fb093cabd3b13b993a3771c2a0e7bf90578d88b01b1b2fe",
+  "artifacts/nat-036/logs/package-001-repro.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-036/logs/package-001-repro.stdout": "f1e77f639be4cdcb8057096a0cd5274c650656eb0039a32f02efa87fb1d623dc",
+  "artifacts/nat-036/logs/package-001.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-036/logs/package-001.stdout": "f1e77f639be4cdcb8057096a0cd5274c650656eb0039a32f02efa87fb1d623dc",
+  "artifacts/nat-036/logs/package-002-17stop.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-036/logs/package-002-17stop.stdout": "593906e7b566b1a76892a1b5e6e150cbb6c8568197e5ec755d08a3d22179b9fc",
+  "artifacts/nat-036/logs/package-final.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-036/logs/package-final.stdout": "f1e77f639be4cdcb8057096a0cd5274c650656eb0039a32f02efa87fb1d623dc",
+  "artifacts/nat-036/logs/test_nat036-venv-long.log": "47b95ae3080aab8272a16555fa9374d7b92f86661a2cd76cd2c617efad371a88",
+  "artifacts/nat-036/logs/test_nat036-venv.log": "c8f87c4c68efc72a992887cf812fae5696283233b5c23bf927464732bf6d0226",
+  "docs/procedures/nat-036/README.md": "eceb183df155da26ab23f97649b6aff323fe01eb5d905c352d61dcdd21990dd8",
+  "docs/procedures/nat-036/decision-0018-question.md": "b6dc4ba2f2e9734aefc2b373f127aa5a556f81b8613b118e1f6813bab9e38436",
+  "docs/procedures/nat-036/build.py": "88691d19c89df7fe68fe4fd88183bfdd8ae7801a072e21f086be64b8bc827613",
+  "docs/procedures/nat-036/patch_loader3.py": "1fb95d7c59356e24540d863b921ec39efcaeb158ee06eeee7be3c1340258447d",
+  "docs/procedures/nat-036/decode3.py": "ab7d299884a05d649dfba3e5ce286e2d2000b5ff710e5602e9f27bdfa6f015b2",
+  "docs/procedures/nat-036/test_nat036.py": "46fd7ed83a7cedf274d1a64715fa482d13ab384d1fa28f6256ca37fc02b016c3",
+  "docs/procedures/nat-036/src/ckpt3.c": "3232e8810945293e174022c0856a21049056d4da2ae0a7b8a7c462105794b436",
+  "docs/procedures/nat-036/src/ckpt3.h": "9dcf6f591d061291837d008ba4b2768a62cd42ea662c9361639d2bb727c7ddcb",
+  "docs/procedures/nat-036/src/ckpt3_stub.S": "32ad7a8c0ceab9d619c7e0aebceec9d166bbd1e971361104e6132ab9cb90c7d3",
+  "docs/procedures/nat-036/src/marker3.h": "a2b5c59f74607f54d1927d1befcf16a6ed961a482ded1c05110677dfb7dce44f",
+  "docs/procedures/nat-036/src/markerlib3.c": "e5d620c275930f4ead66d231c554395bd947e39632d5bb3cdec7c46dc1ba0dbc",
+  "docs/procedures/nat-036/test_support/host_mk3.c": "b9642df039b7f56a40e042820a3f8e02ebcded0b3a0049c7e4754f4c1baf81ad",
+  "docs/procedures/nat-036/test_support/nat036_mock.c": "2786dddeed39651ffeb72ee4e23f2e48c418212a665cfbc84e40f8ade0fdc525",
+  "docs/procedures/nat-036/test_support/nat036_mock.ld": "03773e9e3bef69c1ddbf6f648941b6c4247e6c5a30b4ff5e6ed84c4c0c5074e1",
+  "docs/procedures/nat-036/test_support/mutate_nat036.py": "4c53abd7c8cb3fea8e839fac201434a1a85c198699ad090b9d1ee84ae5ddc201"
+ },
+ "artifacts": [
+  "artifacts/nat-036/task.json",
+  "artifacts/nat-036/build-001/build.json",
+  "artifacts/nat-036/build-001/loader-diag-xnu-ckpt3/Image",
+  "artifacts/nat-036/build-001/loader-diag-xnu-ckpt3/Image.payload",
+  "artifacts/nat-036/build-001/loader-diag-xnu-ckpt3/loader.elf",
+  "artifacts/nat-036/build-001-repro/build.json",
+  "artifacts/nat-036/build-001-repro/loader-diag-xnu-ckpt3/Image",
+  "artifacts/nat-036/build-001-repro/loader-diag-xnu-ckpt3/Image.payload",
+  "artifacts/nat-036/build-001-repro/loader-diag-xnu-ckpt3/loader.elf",
+  "artifacts/nat-036/build-001-final/build.json",
+  "artifacts/nat-036/build-001-final/loader-diag-xnu-ckpt3/Image",
+  "artifacts/nat-036/build-001-final/loader-diag-xnu-ckpt3/Image.payload",
+  "artifacts/nat-036/build-001-final/loader-diag-xnu-ckpt3/loader.elf",
+  "artifacts/nat-036/build-002-17stop/build.json",
+  "artifacts/nat-036/build-002-17stop/loader-diag-xnu-ckpt3/Image",
+  "artifacts/nat-036/build-002-17stop/loader-diag-xnu-ckpt3/Image.payload",
+  "artifacts/nat-036/build-002-17stop/loader-diag-xnu-ckpt3/loader.elf",
+  "artifacts/nat-036/package-001/recovery.img",
+  "artifacts/nat-036/package-001/package.json",
+  "artifacts/nat-036/package-001-repro/recovery.img",
+  "artifacts/nat-036/package-001-repro/package.json",
+  "artifacts/nat-036/package-001-final/recovery.img",
+  "artifacts/nat-036/package-001-final/package.json",
+  "artifacts/nat-036/package-002-17stop/recovery.img",
+  "artifacts/nat-036/package-002-17stop/package.json",
+  "artifacts/nat-036/logs/.stderr",
+  "artifacts/nat-036/logs/.stdout",
+  "artifacts/nat-036/logs/build-001-repro.stderr",
+  "artifacts/nat-036/logs/build-001-repro.stdout",
+  "artifacts/nat-036/logs/build-001.stderr",
+  "artifacts/nat-036/logs/build-001.stdout",
+  "artifacts/nat-036/logs/build-002-17stop.stderr",
+  "artifacts/nat-036/logs/build-002-17stop.stdout",
+  "artifacts/nat-036/logs/build-final.stderr",
+  "artifacts/nat-036/logs/build-final.stdout",
+  "artifacts/nat-036/logs/make-check.log",
+  "artifacts/nat-036/logs/mutation-full.log",
+  "artifacts/nat-036/logs/mutation-rerun-survivors.log",
+  "artifacts/nat-036/logs/package-001-repro.stderr",
+  "artifacts/nat-036/logs/package-001-repro.stdout",
+  "artifacts/nat-036/logs/package-001.stderr",
+  "artifacts/nat-036/logs/package-001.stdout",
+  "artifacts/nat-036/logs/package-002-17stop.stderr",
+  "artifacts/nat-036/logs/package-002-17stop.stdout",
+  "artifacts/nat-036/logs/package-final.stderr",
+  "artifacts/nat-036/logs/package-final.stdout",
+  "artifacts/nat-036/logs/test_nat036-venv-long.log",
+  "artifacts/nat-036/logs/test_nat036-venv.log",
+  "docs/procedures/nat-036/README.md",
+  "docs/procedures/nat-036/decision-0018-question.md",
+  "docs/procedures/nat-036/build.py",
+  "docs/procedures/nat-036/patch_loader3.py",
+  "docs/procedures/nat-036/decode3.py",
+  "docs/procedures/nat-036/test_nat036.py",
+  "docs/procedures/nat-036/src/ckpt3.c",
+  "docs/procedures/nat-036/src/ckpt3.h",
+  "docs/procedures/nat-036/src/ckpt3_stub.S",
+  "docs/procedures/nat-036/src/marker3.h",
+  "docs/procedures/nat-036/src/markerlib3.c",
+  "docs/procedures/nat-036/test_support/host_mk3.c",
+  "docs/procedures/nat-036/test_support/nat036_mock.c",
+  "docs/procedures/nat-036/test_support/nat036_mock.ld",
+  "docs/procedures/nat-036/test_support/mutate_nat036.py"
+ ]
+}

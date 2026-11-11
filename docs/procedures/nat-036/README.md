@@ -144,5 +144,5 @@ Run with an interpreter that has capstone and unicorn and `zig`, `cc` on PATH (`
 * `test_nat036.py`, `test_support/{host_mk3.c,nat036_mock.c,nat036_mock.ld,mutate_nat036.py}`.
 * `decision-0018-question.md`: the draft question; `evidence.json`: provenance, commands, exit codes, hashes.
 
-Run: `<venv>/bin/python -I docs/procedures/nat-036/test_nat036.py` (about 1 min; `NAT036_LONG=1` about 3 min) and
+Run: `<venv>/bin/python -I docs/procedures/nat-036/test_nat036.py` (61 s; `NAT036_LONG=1` 441 s on the loaded host) and
 `<venv>/bin/python docs/procedures/nat-036/test_support/mutate_nat036.py` (many minutes; indices select mutations).
