@@ -1,0 +1,138 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T02:41:00+00:00",
+ "commit": "e02fd96d08f9599025f50b19019d09192c98a43b",
+ "tree_state": "the files listed under sha256 are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat044-20261111-resetimg",
+ "summary": "Reset canary images loader-diag-reset (Download word 0x12345601) and loader-diag-reset-bl (Bootloader word 0x1234560d, mode 3): the run-006 loader family (NAT-020 build-003 + NAT-022 --trig-hold --adt-aligned + NAT-026 payload fix) plus a six-hunk patch (entry PMU snapshot with clearing of a leftover Download/Bootloader request, a 45 s deadline measured from after the 83 s watchdog arm, RESET stage marker, RST report frames) and the unmodified NAT-042 reset module. Built twice with identical hashes, packaged into RECOVERY candidates (hashes only), 46 host/aarch64-simulator tests, 46/46 mutants killed, decision text for the native run (NAT-046) drafted and not dated. Nothing was flashed or run on the phone.",
+ "evidence_category": "host-test (host x86 model + unicorn instruction-level simulation of the compiled loader); not a measurement of the S24",
+ "acceptance": {
+  "1_build": "build.py applies nat-022 patch_loader.py (--trig-hold --adt-aligned), nat-022 marker library, then patch_loader4.py (6 exact-match hunks, each anchor once, all-or-nothing); the NAT-042 module is linked unmodified (hashes equal to nat-042 sources: s5e9945_reset.h/.c); both images build with the loader flags and are reproducible (build-001 and build-002 image hashes identical).",
+  "2_tests": "test_nat044.py: 46 tests (system python: 31 run, 15 skipped for missing unicorn/capstone; interpreter with unicorn 2.1.4 + capstone: all 46 run). Layers: Patch (anchors, diff = hunks only), HostReset (real patched markerlib.c + markerlib4.c + NAT-042 module on x86 against a PMU register model), Build, Aarch64 (the built loader.elf in unicorn: trigger at the deadline after the RESET frame decoded from the framebuffer bytes, vendor register order and values, bootloader variant, read-back failure triggers nothing and is reported, unarmed never writes, leftover request cleared and reported, deadline armed only after the watchdog in the real recovery_guard). The deadline (45 s) is at most WDT (83 s) minus 20 s, enforced by build.py and tested. Mutation: 46 mutants of the new code, patch hunks, build rules and decoder; 46/46 killed, 0 invalid (mutation-002). The first run (mutation-001, 45 mutants) had two survivors and one invalid mutant, which exposed a tautological test and a missing ordering check; both fixed before mutation-002.",
+  "3_package_and_decision_text": "package-001: recovery.img for each image from the NAT-006 builder (payload verbatim, 100663296 bytes, differing 4 KiB pages 19608 each, canary at offset 2048); hashes only, no firmware committed. decision-template.md: decision text for NAT-046 under decision 0019 with pass/fail wording for U1-U4, protocol of runs 001-009; not dated and not a decision record. Nothing is flashed or run."
+ },
+ "established": [
+  "loader-diag-reset Image sha256 24baf94e039be4869361706356005bc19aa891a2ce170332f8a6ab2f718635a1; loader-diag-reset-bl Image sha256 87226d5246a906de28dfbfba2c479ca2698732c5103deca2b0f2654c899f8362; RECOVERY candidates e4cd7bdf4789b5bc60f8a0b3a0d5dd887ab75f345df13a0b0115a0934419fe4a and 7481c95ab8ef56a112507abb5cfa9e273285e32c7548264bb224ed5614832d2b.",
+  "In the instruction-level run of the compiled loader the PMU stores are INFORM2 byte 2 := 0x4e, INFORM3 := reason, reboot-cmd bits [2:0] := mode, 0x3c00 := 2, in that order, at the deadline (>= 45 s and < 45.05 s after the arm), after the RESET marker (0x41) was in the framebuffer; read-back failures (INFORM2, INFORM3, reboot-cmd) trigger nothing, are drawn as rc 2/3/4 and are not retried.",
+  "A leftover Download/Bootloader INFORM3 word is read before it is cleared, shown in the entry words, cleared with a read-back, and flagged CLEARED or CLEARFAIL in the status frame (decoded from the framebuffer).",
+  "start.S sets CPACR_EL1.FPEN and clears CPTR_EL2 before the first C call; the new code uses q/d register copies emitted by zig cc despite -mgeneral-regs-only, which is safe only inside the loader."
+ ],
+ "not_established": [
+  "U1: that the loader's PMU stores reach the hardware; U2: that 0x3c00 := 2 resets without the ACPM STOP request; U3/U4: that S-Boot honours INFORM3 = Download / Bootloader. All are native measurements for NAT-046; unicorn and the host model have no caches, MMU or memory attributes and are not the S24.",
+  "That the reset marker is seen: it is on screen for milliseconds. That the phone returns to Download Mode, or to Android, by itself."
+ ],
+ "findings": [
+  "The 'no SIMD in the text' check of my first version was vacuous (capstone disasm() stopped after two instructions) and its premise was wrong; replaced by the FPEN-before-C property and by a per-function ordering check (dsb sy between the INFORM3 clearing store and its read-back) in the compiled nat044_snapshot.",
+  "NAT-022's build.py already notes that zig cc emits SIMD with -mgeneral-regs-only; NAT-036's per-function SIMD test is sound."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-044/build.py",
+    "--out",
+    "artifacts/nat-044/build-001",
+    "--loader-source",
+    "<copy of artifacts/nat-020/build-003/source>"
+   ],
+   "exit_code": 0,
+   "note": "same command with build-002; identical image hashes"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-044/test_nat044.py"
+   ],
+   "exit_code": 0,
+   "note": "system python: Ran 46 tests, OK (skipped=15)"
+  },
+  {
+   "argv": [
+    "capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-044/test_nat044.py"
+   ],
+   "exit_code": 0,
+   "note": "interpreter with unicorn 2.1.4 + capstone: Ran 46 tests, OK"
+  },
+  {
+   "argv": [
+    "capvenv/bin/python",
+    "-I",
+    "docs/procedures/nat-044/mutate_nat044.py",
+    "--out",
+    "artifacts/nat-044/mutation-002",
+    "--jobs",
+    "4"
+   ],
+   "exit_code": 0,
+   "note": "killed 46 of 46, invalid 0; mutation-001 (45 mutants) was killed 42, survived 2, invalid 1 and led to test fixes"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-022/package.py",
+    "--image",
+    "artifacts/nat-044/build-002/loader-diag-reset/Image",
+    "--out",
+    "artifacts/nat-044/package-001/loader-diag-reset"
+   ],
+   "exit_code": 0,
+   "note": "and the -bl image"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-044/build-001/build.json",
+  "artifacts/nat-044/build-002/build.json",
+  "artifacts/nat-044/build-002/loader-diag-reset/Image",
+  "artifacts/nat-044/build-002/loader-diag-reset-bl/Image",
+  "artifacts/nat-044/build-002/loader-diag-reset/Image.payload",
+  "artifacts/nat-044/build-002/loader-diag-reset-bl/Image.payload",
+  "artifacts/nat-044/package-001/loader-diag-reset/package.json",
+  "artifacts/nat-044/package-001/loader-diag-reset/recovery.img",
+  "artifacts/nat-044/package-001/loader-diag-reset-bl/package.json",
+  "artifacts/nat-044/package-001/loader-diag-reset-bl/recovery.img",
+  "artifacts/nat-044/mutation-001.log",
+  "artifacts/nat-044/mutation-001/summary.json",
+  "artifacts/nat-044/mutation-002.log",
+  "artifacts/nat-044/mutation-002/summary.json",
+  "docs/procedures/nat-044/README.md",
+  "docs/procedures/nat-044/decision-template.md"
+ ],
+ "sha256": {
+  "docs/procedures/nat-044/README.md": "1fe72c4d873553eeaaf7e185b0fe194ab8f0a5d56eef3a93f75591a8f71b803f",
+  "docs/procedures/nat-044/build.py": "1d667d40f46474bd5a650fa0e69ed13e22b9cb8b52a88909cd98bcbcc3360571",
+  "docs/procedures/nat-044/decode44.py": "deef2c2110fc99965f59559530119000fbbe08bef328a28b25ecaccfdddef066",
+  "docs/procedures/nat-044/decision-template.md": "fe2a0606c6a5a608dd66a3945d318e4d934e3ffc586d7b901d95ce079e617572",
+  "docs/procedures/nat-044/mutate_nat044.py": "56855b4f082a0291f7856c41b90c60b361bda52dde1a071809c2d40d7a8ede8a",
+  "docs/procedures/nat-044/patch_loader4.py": "cea4e3f9836d45bb4db6cb67685acab095c577368fa9be567c9410b82c7afc68",
+  "docs/procedures/nat-044/test_nat044.py": "3e1a2b7bc5f9b224e0af992243da9b2a6d57eb3175263b355ead6555ff513ad2",
+  "docs/procedures/nat-044/src/markerlib4.c": "ebe48416ae573a03ff6dbef24f35972455bc45b4c2bc5f768156f395a46a957c",
+  "docs/procedures/nat-044/src/reset44.h": "26a59f5d66cb0870b7b766129c312d1c5f89f69cf6a6ff65a9b0be98deb14c89",
+  "docs/procedures/nat-044/test_support/host_mk4.c": "fc5f3be81ba9f7e6b808947b4091bdb5ee88bf6c0a9c2f8ba1d631219027e8c8",
+  "docs/procedures/nat-044/test_support/reset_host.c": "0a33e2695c25effbeb569766c44ab2da9fbfb2b4f69a664b7b5862043d992a82",
+  "artifacts/nat-044/build-001/build.json": "d78d7741ce31d0d842fe888c6acd9140d5d3d1cb2346489dc8b9c34f203150cc",
+  "artifacts/nat-044/build-002/build.json": "dced125303123ff68ea6b6cafc6f9d8149e3a525f2d59dd0e6f3f0e267e4727f",
+  "artifacts/nat-044/build-002/loader-diag-reset/Image": "24baf94e039be4869361706356005bc19aa891a2ce170332f8a6ab2f718635a1",
+  "artifacts/nat-044/build-002/loader-diag-reset-bl/Image": "87226d5246a906de28dfbfba2c479ca2698732c5103deca2b0f2654c899f8362",
+  "artifacts/nat-044/build-002/loader-diag-reset/Image.payload": "b79aeecc689c02c7a95ee487fb4a4b808ef8915292e0888122de9be983acaa14",
+  "artifacts/nat-044/build-002/loader-diag-reset-bl/Image.payload": "b05349eb5bc048c3b78694c3f14b3e58def30a7f74b45bd0f3b6d229fb6ef936",
+  "artifacts/nat-044/package-001/loader-diag-reset/package.json": "7e288066214e6ef6bc6b6715334aa50fe4568fc27110ff65e391489440de68a0",
+  "artifacts/nat-044/package-001/loader-diag-reset/recovery.img": "e4cd7bdf4789b5bc60f8a0b3a0d5dd887ab75f345df13a0b0115a0934419fe4a",
+  "artifacts/nat-044/package-001/loader-diag-reset-bl/package.json": "4d27ffdb4ba8ef120b2b69ee890a4b0ccad1798d639781ba39c655b0a7adf27b",
+  "artifacts/nat-044/package-001/loader-diag-reset-bl/recovery.img": "7481c95ab8ef56a112507abb5cfa9e273285e32c7548264bb224ed5614832d2b",
+  "artifacts/nat-044/mutation-001.log": "af97cf59eee9a2d2f39567ea710449d05df1133818cfe9382e88d317c24bf193",
+  "artifacts/nat-044/mutation-001/summary.json": "e355b199e2e626859f8a87ebca9bd6c13981b9022ad20d07492695aaa9caf68c",
+  "artifacts/nat-044/mutation-002.log": "0eb598edad283bc4077d42ff0cdf9d8db05776966f58034963c76e42514cbb81",
+  "artifacts/nat-044/mutation-002/summary.json": "1c09cf4c8918c26a00932b71f913b96e8be34df1a46e2420c0f6789ce303c4a2",
+  "docs/procedures/nat-042/module/s5e9945_reset.h": "05d7a85802cdceb59c2c168dc9ae8bf00b4edaf8c7f24bf9e113e233cc932352",
+  "docs/procedures/nat-042/module/s5e9945_reset.c": "6be65500f2e4661b80f70b73c0c2bb21d5797a38257c6ec0ecaef7fcf307b391"
+ },
+ "device_used": false,
+ "flashed": false
+}
