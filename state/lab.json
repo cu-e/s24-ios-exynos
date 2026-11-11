@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-11T09:54:07+00:00",
+  "updated_at": "2026-11-11T12:36:41+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -13095,8 +13095,14 @@
         "Wait for the device and capture read-only",
         "Sanitize and compare with the source plan"
       ],
-      "status": "pending",
-      "owner": null
+      "status": "done",
+      "owner": "claude-nat039-20261111-session",
+      "started_at": "2026-11-11T12:17:29+00:00",
+      "last_heartbeat": "2026-11-11T12:17:29+00:00",
+      "updated_at": "2026-11-11T12:36:41+00:00",
+      "evidence": "docs/procedures/nat-039/evidence.json",
+      "evidence_sha256": "94ca0cceaffb3bf922e91142e676be83eed877fc9626b44ec59af389662eced3",
+      "finished_at": "2026-11-11T12:36:41+00:00"
     },
     {
       "id": "NAT-040",
@@ -13491,6 +13497,34 @@
       "last_heartbeat": "2026-11-11T09:54:07+00:00",
       "updated_at": "2026-11-11T09:54:07+00:00",
       "blocked_reason": "Specific missing external fact: the host owner's root. Installing /etc/udev/rules.d/70-s24-usbmon.rules and reloading udev needs sudo, which asks for a password the agent does not have (checked 2026-11-11: 'sudo: a password is required'); using the docker group as a root bypass is not done, and 04e8/18d1 cannot stand in because the NAT-041 collector refuses them by design. The rule text, the install commands and the check (host_access.py --check) are in docs/procedures/nat-049/README.md. Resume when the owner runs the two sudo commands (or provides a non-interactive root path), then run the check and save evidence."
+    },
+    {
+      "id": "NAT-051",
+      "title": "Read the HSI0/USB clock, regulator and pm_genpd summaries of the running Android through a documented, reverted debugfs mount (NAT-039 gap: debugfs is registered but not mounted)",
+      "scope": "android-readonly",
+      "evidence_kind": "android-userland",
+      "priority": 60,
+      "depends_on": [
+        "NAT-039"
+      ],
+      "paths": [
+        "docs/procedures/nat-051",
+        "artifacts/nat-051"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "Before the mount: /proc/mounts and /sys/kernel/debug are recorded. The only state change is `mount -t debugfs none /sys/kernel/debug`, undone by `umount` in the same session; afterwards /proc/mounts has no debugfs line again (verified and recorded), and getenforce, sys.usb.config and adb connectivity are unchanged.",
+        "Only these debugfs files are read: regulator/regulator_summary and pm_genpd/pm_genpd_summary (software state), and clk/clk_summary last, under a 20 s timeout, because rate recalculation may read CMU registers (stop and record if it does not return). No regdump file, no gpio file, no write to any debugfs node.",
+        "The sanitized extract is compared with the NAT-039 comparison rows C11d and C13 (clock gates/rates of the HSI0 and USB clocks, pd_hsi0 on/off); the evidence says these are Android-state values, not loader-entry state."
+      ],
+      "steps": [
+        "Record mounts, mount debugfs, read the three summaries with the timeout, unmount, verify",
+        "Extend the NAT-039 comparison rows and write evidence.json"
+      ],
+      "status": "pending",
+      "owner": null
     }
   ],
   "experiments": [
@@ -58030,6 +58064,47 @@
           "priority": 97,
           "blocked_reason": "Specific missing external fact: the host owner's root. Installing /etc/udev/rules.d/70-s24-usbmon.rules and reloading udev needs sudo, which asks for a password the agent does not have (checked 2026-11-11: 'sudo: a password is required'); using the docker group as a root bypass is not done, and 04e8/18d1 cannot stand in because the NAT-041 collector refuses them by design. The rule text, the install commands and the check (host_access.py --check) are in docs/procedures/nat-049/README.md. Resume when the owner runs the two sudo commands (or provides a non-interactive root path), then run the check and save evidence.",
           "last_heartbeat": "2026-11-11T09:54:07+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T12:17:29+00:00",
+      "action": "task.claim:NAT-039",
+      "owner": "claude-nat039-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-039",
+          "status": "in_progress",
+          "owner": "claude-nat039-20261111-session",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T12:17:29+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T12:34:14+00:00",
+      "action": "task.add:NAT-051",
+      "owner": "claude-nat039-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-051",
+          "status": "pending",
+          "owner": null,
+          "priority": 60
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T12:36:41+00:00",
+      "action": "task.done:NAT-039",
+      "owner": "claude-nat039-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-039",
+          "status": "done",
+          "owner": "claude-nat039-20261111-session",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T12:17:29+00:00"
         }
       ]
     }

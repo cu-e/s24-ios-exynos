@@ -1,0 +1,182 @@
+{
+ "kind": "android-userland",
+ "origin": "local-device",
+ "outcome": "pass",
+ "recorded_at": "2026-11-11T12:35:21+00:00",
+ "commit": "c89380460656ccffa74772cb8ec90ac65c9aed7b",
+ "tree_state": "the files listed under sha256 are uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat039-20261111-session",
+ "summary": "Read-only inventory of the live USB stack of the running Android (device tree, sysfs, procfs through adb shell su -c, 51 commands, capture-004 2026-11-11T17:25+05:00) compared with the NAT-040 vendor-source plan: 39 rows, 20 match, 4 consistent, 13 new, 2 unresolved, 0 mismatches. Confirmed: DWC3 0x17900000/0x10000 SPI 403; USBCON/eUSB2 control/eUSB2 PHY/USBDP/TCA at 0x178a0000..0x178e0000; SYSREG_HSI0 0x17820000; PMU 0x12860000, pd_hsi0 0x12862000, isolation +0x61c/+0x620; CMU_HSI0 0x17800000, CMU_TOP 0x22b20000; need_smc 0x17810204; repeaters 0x3e/0x4f on hsi2c 0x110b0000; four USB rails enabled in Android. Not read: clock/gate values and rates, pd_hsi0 state, controller IP id, repeater presence (debugfs not mounted, no register reads, no I2C transactions).",
+ "evidence_category": "android-userland: read-only measurement of the running Android on this S24; not loader-entry state and not native-device evidence",
+ "acceptance": {
+  "1_capture": "met with substitutions: dmesg lines (the ring buffer starts at uptime 25774 s and holds no probe lines), /proc/iomem for 0x17820000-0x1790ffff, UDC state and speeds, DT nodes with all properties of the controller, glue, PHY, hsi2c and repeaters, regulator state by sysfs, runtime-PM state, I2C binding. NOT obtained: clk_summary lines and the controller regdump (debugfs is registered but not mounted; mounting was not done: state change, clk_summary may read CMU registers). Tracked by NAT-051. No write to any node, no settings change; the deny-list guard and tests enforce that.",
+  "2_comparison": "met for every value the capture can supply: 39 rows with expected/observed/source, 0 mismatches; controller base 0x17900000 and SYSREG_HSI0 0x17820000 confirmed. Controller version, clock rates and PHY revision registers are listed as not established.",
+  "3_device_absent": "n/a: the phone was attached"
+ },
+ "established": [
+  "Controller DWC3 at 0x17900000, window 0x10000, SPI 403 (GIC hwirq 435 live in /proc/interrupts); the kernel claims 0x1790c100-0x1790ffff.",
+  "PHY node maps 0x178a0000/0x178b0000/0x178c0000/0x178d0000/0x178e0000 (0x200,0x200,0x200,0x800,0x800), all claimed by 178a0000.phy; SYSREG_HSI0 0x17820000 (0x10000); PMU 0x12860000 (0x10000), pd_hsi0 0x12862000 (0x20), PMU USB isolation offset 0x61c and DP 0x620; CMU_HSI0 0x17800000 (pd_hsi0 cmu_id); CMU_TOP clock-controller 0x22b20000 (0x8000, compatible samsung,s5e9945-clock) containing the three L2 read addresses; need_smc 0x17810204.",
+  "Repeater nodes TUSB2E11 0x3e and PTN3222 0x4f are children of hsi2c 0x110b0000 (Linux bus 9), status okay, both drivers bound; maximum-speed super-speed.",
+  "vdd075_usb 0.75 V, vdd12_usb 1.2 V, vdd18_usb 1.8 V, vdd33_usb 3.1 V are enabled with one user each in Android and sit on s2mps28-5, s2mps28-4, s2mps27, s2mps27 (the plan's s5_l2, s4_l4, l7, l11 naming).",
+  "No iommus, dma-coherent or dma-ranges property on the glue, the controller or the PHY; no sysmmu in 0x178x-0x179x.",
+  "Android state at capture: role b_peripheral, UDC configured at high-speed (maximum super-speed), Type-C port0 with a partner, 17900000.usb and 17900000.dwc3 runtime-PM active.",
+  "PHY tune tables hs_tune_phy and ss_tune are status disabled with 0xff sentinels; DT repeater tuning pairs recorded."
+ ],
+ "not_established": [
+  "Loader-entry state of rails, pd_hsi0, clocks and repeater on the RECOVERY path (that is NAT-043/NAT-046 on the native path).",
+  "Any register value: CMU_TOP/CMU_HSI0 mux-gate-divider, SYSREG_HSI0, USB and PHY registers, GSNPSID/IP id (no register reads were authorized from Android); clock rates; pd_hsi0 on/off read from genpd (inferred on from active consumers).",
+  "Which repeater is fitted: both vendor probes make no I2C transaction, so a bound driver does not show a chip; no I2C transaction was issued.",
+  "The S2MPU in front of HSI0 DMA, the 19.2 MHz reference rate, the bank behind gpio phandle 0x65 and its level."
+ ],
+ "findings": [
+  "Writing the tests exposed two defects in the capture's own guard, fixed after the evidence run with the command set unchanged (manifest commands_sha256 is tested against the script): assert_read_only() bound COMMANDS as a default argument so it could check a different list than main() ran, and the deny-list pattern \\bpython\\b did not match python3.",
+  "The first version of comparison row C02 reported a mismatch because the expected string was formatted differently from the observed one (a comparison bug, the device-tree value was 403); the row now compares structured values and the SPI number is read from the NAT-040 README. The first C12 expectation was the measured set itself; it now derives the PMIC instance from the plan's own rail names.",
+  "Debugfs is compiled in but not mounted on this Android; clk_summary, regulator_summary, pm_genpd_summary and the dwc3 regdump are therefore not available without a state change. NAT-051 records that as a separately scoped, reverted-mount follow-up."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-039/capture.py",
+    "--out",
+    "artifacts/nat-039/capture-001"
+   ],
+   "exit_code": 0,
+   "note": "28 commands; first pass"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-039/capture.py",
+    "--out",
+    "artifacts/nat-039/capture-002"
+   ],
+   "exit_code": 0,
+   "note": "42 commands"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-039/capture.py",
+    "--out",
+    "artifacts/nat-039/capture-003"
+   ],
+   "exit_code": 0,
+   "note": "49 commands"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-039/capture.py",
+    "--out",
+    "artifacts/nat-039/capture-004"
+   ],
+   "exit_code": 0,
+   "note": "51 commands, the evidence run; per-command exit 0 except two head -3 on absent debugfs files (exit 1)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-039/compare.py",
+    "extract",
+    "--capture",
+    "artifacts/nat-039/capture-004",
+    "--out",
+    "docs/procedures/nat-039/capture-extract"
+   ],
+   "exit_code": 0
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-039/compare.py",
+    "compare",
+    "--capture",
+    "docs/procedures/nat-039/capture-extract",
+    "--json",
+    "docs/procedures/nat-039/comparison.json"
+   ],
+   "exit_code": 0,
+   "note": "39 rows, 0 mismatches; the comparison of the raw capture-004 is identical (tested)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-039/test_nat039.py"
+   ],
+   "exit_code": 0,
+   "note": "Ran 56 tests, OK, 0.3 s"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "Ran 214 tests in 16.6 s, OK (artifacts/nat-039/make-check.log)"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-039/capture-001/index.json",
+  "artifacts/nat-039/capture-002/index.json",
+  "artifacts/nat-039/capture-003/index.json",
+  "artifacts/nat-039/capture-004/index.json",
+  "artifacts/nat-039/test-final.log",
+  "artifacts/nat-039/make-check.log",
+  "docs/procedures/nat-039/capture-extract/manifest.json",
+  "docs/procedures/nat-039/comparison.json",
+  "docs/procedures/nat-039/README.md",
+  "devices/local-2026-11-11-nat039.json"
+ ],
+ "sha256": {
+  "docs/procedures/nat-039/README.md": "a93d9b9cc6acee594c488a098ca034d458d6477cd5505ba29499977d0237a279",
+  "docs/procedures/nat-039/capture.py": "fc458576fc2b0c59ab5c6a4585b206a30ecb7df52e82f33068e839e9402c9276",
+  "docs/procedures/nat-039/compare.py": "0cea6fa0fc774a6a2a4a4867d968071b4dc70dd8677fdbb9fefcf247ebaf8730",
+  "docs/procedures/nat-039/test_nat039.py": "a073a3b5bb248390322f2973ec44f25de550b3fb86cdfd0530cc53d95b8d01ff",
+  "docs/procedures/nat-039/comparison.json": "40c4c1253219036e1bddc63c0283ad37f71717615990ec2bebcfff08c8c4dcdf",
+  "docs/procedures/nat-039/capture-extract/manifest.json": "0323dbb7fdb9b899762b3afd4bb37d1bab48eae872afd7683fa5cd71fa270c18",
+  "capture-004/index.json": "c6c7c8df52ce51d3309757f4f5ba3ca803a037731ad6d0b874b66ff6a260fd69",
+  "commands_sha256": "e7c5201f90150fe8bb9a022147620a966c51ed5ec4de7d29228b10b04640142b",
+  "capture-004/identity.txt": "37145e8b186eac2b8ba91808eb7c50bf4fd68d1e8ba876e46298dd34cd02b48a",
+  "capture-004/mounts-debugfs.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "capture-004/clk-hsi0.txt": "0302c127a4dd94e6aaf07b1264eafbd8d3f02d6768b5ceec1afd40e8ed1660e9",
+  "capture-004/regulator-usb.txt": "c5f22534ba513662feafb90c2d2e149ed0df2245e38050bc1c65edac3ff654cf",
+  "capture-004/genpd-hsi0.txt": "d60ec219516be303a17e3dc4743ca17cd6ea3c6e1f0ba1a7fa52d87859901527",
+  "capture-004/debugfs-usb-dirs.txt": "76b472a38bb569c3b7685fc6628c9c4d652456e2188ac3c63e3bfd0234db5889",
+  "capture-004/iomem-hsi0.txt": "4c48f2e52e4a14e6fbabddd063859038ea8321690a336e3a14d4162ffc74821f",
+  "capture-004/iomem-pmu.txt": "01041de542f1ee311b3faf49552303dc53690bb35f7f3b13d61c90a78b928a49",
+  "capture-004/iomem-hsi2c34.txt": "e64214daa24d0f04bac04b7733cb5102d5f7de94ac90d8369a6c3f56a418fc3b",
+  "capture-004/interrupts-usb.txt": "5ae2a5b8a513624663a34f288ae26f3936bb80dab4aa047a415c27e558c8a644",
+  "capture-004/dt-usb-top.txt": "0c334948427fd0ba1b3122087cd5401eb3cd50864fdc098b8053eb3a47036e4d",
+  "capture-004/dt-dwc3.txt": "2fc7043237ea4cde016db7b02882c6bc197d5c4e49a42a841ae3cf27f7525c8c",
+  "capture-004/dt-phy.txt": "6893009a8ef3e33b5615deffe8aa368491f6d898ef51b256b4c18fe2eb6adaee",
+  "capture-004/dt-hsi2c.txt": "ab4c9fdeadbf165a8f62f56f24c0a36c42023c285e3e23a048ac8b97221e442e",
+  "capture-004/dt-sysreg-pd-cmu.txt": "97518ec1d447e86672af2a2b9117792dfff55cf483649f112edaf28bb823ee73",
+  "capture-004/dt-pmu.txt": "dd079ebb88577fdd46418a2431a9f87409b9bc01c3da296f4fe94a5f14d30844",
+  "capture-004/dt-hs-ss-tune-phandles.txt": "ade3e229367b83f1a318f108da48b73dcd804127d9851db92a2687f7ff493ca9",
+  "capture-004/dt-repeater-tune.txt": "8ccc1f33bf0d284894ca46885b3705ff0592a1e8d251c20e4ed7595ecd92c8d3",
+  "capture-004/dt-dma-props.txt": "527aca5110d50f92bdaa1706316d76cf9f5aba442a8f21d9ba75c83e9bc48eed",
+  "capture-004/i2c-bus9.txt": "98c1c7767013bf535ae3ba65c14641651e2640f693c62fe0bd37c11ccee12a0d",
+  "capture-004/i2c-repeater-drivers.txt": "e138c523ff6f3f3cd504a42e571a2ab1b6b88674cccf302eae4acda275d7247c",
+  "capture-004/i2c-repeater-names.txt": "b1623c988239b0e770bea78d4d57cff1cef49cc0cbd4a89d4b1a7f4ea9e6eb47",
+  "capture-004/regulators.txt": "6ed185d956889aa165675da0187bb6fd9d353d046fa2ba44a80b3aa437959830",
+  "capture-004/regulator-parents.txt": "90f1541965b3e49a8949981546b4b54663ad2d436868ee68781e6ca44abbc29c",
+  "capture-004/runtime-pm.txt": "c6afeaa69fe4404bc7464fdfdbb5adb6189ce6ddd155f6af1fad5acfe28d1aca",
+  "capture-004/udc-state.txt": "d6a82cf0e1765c947a92c3a9b573b7236e88fa83dbe8b71dfb4601e74ddbb68e",
+  "capture-004/usb-sysfs.txt": "22bbd30f57a198c5782e3b4d2e91880a3b94be799c66ec28827b67d69abe21b0",
+  "capture-004/platform-devices.txt": "6c949c4617faa98416b550f187b829f87ffba7988fa7a62b0f319c3f2e2e4294",
+  "capture-004/clock-controllers.txt": "c99626aff918a00f73c27a49e065fa22cc55245c9ab3a200c0da0f83b3034b79",
+  "capture-004/typec.txt": "3fe9c9ebbaaaa32429c772f046138fe3ea7cb076c215009c2c4a4134ccbf3615",
+  "devices/local-2026-11-11-nat039.json": "6e94cd952d2fc09c4468ca9447c54011240e7803c6b4de9c9d85cb5896932359"
+ },
+ "device_used": true,
+ "flashed": false,
+ "device_inventory": "devices/local-2026-11-11-nat039.json"
+}

@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-11T09:54:09+00:00",
-  "ledger_updated_at": "2026-11-11T09:54:07+00:00",
-  "registry_sha256": "542ef2d124875264bc5511537aaf16c09d808282d8b3cad955edb0837c4588ae",
+  "generated_at": "2026-11-11T12:36:44+00:00",
+  "ledger_updated_at": "2026-11-11T12:36:41+00:00",
+  "registry_sha256": "ac8a854247ba41e7926716daa28e51498ca8ce362b020940256f6faaba01ec90",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
-      "NAT-039"
+      "NAT-051"
     ],
     "in_progress": [],
     "blocked": [
@@ -190,6 +190,7 @@
       "NAT-024",
       "NAT-025",
       "NAT-026",
+      "NAT-039",
       "NAT-040",
       "NAT-041",
       "KRN-005",
@@ -5810,9 +5811,15 @@
         "Wait for the device and capture read-only",
         "Sanitize and compare with the source plan"
       ],
-      "status": "pending",
-      "owner": null,
-      "column": "ready",
+      "status": "done",
+      "owner": "claude-nat039-20261111-session",
+      "started_at": "2026-11-11T12:17:29+00:00",
+      "last_heartbeat": "2026-11-11T12:17:29+00:00",
+      "updated_at": "2026-11-11T12:36:41+00:00",
+      "evidence": "docs/procedures/nat-039/evidence.json",
+      "evidence_sha256": "94ca0cceaffb3bf922e91142e676be83eed877fc9626b44ec59af389662eced3",
+      "finished_at": "2026-11-11T12:36:41+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-039.md"
     },
@@ -5930,7 +5937,7 @@
         "Specific missing external fact: the host owner's root. Installing /etc/udev/rules.d/70-s24-usbmon.rules and reloading udev needs sudo, which asks for a password the agent does not have (checked 2026-11-11: 'sudo: a password is required'); using the docker group as a root bypass is not done, and 04e8/18d1 cannot stand in because the NAT-041 collector refuses them by design. The rule text, the install commands and the check (host_access.py --check) are in docs/procedures/nat-049/README.md. Resume when the owner runs the two sudo commands (or provides a non-interactive root path), then run the check and save evidence."
       ],
       "card_path": "planning/tasks/NAT-050.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "KRN-005",
@@ -6431,8 +6438,7 @@
       "owner": null,
       "column": "gated",
       "reasons": [
-        "Scope not authorized: native",
-        "Dependencies: NAT-039"
+        "Scope not authorized: native"
       ],
       "card_path": "planning/tasks/NAT-043.md"
     },
@@ -13323,6 +13329,37 @@
       "card_path": "planning/tasks/KRN-042.md"
     },
     {
+      "id": "NAT-051",
+      "title": "Read the HSI0/USB clock, regulator and pm_genpd summaries of the running Android through a documented, reverted debugfs mount (NAT-039 gap: debugfs is registered but not mounted)",
+      "scope": "android-readonly",
+      "evidence_kind": "android-userland",
+      "priority": 60,
+      "depends_on": [
+        "NAT-039"
+      ],
+      "paths": [
+        "docs/procedures/nat-051",
+        "artifacts/nat-051"
+      ],
+      "sources": [
+        "s24-linux"
+      ],
+      "acceptance": [
+        "Before the mount: /proc/mounts and /sys/kernel/debug are recorded. The only state change is `mount -t debugfs none /sys/kernel/debug`, undone by `umount` in the same session; afterwards /proc/mounts has no debugfs line again (verified and recorded), and getenforce, sys.usb.config and adb connectivity are unchanged.",
+        "Only these debugfs files are read: regulator/regulator_summary and pm_genpd/pm_genpd_summary (software state), and clk/clk_summary last, under a 20 s timeout, because rate recalculation may read CMU registers (stop and record if it does not return). No regdump file, no gpio file, no write to any debugfs node.",
+        "The sanitized extract is compared with the NAT-039 comparison rows C11d and C13 (clock gates/rates of the HSI0 and USB clocks, pd_hsi0 on/off); the evidence says these are Android-state values, not loader-entry state."
+      ],
+      "steps": [
+        "Record mounts, mount debugfs, read the three summaries with the timeout, unmount, verify",
+        "Extend the NAT-039 comparison rows and write evidence.json"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-051.md"
+    },
+    {
       "id": "CELL-011",
       "title": "Copy the two measured BYH3 vendor RIL libraries to the host with read-only root (decision 0002 item 3)",
       "status": "done",
@@ -15075,7 +15112,7 @@
         "id": "NAT-050",
         "status": "blocked",
         "last_heartbeat": "2026-11-11T09:54:07+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": null,
         "next_step": null,
         "handoff": null,
@@ -15124,46 +15161,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-11T02:02:06+00:00",
-      "action": "task.add:NAT-046",
-      "owner": "claude-nat042-20261111-reboot",
-      "tasks": [
-        {
-          "id": "NAT-046",
-          "status": "pending",
-          "owner": null,
-          "priority": 96
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T02:02:14+00:00",
-      "action": "task.add:NAT-047",
-      "owner": "claude-nat042-20261111-reboot",
-      "tasks": [
-        {
-          "id": "NAT-047",
-          "status": "pending",
-          "owner": null,
-          "priority": 95
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T02:02:41+00:00",
-      "action": "task.claim:NAT-044",
-      "owner": "claude-nat044-20261111-resetimg",
-      "tasks": [
-        {
-          "id": "NAT-044",
-          "status": "in_progress",
-          "owner": "claude-nat044-20261111-resetimg",
-          "priority": 96,
-          "last_heartbeat": "2026-11-11T02:02:41+00:00"
-        }
-      ]
-    },
     {
       "at": "2026-11-11T02:41:34+00:00",
       "action": "task.done:NAT-044",
@@ -15403,11 +15400,52 @@
           "last_heartbeat": "2026-11-11T09:54:07+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-11T12:17:29+00:00",
+      "action": "task.claim:NAT-039",
+      "owner": "claude-nat039-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-039",
+          "status": "in_progress",
+          "owner": "claude-nat039-20261111-session",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T12:17:29+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T12:34:14+00:00",
+      "action": "task.add:NAT-051",
+      "owner": "claude-nat039-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-051",
+          "status": "pending",
+          "owner": null,
+          "priority": 60
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T12:36:41+00:00",
+      "action": "task.done:NAT-039",
+      "owner": "claude-nat039-20261111-session",
+      "tasks": [
+        {
+          "id": "NAT-039",
+          "status": "done",
+          "owner": "claude-nat039-20261111-session",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T12:17:29+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "f734c5dc0347de95dc9dd7ecb62943736e8c0c5919f60a97cfa396f7369d0b99",
-    "BOARD.md": "5afb4d4002339de42badf438ac5bc8e82e420d4a64bd8356418614aa85caf0e9",
+    "STATUS.md": "3e62530fcbfdc515ed5f5ee8fa4be888f712360d8a2c38d6f02ed7bf23ae0e5a",
+    "BOARD.md": "cb167578b5c150fb4bb9f5f6d4dd166d3d48caf3f1229513387711d05575e5b9",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -15532,10 +15570,10 @@
     "planning/tasks/NAT-024.md": "10bde102216adebc51d1565be90df70cb2b646c764ea667e6a0472b93d210e22",
     "planning/tasks/NAT-025.md": "e958e1e30a03146a49c07bbeece17b3c5da7421daba0c5f051311ea83bc44afc",
     "planning/tasks/NAT-026.md": "acb70ae2478f94833a09a44e0f65181af1036223d44b1a27d294bda689f10a12",
-    "planning/tasks/NAT-039.md": "6a1bfefe71953e3827bf0a66d6b2894292d0021661fe3e57fc90775452364dca",
+    "planning/tasks/NAT-039.md": "fe937ff0ef2570909cced07c76fdee37d63b4bb84627a1ce54a7874625b21212",
     "planning/tasks/NAT-040.md": "d2a424f16c6665ca3836862097f55524ec7f0bbf53241b330e89e57648563897",
     "planning/tasks/NAT-041.md": "a3421dc1c461e0ce04af4851d361af8888a14702f98652555347c1bfc5cae630",
-    "planning/tasks/NAT-050.md": "21a26fb61b5e2be4ee47167de3d1b03a851a34c2714961a2a0bfc3c7ff3baf12",
+    "planning/tasks/NAT-050.md": "3aa5fc869a2e660813bf581fad15a20e073f1fa817104f9f9d36ae2e38a45953",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/REV-004.md": "8c7b273845208b121b2d6d1f05038b627689d3f97b766a765a91cdf23082bdb1",
     "planning/tasks/REV-011.md": "5ea2857fe5caca100edd1f7f53667f0b2a27de4b576000ecd14e2a55f1e7d51b",
@@ -15547,7 +15585,7 @@
     "planning/tasks/NAT-018.md": "99ed6f18b19d229ab18943b58d41e54e62b137950c525a3c408119e479c590cb",
     "planning/tasks/NAT-035.md": "df46e6b02ce966e9cdef479dca3452834653951b87029bc481cb00ffcaa27113",
     "planning/tasks/NAT-042.md": "93fed97a38306f556c45cae537c69262efde6ea20e64834048a2672611aab75f",
-    "planning/tasks/NAT-043.md": "e316b33a327b1fdd634251a09c02da6968ce377c1c9a206c430cb7bd27f6559f",
+    "planning/tasks/NAT-043.md": "daf3e538b6313132e4ce6178be0ac1af2f24868eed0e30a4b13d1909cf57b790",
     "planning/tasks/NAT-044.md": "ebe6e82d271322eba40665841d59265456760651c738681d5df0cc17d80305aa",
     "planning/tasks/NAT-046.md": "0aaea2a4708bfd98eaa14ab3db36c2eb249ab729acc7b620a76ce6734436e47e",
     "planning/tasks/NAT-048.md": "018ae63e1c1a425dcb6cab1eb1a660a6a80e87ffc0cb9502067f26ebc6e11d38",
@@ -15701,6 +15739,7 @@
     "planning/tasks/KRN-040.md": "3078f05d1553121a53783a5f8e7d073b93d9c2917afb3e2ef72f381a782e9d70",
     "planning/tasks/DRV-007.md": "3d06e2678a4b40a3bcfa3cef7473f73c9c6edf9a7084945294f6b98a6951a007",
     "planning/tasks/KRN-042.md": "9a4c9f3acb9abc5a938b6fcfa99883a550a3c9f2df3e6ddf687f9aa26c8b1231",
+    "planning/tasks/NAT-051.md": "a5432d3b2646e394dad54cd1e290d1bcd5cd2c56a5b6372ae335933e638a5364",
     "planning/tasks/CELL-011.md": "aab6d3d32eec01b9cf0d5004a01000984ffd490a36161a7c56fd92d0359ef932",
     "planning/tasks/FND-001.md": "ee81357df48cbcec414e6dc2f58f1325d8936e16bbbe8022d8b771c316d6b0f8",
     "planning/tasks/RES-001.md": "956b0cf0fe59602b13d98565c02c1486438c7f0451c2800e8d5c1a77e8e1d9fe",
