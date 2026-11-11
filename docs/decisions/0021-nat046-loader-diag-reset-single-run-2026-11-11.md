@@ -77,7 +77,7 @@ grants nothing beyond it.
   device on the host bus would be indistinguishable from the phone (the host has only this phone's 04e8 device attached now).
 * RAM contents are volatile; nothing about the running Android is read or changed by the image.
 
-## Owner confirmation (added before the run, 2026-11-11 ~13:00Z)
+## Owner confirmation (added before the run, 2026-11-11, after the 12:44Z refusal; the answer arrived about an hour later)
 
 After the Claude Code auto-mode classifier refused the launch at 12:44Z (not retried or worked around), the owner was asked one narrowly scoped
 question in the session, listing this image's hashes, the single RECOVERY write, the 45 s self-reset, the 83 s watchdog, the stock restore, that
