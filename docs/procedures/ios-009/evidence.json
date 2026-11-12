@@ -1,0 +1,72 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T00:17:08+00:00",
+ "commit": "b082768d09f83a19218329b33d5bb1a08e558bf4",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "tree_state": "all listed files are committed at the recorded commit",
+ "summary": "Route for preparing the iOS 16.5 20F66 userland chosen by reusing the pinned HackiOS recipe (references/hakios @ 87bf4851bcc9cbb24fd79997820aa3661abe4ea5) and stock 7-Zip 26.04 instead of own DMG/APFS tools. The donor sysimage/unpack.sh ran unmodified, from a staged copy of 29 hash-checked pinned files, on the owner's IPSW (6,165,698,198 bytes): 43,230 files / 2,881 MB selected, rootfs 2.9 GB, OS cryptex 24 MB, App cryptex 11 MB, dyld shared cache 43 files 2.6 GB, DeviceTree 33,694 B, no LZBITMAP leftovers. /sbin/launchd, /usr/lib/dyld, backboardd and SpringBoard are present (hashes in unpack-summary.json). The note lists eight variants with how each was checked and why it was adopted, kept as reference or rejected, and the confirmed gaps for own code (PID 1 chain build, delivery into RAM, kernel mount, launchd handshake, graphics).",
+ "evidence_category": "host-test (a donor script run on this host) over source-review inputs (donor files read at the pinned SHA). Nothing ran on the S24; nothing shows iOS UI; presence of a binary is not compatibility with the project kernel (dyld/launchd/syscall equality is untested, task IOS-012).",
+ "acceptance": {
+  "1_variants_and_pin": "Note section 2 (V1-V8) and section 3 (provenance and licences). `tools/sources.py verify hakios` exit 0, clean=true, 36 review files after an append-only widening of review_files; the sparse checkout was widened, not narrowed.",
+  "2_donor_run": "unpack.sh ran unmodified; first run in the background (its exit status was not captured, the last line 'unpack.sh: done' was printed), second run with the done markers exit 0 (the script's own end checks: 43 cache files, no :com.apple.* leftovers, webbookmarksd present). unpack-summary.json records counts, sizes and SHA-256 of the key programs and listings. Presence is not compatibility.",
+  "3_gaps_and_registry": "Note section 6 (G1-G5, each with its confirming observation) and section 7. Registry: IOS-009..013 added; IOS-007 released, narrowed and blocked as superseded with its reason; IOS-005/006/008 remain waiting behind IOS-005 and are superseded by IOS-010..013 (see handoff in the task note)."
+ },
+ "commands": [
+  {
+   "cmd": "python3 tools/sources.py verify hakios",
+   "exit": 0,
+   "result": "revision 87bf4851bcc9cbb24fd79997820aa3661abe4ea5 clean=true, 36 review files hashed"
+  },
+  {
+   "cmd": "python3 -I tools/ios/stage_hakios_recipe.py artifacts/ios-root/recipe --manifest docs/procedures/ios-009/recipe-manifest.json",
+   "exit": 0,
+   "result": "staged 29 files"
+  },
+  {
+   "cmd": "KEEP=1 bash sysimage/unpack.sh artifacts/apple-inputs/iPhone10,3,iPhone10,6_16.5_20F66_Restore.ipsw  (in artifacts/ios-root/recipe)",
+   "exit": null,
+   "result": "background run; log ended with 'unpack.sh: done: 2.9G rootfs, 24M cryptex, 11M App cryptex, 2.6G dyld shared cache'; exit status not captured"
+  },
+  {
+   "cmd": "KEEP=1 bash sysimage/unpack.sh <same IPSW>  (second run, markers present)",
+   "exit": 0,
+   "result": "unpack.sh: done: 2.9G rootfs, 24M cryptex, 11M App cryptex, 2.6G dyld shared cache"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/ios-009/summarize_unpack.py",
+   "exit": 0,
+   "result": "43230 rootfs files, 0 LZBITMAP leftovers, 43 cache files"
+  },
+  {
+   "cmd": "rpm -V 7zip",
+   "exit": 0,
+   "result": "no output; 7zip-26.04-1.fc43.x86_64 unmodified"
+  }
+ ],
+ "sha256": {
+  "research/notes/IOS-009-userland-recipe-selection.md": "ae15fb1a08475dd0e62340c798d9a28e3fd5ab4972554443f5bef0b2d185d158",
+  "research/sources.json": "bb4d34f0b0784e6b66051f9c454753c348aa3f72161c82a215911732b02c22cb",
+  "tools/ios/stage_hakios_recipe.py": "1617831ac5c09fcb7817af221f35ebe90617d0a49a5bfe77e311d1a0741476fd",
+  "docs/procedures/ios-009/recipe-manifest.json": "1caa8ee5a869b27e47be25ddbe232ee0964c8e5fbbe8cbaff5ba1ce8722991cd",
+  "docs/procedures/ios-009/unpack-summary.json": "29062e5b1a1cb902fe77d2ca3c4010eaeda43f2a3e9d33b46f77a7ac1c463d94",
+  "docs/procedures/ios-009/summarize_unpack.py": "45105b7197ba072f0b20b4933902d5154b3198ef0cbb9abb4a284bcea70baf1b"
+ },
+ "limits": [
+  "The donor's 2.5 GB system.apfs figure is a claim and is not reproduced (task IOS-010).",
+  "The donor's kernel/loader assumptions (xnuloader, xl ramdisk) were not run; delivery into RAM remains the earliest unsolved blocker (NAT-073, NAT-071).",
+  "apfsprogs (apfsck) is not pinned or built yet (IOS-010).",
+  "The first unpack.sh run's exit code was not captured (background run); the idempotent second run exited 0 and the script's own end checks passed in both.",
+  "Classifier-stop disclosure unchanged from IOS-003: 2026-11-11T23:05Z, session 6d8d2b72, 'Code from External'; no new stop occurred during this task. Compiling and running the donor's unzbm (libzbitmap, APSL) as part of unpack.sh was not refused."
+ ],
+ "artifacts": [
+  "research/notes/IOS-009-userland-recipe-selection.md",
+  "research/sources.json",
+  "tools/ios/stage_hakios_recipe.py",
+  "docs/procedures/ios-009/recipe-manifest.json",
+  "docs/procedures/ios-009/unpack-summary.json",
+  "docs/procedures/ios-009/summarize_unpack.py",
+  "docs/procedures/ios-009/task.json"
+ ]
+}

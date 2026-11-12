@@ -20,7 +20,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 PREFIXES = ("sysimage/", "tools/font_trim.py", "tools/apfs/", "userland/", "xnu-deps/build/lzbitmap/",
-            "xnuloader/mkpayload.py", "Makefile", "NOTICE", "LICENSE", "LICENSE.APSL")
+            "xnuloader/mkpayload.py", "xnu/files/bsd/miscfs/apfs/", "Makefile", "NOTICE", "LICENSE",
+            "LICENSE.APSL")
 
 
 def main(argv):
