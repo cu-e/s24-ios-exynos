@@ -1,0 +1,81 @@
+{
+ "task_id": "NAT-104",
+ "kind": "host-test",
+ "origin": "local-host",
+ "date": "2026-11-12",
+ "recorded_at": "2026-11-12T21:09:04+00:00",
+ "outcome": "pass",
+ "owner": "gemini-ios-20261113-a",
+ "commit": "43fba6586270ef05ee2e77ef085d3dc2f2532fd9",
+ "decision": "docs/decisions/0039-nat104-loader-diag-xnu-hb2-md1-single-run-2026-11-12.md",
+ "summary": "Built and packaged loader-diag-xnu-hb2-md1 (glue62_impl.h updated for B8: TAIL_RETURN=262144u, BURST=4096u, 10x N62_WAIT before why=2 KL begin; cmdline tag NAT104-hb2; all bytes after the 385,024-byte loader region match NAT-102 except the 2 cmdline tag digits). Derived session_nat104.py with 9 counted substitutions, verified 20/20 tests in test_nat104.py (including -DNAT062_HOST -Werror compiled C harness and 120 KiB / 280 KiB / NAT-103 archive checks), and passed mutate_nat104.py across 254 mutants with 0 unexplained survivors (2 equivalent sys.modules entries in equivalent.json). Nothing ran on a phone.",
+ "artifacts": [
+  "docs/procedures/nat-104/README.md",
+  "docs/procedures/nat-104/build.py",
+  "docs/procedures/nat-104/analyze_nat104.py",
+  "docs/procedures/nat-104/derive104.py",
+  "docs/procedures/nat-104/session_nat104.py",
+  "docs/procedures/nat-104/test_nat104.py",
+  "docs/procedures/nat-104/mutate_nat104.py",
+  "docs/procedures/nat-104/equivalent.json",
+  "docs/procedures/nat-104/mutation.json",
+  "docs/decisions/0039-nat104-loader-diag-xnu-hb2-md1-single-run-2026-11-12.md",
+  "artifacts/nat-104/build-001/build.json",
+  "artifacts/nat-104/package-001/package.json"
+ ],
+ "built_artifacts": {
+  "loader_image": "artifacts/nat-104/build-001/loader-diag-xnu-hb2-md1/Image",
+  "loader_image_bytes": 385024,
+  "loader_image_sha256": "88f64a746e58df72a8c4a8f81f1bf38c674a3e5f834e041f94873ab237fdbc07",
+  "image_payload": "artifacts/nat-104/build-001/loader-diag-xnu-hb2-md1/Image.payload",
+  "image_payload_bytes": 26134288,
+  "image_payload_sha256": "4161da474ddb1c708d8b2674111d8f6e6286a697888a999b6d1fee5963d3d1b7",
+  "glue62_impl_h": "artifacts/nat-104/build-001/loader-diag-xnu-hb2-md1/source/shim/e1s-xnu/glue62_impl.h",
+  "glue62_impl_sha256": "38d8723b033bcb6b969af9ca961586c54f0582c3c56d720dcb0efd5f7b8df863",
+  "recovery_img": "artifacts/nat-104/package-001/loader-diag-xnu-hb2-md1/recovery.img",
+  "recovery_img_bytes": 100663296,
+  "recovery_img_sha256": "540b64a5736d444bdf8c0f09a6897c0469b3fb36332dce87f3ff626377bb1963",
+  "md0_sha256": "97f9b5d8a5c7d02ebf2d527dedddbc6a043d69a7191339d8d5dbe4fe7144e58c",
+  "md0_bytes": 4194304
+ },
+ "file_hashes": {
+  "docs/procedures/nat-104/build.py": "bfa8306c9403ac2804246de0fcc5d7a761f57bac877a572338d248169d8f9f02",
+  "docs/procedures/nat-104/analyze_nat104.py": "0dcb83251c019ac8d409f6d9a7f8cf40b2fc26b2d4872251bae69fbf4e1d0510",
+  "docs/procedures/nat-104/derive104.py": "a283d972ff65779252edce54588ffc54176eac12e610e69d6570229cea47dcb9",
+  "docs/procedures/nat-104/session_nat104.py": "fcb5b383f2c9ded4431317a9d5ab773f5ed362eec937789570fc0b77cf68b6c8",
+  "docs/procedures/nat-104/test_nat104.py": "7d3e8b9ac6450b97af3b14dcef0187a69fbe280407bf85826fe530a4e7f66794",
+  "docs/procedures/nat-104/mutate_nat104.py": "ced0b0652ee7e3cd0e977291ea927d18e74fbf575a14e3a51bf366f506bcecb6",
+  "docs/procedures/nat-104/equivalent.json": "08293058e52b3b85d7aa0c9d78933070fcb93af0744d11be7106b79e54561d21",
+  "docs/procedures/nat-104/mutation.json": "1987c4668dc2e032471dcf1aceb1958df9aa70f577989758ad59ad1b57e86c62",
+  "docs/decisions/0039-nat104-loader-diag-xnu-hb2-md1-single-run-2026-11-12.md": "dc8d888c11847ac71a9e73f05e6f1d418ea4b40bfcfc950d60af7c073fb72bc8"
+ },
+ "commands": [
+  {
+   "command": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-104/build.py --out artifacts/nat-104/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-101/pid1-hb/root.apfs --deadline-s 360 --pet-s 30 --rx-cap-s 240 --return-after-s 60 --rx-direct 1 --report-s 10",
+   "exit_code": 0
+  },
+  {
+   "command": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-104/build-001 --out artifacts/nat-104/package-001 --only loader-diag-xnu-hb2-md1",
+   "exit_code": 0
+  },
+  {
+   "command": "python3 docs/procedures/nat-104/derive104.py --check",
+   "exit_code": 0,
+   "output": "ok: session_nat104.py equals the derivation (9 substitutions)"
+  },
+  {
+   "command": "artifacts/nat-065/venv/bin/python -B -W ignore -I docs/procedures/nat-104/test_nat104.py -v",
+   "exit_code": 0,
+   "summary": "Ran 20 tests in 3.063s - OK"
+  },
+  {
+   "command": "TMPDIR=artifacts/nat-104/tmp artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-104/mutate_nat104.py --out artifacts/nat-104/mutation-2 --jobs 8",
+   "exit_code": 0,
+   "summary": {
+    "analyze_nat104.py": {"total": 116, "killed": 107, "survived": 1, "survived_unexplained": 0, "invalid": 8},
+    "build.py": {"total": 119, "killed": 114, "survived": 1, "survived_unexplained": 0, "invalid": 4},
+    "derive104.py": {"total": 19, "killed": 19, "survived": 0, "survived_unexplained": 0, "invalid": 0}
+   }
+  }
+ ]
+}

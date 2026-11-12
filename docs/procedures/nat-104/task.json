@@ -1,0 +1,32 @@
+{
+  "id": "NAT-104",
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "priority": 100,
+  "depends_on": [
+    "NAT-101",
+    "NAT-102"
+  ],
+  "title": "Build loader-diag-xnu-hb2-md1 (B8 log window fix: TAIL_RETURN=262144, BURST=4096, 5s return settle wait), derive session_nat104.py, verify C host harness, payload diff vs NAT-102, analyser, mutation pass, and draft decision 0039",
+  "paths": [
+    "docs/procedures/nat-104",
+    "artifacts/nat-104"
+  ],
+  "sources": [
+    "s24-port"
+  ],
+  "acceptance": [
+    "patch_glue104 raises NAT062_TAIL_RETURN to 262144u, sets NAT062_BURST to 4096u, and inserts a 10 * N62_WAIT() (5s) USB settle delay for NAT062_WHY_RETURN before KL begin while leaving NAT062_WHY_FINAL unchanged.",
+    "Built Image.payload matches NAT-102 byte for byte after the 385,024-byte loader region except for the 3 bytes of NAT104-hb2 vs NAT102-hb1 in the kernel command line; packaged recovery.img passes package.py.",
+    "Compiled C host tests (-DNAT062_HOST -Werror) confirm gap=0 at 116,430 and 270,336 bytes, gap=1 at 270,337 bytes, 10 pre-begin waits on why=2, 0 pre-begin waits on why=1, and burst*3 < 32768.",
+    "analyze_nat104.py (over TAIL_MAX[2]=262144) and derive104.py --check pass all tests and mutation testing ends with zero unexplained survivors; decision 0039 is written."
+  ],
+  "steps": [
+    "Create NAT-104 build.py, analyze_nat104.py, derive104.py, and unit/C-host tests",
+    "Build loader-diag-xnu-hb2-md1 and package recovery.img into artifacts/nat-104",
+    "Generate session_nat104.py, run tests and mutation suite with equivalent.json",
+    "Draft decision 0039 and record host-test evidence.json + README.md"
+  ],
+  "status": "pending",
+  "owner": null
+}
