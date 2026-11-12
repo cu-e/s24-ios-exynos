@@ -1,0 +1,27 @@
+--- a/userland/src/stage0.c
++++ b/userland/src/stage0.c
+@@ -5,8 +5,12 @@
+  * and a half to upload to the phone, so nothing that changes often lives in
+  * it. All of that - the real init, its tests, the list of launchd jobs - is
+  * in the small image that travels with the kernel (the second RAM disk,
+- * /dev/md1), an APFS container (tools/apfs/mkapfs.py). This program
++ * /dev/md0), an APFS container (tools/apfs/mkapfs.py). This program
+  * mounts it on /redwood and hands over.
++ *
++ * NAT-083 (this project): the donor's /dev/md1 is /dev/md0 here.  The project's md1 is the big system image (delivered over
++ * USB, the kernel's root with rd=md1); md0 is the small image.  Counted substitution of the pinned donor file, see
++ * docs/procedures/nat-083/make_variant83.py.
+  */
+ #include "mini.h"
+ 
+@@ -24,8 +28,8 @@
+ 		close(fd);
+ 	}
+ 
+-	if (mount("apfs", "/redwood", MNT_RDONLY, (void *)"/dev/md1") != 0) {
+-		printf("stage0: cannot mount /dev/md1 on /hakios: %s\n", strerror(errno));
++	if (mount("apfs", "/redwood", MNT_RDONLY, (void *)"/dev/md0") != 0) {
++		printf("stage0: cannot mount /dev/md0 on /hakios: %s\n", strerror(errno));
+ 	} else {
+ 		execve(init_argv[0], init_argv, envp);
+ 		printf("stage0: cannot run %s: %s\n", init_argv[0], strerror(errno));
