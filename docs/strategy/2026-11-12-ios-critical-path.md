@@ -187,6 +187,49 @@ Shortest justified path from the current PID 1 to the first real lock-screen/Spr
 
 Rung status of this path today: steps 1-4 are *written/built/model-tested* in parts (images, analysers, stand-ins); *ran on S24*: PID 1, Apple launchd, one Apple daemon; *showed real iOS UI*: nothing. No date is promised.
 
+## 0e. Status update, 2026-11-12 after NAT-098/099/101/102 (this section replaces 0d where they differ)
+
+NAT-098 ran `loader-diag-xnu-sq-md1` (Stage A without the `lsd` job) once under decision 0037: RECOVERY only, restored from the pinned stock, Android checked, host load 3.47; the whole root arrived at 13.81 MB/s. Pre-registered rows: chain row 9, Stage A **A8** (outcome *inconclusive*; no launchd console-form line in the returned text, so no ladder row above A8 could apply). Post-hoc reading (written after the analysers, not a ladder row, `docs/procedures/nat-098/`): the `lsd` CPU-monitor flood is gone (0 of 304 timestamped lines), the surviving kernel text is continuous from 215.1 s to 268.5 s, launchd ran NAT-088's three boot tasks, pids 9-25 were created, `logd[16]` and `containermanagerd[12]` are named by the minisandbox lines, no panic line. **What NAT-088's run had and this one lacks: launchd's own console lines and the `ps` lists of the heartbeat job** (`com.nat085.ps`). Hypothesis **H-logd** (untested): once Apple's `logd` runs, the output that launchd and its jobs write to `/dev/console` no longer reaches the kernel log the project returns. The window does not explain the absence: from 215.1 s on the text is continuous (the unsent middle and both holes lie before 216 s, `docs/procedures/nat-098/README.md`), so the missing lines are missing from the kernel log itself. pids 22-25 appeared 10.0 s apart, which matches the heartbeat job's `ThrottleInterval 10`: the job was respawned, so either its `ps` died before printing (a launch-time kill or denial of an Apple binary started by launchd, a B11-type cause) or its output no longer reaches the console (H-logd). Only an observer that does not depend on launchd, and that records how its own child ended, separates the two.
+
+| Item | written | built | model-tested | ran on S24 | real iOS UI |
+| --- | --- | --- | --- | --- | --- |
+| Flood removed by leaving `lsd` out of the small root | yes | yes | yes | **yes** (NAT-098: 0 of 304 lines) | no |
+| Apple `logd` and `containermanagerd` run under restore-mode launchd (minisandbox lines name them; pids 9-25 exist) | plists in the image | yes | static only | **yes** (named, not shown to be healthy) | no |
+| launchd's console lines and `ps` lists after `logd` started | yes | yes | yes | **not observed** (H-logd untested) | no |
+| `hb`, a launchd-independent heartbeat (NAT-101): freestanding arm64 Mach-O, raw Darwin system calls, started from `/etc/rc` before `exec launchd`, writes `SWEET hb:` lines and Apple's `/bin/ps` output to `/dev/console` every 10 s | yes | yes (16,635 B, NAT-077's clang + lld + mkstatic pipeline) | **yes, in a model**: control flow through a libc model (NAT-101) and the real Mach-O executed under Unicorn with a multi-process fake Darwin kernel in three scheduling orders (NAT-102 `hb_vm.py`); ABI-breaking mutants of `hb.c` detected or shown equivalent with the XNU source | **no** | no |
+| Image `loader-diag-xnu-hb-md1` (NAT-102): NAT-096's image plus `hb` and one rc line | yes | yes (RECOVERY sha256 `e938cb4a...ba94`) | yes (byte comparison with NAT-096's payload: only the tag bytes and the md0 region differ) | **no** (native run NAT-103, decision 0038) | no |
+| Stage B small root (NAT-099: Stage A root + backboardd plist + donor prebuilt `libhakios.dylib` + `etc/inject.conf`) | yes | yes (readback by the kernel's apfs_lib) | yes (19 tests) | **no** | no |
+
+The model is not the payload kernel. It checks that the machine code of `hb` is consistent with the Darwin arm64 system-call conventions as the project's XNU source states them (number in x16, carry = error with errno in x0, the fork child flag in x1, `select(0,0,0,0,&tv)` as the sleep, `wait4` status layout); where the phone's kernel differs, the native run is the test. One model fact is cited to the source: on an error the kernel stores `x[1] = 0` (`bsd/dev/arm/systemcalls.c`, `arm_prepare_u64_syscall_return`).
+
+**The earliest unsolved blocker is still B7: which of Apple's daemons stay up under restore-mode launchd.** Partly answered: `logd` and `containermanagerd` start. Unknown: whether they stay up, what launchd does after, and whether PID 1 survives. The binding constraint is again **B8, in a new form**: not the volume of one daemon's message but the loss of the routing from launchd and its jobs to the readable log. `hb` goes around launchd; its result decides which of three readings holds:
+
+* **H5 (ps lists after `hb` markers):** the console path works after `logd` started, so the lost launchd lines are a launchd/`logd` routing or window matter; the lists give the process table (B7 in the process-name sense) at about 10 s intervals; only 4-6 rounds fall inside the ~60 s window.
+* **H3 or H2 (markers without lists, or the start line only):** `hb` ran and its console writes work (its own lines are in the log) but its `ps` printed nothing: the `ps` status line (wait status: a signal number means a kill, 32512 means the exec failed, `timeout-killed` means it hung) says why. A kill or a failed exec of Apple's `/bin/ps` points at the kernel's launch-time checks (B11), not at the console path.
+* **H1 (no `hb` line):** either `hb` did not start (the rc echo `$ /redwood/bin/hb` is in the head window) or its console writes are lost after `logd` starts; the next step is a reader that does not use the console (a file in the RAM file system read by a project program at the end, or a USB channel from a project process).
+
+Shortest justified path from the current PID 1 to the first real lock-screen/SpringBoard frame (steps are *planned* unless a rung is named; the order is by blocker, earliest first):
+1. **Observe launchd-independently** (NAT-103: the `hb` image under decision 0038). By row: H5 -> step 2 with the process list; H3/H2 -> the `ps` status lines; H1 -> a non-console reader first.
+2. **Stage A pass (B7)**: the seven self-starting daemons in a last complete `ps` list; a daemon that exits names the next kernel or stub change (B11 is the leading hypothesis: the AMFI stand-in grants nothing).
+3. **Stage B (B9, B10)**: backboardd and the donor's `libhakios.dylib` (prebuilt, inspected statically in IOS-014, not run) as one removable, bounded step; first backboardd lines, first failing selector.
+4. **A frame on the panel**: scan-out reuse from NAT-070 (DECON0 and RDMA0/1 are running; panel visibility was not observed) and the question whether a first frame without a GPU driver is possible. **Plausible, not proven**; no software-rendering promise.
+5. **SpringBoard**, then the lock screen; touch after the first frame.
+
+Rung status of this path today: steps 1-5 are *written/built/model-tested* in parts; *ran on the S24*: PID 1 probe, delivery of the 2.31 GiB root, Apple's launchd and, by name, `logd` and `containermanagerd`; *showed real iOS UI*: nothing. No date is promised.
+
+## 0f. Status update, 2026-11-12 after NAT-103 (this section replaces 0e where they differ)
+
+NAT-103 ran `loader-diag-xnu-hb-md1` (`loader_log`-based quiet Stage A + `/redwood/bin/hb` started in `/etc/rc` before `exec /sbin/launchd.darwin`) once under decision 0038 (RECOVERY only, restored from pinned stock, Android checked, host load 1.91 at launch). Full root arrived (`2,475,720,704` B in `172.04s`, `14.39 MB/s`, `0` retries/errors). Pre-registered analysers (run after watcher and collector exited): chain row **9** (`PARTIAL`), Stage A **A8** (`not-evaluated`), and heartbeat ladder **H1** (`no-hb-line`); `NAT-103` stays open (`inconclusive`).
+
+Post-hoc inspection of `boot 000002` vs NAT-098 and `loader_return.c` / `glue62_impl.h` reveals the **binding B8 mechanism**:
+
+* `loader_return.c` (`loader_log_append_msgbuf()`) appends the kernel `msgbufp` (`~30.5 KiB`) **after** the userland console ring (`~85.5 KiB` in NAT-103 vs `~81.3 KiB` in NAT-098; `+4,588` B total length, `116,430` vs `111,842`).
+* `docs/procedures/nat-062/src/glue62_impl.h` transmits only `NAT062_HEAD_RETURN = 8,192` (`0x0..0x2000`, stopping inside `/etc/rc` `vm_stat`) and `NAT062_TAIL_RETURN = 32,768` (`0x146ce..0x1c6ce`), dropping `75,470` bytes (`gap`) in the middle.
+* After the initial `4,896`-byte ring-overrun hole at `tail_start` (`0x146ce..0x159ee`), **100% of surviving tail bytes (`0x159ee..0x1c6ce`) lie inside the kernel message buffer (`216.673s .. 269.309s`)**. Thus, unlike NAT-088 (`len = 57,665`), zero bytes of console output past `8,192` reached the returned tail in either NAT-098 or NAT-103.
+* Circumstantial indicators of `hb` running: `launchd` self-start spawns shifted `+2` PIDs (`11..18` vs `9..16` in NAT-098) and periodic `10.04s` spawns stepped `+2` (`25, 27, 29, 31` with `22, 26, 28, 30` absent from memorystatus), with `memory: free 998, files 552, programs 10` at `266.728s`, plus `+4,588` bytes before `tail`.
+
+**Immediate next blocker is still B8 (unsent 75 KiB console ring inside `loader_log`), NOT userland/daemon code:** before changing `hb` or daemons, return the missing console window (either widen `glue62_impl.h` / stream `loader_log` without the `75 KiB` gap and `4.8 KiB` initial overrun, OR add a non-console reader that sends console/RAMFS output cleanly after boot). Then re-run Stage A observability once cleanly to read `SWEET hb:` and `ps -A`/`ps -Ao` lists and answer **B7**.
+
 ## 1. Audit of the selected profile and local components
 
 Selected profile (docs/implementation.md, CAPABILITIES.md): **iPhone X (iPhone10,3, D22AP, t8015) iOS 16.5 (build 20F66)** userland on **XNU 8796.121.2** (HackiOS base d82c64a3) for **SM-S921B/e1s**.

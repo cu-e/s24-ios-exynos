@@ -1,0 +1,178 @@
+{
+ "task_id": "NAT-103",
+ "kind": "native-device",
+ "origin": "local-device",
+ "date": "2026-11-12",
+ "outcome": "inconclusive",
+ "decision": "docs/decisions/0038-nat102-loader-diag-xnu-hb-md1-single-run-2026-11-12.md",
+ "image": "loader-diag-xnu-hb-md1",
+ "summary": "loader-diag-xnu-hb-md1 ran once on SM-S921B/e1s (decision 0038, RECOVERY only, restored from pinned stock 96620b8b...babf67, Android verified). Host load at launch: 1.91 (idle). The full 2,475,720,704-byte root delivered in 172.04s (14.39 MB/s, 0 retries, 0 device rx errors). Pre-registered analysers run after watcher and collector exit returned chain row 9 (PARTIAL), Stage A row A8 (not-evaluated), and NAT-102 heartbeat row H1 (no-hb-line), so NAT-103 remains open. Post-hoc inspection of boot 000002 reveals why console text is missing from the returned tail in both NAT-098 and NAT-103: loader_return.c appends the ~30.5 KiB kernel message buffer at the end of loader_log (116,430 bytes total; +4,588 bytes over NAT-098's 111,842), while glue62_impl.h sends only head=8192 and tail=32768, skipping 75,470 bytes (0x2000..0x146ce); after the 4,896-byte ring-overrun hole at tail start (0x146ce..0x159ee), 100% of surviving tail bytes (0x159ee..0x1c6ce) sit inside the kernel message buffer (216.673s..269.309s). Launchd self-start PIDs shifted +2 relative to NAT-098 (11..18 vs 9..16) and 10.04s-periodic spawns stepped +2 (25, 27, 29, 31 vs 22, 23, 24, 25), consistent with hb and its /bin/ps runs executing off-camera inside the unsent 75,470-byte console window.",
+ "host_launch": {
+  "loadavg_1m_5m_15m": [1.91, 3.23, 6.36],
+  "recovery_written_sha256": "e938cb4a5578b404685feeb21c0a480285b57157f10f4573fba07f28f5afba94",
+  "reboot_requested_at": "2026-11-12T20:35:29.071654+00:00",
+  "one_shot_marker": "artifacts/nat-102/native-attempt-loader-diag-xnu-hb-md1-used.json",
+  "one_shot_marker_sha256": "cfb7cfac3cac963ea236683f0b1087cfe4c493654c4c014d9f6da5f83d032fe4"
+ },
+ "delivery": {
+  "outcome": "delivered",
+  "size": 2475720704,
+  "sha256": "4377e98854753f648afde01d884bde352f316acad172eb5e46d44717954262f6",
+  "seconds": 172.04,
+  "mb_per_s": 14.39,
+  "chunks": 296,
+  "retries": 0,
+  "rx_errors": 0,
+  "rx_aborts": 0,
+  "rx_gaps": 0,
+  "rx_rejects": 0,
+  "rx_resets": 0
+ },
+ "restore_and_android": {
+  "download_mode_dt_s": 388.23,
+  "restore_report": "artifacts/nat-103/restore-001/report.json",
+  "assess_outcome": "pass",
+  "android_after_outcome": "pass",
+  "recovery_hash_match": true,
+  "user_data_directories": "user_data_directories_present"
+ },
+ "pre_registered": {
+  "analyze_nat087": {
+   "chain_verdict": "PARTIAL",
+   "restore_row": 9,
+   "restore_name": "not-evaluated",
+   "boots": 2,
+   "drops": 2,
+   "capture_errors": ["start-failed", "producer-reported-drop", "producer-reported-drop"]
+  },
+  "analyze_nat097": {
+   "row": 8,
+   "name": "not-evaluated",
+   "reason": "no launchd line in the returned text; the dump's begin record was lost and its geometry was inferred from the end line and the received offsets (NAT-097 rules)",
+   "ps_lists": 1,
+   "last_list_rows": 2,
+   "hole_bytes": 7968,
+   "gap_bytes": 75470
+  },
+  "analyze_nat102": {
+   "row": 1,
+   "name": "no-hb-line",
+   "reason": "no `SWEET hb:` line in the kernel text; the dump's begin record was lost and its geometry was inferred (NAT-097 rules)",
+   "hb_lines": 0,
+   "lists_not_from_hb": 1,
+   "launchd_console_lines": 0,
+   "begin_inferred": true,
+   "inferred_begin": {"why": 2, "len": 116430, "head": 8192, "tail": 32768, "gap": 75470}
+  }
+ },
+ "posthoc": {
+  "note": "post-hoc reading from posthoc_boot2.py; not a ladder row",
+  "dump_length": 116430,
+  "delta_vs_nat098_bytes": 4588,
+  "kernel_clock_first": 216.673453,
+  "kernel_clock_last": 269.30925,
+  "timestamped_lines": 304,
+  "flood_lines": 0,
+  "memorystatus_pids": [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 23, 24, 25, 27, 29, 31],
+  "memory_line": "memory: free 998, files 552, programs 10, wired 2533 (0 surfaces 0, ramfs 98), compressor 0 (holding 0) MB; available 1550, kills below 165 (the idle) and 82 (anybody)"
+ },
+ "established_on_device": [
+  "Whole 2,475,720,704-byte root delivered on idle host (14.39 MB/s, 0 retries, 0 errors); init passed 35/35 checks; /redwood/bin/hb (16635 B) present in md0.",
+  "Without com.apple.lsd, 0 CPU-monitor flood lines appear in 304 timestamped tail lines; launchd reaches Early boot complete (218.659902s) and 10 userland programs are active at 266.728s.",
+  "loader_log reached 116,430 bytes (+4,588 vs NAT-098) and surviving tail (0x159ee..0x1c6ce) sits wholly within the ~30.5 KiB kernel message buffer appended after the console ring; the entire console ring past 8,192 bytes lies in the unsent 75,470-byte gap and initial 4,896-byte hole."
+ ],
+ "not_established": [
+  "Whether SWEET hb: lines or launchd's post-logd console output reached the ~85.5 KiB console ring (which lies uninspected inside the 75,470-byte gap).",
+  "Which of the 7 self-starting Apple daemons (other than logd[18] and containermanager[14] named in minisandbox lines) stayed up under launchd."
+ ],
+ "commands": [
+  {
+   "step": "preflight",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-102/session_nat102.py --image loader-diag-xnu-hb-md1 --out artifacts/nat-103/preflight-001",
+   "exit_code": 0,
+   "outcome": "ready-read-only-registry-closed"
+  },
+  {
+   "step": "execute",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-102/session_nat102.py --image loader-diag-xnu-hb-md1 --out artifacts/nat-103/run-001 --execute",
+   "exit_code": 0,
+   "outcome": "native-attempt-started"
+  },
+  {
+   "step": "restore",
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py restore --bus 5 --address 26 --out artifacts/nat-103/restore-001",
+   "exit_code": 0,
+   "outcome": "awaiting-readback"
+  },
+  {
+   "step": "check_android",
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-103/android-after-001.json",
+   "exit_code": 0,
+   "outcome": "pass"
+  },
+  {
+   "step": "assess",
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py assess --restore artifacts/nat-103/restore-001/report.json --android artifacts/nat-103/android-after-001.json",
+   "exit_code": 0,
+   "outcome": "pass"
+  },
+  {
+   "step": "analyze_nat087",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-087/analyze_nat087.py --archive artifacts/nat-103/run-001/archive --events artifacts/nat-103/run-001/usb-events.jsonl --report artifacts/nat-103/run-001/report.json --delivery artifacts/nat-103/run-001/delivery/delivery.json --root artifacts/nat-083/system-padded.apfs --size 2475720704 --sha256 4377e98854753f648afde01d884bde352f316acad172eb5e46d44717954262f6 --image loader-diag-xnu-hb-md1 --out artifacts/nat-103/run-001/analysis-nat087.json --log-out artifacts/nat-103/run-001/kernel-log.txt",
+   "exit_code": 0,
+   "outcome": "chain row 9 PARTIAL / restore row 9 not-evaluated"
+  },
+  {
+   "step": "analyze_nat097",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-097/analyze_nat097.py --archive artifacts/nat-103/run-001/archive --jobs-dir artifacts/nat-101/pid1-hb/root/LaunchDaemons --out artifacts/nat-103/run-001/analysis-nat097.json",
+   "exit_code": 0,
+   "outcome": "row A8 not-evaluated"
+  },
+  {
+   "step": "analyze_nat102",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-102/analyze_nat102.py --archive artifacts/nat-103/run-001/archive --jobs-dir artifacts/nat-101/pid1-hb/root/LaunchDaemons --out artifacts/nat-103/run-001/analysis-nat102.json",
+   "exit_code": 0,
+   "outcome": "row H1 no-hb-line"
+  },
+  {
+   "step": "posthoc_boot2",
+   "cmd": "python3 -B -I docs/procedures/nat-093/posthoc_boot2.py --archive artifacts/nat-103/run-001/archive --boot-glob '000002-*' --out-text artifacts/nat-103/run-001/kernel-log-boot2-posthoc.txt --out-excerpt docs/procedures/nat-103/kernel-text-excerpt.txt --out-json artifacts/nat-103/run-001/posthoc.json",
+   "exit_code": 0,
+   "outcome": "post-hoc summary written"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-103/preflight-001/report.json",
+  "artifacts/nat-103/run-001/report.json",
+  "artifacts/nat-103/run-001/usb-events.jsonl",
+  "artifacts/nat-103/run-001/delivery/delivery.json",
+  "artifacts/nat-103/run-001/archive/manifest.json",
+  "artifacts/nat-103/run-001/analysis-nat087.json",
+  "artifacts/nat-103/run-001/analysis-nat097.json",
+  "artifacts/nat-103/run-001/analysis-nat102.json",
+  "artifacts/nat-103/run-001/kernel-log.txt",
+  "artifacts/nat-103/run-001/kernel-log-boot2-posthoc.txt",
+  "artifacts/nat-103/run-001/posthoc.json",
+  "artifacts/nat-103/restore-001/report.json",
+  "artifacts/nat-103/restore-001/assess.json",
+  "artifacts/nat-103/android-after-001.json",
+  "devices/local-2026-11-12-nat103.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-103/preflight-001/report.json": "c68ebe0cbc45ec84e7cd523f58b938532cf4d62263235559a65f0bbd54df210e",
+  "artifacts/nat-103/run-001/report.json": "0d83335359d1fcc32551ba347b067de11ecc09d5555f79be6fd11a57160a3267",
+  "artifacts/nat-103/run-001/usb-events.jsonl": "4dc38b6033621ac589e17def29e4cc84a5e0beb519e08cfc419dab95aea73bf0",
+  "artifacts/nat-103/run-001/delivery/delivery.json": "1b3ee8d93d07730b3a22051212ca388f4aaff0268cc086dc031a55593ba2a8df",
+  "artifacts/nat-103/run-001/archive/manifest.json": "8780c7860e865f648c75a48c3447fd92871b42abc2a95494cbd99067298ce10d",
+  "artifacts/nat-103/run-001/analysis-nat087.json": "e0d0e1d81be236344c199ebe77e733c7886ced8956763fd484078d37c1fa48a6",
+  "artifacts/nat-103/run-001/analysis-nat097.json": "2c5dec831bc343f145fcf187b26a81705b9a6abc5e82345499a55313d02d3b5b",
+  "artifacts/nat-103/run-001/analysis-nat102.json": "709395a3a5cb40df0751129acadb26fa399e158cadb465bb42e058a2207bfe94",
+  "artifacts/nat-103/run-001/kernel-log.txt": "f8b87c02e9ba84b3bf4ea1b1a923468a89877f85b1a6453b2a45a78e515268e6",
+  "artifacts/nat-103/run-001/kernel-log-boot2-posthoc.txt": "52a4694ba0c92923a54eb67c4a672e4ccbf798873b8b78f6bced8ddf06f03fb",
+  "artifacts/nat-103/run-001/posthoc.json": "1fc10f1e2a659d089d5f534418ae394d7601cef6253a78a078323450ad8d1bba",
+  "artifacts/nat-103/restore-001/report.json": "fa8519491e86c697f31dd7830dd904e7c4e4e239dd2a84ca0c417718277cd456",
+  "artifacts/nat-103/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "artifacts/nat-103/android-after-001.json": "d45d843d1205120b4829f208c89e48466776c24e668b3229b5620407e18e535e",
+  "devices/local-2026-11-12-nat103.json": "393ea420a83d4af17d9171c7e18393e5ceaf9c2b566fa53fd2c8c3f08515fb62"
+ }
+}
