@@ -1,0 +1,18 @@
+{
+  "id": "NAT-088",
+  "scope": "native",
+  "evidence_kind": "native-device",
+  "priority": 97,
+  "depends_on": ["NAT-087"],
+  "title": "Native run of loader-diag-xnu-rm-md1 (decision 0034): kernel command line ends in xrd=md0 so that Apple's launchd enters restore/ramdisk mode and skips the boot tasks (launchd_cache_loader among them); does launchd stay alive and run the one job twice",
+  "paths": ["docs/procedures/nat-088", "artifacts/nat-087/run-001"],
+  "sources": ["s24-port"],
+  "acceptance": [
+    "One run under decision 0034 (committed before the launch), RECOVERY only, restored from the pinned stock by NAT-013 with the pyusb venv python; Android and data checked afterwards; no retry.",
+    "Judged by analyze_nat087.py unchanged: the chain row (decision 0032's table) and the restore row R1-R9 with the facts it reports (boot tasks started in order, the Restore environment line, cache lines, Skipping boot-task lines, process lists printed by the job, failure-word lines, PID 1 exit or panic, console bytes after the exec line, log gaps, the ending, the delivery rate and committed offset).",
+    "Any restore row other than R1 is recorded as the finding with its numbers and does not complete the task; the whole-image digest of the delivered root stays reported as open."
+  ],
+  "steps": ["Open the native permit citing decision 0034 and claim", "Preflight, launch and restore", "Analyse and record"],
+  "status": "pending",
+  "owner": null
+}

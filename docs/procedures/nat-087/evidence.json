@@ -1,0 +1,175 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T13:04:58+00:00",
+ "commit": "db1f58b38a449fde1b785dd2494dbd6b9955c8d6",
+ "tree_state": "every file listed under sha256 was uncommitted at recording time and is committed in the commit that follows this record; the recorded commit is its parent. Dirty files that are not this task's (BOARD.md, STATUS.md, planning/tasks/*, state/*, docs/procedures/nat-004, nat-053, mcp.db, odin4.log, x/) were not touched by hand and are not part of it.",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "summary": "The host side of the third APFS-root native run, finished. NAT-086 (decision 0033) showed that /chosen/ephemeral-storage=1 makes keybagd skip on the S24 and that launchd then dies at the launchd_cache_loader boot task, because the donor recipe deletes System/Library/xpc/launchd.plist on purpose. Source review of the pinned sbin/launchd (capstone disassembly, local iPhone10,3 16.5 unpack): launchd searches kern.bootargs with strstr for rd=md0 and sets a restore flag; with it a boot task runs only if PerformAlways or PerformInRestore, so only commit-boot-mode, init-with-data-volume and restore-datapartition qualify, and a missing service cache is not fatal. XNU's pexpert/gen/bootargs.c (compiled on the host with shim headers) compares whole keys, so a LAST token ' xrd=md0' leaves the kernel's rd=md1 alone while kern.bootargs (strlcpy of PE_boot_args) still contains rd=md0. build.py builds loader-diag-xnu-rm-md1 = NAT-085's image with the tag NAT087-rm1 and that token (RECOVERY 8827c97e..., Image.payload d23c71b4..., command line 236 of 255 bytes); the XNU payload is byte-for-byte NAT-085's except the command-line field. session_nat087.py is derived from session_nat085.py by 9 counted substitutions (derive87.py --check exit 0). analyze_nat087.py judges the console text after the last exec with rows R1-R9 on top of NAT-083's chain module; run over the REAL NAT-084 and NAT-086 archives it reads R5 (boot tasks not skipped), the control that separates a launchd without restore mode from one with it. 115 tests pass; mutation pass of 385 candidates: 365 killed, 15 do not parse, 5 survivors each explained in equivalent.json. Decision 0034 is written for one native run (NAT-088). Nothing here ran on the phone with this image.",
+ "acceptance": {
+  "1_cmdline": "test_nat087.py: KernelBootArgParser compiles XNU's real pexpert/gen/bootargs.c (pinned SHA c54f35ca...) and gets rd -> md1 and xrd -> md0 for the packaged command line (control: a last rd=md0 gives md0); KernBootargsSysctl pins kern.bootargs = PE_boot_args() in kern_sysctl.c; BuiltPayload compares Image.payload with NAT-085's byte for byte (26 differing bytes in the loader and the tag/token, the rest equal apart from the 608-byte SWEETXNU command-line field).",
+  "2_launchd_reading": "AppleLaunchd parses the Boot dictionary embedded in the pinned launchd (__TEXT,__config) and requires ALLOWED_TASKS to equal its PerformAlways/PerformInRestore set, and the strstr import and the rd=md0 string to be present. This is source review; whether launchd enters restore mode on the phone is the question of NAT-088.",
+  "3_driver_analyser_decision": "derive87.py --check exit 0 (9 substitutions); analyser rows R1-R9 over hand-written variants and the real NAT-084/NAT-086 archives (both R5); mutation pass; decision 0034 with hashes; driver preflight 'ready-read-only-registry-closed'."
+ },
+ "findings": [
+  "The first mutation pass (385 candidates) left 25 + 6 survivors. They exposed weaknesses of the first test set, none a defect of the code under test: the bounds test used the module's own constants (so changing a constant could not fail it); the stop-sign test of decide_restore was conditional (`if s['row'] == 4`) and could pass without checking anything; the text-level tests never put the kernel marker or the restore line at offset 0; the reason strings were only checked with assertIn. Eleven tests (class Boundaries and two in BuildWrapper) were added; the second full pass left 5 survivors, all explained.",
+  "decide_restore's `no $ exec` branch is unreachable through analyze() (chain row 1 needs the exec line); it is tested by calling decide_restore with a hand-built kernel reading.",
+  "NAT-087 depends on NAT-085, not on NAT-086: NAT-086's outcome is fail and it stays in_progress, so it can never be a satisfied dependency.",
+  "build.py line 42 (`b83 = b85.b83`) is a dead alias. It is left in place because build.json of the built image records the SHA-256 of build.py (nat087_sources); changing the file would make that record stale without changing the image."
+ ],
+ "established": [
+  "The image, its package and its command line exist with the recorded sizes and hashes; the packaged line is NAT-085's with the tag NAT087-rm1 and ' xrd=md0' last, 236 bytes.",
+  "XNU's real boot-arg parser, compiled on the host, returns rd=md1 and xrd=md0 for it; the kern.bootargs sysctl returns the same string (source review).",
+  "Apple's launchd of the local unpack contains the strstr import, the rd=md0 string and a Boot dictionary whose PerformAlways/PerformInRestore tasks are exactly the analyser's allowed list.",
+  "The driver, the analyser and the build wrapper behave as written; 365 of 385 mutants killed, 15 unparsable, 5 equivalent with reasons.",
+  "make check exit 0 (log attached); preflight is ready-read-only-registry-closed with Android running."
+ ],
+ "not_established": [
+  "Anything about the S24 with this image: that launchd enters restore mode through the substring, that it skips the boot tasks, whether a job loads in restore mode, how long launchd lives, how much memory it takes.",
+  "That the restore flag does not change other launchd behaviour that matters for the later job set (services that refuse to run on a ramdisk).",
+  "That the returned log window holds the restore line (gaps are handled as 'not established').",
+  "That the delivered root is intact as a whole (NAT-078 read back 59.6% only; NAT-084 and NAT-086 ran from it).",
+  "Anything about display, input, GPU, backboardd or SpringBoard."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-087/test_nat087.py"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; Ran 115 tests, OK; logs artifacts/nat-087/logs/test.{stdout,stderr,exit}"
+  },
+  {
+   "argv": [
+    "python3",
+    "-B",
+    "-I",
+    "docs/procedures/nat-087/derive87.py",
+    "--check"
+   ],
+   "exit_code": 0,
+   "note": "ok: session_nat087.py equals the derivation (9 substitutions)"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-I",
+    "docs/procedures/nat-087/mutate_nat087.py",
+    "--out",
+    "artifacts/nat-087/mutation-final",
+    "--jobs",
+    "8"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; 385 candidates; stdout artifacts/nat-087/mutation-final.stdout; the first pass (artifacts/nat-087/mutation, 31 survivors) is kept as the record of what the added tests fixed"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; logs artifacts/nat-087/logs/make-check.*"
+  },
+  {
+   "argv": [
+    "python3",
+    "-B",
+    "-I",
+    "docs/procedures/nat-087/session_nat087.py",
+    "--image",
+    "loader-diag-xnu-rm-md1",
+    "--out",
+    "artifacts/nat-087/preflight-001"
+   ],
+   "exit_code": 0,
+   "note": "ready-read-only-registry-closed; no device write"
+  }
+ ],
+ "mutation_summary": {
+  "docs/procedures/nat-087/analyze_nat087.py": {
+   "total": 282,
+   "killed": 268,
+   "survived": 1,
+   "survived_unexplained": 0,
+   "invalid": 13,
+   "timeout": 0
+  },
+  "docs/procedures/nat-087/build.py": {
+   "total": 84,
+   "killed": 78,
+   "survived": 4,
+   "survived_unexplained": 0,
+   "invalid": 2,
+   "timeout": 0
+  },
+  "docs/procedures/nat-087/derive87.py": {
+   "total": 19,
+   "killed": 19,
+   "survived": 0,
+   "survived_unexplained": 0,
+   "invalid": 0,
+   "timeout": 0
+  }
+ },
+ "sha256": {
+  "docs/procedures/nat-087/README.md": "580e6bc83742735f64caeafc2404df040d812e00245d86874a6b27a99e66a7a4",
+  "docs/procedures/nat-087/analyze_nat087.py": "b3fa68b39fafe0309f225ca5e07fd1a95ec90c0154de724543ca9f59a0a907d7",
+  "docs/procedures/nat-087/build.py": "128c8b37dac26c4ff1afc2218ca037071b096606640cb9b2f1424d65dc5a889c",
+  "docs/procedures/nat-087/derive87.py": "58e6925cf4680a823e849f0cffc08c5fc5ce0b48331d186fe6a1438537daad49",
+  "docs/procedures/nat-087/equivalent.json": "661c559a1db9ca4b9fe0648a6958ad4e402ca08a33cd548c5e4d69688df6f9d5",
+  "docs/procedures/nat-087/mutate_nat087.py": "b8a50997408fb4ad54db90255c4d23494746f08e5d10e3d47fca8e6d39fde58c",
+  "docs/procedures/nat-087/mutation.json": "7f8b3824e8ecf386582dc6e9354bc9f20587163f952cf57a7954d6333adadb9b",
+  "docs/procedures/nat-087/session_nat087.py": "413d62fbad228bed494127ed7cd243835e049bd900ee0a399498cb16d77ba8a6",
+  "docs/procedures/nat-087/task.json": "f5a28acd41eb879a2defe6a1d7340f5ced632abd1e4669ad01b7000bbdf1802d",
+  "docs/procedures/nat-087/test_nat087.py": "ca83eb16ab370d49ae7c7b7ac91e1421bc61eff5fe098dfaedc4f9cfeeeeaf8d",
+  "docs/procedures/nat-088/task.json": "677fdf7cb337224549fd3a7b1b541272c42c36f663ca7d135b690acb9f7d0d8a",
+  "docs/decisions/0034-nat087-loader-diag-xnu-rm-md1-single-run-2026-11-12.md": "cf562b83403a1af160eac3f7bf067f85975334b713f582223be29186445496b0"
+ },
+ "artifacts": [
+  "artifacts/nat-087/logs/test.stdout",
+  "artifacts/nat-087/logs/test.stderr",
+  "artifacts/nat-087/logs/test.exit",
+  "artifacts/nat-087/logs/derive-check.stdout",
+  "artifacts/nat-087/logs/derive-check.stderr",
+  "artifacts/nat-087/logs/derive-check.exit",
+  "artifacts/nat-087/logs/make-check.stdout",
+  "artifacts/nat-087/logs/make-check.stderr",
+  "artifacts/nat-087/logs/make-check.exit",
+  "artifacts/nat-087/logs/preflight.stdout",
+  "artifacts/nat-087/logs/preflight.stderr",
+  "artifacts/nat-087/logs/preflight.exit",
+  "artifacts/nat-087/mutation-final.stdout",
+  "artifacts/nat-087/mutation-final/mutation.json",
+  "artifacts/nat-087/build-001/build.json",
+  "artifacts/nat-087/package-001/package.json",
+  "artifacts/nat-087/package-001/loader-diag-xnu-rm-md1/recovery.img"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-087/logs/test.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-087/logs/test.stderr": "c5b12f596e86a1c108e18cef8ba3c524422c48bf58d5f644f82a25449a2fc0a3",
+  "artifacts/nat-087/logs/test.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+  "artifacts/nat-087/logs/derive-check.stdout": "1dffe4946d434ba6b6ea792d77b9e9e9852bdbcce10a38c8d4d1544e52017f4f",
+  "artifacts/nat-087/logs/derive-check.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-087/logs/derive-check.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+  "artifacts/nat-087/logs/make-check.stdout": "1187ded8d9f276255a20024484613758c6a6a7093267a63a4611a042a15c232b",
+  "artifacts/nat-087/logs/make-check.stderr": "1ec9dafe10cacc741c0e7466c793ae0ad9ef6989777b5844b40c355bf9a3663f",
+  "artifacts/nat-087/logs/make-check.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+  "artifacts/nat-087/logs/preflight.stdout": "c9a1ec16d836b040f499ad98405290f73d8232eda300029929883fa1962c917b",
+  "artifacts/nat-087/logs/preflight.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-087/logs/preflight.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+  "artifacts/nat-087/mutation-final.stdout": "9b7efd00d17cf35bbce7a32bff8e8d827ce8068d5b248f1fc710a7bb8c9a81f1",
+  "artifacts/nat-087/mutation-final/mutation.json": "7f8b3824e8ecf386582dc6e9354bc9f20587163f952cf57a7954d6333adadb9b",
+  "artifacts/nat-087/build-001/build.json": "b1e53b060dd54777457a6c36a6f2156a822b48658a6f4c0f90e14f01a57e90f4",
+  "artifacts/nat-087/package-001/package.json": "79344217136a004d05154749d5b702503cf53f6d48c73cf16af5fe5cfd5219c7",
+  "artifacts/nat-087/package-001/loader-diag-xnu-rm-md1/recovery.img": "8827c97e365809932d5b9238913efbd72c13ae1d6ab3fb17394604e7eca1e667"
+ },
+ "deviations_from_task_text": "None of substance: the task text asked for a decision 'draft'; the full decision file 0034 was written, because the run follows under it. The task depended on NAT-086 in the first draft and now depends on NAT-085 (see findings)."
+}

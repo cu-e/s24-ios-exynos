@@ -1,0 +1,18 @@
+{
+  "id": "NAT-087",
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "priority": 97,
+  "depends_on": ["NAT-085"],
+  "title": "Next image after the NAT-086 finding: launchd restore/ramdisk mode through a last kernel-command-line token xrd=md0 (launchd's strstr for rd=md0 finds it, XNU's whole-key parser ignores it) so that the boot tasks, including launchd_cache_loader, are skipped; build, derive the session driver, analyser rows R1-R9, tests over XNU's real boot-arg parser and Apple's launchd Boot dictionary, decision draft",
+  "paths": ["docs/procedures/nat-087", "artifacts/nat-087"],
+  "sources": ["s24-port"],
+  "acceptance": [
+    "The kernel command line of the built payload equals NAT-085's with the new tag and one last token xrd=md0 and nothing else changed in the XNU payload; XNU's own pexpert/gen/bootargs.c (compiled on the host with shim headers) returns rd=md1 and xrd=md0 for it; kern.bootargs returns the same string the parser reads (source review of kern_sysctl.c).",
+    "The restore-mode reading is documented from the disassembly of the pinned launchd (strstr rd=md0, the Boot dictionary flags: PerformAlways / PerformInRestore tasks only) and the allowed-task list of the analyser equals the Boot dictionary read from the binary. This is source review: whether launchd enters restore mode on the phone is the question of the native task.",
+    "A session driver derived from NAT-085's by counted substitutions and an analyser (rows R1-R9) tested over the real NAT-084 and NAT-086 archives (both read R5, the control that the analyser tells a launchd without restore mode from one with it; the restore text itself is hand-written because no run has printed it); mutation pass; decision draft with hashes. Nothing here measures the phone."
+  ],
+  "steps": ["Build the image with the token", "Driver and analyser", "Tests and mutation pass", "Decision"],
+  "status": "pending",
+  "owner": null
+}

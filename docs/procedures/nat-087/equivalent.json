@@ -1,0 +1,37 @@
+[
+ {
+  "file": "docs/procedures/nat-087/analyze_nat087.py",
+  "line": 63,
+  "desc": "statement deleted",
+  "code": "sys.modules[name] = m",
+  "reason": "`sys.modules[name] = m` in _load() registers the module under its name; it matters only for pickling and for dataclass/typing lookups by module name. The modules loaded this way (the NAT-083 analyser, NAT-085's build.py) use none of them (their own _load has the same line and they define no dataclass and pickle nothing), and exec_module() runs without the registration, so every call behaves identically."
+ },
+ {
+  "file": "docs/procedures/nat-087/build.py",
+  "line": 36,
+  "desc": "statement deleted",
+  "code": "sys.modules[name] = m",
+  "reason": "`sys.modules[name] = m` in _load() registers the module under its name; it matters only for pickling and for dataclass/typing lookups by module name. The modules loaded this way (the NAT-083 analyser, NAT-085's build.py) use none of them (their own _load has the same line and they define no dataclass and pickle nothing), and exec_module() runs without the registration, so every call behaves identically."
+ },
+ {
+  "file": "docs/procedures/nat-087/build.py",
+  "line": 42,
+  "desc": "statement deleted",
+  "code": "b83 = b85.b83",
+  "reason": "`b83` is assigned in build.py and never read there (grep finds the name only on that line); the wrapper uses b85, b65 and sha. Deleting a dead alias cannot change any behaviour. The line is kept, not removed, because build.json of the built image records the SHA-256 of this file (nat087_sources) and the image is not rebuilt for a cosmetic edit."
+ },
+ {
+  "file": "docs/procedures/nat-087/build.py",
+  "line": 90,
+  "desc": "literal 1 -> 0",
+  "code": "rec.write_text(json.dumps(d, indent=1))",
+  "reason": "only the indentation of the whitespace in build.json changes. The file is read back with json.loads (this wrapper's own post-check, the tests and the packager), which ignore whitespace, so the parsed content is identical."
+ },
+ {
+  "file": "docs/procedures/nat-087/build.py",
+  "line": 90,
+  "desc": "literal 1 -> 2",
+  "code": "rec.write_text(json.dumps(d, indent=1))",
+  "reason": "same as indent 1 -> 0: a different JSON indentation, parsed identically by every reader."
+ }
+]
