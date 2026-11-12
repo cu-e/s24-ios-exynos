@@ -1,0 +1,94 @@
+{
+ "task_id": "NAT-110",
+ "kind": "host-test",
+ "origin": "local-host",
+ "date": "2026-11-13",
+ "recorded_at": "2026-11-12T23:24:52+00:00",
+ "outcome": "pass",
+ "owner": "gemini-ios-20261113-a",
+ "commit": "97337e8406b8cc7093ff56c446765750ef55df72",
+ "decision": "docs/decisions/0042-nat110-loader-diag-xnu-sc2-md1-single-run-2026-11-13.md",
+ "summary": "Built and packaged Stage C2 + hb RECOVERY image loader-diag-xnu-sc2-md1 (396-file md0 root derived from NAT-108 pid1-sc1-hb: added empty etc/quiet to eliminate ~280 KB synchronous launchd framebuffer logging, pruned com.nat085.ps.plist + 27 non-UI background plists leaving 377 LaunchDaemons; cmdline NAT110-sc2 + fb_diff=1 + loader_return_after=63, 246 B < 256 B; --deadline-s 365). Derived session_nat110.py (9 substitutions), verified analyze_nat110.py (truncated SpringBoa* matching, service spawned with pid <N>, etc_quiet_active, reclassifying NAT-109 from false C4 to C6), passed 12/12 tests in test_nat110.py, and passed mutate_nat110.py across 412 mutants (392 killed, 2 equivalent in equivalent.json, 18 invalid, 0 unexplained survivors). Nothing ran on a phone.",
+ "artifacts": [
+  "docs/procedures/nat-110/README.md",
+  "docs/procedures/nat-110/build_sc2_hb_root.py",
+  "docs/procedures/nat-110/build.py",
+  "docs/procedures/nat-110/analyze_nat110.py",
+  "docs/procedures/nat-110/derive110.py",
+  "docs/procedures/nat-110/session_nat110.py",
+  "docs/procedures/nat-110/test_nat110.py",
+  "docs/procedures/nat-110/mutate_nat110.py",
+  "docs/procedures/nat-110/equivalent.json",
+  "docs/procedures/nat-110/mutation.json",
+  "docs/decisions/0042-nat110-loader-diag-xnu-sc2-md1-single-run-2026-11-13.md",
+  "artifacts/nat-110/pid1-sc2-hb/build.json",
+  "artifacts/nat-110/build-001/build.json",
+  "artifacts/nat-110/package-001/package.json"
+ ],
+ "built_artifacts": {
+  "md0_root_apfs": "artifacts/nat-110/pid1-sc2-hb/root.apfs",
+  "md0_bytes": 4194304,
+  "md0_sha256": "6e9bdcef4ed6d4cd592ae004f1ec84013326242472be6f27074d5364a495583c",
+  "md0_files": 396,
+  "launchdaemons_plist_count": 377,
+  "loader_image": "artifacts/nat-110/build-001/loader-diag-xnu-sc2-md1/Image",
+  "loader_image_bytes": 385024,
+  "loader_image_sha256": "954aef2c80da0d326cb63574422ac5be2420effcd892cd7ae6f468f95f077c88",
+  "image_payload": "artifacts/nat-110/build-001/loader-diag-xnu-sc2-md1/Image.payload",
+  "image_payload_bytes": 26134288,
+  "image_payload_sha256": "31a9f150ba75d967fa074a320998ba6b88986c952ade1ff002ac718bf44a02c6",
+  "glue62_impl_h": "artifacts/nat-110/build-001/loader-diag-xnu-sc2-md1/source/shim/e1s-xnu/glue62_impl.h",
+  "glue62_impl_sha256": "7fa35d764441bca2ce000408a2fea17672c149a45129047224c70880dcc71d60",
+  "recovery_img": "artifacts/nat-110/package-001/loader-diag-xnu-sc2-md1/recovery.img",
+  "recovery_img_bytes": 100663296,
+  "recovery_img_sha256": "3e0c594060a58e4045ef6dee417931d8e79ed8fb139de38b5cb18d1294788258"
+ },
+ "file_hashes": {
+  "docs/procedures/nat-110/README.md": "998ebbd02309b47f6aacb582371dc2c73c238eaa32091017338a96e7ab0cbd0a",
+  "docs/procedures/nat-110/build_sc2_hb_root.py": "7e33923ba490c881f68c2544714c724d006b7280b0ab1b825d69c1a64f233003",
+  "docs/procedures/nat-110/build.py": "44a96440731d1a9eee516888919aae927471acb05c87c6af5b40613fa35c0631",
+  "docs/procedures/nat-110/analyze_nat110.py": "dde8d22c6b5faa031f96df3f92f9fe41a2fd105b54c94a5c509e32a82c304e3e",
+  "docs/procedures/nat-110/derive110.py": "7603915af7f9143f887ccf10ecf126b907cd66f3b7875cec61a1394074b16966",
+  "docs/procedures/nat-110/session_nat110.py": "8f1d029839ac4402c8a534e8272edcce660855fd1329c06ebea1e4d56d898676",
+  "docs/procedures/nat-110/test_nat110.py": "4fd18956b76dc9ceb9362131be1503e23fc25d5bb68e315b7274c494c4a6ce31",
+  "docs/procedures/nat-110/mutate_nat110.py": "ba97ab4cb21a0dea7279d37446d6a597ee1c5af142969c4a190ff456c686b048",
+  "docs/procedures/nat-110/equivalent.json": "ac62960f044336a43b66b91f7d7ab7043b8f6b7305f7215bb20e8cedc758e3a5",
+  "docs/procedures/nat-110/mutation.json": "67110fc57ba62ead13f201de53d465a983e39eca671c1097afde6ea815a5f37f",
+  "docs/decisions/0042-nat110-loader-diag-xnu-sc2-md1-single-run-2026-11-13.md": "c60f62427bdf9e32f43a556d19f6362fc0d292184c5a063d12010e593f9c4742"
+ },
+ "commands": [
+  {
+   "command": "python3 docs/procedures/nat-110/build_sc2_hb_root.py",
+   "exit_code": 0,
+   "summary": "396 files, 377 LaunchDaemons, kernel_readback_ok=true"
+  },
+  {
+   "command": "python3 docs/procedures/nat-110/build.py --out artifacts/nat-110/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0
+  },
+  {
+   "command": "python3 docs/procedures/nat-044/package.py --build artifacts/nat-110/build-001 --out artifacts/nat-110/package-001",
+   "exit_code": 0
+  },
+  {
+   "command": "python3 docs/procedures/nat-110/derive110.py --check",
+   "exit_code": 0,
+   "output": "ok: session_nat110.py equals the derivation (9 substitutions)"
+  },
+  {
+   "command": "python3 -B -I docs/procedures/nat-110/test_nat110.py -v",
+   "exit_code": 0,
+   "summary": "Ran 12 tests in 0.478s - OK"
+  },
+  {
+   "command": "rm -rf artifacts/nat-110/mut artifacts/nat-110/mut-annotated && python3 -B -I docs/procedures/nat-110/mutate_nat110.py --out artifacts/nat-110/mut --jobs 4 --timeout 30",
+   "exit_code": 0,
+   "summary": {
+    "analyze_nat110.py": {"total": 107, "killed": 103, "survived": 1, "survived_unexplained": 0, "invalid": 3},
+    "build.py": {"total": 105, "killed": 98, "survived": 1, "survived_unexplained": 0, "invalid": 6},
+    "build_sc2_hb_root.py": {"total": 181, "killed": 172, "survived": 0, "survived_unexplained": 0, "invalid": 9},
+    "derive110.py": {"total": 19, "killed": 19, "survived": 0, "survived_unexplained": 0, "invalid": 0}
+   }
+  }
+ ]
+}

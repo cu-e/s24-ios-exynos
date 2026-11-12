@@ -1,0 +1,31 @@
+{
+  "id": "NAT-110",
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "priority": 100,
+  "depends_on": [
+    "NAT-108",
+    "NAT-109"
+  ],
+  "title": "Build and test Stage C2+hb image loader-diag-xnu-sc2-md1: etc/quiet log trim, pruned non-UI background LaunchDaemons, loader_return_after=65, fixed SpringBoard analyser (C0-C7) and single-run decision draft",
+  "paths": [
+    "docs/procedures/nat-110",
+    "artifacts/nat-110"
+  ],
+  "sources": [
+    "s24-port",
+    "hakios"
+  ],
+  "acceptance": [
+    "build_sc2_hb_root.py builds artifacts/nat-110/pid1-sc2-hb/root.apfs (4 MiB / 4194304 B) on pinned NAT-108 pid1-sc1-hb base with empty etc/quiet (0644) and explicitly pruned com.nat085.ps.plist plus non-UI background LaunchDaemons while keeping SpringBoard, backboardd, UI/XPC helpers, libhakios.dylib, libhakios.sb.dylib, var/ preferences, hb, and etc/rc intact, verified by verify.py content and kernel apfs_lib readback.",
+    "build.py packages loader-diag-xnu-sc2-md1 (nat_attempt=NAT110-sc2, loader_return_after=65, fb_diff=1, cmdline < 256 B, NAT-106 512 KiB KL tail/burst/settle) into artifacts/nat-110/package-001/recovery.img.",
+    "derive110.py --check matches session_nat110.py; analyze_nat110.py fixes ps -A SpringBoa truncation and elided xpcproxy service spawns across C0-C7; test_nat110.py and mutate_nat110.py pass with 0 unexplained survivors; decision 0042 drafted with built hashes."
+  ],
+  "steps": [
+    "Build and verify artifacts/nat-110/pid1-sc2-hb/root.apfs via build_sc2_hb_root.py",
+    "Implement build.py, derive110.py -> session_nat110.py, analyze_nat110.py, test_nat110.py",
+    "Run build, packaging, tests, mutation pass, and record decision 0042 and NAT-110 evidence"
+  ],
+  "status": "pending",
+  "owner": null
+}

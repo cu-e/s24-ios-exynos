@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-12T22:54:01+00:00",
-  "ledger_updated_at": "2026-11-12T22:53:47+00:00",
-  "registry_sha256": "137d3f05e0e4303e2da71fe697a392ca9daa4dda84bf68bc6582961fe630a4d0",
+  "generated_at": "2026-11-12T23:25:39+00:00",
+  "ledger_updated_at": "2026-11-12T23:25:29+00:00",
+  "registry_sha256": "ad497d2d0fe09bf97efe3e46c488a006bc80c8f93179499a6cb45ae97ed98580",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -165,6 +165,7 @@
       "NAT-107",
       "NAT-108",
       "NAT-109",
+      "NAT-110",
       "KRN-010",
       "KRN-012",
       "KRN-013",
@@ -3809,6 +3810,46 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-109.md"
+    },
+    {
+      "id": "NAT-110",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 100,
+      "depends_on": [
+        "NAT-108",
+        "NAT-109"
+      ],
+      "title": "Build and test Stage C2+hb image loader-diag-xnu-sc2-md1: etc/quiet log trim, pruned non-UI background LaunchDaemons, loader_return_after=65, fixed SpringBoard analyser (C0-C7) and single-run decision draft",
+      "paths": [
+        "docs/procedures/nat-110",
+        "artifacts/nat-110"
+      ],
+      "sources": [
+        "s24-port",
+        "hakios"
+      ],
+      "acceptance": [
+        "build_sc2_hb_root.py builds artifacts/nat-110/pid1-sc2-hb/root.apfs (4 MiB / 4194304 B) on pinned NAT-108 pid1-sc1-hb base with empty etc/quiet (0644) and explicitly pruned com.nat085.ps.plist plus non-UI background LaunchDaemons while keeping SpringBoard, backboardd, UI/XPC helpers, libhakios.dylib, libhakios.sb.dylib, var/ preferences, hb, and etc/rc intact, verified by verify.py content and kernel apfs_lib readback.",
+        "build.py packages loader-diag-xnu-sc2-md1 (nat_attempt=NAT110-sc2, loader_return_after=65, fb_diff=1, cmdline < 256 B, NAT-106 512 KiB KL tail/burst/settle) into artifacts/nat-110/package-001/recovery.img.",
+        "derive110.py --check matches session_nat110.py; analyze_nat110.py fixes ps -A SpringBoa truncation and elided xpcproxy service spawns across C0-C7; test_nat110.py and mutate_nat110.py pass with 0 unexplained survivors; decision 0042 drafted with built hashes."
+      ],
+      "steps": [
+        "Build and verify artifacts/nat-110/pid1-sc2-hb/root.apfs via build_sc2_hb_root.py",
+        "Implement build.py, derive110.py -> session_nat110.py, analyze_nat110.py, test_nat110.py",
+        "Run build, packaging, tests, mutation pass, and record decision 0042 and NAT-110 evidence"
+      ],
+      "status": "done",
+      "owner": "gemini-ios-20261113-a",
+      "started_at": "2026-11-12T23:05:55+00:00",
+      "last_heartbeat": "2026-11-12T23:05:55+00:00",
+      "updated_at": "2026-11-12T23:25:29+00:00",
+      "evidence": "docs/procedures/nat-110/evidence.json",
+      "evidence_sha256": "96cf7905dd02a7edba84939005a5ad8e67a1baa8cf60375a66c83a55515357b6",
+      "finished_at": "2026-11-12T23:25:29+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-110.md"
     },
     {
       "id": "KRN-008",
@@ -18168,47 +18209,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-12T21:32:01+00:00",
-      "action": "task.add:NAT-106",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-106",
-          "status": "pending",
-          "owner": null,
-          "priority": 100
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T21:32:13+00:00",
-      "action": "task.claim:NAT-106",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-106",
-          "status": "in_progress",
-          "owner": "gemini-ios-20261113-a",
-          "priority": 100,
-          "last_heartbeat": "2026-11-12T21:32:13+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T21:51:15+00:00",
-      "action": "task.done:NAT-106",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-106",
-          "status": "done",
-          "owner": "gemini-ios-20261113-a",
-          "priority": 100,
-          "last_heartbeat": "2026-11-12T21:32:13+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-12T21:52:54+00:00",
       "action": "task.add:NAT-107",
       "owner": "gemini-ios-20261113-a",
@@ -18418,11 +18418,52 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-12T23:05:44+00:00",
+      "action": "task.add:NAT-110",
+      "owner": "gemini-ios-20261113-a",
+      "tasks": [
+        {
+          "id": "NAT-110",
+          "status": "pending",
+          "owner": null,
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T23:05:55+00:00",
+      "action": "task.claim:NAT-110",
+      "owner": "gemini-ios-20261113-a",
+      "tasks": [
+        {
+          "id": "NAT-110",
+          "status": "in_progress",
+          "owner": "gemini-ios-20261113-a",
+          "priority": 100,
+          "last_heartbeat": "2026-11-12T23:05:55+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T23:25:29+00:00",
+      "action": "task.done:NAT-110",
+      "owner": "gemini-ios-20261113-a",
+      "tasks": [
+        {
+          "id": "NAT-110",
+          "status": "done",
+          "owner": "gemini-ios-20261113-a",
+          "priority": 100,
+          "last_heartbeat": "2026-11-12T23:05:55+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "6dc440a77841115cb15858448c3fe0cbedc03049ec626bcb961d3bb976ccbcb7",
-    "BOARD.md": "23ec16890e08b5782bfc5b3ac5c2e958bb19c23d92cfe62532130d452a807b14",
+    "STATUS.md": "27f2e5d3e3f053af18a888380d5444c2da273b0cacc859f02ff0201a155c267d",
+    "BOARD.md": "49224242e6285c44d6dfc21f7d2bb98bed9ea7c5cdc10d86fc2fc65ba7d86fdf",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -18500,6 +18541,7 @@
     "planning/tasks/NAT-107.md": "064f450fa5fb9921f20920317106d6bebf5ed6fa61717fc6e701f5799de2007a",
     "planning/tasks/NAT-108.md": "eb34ac875aafabff05e4b9841bda916021942993d0311e4673a8661182e5269b",
     "planning/tasks/NAT-109.md": "df54703729cddb89c501d88ec7d5a5cd6ee264e4ac797fec7433673890f82da5",
+    "planning/tasks/NAT-110.md": "565a63749f0db4046c0aab98d47cdc258d9127daec3a641e7fd6ad2704dc995c",
     "planning/tasks/KRN-008.md": "36d33f795d9569f340f53a5e0a909dc8efcdc5024c9133ccd614a6de5af22894",
     "planning/tasks/KRN-010.md": "4f479284d71242353a2a95508bac0b5304468c6ee44704b7561bc32cee8e1832",
     "planning/tasks/KRN-012.md": "5639fd265337eacb414447c0f5aa26bb2ad600fead5ca21572bcdb2b96f7b4e8",
