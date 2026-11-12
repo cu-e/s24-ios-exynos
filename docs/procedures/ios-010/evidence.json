@@ -1,0 +1,72 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T00:38:06+00:00",
+ "commit": "b3d15d2389ff5254f29ee617efabfa657ce70e53",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "tree_state": "all listed files are committed at the recorded commit; images and the Apple tree are under gitignored artifacts/",
+ "summary": "The resident root of the chosen route exists on the host: system.apfs, 2475712512 bytes (2.31 GiB), built by the donor's unmodified mkapfs.py -z from a hard-link copy of the tree that the donor's unpack.sh made out of the owner's iPhone10,3 iOS 16.5 20F66 IPSW (45044 files, 16545 directories, 669 symbolic links in the image; 8385 files compressed in the resource fork, 31826 whole in their attribute). Apple's /sbin/launchd is kept as /sbin/launchd.darwin, the project-built stage0 is /sbin/launchd, LaunchDaemons is a link to /redwood/LaunchDaemons, the OS and App cryptex trees are grafted under /System/Cryptexes and the 43-file split dyld shared cache sits in com.apple.dyld. apfsck (apfsprogs at the donor's pinned commit, built here from the 58 pinned review files with the host cc) finds the container clean (`apfsck -cw: clean`), and the kernel's own apfs_lib compiled for the host reads back all 62258 entries exactly as in the source tree. The same check on the IOS-011 small root.apfs (rc.launchd, 33 entries) is clean as well.",
+ "evidence_category": "host-test. mkapfs.py is Python run on the host; apfsck and apfs-tool are host builds. The kernel on the S24 has not mounted this image; the image is not shown to be bootable.",
+ "acceptance": {
+  "1_apfsprogs_pinned": "research/sources.json entry apfsprogs, revision 1bd1c1c2140d13d1b6d2e03379316572bee70aa3 (the commit named in the donor's check-image.sh), 58 review files (apfsck, include/apfs, lib, LICENSE, README), licence note GPL-2.0 checker only; `tools/sources.py verify apfsprogs` reports clean. apfsck is built by tools/ios/build_apfsck.py directly from those files (no upstream Makefile, test or script is run); binary sha256 b8a2016b3554bb3bacc5d226265505515cdaf088d886cd858f31d2c34381f85d, host compiler cc (GCC) 15.3.1 20260722 (Red Hat 15.3.1-1), 25 compile steps, 0 warnings in total.",
+  "2_image_and_checks": "tools/ios/build_system_image.py (exit 0): compose 0.8 s, mkapfs.py 63.4 s, check-image.sh 42.7 s (apfsck + apfs-tool census/cat of every entry against the source tree). system.apfs sha256 6304b2c54d56055e8df7b2b63dcbe79a9415d860b598cb8e11bda5eed47e150f. The unpacked Apple tree is unchanged by the build (launchd hash and inode equal before and after; hard links only).",
+  "3_budget": {
+   "against_donor_claim_2_5_GB": "2475712512 bytes = 2.476 GB (decimal) / 2.31 GiB: 99% of the donor's ~2.5 GB figure; the sysroot's files add up to 5644490487 bytes (5.64 GB), so the zlib decmpfs packing here is about 2.3x.",
+   "against_recovery_slot_96_MiB": "the slot is 100663296 bytes; the image is 24.6 times larger. It cannot be delivered through the slot and no other Android partition may be used (decisions 0002, 0019), so it has to arrive in RAM.",
+   "where_the_bytes_are": "dyld shared cache: 996319232 bytes of the image (43 files, 2722512896 raw bytes in the unpack tree, ~2.7x packed); everything else: 1479393280 bytes (1.38 GiB). Cache and the rest cannot be separated for delivery: dyld maps the cache from the cryptex at /System/Cryptexes/OS.",
+   "against_usb_budget_NAT-073": "arithmetic only, nothing measured on the phone: the loader's log channel is control-transfer only (NAT-041), so a USB high-speed control channel (at most 64-byte packets) cannot move 2.3 GiB inside the ~57 s loader deadline or the 83 s watchdog window. The donor's figure for its bulk loader is 28 MB/s: 2475712512 bytes would take about 88 s at that rate (71 s at 35 MB/s), i.e. longer than the whole watchdog window on its own, before the kernel boot (~48.6 s to PID 1) and with the ~7.06 GiB of RAM as the other limit (the image is resident and the decompressed pages dyld maps come on top). This is the input for NAT-073 (loader bulk-OUT plus a bounded watchdog keepalive, or a kernel USB block device, or a smaller root); no choice is made here.",
+   "not_shown": "bootability; kernel mount of this image; RAM needed for the mapped cache; the real transfer rate of any channel on this phone."
+  }
+ },
+ "commands": [
+  {
+   "cmd": "python3 -I tools/sources.py fetch apfsprogs; python3 -I tools/sources.py verify apfsprogs",
+   "exit": 0,
+   "result": "clean at 1bd1c1c2..., 58 review files"
+  },
+  {
+   "cmd": "python3 -I tools/ios/build_apfsck.py artifacts/ios-root/apfsck-build --install-as artifacts/ios-root/recipe/xnu-deps/build/apfsprogs/apfsck/apfsck --report docs/procedures/ios-010/apfsck-build.json",
+   "exit": 0,
+   "result": "first attempt exit 1: relative output path with a changed cwd, fixed by resolving the path; second run built"
+  },
+  {
+   "cmd": "bash artifacts/ios-root/recipe/tools/apfs/check-image.sh artifacts/ios-root/pid1-launchd/root.apfs redwood=artifacts/ios-root/pid1-launchd/root",
+   "exit": 0,
+   "result": "apfsck -cw: clean; 33 entries read back by apfs-tool"
+  },
+  {
+   "cmd": "python3 -I tools/ios/build_system_image.py artifacts/ios-root/system-build --keep-sysroot --report docs/procedures/ios-010/build-report-system.json",
+   "exit": 0,
+   "result": "mkapfs.py 63.4 s; check-image.sh 42.7 s: apfsck -cw: clean; 62258 entries read back by apfs-tool, every one as in the source tree"
+  },
+  {
+   "cmd": "(cd artifacts/ios-root/recipe && python3 -I tools/apfs/mkapfs.py -z -o ../system-nocache.apfs System=../sysroot-nocache,manifest=sysimage/system.manifest)",
+   "exit": 0,
+   "result": "1479393280 bytes without the dyld cache; see size-attribution.json"
+  }
+ ],
+ "sha256": {
+  "tools/ios/build_apfsck.py": "0ae05d6c87ffc281d62d3b68505610762fd4c148baaad535c29da7c9d1e5fbf9",
+  "tools/ios/build_system_image.py": "ec3d5622cf1b8dde4233b00cb0b557c26ff3d0d9225d3fabb8dcaf8ded3ec642",
+  "research/sources.json": "78ae9280ba1678b284d47ada40e3e05a7e6cce6a4016eb8ebc10628048bcb049",
+  "docs/procedures/ios-010/apfsck-build.json": "03fcf1556acb7cb3050bb7a1a6c45f45491b8716971ef0301fa59a3ef2293cd9",
+  "docs/procedures/ios-010/build-report-system.json": "0cc5852c7ee7eb571a0a15c903e6912127a845a21c94e71bd2542667d5094053",
+  "docs/procedures/ios-010/size-attribution.json": "eaf5a2a121209b120d629f4d10a812e248b6eb687d6b642a99f02619b489ed45"
+ },
+ "limits": [
+  "Omitted from the donor's system step (by omission, nothing changed): mkhighrate.py (not in the pinned review set; the 120 Hz CoreAnimation bundle keys), the audio/modem firmware and speaker files, the package-manager prefix, the HakiosAudio.driver and HakiosMetal links, big/ (Turnip/M2V). None is needed for Apple's launchd, backboardd and SpringBoard to be on the disk; mkhighrate.py matters later for the frame rate.",
+  "The reader that checked the image and the writer that made it are partly one lineage (apfs_lib and mkapfs.py are the donor's); apfsck is an independent third party and found it clean, and apfsck is not a mount by Apple's kernel or by this project's kernel on the S24.",
+  "Sealed-volume metadata and the signature chain of the IPSW images were not verified by this task (IOS-009 ran the donor unpack, which reads the images as they are).",
+  "A downloaded third-party binary (ipsw) was blocked by the auto-mode classifier in the next task (IOS-012) and was not run; nothing here depends on it. Classifier-stop disclosure: sixth stop 2026-11-11T23:05Z, seventh 2026-11-12T00:36Z, session 6d8d2b72."
+ ],
+ "artifacts": [
+  "tools/ios/build_apfsck.py",
+  "tools/ios/build_system_image.py",
+  "research/sources.json",
+  "docs/procedures/ios-010/apfsck-build.json",
+  "docs/procedures/ios-010/build-report-system.json",
+  "docs/procedures/ios-010/size-attribution.json",
+  "docs/procedures/ios-010/task.json"
+ ]
+}
