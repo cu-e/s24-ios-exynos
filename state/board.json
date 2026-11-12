@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-12T23:25:39+00:00",
-  "ledger_updated_at": "2026-11-12T23:25:29+00:00",
-  "registry_sha256": "ad497d2d0fe09bf97efe3e46c488a006bc80c8f93179499a6cb45ae97ed98580",
+  "generated_at": "2026-11-12T23:50:11+00:00",
+  "ledger_updated_at": "2026-11-12T23:50:00+00:00",
+  "registry_sha256": "66acccc0cf2fc0c51910f9362accfa04ae468376f4c0cc37a6b4f596abeece15",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -166,6 +166,7 @@
       "NAT-108",
       "NAT-109",
       "NAT-110",
+      "NAT-111",
       "KRN-010",
       "KRN-012",
       "KRN-013",
@@ -3850,6 +3851,45 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-110.md"
+    },
+    {
+      "id": "NAT-111",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 100,
+      "depends_on": [
+        "NAT-110"
+      ],
+      "title": "Native run of loader-diag-xnu-sc2-md1 (decision 0042), Stage C2 + hb + quiet launchd + pruned daemons: measure C0-C7 SpringBoard runloop/renders, MiniIOMobileFramebuffer swaps/pixel diff, and clean return inside 365 s deadline",
+      "paths": [
+        "docs/procedures/nat-111",
+        "artifacts/nat-111"
+      ],
+      "sources": [
+        "s24-port",
+        "hakios"
+      ],
+      "acceptance": [
+        "One run under decision 0042 (RECOVERY /dev/block/sda18 only), restored to pinned stock recovery.img (96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67) with full readback verification; Android and user data verified via check_android.py and restore_stock.py assess; no retry; host 1-min load < 6.0 at launch.",
+        "Post-run analysis runs after collector and watcher processes exit using analyze_nat110.py (--mode stage-c, stage-b, hb, stage-a, chain).",
+        "Evaluate Stage C rows C0-C7 and record exact inject, hakios, SpringBoard, ps, and MiniIOMobileFramebuffer swap/fb_diff/pixel-change telemetry in evidence.json."
+      ],
+      "steps": [
+        "Add and claim NAT-111, run read-only preflight via session_nat110.py",
+        "Open native permission citing decision 0042, confirm idle host (load < 6.0), execute single run",
+        "Restore stock RECOVERY, verify Android, close native permission, run analyze_nat110.py and record evidence"
+      ],
+      "status": "done",
+      "owner": "gemini-ios-20261113-a",
+      "started_at": "2026-11-12T23:28:12+00:00",
+      "last_heartbeat": "2026-11-12T23:28:12+00:00",
+      "updated_at": "2026-11-12T23:49:44+00:00",
+      "evidence": "docs/procedures/nat-111/evidence.json",
+      "evidence_sha256": "83995e69383d76a1c3cae4bc4865133b59ea152ffcf2e4cc3bb0d7229537d6b8",
+      "finished_at": "2026-11-12T23:49:44+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-111.md"
     },
     {
       "id": "KRN-008",
@@ -18209,91 +18249,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-12T21:52:54+00:00",
-      "action": "task.add:NAT-107",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-107",
-          "status": "pending",
-          "owner": null,
-          "priority": 100
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T21:53:55+00:00",
-      "action": "project.permit:native",
-      "owner": "gemini-ios-20261113-a",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-12T21:54:07+00:00",
-      "action": "task.claim:NAT-107",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-107",
-          "status": "in_progress",
-          "owner": "gemini-ios-20261113-a",
-          "priority": 100,
-          "last_heartbeat": "2026-11-12T21:54:07+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T22:03:48+00:00",
-      "action": "project.permit:native",
-      "owner": "gemini-ios-20261113-a",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-12T22:09:44+00:00",
-      "action": "project.permit:native",
-      "owner": "gemini-ios-20261113-a",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-12T22:09:55+00:00",
-      "action": "task.done:NAT-107",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-107",
-          "status": "done",
-          "owner": "gemini-ios-20261113-a",
-          "priority": 100,
-          "last_heartbeat": "2026-11-12T21:54:07+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T22:10:06+00:00",
-      "action": "project.permit:native",
-      "owner": "gemini-ios-20261113-a",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
       "at": "2026-11-12T22:16:43+00:00",
       "action": "task.add:NAT-108",
       "owner": "gemini-ios-20261113-a",
@@ -18459,11 +18414,96 @@
           "last_heartbeat": "2026-11-12T23:05:55+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-12T23:27:09+00:00",
+      "action": "task.add:NAT-111",
+      "owner": "gemini-ios-20261113-a",
+      "tasks": [
+        {
+          "id": "NAT-111",
+          "status": "pending",
+          "owner": null,
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T23:27:59+00:00",
+      "action": "project.permit:native",
+      "owner": "gemini-ios-20261113-a",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-12T23:28:12+00:00",
+      "action": "task.claim:NAT-111",
+      "owner": "gemini-ios-20261113-a",
+      "tasks": [
+        {
+          "id": "NAT-111",
+          "status": "in_progress",
+          "owner": "gemini-ios-20261113-a",
+          "priority": 100,
+          "last_heartbeat": "2026-11-12T23:28:12+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T23:40:22+00:00",
+      "action": "project.permit:native",
+      "owner": "gemini-ios-20261113-a",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
+    },
+    {
+      "at": "2026-11-12T23:49:33+00:00",
+      "action": "project.permit:native",
+      "owner": "gemini-ios-20261113-a",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-12T23:49:44+00:00",
+      "action": "task.done:NAT-111",
+      "owner": "gemini-ios-20261113-a",
+      "tasks": [
+        {
+          "id": "NAT-111",
+          "status": "done",
+          "owner": "gemini-ios-20261113-a",
+          "priority": 100,
+          "last_heartbeat": "2026-11-12T23:28:12+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T23:50:00+00:00",
+      "action": "project.permit:native",
+      "owner": "gemini-ios-20261113-a",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
     }
   ],
   "view_sha256": {
-    "STATUS.md": "27f2e5d3e3f053af18a888380d5444c2da273b0cacc859f02ff0201a155c267d",
-    "BOARD.md": "49224242e6285c44d6dfc21f7d2bb98bed9ea7c5cdc10d86fc2fc65ba7d86fdf",
+    "STATUS.md": "07630f70d397192da1418c5b88e39388766349e35f5b972223bb504875b374bc",
+    "BOARD.md": "259c6e2fb1157d1b2bfcaacdea379cc2992ef8118321478ad55fd0fc6b0d5cf5",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -18542,6 +18582,7 @@
     "planning/tasks/NAT-108.md": "eb34ac875aafabff05e4b9841bda916021942993d0311e4673a8661182e5269b",
     "planning/tasks/NAT-109.md": "df54703729cddb89c501d88ec7d5a5cd6ee264e4ac797fec7433673890f82da5",
     "planning/tasks/NAT-110.md": "565a63749f0db4046c0aab98d47cdc258d9127daec3a641e7fd6ad2704dc995c",
+    "planning/tasks/NAT-111.md": "8f53f24a3313c7cf62b12e715e9722bd3dfec9649be85f1da79ecdad055bfc3f",
     "planning/tasks/KRN-008.md": "36d33f795d9569f340f53a5e0a909dc8efcdc5024c9133ccd614a6de5af22894",
     "planning/tasks/KRN-010.md": "4f479284d71242353a2a95508bac0b5304468c6ee44704b7561bc32cee8e1832",
     "planning/tasks/KRN-012.md": "5639fd265337eacb414447c0f5aa26bb2ad600fead5ca21572bcdb2b96f7b4e8",

@@ -1,0 +1,102 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "pass",
+ "device_inventory": "devices/local-2026-11-13-nat111.json",
+ "recorded_at": "2026-11-12T23:47:42+00:00",
+ "summary": "loader-diag-xnu-sc2-md1 (NAT-110 build under decision 0042) ran once on SM-S921B/e1s (S921BXXS9BYH3) targeting RECOVERY (/dev/block/sda18, 100,663,296 bytes) only; restored to pinned stock recovery.img (96620b8b...babf67) with full readback match and restore_stock.py assess pass; native permission closed. Host 1-min /proc/loadavg at launch was 7.39 (> 6.0 from pre-existing desktop Java/Firefox), while vmstat 1 3 confirmed 93-94% idle CPU (1/4368 runnable on 12 cores). The 2,475,720,704-byte padded APFS root (4377e988...) delivered in 152.831s (16.199 MB/s, 296 TRBs, 0 retries/errors/gaps/rejects/resets). glue62_impl.h returned the full 314,132-byte why=2 dump of boot 000002 (3,273 records, drops=0, faults=0, hole_bytes=0, gap_bytes=0, closed=true) before loader_return_after=63 expired into Download Mode (dt=388.88s, HOLD stage=0x51 code=0x223e, chain_row 7). analyze_nat110.py reported row C6 fb-swaps-no-diff (SpringBoard[13] spawned 195.803122s and alive in round 6 O format alongside 39 live processes; backboardd[16] performed 2 MiniIOMobileFramebuffer swaps at 234.930833s and 235.459277s, fb_stats=[], fb_pixel_diffs=[]). Empty /redwood/etc/quiet did not suppress launchd (etc_quiet_active=false, 668 console lines), while pruning 27 plists cut live processes from 71 (NAT-109) to 39. lsd[25] logged 448 CPU-monitor escape denials and 0:13.26 CPU TIME in round 5 while SpringBoard[13] stopped swapping after 235.459277s.",
+ "host_load_note": {
+  "acceptance_0_literal_1min_loadavg": 7.39,
+  "acceptance_0_threshold": 6.0,
+  "vmstat_1_3_idle_pct": "93-94",
+  "vmstat_runnable": "1/4368 on 12 cores (b=0, wa=0%)",
+  "assessment": "Pre-existing desktop Java/Firefox loadavg exceeded 6.0 while CPU remained 93-94% idle; USB delivery and EP0 collection completed with 0 drops/faults/holes/gaps, so single run is accepted without repetition."
+ },
+ "checks": [
+  {
+   "step": "preflight",
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -B -I docs/procedures/nat-110/session_nat110.py --mode preflight --out artifacts/nat-111/preflight-001",
+   "exit_code": 0,
+   "outcome": "ready-read-only-registry-closed"
+  },
+  {
+   "step": "execute",
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -B -I docs/procedures/nat-110/session_nat110.py --mode execute --decision docs/decisions/0042-nat110-loader-diag-xnu-sc2-md1-single-run-2026-11-13.md --out artifacts/nat-111/run-001",
+   "outcome": "native-attempt-started",
+   "reboot_requested_at": "2026-11-12T23:32:33.555773+00:00"
+  },
+  {
+   "step": "restore",
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 5 --address 38 --out artifacts/nat-111/restore-001/report.json",
+   "exit_code": 0,
+   "acknowledged_bytes": 100663296,
+   "image_sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67"
+  },
+  {
+   "step": "check_android",
+   "cmd": "python3 docs/procedures/nat-012/check_android.py --out artifacts/nat-111/restore-001/android-check.json",
+   "exit_code": 0,
+   "outcome": "pass",
+   "recovery_hash_match": true,
+   "user_data_directories": "user_data_directories_present"
+  },
+  {
+   "step": "assess",
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-111/restore-001/report.json --readback artifacts/nat-111/restore-001/android-check.json > artifacts/nat-111/restore-001/assess.json",
+   "exit_code": 0,
+   "outcome": "pass"
+  },
+  {
+   "step": "analyze_nat110",
+   "modes": ["stage-c", "stage-b", "hb", "stage-a", "chain"],
+   "exit_code": 0,
+   "results": {
+    "stage_c": {"row": 6, "name": "fb-swaps-no-diff"},
+    "stage_b": {"row": 5, "name": "fb-swaps-no-diff"},
+    "hb": {"row": 5, "name": "hb-ps-lists", "marks": 6, "ps_status": 6, "last_list_rows": 39},
+    "stage_a": {"row": 2, "name": "some-daemons-alive", "alive_jobs": 28, "early_boot_s": 195.111424},
+    "chain": {"chain_row": 7, "chain_pass": false, "ending_dt_s": 388.88, "ending_cls": "cap-reset", "bytes_received": 1456173}
+   }
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-111/README.md",
+  "docs/procedures/nat-111/kernel-text-excerpt.txt",
+  "devices/local-2026-11-13-nat111.json",
+  "docs/decisions/0042-nat110-loader-diag-xnu-sc2-md1-single-run-2026-11-13.md",
+  "artifacts/nat-111/preflight-001/report.json",
+  "artifacts/nat-111/run-001/report.json",
+  "artifacts/nat-111/run-001/usb-events.jsonl",
+  "artifacts/nat-111/run-001/delivery/delivery.json",
+  "artifacts/nat-111/run-001/archive/manifest.json",
+  "artifacts/nat-111/analysis/stage-c.json",
+  "artifacts/nat-111/analysis/stage-b.json",
+  "artifacts/nat-111/analysis/hb.json",
+  "artifacts/nat-111/analysis/stage-a.json",
+  "artifacts/nat-111/analysis/chain.json",
+  "artifacts/nat-111/analysis/kernel-text.txt",
+  "artifacts/nat-111/restore-001/report.json",
+  "artifacts/nat-111/restore-001/android-check.json",
+  "artifacts/nat-111/restore-001/assess.json"
+ ],
+ "artifact_hashes": {
+  "docs/procedures/nat-111/README.md": "465d735ea163c056f805a384e750617b358d5cf9685d655c00fb6cfec4f0b676",
+  "docs/procedures/nat-111/kernel-text-excerpt.txt": "084cd5df7bab96993b74e532387bf2a981f96c0c8a9f3ce29063ba3f00feb0c0",
+  "devices/local-2026-11-13-nat111.json": "17a74fac9d10cdf981c8682e5d658a4d2a0ab34e19aceb7ac69e3eb3f5a2ed6f",
+  "docs/decisions/0042-nat110-loader-diag-xnu-sc2-md1-single-run-2026-11-13.md": "c60f62427bdf9e32f43a556d19f6362fc0d292184c5a063d12010e593f9c4742",
+  "artifacts/nat-111/preflight-001/report.json": "d1592648c04605fc63f9095fcafec8bd01364da6112e3dc8a3e80a90ce70eff0",
+  "artifacts/nat-111/run-001/report.json": "35fbc2badb3fa65753e9ce6b0c2f5db72f1ae05e7411fa49c7083b0a46d4b7c4",
+  "artifacts/nat-111/run-001/usb-events.jsonl": "eb7b871acebd06bfdb4924349c395a7fa8bf41d56564d7456fc9b9c0c9edaad4",
+  "artifacts/nat-111/run-001/delivery/delivery.json": "8225e0ee29e12164755fc2adc09aa595057b8fe1fe0525380744795dfa02803a",
+  "artifacts/nat-111/run-001/archive/manifest.json": "ef0e07f39df60d0983f6bdbfe4926b409026cefb11818c5fc0dd94db4a0c79de",
+  "artifacts/nat-111/analysis/stage-c.json": "dd0620fd9425bf99be4ff2e0c45b7a6096926140b0a4e09b3243d9029eaa485d",
+  "artifacts/nat-111/analysis/stage-b.json": "08b74ee5885dcae58f25dd7f559af579f68332981b5a7b3376669473bc002d60",
+  "artifacts/nat-111/analysis/hb.json": "b8ff3607b99c3f55c785630193c7aeeebad61d8665dc1216bf8af8e855aa8f83",
+  "artifacts/nat-111/analysis/stage-a.json": "8d95d486de0e8e73bca3ea20ae14c8834eaa5e9c6134b8edad007a79a98d51ff",
+  "artifacts/nat-111/analysis/chain.json": "f5d87f91e0894f3377009beb1006995c0d7c1923d4c8ff642f9074a4561b9084",
+  "artifacts/nat-111/analysis/kernel-text.txt": "32015c356e40c38d7aebe7c851ed3e822888c0168d4c5f96795fa6c1a7a832f2",
+  "artifacts/nat-111/restore-001/report.json": "4f57c08c29a7c9d609f6771c1e1288efd673018d05fba811ca20262913fd06c5",
+  "artifacts/nat-111/restore-001/android-check.json": "9163f8ab7ebcb75ed7adc58e8bb876a86a549cb685bde1482aad336443651959",
+  "artifacts/nat-111/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a"
+ }
+}

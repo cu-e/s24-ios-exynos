@@ -2,13 +2,13 @@
 
 > Generated from state/lab.json. Use the CLI; do not edit this board or its task cards.
 
-Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-12T23:25:39+00:00.
+Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-12T23:50:11+00:00.
 
-Registry SHA256: `ad497d2d0fe09bf97efe3e46c488a006bc80c8f93179499a6cb45ae97ed98580`. Run `python3 tools/lab.py board --check` to detect stale files.
+Registry SHA256: `66acccc0cf2fc0c51910f9362accfa04ae468376f4c0cc37a6b4f596abeece15`. Run `python3 tools/lab.py board --check` to detect stale files.
 
 [Workflow](docs/planning.md) · [All task details](planning/README.md) · [Machine view](state/board.json) · [Status](STATUS.md)
 
-| Ready (4) | In progress (8) | Blocked (20) | Waiting (21) | Needs authorization (23) | Done (331) |
+| Ready (4) | In progress (8) | Blocked (20) | Waiting (21) | Needs authorization (23) | Done (332) |
 | --- | --- | --- | --- | --- | --- |
 | [**NAT-082**](planning/tasks/NAT-082.md) · P97<br>Stage-0 PID 1 for the next native run: on the critical path to Apple dyld/launchd, read the delivered root from inside the kernel instead of hashing a prefix. A static arm64 Mach-O (md0, as the NAT-077 probe) that (1) mounts /dev/md1 read-only with the donor&#x27;s stage0 call (mount(&quot;apfs&quot;, &quot;/redwood&quot;, MNT_RDONLY, &quot;/dev/md1&quot;), pinned donor SHA 87bf485), (2) lists a fixed set of paths of the iOS root (/sbin/launchd, /usr/lib/dyld, the dyld shared cache, a handful of frameworks) with st_size, (3) reads named files and prints their SHA-256 with ARMv8 SHA-256 instructions (read and hash timed separately, the dyld shared cache is in the unread tail), all under 55 s so loader_return_after (max 63 s) needs no keepalive, (4) prints exit status 81; plus the host-side expected values read by apfs_lib from the same image. Host-test only (Unicorn and the existing apfs_lib), no phone action<br>host · unassigned | [**NAT-103**](planning/tasks/NAT-103.md) · P100<br>Native run of loader-diag-xnu-hb-md1 (decision 0038), the NAT-102 diagnostic image whose /etc/rc launches NAT-101&#x27;s hb before /sbin/launchd.darwin on an idle host: does hb start and print markers and ps -A / ps -Ao pid,ppid,stat,comm lists to /dev/console after launchd and logd start (rows H0-H5), and which self-starting Apple daemons are alive when console noise resumes?<br>native · gemini-ios-20261113-a | [**INT-002**](planning/tasks/INT-002.md) · P100<br>Coordinate kernel build boot and virtualization integration<br>host · claude-takeover-20261110-6c8f<br>Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance (its handoff says the role continues after the gate review). Its gate tool is in main (tools/integration_gate.py, docs/integration/kernel/test_gate.py). The work it waited for has since reached main by direct merges under decision 0002 (STR-024, STR-037, STR-041 1042-body link; VM-047 and REV-047 on 2026-11-10). Without root approval and the multi-integrator protocol it cannot pass its own acceptance. | [**NAT-094**](planning/tasks/NAT-094.md) · P98<br>Quiet Stage A image after NAT-093: NAT-092&#x27;s image with the com.apple.lsd job removed from the small root (md0), because lsd&#x27;s repeated CPU-monitor kernel message filled the 32 KiB log tail; image name loader-diag-xnu-sq-md1, tag NAT094-sq1; build, package, derive the driver, tests incl. byte-for-byte comparison with NAT-092&#x27;s build, mutation pass, decision draft<br>host · unassigned<br>Dependencies: NAT-093 | [**NAT-017**](planning/tasks/NAT-017.md) · P97<br>Qualify an independent early-log canary and per-reset retention before any further XNU attempt<br>native · unassigned<br>Scope not authorized: native | [**KRN-009**](planning/tasks/KRN-009.md) · P100<br>Implement actual atomic type metadata for genuine selected XNU allocator uses<br>host · codex-compiler-atomics-20261105-t |
 | [**NAT-071**](planning/tasks/NAT-071.md) · P96<br>Milestone 1 remainder (host): make a run last long enough to observe more than the kernel&#x27;s boot - decide and build the cheapest verified bound (longer loader watchdog cap with a fixed hard deadline vs kernel-side keepalive), a stay-alive PID 1 with a periodic heartbeat, and the first exercise of the timed loader_return_after path; image, host tests, analyser, decision draft; no phone action<br>host · unassigned | [**NAT-098**](planning/tasks/NAT-098.md) · P99<br>Native run of loader-diag-xnu-sq-md1 (decision 0037), the quiet Stage A image: eighteen of Apple&#x27;s own LaunchDaemons plists (no com.apple.lsd) plus the ps heartbeat in the small root under restore-mode launchd on an idle host; does the returned log window now show launchd and the ps -A lists, which Apple daemons run, which died and why, which process names the CPU-monitor message names<br>native · claude-nat065-20261112-ramdisk | [**INT-003**](planning/tasks/INT-003.md) · P100<br>Coordinate crypto drivers and platform integration<br>host · claude-takeover-20261110-6c8f<br>Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance. It depends on the stopped root/CM approval protocol, so its acceptance (serialized grants, original owners closing their tasks) cannot be met any more. Remaining component work (provider TUs, archives, link and private ABI) belongs to those component tasks. Handoff: worktrees/int-platform-20261106/docs/integration/platform/native-provider-headers98-review/handoff.md. | [**NAT-095**](planning/tasks/NAT-095.md) · P98<br>Reader v2 for kernel-log dumps that lost their KL begin record: infer the head/tail geometry from the end line and the received offsets, verify it against the end line&#x27;s record and byte counts, mark the dump begin_inferred, and feed the unchanged NAT-089 row logic; test on the real NAT-093 archive (skipped when absent) and on synthetic dumps; mutation pass<br>host · unassigned<br>Dependencies: NAT-093 | [**NAT-072**](planning/tasks/NAT-072.md) · P93<br>Single native run of the NAT-071 image under its own decision file: does the payload kernel stay alive for the new bound with PID 1 printing heartbeats, and does the timed loader_return path hand the log back; restore stock RECOVERY, verify Android, analyse<br>native · unassigned<br>Scope not authorized: native; Dependencies: NAT-071 | [**KRN-025**](planning/tasks/KRN-025.md) · P100<br>Build and qualify genuine selected cc_kext compiler runtime<br>host · codex-team-cc-runtime-20261105-az |
@@ -84,6 +84,7 @@ Registry SHA256: `ad497d2d0fe09bf97efe3e46c488a006bc80c8f93179499a6cb45ae97ed985
 | — | — | — | — | — | [**NAT-108**](planning/tasks/NAT-108.md) · P100<br>Build and test Stage C1+hb image loader-diag-xnu-sc1-md1: full donor DARWIN_JOBS + --rest LaunchDaemons/LaunchAngels, libhakios.sb.dylib, var/ preferences, fb_diff=1, Stage C analyser (C0-C7) and single-run decision draft<br>host · gemini-ios-20261113-a |
 | — | — | — | — | — | [**NAT-109**](planning/tasks/NAT-109.md) · P100<br>Native run of loader-diag-xnu-sc1-md1 (decision 0041), Stage C1 + hb + fb_diff=1: measure C0-C7 SpringBoard launch/survival, DARWIN_JOBS + --rest LaunchDaemons, libhakios.sb.dylib injection, and MiniIOMobileFramebuffer swaps/pixel diff<br>native · gemini-ios-20261113-a |
 | — | — | — | — | — | [**NAT-110**](planning/tasks/NAT-110.md) · P100<br>Build and test Stage C2+hb image loader-diag-xnu-sc2-md1: etc/quiet log trim, pruned non-UI background LaunchDaemons, loader_return_after=65, fixed SpringBoard analyser (C0-C7) and single-run decision draft<br>host · gemini-ios-20261113-a |
+| — | — | — | — | — | [**NAT-111**](planning/tasks/NAT-111.md) · P100<br>Native run of loader-diag-xnu-sc2-md1 (decision 0042), Stage C2 + hb + quiet launchd + pruned daemons: measure C0-C7 SpringBoard runloop/renders, MiniIOMobileFramebuffer swaps/pixel diff, and clean return inside 365 s deadline<br>native · gemini-ios-20261113-a |
 | — | — | — | — | — | [**KRN-010**](planning/tasks/KRN-010.md) · P99<br>Generate genuine selected kernel MIG sources and headers with matching component profiles<br>host · codex-kernel-mig-20261105-u |
 | — | — | — | — | — | [**KRN-012**](planning/tasks/KRN-012.md) · P99<br>Generate and qualify genuine selected BSD syscall sources and headers<br>host · codex-kernel-syscalls-20261105-v |
 | — | — | — | — | — | [**KRN-013**](planning/tasks/KRN-013.md) · P99<br>Generate genuine selected assembly offsets and local kernel version metadata<br>host · codex-kernel-setup-20261105-w |
@@ -379,16 +380,6 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 
 ## Recent activity
 
-- 2026-11-12T21:52:54+00:00 · gemini-ios-20261113-a · task.add:NAT-107
-  - NAT-107: pending
-- 2026-11-12T21:53:55+00:00 · gemini-ios-20261113-a · project.permit:native
-- 2026-11-12T21:54:07+00:00 · gemini-ios-20261113-a · task.claim:NAT-107
-  - NAT-107: in_progress
-- 2026-11-12T22:03:48+00:00 · gemini-ios-20261113-a · project.permit:native
-- 2026-11-12T22:09:44+00:00 · gemini-ios-20261113-a · project.permit:native
-- 2026-11-12T22:09:55+00:00 · gemini-ios-20261113-a · task.done:NAT-107
-  - NAT-107: done
-- 2026-11-12T22:10:06+00:00 · gemini-ios-20261113-a · project.permit:native
 - 2026-11-12T22:16:43+00:00 · gemini-ios-20261113-a · task.add:NAT-108
   - NAT-108: pending
 - 2026-11-12T22:16:54+00:00 · gemini-ios-20261113-a · task.claim:NAT-108
@@ -411,6 +402,16 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
   - NAT-110: in_progress
 - 2026-11-12T23:25:29+00:00 · gemini-ios-20261113-a · task.done:NAT-110
   - NAT-110: done
+- 2026-11-12T23:27:09+00:00 · gemini-ios-20261113-a · task.add:NAT-111
+  - NAT-111: pending
+- 2026-11-12T23:27:59+00:00 · gemini-ios-20261113-a · project.permit:native
+- 2026-11-12T23:28:12+00:00 · gemini-ios-20261113-a · task.claim:NAT-111
+  - NAT-111: in_progress
+- 2026-11-12T23:40:22+00:00 · gemini-ios-20261113-a · project.permit:native
+- 2026-11-12T23:49:33+00:00 · gemini-ios-20261113-a · project.permit:native
+- 2026-11-12T23:49:44+00:00 · gemini-ios-20261113-a · task.done:NAT-111
+  - NAT-111: done
+- 2026-11-12T23:50:00+00:00 · gemini-ios-20261113-a · project.permit:native
 
 Use a unique owner per agent session. Atomically take ready work:
 

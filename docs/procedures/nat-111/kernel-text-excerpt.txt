@@ -1,0 +1,127 @@
+===== SANITIZED EXCERPT: artifacts/nat-111/analysis/kernel-text.txt (boot 000002, gap=0, hole=0) =====
+Note: Host username sanitized from Darwin kernel version banner line ([host]). See local artifacts/nat-111/analysis/kernel-text.txt (3047 lines, 314348 bytes, sha256 32015c356e40c38d7aebe7c851ed3e822888c0168d4c5f96795fa6c1a7a832f2).
+
+--- Init / /redwood/etc/quiet / Stage C2 library insertion ---
+=== init: process 1, started as /redwood/sbin/init ===
+Darwin 22.5.0 iPhone10,3
+Darwin Kernel Version 22.5.0: 2026-11-06T11:48:35.939333+00:00; [host]:s24-ios-exynos-local/STR012VERSION-001/DEVELOPMENT_ARM64_E1S
+memory 4096 MB, page size 16384, 1 cpu
+  -rw-r--r--  1        0 /redwood/etc/quiet
+  -rw-r--r--  1      127 /redwood/etc/inject.conf
+  -rw-r--r--  1     1152 /redwood/etc/rc
+  -rw-r--r--  1       86 /redwood/etc/motd
+=== 35 checks, 0 failed ===
+init: library insertion: /redwood/lib/libhakios.dylib backboardd containermanagerd containermanagerd_system;/redwood/lib/libhakios.sb.dylib SpringBoard
+init: up to 32768 vnodes
+
+--- /redwood/etc/rc & mounts & launchd ---
+=== /redwood/etc/rc ===
+
+$ /bin/df
+Filesystem  512-blocks    Used Available Capacity iused ifree %iused  Mounted on
+root_device    4835376 4813576         0   100%   61589     0  100%   /
+devfs               78      78         0   100%     136     0  100%   /dev
+/dev/md0          8192     696         0   100%     406     0  100%   /redwood
+ramfs          2097152     320   2096832     1%     130 65406    0%   /private/var
+
+$ /sbin/mount
+root_device on / (apfs, local, read-only)
+devfs on /dev (devfs, local, nobrowse)
+/dev/md0 on /redwood (apfs, local, read-only)
+ramfs on /private/var (ramfs, local)
+
+$ /redwood/bin/hb &
+$ exec /sbin/launchd.darwin
+SWEET hb: start pid=8 ppid=1 period=10s rounds=60 ps_timeout=8s
+SWEET hb: n=1 pid=8 ppid=1 up=0
+com.apple.xpc.launchd|1970-01-01 00:03:14.755571 <Notice>: hello
+com.apple.xpc.launchd|1970-01-01 00:03:14.762976 <Notice>: boot-args = rd=md1 e1sufs=0 e1sufs_probe=0 ufsrw=0 ufs_write=0 sweethw=0 nat_attempt=NAT110-sc2 debug=0xc serial=3 cpus=1 keepsyms=1 -v loader_return_after=63 launchdsuffix=release cs_enforcement_disable=1 e1stouch=0 e1sbattery=0 fb_diff=1 xrd=md0
+com.apple.xpc.launchd|1970-01-01 00:03:14.763039 <Notice>: Restore environment starting.
+
+--- SpringBoard[13] & backboardd[16] spawn + libhakios.sb.dylib / libhakios.dylib hooks ---
+com.apple.xpc.launchd|1970-01-01 00:03:15.803122 (user/501/com.apple.SpringBoard [13]) <Notice>: service spawned with pid 13
+com.apple.xpc.launchd|1970-01-01 00:03:15.803167 (user/501/com.apple.SpringBoard [13]) <Notice>: internal event: SPAWNED, code = 0
+com.apple.xpc.launchd|1970-01-01 00:03:15.803272 (user/501/com.apple.SpringBoard [13]) <Notice>: Successfully spawned SpringBoard[13] because system support
+hakios: SpringBoard: no GPU draws, vibrant views are plain (the lock screen's clock is white)
+hakios: SpringBoard: activation answered here, setup assistant refused, application snapshots as JPEG, the side button's long press checked, battery level from QG, battery state from QG, poster switcher not offered
+hakios: cellular: the kernel says up=-1 registered=-1 bars=-1 dbm=-1 radio=-1
+hakios: cellular: -[_UIStatusBarCellularSignalView setSignalMode:] replaced (types "v24@0:8q16"): active while the kernel says registered
+hakios: cellular: -[SBStatusBarStateAggregator _updateSignalStrengthItem:withData:SIMInfo:barsGetter:barsSetter:] at 0x1c5043430, types "v52@0:8i16@20@28@?36@?44": replaced
+hakios: battery UI: shows% ok, set-shows% ok, bolt ok, chargePercent ok, setChargePercent ok, lockscreen ring ok
+hakios: container manager: no personas
+com.apple.xpc.launchd|1970-01-01 00:03:21.237024 (user/501) <Warning>: failed lookup: name = com.apple.chronoservices, flags = 0x200, requestor = SpringBoard[13], error = 3: No such process
+com.apple.xpc.launchd|1970-01-01 00:03:21.750192 (user/501/com.apple.SpringBoard [13]) <Notice>: job state = running
+hakios: window server hooks installed
+hakios: input: /dev/hakios-touch: No such file or directory
+
+--- First 2 MiniIOMobileFramebuffer swaps + final hb round 6 (up=55s, 39 processes alive) ---
+hakios: is_ready -> 1 (call 0, flags 0x11804801, b233 0xff)
+hakios: is_ready -> 1 (call 1, flags 0x11804801, b233 0xff)
+hakios: ignore_update_p -> 0 (call 0, flags 0x411804801, update flags 0x80018)
+hakios:   display +0x220: 0 0x100000000 0xffffffffffffffff 0xffffffffffffffff 0x100 0x16636e03c
+hakios: begin_update -> 0 (flags 0x411804801)
+hakios: no accelerated renderer; the software one will draw
+hakios: render_update -> 0x1 (flags 0)
+hakios: finish_update(0) -> 0
+hakios: is_ready -> 1 (call 2, flags 0x411820801, b233 0xff)
+hakios: ignore_update_p -> 0 (call 1, flags 0x411820801, update flags 0x80018)
+hakios:   display +0x220: 0 0x100000000 0xffffffffffffffff 0xffffffffffffffff 0x100 0x16636e03c
+hakios: begin_update -> 0 (flags 0x411820801)
+hakios: render_update -> 0x1 (flags 0)
+hakios: finish_update(0) -> 0
+
+SWEET hb: n=6 pid=8 ppid=1 up=55
+  PID  PPID STAT COMM
+    1     0 Ss   /sbin/launchd.darwin
+    8     1 S    /redwood/bin/hb
+   11     1 Ss   /usr/libexec/UserEventAgent
+   12     1 Ss   /usr/libexec/runningboardd
+   13     1 Ss   /System/Library/CoreServices/SpringBoard.app/SpringBoard
+   14     1 Rs   /System/Library/CoreServices/powerd.bundle/powerd
+   15     1 Ss   /usr/libexec/remoted
+   16     1 Ss   /usr/libexec/backboardd
+   17     1 Ss   /usr/libexec/containermanagerd
+   18     1 Ss   /usr/sbin/distnoted
+   19     1 Ss   /usr/libexec/usermanagerd
+   20     1 Ss   /usr/libexec/fseventsd
+   21     1 Ss   /usr/libexec/logd
+   22     1 Ss   /usr/sbin/notifyd
+   23     1 Rs   /usr/libexec/logd_helper
+   24     1 Ss   /usr/sbin/cfprefsd
+   25     1 Rs   /usr/libexec/lsd
+   26     1 Ss   /usr/libexec/configd
+   27     1 Ss   /System/Library/PrivateFrameworks/CoreAccessories.framework/XP
+   29     1 Ss   /usr/libexec/MobileGestaltHelper
+   30     1 Ss   /System/Library/PrivateFrameworks/BiomeStreams.framework/Suppo
+   31     1 Ss   /System/Library/CoreServices/iconservicesagent
+   33     1 Ss   /System/Library/Frameworks/Accounts.framework/accountsd
+   34     1 Ss   /usr/libexec/mobileactivationd
+   35     1 Ss   /usr/libexec/timed
+   36     1 Ss   /usr/libexec/securityd
+   37     1 Ss   /usr/libexec/nehelper
+   38     1 Ss   /usr/sbin/mDNSResponder
+   39     1 Ss   /System/Library/Frameworks/Security.framework/CloudKeychainPro
+   40     1 Ss   /System/Library/PrivateFrameworks/ApplePushService.framework/a
+   41     1 Ss   /System/Library/PrivateFrameworks/WirelessDiagnostics.framewor
+   43     1 Ss   /usr/sbin/mediaserverd
+   46     1 Rs   /usr/libexec/profiled
+   47     1 Ss   /System/Library/PrivateFrameworks/TCC.framework/Support/tccd
+   48     1 Ss   /usr/libexec/misagent
+   49     1 Ss   /usr/libexec/online-auth-agent
+   50     1 Rs   /System/Library/PrivateFrameworks/FontServices.framework/Suppo
+   52     1 Rs   /System/Library/Frameworks/AudioToolbox.framework/XPCServices/
+   53     8 R    ps
+SWEET hb: n=6 ps pid=53 status=0 ms=106
+
+--- Kernel buffer: watchdog expiration, MiniIOMobileFramebuffer swaps, lsd CPU-monitor spam (448 lines total) ---
+--- loader_return_after expired ---
+[  234.910959]: MiniIOSurface: backboardd[16] created surface 1: 1125x2436 'BGRA', 4608 bytes per row, 0 planes, 11239424 bytes
+[  234.930833]: MiniIOMobileFramebuffer: swap 1 (#0): surfaces 1 0 0 0, layers set 0x80000007 cleared 0x80000006
+[  234.930852]: MiniIOMobileFramebuffer: swap 1 layer 0: surface 1 (1125x2436 'BGRA') from 0,0 1125x2436 to 0,0 1125x2436, layers set 0x80000007
+[  235.443590]: MiniIOMobileFramebuffer: swap #1: surfaces in layers 0x1 now (0x0 before): 1 0 0 0
+[  235.449956]: MiniIOSurface: backboardd[16] created surface 3: 1125x2436 'BGRA', 4608 bytes per row, 0 planes, 11239424 bytes
+[  235.459277]: MiniIOMobileFramebuffer: swap 2 (#1): surfaces 3 0 0 0, layers set 0x1 cleared 0x0
+[  235.459295]: MiniIOMobileFramebuffer: swap 2 layer 0: surface 3 (1125x2436 'BGRA') from 0,0 1125x2436 to 0,0 1125x2436, layers set 0x1
+... (lsd[25] CPU monitor denials continue through end of boot capture: 448 total) ...
+[  256.351028]: process lsd[25] denied attempt to escape CPU monitor (missing required entitlement).
+
