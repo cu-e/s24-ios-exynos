@@ -165,5 +165,10 @@
   "artifacts/nat-076/logs/make-check.stdout": "d62369d99883c026c032b4f7a6f2bc9b74644b77db212eb7505ab7bf15a94d13",
   "artifacts/nat-076/logs/make-check.stderr": "a141df627475e03b398830a2115598fa0b2ba1d32ee5014b0372d1ec7b21bde8",
   "artifacts/nat-076/logs/make-check.exit": "684f663f82c1799758624c87f292e22b92d1f2215b53477cb2fcb6dd52711f02"
- }
+ },
+ "deviations_from_task_text": [
+  "rx_bytes/rx_trbs/rx_errors are reported by a new request GET_RX (0x07, struct usbmon_rx, magic S24R), not in GET_INFO: GET_INFO is the fixed 112-byte structure the NAT-041 collector parses by length and version, so extending it would break that collector. GET_INFO is unchanged (CompatibilityTests).",
+  "One TRB per chunk (staged chunk 64 KiB, direct chunk at most 8 MiB) instead of chained TRBs of up to 16 MiB: a chunk is one RX_BEGIN, one TRB, one completion, one checksum, one commit, so no partial-failure state exists for the resume rule to describe. The ring has 4 slots (3 data + link) instead of the vendor's 256 because only one chunk is ever armed.",
+  "Staged mode (DMA into a loader page below 4 GiB, CPU copy to the destination) is the default; direct mode is a flag. Reason: NAT-040 item U5 is unresolved."
+ ]
 }
