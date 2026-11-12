@@ -1,20 +1,21 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-12T01:37:21+00:00",
-  "ledger_updated_at": "2026-11-12T01:37:18+00:00",
-  "registry_sha256": "16ad91a37b9fa085b92db6036e7c7be4aa9a7e42e31f118751e7e4211424b798",
+  "generated_at": "2026-11-12T01:41:10+00:00",
+  "ledger_updated_at": "2026-11-12T01:41:07+00:00",
+  "registry_sha256": "ead36c7eb8f6368e2a91de2e0fbd4c565a0f531d4c61e4cdfa831da8ca800f06",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
       "NAT-071",
       "NAT-054",
       "NAT-055",
-      "NAT-074",
       "IOS-013",
       "NAT-076",
       "NAT-077"
     ],
-    "in_progress": [],
+    "in_progress": [
+      "NAT-074"
+    ],
     "blocked": [
       "INT-002",
       "INT-003",
@@ -9853,11 +9854,18 @@
         "ADT RAMDisk and builder",
         "Harness, model, mutants, decision draft"
       ],
-      "status": "pending",
-      "owner": null,
-      "column": "ready",
+      "status": "in_progress",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-12T01:37:38+00:00",
+      "last_heartbeat": "2026-11-12T01:41:07+00:00",
+      "updated_at": "2026-11-12T01:41:07+00:00",
+      "progress_note": "Design addendum written from the NAT-065 loader and mkpayload sources: two 512 MiB limits (loader MAX_WINDOW and ADT dram-size via payload mem_size, with a 4 GiB header check), root goes to RAMDisk1/md1 as a reserve-only range with ADT/boot_args moved above it; first window 4096 MiB.",
+      "next_step": "Write the loader variant patch against a copy of the NAT-065 source and the window harness changes; then layout model and unicorn tests",
+      "handoff": "docs/procedures/nat-074/design.md",
+      "column": "in_progress",
       "reasons": [],
-      "card_path": "planning/tasks/NAT-074.md"
+      "card_path": "planning/tasks/NAT-074.md",
+      "report_health": "recent"
     },
     {
       "id": "NAT-075",
@@ -15622,7 +15630,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-005, IOS-007"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-005, IOS-007, NAT-074"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -15661,7 +15669,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-007"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-007, NAT-074"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -16662,6 +16670,17 @@
         "worktree": null
       },
       {
+        "id": "NAT-074",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-12T01:41:07+00:00",
+        "report_health": "recent",
+        "progress_note": "Design addendum written from the NAT-065 loader and mkpayload sources: two 512 MiB limits (loader MAX_WINDOW and ADT dram-size via payload mem_size, with a 4 GiB header check), root goes to RAMDisk1/md1 as a reserve-only range with ADT/boot_args moved above it; first window 4096 MiB.",
+        "next_step": "Write the loader variant patch against a copy of the NAT-065 source and the window harness changes; then layout model and unicorn tests",
+        "handoff": "docs/procedures/nat-074/design.md",
+        "branch": null,
+        "worktree": null
+      },
+      {
         "id": "IOS-007",
         "status": "blocked",
         "last_heartbeat": "2026-11-12T00:15:39+00:00",
@@ -16727,34 +16746,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-12T00:15:08+00:00",
-      "action": "task.claim:IOS-009",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-009",
-          "status": "in_progress",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 99,
-          "last_heartbeat": "2026-11-12T00:15:08+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T00:15:29+00:00",
-      "action": "task.claim:IOS-007",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-007",
-          "status": "in_progress",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 88,
-          "last_heartbeat": "2026-11-12T00:15:29+00:00"
-        }
-      ]
-    },
     {
       "at": "2026-11-12T00:15:39+00:00",
       "action": "task.block:IOS-007",
@@ -17003,11 +16994,42 @@
           "last_heartbeat": "2026-11-12T01:19:24+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-12T01:37:38+00:00",
+      "action": "task.claim:NAT-074",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-074",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 92,
+          "last_heartbeat": "2026-11-12T01:37:38+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T01:41:07+00:00",
+      "action": "task.update:NAT-074",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-074",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 92,
+          "progress_note": "Design addendum written from the NAT-065 loader and mkpayload sources: two 512 MiB limits (loader MAX_WINDOW and ADT dram-size via payload mem_size, with a 4 GiB header check), root goes to RAMDisk1/md1 as a reserve-only range with ADT/boot_args moved above it; first window 4096 MiB.",
+          "next_step": "Write the loader variant patch against a copy of the NAT-065 source and the window harness changes; then layout model and unicorn tests",
+          "last_heartbeat": "2026-11-12T01:41:07+00:00",
+          "handoff": "docs/procedures/nat-074/design.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "2c9b62a083b0918c1df649bdf013968970d01e0a68c4b3bed0a258461329995a",
-    "BOARD.md": "0915ef128435159d62ae1db23067fefd194e21fb18ab6b04430824fc7d0971b3",
+    "STATUS.md": "4cd3c4e1d1a4e736566d63498dca1369aca0d28a947923f0b07974a6e67d5415",
+    "BOARD.md": "2d4435c7f7eee584ee1b2057ff28ee2be9c74572a9ce21b434f9aa1b78fa2d83",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -17226,7 +17248,7 @@
     "planning/tasks/SEN-001.md": "3c54f6f748160ba9c5b4c4f27f41576ddb90a5c2f73f0243805e189091695d2d",
     "planning/tasks/ODIN-001.md": "ac0ee966c510177f407059b9a1c47e89df084a5b1c873bb7eea122547f1d4f0a",
     "planning/tasks/IOS-003.md": "59ae2b6225dc73ce34729b9d7c5f86da9e4a34b474f578db13a29a02187c6d8a",
-    "planning/tasks/NAT-074.md": "ceff7a72c131bdbf1618ed1194a03c13546d5f348961a9cda77beb61d234a5a1",
+    "planning/tasks/NAT-074.md": "0185eb95d0726e6287bf033502e486de7a95c93e6ac572947d76346fd5b82622",
     "planning/tasks/NAT-075.md": "198bdac29fa1ab39ed43184860aa3a276b9af427aa5d0174da367412f0f6c5de",
     "planning/tasks/NAT-013.md": "b211a32160f7a1711f4cdfb1218280216622baf34bd7fdfcfdf7b259ce4b12a9",
     "planning/tasks/NAT-073.md": "b516be95aa111fc8a8f7696cce5f92a9df91eb180eb86e714722afac04033dca",
@@ -17357,8 +17379,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "48f9078cfb3ae6e85a498a841355672a5fdd3302f22807a04b70bc9199476f39",
-    "planning/tasks/DRV-003.md": "084496cdd5ef1f6af6c1b3292acc5c9beefa0de4bbda17d3632bc3ec9c888760",
+    "planning/tasks/NAT-003.md": "63b96d8b7dea06bf5d41208cad13bbc7c43dd420a8ab7bdb3252504ebae43e2c",
+    "planning/tasks/DRV-003.md": "dbb9d4dce8cd692f347ac23abd35eeb6dc322c8176c918a5acdb90e009108c7a",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",
