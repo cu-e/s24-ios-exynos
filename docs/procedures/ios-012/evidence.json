@@ -1,0 +1,83 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-12T06:30:00+00:00",
+  "commit": "a3e1af3fbcdfa2d627f2c7852f698ff901a58773",
+  "owner": "claude-nat065-20261112-ramdisk",
+  "tree_state": "tool, tests, report, note and matrix edit are committed at the recorded commit; the raw JSON outputs and the dyld disassembly listed under artifacts are local-only (gitignored) and hashed here",
+  "summary": "Static audit of the owner's iPhone10,3 iOS 16.5 (20F66) userland as unpacked by the donor recipe (IOS-009), against the project kernel tree (xnu-8796.121.2, DEVELOPMENT_ARM64_E1S). All six programs (dyld, launchd, xpcproxy, amfid, backboardd, SpringBoard) are plain arm64 iOS 16.5 Mach-O with chained fixups and LC_LOAD_DYLINKER /usr/lib/dyld; every required library of every closure resolves to an image of the 43-file, 2710-image dyld shared cache (only weak/optional liblinkguard, libobjc-env, Darwinup and MLCompilerRuntime are absent). libsystem_kernel has 506 svc #0x80 sites, 502 with an immediate x16: 474 match the project's syscalls.master / syscall_sw.c table by name, 0 numbers are absent, 0 names differ, 22 are nosys/enosys in this configuration (251-256, 258-265, 293, 337, 418, 419, 483, 493, 519, 535) and 6 stubs have no exported name; dyld's own 158 distinct numbers are all enabled. dyld reads commpage offsets +0xd0, +0xd8, +0x10c (and byte +0x105) that the open header does not define, and two Apple system registers (S3_6_C15_C1_5 in dyld only, S3_4_C15_C10_6 in dyld and libsystem_kernel); the register path of the allocator write protection is guarded by a byte whose origin was not found. dyld embeds libignition (cryptex graft, trust cache load gated by ignition_level); the shared region (0x180000000 + 0xa9eec000) fits the kernel's SHARED_REGION_BASE/SIZE_ARM64. No missing userland file was found for the six programs.",
+  "evidence_category": "host-test / source-review. Nothing ran on the S24 and nothing ran in an emulator. Static name and number matches are not behaviour matches; commpage and register scans are heuristics that show access shapes, not what the code does. The hand reading of dyld used the Android NDK llvm-objdump 19.0.1 as a viewer and is not reproducible by the tool.",
+  "acceptance": {
+    "1_per_program_report": "Met for six programs (the task text said four; amfid and xpcproxy were added because launchd spawns them). docs/procedures/ios-012/interface-audit.json section 'programs' lists load commands, platform/minos/sdk, dyld info type, direct libraries and the closure resolved against the cache image list; missing items are named (only weak/optional ones). Note section 2.",
+    "2_syscall_comparison_static": "Met. 'libsystem_kernel_vs_project_kernel' and 'dyld_direct_system_calls' in the report; the 22 nosys numbers and the 6 stubs without an export name are named; the note labels it a static comparison and states that argument layouts, semantics and the xnu-8796.122.4~1 differences were not compared. Note section 3.",
+    "3_dyld_expectations_tied_to_IOS-003": "Met as far as static reading goes. Commpage fields (R22), Apple system registers (R23), syscall numbering (R20), dyld/cache (R19), AMFI/trust cache/code-signing strings and the shared-region and code-signing syscall paths (R05/R06/R07), launchd handshake strings (R09) are listed in note sections 4-5 and in the IOS-003 matrix (R19, R20 updated; R22, R23 added). Open, not established statically: which path dyld takes through the allocator register code, the libignition branch with the donor root, and the kernel's answers to code-signature registration and entitlement reads."
+  },
+  "results": {
+    "programs": 6,
+    "cache_files": 43,
+    "cache_images": 2710,
+    "cache_bytes": 2722512896,
+    "libsystem_kernel_svc_sites": 506,
+    "svc_with_immediate": 502,
+    "distinct_bsd_numbers": 443,
+    "distinct_mach_traps": 58,
+    "name_matches": 474,
+    "numbers_absent_from_kernel_table": 0,
+    "names_that_differ": 0,
+    "nosys_in_configuration": 22,
+    "stubs_without_export_name": 6,
+    "dyld_direct_numbers": 158,
+    "dyld_direct_numbers_enabled": 158,
+    "commpage_offsets_undefined_in_open_header": ["+0xd0 (50 reads)", "+0xd8 (28)", "+0x10c (14)", "+0x105 (1)"],
+    "apple_system_registers": ["S3_6_C15_C1_5 (dyld: 65 mrs, 39 msr)", "S3_4_C15_C10_6 (dyld x2, libsystem_kernel x2)"],
+    "unit_tests": "45 passed (tests/test_macho_audit.py)",
+    "mutation": "75 textual mutants, 75 killed, 0 survived, 0 invalid (docs/procedures/ios-012/mutation.json)",
+    "make_check": "355 tests OK, exit 0"
+  },
+  "commands": [
+    {"cmd": "python3 -I -m unittest discover -s tests -p test_macho_audit.py", "exit": 0, "result": "Ran 45 tests, OK"},
+    {"cmd": "python3 -I docs/procedures/ios-012/mutants.py --json docs/procedures/ios-012/mutation.json (log: artifacts/ios-root/ios012/mutation.log)", "exit": 0, "result": "75 killed, 0 survived, 0 invalid"},
+    {"cmd": "python3 -I docs/procedures/ios-012/make_reports.py docs/procedures/ios-012/interface-audit.json", "exit": 0, "result": "report written, sanitized (no home paths)"},
+    {"cmd": "python3 -I tools/ios/macho_audit.py audit|closure|syscalls|program-syscalls|cstrings|commpage|sysregs (raw outputs under artifacts/ios-root/ios012/)", "exit": 0, "result": "JSON outputs hashed below"},
+    {"cmd": "python3 tools/lab.py board --check", "exit": 0, "result": "OK: planning views match the current registry"},
+    {"cmd": "TMPDIR=/home/egor/.cache/nat059-tmp make check", "exit": 0, "result": "Ran 355 tests, OK"}
+  ],
+  "sha256": {
+    "tools/ios/macho_audit.py": "10f003c6c1fba9b85e80aee59fe0d3758bc5438581bbe45a699f4f2222b7a576",
+    "tests/test_macho_audit.py": "7b33ceac93b784f00c10f9a8f633adc7ec095f06da7e48f29192faa699d8efae",
+    "docs/procedures/ios-012/make_reports.py": "1534fe1d38e3803666dff7a0dc62a67abf2a198c82e7eca7e8eb032f2fb826da",
+    "docs/procedures/ios-012/mutants.py": "942e2b4f8a6df682af78bcc219faed99c45e16f7cacdcd1cad74d68a2bf6d598",
+    "docs/procedures/ios-012/interface-audit.json": "b267a066795f1ddb78f9d808ceb9a92a3bc55bdf2c9be5d5e79b0d68c2850fa4",
+    "docs/procedures/ios-012/mutation.json": "59b62f6a91c7684c2e6a4fd8a49db171fd69a03e01d1c68a312ac615139829db",
+    "research/notes/IOS-012-userland-kernel-interface-audit.md": "d42bda593ea879e87d9c6453d1710b058c844bf5643cde46619fe90c6392f7e9",
+    "artifacts/ios-root/ios012/closure.json": "f775eaec110e850114b5112c447bda9c0c787ce7ddbed2d30e345b6d4f1d41c1",
+    "artifacts/ios-root/ios012/syscalls.json": "02923d7c04b160f7c72a2e792604d16fd26a1f5ad7a7ac97f2d4990b25148d31",
+    "artifacts/ios-root/ios012/program-syscalls.json": "cc237f7211a7d74d302b1bc03f7711ede7da83bbcd1e01c43f6cd73d7adb4ae6",
+    "artifacts/ios-root/ios012/dyld-cstrings.json": "810e231a31f0267ae01b9a06f18bd6a182d2e798c963c24159d70ed1562199b2",
+    "artifacts/ios-root/ios012/launchd-cstrings.json": "2226db0d6e1d16b2220c30a6e054a893c40af996f983675356a715e425deff12",
+    "artifacts/ios-root/ios012/commpage.json": "03985617b8b6a9a7465135b4cd2b04c5815a23b556d51b3f7f6fb09303d35d18",
+    "artifacts/ios-root/ios012/sysregs.json": "c74e31acf3d0937e88a07dcc9be42779cd0193c0583bae9bdd1939cd40c64fe8",
+    "artifacts/ios-root/ios012/dyld.disasm": "01d118c61aeca2aabe4666ba121abcbe3045f15d578f60996da2eed9a13265a8",
+    "artifacts/ios-root/ios012/make-check.log": "80206127b65c3a924f7b5462128d7a5df0ef4b182731638c32378b6bcea6235d"
+  },
+  "limits": [
+    "Static analysis only. No Apple code ran. Names and numbers agree; semantics, argument layouts and the 122.4~1 vs 121.2 kernel differences were not compared.",
+    "Commpage and system-register scans are pattern heuristics over __text (movk/orr address shapes, mrs/msr encodings); a miss proves nothing, a hit proves an access shape.",
+    "The origin of the allocator byte (+0x21) that selects the Apple-register write-protection path in dyld was not found; whether the S24 takes that path is unknown until the first dyld run (brk #1 at dyld vm 0x7d3c would show it).",
+    "Which of the 22 nosys numbers the six programs call is not established.",
+    "The libignition branch with the donor's merged root, the kernel's code-signature registration and entitlement answers, and the cache launchd handshake (R09) are unobserved.",
+    "The cache auditor is own code because no ready tool was usable for reading the split cache together with the project kernel tables; the NDK llvm-objdump was used only as a viewer."
+  ],
+  "artifacts": [
+    "tools/ios/macho_audit.py",
+    "tests/test_macho_audit.py",
+    "docs/procedures/ios-012/make_reports.py",
+    "docs/procedures/ios-012/mutants.py",
+    "docs/procedures/ios-012/mutation.json",
+    "docs/procedures/ios-012/interface-audit.json",
+    "research/notes/IOS-012-userland-kernel-interface-audit.md",
+    "research/notes/IOS-003-kernel-readiness-matrix.md",
+    "artifacts/ios-root/ios012/ (local only, gitignored)"
+  ]
+}
