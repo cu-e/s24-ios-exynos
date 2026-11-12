@@ -1,0 +1,94 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T02:20:24+00:00",
+ "commit": "e30634699cdefc256dbfae2d632fa80888fec26e",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "summary": "Big-window loader variant and md1 reserve payload, built on the host from the pinned NAT-065 loader source and mkpayload.py. Window rule: merge touching /memory nodes, first window capped at 4096 MiB (base 0x8fe400000 on the real device-tree facts), the old rule still returns the NAT-068 512 MiB window. Loader: three-span clear plan (139.48 MiB at the built layout) and cache clean by VA over the whole window, bounded watchdog pet (every 30 s, only before the 150 s cap, never after, one call site of s5e_wdt_pet, final pet before the jump), NAT-044 reset path unchanged and still the exit at the cap. Payload (mkpayload74): reserve-only RAMDisk1 of 2,475,720,704 B (root volume rounded up to 16 KiB) inside kernel_end with an ADT entry and no segment; md0 stays the 16,635-byte NAT-068 probe; mem_size 4 GiB; adt_size fixed to a multiple of 8 (14060 -> 14064); command line is NAT-067's (touch and battery drivers off) with tag NAT075-md1. Tested by 13 harness/window tests, 29 model tests (capstone on the built loader.elf, unicorn on recovery_guard and mk_hold, compiled-C struct offsets) and 38 mutants (all killed). Nothing ran on the S24 and no image was written to it.",
+ "evidence_category": "host-test: authored code, built on the host, checked by disassembly and an instruction-level model of the NEW code only. Not covered: loader_main as a whole (its layout check, boot_args.memSize from the window), the effect of a watchdog pet on this SoC's windowed watchdog, a 16 KiB-page boot with a 4 GiB window, md1 mapping by the kernel, USB rate, APFS mount. Those need NAT-075 on the phone.",
+ "acceptance": {
+  "1_window_harness": "Met with a documented deviation. The window rule on the real device-tree facts (devices/e1s-fdt/2026-11-10/runtime.facts.json) returns base 0x8fe400000 and 4096 MiB, NOT 0x8cb800000 / 4908 MiB as the registry text says: the loader refuses mem_size > 4 GiB in its payload header check, so the first window is capped at 4096 MiB (design.md addendum). A gap below 256 MiB is rejected and the old rule returns the NAT-068 window 0x9de400000 / 512 MiB (test_nat074.py, 13 tests; mutants.py 9 killed + 1 equivalent). docs/procedures/nat-073/budget.py was used only as a cross-check.",
+  "2_loader_code": "Met with documented deviations. Checked by capstone on the built loader.elf and by unicorn: the pet is one s5e_wdt_pet call in nat074_pet, reached only from nat044_tick (every 30 s while before the cap) and nat074_final_pet (once, before the jump, not after the cap, not if unarmed); the NAT-044 reset path is not edited by the variant (the new code only adds the pet branch in front of it) and its register-write sequence is exercised in the model (INFORM2/INFORM3/CMD/REBOOT writes, pets at ~30/60/90/120 s, none at >= 150 s; a refused reset leaves the watchdog unpetted). Cache clean by VA over the whole window: present (dc civac site count compared with the NAT-065 loader). DEVIATION 1: the clear is not 'at most 64 MiB plus BSS': a three-span plan clears 139.48 MiB at the built layout (the first 64 MiB, the span above the reserve up to the ADT/boot_args and the top 2 MiB), because the first 64 MiB alone would leave the kernel's boot_args/ADT area and the stack of the loader's top uncleared; the plan is tested against an independent model on a grid of layouts. DEVIATION 2: NAT-020's forbidden-symbol rule applies to recovery_guard only; s5e_wdt_pet is not reachable from it (tested), so no amendment to the rule was needed beyond listing it here. Mutants: 38 on the new hunks (plan, pet period, final pet, cap, reserve rules, cmdline, mkpayload patch), all killed; 3 were first invalid (pattern did not match the source), corrected and rerun; one equivalent-candidate ('>=' to '>' in the pet comparison) was never run.",
+  "3_adt_ramdisk_and_builder": "Met with a documented deviation. RAMDisk1 size = 2,475,720,704 B (2,475,712,512 + 8192, a multiple of 16 KiB); build.py pads and rejects other sizes (also a size mdevadd's 4 KiB block count would truncate); payload header mem_size = 4096 MiB = the window (tested); ADT dram-size untouched; boot_args.memSize is written by the loader from the window (source reading only, not executed here). The kernel prints md sizes in bytes for the 4 KiB-block md device: expected 'for 0000000093908000' and 604,424 blocks. The decision draft for NAT-075 (docs/procedures/nat-074/decision-draft.md) names the pass rule and risks. No native run in this task. DEVIATION: the registry text says 'only the 16,635-byte probe is present' and 'merge touching nodes and take the 4908 MiB gap'; the 4908 MiB gap is not used because of the 4 GiB header check; the remaining 812 MiB are an option for a later variant only if the loader's header check is changed."
+ },
+ "corrections_made_during_review": [
+  "The design's first clear plan cleared only the low 256 MiB and left the area above the reserve uncleared; replaced by the three-span plan and an independent model of it.",
+  "A first draft of the design addendum misstated NAT-020's forbidden-symbol rule; corrected (applies to recovery_guard).",
+  "The first build carried NAT-065's command line, i.e. the touch driver that crashed NAT-066 would have been enabled; the builder now takes NAT-067's line and tag NAT075-md1, with a test and two mutants. build-001 was discarded and rebuilt as build-002 before any use.",
+  "Pet matcher in test_model.py initially found no pets because it assumed adjacent register writes; fixed to account for the intervening read of WTDAT.",
+  "`pkill -f` with a pattern in the same command line killed the invoking shell (exit 144) once while editing the mutant list; edits were re-applied and no result was taken from the interrupted run."
+ ],
+ "commands": [
+  {
+   "cmd": "TMPDIR=/home/egor/.cache/nat059-tmp python3 -I docs/procedures/nat-074/build.py --out artifacts/nat-074/build-002 --loader-source artifacts/nat-020/build-003/source",
+   "exit": 0,
+   "result": "Image.payload 5f394955...e25f, loader-diag-xnu-bigwin-md1 Image 47787e1d...7d68"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/nat-074/test_nat074.py",
+   "exit": 0,
+   "result": "Ran 13 tests, OK"
+  },
+  {
+   "cmd": "TMPDIR=/home/egor/.cache/nat059-tmp artifacts/nat-065/venv/bin/python -W ignore -I docs/procedures/nat-074/test_model.py",
+   "exit": 0,
+   "result": "Ran 29 tests, OK"
+  },
+  {
+   "cmd": "TMPDIR=/home/egor/.cache/nat059-tmp artifacts/nat-065/venv/bin/python -W ignore -I docs/procedures/nat-074/mutants_model.py --json docs/procedures/nat-074/mutation-model.json",
+   "exit": 1,
+   "result": "35 killed, 0 survived, 3 invalid (pattern mismatch, corrected below)"
+  },
+  {
+   "cmd": "TMPDIR=/home/egor/.cache/nat059-tmp artifacts/nat-065/venv/bin/python -W ignore -I docs/procedures/nat-074/mutants_model.py --json artifacts/nat-074/mutation-rerun-invalid3.json --only pet-time-not-recorded --only pet-count-not-kept --only final-pet-never",
+   "exit": 0,
+   "result": "3 killed; merged into mutation-model.json: 38 killed, 0 survived, 0 invalid"
+  },
+  {
+   "cmd": "TMPDIR=/home/egor/.cache/nat059-tmp make check",
+   "exit": 0,
+   "result": "Ran 355 tests, OK (artifacts/nat-074/make-check-002.log)"
+  }
+ ],
+ "sha256": {
+  "Image.payload": "5f39495505fd413671c6007a61ae7dab64b313014fa82a31e3302dcb89d1e25f",
+  "Image": "47787e1d0582bd0380b5aff201e9829cda3695ae5d83bf4882684fe858aa7d68",
+  "loader.elf": "8610417d1797e8d2e5cd9922b555fc86a598f6bd5c73b6182bc417ce7e758b38",
+  "payload.adt8.bin": "5638f5294772e493628d17bf3ede546568a32061280b7b4355d0ccbf8e219a0f",
+  "mutation-model.json": "c79eb3c9b4f0074f90ffc488db674d149a2506125eff9f6079482094fc48701d",
+  "mutants_model.log": "f9c2d1d8188cf72777bfeea08ca400b9f42f54cc873ce1868eff53433c4da91d",
+  "make-check-002.log": "dcb0a48143bc55d7b275805d465ebe95c3fa3554beb470da7dc8cee1cef559b6",
+  "build.json": "67e962b16cdd3c94804fcf7ac6b06f587849ec448b04c962b9e6de57c6371990",
+  "mkpayload74 patched": "46229c7cded29355279d454f7f69b863f6aa501ddadd5393d91581ef3434d582",
+  "mkpayload base": "50c043e4033ceea682bd20134b5283c1abec51985d49609a3bce5ea0a4013ed7"
+ },
+ "limits": [
+  "No instruction-level run of loader_main or of the whole boot: the model runs recovery_guard, mk_hold, nat074_pet/nat074_final_pet and the compiled clear-plan function only.",
+  "The mutation set covers the new hunks listed in mutants_model.py; the equivalent-candidate '>=' to '>' in the pet comparison was not run; test_model.py pins instruction forms for the cap and pet period (compiler is pinned: zig cc).",
+  "Whether the 30 s pet reloads this SoC's windowed watchdog, whether a 16 KiB-page kernel boots with a 4 GiB window, whether md1 is mapped for its full range and the USB receive rate are open until NAT-075; the decision draft lists the observable for each.",
+  "The Image and build-002 directory are local artifacts (not committed); Apple inputs are not involved."
+ ],
+ "artifacts": [
+  "docs/procedures/nat-074/design.md",
+  "docs/procedures/nat-074/make_variant.py",
+  "docs/procedures/nat-074/build.py",
+  "docs/procedures/nat-074/patch_mkpayload.py",
+  "docs/procedures/nat-074/test_nat074.py",
+  "docs/procedures/nat-074/test_model.py",
+  "docs/procedures/nat-074/check_big_window.py",
+  "docs/procedures/nat-074/mutants.py",
+  "docs/procedures/nat-074/mutants_model.py",
+  "docs/procedures/nat-074/mutation-window.json",
+  "docs/procedures/nat-074/mutation-model.json",
+  "docs/procedures/nat-074/decision-draft.md",
+  "artifacts/nat-074/build-002/build.json",
+  "artifacts/nat-074/build-002/loader-diag-xnu-bigwin-md1/Image.payload",
+  "artifacts/nat-074/build-002/loader-diag-xnu-bigwin-md1/Image",
+  "artifacts/nat-074/build-002/loader-diag-xnu-bigwin-md1/loader.elf",
+  "artifacts/nat-074/build-002/loader-diag-xnu-bigwin-md1/payload.adt8.bin",
+  "artifacts/nat-074/mutants_model.log",
+  "artifacts/nat-074/mutation-rerun-invalid3.json",
+  "artifacts/nat-074/make-check-002.log"
+ ]
+}
