@@ -1,0 +1,107 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T20:21:00+00:00",
+ "commit": "404acdcc39e38f4cb34955dd1afb073b0fed7398",
+ "tree_state": "NAT-102 files (including equivalent.json, mutation.json, README.md, evidence.json) and docs/decisions/0038-nat102-loader-diag-xnu-hb-md1-single-run-2026-11-12.md are uncommitted at recording and committed immediately after completion; unrelated dirty files in the working tree are excluded.",
+ "owner": "gemini-ios-20261113-a",
+ "summary": "Host-side build, packaging, driver derivation, heartbeat analyser (H0-H5), Unicorn Darwin ABI model verification, and decision draft for loader-diag-xnu-hb-md1 (NAT102-hb1). Built artifacts/nat-102/build-001/loader-diag-xnu-hb-md1/Image.payload (26,134,288 B, sha256 88d6217681784ab638025ad42cb0992672d84bd2b6d21af92c09d85e54e0cd1f) and packaged artifacts/nat-102/package-001/loader-diag-xnu-hb-md1/recovery.img (100,663,296 B, sha256 e938cb4a5578b404685feeb21c0a480285b57157f10f4573fba07f28f5afba94) embedding NAT-101's 4 MiB heartbeat root (97f9b5d8a5c7d02ebf2d527dedddbc6a043d69a7191339d8d5dbe4fe7144e58c). derive102.py --check passes (9 substitutions); test_nat102.py passes 39/39; test_analyze102.py passes 30/30; test_hb_vm.py passes 23/23; abi-mutants.json detects 21/22 ABI mutants (1 equivalent); mutate_nat102.py v2 across analyze_nat102.py, build.py, and derive102.py kills 452/488 with 12 explained equivalents in equivalent.json and 24 invalid (0 unexplained survivors, exit 0). Prepared docs/decisions/0038-nat102-loader-diag-xnu-hb-md1-single-run-2026-11-12.md. No phone hardware run occurred in NAT-102.",
+ "acceptance": {
+  "1_build_and_package": "build.py produced artifacts/nat-102/build-001/loader-diag-xnu-hb-md1/Image (6f70f14eb266fbede5c34bdf44eee3195a04bebdab379816c38cbadb98ef7864), Image.payload (26,134,288 B, sha256 88d6217681784ab638025ad42cb0992672d84bd2b6d21af92c09d85e54e0cd1f), and build.json (627465bd51330944c668da1e500a7527381a55f3af80376e8e29ab1d23273a1f); recovery.img (100,663,296 B, sha256 e938cb4a5578b404685feeb21c0a480285b57157f10f4573fba07f28f5afba94) embeds Image.payload identically at offset 2048 and carries the 236-byte cmdline ending in xrd=md0 with tag NAT102-hb1.",
+  "2_driver_and_unit_tests": "derive102.py --check exits 0 (9 substitutions from session_nat096.py); test_nat102.py passes 39/39; test_analyze102.py passes 30/30 (covering H0-H5 rules, real hb.c host model, NAT-098 H1 baseline, and synthetic archive edge cases); test_hb_vm.py passes 23/23.",
+  "3_abi_and_python_mutation": "artifacts/nat-102/abi-mutants.json records 21 detected and 1 equivalent (fork-child-ignores-carry) out of 22 Darwin ABI mutants under Unicorn. docs/procedures/nat-102/mutation.json (4e4fc0f33cdd63d837fb4eb5784455346ac6c95c614341e05832d9be9994180e) records 488 mutants across analyze_nat102.py (377 total, 345 killed, 9 explained, 23 invalid), build.py (92 total, 88 killed, 3 explained, 1 invalid), and derive102.py (19 total, 19 killed, 0 survived, 0 invalid); 0 unexplained survivors (exit 0).",
+  "4_decision_draft": "docs/decisions/0038-nat102-loader-diag-xnu-hb-md1-single-run-2026-11-12.md (1cd5fd6a2ed88b6ee98eeee341ba06ce02df8d5aa8ed15358e8c2260726726f4) records both pinned hashes, kernel command line, decision 0019 standing authority, pre-registered analysers, and mandatory stock RECOVERY restore protocol."
+ },
+ "established": [
+  "loader-diag-xnu-hb-md1 recovery.img and Image.payload match NAT-096 outside the pinned NAT-101 root.apfs region, the 5-byte NAT102-hb1 tag, and the loader image name immediates.",
+  "session_nat102.py matches derive102.py's 9 counted substitutions from session_nat096.py and enforces the NAT-101/NAT-102/0038 launch gate.",
+  "analyze_nat102.py classifies NAT-098's returned kernel text as H1 (no-hb-line) and handles H0-H5 cases with 0 unexplained survivors in mutation testing.",
+  "Under test_hb_vm.py's Unicorn model of the project XNU Darwin syscall ABI, the packaged 16,635-byte Mach-O hb binary completes 60 rounds cleanly across all tested scheduler policies and detects 21/22 injected ABI errors."
+ ],
+ "not_established": [
+  "Whether XNU's real kernel on this S24 matches the Unicorn model's fork/carry/select ABI assumptions or starts /redwood/bin/hb cleanly before /sbin/launchd.darwin.",
+  "Whether hb's /dev/console output appears after logd startup or which Apple daemons are alive on S24 hardware (tested only in NAT-103)."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-B",
+    "-I",
+    "docs/procedures/nat-102/derive102.py",
+    "--check"
+   ],
+   "exit_code": 0,
+   "note": "ok: session_nat102.py equals the derivation (9 substitutions)"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-I",
+    "docs/procedures/nat-102/test_nat102.py",
+    "-v"
+   ],
+   "exit_code": 0,
+   "note": "Ran 39 tests in 1.562s, OK"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-I",
+    "docs/procedures/nat-102/test_analyze102.py",
+    "-v"
+   ],
+   "exit_code": 0,
+   "note": "Ran 30 tests in 2.412s, OK"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-I",
+    "docs/procedures/nat-102/test_hb_vm.py",
+    "-v"
+   ],
+   "exit_code": 0,
+   "note": "Ran 23 tests in 1.168s, OK"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-I",
+    "docs/procedures/nat-102/mutate_nat102.py",
+    "--out",
+    "artifacts/nat-102/mutation-v2",
+    "--jobs",
+    "8"
+   ],
+   "exit_code": 0,
+   "note": "488 mutants across analyze_nat102.py, build.py, derive102.py: 452 killed, 12 explained in equivalent.json, 24 invalid, 0 unexplained survivors; copied to docs/procedures/nat-102/mutation.json"
+  }
+ ],
+ "artifacts": [
+  "docs/decisions/0038-nat102-loader-diag-xnu-hb-md1-single-run-2026-11-12.md",
+  "docs/procedures/nat-102/README.md",
+  "docs/procedures/nat-102/task.json",
+  "docs/procedures/nat-102/build.py",
+  "docs/procedures/nat-102/derive102.py",
+  "docs/procedures/nat-102/session_nat102.py",
+  "docs/procedures/nat-102/analyze_nat102.py",
+  "docs/procedures/nat-102/hb_vm.py",
+  "docs/procedures/nat-102/abi_mutants.py",
+  "docs/procedures/nat-102/mutate_nat102.py",
+  "docs/procedures/nat-102/test_nat102.py",
+  "docs/procedures/nat-102/test_analyze102.py",
+  "docs/procedures/nat-102/test_hb_vm.py",
+  "docs/procedures/nat-102/equivalent.json",
+  "docs/procedures/nat-102/mutation.json",
+  "artifacts/nat-102/build-001/build.json",
+  "artifacts/nat-102/package-001/package.json",
+  "artifacts/nat-102/abi-mutants.json",
+  "artifacts/nat-102/package-001/loader-diag-xnu-hb-md1/recovery.img"
+ ]
+}

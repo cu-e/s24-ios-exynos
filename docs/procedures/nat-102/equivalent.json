@@ -1,0 +1,74 @@
+[
+ {
+  "file": "docs/procedures/nat-102/analyze_nat102.py",
+  "line": 36,
+  "desc": "statement deleted",
+  "reason": "_load() registers the module in sys.modules before exec_module; the two modules analyze_nat102.py imports (nat-089/analyze_nat089.py and nat-097/kl_reader2.py) are loaded once at import time and use no dataclass, pickle, or typing.get_type_hints, so exec_module succeeds identically without registration."
+ },
+ {
+  "file": "docs/procedures/nat-102/analyze_nat102.py",
+  "line": 95,
+  "desc": "condition forced false",
+  "reason": "Defensive guard `if HEAD_A.match(lines[j]) or HEAD_O.match(lines[j]): break`: HEAD_A (`PID TTY TIME CMD`) and HEAD_O (`PID PPID STAT COMM`) start with `PID`, whereas A89.PS_ROW and ROW_O require a leading numeric PID, so lines 99-100 (`if not r: break`) and 104-105 (`if not r ...: break`) immediately break at the same line j even if lines 95-96 do not trigger."
+ },
+ {
+  "file": "docs/procedures/nat-102/analyze_nat102.py",
+  "line": 95,
+  "desc": "or -> and",
+  "reason": "Defensive guard `if HEAD_A.match(lines[j]) or HEAD_O.match(lines[j]): break`: HEAD_A and HEAD_O both start with `PID` and are rejected by A89.PS_ROW and ROW_O directly below (lines 99-100 and 104-105), so `or -> and` breaks at the same line j with identical parsed lists."
+ },
+ {
+  "file": "docs/procedures/nat-102/analyze_nat102.py",
+  "line": 96,
+  "desc": "statement deleted",
+  "reason": "Deleting `break` after `if HEAD_A.match(...) or HEAD_O.match(...):` falls directly into lines 97-106 where neither A89.PS_ROW nor ROW_O matches a header line starting with `PID`, hitting `break` on line 100 or 105 at the exact same iteration."
+ },
+ {
+  "file": "docs/procedures/nat-102/analyze_nat102.py",
+  "line": 123,
+  "desc": "literal 1 -> 2",
+  "reason": "For any string s, `s.rsplit('/', 2)[-1]` and `s.rsplit('/', 1)[-1]` always return the identical final `/`-delimited component."
+ },
+ {
+  "file": "docs/procedures/nat-102/analyze_nat102.py",
+  "line": 126,
+  "desc": "literal 1 -> 2",
+  "reason": "For any string s, `s.rsplit('/', 2)[-1]` and `s.rsplit('/', 1)[-1]` always return the identical final `/`-delimited component."
+ },
+ {
+  "file": "docs/procedures/nat-102/analyze_nat102.py",
+  "line": 137,
+  "desc": "+ -> -",
+  "reason": "In `hb_lines = (1 if p['start'] else 0) + len(p['marks']) + ...`, hb_lines is read only inside the final `else:` branch of `analyze_text` (line 174), which is reachable only when `p['marks']` is empty (and `p['start']` is None), so `+ 0` and `- 0` evaluate identically."
+ },
+ {
+  "file": "docs/procedures/nat-102/analyze_nat102.py",
+  "line": 137,
+  "desc": "literal 1 -> 0",
+  "reason": "In `hb_lines = (1 if p['start'] else 0) + ...`, hb_lines is read only inside the final `else:` branch of `analyze_text` (line 174), where `p['start']` is always falsy (`None`), so `(1 if p['start'] else 0)` and `(0 if p['start'] else 0)` both evaluate to `0`."
+ },
+ {
+  "file": "docs/procedures/nat-102/analyze_nat102.py",
+  "line": 137,
+  "desc": "literal 1 -> 2",
+  "reason": "In `hb_lines = (1 if p['start'] else 0) + ...`, hb_lines is read only inside the final `else:` branch of `analyze_text` (line 174), where `p['start']` is always falsy (`None`), so `(1 if p['start'] else 0)` and `(2 if p['start'] else 0)` both evaluate to `0`."
+ },
+ {
+  "file": "docs/procedures/nat-102/build.py",
+  "line": 38,
+  "desc": "statement deleted",
+  "reason": "_load() registers dynamically loaded builder modules in sys.modules before exec_module; the modules loaded by build.py use no dataclass, pickle, or typing.get_type_hints, so exec_module works identically without registration."
+ },
+ {
+  "file": "docs/procedures/nat-102/build.py",
+  "line": 88,
+  "desc": "literal 1 -> 0",
+  "reason": "Pure JSON whitespace formatting (`json.dumps(d, indent=1)` -> `indent=0`) in the written build record `build.json`; all JSON consumers parse the structure equivalently."
+ },
+ {
+  "file": "docs/procedures/nat-102/build.py",
+  "line": 88,
+  "desc": "literal 1 -> 2",
+  "reason": "Pure JSON whitespace formatting (`json.dumps(d, indent=1)` -> `indent=2`) in the written build record `build.json`; all JSON consumers parse the structure equivalently."
+ }
+]

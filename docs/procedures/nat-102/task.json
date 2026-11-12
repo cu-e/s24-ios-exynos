@@ -1,0 +1,33 @@
+{
+  "id": "NAT-102",
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "priority": 98,
+  "depends_on": [
+    "NAT-101"
+  ],
+  "title": "Heartbeat image after NAT-098 (inconclusive, so not a dependency): NAT-096's quiet Stage A image with NAT-101's launchd-independent heartbeat `hb` started from /etc/rc of the small root; image name loader-diag-xnu-hb-md1, tag NAT102-hb1. Build, package, derive the driver (derive102.py from NAT-096's), the heartbeat analyser analyze_nat102.py (rows H0-H5 over NAT-097's reader v2), host tests incl. a byte-for-byte comparison with NAT-096's build, a Unicorn multi-process model of the Darwin system-call ABI that runs the real hb Mach-O (hb_vm.py) with ABI-breaking mutants of hb.c (abi_mutants.py), a mutation pass, and a decision draft (0038) for one native run. Nothing here measures the phone",
+  "paths": [
+    "docs/procedures/nat-102",
+    "artifacts/nat-102",
+    "docs/decisions/0038-nat102-loader-diag-xnu-hb-md1-single-run-2026-11-12.md"
+  ],
+  "sources": [
+    "s24-port"
+  ],
+  "acceptance": [
+    "The small root is NAT-101's (NAT-096's Stage A root plus bin/hb and the one rc line `/redwood/bin/hb &` before the exec line). The built payload equals NAT-096's except the md0 region and the command-line tag (NAT096-sq1 -> NAT102-hb1); the loader image differs only in the words that encode the image name; the kernel command line is NAT-096's with the new tag and ends in xrd=md0; packaged RECOVERY and payload hashes are recorded.",
+    "A session driver derived from NAT-096's by counted substitutions (derive102.py --check) with a registry gate that adds NAT-101 and NAT-102 and does not require NAT-098; an analyser analyze_nat102.py with rows H0-H5 and tests against synthetic text, hb's own output compiled on the host, and the real NAT-098 archive (expected H1); a Unicorn model that runs the real hb Mach-O with a multi-process fake Darwin kernel (fork child flag in x1, carry/errno, dup2 before execve, select timevals, wait4 statuses, SIGKILL path, failure paths) in three scheduling orders, and ABI-breaking mutants of hb.c that the model must detect or that are shown equivalent with the XNU source. The model is not the payload kernel and shows nothing about the phone.",
+    "Tests, a mutation pass under the RAM cap with every survivor examined, and decision 0038 with every hash recomputed that states what the image changes against NAT-096 (one program and one rc line added), why (NAT-098 lost launchd's console lines and the heartbeat job's lists), the question, the pre-registered rows (chain rows, Stage A rows, heartbeat rows H1-H5), the idle-host condition and the known limits. Nothing here measures the phone."
+  ],
+  "steps": [
+    "Build the image and package it",
+    "Derive the driver",
+    "Heartbeat analyser and its tests",
+    "Unicorn ABI model, its tests and the ABI mutants",
+    "Mutation pass",
+    "Decision 0038"
+  ],
+  "status": "pending",
+  "owner": null
+}
