@@ -1,0 +1,233 @@
+{
+ "kind": "native-device",
+ "origin": "local-host",
+ "outcome": "inconclusive",
+ "recorded_at": "2026-11-12T09:50:26+00:00",
+ "commit": "9d38dd0ad338f37889a53e7e39238a5bc1085019",
+ "tree_state": "docs/procedures/nat-078 files listed under sha256 were uncommitted at recording time and are committed in the commit that follows; the recorded commit is its parent",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "decision": "docs/decisions/0030-nat078-loader-diag-xnu-rx-md1-single-run-2026-11-12.md",
+ "summary": "One native run of loader-diag-xnu-rx-md1 (decision 0030). The host streamed the 2,475,720,704-byte padded root image over USB bulk-OUT into the md1 reserve in 152.98 s (16.183 MB/s), 296 chunks, no error, no retry; the device and the loader both report committed == the whole image and loader status done. The payload kernel booted (16 KiB pages, md1 registered), PID 1 (the NAT-077 hash probe) read /dev/rmd1 and printed 11 digests covering the first 1,476,395,008 bytes (59.6%), every one equal to the host's SHA-256 of the same prefix; the kernel's timed return after 45 s cut the hash before the final line, so the digest of the whole image was not obtained. The phone ended in Download Mode at +382.39 s (cap-reset window), the pinned stock RECOVERY was restored with NAT-013 and Android was verified. Pre-registered row 3a: not a pass. The shipped analyser reports row 8 on the whole archive because the collector archive has two boots and the analyser takes the first; the same analyser on the second boot alone gives row 3a.",
+ "acceptance": {
+  "one_run_under_its_own_decision": "decision 0030 was committed in 9d38dd0 (HEAD at launch) before any device access; one RECOVERY write with readback, one reboot, no retry",
+  "restored_and_checked": "NAT-013 restore (pyusb venv python) exit 0; check_android pass; assess pass (six conditions true)",
+  "reported_separately": "see numbers.json: bytes and seconds by device and by host, rate, rx_errors, PID 1's digests against the image, page size and free pages, ending",
+  "finding_not_a_pass": "row 3a of the pre-registered table: delivery complete, every printed digest equal, hash cut short by the kernel's return; recorded as the finding, outcome inconclusive"
+ },
+ "findings": [
+  "Delivery works on the phone: 2,475,720,704 B in 152.98 s = 16.183 MB/s (host) and 152.97 s (loader clock), 296 TRBs, errors/dups/gaps/rejects/resets/aborts all 0. The 225 s budget needed 11.0 MB/s.",
+  "NAT-040 item U5 is answered for this controller: the DWC3 DMA writes into the reserve above 4 GiB (destination PA 0x902d7c000), directly.",
+  "The kernel read /dev/rmd1 through the MMU and matched the host for 11 consecutive prefix digests (1.375 GiB). The loader's final cache clean over the window was sufficient for that span.",
+  "The probe's SHA-256 (plain C, with the reads) runs at 33.0 MB/s; the whole image needs 75 s, the kernel's loader_return_after allows at most 63 s. Either a faster probe (SHA-256 instructions; read and hash timed separately) or the NAT-071 keepalive is needed for a whole-image digest.",
+  "The unpetted project kernel ran its 45 s and returned by itself; no SEC_UPLOAD.",
+  "The collector archive of this run has two boots: a capture-error (UsbTimeout, Errno 5) at 09:35:22Z, about when the kernel returned to the loader, and a new session at 09:35:37Z. Earlier runs (NAT-066, 068, 075) had one boot. The second boot holds the replay of the ring with the kernel text. The cause of the break is not established.",
+  "analyze_nat080.py takes the first boot of the image, so its output on the whole archive is row 8 ('no probe line'), which misdescribes the phone. This is a limitation of the analyser found by the real run, not a change of the pass rule; both outputs are kept.",
+  "pyusb set_configuration by the companion did not interrupt the collector: the loader's progress lines reached the host live (+41 s, +101 s, +181 s after the request for loader t=10 s, 70 s, 150 s)."
+ ],
+ "established": [
+  "native-device: a full-size (2.31 GiB) image can be placed into RAM over USB on this phone, with device-side checksum verification per chunk, in 153 s.",
+  "native-device: DWC3 DMA reaches the md1 reserve at PA 0x902d7c000 (above 4 GiB) without staging.",
+  "native-device: the kernel reads back the first 1,476,395,008 bytes of the delivered image through /dev/rmd1 unchanged (SHA-256 prefix digests equal to the host's).",
+  "native-device: the NAT-079 loader's receive cap, return path, pet schedule and the 360 s deadline reset worked as designed (Download Mode at +382.39 s)."
+ ],
+ "not_established": [
+  "The SHA-256 of the whole image as seen by the kernel; the last 999,325,696 bytes were not read back.",
+  "That APFS mounts from md1; that any Apple binary (dyld, launchd) runs; anything about display, input or GPU. The probe is not Apple's launchd.",
+  "The cause of the collector's break at the kernel's return.",
+  "Whether the 33 MB/s of the probe is limited by the read through mdevrw, by the SHA-256 code, or by the CPU clock the loader leaves."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-B",
+    "-I",
+    "docs/procedures/nat-080/session_nat078.py",
+    "--image",
+    "loader-diag-xnu-rx-md1",
+    "--out",
+    "artifacts/nat-078/preflight-001"
+   ],
+   "exit_code": null,
+   "shell_status_note": "run as `... | tail -5; echo exit=$?`, so the 0 printed was tail's status, not the driver's; the driver's own result is preflight-001/report.json",
+   "result": "outcome ready-read-only, registry_blocker None"
+  },
+  {
+   "argv": [
+    "python3",
+    "-B",
+    "-I",
+    "docs/procedures/nat-080/session_nat078.py",
+    "--image",
+    "loader-diag-xnu-rx-md1",
+    "--out",
+    "artifacts/nat-078/run-001",
+    "--execute"
+   ],
+   "exit_code": null,
+   "shell_status_note": "same: piped through `tail -5`, so no driver exit code was recorded; the driver's own result is run-001/report.json",
+   "result": "outcome native-attempt-started, device_write_started true, reboot_sent true: RECOVERY written and read back, watcher + collector + companion started, one adb reboot recovery at 2026-11-12T09:31:31.975892Z"
+  },
+  {
+   "argv": [
+    "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "restore",
+    "--bus",
+    "5",
+    "--address",
+    "112",
+    "--out",
+    "artifacts/nat-078/restore-001"
+   ],
+   "exit_code": 0,
+   "result": "outcome awaiting-readback; Download Mode device 04e8:685d, iProduct SAMSUNG USB"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-012/check_android.py",
+    "artifacts/nat-078/restore-001/android-check.json"
+   ],
+   "exit_code": 0,
+   "result": "RECOVERY hash equals the pinned stock, user data directories present, Android booted"
+  },
+  {
+   "argv": [
+    "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "assess",
+    "--report",
+    "artifacts/nat-078/restore-001/report.json",
+    "--readback",
+    "artifacts/nat-078/restore-001/android-check.json"
+   ],
+   "exit_code": 0,
+   "result": "assess pass (PIT validated, upload acknowledged, session end, reboot confirmed, Android booted, readback matches)"
+  },
+  {
+   "argv": [
+    "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-080/analyze_nat080.py",
+    "--archive",
+    "artifacts/nat-078/run-001/archive",
+    "--events",
+    "artifacts/nat-078/run-001/usb-events.jsonl",
+    "--report",
+    "artifacts/nat-078/run-001/report.json",
+    "--delivery",
+    "artifacts/nat-078/run-001/delivery",
+    "--root",
+    "artifacts/nat-077/system-padded.apfs",
+    "--size",
+    "2475720704",
+    "--sha256",
+    "552800ff3ac3de129b550c838681d0cb1d08cc4df0d38b2dc1088a9b258a8258",
+    "--out",
+    "artifacts/nat-078/run-001/analysis.json",
+    "--log-out",
+    "artifacts/nat-078/run-001/kernel-log.txt"
+   ],
+   "exit_code": 0,
+   "env": {
+    "TMPDIR": "/home/egor/.cache/nat059-tmp"
+   },
+   "result": "whole archive, analyser unchanged since decision 0030: verdict PARTIAL, row 8 (the analyser takes the first of two boots)"
+  },
+  {
+   "argv": [
+    "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-080/analyze_nat080.py",
+    "--archive",
+    "artifacts/nat-078/run-001-boot2-view-final/archive",
+    "--events",
+    "artifacts/nat-078/run-001/usb-events.jsonl",
+    "--report",
+    "artifacts/nat-078/run-001/report.json",
+    "--delivery",
+    "artifacts/nat-078/run-001/delivery",
+    "--root",
+    "artifacts/nat-077/system-padded.apfs",
+    "--size",
+    "2475720704",
+    "--sha256",
+    "552800ff3ac3de129b550c838681d0cb1d08cc4df0d38b2dc1088a9b258a8258",
+    "--out",
+    "artifacts/nat-078/run-001-boot2-view-final/analysis.json",
+    "--log-out",
+    "artifacts/nat-078/run-001-boot2-view-final/kernel-log.txt"
+   ],
+   "exit_code": 0,
+   "env": {
+    "TMPDIR": "/home/egor/.cache/nat059-tmp"
+   },
+   "result": "same analyser on a copy of the archive holding attempt.json, events.jsonl and boot 2 only (no manifest): PARTIAL, row 3 variant a"
+  }
+ ],
+ "sha256": {
+  "docs/procedures/nat-078/README.md": "33b7a57b761970aad9d89be6c3af2b5b8c6a6d18061275d4672f5f4367ec777c",
+  "docs/procedures/nat-078/numbers.json": "6e22678908750af40cc9315fa9146b13cf6decd673546227a73b33bcca1450e4",
+  "docs/decisions/0030-nat078-loader-diag-xnu-rx-md1-single-run-2026-11-12.md": "d540448d9623643ede9562983a277e4e13ed0da1535f777b43ba436aa22a2978"
+ },
+ "artifacts": [
+  "artifacts/nat-078/native-attempt-loader-diag-xnu-rx-md1-used.json",
+  "artifacts/nat-078/preflight-001/report.json",
+  "artifacts/nat-078/run-001/report.json",
+  "artifacts/nat-078/run-001/usb-events.jsonl",
+  "artifacts/nat-078/run-001/delivery/delivery.json",
+  "artifacts/nat-078/run-001/delivery/delivery.jsonl",
+  "artifacts/nat-078/run-001/archive/manifest.json",
+  "artifacts/nat-078/run-001/archive/events.jsonl",
+  "artifacts/nat-078/run-001/archive/attempt.json",
+  "artifacts/nat-078/run-001/analysis.json",
+  "artifacts/nat-078/run-001/analysis.stdout",
+  "artifacts/nat-078/run-001/analysis-early.json",
+  "artifacts/nat-078/run-001/kernel-log.txt",
+  "artifacts/nat-078/run-001/kernel-log-early.txt",
+  "artifacts/nat-078/run-001-boot2-view-final/analysis.json",
+  "artifacts/nat-078/run-001-boot2-view-final/analysis.stdout",
+  "artifacts/nat-078/run-001-boot2-view-final/kernel-log.txt",
+  "artifacts/nat-078/restore-001/report.json",
+  "artifacts/nat-078/restore-001/android-check.json",
+  "artifacts/nat-078/restore-001.stdout",
+  "artifacts/nat-078/check-android.stdout",
+  "artifacts/nat-078/assess-001.stdout"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-078/native-attempt-loader-diag-xnu-rx-md1-used.json": "0d6bcadfd01b50a9063b99a46b5f629f6e66a405c2cc8dda4950efd347671cfb",
+  "artifacts/nat-078/preflight-001/report.json": "c9d048b2c1cd156f1123c09dd57ba4a266924d3e5327d8811ca893ac707b2d57",
+  "artifacts/nat-078/run-001/report.json": "89e9c9e0179b430078b09e29f10d092735661601dfac4ef3ac09cd8971292f0c",
+  "artifacts/nat-078/run-001/usb-events.jsonl": "6e2fa6b79b66eddb4cc0b10826d6082cf4b016c4562913d798ad0c11e4c1f6f0",
+  "artifacts/nat-078/run-001/delivery/delivery.json": "010ceb9536cf87b692ad2420218a4a027d360d6bee61fc3ad6346c18c8abd28d",
+  "artifacts/nat-078/run-001/delivery/delivery.jsonl": "3d12bd33ed70eba96d9e943afe97837c271c3b87f01dae84dbd12849c6447408",
+  "artifacts/nat-078/run-001/archive/manifest.json": "b65c42d3eb1451f2b811e552b02209d8474629f98dcf5e9b446297acb65d0377",
+  "artifacts/nat-078/run-001/archive/events.jsonl": "622a31934a7ea7a2250c702319ac6272c419b3a3d39a52b3567682702e4c6c95",
+  "artifacts/nat-078/run-001/archive/attempt.json": "64c3e425f8f3362c852671e31bcdb666cb800bd2670cbf4fb03180197a75f556",
+  "artifacts/nat-078/run-001/analysis.json": "db31e0766729d3ad25c5ab1a496b9f812711ff49458ac9f4534968157394efdc",
+  "artifacts/nat-078/run-001/analysis.stdout": "db31e0766729d3ad25c5ab1a496b9f812711ff49458ac9f4534968157394efdc",
+  "artifacts/nat-078/run-001/analysis-early.json": "4b9f7e1e2c2acb67083b2825482882384997bdeabb3db159b6d69dbe48c0d36d",
+  "artifacts/nat-078/run-001/kernel-log.txt": "f8b87c02e9ba84b3bf4ea1b1a923468a89877f85b1a6453b2a45a78e515268e6",
+  "artifacts/nat-078/run-001/kernel-log-early.txt": "f8b87c02e9ba84b3bf4ea1b1a923468a89877f85b1a6453b2a45a78e515268e6",
+  "artifacts/nat-078/run-001-boot2-view-final/analysis.json": "a93f68c08ea6bdfccd2dedff3733edc5a371b12850768b8d31945b879d9fd8a7",
+  "artifacts/nat-078/run-001-boot2-view-final/analysis.stdout": "a93f68c08ea6bdfccd2dedff3733edc5a371b12850768b8d31945b879d9fd8a7",
+  "artifacts/nat-078/run-001-boot2-view-final/kernel-log.txt": "4c1ae989d47d1af2d69a6bcb534719932ef788813b205b9e0a64a153fc26c3a6",
+  "artifacts/nat-078/restore-001/report.json": "8eaa2f811773207dd10750b9e80dc612de739608e2e09928b9fd5a9d91d77fe4",
+  "artifacts/nat-078/restore-001/android-check.json": "88af5b83fbf5d03b4d07952a2744625792620c6d7f7338db6ce204d8fbbf0a02",
+  "artifacts/nat-078/restore-001.stdout": "9dc8bd160c29f3ee2737f24220227ec229179ae075c9fe7977b73d4d98ed6651",
+  "artifacts/nat-078/check-android.stdout": "4d929f67b283f8ac6fce48819c619adc6bd41fb20c7a74af58dce8965dd43795",
+  "artifacts/nat-078/assess-001.stdout": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a"
+ },
+ "deviations_from_task_text": [
+  "4096 MiB window instead of 4908 MiB (the loader refuses mem_size > 4 GiB); md0 stays the probe, the root image goes to the reserve-only md1/rmd1; direct DMA instead of staged receive (decision 0030, deviations).",
+  "The task text asks for 'PID 1's digest against the image's SHA-256': the digest obtained is a prefix digest (11 lines up to 59.6%), not the whole-image digest."
+ ]
+}
