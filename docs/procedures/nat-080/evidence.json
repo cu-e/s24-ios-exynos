@@ -1,0 +1,260 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T09:21:14+00:00",
+ "commit": "7fc1e51126598c58ea1d130f032c7f0405a96c41",
+ "tree_state": "all files listed under sha256 except tools/ios/root_send.py were uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "summary": "The host side of the NAT-078 delivery run: session_nat078.py derived from NAT-075's driver by asserted substitution (derive.py --check), the delivery companion deliver_nat080.py (waits for the device's own ready reply, streams the padded root with the real tools/ios/root_send.py through a metering transport with a deadline, records the device's view, never reboots and never retries), the analyser analyze_nat080.py (rows 1-10 of the NAT-077 pass table from the NAT-065 chain verdict, the loader's values, the companion's record, the probe's lines checked against host prefix digests of the root file, and the ending), and 172 tests (85 + 62 + 18 + 7) on the NAT-076 model device. A mutation pass of 1029 candidates (987 killed, 41 do not parse, 1 survivor shown to be equivalent). Nothing was run on the phone, no device was opened and no USB transfer was made by any test other than through the model.",
+ "acceptance": {
+  "1_driver_and_coexistence": "session_nat078.py is the NAT-075 driver with counted substitutions (derive.py refuses a drifted NAT-075 driver; --check exits 0); test_nat080.py pins the replaced lines, what is added (companion started after the collector is confirmed polling and before the single reboot, no second reboot, no retry, no device access of its own), the constants against the NAT-079 package, the padded root and the loader's receive cap (send 225 s + margin 15 s <= cap 240 s). test_coexist80.py runs the real NAT-041 collector and the sender on the model with strict turn-taking: collector requests are 0x01-0x05 on endpoint 0 only and all return ok, one collector run, the image arrives exactly, the archive accounts for every byte of the device log, one bus reset in a chunk and three between chunks are survived by reconnect/resume (sender) and by the same collector run.",
+  "2_analyser": "analyze_nat080.py gives each row of the NAT-077 pass table (1, 2, 3 with variant a, 4, 5, 6, 7, 8, 9, 10) from fixtures produced by the real probe (compiled for the host and run over chosen images) and the real companion, and reads the archived NAT-068 and NAT-075 runs without mistaking them for this image's boot: digest mismatch localised to the first prefix line, short transfer judged over the delivered span only, SEC_UPLOAD ending, cap reset window 364.0-405.0 host seconds. Mutation pass: docs/procedures/nat-080/mutation.json (survivors listed with reasons in equivalent.json).",
+  "3_no_native_run": "No native run, no ADB, no USB device opened, no permit used in this task."
+ },
+ "findings": [
+  "The first mutation pass had 107 survivors (analyser 51, companion 41, derive 15). Most were real test gaps (rounding, clock offsets, exit-class numbers, messages, boundaries, what main() writes); each was closed with a test whose expected value is worked out by hand. Three lines were dead code and were removed (an alias of the NAT-065 classifier, two initial assignments); the return-class expression was restructured so that it has no redundant comparison. The second pass left three survivors: two boundaries (the signed-status reading at 2^63, the 8 MiB read block of the streaming hash) closed with tests and verified by re-applying the mutants, and argv[0:] in derive.py, which is equivalent.",
+  "Checking the acceptance text against the tests after the first passes showed that nothing yet ran the real collector next to the sender: the companion tests only used the sender. test_coexist80.py was written for that, the runner's list of suites now includes it, and the final pass was run with it.",
+  "Readiness is a property of the device, not of the collector: the loader's engine is up with a 512-byte placeholder long before the receive path is installed, so 'the collector sees the engine' is not a safe moment to start sending. The companion waits for the device's own reply (receive path present, capacity equal to the image size, nothing committed, state IDLE) and refuses any other capacity or a device that holds state.",
+  "A mutation pass run while /tmp was full (EDQUOT) is polluted: NAT-079's passes 1 and 2 were. All NAT-080 passes ran with TMPDIR off /tmp; the invalid mutants of the final pass are syntax errors only."
+ ],
+ "established": [
+  "Host-test: the driver is the derivation (counted substitutions) from NAT-075's driver and its added steps are the ones listed; constants agree with the NAT-079 package record, the padded root's record and the loader's build record.",
+  "Host-test: the companion sends nothing before the device's ready reply, delivers the exact image through the engine model with the real sender, survives bus resets, stops at its deadline without a retry, ends an armed chunk with RX_ABORT, and leaves a durable record for every ending with the exit status the driver expects.",
+  "Host-test: the real NAT-041 collector and the real sender coexist on the model device under strict turn-taking (see acceptance 1).",
+  "Host-test: the analyser gives each pass-table row for causes produced by the real probe and companion, and 987 of 988 valid mutants of the three modules are killed by the suites (the remaining one is equivalent)."
+ ],
+ "not_established": [
+  "Anything about the S24: the host-to-phone USB rate (the 225 s budget needs about 11 MB/s), whether the DWC3 DMA reaches the md1 reserve above 4 GiB (NAT-040 item U5), cache visibility of the delivered bytes to the kernel, how long the probe's SHA-256 of 2.31 GiB takes on the device.",
+  "Anything about libusb: whether another process may keep issuing endpoint-0 transfers while pyusb runs set_configuration or a reset; the model shows the protocols do not interfere, not that the host stack allows it.",
+  "That the analyser's parsers match the real device log byte for byte: they match the NAT-077 probe's and the loader emitter's formats as written in their sources and as run on the host and the key=0xHEX shape archived from NAT-075. A new kind of line is row 8, not a guess.",
+  "The decision for NAT-078 (own decision file, committed before the run, native permit) and anything about Apple userland."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-080/test_deliver80.py"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; 85 tests, OK (the companion against the compiled loader's receive phase in the NAT-076 model; needs Unicorn); logs artifacts/nat-080/logs/test-deliver.{stdout,stderr}"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-080/test_analyze80.py"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; 62 tests, OK; logs artifacts/nat-080/logs/test-analyze.{stdout,stderr}"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-080/test_nat080.py"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; 18 tests, OK; logs artifacts/nat-080/logs/test-derive.{stdout,stderr}"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-080/test_coexist80.py"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; 7 tests, OK (the real NAT-041 collector and the sender on the model, strict turn-taking); logs artifacts/nat-080/logs/test-coexist.{stdout,stderr}"
+  },
+  {
+   "argv": [
+    "python3",
+    "-B",
+    "-I",
+    "docs/procedures/nat-080/derive.py",
+    "--check"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; exit 0 = session_nat078.py is the derivation from NAT-075's driver and the pinned NAT-079 package; logs artifacts/nat-080/logs/derive-check.{stdout,stderr}"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-I",
+    "docs/procedures/nat-080/mutate_nat080.py",
+    "--annotate",
+    "artifacts/nat-080/mutation-run3/mutation.json",
+    "--out",
+    "artifacts/nat-080/mutation-run3-annotated"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; exit 0 = every survivor of mutation-run3 has a reason in equivalent.json; the result is docs/procedures/nat-080/mutation.json; logs artifacts/nat-080/logs/mutation-annotate.{stdout,stderr}"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; 448 tests OK; logs artifacts/nat-080/logs/make-check.{stdout,stderr,exit}"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-I",
+    "docs/procedures/nat-080/mutate_nat080.py",
+    "--out",
+    "artifacts/nat-080/mutation-run1",
+    "--jobs",
+    "10"
+   ],
+   "exit_code": null,
+   "note": "first pass, 1035 candidates, 994 valid, 107 survivors; started in the background, its exit status was not captured; result artifacts/nat-080/mutation-run1/mutation.json"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-I",
+    "docs/procedures/nat-080/mutate_nat080.py",
+    "--out",
+    "artifacts/nat-080/mutation-run2",
+    "--jobs",
+    "10"
+   ],
+   "exit_code": null,
+   "note": "second pass, 1029 candidates, 3 survivors (two closed with tests, one equivalent); started in the background, its exit status was not captured; log artifacts/nat-080/mutation-run2.log"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-I",
+    "docs/procedures/nat-080/mutate_nat080.py",
+    "--out",
+    "artifacts/nat-080/mutation-run3",
+    "--jobs",
+    "10"
+   ],
+   "exit_code": null,
+   "note": "final pass on the final sources and the four test files, 1029 candidates, 987 killed, 1 survivor (equivalent), 41 invalid; started in the background, its exit status was not captured (the annotate step above gives the status of its result); log artifacts/nat-080/mutation-run3.log"
+  }
+ ],
+ "mutation_summary": {
+  "first_pass": "artifacts/nat-080/mutation-run1: 1035 candidates, 994 valid, 107 survivors",
+  "second_pass": "artifacts/nat-080/mutation-run2: 1029 candidates, 988 valid, 3 survivors",
+  "final_pass": "artifacts/nat-080/mutation-run3 (docs/procedures/nat-080/mutation.json): 1029 candidates, 988 valid, 987 killed, 1 survivor (equivalent, reason in equivalent.json), 41 invalid (syntax only)",
+  "per_file": {
+   "docs/procedures/nat-080/analyze_nat080.py": {
+    "total": 606,
+    "killed": 570,
+    "survived": 0,
+    "survived_unexplained": 0,
+    "invalid": 36,
+    "timeout": 3
+   },
+   "docs/procedures/nat-080/deliver_nat080.py": {
+    "total": 318,
+    "killed": 316,
+    "survived": 0,
+    "survived_unexplained": 0,
+    "invalid": 2,
+    "timeout": 13
+   },
+   "docs/procedures/nat-080/derive.py": {
+    "total": 105,
+    "killed": 101,
+    "survived": 1,
+    "survived_unexplained": 0,
+    "invalid": 3,
+    "timeout": 0
+   }
+  }
+ },
+ "sha256": {
+  "docs/procedures/nat-080/README.md": "cdb6373e69d5c5e40562bb6f5d2a98cee3fb958b1570db74a1a0da9584995a43",
+  "docs/procedures/nat-080/analyze_nat080.py": "88774a55870c4da37fe507bd05488f319f69e8022b52b06f86e2491e20964766",
+  "docs/procedures/nat-080/deliver_nat080.py": "dfa65d66378e5bc2701b92e268c4ccb46b753b3074e120bc98df540d6c79fbf6",
+  "docs/procedures/nat-080/derive.py": "7b606c7a36bc773e5c008395b7d81d57b388a765833f7ef7e874130a4d323648",
+  "docs/procedures/nat-080/equivalent.json": "a72d796d16e6c0e03907b363327955fabb448b18637b670d86574e041c9fa1c0",
+  "docs/procedures/nat-080/mutate_nat080.py": "ef1cd0f76bca63c102789cb657734699ce904e0ddb108e795c1ec8f2671b05c2",
+  "docs/procedures/nat-080/mutation.json": "054c7f8597cf84938dc4c9a3907e88947a766bdbd42fbc20b22226c24cb5d080",
+  "docs/procedures/nat-080/session_nat078.py": "d4c1a99b22137ed48e5d23d1fcad86e020b3bddab012a3044d28ebde04987c2b",
+  "docs/procedures/nat-080/test_analyze80.py": "08f14b8b57fd1fd1fa27fb92113b048c64ffe4911844ab0e92771839c40ea42d",
+  "docs/procedures/nat-080/test_coexist80.py": "8c2a1d1c1743e507f9fc9c8ec3f1204dedf939bb5332170de4c4df9e11b6c45c",
+  "docs/procedures/nat-080/test_deliver80.py": "e01fb5b72913e2bbaa639f56ddc9daf9dd5d3e7a879bf68df9ec811384b1d93e",
+  "docs/procedures/nat-080/test_nat080.py": "50044fa2ebc13b12dc075eb1717995522b9a33a3dbc0237fcca692df44908801",
+  "tools/ios/root_send.py": "a07b9ba94a2b5c37723cac76439a305669d4825042d2e2c520e76a66b83e69ef"
+ },
+ "artifacts": [
+  "artifacts/nat-080/logs/commands.json",
+  "artifacts/nat-080/logs/derive-check.stderr",
+  "artifacts/nat-080/logs/derive-check.stdout",
+  "artifacts/nat-080/logs/make-check.exit",
+  "artifacts/nat-080/logs/make-check.stderr",
+  "artifacts/nat-080/logs/make-check.stdout",
+  "artifacts/nat-080/logs/mutation-annotate.stderr",
+  "artifacts/nat-080/logs/mutation-annotate.stdout",
+  "artifacts/nat-080/logs/test-analyze.stderr",
+  "artifacts/nat-080/logs/test-analyze.stdout",
+  "artifacts/nat-080/logs/test-coexist.stderr",
+  "artifacts/nat-080/logs/test-coexist.stdout",
+  "artifacts/nat-080/logs/test-deliver.stderr",
+  "artifacts/nat-080/logs/test-deliver.stdout",
+  "artifacts/nat-080/logs/test-derive.stderr",
+  "artifacts/nat-080/logs/test-derive.stdout",
+  "artifacts/nat-080/mutation-run1/mutation.json",
+  "artifacts/nat-080/mutation-run1.log",
+  "artifacts/nat-080/mutation-run2/mutation.json",
+  "artifacts/nat-080/mutation-run2.log",
+  "artifacts/nat-080/mutation-run3/mutation.json",
+  "artifacts/nat-080/mutation-run3.log",
+  "artifacts/nat-080/mutation-run3-annotated/mutation.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-080/logs/commands.json": "2fa573426201f415938c515c6990050156e38bd00794017bea462bebe6f7b186",
+  "artifacts/nat-080/logs/derive-check.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-080/logs/derive-check.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-080/logs/make-check.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+  "artifacts/nat-080/logs/make-check.stderr": "63864f9433747b2cf3116b6aa67779d1ba432d912e21c6a26893beb0064f16b8",
+  "artifacts/nat-080/logs/make-check.stdout": "5c801fbad0618f9fd25af05602ecb830d96cf02a1b89329312e54b6e5990123e",
+  "artifacts/nat-080/logs/mutation-annotate.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-080/logs/mutation-annotate.stdout": "6ba0c337d2e976ad88e3a7692678adb48deaad460ee490b9906801037993f91e",
+  "artifacts/nat-080/logs/test-analyze.stderr": "a53cafbae77097a663b894fde9276a4e8db97582bc84a36dd5380cbd9f1a3555",
+  "artifacts/nat-080/logs/test-analyze.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-080/logs/test-coexist.stderr": "37d9aee7290aca537e41bba728faf3db67166e87515289b99a8f21354afe07af",
+  "artifacts/nat-080/logs/test-coexist.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-080/logs/test-deliver.stderr": "2f0aebba627e03f6398ced38a541be500c93a3926f9dbb6c5c023d8f83b8c345",
+  "artifacts/nat-080/logs/test-deliver.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-080/logs/test-derive.stderr": "463202c77dee265b2bb3528aad75d66e1e208237c7d9ea530b9c523741d7b7c6",
+  "artifacts/nat-080/logs/test-derive.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-080/mutation-run1/mutation.json": "ac6ef1922d612af188ac501d0cdc72bed98a7d008b1707a8c9d9d8a80745e960",
+  "artifacts/nat-080/mutation-run1.log": "43995f4ce981a388b87ae1ae61bc95d115a7aa2933e38a0f04861d30c21a468f",
+  "artifacts/nat-080/mutation-run2/mutation.json": "6ce1340ceb47f393df2ef77e7bcede3fe0dcfec65e82433ba9a37a1fce2bdca6",
+  "artifacts/nat-080/mutation-run2.log": "2490bbdca5ef13bdcd9d97f24ea923327d54ab56fda4f3e45a66e15dcaac83b0",
+  "artifacts/nat-080/mutation-run3/mutation.json": "054c7f8597cf84938dc4c9a3907e88947a766bdbd42fbc20b22226c24cb5d080",
+  "artifacts/nat-080/mutation-run3.log": "5dc403dcdba0b108db545589c5b91cff31ca25481bc9751ef455d7682073d44b",
+  "artifacts/nat-080/mutation-run3-annotated/mutation.json": "054c7f8597cf84938dc4c9a3907e88947a766bdbd42fbc20b22226c24cb5d080"
+ },
+ "deviations_from_task_text": [
+  "The task text says the sender starts 'only after the collector reports the engine up'. The companion is started after the collector is confirmed polling and before the single reboot, and sends only after the device's own GET_RX reply says the receive path is ready (capacity equal to the image size, committed 0, IDLE). That is later than 'the engine is up' (the placeholder phase) and is deliberate.",
+  "'Coexisting without interface conflicts' is shown on the model with strict turn-taking between the two actors (the C model is one state machine), not with concurrent libusb access; the adapter cannot claim an interface, so 'no EBUSY' holds only in that sense.",
+  "'Stops the sender at the loader cap': the companion's own deadline is counted from the moment the device was ready (225 s) and the driver's preflight requires deadline + 15 s margin <= the loader's receive cap recorded in the build record (240 s); the loader's cap itself is NAT-079's.",
+  "The pass-table fixtures are not only archive formats: rows are also produced by the real probe compiled for the host and the real companion over devices the tests choose, in addition to the archived NAT-068/NAT-075 runs."
+ ]
+}
