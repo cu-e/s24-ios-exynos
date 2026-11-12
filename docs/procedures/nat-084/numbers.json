@@ -1,0 +1,77 @@
+{
+ "decision": "docs/decisions/0032-nat083-loader-diag-xnu-rt-md1-single-run-2026-11-12.md",
+ "row": "1a",
+ "chain": "PASS",
+ "delivery": {
+  "bytes": 2475720704,
+  "loader_status": "done",
+  "gaps": 0,
+  "errors": 0
+ },
+ "apfs_volume": {
+  "index": 0,
+  "name": "System",
+  "container": 0,
+  "at_mb": 0,
+  "files": 45044,
+  "directories": 16545,
+  "blocks_used": 601697,
+  "block_size": 4096
+ },
+ "init": {
+  "checks": 35,
+  "failed": 0
+ },
+ "commands": {
+  "/bin/df": {
+   "bytes": 392,
+   "text": "Filesystem  512-blocks    Used Available Capacity iused ifree %iused  Mounted on\nroot_device    4835376 4813576         0   100%   61589     0  100%   /\ndevfs               78      78         0   100%     136     0  100%   /dev\n/dev/md0          8192     120         0   100%      11     0  100%   /redwood\nramfs          2097152      64   2097088     1%     120 65416    0%   /private/var"
+  },
+  "/sbin/mount": {
+   "bytes": 166,
+   "text": "root_device on / (apfs, local, read-only)\ndevfs on /dev (devfs, local, nobrowse)\n/dev/md0 on /redwood (apfs, local, read-only)\nramfs on /private/var (ramfs, local)"
+  },
+  "/bin/ps -A": {
+   "bytes": 111,
+   "text": "  PID TTY           TIME CMD\n    1 ??         0:00.11 /redwood/sbin/init\n    6 ??         0:00.01 /bin/ps -A"
+  },
+  "/usr/bin/vm_stat": {
+   "bytes": 1139,
+   "text": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                              104460.\nPages active:                               550.\nPages inactive:                              55.\nPages speculative:                         1381.\nPages throttled:                              0.\nPages wired down:                        155577.\nPages purgeable:                              2.\n\"Translation faults\":                      5042.\nPages copy-on-write:                         66.\nPages zero filled:                         4208.\nPages reactivated:                            0.\nPages purged:                                 0.\nFile-backed pages:                         1946.\nAnonymous pages:                             40.\nPages stored in compressor:                   0.\nPages occupied by compressor:                 0.\nDecompressions:                               0.\nCompressions:                                 0.\nPageins:                                   1206.\nPageouts:                                     0.\nSwapins:                                      0.\nSwapouts:                                     0."
+  }
+ },
+ "vm_free_pages": 105521,
+ "vm_total_pages": 262144,
+ "page_size": 16384,
+ "launchd": {
+  "console_bytes": 7885,
+  "ignition": "hello ok; preboot: failed to lookup preboot: 25 -> ignite() returned 25 (not fatal)",
+  "bootstrapper": "Darwin Bootstrapper Version 7.0.0 (libxpc_executables-2462.120.4)",
+  "boot_tasks_run": [
+   "fsck",
+   "mount-phase-1",
+   "data-protection",
+   "finish-obliteration",
+   "detect-installed-roots",
+   "commit-boot-mode",
+   "restore-datapartition",
+   "mount-phase-2",
+   "init-with-data-volume",
+   "MSUEarlyBootTask",
+   "fips",
+   "keybag"
+  ],
+  "fips": "18 corecrypto self-tests PASSED in 238 ms",
+  "fatal": "keybag: /private/var/keybags/systembag.kb missing -> MKB_INIT FATAL KEYBAG ERROR kb_load -> reboot",
+  "kernel_time_mach_reboot_s": 203.3,
+  "launchd_wallclock_first_to_keybag_s": [
+   202.388,
+   203.198
+  ]
+ },
+ "ending": {
+  "first_usb_return": "download 04e8:685d",
+  "dt_s": 379.91,
+  "class": "cap-reset"
+ }
+}

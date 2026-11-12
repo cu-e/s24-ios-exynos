@@ -1,0 +1,172 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T11:45:00+00:00",
+ "commit": "50785ef787e25045d01d22c66a2d54865ea3b1b3",
+ "tree_state": "docs/procedures/nat-084 files listed under sha256 were uncommitted at recording time and are committed in the commit that follows; the recorded commit is its parent (decision 0032 and the analyser were committed there before the launch)",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "decision": "docs/decisions/0032-nat083-loader-diag-xnu-rt-md1-single-run-2026-11-12.md",
+ "device_inventory": "devices/local-2026-11-12-nat084.json",
+ "summary": "One native run of loader-diag-xnu-rt-md1 (decision 0032). The 2.31 GiB donor-recipe APFS delivered into RAM was mounted by the donor apfs VFS as the kernel root (rd=md1), the donor stage0 and init ran (35 checks, 0 failed), Apple's own df, mount, ps -A and vm_stat ran, and exec /sbin/launchd.darwin was reached: ladder row 1a (pass) from the unchanged analyser. Reading the log by hand beyond the ladder: Apple's launchd (libxpc_executables-2462.120.4) ran its boot tasks fsck..fips, Apple corecrypto FIPS POST passed 18 self-tests from the dylib, libignition failed at stage preboot (errno 25, not fatal), and the keybag boot task died on the missing /private/var/keybags/systembag.kb and requested a reboot at kernel time 203.3 s. First Apple user space on this S24; no UI, display, input or GPU.",
+ "acceptance": {
+  "one_run_under_its_own_decision": "decision 0032 committed in 50785ef before any device access; one RECOVERY write with readback db5dea20..., one reboot, no retry",
+  "restored_and_checked": "NAT-013 restore (pyusb venv python) upload acknowledged, reboot confirmed; check_android pass (recovery sha256 96620b8b... = pinned stock, user data directories present); assess pass (six stages true)",
+  "judged_by_unchanged_analyser": "analyze_nat083.py sha256 f20bcf32...857a9: chain PASS, row 1a, facts in numbers.json",
+  "non_1a_rows_not_applicable": "row 1a obtained; the whole-image digest of the delivered root remains open (NAT-078)"
+ },
+ "findings": [
+  "Row 1a: BSD root md1 (major 1 minor 1), apfs volume 'System' 45,044 files, 16,545 directories; init banner pid 1 /redwood/sbin/init; 35 checks 0 failed; df/mount/ps/vm_stat outputs captured (numbers.json); free pages 105,521 of 262,144 (16 KiB).",
+  "Apple's launchd printed 7,885 bytes (launchd-console.txt). libignition 1.0.0: hello ok, preboot failed with errno 25 ('failed to lookup preboot'), ignite() returned 25 and launchd continued with the xpc bootstrapper 7.0.0.",
+  "Boot tasks run in order: fsck, mount-phase-1, data-protection, finish-obliteration, detect-installed-roots, commit-boot-mode, restore-datapartition, mount-phase-2, init-with-data-volume, MSUEarlyBootTask, fips, keybag. fips: Apple corecrypto Module v13.0 FIPS POST, 18 tests PASSED in 238 ms.",
+  "keybag (MKB_INIT) failed fatally: /private/var/keybags/systembag.kb absent, 'Unable to load keybag with No Crypto: -7', 'FATAL KEYBAG ERROR: kb_load', REBOOTING INTO RECOVERY MODE; the kernel logged unmount of /private/var and /redwood and MACH Reboot (kernel time 203.345 s). The analyser's row 1a ('no PID 1 exit') does not capture this; the registered ladder did not anticipate launchd getting this far.",
+  "First USB return was Download Mode at dt 379.91 s (analyser class cap-reset, consistent with the 360 s deadline); whether the kernel's reboot path reset the SoC is not established."
+ ],
+ "established": [
+  "native-device: the donor apfs VFS mounts the delivered 2.31 GiB image from RAM as the root filesystem of the project XNU on the S24.",
+  "native-device: unmodified Apple user-space binaries (df, mount, ps, vm_stat, launchd.darwin and the dylibs they load, including corecrypto) execute on the S24 under the project's XNU, so dyld works for them with the iOS 16.5 libraries from this root.",
+  "native-device: Apple's launchd gets through ten boot tasks and the FIPS self-test; the first hard stop is the keybag task for lack of /private/var/keybags/systembag.kb."
+ ],
+ "not_established": [
+  "That any launchd job or XPC service runs; the job list was empty by design.",
+  "That systembag.kb of some kind (or a launchd boot-task change) is enough to pass the keybag task; that libignition's preboot failure matters beyond its message.",
+  "That the kernel's reboot path resets the SoC; anything about display, input, GPU, backboardd or SpringBoard.",
+  "The whole-image SHA-256 of the delivered root as seen by the kernel (NAT-078)."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-B",
+    "-I",
+    "docs/procedures/nat-083/session_nat083.py",
+    "--image",
+    "loader-diag-xnu-rt-md1",
+    "--out",
+    "artifacts/nat-083/preflight-001"
+   ],
+   "result": "outcome ready-read-only-registry-closed (native permit still closed at that time)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-B",
+    "-I",
+    "docs/procedures/nat-083/session_nat083.py",
+    "--image",
+    "loader-diag-xnu-rt-md1",
+    "--out",
+    "artifacts/nat-083/run-001",
+    "--execute"
+   ],
+   "result": "report.json outcome native-attempt-started; reboot requested 2026-11-12T11:14:10Z; watcher and collector started before the reboot"
+  },
+  {
+   "argv": [
+    "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "restore",
+    "--bus",
+    "5",
+    "--address",
+    "118",
+    "--out",
+    "artifacts/nat-083/restore-tool-001"
+   ],
+   "result": "restore-tool-001/report.json: PIT validated, upload acknowledged (acknowledged_bytes 100663296), session end, reboot confirmed; outcome awaiting-readback",
+   "note": "the first attempt (driver --restore, artifacts/nat-083/restore-001) failed before any device access because the phone was in Download Mode"
+  },
+  {
+   "argv": [
+    "python3",
+    "-B",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "assess",
+    "--out",
+    "artifacts/nat-083/restore-tool-001"
+   ],
+   "result": "assess-001.stdout: outcome pass, six stages true (incl. android_booted, recovery_readback_matches)",
+   "note": "argv approximate; authoritative record is artifacts/nat-083/assess-001.stdout"
+  },
+  {
+   "argv": [
+    "check_android.py",
+    "artifacts/nat-083/check-android.json"
+   ],
+   "result": "outcome pass: recovery sha256 96620b8b... equals pinned stock; user data directories present",
+   "note": "path of the script not re-verified for this record; the output file is authoritative"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-I",
+    "docs/procedures/nat-083/analyze_nat083.py",
+    "--archive",
+    "artifacts/nat-083/run-001/archive",
+    "--events",
+    "artifacts/nat-083/run-001/usb-events.jsonl",
+    "--report",
+    "artifacts/nat-083/run-001/report.json",
+    "--delivery",
+    "artifacts/nat-083/run-001/delivery",
+    "--root",
+    "artifacts/nat-083/system-padded.apfs",
+    "--size",
+    "2475720704",
+    "--sha256",
+    "4377e98854753f648afde01d884bde352f316acad172eb5e46d44717954262f6",
+    "--out",
+    "artifacts/nat-083/run-001/analysis.json",
+    "--log-out",
+    "artifacts/nat-083/run-001/kernel-log.txt"
+   ],
+   "result": "first run before the collector finished: chain PARTIAL, row 9 (kept as analysis-early.*); second run on the complete archive: chain PASS, row 1a, pass true"
+  }
+ ],
+ "exit_codes_note": "The recorded results are the tools' own report files; shell exit codes of the individual invocations were not captured separately for this run, so none are claimed here.",
+ "sha256": {
+  "docs/procedures/nat-084/README.md": "451e9afedf0e3e77c1a0baaa073e847dfadcc59615052c36e1f0bc9a5ecff516",
+  "docs/procedures/nat-084/numbers.json": "16a1d0a52d96209f9c60c800ab373e1281979625ec725406222d29761adfd2fc",
+  "docs/procedures/nat-084/launchd-console.txt": "cf0dd91a14371a70f1d72ae52d91d1ea52e0aab1669343051c0d4cb5850b9ba9",
+  "docs/decisions/0032-nat083-loader-diag-xnu-rt-md1-single-run-2026-11-12.md": "2f6783f7b45f642aa8e082db0070b0927df567c870e62067b51b11ff39f5a055"
+ },
+ "artifacts": [
+  "artifacts/nat-083/native-attempt-loader-diag-xnu-rt-md1-used.json",
+  "artifacts/nat-083/preflight-001/report.json",
+  "artifacts/nat-083/run-001/report.json",
+  "artifacts/nat-083/run-001/usb-events.jsonl",
+  "artifacts/nat-083/run-001/delivery/delivery.json",
+  "artifacts/nat-083/run-001/archive/manifest.json",
+  "artifacts/nat-083/run-001/analysis.json",
+  "artifacts/nat-083/run-001/analysis-early.json",
+  "artifacts/nat-083/run-001/kernel-log.txt",
+  "artifacts/nat-083/restore-tool-001/report.json",
+  "artifacts/nat-083/check-android.json",
+  "artifacts/nat-083/assess-001.stdout",
+  "devices/local-2026-11-12-nat084.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-083/native-attempt-loader-diag-xnu-rt-md1-used.json": "87ca2461422c1003fe67bb6a755a303769679b233445b937940a8eea3597347d",
+  "artifacts/nat-083/preflight-001/report.json": "f326a40705e76f85309add602f0f9ac0e904c2ac29bb74b39b0c25edc6af6502",
+  "artifacts/nat-083/run-001/report.json": "121e407722a8c8bd89131aeaf512987216599241ee560efa04f950b55fa423b9",
+  "artifacts/nat-083/run-001/usb-events.jsonl": "b1ae956c75761d2be1ca51e806cf27815121c5a2b840360012abeda4a5a8e608",
+  "artifacts/nat-083/run-001/delivery/delivery.json": "759c9781b2d36d4a4d4da96a69ad4a8ba6ecc2c39949970d74545787ffcacadd",
+  "artifacts/nat-083/run-001/archive/manifest.json": "811aa726e0c9df71a12c6fe7db2b057ee96672a3cbb1c56ca77bd5501db8c8c7",
+  "artifacts/nat-083/run-001/analysis.json": "9a75e43b43d334aade0df7d2b543ce1b9192cd63d9dae0b77bfcaca0287a6df8",
+  "artifacts/nat-083/run-001/analysis-early.json": "1dc90006775779261d02e32311e84b2c9efd8752600ada48f1c138dbb597c9ae",
+  "artifacts/nat-083/run-001/kernel-log.txt": "0f6f752468bd2b7026ad9acba077bbe8327e972b67f99a2975b1c83e29b7c965",
+  "artifacts/nat-083/restore-tool-001/report.json": "1c7ced5689316d3a660276b3a69bfcdaeaafab499466dfdc8684735e09bb81a3",
+  "artifacts/nat-083/check-android.json": "8319b8989ea1c00b1c7d96f67658a9644d8759f3793cc617bbcd598edc94bdde",
+  "artifacts/nat-083/assess-001.stdout": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "devices/local-2026-11-12-nat084.json": "253c02ab6ea88926f6b2d906015bd369529ca3055bd2f43415b437bfa6711f04"
+ },
+ "deviations_from_task_text": [
+  "The analyser was run once too early (no collector manifest): chain PARTIAL, row 9. Kept as analysis-early.*; not a device finding. The final judgement is from the same unchanged analyser on the complete archive.",
+  "The driver's --restore could not run (phone in Download Mode, driver needs adb); the NAT-013 tool was used.",
+  "A stray empty file named --help was created by `check_android.py --help` and removed.",
+  "The argv of the assess and check_android invocations is approximate; the authoritative records are the output files named in each entry."
+ ]
+}

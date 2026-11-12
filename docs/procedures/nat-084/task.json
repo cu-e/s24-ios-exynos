@@ -1,0 +1,31 @@
+{
+  "id": "NAT-084",
+  "scope": "native",
+  "evidence_kind": "native-device",
+  "priority": 95,
+  "depends_on": [
+    "NAT-083",
+    "NAT-070",
+    "NAT-080"
+  ],
+  "title": "Native run of loader-diag-xnu-rt-md1 (decision 0032): the delivered 2.31 GiB APFS as the kernel's root (rd=md1), donor stage0 -> init on the small md0 image, Apple's own df/mount/ps/vm_stat from that root, then exec /sbin/launchd.darwin (Apple's launchd as PID 1, empty job list); first Apple userland on the S24",
+  "paths": [
+    "docs/procedures/nat-084",
+    "artifacts/nat-083/run-001"
+  ],
+  "sources": [
+    "s24-port"
+  ],
+  "acceptance": [
+    "One run under decision 0032 (committed before the launch), RECOVERY only, restored from the pinned stock by NAT-013 with the pyusb venv python; Android and data checked afterwards; no retry.",
+    "Judged by analyze_nat083.py unchanged: the row (1a, 1b, 2..9) with the facts it reports (BSD root and md1 lines, apfs volume line, stage0 and init lines, each Apple program's output and exit mark, the exec line, PID 1 exit or panic, console bytes after the exec line, free pages, the log gaps, the ending, the delivery rate and committed offset).",
+    "Any row other than 1a is recorded as the finding with its numbers and does not complete the task; the whole-image digest of the delivered root is reported as still open."
+  ],
+  "steps": [
+    "Open the native permit citing decision 0032 and claim",
+    "Preflight, launch and restore",
+    "Analyse and record"
+  ],
+  "status": "pending",
+  "owner": null
+}
