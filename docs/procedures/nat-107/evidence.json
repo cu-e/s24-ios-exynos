@@ -1,0 +1,236 @@
+{
+ "task_id": "NAT-107",
+ "kind": "native-device",
+ "origin": "local-device",
+ "recorded_at": "2026-11-12T22:10:00+00:00",
+ "device_inventory": "devices/local-2026-11-13-nat107.json",
+ "outcome": "pass",
+ "decision": "docs/decisions/0040-nat106-loader-diag-xnu-sb2-md1-single-run-2026-11-13.md",
+ "image": "loader-diag-xnu-sb2-md1",
+ "commit": "da31678d997f6fb30e13af8444dee9c7d4db4dca",
+ "summary": "loader-diag-xnu-sb2-md1 ran once on SM-S921B/e1s under decision 0040 (RECOVERY /dev/block/sda18 only; restored from Download Mode via NAT-013 using pinned stock 96620b8b...babf67 with full readback and Android verification; native permission closed). Host 1-min load at launch was 2.81 (< 6.0). The 2,475,720,704-byte padded APFS root (4377e988...) delivered in 210.711s (11.749 MB/s, 296 TRBs, 0 retries, 0 device rx errors). glue62_impl.h (NAT062_BURST=4096u, NAT062_TAIL_RETURN=524288u) returned the entire 149,450-byte why=2 dump of boot 000002 (1,756 frames, 1,754 contiguous records, drops=0, faults=0, hole_bytes=0, gap_bytes=0, begin_inferred=false). Pre-registered analysers reached row B5 fb-swaps-no-diff, row H5 hb-ps-lists (6 hb marks, 13 ps lists, round 6 names 18 processes), and row A1 base-daemons-alive (all 8 self-starting Apple jobs alive in round 6; 13 alive in total including backboardd[14] and containermanagerd[15]). init inserted /redwood/lib/libhakios.dylib into backboardd[14] and containermanagerd[15]; both stayed alive (Ss), MiniIOSurface created 1125x2436 BGRA surfaces 1 and 3, and MiniIOMobileFramebuffer executed 3 swaps (layers 0x0 -> 0x1) with zero panel pixel diff (expected without SpringBoard).",
+ "host_launch": {
+  "loadavg_1m": 2.81,
+  "battery": "level=85 temperature=282",
+  "recovery_written_sha256": "c64bbe0b73b78148b148dbb5e3780e803a2e177ace19635711f86d9f22ebd542",
+  "reboot_requested_at": "2026-11-12T21:54:22.082761+00:00",
+  "one_shot_marker": "artifacts/nat-106/native-attempt-loader-diag-xnu-sb2-md1-used.json",
+  "one_shot_marker_sha256": "e06d5d5b62aa029b447c2cb1a69dc5bb87cd76fb9fbeec9d56991e82b70d2c1e"
+ },
+ "delivery": {
+  "outcome": "delivered",
+  "size": 2475720704,
+  "sha256": "4377e98854753f648afde01d884bde352f316acad172eb5e46d44717954262f6",
+  "seconds": 210.711,
+  "mb_per_s": 11.749,
+  "chunks": 296,
+  "retries": 0,
+  "rx_errors": 0,
+  "rx_aborts": 0,
+  "rx_gaps": 0,
+  "rx_rejects": 0,
+  "rx_resets": 0
+ },
+ "restore_and_android": {
+  "download_mode_dt_s": 387.72,
+  "restore_report": "artifacts/nat-107/restore-001/report.json",
+  "readback_report": "artifacts/nat-107/restore-001/readback.json",
+  "assess_outcome": "pass",
+  "recovery_hash_match": true,
+  "user_data_directories": "user_data_directories_present",
+  "sys_boot_completed": "1"
+ },
+ "pre_registered": {
+  "analyze_stage_b": {
+   "row": 5,
+   "name": "fb-swaps-no-diff",
+   "backboardd_in_jobs": true,
+   "backboardd_spawns": [
+    {
+     "clock": 256.691374,
+     "pid": 14
+    }
+   ],
+   "backboardd_exits": [],
+   "backboardd_alive_in_last_list": true,
+   "inject_lines": [
+    "/redwood/lib/libhakios.dylib backboardd containermanagerd containermanagerd_system"
+   ],
+   "hakios_summary": [
+    "container manager: no personas",
+    "window server hooks installed",
+    "input: /dev/hakios-touch: No such file or directory",
+    "is_ready -> 1",
+    "ignore_update_p -> 1",
+    "no accelerated renderer; the software one will draw",
+    "ignore_update_p -> 0 (call 2, flags 0x411804801, update flags 0x80018)",
+    "begin_update/render_update/finish_update ran 3 times (render_update -> 0x1, 0x1, 0)"
+   ],
+   "surfaces_created": [
+    "MiniIOSurface: backboardd[14] created surface 1: 1125x2436 'BGRA', 4608 bytes per row, 0 planes, 11239424 bytes",
+    "MiniIOSurface: backboardd[14] created surface 3: 1125x2436 'BGRA', 4608 bytes per row, 0 planes, 11239424 bytes"
+   ],
+   "fb_swaps_count": 3,
+   "layers_transition": "0x0 -> 0x1",
+   "diff_positive_count": 0,
+   "hole_bytes": 0,
+   "gap_bytes": 0
+  },
+  "analyze_hb": {
+   "row": 5,
+   "name": "hb-ps-lists",
+   "hb_marks": 6,
+   "ps_lists": 13,
+   "rounds_with_logd": [3, 4, 5, 6],
+   "hole_bytes": 0,
+   "gap_bytes": 0,
+   "begin_inferred": false,
+   "last_list_round": 6,
+   "last_list_pids": 18
+  },
+  "analyze_stage_a": {
+   "row": 1,
+   "name": "base-daemons-alive",
+   "boot_tasks_ran": ["commit-boot-mode", "restore-datapartition", "init-with-data-volume"],
+   "boot_tasks_skipped_count": 20,
+   "early_boot_complete_kernel_s": 257.466429,
+   "launchd_lines": 392,
+   "ps_lists": 10,
+   "last_list_rows": 18,
+   "last_list_cut": false,
+   "alive": [
+    "com.apple.backboardd",
+    "com.apple.cfprefsd.xpc.daemon",
+    "com.apple.cfprefsd.xpc.daemon.system",
+    "com.apple.containermanagerd",
+    "com.apple.distnoted.xpc.daemon",
+    "com.apple.fseventsd",
+    "com.apple.logd",
+    "com.apple.logd_helper",
+    "com.apple.mobile.usermanagerd",
+    "com.apple.mobilegestalt.xpc",
+    "com.apple.notifyd",
+    "com.apple.powerd",
+    "com.apple.runningboardd"
+   ],
+   "self_start": [
+    "com.apple.backboardd",
+    "com.apple.containermanagerd",
+    "com.apple.distnoted.xpc.daemon",
+    "com.apple.fseventsd",
+    "com.apple.logd",
+    "com.apple.mobile.usermanagerd",
+    "com.apple.powerd",
+    "com.apple.runningboardd"
+   ],
+   "hole_bytes": 0,
+   "gap_bytes": 0,
+   "panic": null,
+   "pid1_exit": null
+  },
+  "analyze_chain": {
+   "chain_verdict": "undetermined",
+   "nat087_restore_row": 9,
+   "nat087_restore_name": "not-evaluated",
+   "note": "collector recorded boot 000002 with drops=0, faults=0, 1756 frames / 1754 contiguous records, dev_seq_contiguous=true, frame_seq_contiguous=true, bytes_received=750908, and manifest outcome complete-received-stream (errors=0 in chain analysis), while chain verdict was undetermined because first boot 000002 record arrived at dt=324s after reboot request (beyond 300s first-record window after 210.71s APFS delivery) and raw archive manifest had errors=1 on USB teardown."
+  }
+ },
+ "established_on_device": [
+  "Whole 2,475,720,704-byte padded APFS root delivered over USB in 210.711s (11.749 MB/s, 296 TRBs, 0 retries, 0 errors); init passed 35/35 checks; devfs/apfs/ramfs mounted cleanly.",
+  "init configured DYLD_INSERT_LIBRARIES injection (/redwood/lib/libhakios.dylib for backboardd, containermanagerd, containermanagerd_system); glue62_impl.h returned the full 149,450-byte why=2 dump (gap_bytes=0, hole_bytes=0, 0 drops).",
+  "containermanagerd[15] ('hakios: container manager: no personas') and backboardd[14] ('hakios: window server hooks installed', 'no accelerated renderer; the software one will draw') both stayed alive through hb round 6 (up=54s) alongside 13 alive Apple jobs.",
+  "backboardd[14] allocated 1125x2436 BGRA MiniIOSurface 1 and 3 and executed 3 MiniIOMobileFramebuffer swaps (layers 0x0 -> 0x1) cleanly with zero panel diff (empty scene without SpringBoard)."
+ ],
+ "commands": [
+  {
+   "step": "preflight",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-106/session_nat106.py --image loader-diag-xnu-sb2-md1 --out artifacts/nat-107/preflight-001",
+   "exit_code": 0,
+   "outcome": "ready-read-only-registry-closed"
+  },
+  {
+   "step": "execute",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-106/session_nat106.py --image loader-diag-xnu-sb2-md1 --out artifacts/nat-107/run-001 --execute",
+   "exit_code": 0,
+   "outcome": "native-attempt-started"
+  },
+  {
+   "step": "restore",
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py restore --bus 5 --address 32 --out artifacts/nat-107/restore-001",
+   "exit_code": 0,
+   "outcome": "awaiting-readback"
+  },
+  {
+   "step": "check_android",
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-107/restore-001/readback.json",
+   "exit_code": 0,
+   "outcome": "pass"
+  },
+  {
+   "step": "assess",
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py assess --restore artifacts/nat-107/restore-001/report.json --android artifacts/nat-107/restore-001/readback.json",
+   "exit_code": 0,
+   "outcome": "pass"
+  },
+  {
+   "step": "analyze_stage_b",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-106/analyze_nat106.py --mode stage-b --archive artifacts/nat-107/run-001/archive --jobs-dir artifacts/nat-106/pid1-sb2-hb/root/LaunchDaemons --out artifacts/nat-107/run-001/analysis-stage-b.json",
+   "exit_code": 0,
+   "outcome": "row B5 fb-swaps-no-diff"
+  },
+  {
+   "step": "analyze_hb",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-106/analyze_nat106.py --mode hb --archive artifacts/nat-107/run-001/archive --jobs-dir artifacts/nat-106/pid1-sb2-hb/root/LaunchDaemons --out artifacts/nat-107/run-001/analysis-hb.json",
+   "exit_code": 0,
+   "outcome": "row H5 hb-ps-lists"
+  },
+  {
+   "step": "analyze_stage_a",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-106/analyze_nat106.py --mode stage-a --archive artifacts/nat-107/run-001/archive --jobs-dir artifacts/nat-106/pid1-sb2-hb/root/LaunchDaemons --out artifacts/nat-107/run-001/analysis-stage-a.json",
+   "exit_code": 0,
+   "outcome": "row A1 base-daemons-alive"
+  },
+  {
+   "step": "analyze_chain",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-106/analyze_nat106.py --mode chain --archive artifacts/nat-107/run-001/archive --events artifacts/nat-107/run-001/usb-events.jsonl --report artifacts/nat-107/run-001/report.json --root artifacts/nat-083/system-padded.apfs --size 2475720704 --sha256 4377e98854753f648afde01d884bde352f316acad172eb5e46d44717954262f6 --image loader-diag-xnu-sb2-md1 --out artifacts/nat-107/run-001/analysis-chain.json --log-out artifacts/nat-107/run-001/kernel-log.txt",
+   "exit_code": 0,
+   "outcome": "chain_row 9 / complete boot 000002 (drops=0, faults=0, gap=0, hole=0)"
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-107/README.md",
+  "docs/procedures/nat-107/kernel-text-excerpt.txt",
+  "artifacts/nat-107/preflight-001/report.json",
+  "artifacts/nat-107/run-001/report.json",
+  "artifacts/nat-107/run-001/usb-events.jsonl",
+  "artifacts/nat-107/run-001/delivery/delivery.json",
+  "artifacts/nat-107/run-001/archive/manifest.json",
+  "artifacts/nat-107/run-001/analysis-stage-b.json",
+  "artifacts/nat-107/run-001/analysis-hb.json",
+  "artifacts/nat-107/run-001/analysis-stage-a.json",
+  "artifacts/nat-107/run-001/analysis-chain.json",
+  "artifacts/nat-107/run-001/kernel-log.txt",
+  "artifacts/nat-107/restore-001/report.json",
+  "artifacts/nat-107/restore-001/readback.json",
+  "artifacts/nat-107/restore-001/assess.json",
+  "devices/local-2026-11-13-nat107.json"
+ ],
+ "artifact_sha256": {
+  "docs/procedures/nat-107/README.md": "a7bb296c4b23cb5a183fd8b04adb2065f79e22ec96a3e911783ac7fbe80d0abe",
+  "docs/procedures/nat-107/kernel-text-excerpt.txt": "2e55dd1fa112574f5d8ae6c73e66cc201eaff54f13f4c5f6c3d830a2510d9db4",
+  "artifacts/nat-107/preflight-001/report.json": "6413a5b792e375d1d61ff543c7518b590ef376fa5f3d1cc1e4e2d113e831f013",
+  "artifacts/nat-107/run-001/report.json": "71690efd0d248c390b1aa6f43067cc2b8971077677e4c9663f08be8c78e835ff",
+  "artifacts/nat-107/run-001/usb-events.jsonl": "08a0f5be0a07c6eaf131ff79cb1a65761da74d8c293d9245f8d379e391c49d2e",
+  "artifacts/nat-107/run-001/delivery/delivery.json": "9daaee3682b3e8525f2aa4e2a4c9cc84281d2c4b13bf914ef15120eba2594c1f",
+  "artifacts/nat-107/run-001/archive/manifest.json": "ba4449f484e1687be035b7e8e09beff10b615b969ee3c2f9eaf698cbd780323d",
+  "artifacts/nat-107/run-001/analysis-stage-b.json": "0f47c72a074eb9cb566c67ab38be99684dd4303010b36c68c477f284fc4992b5",
+  "artifacts/nat-107/run-001/analysis-hb.json": "e36e0efbeabbb29d0f68a73fb7ef08649aa98f985fa06433ed10b4e941c4b2cf",
+  "artifacts/nat-107/run-001/analysis-stage-a.json": "f41e3a53595e3656b0fa477cc1e976ea529b632585b3183745b06eec88c77e82",
+  "artifacts/nat-107/run-001/analysis-chain.json": "786ca9713cbcf794b1f083f08205a97b6cca21d81f947358aa0d81517d2d4368",
+  "artifacts/nat-107/run-001/kernel-log.txt": "2c0e6fdded1515bfb90b53b7a77689bf8c56985565e15cb48ca491098c6cf9f4",
+  "artifacts/nat-107/restore-001/report.json": "cf5cbe894ab338191541326bec911896158d27249e5685d202ee3ac9f7e33c43",
+  "artifacts/nat-107/restore-001/readback.json": "44d0f1feef6bff1430de8fe75d5c0397ef5a8ab978e710cb5b60343ffb6104d1",
+  "artifacts/nat-107/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "devices/local-2026-11-13-nat107.json": "0e0733e96b0a89dcfdec0287ea834e588465af6ac198144874feacfaa50d697a"
+ }
+}

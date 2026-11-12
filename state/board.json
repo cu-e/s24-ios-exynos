@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-12T21:51:33+00:00",
-  "ledger_updated_at": "2026-11-12T21:51:15+00:00",
-  "registry_sha256": "0f1a020e1f228b08f89cef5709da8f938d8175508ebcef6b2ff1881f7824c142",
+  "generated_at": "2026-11-12T22:10:17+00:00",
+  "ledger_updated_at": "2026-11-12T22:10:06+00:00",
+  "registry_sha256": "fb9df8cd44cec9d88509f52a3c2a2a48a01ca10fb3c5a4bccc537ae3cc4590e0",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -162,6 +162,7 @@
       "NAT-104",
       "NAT-105",
       "NAT-106",
+      "NAT-107",
       "KRN-010",
       "KRN-012",
       "KRN-013",
@@ -3687,6 +3688,45 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-106.md"
+    },
+    {
+      "id": "NAT-107",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 100,
+      "depends_on": [
+        "NAT-106"
+      ],
+      "title": "Native run of loader-diag-xnu-sb2-md1 (decision 0040), Stage B + hb + 512 KiB KL tail: test libhakios injection into backboardd/containermanagerd, measure B0-B6 outcomes, and inspect MiniIOMobileFramebuffer swap/pixel diffs",
+      "paths": [
+        "docs/procedures/nat-107",
+        "artifacts/nat-107"
+      ],
+      "sources": [
+        "s24-port",
+        "hakios"
+      ],
+      "acceptance": [
+        "One run under decision 0040 (RECOVERY /dev/block/sda18 only), restored to pinned stock recovery.img (96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67) with full readback verification; Android and user data verified via check_android.py and restore_stock.py assess; no retry; host 1-min load < 6.0 at launch.",
+        "Post-run analysis runs after collector and watcher processes exit using analyze_nat106.py (--mode stage-b, hb, stage-a, chain).",
+        "Evaluate Stage B rows B0-B6 and record exact inject, launchd, hakios, ps, and MiniIOMobileFramebuffer telemetry in evidence.json."
+      ],
+      "steps": [
+        "Add and claim NAT-107, run read-only preflight via session_nat106.py",
+        "Open native permission citing decision 0040, confirm idle host (load < 6.0), execute single run",
+        "Restore stock RECOVERY, verify Android, close native permission, run analyze_nat106.py and record evidence"
+      ],
+      "status": "done",
+      "owner": "gemini-ios-20261113-a",
+      "started_at": "2026-11-12T21:54:07+00:00",
+      "last_heartbeat": "2026-11-12T21:54:07+00:00",
+      "updated_at": "2026-11-12T22:09:55+00:00",
+      "evidence": "docs/procedures/nat-107/evidence.json",
+      "evidence_sha256": "8f29a1f12747b74ad873483e626e1dfc9081ef7a9fe782231ec782830cc2771b",
+      "finished_at": "2026-11-12T22:09:55+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-107.md"
     },
     {
       "id": "KRN-008",
@@ -18046,103 +18086,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-12T20:23:16+00:00",
-      "action": "task.claim:NAT-103",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-103",
-          "status": "in_progress",
-          "owner": "gemini-ios-20261113-a",
-          "priority": 100,
-          "last_heartbeat": "2026-11-12T20:23:16+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T20:23:47+00:00",
-      "action": "project.permit:native",
-      "owner": "gemini-ios-20261113-a",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-12T20:24:16+00:00",
-      "action": "task.update:NAT-103",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-103",
-          "status": "in_progress",
-          "owner": "gemini-ios-20261113-a",
-          "priority": 100,
-          "progress_note": "NAT-101 and NAT-102 done and committed (404acdc, ef23198); Decision 0038 committed; read-only preflight passed (artifacts/nat-103/preflight-001/report.json, stock RECOVERY 96620b8b... verified). Deferred launch and closed native=false without touching phone because host 1-min load average remained 10.76-11.42 (exceeds <6.0 limit in Decision 0038) due to external java/yoitsu-launcher/weston workload.",
-          "next_step": "Wait until host 1-min load average < 6.0 and no concurrent CPU-heavy workload runs, re-open native permit citing docs/decisions/0038-nat102-loader-diag-xnu-hb-md1-single-run-2026-11-12.md, execute session_nat102.py --image loader-diag-xnu-hb-md1 --out artifacts/nat-103/run-001 --execute, restore stock RECOVERY via NAT-013 + check_android.py + assess, close native=false, and run analyze_nat087/097/102 after collector+watcher exit.",
-          "last_heartbeat": "2026-11-12T20:24:16+00:00",
-          "branch": "main",
-          "worktree": "/home/egor/dev/pet/s24-ios-exynos"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T20:35:06+00:00",
-      "action": "project.permit:native",
-      "owner": "gemini-ios-20261113-a",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-12T20:43:24+00:00",
-      "action": "project.permit:native",
-      "owner": "gemini-ios-20261113-a",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-12T20:50:38+00:00",
-      "action": "task.update:NAT-103",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-103",
-          "status": "in_progress",
-          "owner": "gemini-ios-20261113-a",
-          "priority": 100,
-          "progress_note": "Run completed cleanly and Android restored/verified (assess=pass, recovery_hash_match=true). Pre-registered analysers: chain=9 PARTIAL, Stage A=A8, NAT-102=H1 (no-hb-line). Post-hoc: loader_log=116,430 B (+4,588 vs NAT-098) and 30.5 KiB msgbufp at end fills the 32 KiB tail window, leaving the 75,470 B middle gap (0x2000..0x146ce) unsent.",
-          "next_step": "Fix B8 log window (widen glue62 dump / stream middle of loader_log without initial 4.8 KiB overrun) in a new procedure, verify on host, and re-run Stage A + hb.",
-          "last_heartbeat": "2026-11-12T20:50:38+00:00",
-          "branch": "main",
-          "worktree": "/home/egor/dev/pet/s24-ios-exynos",
-          "handoff": "docs/procedures/nat-103/evidence.json"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T20:54:09+00:00",
-      "action": "task.add:NAT-104",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-104",
-          "status": "pending",
-          "owner": null,
-          "priority": 100
-        }
-      ]
-    },
-    {
       "at": "2026-11-12T20:54:44+00:00",
       "action": "task.claim:NAT-104",
       "owner": "gemini-ios-20261113-a",
@@ -18313,11 +18256,96 @@
           "last_heartbeat": "2026-11-12T21:32:13+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-12T21:52:54+00:00",
+      "action": "task.add:NAT-107",
+      "owner": "gemini-ios-20261113-a",
+      "tasks": [
+        {
+          "id": "NAT-107",
+          "status": "pending",
+          "owner": null,
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T21:53:55+00:00",
+      "action": "project.permit:native",
+      "owner": "gemini-ios-20261113-a",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-12T21:54:07+00:00",
+      "action": "task.claim:NAT-107",
+      "owner": "gemini-ios-20261113-a",
+      "tasks": [
+        {
+          "id": "NAT-107",
+          "status": "in_progress",
+          "owner": "gemini-ios-20261113-a",
+          "priority": 100,
+          "last_heartbeat": "2026-11-12T21:54:07+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T22:03:48+00:00",
+      "action": "project.permit:native",
+      "owner": "gemini-ios-20261113-a",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
+    },
+    {
+      "at": "2026-11-12T22:09:44+00:00",
+      "action": "project.permit:native",
+      "owner": "gemini-ios-20261113-a",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-12T22:09:55+00:00",
+      "action": "task.done:NAT-107",
+      "owner": "gemini-ios-20261113-a",
+      "tasks": [
+        {
+          "id": "NAT-107",
+          "status": "done",
+          "owner": "gemini-ios-20261113-a",
+          "priority": 100,
+          "last_heartbeat": "2026-11-12T21:54:07+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T22:10:06+00:00",
+      "action": "project.permit:native",
+      "owner": "gemini-ios-20261113-a",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
     }
   ],
   "view_sha256": {
-    "STATUS.md": "8c2e8bcaf8b1579d7c7a7ae4aeef39bb0aa5126f2d22155b18324f42341b2fc7",
-    "BOARD.md": "658537ec842842e388017fbc628607f7f1dc1f9c0d58c0c0df7a269fabc4b45f",
+    "STATUS.md": "d2271e269cd1d95cbb3c4fc7866de19ee8ba493f99e7c0a8b4a2306ac74c3d90",
+    "BOARD.md": "e3639a30f6aeb21cad1b052f1b9d0fd2f72004357b3537b754c2c9757ade8c13",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -18392,6 +18420,7 @@
     "planning/tasks/NAT-104.md": "533d93de6fb79f6539850c97598e2bc4961cfbd2ef3f85aacb5b6962dc1a82a1",
     "planning/tasks/NAT-105.md": "69e0b96625c3f01193962bef5eca9c7622ec5bf429e92f5252bd2a9700b9b908",
     "planning/tasks/NAT-106.md": "dd4d6d79c97d6789f3926e7eef42e5477af4d745541922dbffa4e987751e5406",
+    "planning/tasks/NAT-107.md": "064f450fa5fb9921f20920317106d6bebf5ed6fa61717fc6e701f5799de2007a",
     "planning/tasks/KRN-008.md": "36d33f795d9569f340f53a5e0a909dc8efcdc5024c9133ccd614a6de5af22894",
     "planning/tasks/KRN-010.md": "4f479284d71242353a2a95508bac0b5304468c6ee44704b7561bc32cee8e1832",
     "planning/tasks/KRN-012.md": "5639fd265337eacb414447c0f5aa26bb2ad600fead5ca21572bcdb2b96f7b4e8",

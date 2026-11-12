@@ -1,0 +1,85 @@
+===== SANITIZED EXCERPT: artifacts/nat-107/run-001/kernel-log.txt (boot 000002, gap=0, hole=0) =====
+Note: Host username sanitized from Darwin kernel version banner lines ([host]). See local artifacts/nat-107/run-001/kernel-log.txt (1642 lines, sha256 2c0e6fdded1515bfb90b53b7a77689bf8c56985565e15cb48ca491098c6cf9f4).
+
+--- Init / Stage B library insertion ---
+=== init: process 1, started as /redwood/sbin/init ===
+Darwin 22.5.0 iPhone10,3
+Darwin Kernel Version 22.5.0: 2026-11-06T11:48:35.939333+00:00; [host]:s24-ios-exynos-local/STR012VERSION-001/DEVELOPMENT_ARM64_E1S
+memory 4096 MB, page size 16384, 1 cpu
+...
+=== 35 checks, 0 failed ===
+init: library insertion: /redwood/lib/libhakios.dylib backboardd containermanagerd containermanagerd_system
+init: up to 32768 vnodes
+
+--- /redwood/etc/rc & mounts ---
+$ /sbin/mount
+root_device on / (apfs, local, read-only)
+devfs on /dev (devfs, local, nobrowse)
+/dev/md0 on /redwood (apfs, local, read-only)
+ramfs on /private/var (ramfs, local)
+$ /redwood/bin/hb &
+$ exec /sbin/launchd.darwin
+...
+SWEET hb: start pid=8 ppid=1 period=10s rounds=60 ps_timeout=8s
+SWEET hb: n=1 pid=8 ppid=1 up=0
+com.apple.xpc.launchd|1970-01-01 00:04:16.619720 <Notice>: boot-args = rd=md1 e1sufs=0 e1sufs_probe=0 ufsrw=0 ufs_write=0 sweethw=0 nat_attempt=NAT106-sb2 debug=0xc serial=3 cpus=1 keepsyms=1 -v loader_return_after=60 launchdsuffix=release cs_enforcement_disable=1 e1stouch=0 e1sbattery=0 xrd=md0
+...
+hakios: container manager: no personas
+...
+objc[14]: Class _BKRuleResolutionTranscript is implemented in both /System/Library/PrivateFrameworks/BackBoardHIDEventFoundation.framework/BackBoardHIDEventFoundation (0x200de3ca8) and /usr/libexec/backboardd (0x1004ec750). One of the two will be used. Which one is undefined.
+hakios: window server hooks installed
+hakios: input: /dev/hakios-touch: No such file or directory
+com.apple.xpc.launchd|1970-01-01 00:04:17.056300 (user/501/com.apple.backboardd [14]) <Notice>: Successfully spawned backboardd[14] because speculative
+...
+hakios: is_ready -> 1
+hakios: ignore_update_p -> 1
+hakios: no accelerated renderer; the software one will draw
+...
+hakios: ignore_update_p -> 0 (call 2, flags 0x411804801, update flags 0x80018)
+hakios: begin_update(0x104c98e00, 0x104c60730, 0x16b922c60) -> 0
+hakios: render_update(0x104c98e00, 0x104c60730) -> 0x1
+hakios: finish_update(0) -> 0
+hakios: begin_update(0x104c98e00, 0x104c60730, 0x16b922c60) -> 0
+hakios: render_update(0x104c98e00, 0x104c60730) -> 0x1
+hakios: finish_update(0) -> 0
+hakios: begin_update(0x104c98e00, 0x104c60730, 0x16b922c60) -> 0
+hakios: render_update(0x104c98e00, 0x104c60730) -> 0
+hakios: finish_update(0) -> 0
+
+--- Final hb round (round 6, up=54s) ---
+SWEET hb: n=6 pid=8 ppid=1 up=54
+  PID  PPID STAT COMM
+    1     0 Ss   /sbin/launchd.darwin
+    8     1 S    /redwood/bin/hb
+   11     1 Ss   /usr/libexec/runningboardd
+   13     1 Ss   /System/Library/CoreServices/powerd.bundle/powerd
+   14     1 Ss   /usr/libexec/backboardd
+   15     1 Ss   /usr/libexec/containermanagerd
+   16     1 Ss   /usr/sbin/distnoted
+   17     1 Ss   /usr/libexec/usermanagerd
+   18     1 Ss   /usr/libexec/fseventsd
+   19     1 Ss   /usr/libexec/logd
+   20     1 Ss   /usr/sbin/notifyd
+   21     1 Ss   /usr/libexec/logd_helper
+   24     1 Ss   /System/Library/PrivateFrameworks/CoreAccessories.framework/XP
+   25     1 Ss   /usr/sbin/cfprefsd
+   26     1 Ss   /usr/libexec/MobileGestaltHelper
+   27     1 Ss   /System/Library/PrivateFrameworks/CoreAnalytics.framework/Supp
+   35     1 Ss   /System/Library/PrivateFrameworks/DataMigration.framework/XPCS
+   37     8 R    ps
+SWEET hb: n=6 ps pid=37 status=0 ms=102
+
+--- Kernel buffer: MiniIOSurface + MiniIOMobileFramebuffer swaps ---
+[  255.384791]: MiniIOMobileFramebuffer: display 1125x2436 on a panel of 1080x2340 (4320 bytes per row)
+...
+[  301.053873]: MiniIOSurface: backboardd[14] created surface 1: 1125x2436 'BGRA', 4608 bytes per row, 0 planes, 11239424 bytes
+...
+[  301.074490]: MiniIOMobileFramebuffer: swap 1 (#0): surfaces 1 0 0 0, layers set 0x80000007 cleared 0x80000006
+[  301.074509]: MiniIOMobileFramebuffer: swap 1 layer 0: surface 1 (1125x2436 'BGRA') from 0,0 1125x2436 to 0,0 1125x2436, layers set 0x80000007
+[  301.126260]: MiniIOMobileFramebuffer: swap #1: surfaces in layers 0x1 now (0x0 before): 1 0 0 0
+...
+[  301.207831]: MiniIOSurface: backboardd[14] created surface 3: 1125x2436 'BGRA', 4608 bytes per row, 0 planes, 11239424 bytes
+...
+[  301.217099]: MiniIOMobileFramebuffer: swap 3 (#2): surfaces 3 0 0 0, layers set 0x1 cleared 0x0
+[  301.217116]: MiniIOMobileFramebuffer: swap 3 layer 0: surface 3 (1125x2436 'BGRA') from 0,0 1125x2436 to 0,0 1125x2436, layers set 0x1
+[  305.344386]: memory: free 867, files 637, programs 20, wired 2570 (3 surfaces 32, ramfs 99), compressor 0 (holding 0) MB; available 1504, kills below 165 (the idle) and 82 (anybody)

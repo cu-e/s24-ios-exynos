@@ -1,0 +1,30 @@
+{
+  "id": "NAT-107",
+  "scope": "native",
+  "evidence_kind": "native-device",
+  "priority": 100,
+  "depends_on": [
+    "NAT-106"
+  ],
+  "title": "Native run of loader-diag-xnu-sb2-md1 (decision 0040), Stage B + hb + 512 KiB KL tail: test libhakios injection into backboardd/containermanagerd, measure B0-B6 outcomes, and inspect MiniIOMobileFramebuffer swap/pixel diffs",
+  "paths": [
+    "docs/procedures/nat-107",
+    "artifacts/nat-107"
+  ],
+  "sources": [
+    "s24-port",
+    "hakios"
+  ],
+  "acceptance": [
+    "One run under decision 0040 (RECOVERY /dev/block/sda18 only), restored to pinned stock recovery.img (96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67) with full readback verification; Android and user data verified via check_android.py and restore_stock.py assess; no retry; host 1-min load < 6.0 at launch.",
+    "Post-run analysis runs after collector and watcher processes exit using analyze_nat106.py (--mode stage-b, hb, stage-a, chain).",
+    "Evaluate Stage B rows B0-B6 and record exact inject, launchd, hakios, ps, and MiniIOMobileFramebuffer telemetry in evidence.json."
+  ],
+  "steps": [
+    "Add and claim NAT-107, run read-only preflight via session_nat106.py",
+    "Open native permission citing decision 0040, confirm idle host (load < 6.0), execute single run",
+    "Restore stock RECOVERY, verify Android, close native permission, run analyze_nat106.py and record evidence"
+  ],
+  "status": "pending",
+  "owner": null
+}

@@ -249,6 +249,24 @@ NAT-104 built `loader-diag-xnu-hb2-md1` (`glue62_impl.h`: `NAT062_BURST=4096u`, 
 2. **Graphics / scan-out (`B4`/`B9`):** decided directly by Stage B's `MiniIOMobileFramebuffer` swap/diff telemetry and a panel update check once `backboardd` runs.
 3. **`SpringBoard` + lock screen + touch (`UI-004`):** follows `backboardd` swap confirmation.
 
+## 0h. Status update, 2026-11-13 after NAT-106/107 (this section replaces 0g where they differ)
+
+NAT-106 built `loader-diag-xnu-sb2-md1` (29-file Stage B + `hb` `md0` root combining `pid1-hb` with `com.apple.backboardd.plist`, donor `libhakios.dylib`, and `etc/inject.conf`; `glue62_impl.h` `NAT062_TAIL_RETURN=524288u`, `NAT062_BURST=4096u`; `11/11` tests, `480` mutants with `0` unexplained survivors). **NAT-107 ran it once** under decision 0040 (`SM-S921B/e1s`, RECOVERY only, restored from pinned stock `96620b8b...babf67`, Android & readback pass, host load `2.81` at launch). Full root arrived (`2,475,720,704` B in `210.711 s`, `11.749 MB/s`, `0` retries/errors). Pre-registered analysers (`analyze_nat106.py`) reached **row B5 `fb-swaps-no-diff`**, **row H5 `hb-ps-lists`**, and **row A1 `base-daemons-alive`**; `NAT-107` is **`done` (`pass`, native-device)**.
+
+| Item | written | built | model-tested | ran on S24 | real iOS UI |
+| --- | --- | --- | --- | --- | --- |
+| Complete `why=2` dump (`149,450` B, `gap=0`, `hole=0`, `drops=0`, `1,754` contiguous records) | yes | yes | yes (NAT-106) | **yes** (NAT-107) | no |
+| `init` `DYLD_INSERT_LIBRARIES` (`/redwood/lib/libhakios.dylib`) into `backboardd` & `containermanagerd` | yes | yes | static only | **yes** (NAT-107) | no |
+| `backboardd` (`pid 14`) + `containermanagerd` (`pid 15`) + all Stage A jobs alive through `hb` round 6 (`13` Apple jobs alive, `18` PIDs) | yes | yes | yes | **yes** (NAT-107: `hakios: container manager: no personas`, `hakios: window server hooks installed`, `no accelerated renderer; the software one will draw`) | no |
+| `MiniIOSurface` + `MiniIOMobileFramebuffer` swaps (`surfaces 1, 3` `1125x2436 'BGRA'`, `3` swaps, layers `0x0 -> 0x1`) | yes | yes | selector scan (IOS-013) | **yes, `0` diff** (NAT-107: `B5`, expected without `SpringBoard`) | **no** (`0` diff / empty scene) |
+| `SpringBoard` + UI scene clients + panel pixel change (`B6`) | partial (donor plist recipe) | no | no | **no** | no |
+
+**Stage B is closed (`B10` donor injection + `backboardd` stability + `IOSurface` + `IOMobileFramebuffer` software-render swap pipeline all verified on hardware with `867` MB free / `1,504` MB available RAM).**
+
+**Earliest remaining blockers on the path to the first real iOS UI frame:**
+1. **Stage C (`SpringBoard` + UI support daemons + `fb_diff > 0` / panel update check):** add `SpringBoard` and the required donor-recipe services (`lsd` / LaunchServices vs CPU-monitor spam check, `runningboardd`/`frontboard`, fonts/services, `inject.conf` targets if needed) while verifying why `diff_positive=0` turns positive when `SpringBoard` draws, AND verifying `e1s-display` CPU scan-out (`B4`: `DECON`/`RDMA`/`0xfa200000`) when pixels change.
+2. **Touch input (`e1s-touch` GPIO defect / `devfs` node alignment with `libhakios.dylib`)**: after the first real `SpringBoard` lock screen frame.
+
 ## 1. Audit of the selected profile and local components
 
 Selected profile (docs/implementation.md, CAPABILITIES.md): **iPhone X (iPhone10,3, D22AP, t8015) iOS 16.5 (build 20F66)** userland on **XNU 8796.121.2** (HackiOS base d82c64a3) for **SM-S921B/e1s**.
