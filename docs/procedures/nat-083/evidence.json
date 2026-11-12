@@ -1,0 +1,163 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T11:22:00+00:00",
+ "commit": "fa6351e7001118d37a2a49b7691b6907040c21fe",
+ "tree_state": "the NAT-083 build files (build.py, make_variant83.py, stage0-md0.patch, build-report-pid1.json, build-report-system.json) were committed in ac34af1 and 88adc71; every other file listed under sha256 was uncommitted at recording time and is committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "summary": "The host side of the first APFS-root native run, finished: (1) the donor stage0.c counted substitution /dev/md1 -> /dev/md0 and the IOS-011/IOS-010 rebuilds (stage0, init, small root.apfs 4,194,304 B, big APFS padded to the NAT-075 reserve 2,475,720,704 B, apfsck clean, 62,258 entries read back) from earlier commits; (2) the loader/payload variant loader-diag-xnu-rt-md1 (md0 = small root, kernel line rd=md1, nat_attempt NAT083-rt1, loader_return_after=60, storage driver off) packaged by NAT-044's package.py as package-002 (RECOVERY db5dea20..., Image.payload 064ed64d..., 19,627 differing 4 KiB pages); (3) the session driver session_nat083.py derived from NAT-080's driver by 12 counted substitutions (derive83.py --check exit 0); (4) the analyser analyze_nat083.py with the pre-registered ladder of decision 0032 (rows 1-9; a log gap turns a missing line into 'not established', never into a negative) and NAT-081's replay-boot selection; (5) 92 tests (73 + 19) whose line formats are rendered from the pinned C sources and whose whole analyze()/main() path runs over the REAL archive of NAT-078 (row 6 there, as the kernel booted rd=md0); (6) a mutation pass of 639 candidates (610 killed, 26 do not parse, 3 survivors shown to be equivalent); (7) decision 0032 with the full hashes and the pass/fail table fixed in advance. Nothing was run on the phone in this task, no device was opened, no permit was used.",
+ "acceptance": {
+  "1_counted_substitutions": "docs/procedures/nat-083/stage0-md0.patch is the counted substitution on the pinned donor stage0.c (3 occurrences, base sha256 18d12e7e, MIT, attribution kept); init.c is unchanged on purpose (its /dev/md0 cryptex path runs only with root_apfs=DEV, which this boot does not set); derive83.py refuses a drifted NAT-080 driver (test_nat083.py).",
+  "2_images": "The rebuilt big image (apfsck clean, 62,258 entries read back) has the new stage0 at /sbin/launchd and Apple's launchd at /sbin/launchd.darwin; padded size 2,475,720,704 B and sha 4377e988... in artifacts/nat-083/padded.json; the small root.apfs (af9fb40f...) holds the donor init, rc.nat083 and an empty job directory.",
+  "3_loader_variant_and_decision": "package-002 pins RECOVERY db5dea20... and Image.payload 064ed64d...; test_nat083.py reads the command line out of the packaged image (rd=md1 once, no rd=md0, nat_attempt=NAT083-rt1, loader_return_after=60). Decision 0032 lists the observables beforehand (BSD root/md1 lines, apfs volume line, stage0 lines, init banner and checks, each Apple program's output and exit mark, the exec line, PID 1 exit/panic, free pages, ending), says that no Apple userland has run on the phone before it, and fixes the nine rows. No native run in this task."
+ },
+ "findings": [
+  "The first mutation pass had 110 survivors (analyser 91, derivation 19): the command-line wrappers (main) and the individual fields of read_userland() had no test of their own. Each was closed with a test whose expected value is worked out by hand (distinct numbers per field, exact stdout/stderr/exit status, an existing output file refused, a wrong root hash refused with nothing written). Two redundant constructs were refactored (the exec-block condition; the dump choice became pick_text()). The third pass left 3 survivors, each explained in equivalent.json.",
+  "The real NAT-078 archive carries the loader's replay (the collector's second session replays the ring from dev_seq 0). With the unmodified NAT-065 chain, NAT-078's own analysis took the first boot and gave NAT-080 row 8 instead of 3a. NAT-081's boot selection (docs/procedures/nat-081/sessions.py) is applied inside analyze(); pinned by RealArchive.test_the_replay_boot_was_judged_and_the_delivery_record_was_read. The regression test that pins the old chain's row 8 belongs to NAT-081 and is still open.",
+  "The init output plus the kernel text may exceed the returned log window (head 8192 + tail 32768 bytes): a needed line that is missing while a gap marker exists is row 8 ('not established'), pinned by the Gaps tests."
+ ],
+ "established": [
+  "The derivation, the analyser's formats (against the pinned C sources) and the decision ladder behave as written on the host models and on the real NAT-078 archive.",
+  "The two images and the packaged RECOVERY exist with the recorded sizes and hashes; the packaged command line is rd=md1."
+ ],
+ "not_established": [
+  "Anything about the S24: that the donor apfs VFS mounts the delivered 2.31 GiB image from RAM on this kernel, that stage0/init run, that Apple's df/mount/ps/vm_stat/launchd run (dyld, shared cache, commpage, the 22 ENOSYS syscalls), how long launchd lives with no jobs, how much memory it takes.",
+  "That the delivered image is intact as a whole: NAT-078 read back 59.6% of it correctly and was cut off before the digest.",
+  "That the returned log window holds all the needed lines (gaps are handled as 'unknown').",
+  "Anything about display, input, GPU, backboardd or SpringBoard."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-083/test_analyze83.py"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; 73 tests, OK; logs artifacts/nat-083/logs/test-analyze.{stdout,stderr}"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-083/test_nat083.py"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; 19 tests, OK; logs artifacts/nat-083/logs/test-derive.{stdout,stderr}"
+  },
+  {
+   "argv": [
+    "python3",
+    "-B",
+    "-I",
+    "docs/procedures/nat-083/derive83.py",
+    "--check"
+   ],
+   "exit_code": 0,
+   "note": "ok: session_nat083.py equals the derivation (12 substitutions)"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-I",
+    "docs/procedures/nat-083/mutate_nat083.py",
+    "--out",
+    "artifacts/nat-083/mutation",
+    "--jobs",
+    "10"
+   ],
+   "exit_code": 0,
+   "note": "third pass: analyser 528 candidates (502 killed, 24 do not parse, 2 survivors explained), derivation 111 (108 killed, 2 do not parse, 1 survivor explained); artifacts/nat-083/mutation.stdout, docs/procedures/nat-083/mutation.json"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; 448 tests, OK; artifacts/nat-083/logs/make-check.stdout"
+  }
+ ],
+ "mutation_summary": {
+  "docs/procedures/nat-083/analyze_nat083.py": {
+   "total": 528,
+   "killed": 502,
+   "survived": 2,
+   "survived_unexplained": 0,
+   "invalid": 24,
+   "timeout": 0
+  },
+  "docs/procedures/nat-083/derive83.py": {
+   "total": 111,
+   "killed": 108,
+   "survived": 1,
+   "survived_unexplained": 0,
+   "invalid": 2,
+   "timeout": 0
+  }
+ },
+ "sha256": {
+  "docs/procedures/nat-083/README.md": "d97836decc485f917f417d53caf7392a08d937feafc296db09adbdb51e5cfd3f",
+  "docs/procedures/nat-083/analyze_nat083.py": "f20bcf32e43aeaba03219d609449f61cdc540c256c713c4e06bd53cc543857a9",
+  "docs/procedures/nat-083/build.py": "a19baea51d14252d3d4cf23f1bf9767c6c5d953929bab8949ac8f105dbdb3c6a",
+  "docs/procedures/nat-083/build-report-pid1-b.json": "df7b800389078c5458c754221b9ea4dff0cbfefe3ec0b88e6ee918319fc22187",
+  "docs/procedures/nat-083/derive83.py": "5c2381658c8588518441fba1b77a3ea88d63211b7f0d7667afa76c8e732ed6e0",
+  "docs/procedures/nat-083/equivalent.json": "40cf9922047e0bbcbfb9fc42ffc1aeeb7b8cbfa266506b1ceab202d653e59c6e",
+  "docs/procedures/nat-083/make_variant83.py": "054348b72f268922ea8e54fa37d4fb456594ffa78e23dee1bbe05279adc1e83f",
+  "docs/procedures/nat-083/mutate_nat083.py": "eb4f8fdf25fa6c39dae149fd5a9abec44714742d4f87ea8f792dc46bd7daabce",
+  "docs/procedures/nat-083/mutation.json": "ca5faaa0056b61ecd1c0e0af2a054584b51fbb93c460918cc59d0d8d7ee3f650",
+  "docs/procedures/nat-083/rc.nat083": "990910b5450753b07491013519fb3c1e181d4086ef885c4b288c6d3aee08b9c7",
+  "docs/procedures/nat-083/session_nat083.py": "4042907ab4d6e56767ff0919130d4c392eb6fb7e68232385bc0116fadd959e7d",
+  "docs/procedures/nat-083/stage0-md0.patch": "207075ef3faeaddfd95c434f33dab254a765897e12c49b92421792c14c671ba9",
+  "docs/procedures/nat-083/test_analyze83.py": "85357e26b253f47e215f55adf7eeec30b5005604e523f57c95be1d8507ba0ed7",
+  "docs/procedures/nat-083/test_nat083.py": "142947ea6f4e9af4b4724f0e6b0a100479932dfc53e32e12585182481c630fe2",
+  "docs/procedures/nat-081/sessions.py": "3434d046cc7268845104109d67d03470107ec489a1113ad7d5467c42050813e4",
+  "docs/procedures/nat-081/analyze_nat081.py": "4923cbc3eb007b9a2d486e54e33c6b71b7ceb69668692cbc51e22b98d279c235",
+  "docs/decisions/0032-nat083-loader-diag-xnu-rt-md1-single-run-2026-11-12.md": "2f6783f7b45f642aa8e082db0070b0927df567c870e62067b51b11ff39f5a055"
+ },
+ "artifacts": [
+  "artifacts/nat-083/logs/test-analyze.stdout",
+  "artifacts/nat-083/logs/test-analyze.stderr",
+  "artifacts/nat-083/logs/test-derive.stdout",
+  "artifacts/nat-083/logs/test-derive.stderr",
+  "artifacts/nat-083/logs/derive-check.stdout",
+  "artifacts/nat-083/logs/derive-check.stderr",
+  "artifacts/nat-083/logs/make-check.stdout",
+  "artifacts/nat-083/logs/make-check.exit",
+  "artifacts/nat-083/mutation/mutation.json",
+  "artifacts/nat-083/mutation.stdout",
+  "artifacts/nat-083/padded.json",
+  "artifacts/nat-083/package-002/package.json",
+  "artifacts/nat-083/package-002/loader-diag-xnu-rt-md1/package.json",
+  "artifacts/nat-083/package-002/loader-diag-xnu-rt-md1/recovery.img",
+  "artifacts/nat-083/pid1-b/root.apfs",
+  "artifacts/nat-083/system-padded.apfs"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-083/logs/test-analyze.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-083/logs/test-analyze.stderr": "3f20f4f8c51e3c55eece1f962ef2c7c70005b4bf2d4943391a5e5c35d81c1b19",
+  "artifacts/nat-083/logs/test-derive.stdout": "87cb04c569291f4c3459a65f645e6e649ed9689ab9653585eec928026a020e24",
+  "artifacts/nat-083/logs/test-derive.stderr": "f2c81c1a1b41c2de8881c0178d8dca28e906469dc056056c1eea0a591f480dc6",
+  "artifacts/nat-083/logs/derive-check.stdout": "87cb04c569291f4c3459a65f645e6e649ed9689ab9653585eec928026a020e24",
+  "artifacts/nat-083/logs/derive-check.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-083/logs/make-check.stdout": "6befaf1226714df935d2fc4441b5e06723162286cab5cbfa9c433bd4fa16ba87",
+  "artifacts/nat-083/logs/make-check.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+  "artifacts/nat-083/mutation/mutation.json": "ca5faaa0056b61ecd1c0e0af2a054584b51fbb93c460918cc59d0d8d7ee3f650",
+  "artifacts/nat-083/mutation.stdout": "88fecee01253fcbfe2d58e6566e4bef19b67989b39342a7faeb49f5e89b2b3be",
+  "artifacts/nat-083/padded.json": "9fe19391d0c7c2917a24559897cb1ab0383adb9708cd1e7cc9480d03ba43b7ba",
+  "artifacts/nat-083/package-002/package.json": "e4ddcb8b14ebe577e19ae75186f44cb328f18fb82b48b3f2f9500b77cc3e91d8",
+  "artifacts/nat-083/package-002/loader-diag-xnu-rt-md1/package.json": "fbdc58a4f60b7bb7e517be90f16609bdbd52fb13beea3922b16ff21ef194e0d7",
+  "artifacts/nat-083/package-002/loader-diag-xnu-rt-md1/recovery.img": "db5dea2017e243fd9de1b11d9b39165b710fc157200f5c4adebbaa1e1def4725",
+  "artifacts/nat-083/pid1-b/root.apfs": "af9fb40f9fd0c691e81ac6c314d1b5c5798b429cb36a28326bc5ddd0826ad71e",
+  "artifacts/nat-083/system-padded.apfs": "4377e98854753f648afde01d884bde352f316acad172eb5e46d44717954262f6"
+ },
+ "deviations_from_task_text": "None of substance: the task text asked for the decision 'template'; the full decision file 0032 was written instead, because the run is intended to follow under it."
+}

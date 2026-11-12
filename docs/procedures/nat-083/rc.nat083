@@ -1,0 +1,10 @@
+# NAT-083 (this project): the etc/rc of the first APFS-root run.
+# init has already run its own checks when it reads this file. The Darwin programs below are Apple's, taken unmodified from the iOS 16.5 root
+# (dynamically linked: they run through /usr/lib/dyld and the shared cache), and their output is short, so that the kernel's log (head 8 KiB +
+# tail 32 KiB come back) still holds the mount lines of the kernel, init's checks and the end of this file. Then process 1 becomes Apple's launchd
+# (/sbin/launchd.darwin) with an EMPTY /redwood/LaunchDaemons: the question is whether launchd starts and stays, not what it would start.
+/bin/df
+/sbin/mount
+/bin/ps -A
+/usr/bin/vm_stat
+exec /sbin/launchd.darwin

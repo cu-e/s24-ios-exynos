@@ -1,0 +1,20 @@
+[
+ {
+  "file": "docs/procedures/nat-083/analyze_nat083.py",
+  "line": 81,
+  "desc": "statement deleted",
+  "reason": "`sys.modules[name] = m` in _load() registers the module under its name; it matters only for pickling and for dataclass/typing lookups by module name. The two modules loaded here (analyze_nat080.py, sessions.py) use none of them (grep for dataclass/pickle/__module__/typing finds nothing in either), and exec_module() runs without the registration, so every call behaves identically."
+ },
+ {
+  "file": "docs/procedures/nat-083/analyze_nat083.py",
+  "line": 172,
+  "desc": "statement deleted",
+  "reason": "`return None` is the last statement of command_problem(); without it the function ends and returns None implicitly. Same value on every path."
+ },
+ {
+  "file": "docs/procedures/nat-083/derive83.py",
+  "line": 95,
+  "desc": "literal 1 -> 0",
+  "reason": "`main(sys.argv[0:])` hands the program name to main() as well; main() only asks whether the option --check is in argv, and argv[0] is the path of derive83.py, never that option, so both calls behave identically. test_nat083.py (class Command) runs the script as a subprocess with --check and pins its exit status and output."
+ }
+]
