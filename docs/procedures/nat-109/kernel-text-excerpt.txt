@@ -1,0 +1,81 @@
+===== SANITIZED EXCERPT: artifacts/nat-109/analysis/kernel-text.txt (boot 000002, gap=0, hole=0) =====
+Note: Host username sanitized from Darwin kernel version banner lines ([host]). See local artifacts/nat-109/analysis/kernel-text.txt (4361 lines, sha256 7a1faa2b2911ecf0e0a0e7a108ba27740165087eb4bc13db638f79755fb74e32).
+
+--- Init / Stage C1 library insertion ---
+=== init: process 1, started as /redwood/sbin/init ===
+Darwin 22.5.0 iPhone10,3
+Darwin Kernel Version 22.5.0: 2026-11-06T11:48:35.939333+00:00; [host]:s24-ios-exynos-local/STR012VERSION-001/DEVELOPMENT_ARM64_E1S
+memory 4096 MB, page size 16384, 1 cpu
+...
+=== 35 checks, 0 failed ===
+init: library insertion: /redwood/lib/libhakios.dylib backboardd containermanagerd containermanagerd_system;/redwood/lib/libhakios.sb.dylib SpringBoard
+init: up to 32768 vnodes
+
+--- /redwood/etc/rc & mounts ---
+$ /sbin/mount
+root_device on / (apfs, local, read-only)
+devfs on /dev (devfs, local, nobrowse)
+/dev/md0 on /redwood (apfs, local, read-only)
+ramfs on /private/var (ramfs, local)
+$ /redwood/bin/hb &
+$ exec /sbin/launchd.darwin
+...
+SWEET hb: start pid=8 ppid=1 period=10s rounds=60 ps_timeout=8s
+SWEET hb: n=1 pid=8 ppid=1 up=0
+com.apple.xpc.launchd|1970-01-01 00:03:10.159179 <Notice>: boot-args = rd=md1 e1sufs=0 e1sufs_probe=0 ufsrw=0 ufs_write=0 sweethw=0 nat_attempt=NAT108-sc1 debug=0xc serial=3 cpus=1 keepsyms=1 -v loader_return_after=60 launchdsuffix=release cs_enforcement_disable=1 e1stouch=0 e1sbattery=0 fb_diff=1 xrd=md0
+
+--- SpringBoard[13] & backboardd[18] spawn + libhakios.sb.dylib / libhakios.dylib hooks ---
+com.apple.xpc.launchd|1970-01-01 00:03:10.592621 (user/501/com.apple.SpringBoard) <Notice>: launching: system support
+com.apple.xpc.launchd|1970-01-01 00:03:11.125105 (user/501/com.apple.SpringBoard [13]) <Notice>: service spawned with pid 13
+com.apple.xpc.launchd|1970-01-01 00:03:11.125280 (user/501/com.apple.SpringBoard [13]) <Notice>: Successfully spawned SpringBoard[13] because system support
+com.apple.xpc.launchd|1970-01-01 00:03:10.860619 (user/501/com.apple.backboardd [18]) <Notice>: xpcproxy spawned with pid 18
+...
+hakios: SpringBoard: no GPU draws, vibrant views are plain (the lock screen's clock is white)
+hakios: SpringBoard: activation answered here, setup assistant refused, application snapshots as JPEG, the side button's long press checked, battery level from QG, battery state from QG, poster switcher not offered
+hakios: cellular: -[_UIStatusBarCellularSignalView setSignalMode:] replaced (types "v24@0:8q16"): active while the kernel says registered
+hakios: cellular: -[SBStatusBarStateAggregator _updateSignalStrengthItem:withData:SIMInfo:barsGetter:barsSetter:] at 0x1c5043430, types "v52@0:8i16@20@28@?36@?44": replaced
+hakios: battery UI: shows% ok, set-shows% ok, bolt ok, chargePercent ok, setChargePercent ok, lockscreen ring ok
+hakios: window server hooks installed
+hakios: input: /dev/hakios-touch: No such file or directory
+hakios: container manager: no personas
+...
+hakios: is_ready -> 1 (call 0, flags 0x11804801, b233 0xff)
+hakios: is_ready -> 1 (call 1, flags 0x11804801, b233 0xff)
+hakios: ignore_update_p -> 0 (call 0, flags 0x411804801, update flags 0x80018)
+hakios: begin_update -> 0 (flags 0x411804801)
+hakios: no accelerated renderer; the software one will draw
+hakios: render_update -> 0x1 (flags 0)
+hakios: finish_update(0) -> 0
+hakios: is_ready -> 1 (call 2, flags 0x411820801, b233 0xff)
+hakios: ignore_update_p -> 0 (call 1, flags 0x411820801, update flags 0x80018)
+hakios: begin_update -> 0 (flags 0x411820801)
+hakios: render_update -> 0x1 (flags 0)
+hakios: finish_update(0) -> 0
+
+--- Final hb round (round 5, up=54s, 71 processes alive) ---
+SWEET hb: n=5 pid=8 ppid=1 up=54
+  PID TTY           TIME CMD
+    1 ??         0:03.71 /sbin/launchd.darwin
+    8 ??         0:00.00 /redwood/bin/hb
+   11 ??         0:00.86 /usr/libexec/UserEventAgent (System)
+   12 ??         0:00.71 /usr/libexec/runningboardd
+   13 ??         0:05.68 /System/Library/CoreServices/SpringBoard.app/SpringBoa
+   15 ??         0:00.42 /System/Library/CoreServices/powerd.bundle/powerd
+   16 ??         0:00.14 /usr/libexec/remoted
+   17 ??         0:00.86 /usr/sbin/wifid
+   18 ??         0:01.59 /usr/libexec/backboardd
+   19 ??         0:05.56 /usr/libexec/containermanagerd --runmode=normal --defa
+   29 ??         0:10.22 /usr/libexec/lsd
+... (71 processes total; see kernel-text.txt lines 3380-3451) ...
+SWEET hb: n=5 ps pid=86 status=0 ms=209
+
+--- Kernel buffer: MiniIOSurface + MiniIOMobileFramebuffer swaps + lsd CPU-monitor spam ---
+[  230.560075]: MiniIOSurface: backboardd[18] created surface 2: 1125x2436 'BGRA', 4608 bytes per row, 0 planes, 11239424 bytes
+[  230.581070]: MiniIOMobileFramebuffer: swap 1 (#0): surfaces 2 0 0 0, layers set 0x80000007 cleared 0x80000006
+[  230.581089]: MiniIOMobileFramebuffer: swap 1 layer 0: surface 2 (1125x2436 'BGRA') from 0,0 1125x2436 to 0,0 1125x2436, layers set 0x80000007
+[  231.094366]: MiniIOMobileFramebuffer: swap #1: surfaces in layers 0x1 now (0x0 before): 2 0 0 0
+[  231.100421]: MiniIOSurface: backboardd[18] created surface 4: 1125x2436 'BGRA', 4608 bytes per row, 0 planes, 11239424 bytes
+[  231.109924]: MiniIOMobileFramebuffer: swap 2 (#1): surfaces 4 0 0 0, layers set 0x1 cleared 0x0
+[  231.109943]: MiniIOMobileFramebuffer: swap 2 layer 0: surface 4 (1125x2436 'BGRA') from 0,0 1125x2436 to 0,0 1125x2436, layers set 0x1
+[  238.862966]: memory: free 581, files 855, programs 136, wired 2522 (4 surfaces 33, ramfs 20), compressor 0 (holding 0) MB; available 1436, kills below 165 (the idle) and 82 (anybody)
+[  248.809261]: process lsd[29] denied attempt to escape CPU monitor (missing required entitlement).

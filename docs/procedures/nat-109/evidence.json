@@ -1,0 +1,249 @@
+{
+ "task_id": "NAT-109",
+ "kind": "native-device",
+ "origin": "local-device",
+ "recorded_at": "2026-11-12T22:48:00+00:00",
+ "device_inventory": "devices/local-2026-11-13-nat109.json",
+ "outcome": "pass",
+ "decision": "docs/decisions/0041-nat108-loader-diag-xnu-sc1-md1-single-run-2026-11-13.md",
+ "image": "loader-diag-xnu-sc1-md1",
+ "commit": "ac7196aca98c2d0c56e2c65964b97d854abaa4c0",
+ "summary": "loader-diag-xnu-sc1-md1 ran once on SM-S921B/e1s under decision 0041 (RECOVERY /dev/block/sda18 only; restored from Download Mode via NAT-013 using pinned stock 96620b8b...babf67 with full Android readback verification and restore_stock.py assess pass; native permission closed). Host 1-min load at launch was 3.57 (< 6.0). The 2,475,720,704-byte padded APFS root (4377e988...) delivered in 152.598s (16.224 MB/s, 296 TRBs, 0 retries, 0 device rx errors). glue62_impl.h returned the full 455,754-byte why=2 dump of boot 000002 (4,942 frames / 4,749 reconstructed KL records, drops=0, faults=0, hole_bytes=0, gap_bytes=0, begin_inferred=false). Because 753 launchd notices and 241 lsd CPU-monitor denials bloated the dump (~118.2s USB transfer), the loader hit its return-after-reboot watchdog (HOLD stage=0x51 code=0x223e) into Download Mode (dt=379.29s, chain_row 7). Pre-registered analysers returned row C4 springboard-exited, row B5 fb-swaps-no-diff, row H5 hb-ps-lists (5 hb marks, 8 ps lists, round 5 at up=54s with 71 processes), and row A2 some-daemons-alive. Post-hoc inspection established that SpringBoard[13] actually spawned cleanly with libhakios.sb.dylib hooks at 00:03:11.125 and stayed alive through round 5 (PID 13, 0:05.68 CPU), missed by analyze_nat108.py because launchd elided xpcproxy and ps -A truncated its path to SpringBoa. backboardd[18] allocated 1125x2436 BGRA surfaces 2 and 4 and performed 2 MiniIOMobileFramebuffer swaps (layers 0x0 -> 0x1 at 230.581s and 231.110s) with no subsequent swap >= 5s later for fb_stats/fb_diff.",
+ "host_launch": {
+  "loadavg_1m": 3.57,
+  "battery": "level=85 temperature=278",
+  "recovery_written_sha256": "90eecfbc45e055d8514639512c56351668f25e2aae7cd0ea6f50241a744fcdbb",
+  "reboot_requested_at": "2026-11-12T22:37:03.525950+00:00",
+  "one_shot_marker": "artifacts/nat-108/native-attempt-loader-diag-xnu-sc1-md1-used.json",
+  "one_shot_marker_sha256": "1ecb57fbbbf71a4bb05bdcedd4c528ab09f63938ad77fd05d24773994b3160cc"
+ },
+ "delivery": {
+  "outcome": "delivered",
+  "size": 2475720704,
+  "sha256": "4377e98854753f648afde01d884bde352f316acad172eb5e46d44717954262f6",
+  "seconds": 152.598,
+  "mb_per_s": 16.224,
+  "chunks": 296,
+  "retries": 0,
+  "rx_errors": 0,
+  "rx_aborts": 0,
+  "rx_gaps": 0,
+  "rx_rejects": 0,
+  "rx_resets": 0
+ },
+ "restore_and_android": {
+  "download_mode_dt_s": 379.29,
+  "restore_report": "artifacts/nat-109/restore-001/report.json",
+  "android_check": "artifacts/nat-109/restore-001/android-check.json",
+  "assess_report": "artifacts/nat-109/restore-001/assess.json",
+  "assess_outcome": "pass",
+  "recovery_hash_match": true,
+  "user_data_directories": "user_data_directories_present",
+  "sys_boot_completed": "1"
+ },
+ "pre_registered": {
+  "analyze_stage_c": {
+   "row": 4,
+   "name": "springboard-exited",
+   "springboard_in_jobs": true,
+   "springboard_domains": ["user/501"],
+   "springboard_spawns": [],
+   "springboard_exits": [],
+   "springboard_alive_in_last_list": false,
+   "eval_list_round": 5,
+   "ps_lists_total": 7,
+   "ps_lists_complete": 7,
+   "inject_lines": [
+    "/redwood/lib/libhakios.dylib backboardd containermanagerd containermanagerd_system;/redwood/lib/libhakios.sb.dylib SpringBoard"
+   ],
+   "springboard_hakios_lines": [
+    "SpringBoard: no GPU draws, vibrant views are plain (the lock screen's clock is white)",
+    "SpringBoard: activation answered here, setup assistant refused, application snapshots as JPEG, the side button's long press checked, battery level from QG, battery state from QG, poster switcher not offered"
+   ],
+   "fb_swaps_count": 2,
+   "layers_transition": "0x0 -> 0x1",
+   "fb_stats_count": 0,
+   "fb_pixel_diffs_count": 0,
+   "lsd_cpu_monitor_denials": 241,
+   "hole_bytes": 0,
+   "gap_bytes": 0
+  },
+  "analyze_stage_b": {
+   "row": 5,
+   "name": "fb-swaps-no-diff",
+   "backboardd_in_jobs": true,
+   "backboardd_spawns": [
+    {
+     "clock": 190.860619,
+     "pid": 18
+    }
+   ],
+   "backboardd_exits": [],
+   "backboardd_alive_in_last_list": true,
+   "fb_swaps_count": 2,
+   "layers_transition": "0x0 -> 0x1",
+   "diff_positive_count": 0,
+   "hole_bytes": 0,
+   "gap_bytes": 0
+  },
+  "analyze_hb": {
+   "row": 5,
+   "name": "hb-ps-lists",
+   "hb_marks": 5,
+   "ps_lists": 8,
+   "rounds_with_logd": [4, 5],
+   "hole_bytes": 0,
+   "gap_bytes": 0,
+   "begin_inferred": false,
+   "last_list_round": 5,
+   "last_list_pids": 71
+  },
+  "analyze_stage_a": {
+   "row": 2,
+   "name": "some-daemons-alive",
+   "boot_tasks_ran": ["commit-boot-mode", "restore-datapartition", "init-with-data-volume"],
+   "boot_tasks_skipped_count": 20,
+   "early_boot_complete_kernel_s": 190.877203,
+   "launchd_lines": 1170,
+   "ps_lists": 6,
+   "last_list_rows": 71,
+   "last_list_cut": false,
+   "alive_count": 41,
+   "self_start_count": 10,
+   "hole_bytes": 0,
+   "gap_bytes": 0,
+   "panic": null,
+   "pid1_exit": null
+  },
+  "analyze_chain": {
+   "chain_row": 7,
+   "chain_pass": false,
+   "ending_klass": "download",
+   "ending_cls": "cap-reset",
+   "ending_dt_s": 379.29,
+   "hold": "HOLD stage=0x51 code=0x223e",
+   "boot_of_image": true,
+   "boots_of_image": 1,
+   "collector_drops": 0,
+   "collector_faults": 0,
+   "collector_frames": 5131,
+   "boot2_frames": 4942,
+   "boot2_records": 4940,
+   "manifest_outcome": "complete-received-stream",
+   "manifest_errors": 0
+  }
+ },
+ "posthoc": {
+  "springboard_spawn_line": "com.apple.xpc.launchd|1970-01-01 00:03:11.125280 (user/501/com.apple.SpringBoard [13]) <Notice>: Successfully spawned SpringBoard[13] because system support",
+  "springboard_round5_ps_line": "   13 ??         0:05.68 /System/Library/CoreServices/SpringBoard.app/SpringBoa",
+  "analyser_truncation_bug": "BSD ps -A truncated /System/Library/CoreServices/SpringBoard.app/SpringBoard to .../SpringBoa, and launchd elided xpcproxy for SpringBoard; fixed in Stage C2 analyser without changing NAT-109 pre-registered outputs.",
+  "surfaces_created": [
+   "MiniIOSurface: backboardd[18] created surface 2: 1125x2436 'BGRA', 4608 bytes per row, 0 planes, 11239424 bytes",
+   "MiniIOSurface: backboardd[18] created surface 4: 1125x2436 'BGRA', 4608 bytes per row, 0 planes, 11239424 bytes"
+  ],
+  "memory_line": "memory: free 581, files 855, programs 136, wired 2522 (4 surfaces 33, ramfs 20), compressor 0 (holding 0) MB; available 1436, kills below 165 (the idle) and 82 (anybody)"
+ },
+ "established_on_device": [
+  "Whole 2,475,720,704-byte padded APFS root delivered over USB in 152.598s (16.224 MB/s, 296 TRBs, 0 retries, 0 errors); init passed 35/35 checks.",
+  "init configured DYLD_INSERT_LIBRARIES injection (/redwood/lib/libhakios.dylib for backboardd/containermanagerd/containermanagerd_system; /redwood/lib/libhakios.sb.dylib for SpringBoard); glue62_impl.h returned the entire 455,754-byte why=2 dump (gap=0, hole=0, 0 drops).",
+  "SpringBoard[13] spawned cleanly, installed all libhakios.sb.dylib UI/activation/cellular/battery hooks, and stayed alive through hb round 5 (up=54s, 0:05.68 CPU, 71 processes alive) with zero SpringBoard or backboardd crashes.",
+  "backboardd[18] software-rendered twice (render_update -> 0x1), creating 1125x2436 BGRA surfaces 2 and 4 and swapping layers 0x0 -> 0x1 at 230.581s and 231.110s."
+ ],
+ "commands": [
+  {
+   "step": "preflight",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-108/session_nat108.py --image loader-diag-xnu-sc1-md1 --out artifacts/nat-109/preflight-001",
+   "exit_code": 0,
+   "outcome": "ready-read-only-registry-closed"
+  },
+  {
+   "step": "execute",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-108/session_nat108.py --image loader-diag-xnu-sc1-md1 --out artifacts/nat-109/run-001 --execute",
+   "exit_code": 0,
+   "outcome": "native-attempt-started"
+  },
+  {
+   "step": "restore",
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python docs/procedures/nat-013/restore_stock.py restore --bus 5 --address 35 --out artifacts/nat-109/restore-001",
+   "exit_code": 0,
+   "outcome": "awaiting-readback"
+  },
+  {
+   "step": "check_android",
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-109/restore-001/android-check.json",
+   "exit_code": 0,
+   "outcome": "pass"
+  },
+  {
+   "step": "assess",
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-109/restore-001/report.json --readback artifacts/nat-109/restore-001/android-check.json",
+   "exit_code": 0,
+   "outcome": "pass"
+  },
+  {
+   "step": "analyze_stage_c",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-108/analyze_nat108.py --mode stage-c --archive artifacts/nat-109/run-001/archive --jobs-dir artifacts/nat-108/build-001/root/LaunchDaemons --out artifacts/nat-109/analysis/stage-c.json",
+   "exit_code": 0,
+   "outcome": "row C4 springboard-exited"
+  },
+  {
+   "step": "analyze_stage_b",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-108/analyze_nat108.py --mode stage-b --archive artifacts/nat-109/run-001/archive --jobs-dir artifacts/nat-108/build-001/root/LaunchDaemons --out artifacts/nat-109/analysis/stage-b.json",
+   "exit_code": 0,
+   "outcome": "row B5 fb-swaps-no-diff"
+  },
+  {
+   "step": "analyze_hb",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-108/analyze_nat108.py --mode hb --archive artifacts/nat-109/run-001/archive --jobs-dir artifacts/nat-108/build-001/root/LaunchDaemons --out artifacts/nat-109/analysis/hb.json",
+   "exit_code": 0,
+   "outcome": "row H5 hb-ps-lists"
+  },
+  {
+   "step": "analyze_stage_a",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-108/analyze_nat108.py --mode stage-a --archive artifacts/nat-109/run-001/archive --jobs-dir artifacts/nat-108/build-001/root/LaunchDaemons --out artifacts/nat-109/analysis/stage-a.json",
+   "exit_code": 0,
+   "outcome": "row A2 some-daemons-alive"
+  },
+  {
+   "step": "analyze_chain",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-108/analyze_nat108.py --mode chain --archive artifacts/nat-109/run-001/archive --events artifacts/nat-109/run-001/usb-events.jsonl --report artifacts/nat-109/run-001/report.json --root artifacts/nat-083/system-padded.apfs --size 2475720704 --sha256 4377e98854753f648afde01d884bde352f316acad172eb5e46d44717954262f6 --image loader-diag-xnu-sc1-md1 --out artifacts/nat-109/analysis/chain.json --log-out artifacts/nat-109/analysis/kernel-text.txt",
+   "exit_code": 0,
+   "outcome": "chain_row 7 download / complete boot 000002 (drops=0, faults=0, gap=0, hole=0)"
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-109/README.md",
+  "docs/procedures/nat-109/kernel-text-excerpt.txt",
+  "artifacts/nat-109/preflight-001/report.json",
+  "artifacts/nat-109/run-001/report.json",
+  "artifacts/nat-109/run-001/usb-events.jsonl",
+  "artifacts/nat-109/run-001/delivery/delivery.json",
+  "artifacts/nat-109/run-001/archive/manifest.json",
+  "artifacts/nat-109/analysis/stage-c.json",
+  "artifacts/nat-109/analysis/stage-b.json",
+  "artifacts/nat-109/analysis/hb.json",
+  "artifacts/nat-109/analysis/stage-a.json",
+  "artifacts/nat-109/analysis/chain.json",
+  "artifacts/nat-109/analysis/kernel-text.txt",
+  "artifacts/nat-109/restore-001/report.json",
+  "artifacts/nat-109/restore-001/android-check.json",
+  "artifacts/nat-109/restore-001/assess.json",
+  "devices/local-2026-11-13-nat109.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-109/preflight-001/report.json": "d580d3e623ed96931c6c0e934c41d128ae91740857b3b202339e33f982f3af88",
+  "artifacts/nat-109/run-001/report.json": "0c065be904d8bf95b3317969bdcb2e5769c56cb1ea2070e7c2244cf22b40ab19",
+  "artifacts/nat-109/run-001/usb-events.jsonl": "92b8faa71b44f61b91a67aa30095bbf9d9e1999bb2e9ab8f49bff4c3e3fd0b39",
+  "artifacts/nat-109/run-001/delivery/delivery.json": "3c6752d00ce54943d7b35344c55aaa087fc5e7d2087798a4f991b3ca7608931b",
+  "artifacts/nat-109/run-001/archive/manifest.json": "6292289cd87ea5e9aa46a0c77b660ad8731a9184da02171962688afb5324e224",
+  "artifacts/nat-109/analysis/stage-c.json": "0b2a9cc9d4614ac91f033d2c4bcd8f0e18b342c97ab488f1a47246a0ff1cf72d",
+  "artifacts/nat-109/analysis/stage-b.json": "5c8e9aadc1e28cf99079bd78d91c40757d9e7209988f30c907518053240a556b",
+  "artifacts/nat-109/analysis/hb.json": "99cbccc70232f4b149985c696003356e7bfdb286f2ed9fdbfdfffac4793a4f04",
+  "artifacts/nat-109/analysis/stage-a.json": "0e14df6d885a09d192cecdb8534a5be8c37d453222ccc8db35e53cddf0b90cc9",
+  "artifacts/nat-109/analysis/chain.json": "8ed1a47dcfaef4c2cc72d4a1e6f26e7a31132e012c6c7d9e06c2404f6f34316a",
+  "artifacts/nat-109/analysis/kernel-text.txt": "7a1faa2b2911ecf0e0a0e7a108ba27740165087eb4bc13db638f79755fb74e32",
+  "artifacts/nat-109/restore-001/report.json": "7d10d1ebbdfc83004683ab91e06720f7791b0acb85e6f5ae43b2074126c7ec32",
+  "artifacts/nat-109/restore-001/android-check.json": "8d05a606b3a5a92913a8a453919f04cd07022186dd2222a7e64d559eef78c487",
+  "artifacts/nat-109/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a"
+ }
+}
