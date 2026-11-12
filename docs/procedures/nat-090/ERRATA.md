@@ -1,0 +1,4 @@
+# Errata (2026-11-12, written after the fact; the evidence files themselves are not edited, the registry holds their SHA-256)
+
+* `docs/procedures/nat-089/evidence.json` has `recorded_at` `2026-11-12T21:00:00+00:00` and `docs/procedures/nat-090/evidence.json` has `2026-11-12T21:40:00+00:00`. Both times were taken from the local clock (UTC+05:00) and labelled `+00:00`: the records were written at about 15:45Z and 15:55Z (the commits `bf2b4f8`, `87d24e2` and `7630d56` carry the author times 20:47, 20:48 and 20:59 at +05:00). The values in the files are wrong by five hours and lie in the future of their own commits.
+* `docs/procedures/nat-089/evidence.json`, acceptance item 2: the task text says "pids 12-14" for the heartbeat spawns; the analyser table does not carry pids, no test pins them, and the file says so; the pids were read by hand from the real NAT-088 text (12, 13, 14).
