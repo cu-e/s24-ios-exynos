@@ -1,0 +1,77 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T17:58:30+00:00",
+ "commit": "07ca33216e628963fd4dfc71e70c6fbae940e160",
+ "tree_state": "base commit; the files below were added on top of it and are committed together with this evidence",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "summary": "Static source-review of the donor's tracked prebuilt libhakios.dylib (donor commit 87bf485, outside the sparse checkout until now) against the donor's inject.c: Mach-O structure, one initialiser (_hakios_init via __init_offsets), no svc instruction, 89 imports with no unlink/rename/mount/exec/socket, 101 of 125 source string literals and 13 of 16 shared-cache constants found, the 24 missing literals belong to two source features that the source itself keeps off the default path (unused ALS fix; boot-arg-only metallib watcher). The binary is older than the pinned source (listing says built 2026-10-25, commit dated 2026-11-04) and cannot be rebuilt here. Nothing was executed.",
+ "evidence_category": "source-review (host, read-only); not host-test of behaviour, not a run on the S24",
+ "acceptance": [
+  "1. Provenance and structure recorded: donor SHA, blob hashes equal to prebuilt/SHA256SUMS, size, Mach-O type/arch/flags, install name, dependents, undefined imports, initialiser; note states that the binary is donor-built and not reproduced here.",
+  "2. Row-by-row comparison with inject.c: 125 literals (101 found, 24 not found), 16 constants (9 exact, 4 only as nearby sums because of VSLOT arithmetic, 3 not found), 89 imports (8 unnamed in the source, listed); one dylib string unexplained ('?'). No row says matches from a symbol name.",
+  "3. Decision written: the prebuilt may be staged by a later host task as a separate removable step with the named residual risks; SDK / open-header rebuild stays the alternative."
+ ],
+ "commands": [
+  {
+   "cmd": "git -C references/hakios sparse-checkout add /prebuilt/SHA256SUMS /prebuilt/userland/libhakios.dylib /prebuilt/userland/hello_dyn /userland/src/hakios.gl.h /userland/src/hello_dyn.c",
+   "exit": 0,
+   "result": "five blobs of the pinned commit fetched into the gitignored clone"
+  },
+  {
+   "cmd": "sha256sum references/hakios/prebuilt/userland/libhakios.dylib references/hakios/prebuilt/userland/hello_dyn",
+   "exit": 0,
+   "result": "both equal the lines of prebuilt/SHA256SUMS"
+  },
+  {
+   "cmd": "python3 -B -I tools/ios/macho_audit.py audit references/hakios/prebuilt/userland/libhakios.dylib",
+   "exit": 0,
+   "result": "DYLIB arm64 plain, iOS minos 16.5 sdk 16.4, chained fixups, 4 dependents"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/ios-014/inspect_dylib.py --dylib references/hakios/prebuilt/userland/libhakios.dylib --source references/hakios/userland/src/inject.c --extra-source references/hakios/userland/src/hakios.input.h --extra-source references/hakios/userland/src/hakios.gl.h --out artifacts/ios-014/inspection.json",
+   "exit": 0,
+   "result": "literals 101/125 found; constants 9 exact + 4 nearby-sum of 16; imports 89, 8 unnamed; svc 0; initialiser _hakios_init"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/ios-014/test_inspect_dylib.py",
+   "exit": 0,
+   "result": "Ran 10 tests, OK (literal scanner, hex constants, movz/movk/movn/orr decoding with hand-derived encodings)"
+  },
+  {
+   "cmd": "python3 -B -I tools/ios/macho_audit.py audit|cstrings references/hakios/prebuilt/userland/hello_dyn",
+   "exit": 0,
+   "result": "EXECUTE arm64, libSystem only, 5 cstrings equal to the 5 literals of hello_dyn.c"
+  }
+ ],
+ "deviations_and_corrections": [
+  "The strategy doc's B10 row said the donor's prebuilt/userland was not in the pinned checkout; it is tracked at the pinned commit (sparse checkout excluded it). Row corrected in this change.",
+  "The first run of the scanner found a bug through a test (a '\"' character literal opened a string); the scanner was rewritten as one pass over comments, character literals, include lines and strings; the literal search first looked only in __cstring and reported 5 `static const char[]` strings as missing; it now searches the whole file and names the section; the constant search first lacked movn and orr-bitmask decoding and the nearby-sum hint.",
+  "One hook constant (0x1882f0908) was decoded by hand from the raw words at 0x4254-0x425c, independently of the decoder.",
+  "No mutation pass was run on inspect_dylib.py: it is an inspection aid whose output was checked by hand for the rows the note quotes, not a gate."
+ ],
+ "limits": [
+  "The dylib is not a reproduced build of inject.c; absence of a string is not absence of code, presence is not proof of the same behaviour.",
+  "Nothing was executed or run on the phone; B9 and B7 are unchanged.",
+  "Whether the 20F66 addresses are right for this phone's cache is decided by IOS-013 and by the library's own run-time check, not here."
+ ],
+ "sha256": {
+  "research/notes/IOS-014-libhakios-prebuilt.md": "ef3ceae8311b164aa45e08b27a9a9429d6ba36ffba2cc0231523096db77bb4ca",
+  "docs/procedures/ios-014/inspect_dylib.py": "cb240ff238c4dc13fbb76f4d2023703d888ad9c666ce6a9a8e409626d182732a",
+  "docs/procedures/ios-014/test_inspect_dylib.py": "db0cfba4a585c6798b07c0c756633278238f3be617694c9ab5b63f523fb7c4d1",
+  "docs/procedures/ios-014/inspection-libhakios.json": "690e5d8b7d8381e3a9101fca0ca6c97d9524d11db21ffe7e2cd7b5b28bf66e06",
+  "docs/strategy/2026-11-12-ios-critical-path.md": "2a4d8bbf1b6857fd433a367ff028055be41af790972d3748fdd9bdd6ed461132"
+ },
+ "artifacts": [
+  "research/notes/IOS-014-libhakios-prebuilt.md",
+  "docs/procedures/ios-014/inspect_dylib.py",
+  "docs/procedures/ios-014/test_inspect_dylib.py",
+  "docs/procedures/ios-014/inspection-libhakios.json",
+  "docs/strategy/2026-11-12-ios-critical-path.md"
+ ],
+ "artifact_sha256_local_not_committed": {
+  "references/hakios/prebuilt/userland/libhakios.dylib": "530c2e681093ece2afe7f5180a4723bd46d92f7af39edc0a8c77136136a4dad6",
+  "references/hakios/prebuilt/userland/hello_dyn": "e5044262e71eb9277ccc2e4d58d9868a8b535aec0c3bf8c5b9f6ab604f978f46"
+ }
+}

@@ -1,0 +1,32 @@
+{
+  "id": "IOS-014",
+  "scope": "host",
+  "evidence_kind": "source-review",
+  "priority": 97,
+  "depends_on": [
+    "IOS-011",
+    "IOS-012"
+  ],
+  "title": "Stage B injection library without an iPhoneOS SDK: fetch the donor's tracked prebuilt/userland/libhakios.dylib (and prebuilt/SHA256SUMS) at the pinned donor SHA 87bf485 into references/hakios, record hashes, and inspect it statically (Mach-O header, load commands, install name, imports, strings, constructor) against references/hakios/userland/src/inject.c, so that the project knows what a Stage B run would load into backboardd before any run. Nothing is executed and nothing is claimed about the phone",
+  "paths": [
+    "docs/procedures/ios-014",
+    "research/notes/IOS-014-libhakios-prebuilt.md",
+    "artifacts/ios-014"
+  ],
+  "sources": [
+    "hakios"
+  ],
+  "acceptance": [
+    "The note records the donor SHA, the blob hashes of the fetched files (checked against prebuilt/SHA256SUMS when it lists them), file size, Mach-O type/arch/flags, install name, dependent libraries, the undefined imports and the constructor, and states what it does NOT establish: the dylib is a binary built by the donor, not reproduced from inject.c on this host, so source and binary are related only by the strings and addresses that can be compared.",
+    "Every string, 20F66 shared-cache address and sysctl/device path in inject.c that can be searched in the binary is compared row by row; each row says found / not found / not comparable, never 'matches' from a symbol name. Any import or string absent from inject.c is listed as unexplained.",
+    "The note ends with a decision: either the prebuilt dylib may be staged into a Stage B small root by a later host task (with the residual risk named) or it must be rebuilt from source first; the Apple SDK / open-header route stays listed as the alternative."
+  ],
+  "steps": [
+    "Fetch the pinned blobs into references/hakios (sparse add) and hash them",
+    "Static inspection with tools/ios/macho_audit.py",
+    "Compare with inject.c row by row",
+    "Write the note and the decision"
+  ],
+  "status": "pending",
+  "owner": null
+}
