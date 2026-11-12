@@ -1,0 +1,23 @@
+[
+ {
+  "file": "docs/procedures/nat-089/analyze_nat089.py",
+  "line": 32,
+  "desc": "literal 0 -> 1",
+  "code": "sys.path.insert(0, str(HERE))",
+  "reason": "the module is run as a script under `python -I` (the test runs it so, and `--help` imports kl_reader through this line: deleting it fails test_command_line_runs_isolated_and_writes_indented_json). Moving the entry from index 0 to index 1 changes only the position of HERE among sys.path entries: with -I the list is the stdlib zip, the stdlib directories and site-packages, none of which holds a `kl_reader` module, so the import resolves to the same file either way."
+ },
+ {
+  "file": "docs/procedures/nat-089/analyze_nat089.py",
+  "line": 147,
+  "desc": "literal 0 -> 1",
+  "code": "e = labels.get(j[\"label\"], dict(domains=[], spawns=[], exits=[], other=0))",
+  "reason": "the default dict stands in for a label launchd never mentioned; the table built from `e` reads only e[\"domains\"], e[\"spawns\"] and e[\"exits\"] (grep finds `other` read nowhere outside read_launchd's own counter), so the initial value of the unused `other` key cannot change any output."
+ },
+ {
+  "file": "docs/procedures/nat-089/kl_reader.py",
+  "line": 29,
+  "desc": "statement deleted",
+  "code": "sys.modules[name] = m",
+  "reason": "`sys.modules[name] = m` in _load() registers the module under its name; it matters only for pickling and for dataclass/typing lookups by module name. The only module loaded this way is NAT-062's analyser, which defines no dataclass, pickles nothing (grep finds neither word) and registers itself under its own name where it loads other modules, and exec_module() runs without the registration, so every call behaves identically."
+ }
+]
