@@ -1,0 +1,29 @@
+{
+ "id": "NAT-075",
+ "scope": "native",
+ "evidence_kind": "native-device",
+ "priority": 92,
+ "depends_on": [
+  "NAT-074"
+ ],
+ "title": "Native run: big window, big md0, no transfer - does the payload kernel boot with a 4908 MiB window, advertise 16 KiB pages, accept a 2.3 GiB md0 and still run the project probe as PID 1, and does the loader-side watchdog pet reload the counter (cap 150 s for this run, reset to Download Mode at the cap)",
+ "paths": [
+  "docs/procedures/nat-075",
+  "artifacts/nat-075"
+ ],
+ "sources": [
+  "s24-port"
+ ],
+ "acceptance": [
+  "One run of the NAT-074 image under its own decision file (committed first, per-image, RECOVERY only, restored from the pinned stock by NAT-013); host receives the loader and kernel text unattended.",
+  "Observed and reported separately: loader window base/size; the kernel's page count and page size in vm_page_bootstrap; the md0 line with the 16 KiB-aligned size; the probe's two lines and exit 81; the pet counter and whether the phone was still running past 83.9 s of the loader clock; boot time; Android check after restore. A SEC_UPLOAD ending (pet did not reload) is a recorded finding that needs the owner's keys, not a pass.",
+  "evidence.json (native-device) with outcome from the decision's pass rule; task done before the native permit is closed."
+ ],
+ "steps": [
+  "Decision file and permit",
+  "Run and restore",
+  "Analyse and record"
+ ],
+ "status": "pending",
+ "owner": null
+}

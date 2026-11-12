@@ -1,18 +1,19 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-12T01:18:48+00:00",
-  "ledger_updated_at": "2026-11-12T01:18:40+00:00",
-  "registry_sha256": "28075355de73253fe6bac4d579014c1e0c54e10610591afe0408a1a0c63a24a5",
+  "generated_at": "2026-11-12T01:36:48+00:00",
+  "ledger_updated_at": "2026-11-12T01:35:55+00:00",
+  "registry_sha256": "a9f9d7387bb55c69246a4336db63365430a36bcea7f35b586b4209d42bd86656",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
       "NAT-071",
       "NAT-054",
       "NAT-055",
-      "NAT-073",
       "IOS-013"
     ],
-    "in_progress": [],
+    "in_progress": [
+      "NAT-073"
+    ],
     "blocked": [
       "INT-002",
       "INT-003",
@@ -37,7 +38,10 @@
     ],
     "waiting": [
       "NAT-056",
+      "NAT-074",
       "IOS-006",
+      "NAT-076",
+      "NAT-077",
       "NAT-011",
       "IOS-008",
       "GPU-007",
@@ -59,6 +63,8 @@
       "NAT-017",
       "NAT-070",
       "NAT-072",
+      "NAT-075",
+      "NAT-078",
       "NAT-003",
       "DRV-003",
       "NAT-004",
@@ -9822,6 +9828,76 @@
       "card_path": "planning/tasks/IOS-003.md"
     },
     {
+      "id": "NAT-074",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 92,
+      "depends_on": [
+        "NAT-073"
+      ],
+      "title": "Big-window loader variant: merge touching device-tree memory nodes and take the 4908 MiB gap (replaces the 512 MiB cap), clear only the first 64 MiB plus segment BSS, clean the whole window by VA, replace the 57 s NAT-044 deadline by a hard cap with a 30 s watchdog pet only before the cap, RAMDisk ADT property = 16 KiB-aligned {address, size} for the 2,475,712,512 B root while only the 16,635-byte probe is present; built as a variant under its own path, host-tested with the nat-006 window harness and an instruction-level model (unicorn) of the new code",
+      "paths": [
+        "docs/procedures/nat-074",
+        "artifacts/nat-074"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "A window harness run on the real device-tree facts (devices/e1s-fdt/2026-11-10/runtime.facts.json) returns base 0x8cb800000 and size 4908 MiB, a harness case with a gap below 256 MiB is rejected, and an old-rule case returns the NAT-068 window 0x9de400000 / 512 MiB (docs/procedures/nat-073/budget.py is a cross-check, not the oracle).",
+        "The emitted loader code, checked by disassembly and a unicorn model: clears at most 64 MiB plus BSS; cleans the whole window by VA; polls a deadline cap constant and pets the watchdog every 30 s only before the cap; never pets after it; the NAT-044 reset path is unchanged and still the exit at the cap. NAT-020's forbidden-symbol rule is amended for s5e_wdt_pet in this image only and the amendment is listed. Mutants on the new hunks (cap, pet period, comparison direction, clear size, alignment) are killed or survivors listed.",
+        "ADT RAMDisk size is a multiple of 16 KiB (2,475,712,512 + 8192 B accounts for the 8192 remainder); the image builder pads and rejects other sizes; the payload header and boot_args memSize equal the window. A decision draft for NAT-075 names the pass rule; no native run in this task."
+      ],
+      "steps": [
+        "Window rule and clear/clean change",
+        "Deadline cap and bounded pet",
+        "ADT RAMDisk and builder",
+        "Harness, model, mutants, decision draft"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: NAT-073"
+      ],
+      "card_path": "planning/tasks/NAT-074.md"
+    },
+    {
+      "id": "NAT-075",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 92,
+      "depends_on": [
+        "NAT-074"
+      ],
+      "title": "Native run: big window, big md0, no transfer - does the payload kernel boot with a 4908 MiB window, advertise 16 KiB pages, accept a 2.3 GiB md0 and still run the project probe as PID 1, and does the loader-side watchdog pet reload the counter (cap 150 s for this run, reset to Download Mode at the cap)",
+      "paths": [
+        "docs/procedures/nat-075",
+        "artifacts/nat-075"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "One run of the NAT-074 image under its own decision file (committed first, per-image, RECOVERY only, restored from the pinned stock by NAT-013); host receives the loader and kernel text unattended.",
+        "Observed and reported separately: loader window base/size; the kernel's page count and page size in vm_page_bootstrap; the md0 line with the 16 KiB-aligned size; the probe's two lines and exit 81; the pet counter and whether the phone was still running past 83.9 s of the loader clock; boot time; Android check after restore. A SEC_UPLOAD ending (pet did not reload) is a recorded finding that needs the owner's keys, not a pass.",
+        "evidence.json (native-device) with outcome from the decision's pass rule; task done before the native permit is closed."
+      ],
+      "steps": [
+        "Decision file and permit",
+        "Run and restore",
+        "Analyse and record"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native",
+        "Dependencies: NAT-074"
+      ],
+      "card_path": "planning/tasks/NAT-075.md"
+    },
+    {
       "id": "NAT-013",
       "title": "Harden stock restore tooling against ended-session resume and premature success reporting",
       "scope": "host",
@@ -9882,11 +9958,15 @@
         "Evaluate options",
         "Recommend and spawn the implementation task"
       ],
-      "status": "pending",
-      "owner": null,
-      "column": "ready",
+      "status": "in_progress",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-12T01:19:24+00:00",
+      "last_heartbeat": "2026-11-12T01:19:24+00:00",
+      "updated_at": "2026-11-12T01:19:24+00:00",
+      "column": "in_progress",
       "reasons": [],
-      "card_path": "planning/tasks/NAT-073.md"
+      "card_path": "planning/tasks/NAT-073.md",
+      "report_health": "recent"
     },
     {
       "id": "PLN-001",
@@ -11068,6 +11148,112 @@
       "column": "ready",
       "reasons": [],
       "card_path": "planning/tasks/IOS-013.md"
+    },
+    {
+      "id": "NAT-076",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 90,
+      "depends_on": [
+        "NAT-073"
+      ],
+      "title": "Bulk-OUT receive path for root delivery: a variant of the NAT-041 DWC3 engine with one bulk-OUT endpoint (DEPCFG/DEPXFERCFG, chained TRBs of up to 16 MiB into the window, XferComplete handling, rx_bytes/rx_trbs/rx_errors in GET_INFO), its model, and a host sender (resumable by offset, bounded writes, checks rx_bytes); built under its own path without editing NAT-041",
+      "paths": [
+        "docs/procedures/nat-076",
+        "artifacts/nat-076",
+        "tools/ios/root_send.py",
+        "tests/test_root_send.py"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "Engine and model tests pass including seeded defects (short packet, TRB error, host disconnect mid-transfer, duplicate offset, wrong length) as NAT-041 did; endpoint and register values are cited to the pinned vendor driver or the Synopsys documentation named in NAT-041, not invented.",
+        "tools/ios/root_send.py sends a file to the model device by offset with a bounded write size, resumes after an injected failure, refuses a file whose size is not a multiple of 16 KiB, and prints the byte count the device reports; tests do not mirror the implementation.",
+        "A mutation pass over the receive state machine and the sender; survivors listed. No native run in this task; the first host-to-device rate is measured later (NAT-078)."
+      ],
+      "steps": [
+        "Endpoint configuration and TRB ring",
+        "Model and tests",
+        "Sender and tests",
+        "Mutants"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: NAT-073"
+      ],
+      "card_path": "planning/tasks/NAT-076.md"
+    },
+    {
+      "id": "NAT-077",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 90,
+      "depends_on": [
+        "NAT-073"
+      ],
+      "title": "Probe PID 1 that hashes /dev/rmd0 (SHA-256, MMU on, kernel-side read) and prints the digest and elapsed time on the console; builder that pads the donor system.apfs to a 16 KiB multiple and records its SHA-256; decision draft for the first delivery run",
+      "paths": [
+        "docs/procedures/nat-077",
+        "artifacts/nat-077"
+      ],
+      "sources": [],
+      "acceptance": [
+        "A static arm64 Mach-O probe built with the project toolchain reads the root device in bounded chunks, computes SHA-256 with an included public-domain or permissively licensed implementation (licence and attribution recorded), prints digest, byte count and seconds; a host build of the same code over a known file gives the digest hashlib gives.",
+        "The builder pads 2,475,712,512 B to 2,475,720,704 B (16 KiB multiple) with zeros, records both SHA-256 values and refuses a size that is not a multiple of 4096; Apple data stays under artifacts/, only sizes and hashes are committed.",
+        "A decision draft for NAT-078 states the question, the observable (digest equals the image digest, host-to-device rate, rx_bytes), and the pass rule; nothing is run on the phone."
+      ],
+      "steps": [
+        "Hashing probe and host build",
+        "Padding builder",
+        "Decision draft"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: NAT-073"
+      ],
+      "card_path": "planning/tasks/NAT-077.md"
+    },
+    {
+      "id": "NAT-078",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 90,
+      "depends_on": [
+        "NAT-075",
+        "NAT-076",
+        "NAT-077"
+      ],
+      "title": "Native delivery run: stream the real padded system.apfs from the host over bulk-OUT into the 4908 MiB window, boot the payload kernel with md0 on it, PID 1 hashes the device; first measured host-to-device rate and first full-size root in RAM",
+      "paths": [
+        "docs/procedures/nat-078",
+        "artifacts/nat-078"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "One run under its own decision file; the phone is restored from the pinned stock by NAT-013; Android and data checked afterwards.",
+        "Reported separately: bytes and seconds received by the device and by the host (rate), rx_errors, PID 1's digest against the image's SHA-256, kernel page size and free pages after md0, and the ending (cap reset to Download Mode or not).",
+        "A digest mismatch, a short transfer or a SEC_UPLOAD ending is recorded as the finding with the numbers, not as a pass."
+      ],
+      "steps": [
+        "Decision file and permit",
+        "Run and restore",
+        "Analyse and record"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native",
+        "Dependencies: NAT-075, NAT-076, NAT-077"
+      ],
+      "card_path": "planning/tasks/NAT-078.md"
     },
     {
       "id": "KRN-033",
@@ -16481,6 +16667,17 @@
         "worktree": null
       },
       {
+        "id": "NAT-073",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-12T01:19:24+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": null,
+        "worktree": null
+      },
+      {
         "id": "IOS-007",
         "status": "blocked",
         "last_heartbeat": "2026-11-12T00:15:39+00:00",
@@ -16546,87 +16743,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-12T00:13:35+00:00",
-      "action": "task.release:IOS-007",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-007",
-          "status": "pending",
-          "owner": null,
-          "priority": 88
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T00:13:48+00:00",
-      "action": "task.narrow:IOS-007",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-007",
-          "status": "pending",
-          "owner": null,
-          "priority": 88,
-          "paths": [
-            "research/notes/IOS-007-hackios-userland-review.md"
-          ]
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T00:13:59+00:00",
-      "action": "task.add:IOS-009",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-009",
-          "status": "pending",
-          "owner": null,
-          "priority": 99
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T00:14:17+00:00",
-      "action": "task.add:IOS-011",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-011",
-          "status": "pending",
-          "owner": null,
-          "priority": 97
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T00:14:28+00:00",
-      "action": "task.add:IOS-012",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-012",
-          "status": "pending",
-          "owner": null,
-          "priority": 96
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T00:14:38+00:00",
-      "action": "task.add:IOS-013",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-013",
-          "status": "pending",
-          "owner": null,
-          "priority": 90
-        }
-      ]
-    },
     {
       "at": "2026-11-12T00:14:54+00:00",
       "action": "task.add:IOS-010",
@@ -16823,11 +16939,90 @@
           "last_heartbeat": "2026-11-12T00:33:58+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-12T01:19:24+00:00",
+      "action": "task.claim:NAT-073",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-073",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 91,
+          "last_heartbeat": "2026-11-12T01:19:24+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T01:35:22+00:00",
+      "action": "task.add:NAT-074",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-074",
+          "status": "pending",
+          "owner": null,
+          "priority": 92
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T01:35:30+00:00",
+      "action": "task.add:NAT-075",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-075",
+          "status": "pending",
+          "owner": null,
+          "priority": 92
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T01:35:38+00:00",
+      "action": "task.add:NAT-076",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-076",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T01:35:47+00:00",
+      "action": "task.add:NAT-077",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-077",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T01:35:55+00:00",
+      "action": "task.add:NAT-078",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-078",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "8bd7a599d4b6c3c05f6037522b15f4e3605ea22e462bcfe715647b3ad32f3c21",
-    "BOARD.md": "daf5f3172f31a804c680305aada6dcd8430d85e7926b2833abad10569f54e7c8",
+    "STATUS.md": "5a35d261fec0122f998f62aad30e2716c503fd055d00d6e99249d9ed0b8b7551",
+    "BOARD.md": "d36639357c88298e99a0a38d872bd723c93e8bb766ae19b37188298444f634b8",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -17046,8 +17241,10 @@
     "planning/tasks/SEN-001.md": "3c54f6f748160ba9c5b4c4f27f41576ddb90a5c2f73f0243805e189091695d2d",
     "planning/tasks/ODIN-001.md": "ac0ee966c510177f407059b9a1c47e89df084a5b1c873bb7eea122547f1d4f0a",
     "planning/tasks/IOS-003.md": "59ae2b6225dc73ce34729b9d7c5f86da9e4a34b474f578db13a29a02187c6d8a",
+    "planning/tasks/NAT-074.md": "5a9e255872de8c37e344b3d9e234835d373e40da825c7dfe9ff9456d3644fa61",
+    "planning/tasks/NAT-075.md": "198bdac29fa1ab39ed43184860aa3a276b9af427aa5d0174da367412f0f6c5de",
     "planning/tasks/NAT-013.md": "b211a32160f7a1711f4cdfb1218280216622baf34bd7fdfcfdf7b259ce4b12a9",
-    "planning/tasks/NAT-073.md": "2cd3118c7a7726d927f2ab869bc7675200eaaa00f1d075bb9b645183ffe005af",
+    "planning/tasks/NAT-073.md": "c0f572aca88a60a21ca8069a1df355b4e7319245dd613a90e476e99e3630ca51",
     "planning/tasks/PLN-001.md": "ecc03d0cd4c97143f04e293265826965c33a7339e0d497343948806d7767290f",
     "planning/tasks/SRC-001.md": "ef537ab96e85bfa678915fd97152f7456ac589bd245fc21494c82154cb479093",
     "planning/tasks/INT-001.md": "9d68fa75fae4c21f31f5ea4734c3f592ed0b41c6ed897d7b045a892c63549760",
@@ -17075,6 +17272,9 @@
     "planning/tasks/VM-055.md": "fe28b385b930f00cd778325365baf0ac4f48ec8512078e17196762089ecc652a",
     "planning/tasks/IOS-006.md": "3bb2991ec29be38928d0445b6a38a5e5a7e68b097a093e9a5efb15f4fe51de92",
     "planning/tasks/IOS-013.md": "b14d39614bd0c70023901cb746509cdd16156f2b37d4b8ac8133679c4c081358",
+    "planning/tasks/NAT-076.md": "5e116caa393fe4309de1fec574fcdbcfb9b94552d77dd8bf5a560f0d7a9b8952",
+    "planning/tasks/NAT-077.md": "24fe4adaa134ed7c67d91a3cb33e1164ef58bb68a5af26fecfb87d149267ecb8",
+    "planning/tasks/NAT-078.md": "82d953023b06216120e5bf59d1d66a079a92ac426e503f3db3dfdee0e5e009a3",
     "planning/tasks/KRN-033.md": "65895b5673cb8432d904647391ec6378b6eafcac42e79bfd6cef92a0dcc4b83f",
     "planning/tasks/NAT-011.md": "13d5b59a05e410c27749dd20732dbe9312dda69ca349e32845cd4b144be9aaa3",
     "planning/tasks/NAT-014.md": "8ab44f96da942083ed04d834447e25cd58e8ddda08c83b2f1ca4e44327720c71",

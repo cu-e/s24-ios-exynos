@@ -1,0 +1,199 @@
+{
+ "device_tree_memory": {
+  "free_gaps_ge_256MiB_high_region": [
+   {
+    "MiB": 4908,
+    "base": "0x8cb800000",
+    "end": "0x9fe400000"
+   }
+  ],
+  "free_gaps_ge_256MiB_low_region": [
+   {
+    "MiB": 493,
+    "base": "0x97c00000",
+    "end": "0xb6900000"
+   },
+   {
+    "MiB": 414,
+    "base": "0xc6190000",
+    "end": "0xe0000000"
+   }
+  ],
+  "largest_gap": {
+   "MiB": 4908,
+   "base": "0x8cb800000",
+   "end": "0x9fe400000"
+  },
+  "largest_gap_when_each_DT_node_is_taken_alone_MiB": 2048,
+  "loader_rule_replayed_on_these_facts": {
+   "MiB": 512,
+   "base": "0x9de400000"
+  },
+  "ranges": [
+   {
+    "MiB": 873,
+    "base": "0x80000000"
+   },
+   {
+    "MiB": 36,
+    "base": "0xc0400000"
+   },
+   {
+    "MiB": 469,
+    "base": "0xc2b00000"
+   },
+   {
+    "MiB": 511,
+    "base": "0xe0100000"
+   },
+   {
+    "MiB": 2048,
+    "base": "0x880000000"
+   },
+   {
+    "MiB": 2048,
+    "base": "0x900000000"
+   },
+   {
+    "MiB": 2048,
+    "base": "0x980000000"
+   }
+  ],
+  "ranges_after_merging_touching_nodes": [
+   {
+    "MiB": 873,
+    "base": "0x80000000"
+   },
+   {
+    "MiB": 36,
+    "base": "0xc0400000"
+   },
+   {
+    "MiB": 469,
+    "base": "0xc2b00000"
+   },
+   {
+    "MiB": 511,
+    "base": "0xe0100000"
+   },
+   {
+    "MiB": 6144,
+    "base": "0x880000000"
+   }
+  ],
+  "reserved_with_address": 30,
+  "total_MiB": 8033
+ },
+ "inputs": {
+  "nat068_kernel_log_sha256": "cb16116895e0bfa595ca029916843fb6c42a226826dfe92fd03352a4302157b9",
+  "nat068_loader_stream_sha256": "267752cc92e6399a55e561f420ef50fa95da78358495dda064936a509ebe7447",
+  "runtime_fdt_facts_sha256": "b7e8cd93a6f54febfbd46b8daa952186ede49bb69acb0d7edd8eaa52af87aeb0"
+ },
+ "kernel_view_nat068": {
+  "bytes_if_16KiB_pages": 2147483648,
+  "bytes_if_4KiB_pages": 536870912,
+  "pages_total": 131072,
+  "reading": "pages x 4 KiB equals the 512 MiB window exactly; the kernel advertised 4 KiB pages in this run",
+  "vm_page_bootstrap_free_pages": 110384,
+  "wired_pages": 20688
+ },
+ "loader_window_nat068": {
+  "base": "0x9de400000",
+  "cap_in_loader_source_MiB": 512,
+  "payload_segment_bytes": 26705920,
+  "payload_segments": 11,
+  "replay_of_loader_rule_matches_observed": true,
+  "size_MiB": 512
+ },
+ "root": {
+  "GiB": 2.306,
+  "MiB": 2361.0,
+  "bytes": 2475712512
+ },
+ "scenarios": {
+  "transfer": [
+   {
+    "MB_per_s": 2.0,
+    "petted_wdt_periods_of_60s": 21,
+    "rate": "control-OUT pessimistic (assumption)",
+    "transfer_s": 1237.9
+   },
+   {
+    "MB_per_s": 15.0,
+    "petted_wdt_periods_of_60s": 3,
+    "rate": "control-OUT optimistic (assumption)",
+    "transfer_s": 165.0
+   },
+   {
+    "MB_per_s": 25.0,
+    "petted_wdt_periods_of_60s": 2,
+    "rate": "bulk-OUT low (assumption)",
+    "transfer_s": 99.0
+   },
+   {
+    "MB_per_s": 28.0,
+    "petted_wdt_periods_of_60s": 2,
+    "rate": "bulk-OUT donor figure",
+    "transfer_s": 88.4
+   },
+   {
+    "MB_per_s": 40.0,
+    "petted_wdt_periods_of_60s": 2,
+    "rate": "bulk-OUT high (assumption)",
+    "transfer_s": 61.9
+   }
+  ],
+  "zeroing": [
+   {
+    "window_MiB": 512,
+    "zero_seconds_at_measured_rate": 7.1
+   },
+   {
+    "window_MiB": 2048,
+    "zero_seconds_at_measured_rate": 28.5
+   },
+   {
+    "window_MiB": 4096,
+    "zero_seconds_at_measured_rate": 57.0
+   },
+   {
+    "window_MiB": 4908,
+    "zero_seconds_at_measured_rate": 68.3
+   }
+  ]
+ },
+ "scope": "NAT-073 root delivery budget; host arithmetic on existing local facts; nothing ran on the phone",
+ "timing_nat068": {
+  "clean_GB_per_s": 6.134,
+  "clean_seconds": 0.088,
+  "copy_phase_seconds_zero_end_to_clean_begin": 6.214,
+  "handoff_counter_seconds": 36.219,
+  "zero_MB_per_s_including_ui_flush": 75.343,
+  "zero_begin_counter_seconds": 21.48,
+  "zero_seconds": 7.126
+ },
+ "window_fit": {
+  "2048MiB": {
+   "after_root_and_120MiB_kernel_estimate_MiB": -433.0,
+   "note": "120 MiB = measured wired pages of the 512 MiB run (81 MiB) rounded up; scales with memory, estimate"
+  },
+  "3072MiB": {
+   "after_root_and_120MiB_kernel_estimate_MiB": 591.0,
+   "note": "120 MiB = measured wired pages of the 512 MiB run (81 MiB) rounded up; scales with memory, estimate"
+  },
+  "4096MiB": {
+   "after_root_and_120MiB_kernel_estimate_MiB": 1615.0,
+   "note": "120 MiB = measured wired pages of the 512 MiB run (81 MiB) rounded up; scales with memory, estimate"
+  },
+  "4908MiB": {
+   "after_root_and_120MiB_kernel_estimate_MiB": 2427.0,
+   "note": "120 MiB = measured wired pages of the 512 MiB run (81 MiB) rounded up; scales with memory, estimate"
+  }
+ },
+ "window_proposal": {
+  "MiB": 4908,
+  "base": "0x8cb800000",
+  "end": "0x9fe400000",
+  "needs": "merge touching DT memory nodes in choose_window and raise MAX_WINDOW"
+ }
+}

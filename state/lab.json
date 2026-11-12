@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-12T01:18:40+00:00",
+  "updated_at": "2026-11-12T01:35:55+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -14486,8 +14486,11 @@
         "Evaluate options",
         "Recommend and spawn the implementation task"
       ],
-      "status": "pending",
-      "owner": null
+      "status": "in_progress",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-12T01:19:24+00:00",
+      "last_heartbeat": "2026-11-12T01:19:24+00:00",
+      "updated_at": "2026-11-12T01:19:24+00:00"
     },
     {
       "id": "IOS-004",
@@ -14829,6 +14832,155 @@
       "evidence": "docs/procedures/ios-010/evidence.json",
       "evidence_sha256": "f9bec88b42439b808fd4952c3ea5233fb91cfaabd4ba7c04b15bf43d324fea2b",
       "finished_at": "2026-11-12T00:38:14+00:00"
+    },
+    {
+      "id": "NAT-074",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 92,
+      "depends_on": [
+        "NAT-073"
+      ],
+      "title": "Big-window loader variant: merge touching device-tree memory nodes and take the 4908 MiB gap (replaces the 512 MiB cap), clear only the first 64 MiB plus segment BSS, clean the whole window by VA, replace the 57 s NAT-044 deadline by a hard cap with a 30 s watchdog pet only before the cap, RAMDisk ADT property = 16 KiB-aligned {address, size} for the 2,475,712,512 B root while only the 16,635-byte probe is present; built as a variant under its own path, host-tested with the nat-006 window harness and an instruction-level model (unicorn) of the new code",
+      "paths": [
+        "docs/procedures/nat-074",
+        "artifacts/nat-074"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "A window harness run on the real device-tree facts (devices/e1s-fdt/2026-11-10/runtime.facts.json) returns base 0x8cb800000 and size 4908 MiB, a harness case with a gap below 256 MiB is rejected, and an old-rule case returns the NAT-068 window 0x9de400000 / 512 MiB (docs/procedures/nat-073/budget.py is a cross-check, not the oracle).",
+        "The emitted loader code, checked by disassembly and a unicorn model: clears at most 64 MiB plus BSS; cleans the whole window by VA; polls a deadline cap constant and pets the watchdog every 30 s only before the cap; never pets after it; the NAT-044 reset path is unchanged and still the exit at the cap. NAT-020's forbidden-symbol rule is amended for s5e_wdt_pet in this image only and the amendment is listed. Mutants on the new hunks (cap, pet period, comparison direction, clear size, alignment) are killed or survivors listed.",
+        "ADT RAMDisk size is a multiple of 16 KiB (2,475,712,512 + 8192 B accounts for the 8192 remainder); the image builder pads and rejects other sizes; the payload header and boot_args memSize equal the window. A decision draft for NAT-075 names the pass rule; no native run in this task."
+      ],
+      "steps": [
+        "Window rule and clear/clean change",
+        "Deadline cap and bounded pet",
+        "ADT RAMDisk and builder",
+        "Harness, model, mutants, decision draft"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "NAT-075",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 92,
+      "depends_on": [
+        "NAT-074"
+      ],
+      "title": "Native run: big window, big md0, no transfer - does the payload kernel boot with a 4908 MiB window, advertise 16 KiB pages, accept a 2.3 GiB md0 and still run the project probe as PID 1, and does the loader-side watchdog pet reload the counter (cap 150 s for this run, reset to Download Mode at the cap)",
+      "paths": [
+        "docs/procedures/nat-075",
+        "artifacts/nat-075"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "One run of the NAT-074 image under its own decision file (committed first, per-image, RECOVERY only, restored from the pinned stock by NAT-013); host receives the loader and kernel text unattended.",
+        "Observed and reported separately: loader window base/size; the kernel's page count and page size in vm_page_bootstrap; the md0 line with the 16 KiB-aligned size; the probe's two lines and exit 81; the pet counter and whether the phone was still running past 83.9 s of the loader clock; boot time; Android check after restore. A SEC_UPLOAD ending (pet did not reload) is a recorded finding that needs the owner's keys, not a pass.",
+        "evidence.json (native-device) with outcome from the decision's pass rule; task done before the native permit is closed."
+      ],
+      "steps": [
+        "Decision file and permit",
+        "Run and restore",
+        "Analyse and record"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "NAT-076",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 90,
+      "depends_on": [
+        "NAT-073"
+      ],
+      "title": "Bulk-OUT receive path for root delivery: a variant of the NAT-041 DWC3 engine with one bulk-OUT endpoint (DEPCFG/DEPXFERCFG, chained TRBs of up to 16 MiB into the window, XferComplete handling, rx_bytes/rx_trbs/rx_errors in GET_INFO), its model, and a host sender (resumable by offset, bounded writes, checks rx_bytes); built under its own path without editing NAT-041",
+      "paths": [
+        "docs/procedures/nat-076",
+        "artifacts/nat-076",
+        "tools/ios/root_send.py",
+        "tests/test_root_send.py"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "Engine and model tests pass including seeded defects (short packet, TRB error, host disconnect mid-transfer, duplicate offset, wrong length) as NAT-041 did; endpoint and register values are cited to the pinned vendor driver or the Synopsys documentation named in NAT-041, not invented.",
+        "tools/ios/root_send.py sends a file to the model device by offset with a bounded write size, resumes after an injected failure, refuses a file whose size is not a multiple of 16 KiB, and prints the byte count the device reports; tests do not mirror the implementation.",
+        "A mutation pass over the receive state machine and the sender; survivors listed. No native run in this task; the first host-to-device rate is measured later (NAT-078)."
+      ],
+      "steps": [
+        "Endpoint configuration and TRB ring",
+        "Model and tests",
+        "Sender and tests",
+        "Mutants"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "NAT-077",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 90,
+      "depends_on": [
+        "NAT-073"
+      ],
+      "title": "Probe PID 1 that hashes /dev/rmd0 (SHA-256, MMU on, kernel-side read) and prints the digest and elapsed time on the console; builder that pads the donor system.apfs to a 16 KiB multiple and records its SHA-256; decision draft for the first delivery run",
+      "paths": [
+        "docs/procedures/nat-077",
+        "artifacts/nat-077"
+      ],
+      "sources": [],
+      "acceptance": [
+        "A static arm64 Mach-O probe built with the project toolchain reads the root device in bounded chunks, computes SHA-256 with an included public-domain or permissively licensed implementation (licence and attribution recorded), prints digest, byte count and seconds; a host build of the same code over a known file gives the digest hashlib gives.",
+        "The builder pads 2,475,712,512 B to 2,475,720,704 B (16 KiB multiple) with zeros, records both SHA-256 values and refuses a size that is not a multiple of 4096; Apple data stays under artifacts/, only sizes and hashes are committed.",
+        "A decision draft for NAT-078 states the question, the observable (digest equals the image digest, host-to-device rate, rx_bytes), and the pass rule; nothing is run on the phone."
+      ],
+      "steps": [
+        "Hashing probe and host build",
+        "Padding builder",
+        "Decision draft"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "NAT-078",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 90,
+      "depends_on": [
+        "NAT-075",
+        "NAT-076",
+        "NAT-077"
+      ],
+      "title": "Native delivery run: stream the real padded system.apfs from the host over bulk-OUT into the 4908 MiB window, boot the payload kernel with md0 on it, PID 1 hashes the device; first measured host-to-device rate and first full-size root in RAM",
+      "paths": [
+        "docs/procedures/nat-078",
+        "artifacts/nat-078"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "One run under its own decision file; the phone is restored from the pinned stock by NAT-013; Android and data checked afterwards.",
+        "Reported separately: bytes and seconds received by the device and by the host (rate), rx_errors, PID 1's digest against the image's SHA-256, kernel page size and free pages after md0, and the ending (cap reset to Download Mode or not).",
+        "A digest mismatch, a short transfer or a SEC_UPLOAD ending is recorded as the finding with the numbers, not as a pass."
+      ],
+      "steps": [
+        "Decision file and permit",
+        "Run and restore",
+        "Analyse and record"
+      ],
+      "status": "pending",
+      "owner": null
     }
   ],
   "experiments": [
@@ -61036,6 +61188,85 @@
           "owner": "claude-nat065-20261112-ramdisk",
           "priority": 96,
           "last_heartbeat": "2026-11-12T00:33:58+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T01:19:24+00:00",
+      "action": "task.claim:NAT-073",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-073",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 91,
+          "last_heartbeat": "2026-11-12T01:19:24+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T01:35:22+00:00",
+      "action": "task.add:NAT-074",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-074",
+          "status": "pending",
+          "owner": null,
+          "priority": 92
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T01:35:30+00:00",
+      "action": "task.add:NAT-075",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-075",
+          "status": "pending",
+          "owner": null,
+          "priority": 92
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T01:35:38+00:00",
+      "action": "task.add:NAT-076",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-076",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T01:35:47+00:00",
+      "action": "task.add:NAT-077",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-077",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T01:35:55+00:00",
+      "action": "task.add:NAT-078",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "NAT-078",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
         }
       ]
     }

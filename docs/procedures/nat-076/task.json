@@ -1,0 +1,32 @@
+{
+ "id": "NAT-076",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 90,
+ "depends_on": [
+  "NAT-073"
+ ],
+ "title": "Bulk-OUT receive path for root delivery: a variant of the NAT-041 DWC3 engine with one bulk-OUT endpoint (DEPCFG/DEPXFERCFG, chained TRBs of up to 16 MiB into the window, XferComplete handling, rx_bytes/rx_trbs/rx_errors in GET_INFO), its model, and a host sender (resumable by offset, bounded writes, checks rx_bytes); built under its own path without editing NAT-041",
+ "paths": [
+  "docs/procedures/nat-076",
+  "artifacts/nat-076",
+  "tools/ios/root_send.py",
+  "tests/test_root_send.py"
+ ],
+ "sources": [
+  "s24-port"
+ ],
+ "acceptance": [
+  "Engine and model tests pass including seeded defects (short packet, TRB error, host disconnect mid-transfer, duplicate offset, wrong length) as NAT-041 did; endpoint and register values are cited to the pinned vendor driver or the Synopsys documentation named in NAT-041, not invented.",
+  "tools/ios/root_send.py sends a file to the model device by offset with a bounded write size, resumes after an injected failure, refuses a file whose size is not a multiple of 16 KiB, and prints the byte count the device reports; tests do not mirror the implementation.",
+  "A mutation pass over the receive state machine and the sender; survivors listed. No native run in this task; the first host-to-device rate is measured later (NAT-078)."
+ ],
+ "steps": [
+  "Endpoint configuration and TRB ring",
+  "Model and tests",
+  "Sender and tests",
+  "Mutants"
+ ],
+ "status": "pending",
+ "owner": null
+}

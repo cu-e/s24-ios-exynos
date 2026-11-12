@@ -1,0 +1,30 @@
+{
+ "id": "NAT-074",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 92,
+ "depends_on": [
+  "NAT-073"
+ ],
+ "title": "Big-window loader variant: merge touching device-tree memory nodes and take the 4908 MiB gap (replaces the 512 MiB cap), clear only the first 64 MiB plus segment BSS, clean the whole window by VA, replace the 57 s NAT-044 deadline by a hard cap with a 30 s watchdog pet only before the cap, RAMDisk ADT property = 16 KiB-aligned {address, size} for the 2,475,712,512 B root while only the 16,635-byte probe is present; built as a variant under its own path, host-tested with the nat-006 window harness and an instruction-level model (unicorn) of the new code",
+ "paths": [
+  "docs/procedures/nat-074",
+  "artifacts/nat-074"
+ ],
+ "sources": [
+  "s24-port"
+ ],
+ "acceptance": [
+  "A window harness run on the real device-tree facts (devices/e1s-fdt/2026-11-10/runtime.facts.json) returns base 0x8cb800000 and size 4908 MiB, a harness case with a gap below 256 MiB is rejected, and an old-rule case returns the NAT-068 window 0x9de400000 / 512 MiB (docs/procedures/nat-073/budget.py is a cross-check, not the oracle).",
+  "The emitted loader code, checked by disassembly and a unicorn model: clears at most 64 MiB plus BSS; cleans the whole window by VA; polls a deadline cap constant and pets the watchdog every 30 s only before the cap; never pets after it; the NAT-044 reset path is unchanged and still the exit at the cap. NAT-020's forbidden-symbol rule is amended for s5e_wdt_pet in this image only and the amendment is listed. Mutants on the new hunks (cap, pet period, comparison direction, clear size, alignment) are killed or survivors listed.",
+  "ADT RAMDisk size is a multiple of 16 KiB (2,475,712,512 + 8192 B accounts for the 8192 remainder); the image builder pads and rejects other sizes; the payload header and boot_args memSize equal the window. A decision draft for NAT-075 names the pass rule; no native run in this task."
+ ],
+ "steps": [
+  "Window rule and clear/clean change",
+  "Deadline cap and bounded pet",
+  "ADT RAMDisk and builder",
+  "Harness, model, mutants, decision draft"
+ ],
+ "status": "pending",
+ "owner": null
+}
