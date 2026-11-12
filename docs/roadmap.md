@@ -19,3 +19,5 @@ The detailed approved sequence, subsystem contracts and stop conditions are in [
 state/lab.json defines the current phase. A written plan or an upstream screenshot does not complete a task.
 
 The registry contains the backlog and dependencies. Continue with RES-001, then RES-002/BLD-001. DEV-001 completed the initial authorized ADB inventory on 2026-11-05. Do not estimate iOS completion percentage from the number of closed tasks.
+
+Current position (2026-11-12, no percentage): stage 5 has partly happened (real XNU text received by the host; the project's own probe ran as PID 1 on this S24; a 4 GiB window with 16 KiB pages and a reserve-only RAM disk were measured, NAT-075). Stage 6 has not started: no root byte has reached the phone. Stage 7 (real iOS UI) has no evidence. The shortest path and the earliest blocker are in [strategy/2026-11-12-ios-critical-path.md](strategy/2026-11-12-ios-critical-path.md), section 0.

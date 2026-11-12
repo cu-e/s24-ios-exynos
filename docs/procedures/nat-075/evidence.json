@@ -1,0 +1,326 @@
+{
+  "kind": "native-device",
+  "origin": "local-device",
+  "outcome": "pass",
+  "question_outcome": "pass: decision 0029's pass rule is met (chain verdict PASS, root.outcome == probe-ran-to-exit, md1/rmd1 registered for 0x93908000, return class cap-reset with Download Mode at +177.93 s inside +165..+195 s); the task's acceptance is met except that the pet counter does not exist in the log (see acceptance 2)",
+  "recorded_at": "2026-11-12T02:51:06+00:00",
+  "commit": "2164105a67641a66aba4756f08c0db765c213e64",
+  "tree_state": "the files listed under sha256 under docs/ are committed in the commit that follows this record; the recorded commit is its parent (decision 0029, 2164105, was committed before the run)",
+  "owner": "claude-nat065-20261112-ramdisk",
+  "summary": "One native run of loader-diag-xnu-bigwin-md1 under decision 0029 (decision 0019 protocol). The host computer received the loader and kernel text by itself (412 frames, 410 records, 27 stop notes, the kernel's own return, its 23857-byte log, HOLD; 0 drops, 0 faults). Measured on the phone for the first time: the loader's 4096 MiB window and its three-span clear (146259968 B as built); XNU booting in it with 16 KiB pages (105775 free + 156369 wired = 262144 pages = 4 GiB); a reserve-only RAMDisk1 of 2475720704 B registered as md1 at FFFFFFF00897C000 with md0 and the probe unaffected (probe ran as PID 1, exit status 81); and the bounded watchdog pet: the run lasted to the 150 s cap and ended in Download Mode at +177.93 s instead of SEC_UPLOAD at about +95 s. No bytes were put into md1. Restored from the pinned stock; Android verified.",
+  "evidence_category": "native-device: one run of a RECOVERY image on this S24 observed by the host collector (EP0 records), the host USB watcher and the Download Mode / Android checks after restore. The kernel and PID 1 text is what the image's stub sent from the kernel's log buffer and console ring at the kernel's return. The pet is observed only through the return class; the image sends no pet counter. The probe is the project's test init, not Apple's launchd.",
+  "acceptance": {
+    "1_decision_and_protocol": "met: decision 0029 (image loader-diag-xnu-bigwin-md1, both hashes, decision 0019) committed (2164105) before the run; native opened citing it, task done while open, closed after; one run, no retry; docs/procedures/nat-075/session_nat075.py was the only launcher (its marker artifacts/nat-075/native-attempt-loader-diag-xnu-bigwin-md1-used.json prevents a second run). The launch was attempted without a further owner question (standing statements recorded in decisions 0025/0026/0029) and was not refused.",
+    "2_observed_and_reported_separately": "loader window base 0x8fe400000, size 0x100000000 (4096 MiB; the task text said 4908 MiB, which the loader refuses above 4 GiB: decision 0029 records the deviation); vm_page_bootstrap: 105775 free + 156369 wired pages = 262144 = 4 GiB at 16 KiB pages (page size 16384 by the analyser's reading); md lines: md0/rmd0 for 0x8000 and md1/rmd1 (01000001/0D000001) at FFFFFFF00897C000 for 0x93908000 = 2475720704 B (the task text said a 2.3 GiB md0: the design changed to a reserve-only md1 with md0 kept as the 16635-byte probe, see NAT-074); probe lines '*** SWEET userspace: init running as PID 1 ***' and 'SWEET probe: done, exiting', exit status 81; pet counter: NOT REPORTED (g_nat044.pets is kept in the loader's RAM and not sent; the effect is read from the return class: no SEC_UPLOAD at about +95 s, Download Mode at +177.93 s after the request, 3.84 s after 1209:0001 vanished); boot time: loader enumerated at +26.9 s, kernel log dump received at +56.5 s; Android check after restore: pass.",
+    "3_evidence_and_ordering": "met: this evidence.json (native-device) with outcome from the decision's pass rule; task done before the native permit is closed."
+  },
+  "established": [
+    "native-device: the loader accepted a 4096 MiB window (window from DTB 0x8fe400000, win size 0x100000000), cleared the three spans (zero_bytes 0x8b7c000 = 146259968 B) and jumped; no refusal text.",
+    "native-device: XNU booted in that window with 16 KiB pages: vm_page_bootstrap 105775 free + 156369 wired pages = 262144 pages = 4 GiB at 16 KiB.",
+    "native-device: a reserve-only RAMDisk1 entry in the ADT inside the payload's kernel_end (2475720704 B = 604424 x 4 KiB, no bytes) is registered by the kernel as md1 (FFFFFFF00897C000, size 0x93908000); md0 and the probe were unaffected: the NAT-068 sequence to load_init_program and exit 81 repeated.",
+    "native-device: the bounded watchdog pet held the phone past the 83 s hardware watchdog (which gives SEC_UPLOAD at about +95 s in NAT-046/048) until the 150 s software cap; the run then ended through the loader's reset path into Download Mode, restored without owner action. Read from the return class; the pet writes themselves are not observed.",
+    "native-device: the host received the whole chain for a fourth payload run: 27 stop notes, the kernel's own return (note n=28, x3=0), the kernel's log (23857 bytes) and HOLD stage 0x51 code 0x223e; 0 drops."
+  ],
+  "not_established": [
+    "That any bytes can be put into md1: the bulk-OUT receive path does not exist yet (NAT-076) and the loader's clear plan skipped the reserve; whether the kernel can read a 2.3 GiB ramdisk (NAT-077).",
+    "The host-to-phone transfer rate and whether the root fits in the cap; whether anything feeds the 83 s watchdog while the kernel runs free (this run's kernel part lasted about 30 s after the jump).",
+    "That the 1.61 GiB left free (105775 x 16 KiB) after the reserve is enough for launchd + dyld + the shared cache (the loader's window ceiling is 4 GiB, Android sees 7.06 GiB).",
+    "That Apple's dyld, launchd or any Apple userland runs; the probe is the project's test init.",
+    "The exact absolute kernel clock rate (stamps about 2.4 % inflated, not re-measured)."
+  ],
+  "findings": [
+    "Decision 0029's pass rule is a conjunction of four conditions and all held; the return came 0.2 s above the narrower predicted band (+173.2..+177.7 s) and inside the rule's window (+165..+195 s). The 3.84 s gap between 1209:0001 vanishing and Download Mode reproduces NAT-068's 3.8 s.",
+    "The return-class discrimination works as designed: a run that does not pet would have ended as SEC_UPLOAD at about +95 s; this one ended in Download Mode, so the pet is the reason the phone lived about 80 s longer than the unpetted hardware watchdog allows.",
+    "Window size, not the reserve, is the memory constraint: after md1 the kernel has 1.61 GiB free; lifting the loader's 4 GiB ceiling (Android sees 7.06 GiB) or shrinking the root becomes a design decision before launchd runs."
+  ],
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/lab.py",
+        "project",
+        "permit",
+        "--scope",
+        "native",
+        "--value",
+        "true",
+        "--decision",
+        "docs/decisions/0029-nat075-loader-diag-xnu-bigwin-md1-single-run-2026-11-12.md",
+        "--owner",
+        "claude-nat065-20261112-ramdisk"
+      ],
+      "exit_code": 0,
+      "note": "native opened for the run window"
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/lab.py",
+        "task",
+        "claim",
+        "NAT-075",
+        "--owner",
+        "claude-nat065-20261112-ramdisk"
+      ],
+      "exit_code": 0,
+      "note": "claimed with native open"
+    },
+    {
+      "argv": [
+        "<pyusb venv>/bin/python",
+        "-I",
+        "docs/procedures/nat-075/session_nat075.py",
+        "--image",
+        "loader-diag-xnu-bigwin-md1",
+        "--out",
+        "artifacts/nat-075/preflight-001"
+      ],
+      "exit_code": 0,
+      "note": "ready-read-only (no write, no reboot); artifacts/nat-075/preflight-001/report.json (a first invocation with a pre-created --out directory failed with FileExistsError before any device access)"
+    },
+    {
+      "argv": [
+        "<pyusb venv>/bin/python",
+        "-I",
+        "docs/procedures/nat-075/session_nat075.py",
+        "--image",
+        "loader-diag-xnu-bigwin-md1",
+        "--out",
+        "artifacts/nat-075/run-001",
+        "--execute"
+      ],
+      "exit_code": 0,
+      "note": "report.json: outcome native-attempt-started, readback of RECOVERY = c76165fb...bdbd14, reboot requested at T0 = 2026-11-12T02:41:47.650651+00:00; watcher and collector running"
+    },
+    {
+      "argv": [
+        "<pyusb venv>/bin/python",
+        "-I",
+        "docs/procedures/nat-013/restore_stock.py",
+        "restore",
+        "--bus",
+        "5",
+        "--address",
+        "108",
+        "--out",
+        "artifacts/nat-075/restore-001"
+      ],
+      "exit_code": 0,
+      "note": "printed 'Restore outcome: awaiting-readback'; restore-001/report.json image_sha256 = stock"
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/nat-012/check_android.py",
+        "artifacts/nat-075/restore-001/android-check.json"
+      ],
+      "exit_code": 0,
+      "note": "recovery_hash_match true, sys.boot_completed 1, user_data_directories_present, outcome pass"
+    },
+    {
+      "argv": [
+        "<pyusb venv>/bin/python",
+        "-I",
+        "docs/procedures/nat-013/restore_stock.py",
+        "assess",
+        "--report",
+        "artifacts/nat-075/restore-001/report.json",
+        "--readback",
+        "artifacts/nat-075/restore-001/android-check.json"
+      ],
+      "exit_code": 0,
+      "note": "output saved in restore-001/assess.txt: outcome pass, all six stages true"
+    },
+    {
+      "argv": [
+        "<pyusb venv>/bin/python",
+        "-W",
+        "ignore",
+        "-I",
+        "docs/procedures/nat-075/analyze_nat075.py",
+        "--archive",
+        "artifacts/nat-075/run-001/archive",
+        "--events",
+        "artifacts/nat-075/run-001/usb-events.jsonl",
+        "--report",
+        "artifacts/nat-075/run-001/report.json",
+        "--out",
+        "artifacts/nat-075/run-001/analysis.json",
+        "--log-out",
+        "artifacts/nat-075/run-001/kernel-log.txt"
+      ],
+      "exit_code": 0,
+      "note": "verdict PASS; bigwin.rule all four true; return cls cap-reset dt 177.93; run after the collector and watcher had exited"
+    },
+    {
+      "argv": [
+        "python3",
+        "-I",
+        "docs/procedures/nat-066/sanitize_run.py",
+        "artifacts/nat-075/run-001",
+        "docs/procedures/nat-075"
+      ],
+      "exit_code": 0,
+      "note": "writes the three sanitized run-001-* files under docs/procedures/nat-075 (asserted replacement counts)"
+    }
+  ],
+  "artifacts": [
+    "artifacts/nat-075/preflight-001/report.json",
+    "artifacts/nat-075/preflight-001/usb-selftest.jsonl",
+    "artifacts/nat-075/native-attempt-loader-diag-xnu-bigwin-md1-used.json",
+    "artifacts/nat-075/run-001.stdout",
+    "artifacts/nat-075/run-001.stderr",
+    "artifacts/nat-075/run-001/report.json",
+    "artifacts/nat-075/run-001/usb-events.jsonl",
+    "artifacts/nat-075/run-001/usb-selftest.jsonl",
+    "artifacts/nat-075/run-001/collector-heartbeat.jsonl",
+    "artifacts/nat-075/run-001/collector.stdout",
+    "artifacts/nat-075/run-001/collector.stderr",
+    "artifacts/nat-075/run-001/usb-watch.stderr",
+    "artifacts/nat-075/run-001/analysis.json",
+    "artifacts/nat-075/run-001/kernel-log.txt",
+    "artifacts/nat-075/analysis.stdout",
+    "artifacts/nat-075/analysis.stderr",
+    "artifacts/nat-075/restore-001.stdout",
+    "artifacts/nat-075/restore-001.stderr",
+    "artifacts/nat-075/restore-001/report.json",
+    "artifacts/nat-075/restore-001/android-check.json",
+    "artifacts/nat-075/restore-001/assess.txt",
+    "artifacts/nat-075/check-android.stdout",
+    "artifacts/nat-075/package-001/loader-diag-xnu-bigwin-md1/recovery.img",
+    "artifacts/nat-074/build-002/loader-diag-xnu-bigwin-md1/Image.payload",
+    "artifacts/nat-074/build-002/loader-diag-xnu-bigwin-md1/Image",
+    "artifacts/nat-075/run-001/archive/attempt.json",
+    "artifacts/nat-075/run-001/archive/chunks.jsonl",
+    "artifacts/nat-075/run-001/archive/collector-summary.json",
+    "artifacts/nat-075/run-001/archive/events.jsonl",
+    "artifacts/nat-075/run-001/archive/manifest.json",
+    "artifacts/nat-075/run-001/archive/received.bin",
+    "artifacts/nat-075/run-001/archive/usb-transfers.jsonl",
+    "artifacts/nat-075/run-001/archive/boots/000001-28b50d050101516f1ec2b6f0c3c067a8-89f6a3190000000094859b93c0cba3a6/frames.jsonl",
+    "artifacts/nat-075/run-001/archive/boots/000001-28b50d050101516f1ec2b6f0c3c067a8-89f6a3190000000094859b93c0cba3a6/payload.bin"
+  ],
+  "images": {
+    "loader-diag-xnu-bigwin-md1": {
+      "recovery_sha256": "c76165fbe6457932e5c459b45a63a8510bf802e72b4278e0f9cb1186edbdbd14",
+      "payload_sha256": "5f39495505fd413671c6007a61ae7dab64b313014fa82a31e3302dcb89d1e25f",
+      "payload_bytes": 21878752,
+      "payload_offset": 2048,
+      "loader_image_sha256": "47787e1d0582bd0380b5aff201e9829cda3695ae5d83bf4882684fe858aa7d68",
+      "xnu_payload_sha256": "5638f5294772e493628d17bf3ede546568a32061280b7b4355d0ccbf8e219a0f",
+      "cmdline": "rd=md0 e1sufs=0 e1sufs_probe=0 ufsrw=0 ufs_write=0 sweethw=0 nat_attempt=NAT075-md1 debug=0xc serial=3 cpus=1 keepsyms=1 -v loader_return_after=8 launchdsuffix=release cs_enforcement_disable=1 e1stouch=0 e1sbattery=0",
+      "window_mib": 4096,
+      "reserve_bytes": 2475720704,
+      "pet_s": 30,
+      "cap_s": 150
+    }
+  },
+  "stock_recovery_sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+  "verdicts": {
+    "run-001": {
+      "chain": "PASS",
+      "root": "probe-ran-to-exit",
+      "bigwin": {
+        "md1_ok": true,
+        "cap_reset": true,
+        "page_size": 16384
+      }
+    }
+  },
+  "run": {
+    "t0_utc": "2026-11-12T02:41:47.650651+00:00",
+    "frames": 412,
+    "records": 410,
+    "notes": 27,
+    "last_checkpoint": 21,
+    "return_note": 28,
+    "return_x3": "0x0",
+    "dump_1": "why=1 len=0",
+    "dump_2": "why=2 len=23857",
+    "hold": "HOLD stage=0x51 code=0x223e",
+    "drops": 0,
+    "bytes_received": 179904,
+    "manifest_outcome": "complete-received-stream",
+    "monitor_appear_dt_s": 26.9,
+    "phone_left_dt_s": 3.55,
+    "usb_gone_dt_s": 174.09,
+    "download_mode_dt_s": 177.93,
+    "return_class": "cap-reset",
+    "vm": {
+      "free": 105775,
+      "wired": 156369,
+      "total": 262144,
+      "page_size": 16384
+    },
+    "md1": {
+      "va": "FFFFFFF00897C000",
+      "size": 2475720704
+    },
+    "loader": {
+      "window_base": "0x8fe400000",
+      "window_size": 4294967296,
+      "zero_bytes_final": 146259968,
+      "clean_span": 4294967296
+    },
+    "root": {
+      "outcome": "probe-ran-to-exit",
+      "exit_status": 81,
+      "signal": 0,
+      "pid": 1
+    }
+  },
+  "sha256": {
+    "docs/procedures/nat-075/README.md": "95d49903f2c567be947724b45942abbf10401d86f3bc70f5da65c436e5433d5f",
+    "docs/procedures/nat-075/run-001-kernel-log.txt": "50a28be0894139827d120c3bf373a5fa518f2f19e297699e693caecc017d2285",
+    "docs/procedures/nat-075/run-001-analysis.json": "9bda3af771244e6e1129df633e0f8070e7da1308ca02fdb161ed2d718faced1b",
+    "docs/procedures/nat-075/run-001-usb-events.jsonl": "0dfc6ac8d9cc81f081324f4d1501770685c56649b6524e9a8a061d8d3f33e2a6",
+    "docs/decisions/0029-nat075-loader-diag-xnu-bigwin-md1-single-run-2026-11-12.md": "b139b322c74240d4202e5e5a37305da4c10e10dd14afc8c7674261c54f0bfa4a",
+    "docs/procedures/nat-075/analyze_nat075.py": "ac3946a518a5f37728f0ed9852939f06bccc9eb2f75d4691c9a92747a9344e61",
+    "docs/procedures/nat-075/session_nat075.py": "509293fed5605c6d9b170afaf53238f143ef77459a11a0db2682572b92b383a0",
+    "docs/procedures/nat-075/derive.py": "f3fb979586c9f409d1adb8bedc59fbfe54c7ebef6aaaaa65c6852f825e3ff8d4",
+    "docs/procedures/nat-075/test_nat075.py": "95948098b3695ee1680ad4f60327c876cda2d75fe4bf09c343e4fb2c01789e13",
+    "docs/procedures/nat-075/mutants_nat075.py": "f25ba6327dfeba7e2f45a3aff8cbda69da7f1e5c37addcee9262b92f18c86de8",
+    "docs/procedures/nat-075/mutation.json": "be665ff72842f1464dacd820a758fb0ca92299b90a4cd1be5a2c47ffa473326b"
+  },
+  "artifact_sha256": {
+    "artifacts/nat-075/preflight-001/report.json": "1976f77e37ab352c94b8a697b871de65bdd948869b1a032899f2688da454fea7",
+    "artifacts/nat-075/preflight-001/usb-selftest.jsonl": "82b80188667d6405b887c2e2a88d0ce444c245c1d61e33455b4d69dae7be0d40",
+    "artifacts/nat-075/native-attempt-loader-diag-xnu-bigwin-md1-used.json": "10beae2d1196cf174a8e66e7e1319cf758f13f722e743e90fa96908c5d4e13a7",
+    "artifacts/nat-075/run-001.stdout": "57fba94e48db23ce58f431f0b0c61d882f5ddf19f75ef8ce4543940d213c0798",
+    "artifacts/nat-075/run-001.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/nat-075/run-001/report.json": "e2279681547e8b901c4647f32ad24f6e782c2e578f7d34e31062ffb62b613b1a",
+    "artifacts/nat-075/run-001/usb-events.jsonl": "0dfc6ac8d9cc81f081324f4d1501770685c56649b6524e9a8a061d8d3f33e2a6",
+    "artifacts/nat-075/run-001/usb-selftest.jsonl": "c83c9bf6174696ab26d8e0227af08787ac2bfb8dd166f6005c5e0a294f53dd28",
+    "artifacts/nat-075/run-001/collector-heartbeat.jsonl": "b54fc75ed9e54ee930f46e8edf6da09267ee31fd1a5fad1fe0d889262dfa8a36",
+    "artifacts/nat-075/run-001/collector.stdout": "7c5c33d0ac292f1533000f0dea85898ecd7c8606f7859425f59d725b40ed4ae9",
+    "artifacts/nat-075/run-001/collector.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/nat-075/run-001/usb-watch.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/nat-075/run-001/analysis.json": "d7c6bc530b2e6267da94441360a039ec13d82b096fdf2ca7021ac0e018dcf985",
+    "artifacts/nat-075/run-001/kernel-log.txt": "1d6b8afe2444b0ef83d76012b7ecb893c45aed1f2be9f688349093ad1cb0edd7",
+    "artifacts/nat-075/analysis.stdout": "d7c6bc530b2e6267da94441360a039ec13d82b096fdf2ca7021ac0e018dcf985",
+    "artifacts/nat-075/analysis.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/nat-075/restore-001.stdout": "9dc8bd160c29f3ee2737f24220227ec229179ae075c9fe7977b73d4d98ed6651",
+    "artifacts/nat-075/restore-001.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/nat-075/restore-001/report.json": "47fd99b23e89efded3867f345bbac04d4651280a89d1e5eab1f421c89e784884",
+    "artifacts/nat-075/restore-001/android-check.json": "c458c4346e2db214266013f67b9d50236c6506428ddaeab0acca2d37d802df39",
+    "artifacts/nat-075/restore-001/assess.txt": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+    "artifacts/nat-075/check-android.stdout": "99bcf165e37bf7ce862dd439071416ee2ca4adb4f8c1d4cb115ff5f33fd22b0e",
+    "artifacts/nat-075/package-001/loader-diag-xnu-bigwin-md1/recovery.img": "c76165fbe6457932e5c459b45a63a8510bf802e72b4278e0f9cb1186edbdbd14",
+    "artifacts/nat-074/build-002/loader-diag-xnu-bigwin-md1/Image.payload": "5f39495505fd413671c6007a61ae7dab64b313014fa82a31e3302dcb89d1e25f",
+    "artifacts/nat-074/build-002/loader-diag-xnu-bigwin-md1/Image": "47787e1d0582bd0380b5aff201e9829cda3695ae5d83bf4882684fe858aa7d68",
+    "artifacts/nat-075/run-001/archive/attempt.json": "d413cfa899c94deaac1690592ead3e46da2abac7beaaea31a28b88dfa87c25e5",
+    "artifacts/nat-075/run-001/archive/chunks.jsonl": "7c6c6096fe809647c75278d16533132a9a415615b02e2a07950bd60aacbfb503",
+    "artifacts/nat-075/run-001/archive/collector-summary.json": "a175bfc7d179062df725d7226ea829da98d5ef21dba8c18e46cbed71263ca2f0",
+    "artifacts/nat-075/run-001/archive/events.jsonl": "b9fdb213f778a43fc8471d4779a1de16f8df3447fcd9591e7dcd43f22bde648f",
+    "artifacts/nat-075/run-001/archive/manifest.json": "b214c61a2f5dad9f46072b2a6b413b7938fb100ca2202332044f811634c1592b",
+    "artifacts/nat-075/run-001/archive/received.bin": "6f2800a37e5e6ae77db49aab769f8b41e6cdfb1900c5f7a0d7b85d2e18626615",
+    "artifacts/nat-075/run-001/archive/usb-transfers.jsonl": "a4d574297822903c31c2ae1feb91f7a4aabf826fca9c1e30f324cfe4d00645ca",
+    "artifacts/nat-075/run-001/archive/boots/000001-28b50d050101516f1ec2b6f0c3c067a8-89f6a3190000000094859b93c0cba3a6/frames.jsonl": "663f9bf2fbdc49b06592bfda1f771ce7393dbda6f7036fb28e7de150e4074b57",
+    "artifacts/nat-075/run-001/archive/boots/000001-28b50d050101516f1ec2b6f0c3c067a8-89f6a3190000000094859b93c0cba3a6/payload.bin": "96e105179a013342463e495da935d026053992b24a9d36448bcd562798f03818"
+  },
+  "device_inventory": "devices/local-2026-11-12-nat075.json",
+  "device_used": true,
+  "flashed": true,
+  "flashed_note": "RECOVERY (/dev/block/sda18) only, the image above, restored to stock (96620b8b...) with full-hash readback; no other partition."
+}
