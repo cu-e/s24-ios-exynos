@@ -1,0 +1,8 @@
+[
+ {"file": "docs/procedures/nat-079/src/nat079_impl.h", "line": 26, "desc": "< -> <=",
+  "reason": "`pa + bytes <= pa` differs from `pa + bytes < pa` only when pa + bytes == pa modulo 2^64, i.e. bytes == 0 or bytes == 2^64; bytes is already at least 8 pages by the previous check and bytes == 2^64 does not fit a uint64_t, so no argument reaches the difference."},
+ {"file": "docs/procedures/nat-079/src/nat079_impl.h", "line": 58, "desc": "return value dropped",
+  "reason": "NAT079_DONE is defined as 0 in nat079_fixed.h, so `return 0` is the same statement after preprocessing; the mutation changes the spelling only. test_nat079 and test_e2e79 pin the value 0 (DONE) in their own status tables."},
+ {"file": "docs/procedures/nat-079/src/nat079_impl.h", "line": 75, "desc": "literal 20 -> 21",
+  "reason": "n79_dec() needs 20 digit slots at most (2^64 - 1 has 20 decimal digits) and writes them from index 0 upwards; a 21-byte buffer holds the same digits and the output is identical. A buffer one byte too small is not equivalent and is killed by the 2^64 - 1 line test."}
+]

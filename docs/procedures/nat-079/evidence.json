@@ -1,0 +1,216 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T09:25:23+00:00",
+ "commit": "d0031dcf668d989e5fe945bf550b2191d1f250ba",
+ "tree_state": "all files listed under sha256 were uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "summary": "The loader variant loader-diag-xnu-rx-md1 for the NAT-078 delivery run: asserted hunks turn the pinned NAT-074 big-window loader sources and the NAT-076 bulk-OUT engine into a loader that, after layout and before the kernel jump, receives the padded root image over USB bulk-OUT directly into the md1 reserve (2,475,720,704 B) with a bounded receive phase (cap 240 s, pet every 30 s, final pet before the jump), a CPU self-test of eight pages of the reserve before the destination is installed, and delivery counters in the loader log; the NAT-077 hash probe is its md0 PID 1 (--ramdisk). Built (build-003), packaged by the NAT-044 chain (package-002, RECOVERY SHA-256 d9502498...02ef), 110 host tests (90 with the compiled loader code in Unicorn, 20 end-to-end with the real sender on the NAT-076 model), a mutation pass of 580 candidates (486 killed, 91 do not build, 3 survivors, each shown to be equivalent), and a decision template for NAT-078. Nothing was run on the phone.",
+ "acceptance": {
+  "1_hunks": "make_variant79.py applies counted, asserted hunks to a copy of the pinned NAT-074 loader source and the NAT-076 engine; a missing or duplicated anchor is an error naming the hunk and writes nothing (test_every_hunk_matches_exactly_once_in_the_real_nat074_sources, test_a_missing_anchor_*, test_a_duplicated_anchor_*); the source headers are copied byte for byte and the base SHAs (artifacts/nat-079/build-003/build.json, which also records the SHA-256 of every file of the NAT-076 engine and of the pinned sources) and the licences (GPL-2.0 for the loader and the vendor DWC3 code) are recorded in the build record and the README; only docs/procedures/nat-079 and artifacts/nat-079 were written; the NAT-074/NAT-076 sources are read, not edited.",
+  "2_host_tests": "test_nat079.py runs the compiled receive phase in Unicorn: it ends on rx_bytes == rx_size (done), on the cap (timeout) and on a failed self-test (status 5, no destination is installed; a host that sent before the destination was real is refused without touching the reserve); the watchdog is petted every 30 s through the whole phase and a phase that overruns the deadline is stopped by the NAT-044 reset sequence with the pets unchanged; the reserve handed to the phase is the loader's own md1 reserve (16 KiB aligned, inside the 4 GiB window, outside the clear plan) for the built payload; the binary rules of NAT-074 still hold (one s5e_wdt_pet call in the image, reached only from the tick and the final pet; the guard arms once for 83 s and never pets or disarms; no cache maintenance in the new code; no vector or float registers). test_e2e79.py runs the same phase against the NAT-076 model with the real tools/ios/root_send.py sender.",
+  "3_package_template_mutation": "The image is packaged by the NAT-044 chain (package-002, hashes pinned in artifacts/nat-079/package-002/package.json and recomputed from the file); docs/procedures/nat-079/decision-template-nat078.md names Image.payload (95aec19a...0512) and RECOVERY (d9502498...02ef) and the NAT-080 hashes; the mutation pass (docs/procedures/nat-079/mutation.json) lists three survivors with reasons in equivalent.json. No native run."
+ },
+ "findings": [
+  "DONE means committed, not verified: the loader counts the bytes the engine accepted; the digest is checked by the PID 1 probe (NAT-077) reading /dev/rmd1.",
+  "Direct DMA into the reserve was chosen over the staged copy that NAT-076 made the default: the loader runs with the MMU off and the staged copy is a byte-granular loop; this is an engineering judgement, not a measurement. Staged mode still exists (--rx-direct 0) and its contract runs on the model. The first accepted direct chunk is the test of NAT-040 item U5.",
+  "The engine comes up with a 512-byte placeholder destination so that the host collector sees the device before the receive path is installed; the companion (NAT-080) must treat that capacity as 'not ready'.",
+  "Timing rules checked by build.py: pet + 20 s <= 83 s (the unpetted hardware watchdog measured in NAT-075), 8 s <= return_after <= 63 s, deadline >= rx cap + return_after + 60 s and <= 600 s; built values rx cap 240 s, return_after 45 s, deadline 360 s, pet 30 s, report 10 s.",
+  "Two mutation passes were polluted by 'Disk quota exceeded' on the shared /tmp tmpfs (180 of 214 impl mutants of pass 2 were reported invalid for that reason); their C results are not used. Pass 5 ran with TMPDIR on the NVMe volume. Pass 4 found four build.py survivors (the RAMDISK_MAX literal and the size checks), killed by a test with the exact limits.",
+  "NAT-076's mutation pass had found two engine defects (a double ENDTRANSFER on a bus reset during a pending end; an idle XferComplete leaving the endpoint enabled with no transfer); this build uses the fixed engine."
+ ],
+ "established": [
+  "Host-test: the hunks apply exactly once to the pinned sources and refuse a drifted base; the build and the NAT-044 package are reproducible from the recorded commands and the recorded hashes equal the files.",
+  "Host-test: the compiled receive phase behaves as listed in acceptance 2 under Unicorn and on the NAT-076 model, including the status codes 0-8, argument refusal, premature host traffic, a fault mid-stream, counters that disagree, a stalled stream and a 4 GiB window with the real-size reserve.",
+  "Host-test: 486 of 489 valid mutants of the new code, the hunk maker and the builder are killed; the other 3 are equivalent with reasons."
+ ],
+ "not_established": [
+  "Anything about the S24: that the DWC3 DMA reaches the reserve above 4 GiB (NAT-040 item U5), the host-to-phone rate (the 225 s delivery budget needs about 11 MB/s), cache visibility of the delivered bytes to the kernel (a clean+invalidate over the reserve before receiving is the follow-up if the NAT-078 digest differs), watchdog behaviour while bulk is served (NAT-071), whether the payload kernel hands PID 1 stdio, how /dev/rmd1 behaves under read(2).",
+  "That the instruction-level model (Unicorn, no MMU, no caches, no real interrupt timing) and the NAT-076 DWC3 model are faithful to the Exynos 2400 controller.",
+  "That the image boots: the RECOVERY image was built and packaged, never written or run."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-079/test_nat079.py"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; 90 tests, OK; logs artifacts/nat-079/logs/test_nat079.{stdout,stderr,exit}"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-079/test_e2e79.py"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; 20 tests, OK; logs artifacts/nat-079/logs/test_e2e79.{stdout,stderr,exit}"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-079/build.py",
+    "--out",
+    "artifacts/nat-079/build-003",
+    "--loader-source",
+    "artifacts/nat-020/build-003/source",
+    "--ramdisk",
+    "artifacts/nat-077/build-final3/hash-probe"
+   ],
+   "exit_code": null,
+   "note": "the build whose record is artifacts/nat-079/build-003/build.json; its exit status was not captured (the record and log exist); output hashes in artifacts/nat-079/build-003.log"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-044/package.py",
+    "--build",
+    "artifacts/nat-079/build-003",
+    "--out",
+    "artifacts/nat-079/package-002"
+   ],
+   "exit_code": null,
+   "note": "the package whose record is artifacts/nat-079/package-002/package.json; its exit status was not captured (record and log exist)"
+  },
+  {
+   "argv": [
+    "sha256sum",
+    "artifacts/nat-079/package-002/loader-diag-xnu-rx-md1/recovery.img",
+    "artifacts/nat-077/system-padded.apfs",
+    "artifacts/nat-077/build-final2/hash-probe"
+   ],
+   "exit_code": 0,
+   "note": "every hash of section 2 of the decision template that names a file was recomputed on 2026-11-12 and equals the template; the Image.payload slice (offset 2048, 21,956,576 B) was hashed from the RECOVERY image; artifacts/nat-079/logs/image-hashes.txt"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-I",
+    "docs/procedures/nat-079/mutate_nat079.py",
+    "--out",
+    "artifacts/nat-079/mutation-run5-full",
+    "--jobs",
+    "10"
+   ],
+   "exit_code": null,
+   "note": "final pass, started in the background, its exit status was not captured; the summary shows 0 unexplained survivors (docs/procedures/nat-079/mutation.json); log artifacts/nat-079/mutation-run5-full.log"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; logs artifacts/nat-079/logs/make-check.{stdout,stderr,exit}; it does not run the NAT-079 procedure tests"
+  }
+ ],
+ "mutation_summary": {
+  "final_pass": "artifacts/nat-079/mutation-run5-full (docs/procedures/nat-079/mutation.json): 580 candidates, 91 invalid (51 do not parse, 40 fail the real build/fixture compile), 486 killed (3 by timeout), 3 survivors, all in equivalent.json",
+  "per_file": {
+   "docs/procedures/nat-079/build.py": {
+    "total": 219,
+    "killed": 210,
+    "survived": 0,
+    "survived_unexplained": 0,
+    "invalid": 9,
+    "timeout": 3
+   },
+   "docs/procedures/nat-079/make_variant79.py": {
+    "total": 126,
+    "killed": 84,
+    "survived": 0,
+    "survived_unexplained": 0,
+    "invalid": 42,
+    "timeout": 0
+   },
+   "docs/procedures/nat-079/src/nat079_fixed.h": {
+    "total": 21,
+    "killed": 20,
+    "survived": 0,
+    "survived_unexplained": 0,
+    "invalid": 1,
+    "timeout": 0
+   },
+   "docs/procedures/nat-079/src/nat079_impl.h": {
+    "total": 214,
+    "killed": 172,
+    "survived": 3,
+    "survived_unexplained": 0,
+    "invalid": 39,
+    "timeout": 0
+   }
+  }
+ },
+ "sha256": {
+  "docs/procedures/nat-079/README.md": "1e9c4769b08001ab66a1323ba30549da74002975fd57be0db862166117a16096",
+  "docs/procedures/nat-079/build.py": "050893ee4c957d732926123b2497bccbd11e030c35e6095033141defa40f4cd3",
+  "docs/procedures/nat-079/decision-template-nat078.md": "05515cf9e577384cda5326d9572c8d7478320b33f24589c2c8ff5e5a429f24b8",
+  "docs/procedures/nat-079/equivalent.json": "d199c7ccbc254a5beea529e7bcc63427e875f5d09d6f4fae1b125ad8dcc980e6",
+  "docs/procedures/nat-079/fixture79.c": "ed932d537a6d911e8361a193d11d4365a8a7f4d8e1f758a527a9db10e09bce1a",
+  "docs/procedures/nat-079/make_variant79.py": "9dcc92a5e6f883759d6d5eb8c52277242ee8c97d60d0fdc3117c541ce1ec86cb",
+  "docs/procedures/nat-079/mutate_nat079.py": "9e5a90b5bebc13008fb56f8e425abf1fad9b5c2fc87debd52fa4f2fcd0be2c5a",
+  "docs/procedures/nat-079/mutation.json": "09498fd67cc31e20422f58fa4f2e1b5d868fa0592cbfb1e524f006df26e834fd",
+  "docs/procedures/nat-079/src/nat079_fixed.h": "6d8e218d44c115b3f40778139821f8672494323a5663791902d263847f8a4c7e",
+  "docs/procedures/nat-079/src/nat079_impl.h": "5b018d109dfd55ff28508a76b586422910ada6caaef0d0203abfb306d1c5efbf",
+  "docs/procedures/nat-079/test_e2e79.py": "0a22876fadbfbdebb3618eca517b6ef0a7175ff33b5ea48f1d7cf86a39e3fa66",
+  "docs/procedures/nat-079/test_nat079.py": "aae34be26493b983ffa8bf5a4fbd101d8b54587be38122dc95ca3fd2f9a36c96"
+ },
+ "artifacts": [
+  "artifacts/nat-079/logs/image-hashes.txt",
+  "artifacts/nat-079/logs/make-check.exit",
+  "artifacts/nat-079/logs/make-check.stderr",
+  "artifacts/nat-079/logs/make-check.stdout",
+  "artifacts/nat-079/logs/test_e2e79.exit",
+  "artifacts/nat-079/logs/test_e2e79.stderr",
+  "artifacts/nat-079/logs/test_e2e79.stdout",
+  "artifacts/nat-079/logs/test_nat079.exit",
+  "artifacts/nat-079/logs/test_nat079.stderr",
+  "artifacts/nat-079/logs/test_nat079.stdout",
+  "artifacts/nat-079/build-003/build.json",
+  "artifacts/nat-079/build-003.log",
+  "artifacts/nat-079/package-002/package.json",
+  "artifacts/nat-079/package-002.log",
+  "artifacts/nat-079/package-002/loader-diag-xnu-rx-md1/package.json",
+  "artifacts/nat-079/package-002/loader-diag-xnu-rx-md1/recovery.img",
+  "artifacts/nat-079/mutation-run5-full/mutation.json",
+  "artifacts/nat-079/mutation-run5-full.log"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-079/logs/image-hashes.txt": "acd2239950e533739e392209e6a36fbdf107f0d9c6e7433b0ad6dc69bc80e51c",
+  "artifacts/nat-079/logs/make-check.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+  "artifacts/nat-079/logs/make-check.stderr": "6391b2e4942262f60956be92380d3e6c897cf4a0de50ead58cd07c8a156a7c3b",
+  "artifacts/nat-079/logs/make-check.stdout": "5c801fbad0618f9fd25af05602ecb830d96cf02a1b89329312e54b6e5990123e",
+  "artifacts/nat-079/logs/test_e2e79.exit": "b8724319d1c3fa14c2ac30ededd2e6335bc782a045e76ab227d5a613928e0b6b",
+  "artifacts/nat-079/logs/test_e2e79.stderr": "54dde4c4bd17cca3c84b6f0f4f9d282457ebe50b0598f28b8d6daa37d8381da8",
+  "artifacts/nat-079/logs/test_e2e79.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-079/logs/test_nat079.exit": "57c833c3bc3f496bf25687f568ba025a819ad122164f20c2ee3d4bfa2f4e1240",
+  "artifacts/nat-079/logs/test_nat079.stderr": "a11010ed9052617accbd33b78b88be95fab3f71fb69a6dc6e4f3b8b066508c12",
+  "artifacts/nat-079/logs/test_nat079.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-079/build-003/build.json": "2f7c0cbc8cc1a62aabf0e799caa463a32b2c161f4bf4242cf14a0c3d387d1fa9",
+  "artifacts/nat-079/build-003.log": "0158fb2e35dd8f060def389bfc147935fbce8fe439ef1c760429286d12502074",
+  "artifacts/nat-079/package-002/package.json": "490d694eeef9bb930f9ef6bcaea425c57e9403a82ebe4b2730a56dfe7835f64d",
+  "artifacts/nat-079/package-002.log": "a73733e5cc5f2d82eb67024dfdb69951ecefd79e1319090f7bdafe1f2a49bc2a",
+  "artifacts/nat-079/package-002/loader-diag-xnu-rx-md1/package.json": "778563204259299547b621af6568133e3afb1edafa0f49964ad088563b0cd567",
+  "artifacts/nat-079/package-002/loader-diag-xnu-rx-md1/recovery.img": "d95024989a2cc8cd96c39a10bf9c4c33552047c36dc0c2618b88dcfef10c02ef",
+  "artifacts/nat-079/mutation-run5-full/mutation.json": "09498fd67cc31e20422f58fa4f2e1b5d868fa0592cbfb1e524f006df26e834fd",
+  "artifacts/nat-079/mutation-run5-full.log": "3761f4ece7cff1b4fd88bc6979f573e106046e8f2cba507fc96735de6da1a63d"
+ },
+ "deviations_from_task_text": [
+  "The task text names 'a staged-write self-test of the reserve before RX_BEGIN is accepted'. The built self-test is a CPU test of eight pages of the reserve (first, last and six interior pages: a pattern, its complement, then zero, with barriers) run before the destination is installed (a failure ends the phase with status 5 and installs no destination); a host that sent before that is refused. The receive itself is direct DMA by default, not staged, for the reason in the findings.",
+  "The reserve is the md1 reserve (2,475,720,704 B) in a 4096 MiB window (NAT-075 layout), registered as md1/rmd1 only; the root is never given to the kernel as md0 (md0 is the 16,635-byte NAT-077 probe, added through a new --ramdisk option of the builder).",
+  "The pinned NAT-074 sources are copied and patched; the NAT-076 engine files are compiled from docs/procedures/nat-076/engine/ and the build record lists them.",
+  "Mutation counts exclude 91 candidates that do not build (51 Python syntax errors in the build/hunk scripts, 40 C mutants rejected by zig -Werror or the fixture under cc -Wall -Wextra)."
+ ]
+}
