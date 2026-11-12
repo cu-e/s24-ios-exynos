@@ -1,0 +1,17 @@
+{
+  "id": "NAT-092",
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "priority": 98,
+  "depends_on": ["NAT-090"],
+  "title": "Documented Stage A re-run image after the NAT-091 delivery shortfall: NAT-090's payload and loader with only the image name (loader-diag-xnu-sb-md1) and the command-line tag (NAT092-sb1) changed; build, package, derive the session driver, tests incl. byte-for-byte comparison with NAT-090's build, mutation pass, decision draft",
+  "paths": ["docs/procedures/nat-092", "artifacts/nat-092"],
+  "sources": ["s24-port"],
+  "acceptance": [
+    "The built payload equals NAT-090's byte for byte except the command-line tag (NAT090-sa1 -> NAT092-sb1); the loader image differs from NAT-090's only in the words that encode the image name; the md0 region equals NAT-089's Stage A small root (sha256 recorded); the packaged RECOVERY and payload hashes are recorded.",
+    "A session driver derived from NAT-087's by counted substitutions (derive92.py --check) with the registry gate NAT-089, NAT-090, NAT-092 (NAT-091 is not required: it ran and was inconclusive), tests, a mutation pass over build.py and derive92.py under the RAM cap, and a decision draft with every hash recomputed that states it is a documented re-run after a delivery shortfall and requires an idle host. Nothing here measures the phone."
+  ],
+  "steps": ["Build and package the image", "Derive the driver", "Tests and mutation pass", "Decision"],
+  "status": "pending",
+  "owner": null
+}

@@ -1,0 +1,23 @@
+[
+ {
+  "file": "docs/procedures/nat-092/build.py",
+  "line": 37,
+  "desc": "statement deleted",
+  "code": "sys.modules[name] = m",
+  "reason": "`sys.modules[name] = m` in _load() registers the module under its name; it matters only for pickling and for dataclass/typing lookups by module name. The only module loaded this way is NAT-087's build.py, which defines no dataclass and pickles nothing, and exec_module() runs without the registration, so every call behaves identically (the same reasoning as NAT-087's own equivalent entry for its _load)."
+ },
+ {
+  "file": "docs/procedures/nat-092/build.py",
+  "line": 85,
+  "desc": "literal 1 -> 0",
+  "code": "rec.write_text(json.dumps(d, indent=1))",
+  "reason": "only the indentation of the whitespace in build.json changes. The file is read back with json.loads (this wrapper's own tests, the packager and the evidence), which ignore whitespace, so the parsed content is identical."
+ },
+ {
+  "file": "docs/procedures/nat-092/build.py",
+  "line": 85,
+  "desc": "literal 1 -> 2",
+  "code": "rec.write_text(json.dumps(d, indent=1))",
+  "reason": "only the indentation of the whitespace in build.json changes; every reader parses it with json.loads, so the parsed content is identical."
+ }
+]
