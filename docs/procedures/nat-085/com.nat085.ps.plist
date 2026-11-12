@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- NAT-085 (this project): the one launchd job of the small root. Apple's launchd, started by /redwood/etc/rc as PID 1, reads this file from
+     /System/Library/LaunchDaemons (a symlink to /redwood/LaunchDaemons) and runs Apple's own /bin/ps -A with its output on the console.
+     KeepAlive with a 10 s throttle makes it a heartbeat: every run prints the process list again, so a launchd that is alive at the end of the
+     log window shows a recent list, and a launchd that never spawns a job shows none. The job has no other purpose; it follows the structure
+     of the donor's com.hakios.demo.plist (RunAtLoad, output to /dev/console). -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.nat085.ps</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/ps</string>
+		<string>-A</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>10</integer>
+	<key>StandardOutPath</key>
+	<string>/dev/console</string>
+	<key>StandardErrorPath</key>
+	<string>/dev/console</string>
+</dict>
+</plist>

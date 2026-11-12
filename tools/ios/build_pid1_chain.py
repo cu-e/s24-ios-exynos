@@ -10,7 +10,8 @@ same flags go to the project's own clang 17 (built from source under artifacts/)
 root/ follows userland/build.sh (the lines named in LAYOUT below).
 
 usage: python3 -I tools/ios/build_pid1_chain.py OUT_DIR [--recipe DIR] [--unpack DIR] [--rc rc.darwin|rc.launchd]
-                                                [--jobs] [--report FILE]
+                                                [--jobs] [--job PLIST]... [--report FILE]
+--job copies one own launchd job plist (a file of this project, not Apple's) into the image's LaunchDaemons next to whatever --jobs adds; it may be given more than once.
 Nothing here runs on the phone.  Apple files are only read (var.skel, LaunchDaemons) and nothing of them is copied
 into the repository.
 """
@@ -72,6 +73,7 @@ def main():
     ap.add_argument("--unpack", type=Path, default=None)
     ap.add_argument("--rc", default="rc.darwin")
     ap.add_argument("--jobs", action="store_true", help="also copy the donor's job set with mkjobs.py")
+    ap.add_argument("--job", type=Path, action="append", default=[], help="an own launchd job plist to copy into LaunchDaemons (repeatable)")
     ap.add_argument("--report", type=Path)
     a = ap.parse_args()
     recipe = a.recipe
@@ -129,6 +131,12 @@ def main():
         r = run([sys.executable, "-I", ul / "mkjobs.py", unpack / "rootfs", root / "LaunchDaemons", *DARWIN_JOBS])
         need(r.returncode == 0, "mkjobs.py failed: " + r.stderr[-600:])
         jobs_note = "%d plists" % len(list((root / "LaunchDaemons").iterdir()))
+    own_jobs = []
+    for j in a.job:
+        need(j.is_file() and j.suffix == ".plist", "--job %s is not a .plist file" % j)
+        need(not (root / "LaunchDaemons" / j.name).exists(), "--job %s: a job of that file name is already in the image" % j.name)
+        shutil.copy2(j, root / "LaunchDaemons" / j.name)
+        own_jobs.append({"file": j.name, "bytes": j.stat().st_size, "sha256": sha256(j)})
 
     # --- the image, by the donor's writer, then a content comparison with its reader ---------------------
     img = out / "root.apfs"
@@ -163,7 +171,7 @@ def main():
     kernel_reader["ok"] = (not kernel_reader["mismatches"] and kernel_reader["files_compared"] == local_files)
     report = {"toolchain": {"clang": sha256(CLANG), "ld": sha256(LD), "otool": sha256(OTOOL), "cflags": CFLAGS,
                             "ldflags": LDFLAGS},
-              "layout_follows": LAYOUT, "rc": a.rc, "jobs": jobs_note, "programs": macho,
+              "layout_follows": LAYOUT, "rc": a.rc, "jobs": jobs_note, "own_jobs": own_jobs, "programs": macho,
               "root_apfs": {"bytes": img.stat().st_size, "sha256": sha256(img), "mkapfs_last_line": mk_line},
               "verify_content": {"exit": r2.returncode, "tail": (r2.stdout + r2.stderr).strip()[-400:]},
               "kernel_apfs_lib_readback": kernel_reader,

@@ -1,0 +1,16 @@
+[
+ {
+  "file": "docs/procedures/nat-085/analyze_nat085.py",
+  "line": 55,
+  "desc": "statement deleted",
+  "code": "sys.modules[name] = m",
+  "reason": "`sys.modules[name] = m` in _load() registers the module under its name; it matters only for pickling and for dataclass/typing lookups by module name. The module loaded here (analyze_nat083.py) uses none of them (its own _load has the same line and `grep` for dataclass/pickle/__module__ finds nothing in it), and exec_module() runs without the registration, so every call behaves identically."
+ },
+ {
+  "file": "docs/procedures/nat-085/derive85.py",
+  "line": 90,
+  "desc": "literal 1 -> 0",
+  "code": "sys.exit(main(sys.argv[1:]))",
+  "reason": "main() looks at its argument list only with `\"--check\" in argv`; passing sys.argv[0:] adds the script path as one more element that is never equal to \"--check\", so the membership test, and with it every path and return value, is the same. (sys.argv[2:] would drop the flag and is killed by test_run_as_a_script_the_flag_reaches_main.)"
+ }
+]
