@@ -1,0 +1,240 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T06:58:55+00:00",
+ "commit": "518b77bd9fb4cb9498882653db5c1755c7e5d8ca",
+ "tree_state": "all files listed under sha256 except task.json were uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "summary": "A static ad-hoc signed arm64 Mach-O probe (16635 bytes) that reads /dev/rmd1 in 128 KiB chunks and prints a SHA-256 with prefix digests every 128 MiB, built with the project toolchain (NDK clang 18.0.2 + LLD + mkstatic.py); its own FIPS 180-4 SHA-256; a padder that makes the 2,475,712,512-byte donor root image 2,475,720,704 bytes (a 16 KiB multiple) and records both digests; 108 tests (21 need Unicorn); a mutation pass of 1311 candidates (1184 valid, 1131 killed, 53 survivors, each examined and recorded as equivalent with a reason); and a decision draft for NAT-078. Nothing was run on the phone; the Mach-O was executed only under Unicorn with a fake six-syscall kernel.",
+ "acceptance": {
+  "1_probe": "src/hash-probe.c + src/sha256.h, built by build.py into artifacts/nat-077/build-final2/hash-probe (16635 bytes, sha256 dc5c7845b3856274b0c8b5519f5b2a726c595de5410cb6cfa818fe0645a258b7). It reads the device in 131072-byte chunks, prints digest, byte count and seconds, and progress lines. SHA-256 is an own implementation of FIPS 180-4 (no third-party code; see deviations). The same C file built for the host (-DHOST_TEST) gives hashlib's digest for FIPS vectors, lengths 1-299, chunk boundaries, short reads, EINTR, a 513 MiB sparse input, and the real padded image (artifacts/nat-077/logs/host-digest-padded.txt). The final Mach-O is run under Unicorn (probe_vm.py) and produces the same digests and exit status 81.",
+  "2_builder": "pad_root.py pads 2475712512 bytes to 2475720704 bytes (151106 pages of 16 KiB) with zeros, verifies size and read-back, refuses a size that is not a multiple of its unit (default 16384; a 4096 unit is accepted, anything not a multiple of 4096 is refused), and records source and padded SHA-256 in artifacts/nat-077/padded.json (6304b2c54d56055e8df7b2b63dcbe79a9415d860b598cb8e11bda5eed47e150f -> 552800ff3ac3de129b550c838681d0cb1d08cc4df0d38b2dc1088a9b258a8258). The Apple-derived image stays in artifacts/ (gitignored); only sizes and hashes are committed.",
+  "3_decision_draft": "docs/procedures/nat-077/decision-draft.md: question, observables (device-committed offset, rate, prefix and final digests, page size, ending), budgets, an 8-row pass table fixed beforehand, deviations from the registry text. Nothing was run on the phone."
+ },
+ "findings": [
+  "LLD's darwin flavour ignores -static and places __text at 0x4000, so mkinit.py (one position-independent __text) cannot take compiled C directly; mkstatic.py shifts the sections by a multiple of 4 KiB and rebuilds the segments, load commands and CodeDirectory. A header comparison shows the new Mach-O has the same segments and load commands as the NAT-075 probe that did boot as PID 1 (both 16635 bytes), differing only in four __TEXT sections instead of one.",
+  "A writable global made LLD emit __DATA,__data, which the wrapper refuses; the probe keeps all state on the stack.",
+  "The first version of the unreadable-device test hung (300 s): with fd 3 closed, /dev/fd/1 opened as fd 3 and the probe read the console pipe. The test now uses a second host build with a nonexistent device path.",
+  "pad_root.py would have unlinked a destination it did not create if opening it exclusively failed; fixed (it now unlinks only a file it created) and tested.",
+  "Mutation passes found real test gaps, each closed with a test and re-run: the first pass left 210 unexplained survivors (the fake kernel numbered descriptors from 3 only, the Unicorn stack was zero-filled, the wrapper's refusals and the padder's fallback paths were untested); the second left 66, of which the dylib-command constants, a section segment name of 16 characters, a device handed descriptor 0 and the real-clock path (a 0.4 s stall test that killed a seconds-only clock by chance, now 1.25 s plus a non-round-milliseconds check) were gaps; the third pass has 53 survivors, all examined, all equivalent (equivalent.json, mutation.json).",
+  "Descriptor numbering: whether the payload kernel hands PID 1 stdio descriptors is not established; the probe works with the console as descriptor 0, as 3, and with the device as descriptor 0.",
+  "The mutation runner leaked host-probe grandchildren of mutants that hung the tests (four were found running and killed by PID); it now runs every test pass in its own session and kills the process group on a timeout (checked)."
+ ],
+ "established": [
+  "Host-test: the probe's C code computes SHA-256 correctly in the cases listed in acceptance 1 and prints the documented text and exit codes in each error case (0x60-0x63, 81).",
+  "Host-test: the final signed Mach-O parses with an independent Mach-O/CodeDirectory reader in the tests, runs under Unicorn from _start with a 16-byte-aligned and a misaligned stack, issues only exit/read/write/open/getpid/gettimeofday with the Darwin register and carry-flag convention, and prints the same digests as hashlib.",
+  "Host-test: the padder and the wrapper refuse the listed bad inputs; the padded image has the recorded size and digest; a host build of the probe over it prints the same digest.",
+  "Host-test: a mutation pass over sha256.h, hash-probe.c, mkstatic.py and pad_root.py (1184 valid mutants, 1131 killed, 53 survivors, 0 unexplained) shows the tests notice changes to those files."
+ ],
+ "not_established": [
+  "Anything about the S24: that the payload kernel starts this Mach-O (the NAT-075 probe with the same header and segments did), that gettimeofday returns usable time there, how /dev/rmd1 behaves under read(2) (alignment, short reads), and how fast the device hashes (scalar C).",
+  "Any byte in md1, the host-to-phone USB rate, U5 and watchdog feeding while the loader serves bulk transfers (NAT-078, NAT-071).",
+  "That the Unicorn kernel model is faithful to XNU: it is a few dozen lines written for these tests.",
+  "That the mutation pass covers the arm64-only paths beyond what Unicorn executes; the mutation generators do not delete single terms of a condition."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-I",
+    "docs/procedures/nat-077/test_nat077.py"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; stderr artifacts/nat-077/logs/test-unicorn.stderr: Ran 108 tests, OK"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-077/test_nat077.py"
+   ],
+   "exit_code": 0,
+   "note": "stderr artifacts/nat-077/logs/test-system.stderr: Ran 108 tests, OK (skipped=21, no unicorn)"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-077/build.py",
+    "--out",
+    "artifacts/nat-077/build-final2"
+   ],
+   "exit_code": 0,
+   "note": "16635 bytes, sha256 dc5c7845b3856274b0c8b5519f5b2a726c595de5410cb6cfa818fe0645a258b7"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-077/pad_root.py",
+    "<donor system.apfs>",
+    "artifacts/nat-077/system-padded.apfs",
+    "--record",
+    "artifacts/nat-077/padded.json",
+    "--expect-padded-bytes",
+    "2475720704"
+   ],
+   "exit_code": 0,
+   "note": "log artifacts/nat-077/pad.log"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-I",
+    "docs/procedures/nat-077/mutate_nat077.py",
+    "--out",
+    "artifacts/nat-077/mutation-run3"
+   ],
+   "exit_code": 1,
+   "note": "exit 1 = survivors without a recorded reason at that moment (equivalent.json was written afterwards from the examined survivors); log artifacts/nat-077-mutation-run3.log"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-I",
+    "docs/procedures/nat-077/mutate_nat077.py",
+    "--annotate",
+    "artifacts/nat-077/mutation-run3/mutation.json",
+    "--out",
+    "artifacts/nat-077/mutation-run3-annotated"
+   ],
+   "exit_code": 0,
+   "note": "attaches the reasons of equivalent.json to the survivors; exit 0 = every survivor explained; the result is docs/procedures/nat-077/mutation.json"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-077/build.py",
+    "--out",
+    "artifacts/nat-077/build-final3"
+   ],
+   "exit_code": 0,
+   "note": "reproducibility: same probe sha256 as build-final2 (artifacts/nat-077/logs/build-final3.log)"
+  },
+  {
+   "argv": [
+    "artifacts/nat-077/build-final2/host-probe",
+    "3<artifacts/nat-077/system-padded.apfs"
+   ],
+   "exit_code": 74,
+   "note": "host build over the padded image; 74 = 0x50 + host PID mod 256, the digest line is in artifacts/nat-077/logs/host-digest-padded.txt"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "artifacts/nat-077/logs/check-prefixes.py"
+   ],
+   "exit_code": 0,
+   "note": "every progress digest and the final one against hashlib (artifacts/nat-077/logs/check-prefixes.out)"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; stdout/stderr under artifacts/nat-077/logs/"
+  }
+ ],
+ "mutation_summary": {
+  "docs/procedures/nat-077/mkstatic.py": {
+   "total": 421,
+   "killed": 410,
+   "survived": 1,
+   "survived_unexplained": 0,
+   "invalid": 10,
+   "timeout": 3
+  },
+  "docs/procedures/nat-077/pad_root.py": {
+   "total": 140,
+   "killed": 129,
+   "survived": 8,
+   "survived_unexplained": 0,
+   "invalid": 3,
+   "timeout": 5
+  },
+  "docs/procedures/nat-077/src/hash-probe.c": {
+   "total": 317,
+   "killed": 227,
+   "survived": 34,
+   "survived_unexplained": 0,
+   "invalid": 56,
+   "timeout": 0
+  },
+  "docs/procedures/nat-077/src/sha256.h": {
+   "total": 433,
+   "killed": 365,
+   "survived": 10,
+   "survived_unexplained": 0,
+   "invalid": 58,
+   "timeout": 0
+  }
+ },
+ "sha256": {
+  "docs/procedures/nat-077/README.md": "fb64987778ed4e305b7735f95aa8212fe0c9f524a0ced2e1d607e195feef3004",
+  "docs/procedures/nat-077/build.py": "d0bc4e9f59801265874c7bd57bbe6a6639e01b82a8beb42a1b3d4626b5858b85",
+  "docs/procedures/nat-077/decision-draft.md": "727b9d5a60c3b413fc8b346fedbbe1c2cfdd5cae1e66ac7aec663420fdb54175",
+  "docs/procedures/nat-077/equivalent.json": "92c8532b006819555ea558dbc4aef3fe78bb835870863941914da17b7a326127",
+  "docs/procedures/nat-077/mkstatic.py": "c5b8ae964964d54187f480df9524588194a7ae365ca30c1972dcfa8cf2b4dfd1",
+  "docs/procedures/nat-077/mutate_nat077.py": "9c6f8fa529cb280e67e2817b63c18692bbc0160d41fc4124a9c4a31a8e186274",
+  "docs/procedures/nat-077/mutation.json": "1c275b0ff1fc70198448aa1cbb6d3a5090884aa5136572d300b86e49b7a6e7f9",
+  "docs/procedures/nat-077/pad_root.py": "f0480db74eb45482fce4d15998d2498d5b0a44679a5f0001789bb56eaebd5518",
+  "docs/procedures/nat-077/probe_vm.py": "607f64f4427bce1163dd99eff58861b5297cb1e1dec16ed8f13705ab3639f88e",
+  "docs/procedures/nat-077/test_nat077.py": "ea804b7da2c2bd14f79b1cca09bfc917f681a470d75f515462fe25d327021a97",
+  "docs/procedures/nat-077/task.json": "bc22ed57e2827a5ed250390eab4ee3cb0b75d03753c2cda17ddc13aee315627c",
+  "docs/procedures/nat-077/src/hash-probe.c": "08911e2941d3f80e01a0d762f17f4166a4aa045607844b32ad471cb4d363783d",
+  "docs/procedures/nat-077/src/host-main.c": "88dde972aa90be489b5742a5001c79522dd2091f360c84d607fb9ef9bfc7becf",
+  "docs/procedures/nat-077/src/sha256.h": "85b6168aebaa64d5720feac4dc6cbe2d6a38f73f3026a2b4a49f52a81c5c66bf"
+ },
+ "artifacts": [
+  "artifacts/nat-077/padded.json",
+  "artifacts/nat-077/pad.log",
+  "artifacts/nat-077/build-final2/hash-probe",
+  "artifacts/nat-077/build-final2/hash-probe.json",
+  "artifacts/nat-077/logs/test-unicorn.stderr",
+  "artifacts/nat-077/logs/test-system.stderr",
+  "artifacts/nat-077/logs/check-prefixes.out",
+  "artifacts/nat-077/logs/check-prefixes.py",
+  "artifacts/nat-077/logs/host-digest-padded.stderr",
+  "artifacts/nat-077/logs/host-digest-padded.txt",
+  "artifacts/nat-077/logs/make-check.stdout",
+  "artifacts/nat-077/logs/make-check.stderr",
+  "artifacts/nat-077/logs/make-check.exit",
+  "artifacts/nat-077/mutation-run3/mutation.json",
+  "artifacts/nat-077-mutation-run3.log",
+  "artifacts/nat-077/logs/mutation-annotate.stdout",
+  "artifacts/nat-077/logs/mutation-annotate.exit",
+  "artifacts/nat-077/logs/build-final3.log",
+  "artifacts/nat-077/build-final3/hash-probe"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-077/padded.json": "98c9cb63f8c3c8ffd3e012f8105495e41a769c2bdf057b141cfe89db706522e9",
+  "artifacts/nat-077/pad.log": "e326da98d4ac56414dadaf3f8366aa5200fb77b5cf6a1512554d344f8ea79cc7",
+  "artifacts/nat-077/build-final2/hash-probe": "dc5c7845b3856274b0c8b5519f5b2a726c595de5410cb6cfa818fe0645a258b7",
+  "artifacts/nat-077/build-final2/hash-probe.json": "1349059e5334b5e0228a91d3ed01933713243d0a581187284012c49d19dc58ef",
+  "artifacts/nat-077/logs/test-unicorn.stderr": "cbb933dc1a4045f9e816ffbcc973671d2d3d4a4f9360e517ea968d1e06c595e8",
+  "artifacts/nat-077/logs/test-system.stderr": "a986b5a21298d5dcbaea40fd1b04a6e83efd8f636206070203d26263bb3887aa",
+  "artifacts/nat-077/logs/check-prefixes.out": "580a447f751ec75ac92ddf999227da36b2b47db17e0f1d95d41ee77cfc6c8e76",
+  "artifacts/nat-077/logs/check-prefixes.py": "62025df45b8f20781a88a21366d5b3c9bb52c5e72652d55a579f2544830a19d1",
+  "artifacts/nat-077/logs/host-digest-padded.stderr": "989e84adbef298c4a877af12a6d91d6f91a9e12860a391919c1a0ba0f04eec2b",
+  "artifacts/nat-077/logs/host-digest-padded.txt": "9f2cba89dbe7a867f38cf4b7396a7bb3360be12c90ac25d3325faae1d2e57af6",
+  "artifacts/nat-077/logs/make-check.stdout": "5c801fbad0618f9fd25af05602ecb830d96cf02a1b89329312e54b6e5990123e",
+  "artifacts/nat-077/logs/make-check.stderr": "157c92bff4642d261f6faa39ddee3ab817b4ae44f1fa3f2cc1643274b027e267",
+  "artifacts/nat-077/logs/make-check.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+  "artifacts/nat-077/mutation-run3/mutation.json": "b01831e4b7d766170d227ed41df6d718610b73a0f162cca62dd35d84091e5fd8",
+  "artifacts/nat-077-mutation-run3.log": "6804c19a04d1e628bdaa14468a636ee16dfa1d36b9f9f4402f49fc7b413436b6",
+  "artifacts/nat-077/logs/mutation-annotate.stdout": "6dad36cd799e57688b5e931f2c270015395693e5938190e3f12bb30fa10dfb3a",
+  "artifacts/nat-077/logs/mutation-annotate.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+  "artifacts/nat-077/logs/build-final3.log": "4bcd5ce7547d17e8835fd372ed5a7ca678e07484bf863d115ad95b82fbbc4e7e",
+  "artifacts/nat-077/build-final3/hash-probe": "dc5c7845b3856274b0c8b5519f5b2a726c595de5410cb6cfa818fe0645a258b7"
+ },
+ "deviations_from_task_text": [
+  "Acceptance 1 says the SHA-256 is 'an included public-domain or permissively licensed implementation'. The implementation is written from FIPS 180-4 for this task; there is no third-party code to include, license or attribute. Correctness rests on the tests (FIPS vectors, hashlib agreement).",
+  "The Mach-O is produced by NDK clang + LLD + mkstatic.py, not by mkinit.py alone: mkinit.py takes one position-independent __text and C needs a linker.",
+  "The registry has no command to extend NAT-078's dependency list. The two prerequisites this task's results show to be necessary (NAT-079: the delivery loader; NAT-080: the session driver and analyser) were registered as separate host tasks and are named as preconditions in decision-draft.md section 8; NAT-078 must not be claimed before both are done.",
+  "'Seconds' in the probe output are wall-clock seconds from gettimeofday, because the Darwin ABI offers no cheaper clock to a freestanding program; whether it advances at that point of the boot is for NAT-078 to see."
+ ]
+}

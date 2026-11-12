@@ -1,0 +1,290 @@
+[
+ {
+  "file": "docs/procedures/nat-077/mkstatic.py",
+  "line": 131,
+  "desc": "literal 64 -> 65",
+  "reason": "The window is only compared with the string \"_start\": a name equal to it ends (NUL) at index 6 in a 64- and in a 65-byte window; any longer name differs in both."
+ },
+ {
+  "file": "docs/procedures/nat-077/pad_root.py",
+  "line": 28,
+  "desc": "literal 20 -> 0",
+  "reason": "READ is only the chunk size of the copy, the hash and the zero scan: the bytes read and their order do not depend on it, so the result is identical (a smaller chunk is only slower, a larger one uses more memory)."
+ },
+ {
+  "file": "docs/procedures/nat-077/pad_root.py",
+  "line": 28,
+  "desc": "literal 20 -> 21",
+  "reason": "READ is only the chunk size of the copy, the hash and the zero scan: the bytes read and their order do not depend on it, so the result is identical (a smaller chunk is only slower, a larger one uses more memory)."
+ },
+ {
+  "file": "docs/procedures/nat-077/pad_root.py",
+  "line": 28,
+  "desc": "literal 8 -> 9",
+  "reason": "READ is only the chunk size of the copy, the hash and the zero scan: the bytes read and their order do not depend on it, so the result is identical (a smaller chunk is only slower, a larger one uses more memory)."
+ },
+ {
+  "file": "docs/procedures/nat-077/pad_root.py",
+  "line": 37,
+  "desc": "literal 1 -> 2",
+  "reason": "For a multiple of 4096 (the preceding `unit % BLOCK` test), unit & (unit-2) equals unit & (unit-4096), which is zero for exactly the same units as unit & (unit-1) (the powers of two): no input on which the two differ."
+ },
+ {
+  "file": "docs/procedures/nat-077/pad_root.py",
+  "line": 39,
+  "desc": "literal 0 -> 1",
+  "reason": "A size of 1 is not a multiple of 4096 and is refused by the second operand with the same exception and message; size 0 is refused by both: the refusal set is unchanged."
+ },
+ {
+  "file": "docs/procedures/nat-077/pad_root.py",
+  "line": 47,
+  "desc": "> -> >=",
+  "reason": "With left == 0 the next read asks for min(READ, 0) = 0 bytes, returns b'' and the `if not b: break` ends the loop: same result."
+ },
+ {
+  "file": "docs/procedures/nat-077/pad_root.py",
+  "line": 47,
+  "desc": "condition forced true",
+  "reason": "A limited read stops at the end of the limit through `min(READ, left)` = 0 returning b'' and `if not b: break`: same result."
+ },
+ {
+  "file": "docs/procedures/nat-077/pad_root.py",
+  "line": 97,
+  "desc": "statement deleted",
+  "reason": "BufferedWriter.truncate() flushes the pending bytes before truncating (and after a FICLONE the buffer is empty), and fsync follows: the file content and its read-back are the same."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 75,
+  "desc": "< -> <=",
+  "reason": "HOST_TEST shim only (the arm64 build uses sc()). open() succeeded with fd 0: the mutant returns -errno, which is 0 because no libc call has failed before in the host wrapper, so the same descriptor comes back. The probe itself treats descriptor 0 as valid (test_descriptor_zero_is_a_valid_console, test_a_device_opened_as_descriptor_zero_is_valid)."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 75,
+  "desc": "literal 0 -> 1",
+  "reason": "HOST_TEST shim only (the arm64 build uses sc()). open() succeeded with fd 0: the mutant returns -errno, which is 0 because no libc call has failed before in the host wrapper, so the same descriptor comes back. The probe itself treats descriptor 0 as valid (test_descriptor_zero_is_a_valid_console, test_a_device_opened_as_descriptor_zero_is_valid)."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 100,
+  "desc": "> -> >=",
+  "reason": "Adding a zero-byte result to the byte counter changes nothing."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 100,
+  "desc": "condition forced true",
+  "reason": "g_total_read only feeds the --fail-after hook; a negative r (a real read error, never produced by a file or a pipe in the tests) is followed by the probe's exit with 0x62 without another read, so the corrupted counter is never used."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 102,
+  "desc": "< -> <=",
+  "reason": "HOST_TEST shim only. At end of file read() returns 0: the mutant returns -errno, which is 0 because errno was never set by a failed libc call in these runs, so the probe sees 0 either way."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 102,
+  "desc": "literal 0 -> 1",
+  "reason": "HOST_TEST shim only. At end of file read() returns 0: the mutant returns -errno, which is 0 because errno was never set by a failed libc call in these runs, so the probe sees 0 either way."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 114,
+  "desc": "< -> <=",
+  "reason": "HOST_TEST shim only. write() returns 0 only for a zero-length request, which put() never issues (it loops while n > 0); for r >= 1 both forms return r."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 114,
+  "desc": "literal 0 -> 1",
+  "reason": "HOST_TEST shim only. write() returns 0 only for a zero-length request, which put() never issues (it loops while n > 0); for r >= 1 both forms return r."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 126,
+  "desc": "literal 0 -> 1",
+  "reason": "The return value of sys_gettimeofday() is ignored by now_us(); the shim only has to fill the structure."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 132,
+  "desc": "literal 0 -> 1",
+  "reason": "The return value of sys_gettimeofday() is ignored by now_us(); the shim only has to fill the structure."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 151,
+  "desc": "literal 0 -> 1",
+  "reason": "Darwin getpid() takes no arguments: the kernel ignores x0-x2 (and the fake kernel does not read them); the result is the same."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 155,
+  "desc": "literal 0 -> 1",
+  "reason": "Darwin exit() takes one argument (the status in x0): x1 and x2 are ignored."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 164,
+  "desc": "literal 0 -> 1",
+  "reason": "put() is never called with an empty string; for a non-empty string the counting loop reaches the same length from 1 as from 0."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 181,
+  "desc": "literal 24 -> 25",
+  "reason": "A u64 has at most 20 digits and the widths used are 1 and 3: a 24- and a 25-byte buffer print the same."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 196,
+  "desc": "literal 3 -> 4",
+  "reason": "Only b[0..2] are used (two hex digits and the NUL)."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 210,
+  "desc": "literal 1 -> 0",
+  "reason": "put_dec() writes its digits with a do-while, so at least one digit appears whatever the width: width 0 and 1 print the same."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 230,
+  "desc": "literal 0 -> 1",
+  "reason": "The initial values are overwritten by sys_gettimeofday() on every path; if the call failed they would be a constant that cancels in the difference of two readings."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 240,
+  "desc": ">= -> >",
+  "reason": "With t == t0 both forms give 0 (t - t0 is 0)."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 240,
+  "desc": "literal 0 -> 1",
+  "reason": "A clock that went backwards reads 1 microsecond instead of 0; the output has millisecond resolution (us / 1000 % 1000), so both print 0.000."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 251,
+  "desc": "literal 32 -> 33",
+  "reason": "Array bound only: the digest is 32 bytes and sha256_final writes exactly 32."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 261,
+  "desc": "literal 1 -> 0",
+  "reason": "put_dec() prints at least one digit whatever the width (do-while)."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 266,
+  "desc": "literal 1 -> 0",
+  "reason": "put_dec() prints at least one digit whatever the width (do-while)."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 279,
+  "desc": "literal 1 -> 0",
+  "reason": "put_dec() prints at least one digit whatever the width (do-while)."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 281,
+  "desc": "literal 1 -> 0",
+  "reason": "put_dec() prints at least one digit whatever the width (do-while)."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 291,
+  "desc": "literal 32 -> 33",
+  "reason": "Array bound only: the digest is 32 bytes and sha256_final writes exactly 32."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 296,
+  "desc": "literal 1 -> 0",
+  "reason": "put_dec() prints at least one digit whatever the width (do-while)."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 296,
+  "desc": "literal 1 -> 2",
+  "reason": "A checkpoint is printed only once bytes >= CKPT_BYTES (10000 or more in every build the tests make, 128 MiB by default): the value has two or more digits, which a width of 2 does not pad."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 308,
+  "desc": "literal 1 -> 0",
+  "reason": "put_dec() prints at least one digit whatever the width (do-while)."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/hash-probe.c",
+  "line": 319,
+  "desc": "literal 0 -> 1",
+  "reason": "Unreachable (sys_exit() ends the process); the host build only needs some return value after it."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/sha256.h",
+  "line": 15,
+  "desc": "literal 8 -> 9",
+  "reason": "A longer array: h[8] is never touched and sha256_copy copies the first 8 words."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/sha256.h",
+  "line": 17,
+  "desc": "literal 64 -> 65",
+  "reason": "A longer array: buf[64] is never touched by the 64-byte block logic."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/sha256.h",
+  "line": 21,
+  "desc": "literal 64 -> 65",
+  "reason": "A longer array of round constants: only k[0..63] are read."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/sha256.h",
+  "line": 47,
+  "desc": "literal 64 -> 65",
+  "reason": "A longer message schedule: w[64] is never touched."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/sha256.h",
+  "line": 50,
+  "desc": "< -> <=",
+  "reason": "w[16] is read from the four bytes after the block and overwritten by the schedule loop (which starts at i = 16) before any use; the extra read stays inside the caller's buffer or the struct."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/sha256.h",
+  "line": 50,
+  "desc": "literal 16 -> 17",
+  "reason": "w[16] is read from the four bytes after the block and overwritten by the schedule loop (which starts at i = 16) before any use; the extra read stays inside the caller's buffer or the struct."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/sha256.h",
+  "line": 73,
+  "desc": "condition forced true",
+  "reason": "With fill == 0 the copy loop moves the bytes into buf one at a time (up to a block) and processes a full buffer exactly as the direct path would, leaving the same state; it is only slower."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/sha256.h",
+  "line": 95,
+  "desc": "literal 32 -> 0",
+  "reason": "A parameter array bound: no code change."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/sha256.h",
+  "line": 107,
+  "desc": "< -> <=",
+  "reason": "At that point fill <= 56; with fill == 56 the mutant stores one more zero at buf[56], which the eight length bytes overwrite immediately afterwards."
+ },
+ {
+  "file": "docs/procedures/nat-077/src/sha256.h",
+  "line": 107,
+  "desc": "literal 56 -> 57",
+  "reason": "At that point fill <= 56, so a bound of 57 pads the same bytes (the extra zero at buf[56] is overwritten by the length)."
+ }
+]
