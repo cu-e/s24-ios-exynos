@@ -1,0 +1,44 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T02:22:32+00:00",
+ "commit": "f90a8207d704cb005d9b3e9d5c9a5686cd13b037",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "summary": "Static trace of what the 20F66 userland asks the kernel for on the frame path (IOMobileFramebuffer and IOSurface user-client selectors, found by following branch islands to IOConnectCall*Method in the dyld shared cache) against the project's kernel stand-ins. IOMobileFramebuffer: 63 distinct constant selectors, 16 handled by MiniIOMobileFramebuffer, 4 named only, 43 unnamed (default answers success with zeros). IOSurface: 43 selectors, 18 handled by MiniIOSurface, 4 named only, 21 unknown (default answers kIOReturnUnsupported). QuartzCore has a software-renderer path in its own strings; the donor's vtable-hook addresses match our cache. The donor's claims about software rendering and Mesa are recorded as claims about other phones. Answer: a first frame without a GPU driver is plausible, not proven; no promise of software rendering; the earliest blocker is the root delivery and dyld/launchd, not a renderer; the cheapest S24 observation is a dynamically linked test program that calls IOMobileFramebuffer/IOSurface against the stand-ins after milestone 2, with a host harness only if NAT-070 shows the panel follows the framebuffer.",
+ "evidence_category": "source-review (static reading of Apple's shared cache and of donor and project sources). Nothing ran on the S24; no iOS UI; no claim about run-time behaviour of backboardd.",
+ "acceptance": {
+  "1_trace": "Met for the kernel interface level: selector censuses for both user clients with the stand-ins' coverage, plus the vtable-slot check for the renderer hooks. Not traced: which of the uncovered selectors backboardd/QuartzCore reach on the path to one frame (needs a run) and IOSurface traps.",
+  "2_donor_claims": "Met: section 'Established' item 5 lists donor statements (HakiOS, ios-lemonadep, y2sios) as claims about other hardware and kernels, and states what they leave open here.",
+  "3_cheapest_observation": "Met: section 'Cheapest observation, and what to prepare on the host' (no new run before a dynamic Mach-O runs; host harness conditional on NAT-070; first S24 observation; readiness criteria for milestones 4 and 5)."
+ },
+ "validation_of_the_method": "The IOSurface per-export attribution reproduces the names of every selector in the stand-in's own kSurfaceMethod* enum (e.g. 5 = IOSurfaceClientSetYCbCrMatrix, 35 = ...CreateMachPortWithOptions), which cross-checks the scan against an independent source. For IOMobileFramebuffer the per-export attribution is not informative (everything lands on IOMobileFramebufferOpen) and only the selector set is used.",
+ "corrections_made_during_review": [
+  "The first scan found 0 IOConnectCall hits because the cache's cross-image calls go through branch islands (adrp+add+br) that were not followed; fixed, then re-run.",
+  "A first version of the note covered IOMobileFramebuffer only; the IOSurface census was added because the task asks for IOSurface and the two stand-ins differ in how they answer unknown calls (zeros vs kIOReturnUnsupported)."
+ ],
+ "commands": [
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -W ignore -I docs/procedures/ios-013/trace_iomfb.py --json docs/procedures/ios-013/iomfb_selectors.json",
+   "exit": 0,
+   "result": "IOMobileFramebuffer 65 call sites / 63 selectors; IOSurface 48 / 43"
+  }
+ ],
+ "sha256": {
+  "research/notes/IOS-013-first-frame-without-gpu.md": "a01554a7150a6bf93d35b5b09e28e948052c4e4280c844987b55e7b111f87b0c",
+  "docs/procedures/ios-013/trace_iomfb.py": "f0dcb3fa5cef3a3674546f7c687c8e9253090323d98d6a4feabb258b0a5c1195",
+  "docs/procedures/ios-013/iomfb_selectors.json": "fc6cd7e9a5b61ed2ffb6103bc425066cdf0f4f7a80332f12a4a23745aa1ebcae"
+ },
+ "limits": [
+  "Only constant-selector calls through direct or island-resolved branches are seen; selectors built at run time or reached through function pointers are missed.",
+  "Selector meanings for calls the stand-ins do not name are unknown.",
+  "Donor claims are not verified here.",
+  "No scan-out evidence: whether the panel follows the loader's framebuffer is NAT-070."
+ ],
+ "artifacts": [
+  "research/notes/IOS-013-first-frame-without-gpu.md",
+  "docs/procedures/ios-013/trace_iomfb.py",
+  "docs/procedures/ios-013/iomfb_selectors.json",
+  "docs/strategy/2026-11-12-ios-critical-path.md"
+ ]
+}
