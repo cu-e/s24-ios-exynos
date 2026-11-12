@@ -1,0 +1,51 @@
+[
+ {
+  "file": "docs/procedures/nat-097/analyze_nat097.py",
+  "line": 23,
+  "desc": "statement deleted",
+  "code": "sys.modules[name] = m",
+  "reason": "`sys.modules[name] = m` in _load() registers the module under its name; it matters only for pickling and for dataclass/typing lookups by module name. The modules loaded this way (NAT-089's kl_reader.py and analyze_nat089.py, NAT-062's analyze_nat062.py, this directory's kl_reader2.py) define no dataclass and pickle nothing, and exec_module() runs without the registration, so every call behaves identically (the same reasoning as NAT-096's and NAT-087's equivalent entries for their _load)."
+ },
+ {
+  "file": "docs/procedures/nat-097/analyze_nat097.py",
+  "line": 55,
+  "desc": "literal 0 -> 1",
+  "code": "ap = argparse.ArgumentParser(description=__doc__.split(\"\\n\")[0])",
+  "reason": "only the first line of the --help text changes (the docstring's second line instead of its first); no behaviour, output file or exit status depends on it."
+ },
+ {
+  "file": "docs/procedures/nat-097/analyze_nat097.py",
+  "line": 61,
+  "desc": "literal 1 -> 0",
+  "code": "a.out.write_text(json.dumps(r, indent=1, default=str) + \"\\n\")",
+  "reason": "only the indentation of the whitespace in the written JSON changes; the tests read it back with json.loads, which ignores whitespace, so the parsed content is identical."
+ },
+ {
+  "file": "docs/procedures/nat-097/analyze_nat097.py",
+  "line": 61,
+  "desc": "literal 1 -> 2",
+  "code": "a.out.write_text(json.dumps(r, indent=1, default=str) + \"\\n\")",
+  "reason": "only the indentation of the whitespace in the written JSON changes; the tests read it back with json.loads, which ignores whitespace, so the parsed content is identical."
+ },
+ {
+  "file": "docs/procedures/nat-097/kl_reader2.py",
+  "line": 36,
+  "desc": "statement deleted",
+  "code": "sys.modules[name] = m",
+  "reason": "`sys.modules[name] = m` in _load() registers the module under its name; it matters only for pickling and for dataclass/typing lookups by module name. The modules loaded this way (NAT-089's kl_reader.py and analyze_nat089.py, NAT-062's analyze_nat062.py, this directory's kl_reader2.py) define no dataclass and pickle nothing, and exec_module() runs without the registration, so every call behaves identically (the same reasoning as NAT-096's and NAT-087's equivalent entries for their _load)."
+ },
+ {
+  "file": "docs/procedures/nat-097/kl_reader2.py",
+  "line": 61,
+  "desc": "condition forced true",
+  "code": "if cur[\"line\"] is None:",
+  "reason": "`line` of a group is only the sort key that puts the inferred dumps of one boot in order with its real dumps (the sort is by the index of a dump's first line). Every stray line of a group lies after the previous dump's last line and before the next dump's `begin`, because the producer sends dumps one after another and a begin or an end line closes or opens a dump in parse_kl; so the index of the group's first line and the index of its last line fall in the same gap between neighbours and give the same order. The two differ only if a complete dump with its own begin sat inside one group, which the sender cannot produce."
+ },
+ {
+  "file": "docs/procedures/nat-097/kl_reader2.py",
+  "line": 119,
+  "desc": "literal 1 -> 2",
+  "code": "last = -1",
+  "reason": "`last` is the grid position of the previous record and is compared with `<=` to the next record's position, which is never below 0; starting at -1 or -2 gives the same answer for the first record (0 > -1 and 0 > -2), so no input changes the result."
+ }
+]

@@ -1,0 +1,28 @@
+{
+  "id": "NAT-097",
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "priority": 98,
+  "depends_on": [
+    "NAT-089"
+  ],
+  "title": "Reader v2 for kernel-log dumps that lost their KL begin record: infer the head/tail geometry from the end line and the received offsets, verify it against the end line's record and byte counts, mark the dump begin_inferred, and feed the unchanged NAT-089 row logic; test on the real NAT-093 archive (skipped when absent) and on synthetic dumps; mutation pass",
+  "paths": [
+    "docs/procedures/nat-097",
+    "artifacts/nat-097"
+  ],
+  "sources": [
+    "s24-port"
+  ],
+  "acceptance": [
+    "On the real NAT-093 archive the reader reports one dump with begin_inferred=true, length 170,097, head 8,192, tail 32,768, 345 of 428 records and the 7,968 lost bytes as holes, equal to docs/procedures/nat-093/posthoc.json; a dump whose end line counts do not match the inferred geometry, whose records are not 96-aligned to one tail start, or that has no end line is NOT inferred and is reported as unreadable with the reason.",
+    "Dumps with an announced begin are read exactly as NAT-089's reader reads them (the same fixtures give identical results); the analyser rows A1-A8 are the NAT-089 rows applied over the v2 text with a marker that says the begin was inferred; tests, mutation pass under the RAM cap. Nothing here measures the phone."
+  ],
+  "steps": [
+    "Derive the geometry and write the reader",
+    "Wrap the analyser",
+    "Tests and mutation pass"
+  ],
+  "status": "pending",
+  "owner": null
+}
