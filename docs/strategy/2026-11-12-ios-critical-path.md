@@ -39,6 +39,90 @@ Earlier text below was written before the IPSW existed; the rows and statements 
 
 Nothing in steps 2-4 has any evidence on this phone. The earliest blocker is step 1; everything after it is blocked behind root delivery, not behind graphics.
 
+## 0b. Status update, 2026-11-12 after NAT-078 and NAT-083 (this section replaces section 0 where they differ)
+
+What changed since section 0: the root is **delivered** (NAT-078, native-device) and a **bootable** variant of it exists on the host (NAT-083, built + host-checked). Everything below separates the five evidence words of the vocabulary above.
+
+| Item | written | built | model-tested | ran on S24 | real iOS UI |
+| --- | --- | --- | --- | --- | --- |
+| Project XNU payload kernel to `bsd_init`, PID 1 (own probe) | yes | yes | yes | **yes** (NAT-068/075/078) | no |
+| Bulk-OUT receive engine, loader variant, host sender | yes | yes | yes (NAT-076/079/080) | **yes** (NAT-078: 2,475,720,704 B in 152.98 s, 16.18 MB/s, 0 errors) | no |
+| DWC3 DMA into RAM above 4 GiB (NAT-040 U5) | - | - | - | **yes** (PA 0x902d7c000) | no |
+| Root readable through `/dev/rmd1` with the MMU on | yes | yes | yes | **partly**: 59.6% (1,476,395,008 B) hashed, 11 digests equal the host's; the other 40.4% unread | no |
+| APFS root image (Apple's launchd, dyld, shared cache, backboardd, SpringBoard inside) | donor recipe | yes (`system.apfs` 2.31 GiB, `apfsck` clean, 62,258 entries read back) | host-checked | **no** (never mounted by the S24 kernel) | no |
+| Stage0 + init + small root for `rd=md1` (NAT-083, `/dev/md1`→`/dev/md0`) | yes | yes | host-checked (`apfsck`) | no | no |
+| Apple dyld, Apple launchd, backboardd, SpringBoard | - | present in the image | static audit only (IOS-012) | **no** | no |
+| Display scan-out registers (read-only dump) | yes | yes | yes (39 tests, 63/65 mutants) | **yes** (NAT-070, decision 0031: 7 windows read, no abort; fork label `decon-running-no-enabled-rdma`, re-read below) | no |
+| A frame from a user process on the panel | - | - | - | **no** | no |
+
+Nothing in the table has put an Apple instruction on the S24 yet; the highest rung reached is "our own static Mach-O ran as PID 1 and the host read its text".
+
+### Audit of the selected profile (what is known, from what, and what stays unknown)
+
+| Question | Answer | Class | Unknown / next check |
+| --- | --- | --- | --- |
+| Exact version, architecture, kernel match | iPhone X (iPhone10,3, D22AP, t8015) iOS 16.5 (20F66), arm64 without pointer authentication; project kernel `xnu-8796.121.2` `DEVELOPMENT_ARM64_E1S` (Darwin 22.5.0 = the iOS 16.5 family) | host-test (IOS-002), ran on S24 (kernel banner) | kernel-vs-userland interface is only exercised by running the userland (milestones 2-3) |
+| Userland files and libraries | six programs audited: `dyld`, `launchd`, `xpcproxy`, `amfid`, `backboardd`, `SpringBoard`; all plain arm64; the closure of each resolves inside the 43-file, 2,710-image shared cache; 0 required libraries missing; `backboardd` links 46 libraries directly (299 images in the closure) | source-review of the IPSW (IOS-012) | symbol presence is not compatibility; only a run shows that |
+| dyld / shared cache | the cache is mapped by dyld from the OS cryptex; the shared region (address range, size) fits our kernel's `vm_map` setup; commpage fields at offsets +0xd0, +0xd8, +0x10c, +0x105 are read by Apple's dyld/libsystem but undefined in the open `cpu_capabilities` header | source-review (IOS-012) | whether Apple code reads them before anything prints; first observable = dyld exit/log text |
+| Apple launchd compatibility | not run; the kernel's AMFI and Seatbelt are stand-ins (the log says so); donors set `launchd_unsecure_cache=1`, `cs_enforcement_disable=1` (already in our command line), `wdt_test=no_user_checkin` | donor claim + kernel log | which of the donor kernel deltas our tree lacks is measured by running launchd (milestone 3) |
+| Syscalls, system registers, IPC | 22 syscalls the userland may call are unimplemented (`nosys`): 251-256, 258-265, 293, 337, 418, 419, 483, 493, 519, 535; Apple system registers `S3_6_C15_C1_5` and `S3_4_C15_C10_6` appear in the cache | source-review (IOS-012) | which of them is hit before the first launchd job: unknown until the run |
+| Services / configuration | launchd needs a job set, `/product` in the ADT (the ADT carries the iPhone X tree, 14,008 B), keystore selectors, `/private/var` | partly model-tested | milestone 3 runs, one job at a time |
+| Graphics: backboardd | links `IOMobileFramebuffer`, `QuartzCore`, `Metal`, `IOSurface`, `IOKit`, `BackBoardServices`, `CoreBrightness`, `CoreGraphics`, `CoreMotion` and the HID libraries directly; `SpringBoard.app` is a thin launcher for `SpringBoard.framework` | source-review (IOS-013 + `otool -L`) | whether `backboardd` runs without a `MTLDevice` is **not known** |
+| Graphics: kernel side | `MiniIOMobileFramebuffer` answers 16 of the 63 constant selectors the userland asks (4 named, 43 unnamed); the IOSurface service answers 18 of 43 (4 named, 21 unknown); the framebuffer reports 1125x2436 on a 1080x2340 panel | source-review (IOS-013), partial run on S24 (framebuffer report) | selectors that fail show up as the first user-visible errors; the 1125x2436 vs 1080x2340 mismatch needs a scaling decision |
+| First frame without a full GPU driver | **plausible, not proven**: QuartzCore has a software renderer path and the donors report frames this way on other SoCs; if `backboardd` or SpringBoard demands a Metal device, the minimum GPU path (GPU-007/GPU-009) joins the critical chain at that point. No software-rendering promise is made | donor claim only | first observable: `backboardd` stays alive and creates an IOSurface-backed layer tree |
+| Separate system image + temporary writable overlay, no Android partition | the root is a read-only APFS container delivered into the 2.31 GiB `md1` reserve (RAM only, nothing written to flash); the donor's `init` gives `/private/var` a **memory filesystem** when no `var_hfs=` device is given, so the writable part is also RAM. 16 KiB pages, 4 GiB window: after the reserve ~1.61 GiB (105,775 pages) is free for the kernel, `launchd`, `backboardd`, SpringBoard and the overlay. An iPhone X has 3 GB, so the budget is tight, not impossible; the levers are a larger loader window (the phone has 7.06 GiB visible), a trimmed root (apps removed) and `fs.compressed` (the root is already built with `mkapfs.py -z`) | native-device (memory and delivery), source-review (donor init) | the real working set of `backboardd` + SpringBoard on this kernel is unmeasured |
+
+**Missing components: none that the owner has to supply.** The IPSW (IOS-001) is in place and accepted. The things that could still be missing are *measurements and project code*, not files: the S24-specific display tables come from the phone itself (own device, read-only register reads over the project's log chain); donor repositories are public and pinned (`research/sources.json`); no Apple file is ever committed. If a later run proves a specific file absent (for example a second IPSW for a different build, or a firmware blob for a peripheral), the entry goes into section 4 with its purpose, the lawful route (Apple's public CDN for the IPSW, the owner's own handset for S24 firmware) and the completion check, before anyone waits for it.
+
+### NAT-070: what the display registers say (native-device, one read at kernel time 40.5 s; decision 0031)
+
+Question asked in advance: do DECON, the DECON0 windows, the RDMA channels, DSIM0/1, DCPHY0 and DPU_MIPI_PHY_CON describe a running pipeline that reads the loader's framebuffer? Observable: the `e1s-display:` lines parsed by `analyze_nat069.py`. The run read all seven windows without an abort or hang; the kernel then ran the project's probe as PID 1 (exit 81, as in NAT-068) and returned its text to the host; the phone went to Download Mode at +79.8 s and was restored (stock RECOVERY hash, Android booted, `assess` pass).
+
+| Register group (as printed) | Value | Reading |
+| --- | --- | --- |
+| framebuffer | 1080x2340, 32 bpp, stride 4320, phys `0xfa200000`; first words `0xffffffff` | same as NAT-068 |
+| DECON0 | `GLOBAL_CON` 0x133 (bit 8 command mode, bit 4 running, bits 1/0 enable), frame counter 1,686; DECON1-3 `GLOBAL_CON` 0x20, counter 0 | DECON0 is running in **MIPI command mode** and has sent frames |
+| DECON0 windows | win2 `0x1` and win3 `0x11` on, both (0,0)-(1079,2339), win0/1 off | two full-screen windows, mapped to channels 0 and 1 (CHMAP = bits 7:4) |
+| RDMA0, RDMA1 | frame 1080x2340, format 0, base `0xfa200000`; RDMA2/3: all zero | both active channels are set up on exactly the console framebuffer |
+| RDMA "enable" word | `0x40000000` on all four channels, including the empty ones | the analyser decodes bit 0 as "on" (UI-007 assumption); the donor's S9 driver (`hakios.exynos_dpu.c`, from Samsung's dpu_9810) defines only bit 2 = busy and bit 4 = SFR update force for this word, so bit 0 is not shown to be an enable bit and bit 30 is not explained |
+| DSIM0/1 | link in stop state, no video mode, PLL/HS clock not running | consistent with a command-mode link between updates (the S9 donor's panel is command-mode; this panel's mode is inferred from DECON0 `GLOBAL_CON` bit 8 only); the status-bit decode is also the patch's assumption |
+| DCPHY0 / DPU_MIPI_PHY_CON | PLL lock 1, ready 1, enable 1 / 1 | the D-PHY is powered |
+
+**Formal result (pre-registered, analyser unchanged): `display.fork = decon-running-no-enabled-rdma`**; the decision text for that label was "revisit the dump window or channel choice before any decision". **Reading of the same numbers against the donor** (source-review, not a new measurement): the structure matches what the S9 donor documents for S-Boot's hand-over (DECON0 in command mode, frames started by the panel's TE, windows on DMA channels that read the boot framebuffer), and the label comes from a bit decode that the Samsung-derived sources do not support. This makes "S-Boot's scan-out can be reused" the working assumption for milestone 4: the baseline is to draw into the boot framebuffer through `MiniIOMobileFramebuffer` (the donor's method, accepting tearing), and the tear-free refinement is to write the new buffer's address into the channel's base-address register and request a shadow update. **Not established:** that the panel shows what the CPU writes there. A command-mode panel updates when a frame is triggered, and only a view of the panel (or the registers that the dump did not include: `HW_SW_TRIG_CONTROL`, `SHADOW_REG_UPDATE_REQ`, `DATA_PATH_CONTROL_0/1`, the IDMA interrupt word, and a second read of the frame counter) can decide it. UI-003 (a full DECON/DSIM bring-up) is therefore off the critical path **provisionally**, and a failed visibility check moves it back.
+
+### Shortest justified path from today's PID 1 to the first real SpringBoard/lock-screen frame
+
+1. **Make the delivered root the kernel's root and read it through the real filesystem** (NAT-083, earliest unsolved blocker). The kernel must mount the 2.31 GiB APFS from `md1` (`rd=md1`, the donor `apfs` VFS is already in `kernel.no-storage`), exec stage0 as `/sbin/launchd`, which mounts the small image on `/redwood` and runs `init`. Observable on the host: stage0 lines, the `/redwood` mount, init's check lines. This is the first moment an Apple-built binary (the dyld or launchd file inside the image) can be opened by our kernel.
+2. **A PID 1 that stays alive** (NAT-071/072): every run to date has been cut at 45-150 s by `loader_return_after` or the 83 s watchdog; Apple's boot takes longer than that. Needs the kernel-side keepalive with a deadline and a verified stop.
+3. **Apple dyld + a dynamically linked program, then Apple launchd** (milestones 2-3): expected stops are the 22 `nosys` syscalls, the commpage fields and the two system registers; each stop is read from the host chain and fixed in the kernel.
+4. **A graphics path** (milestone 4): the NAT-070 fork (below), then a dynamically linked test program that opens `IOMobileFramebuffer`/`IOSurface` (IOS-013 step 3), then `backboardd` with the donor's injected library, then SpringBoard.
+
+The earliest unresolved blocker is step 1 (the APFS root has never been mounted by this kernel). Work on it starts with the NAT-083 loader/payload variant.
+
+### Blocker blocks (a: missing/broken, b: confirming observation, c: minimal change or input, d: ready when, e: prepared without the phone)
+
+| Blocker | a. Missing / broken | b. Confirming observation | c. Minimal change / external input | d. Ready when | e. Without the phone |
+| --- | --- | --- | --- | --- | --- |
+| **B1 APFS root from md1** (NAT-083) | the kernel has never mounted the big APFS as root; the project's `md0` is the small payload ramdisk and `md1` the delivered reserve, the opposite of the donor; stage0 hardcoded `/dev/md1` | NAT-078 read `/dev/rmd1` with the MMU on (59.6% matched); `mockfs_mountroot` has no mount point (read in source) so `mockfs` cannot mount it | `rd=md1` + stage0 `/dev/md1`→`/dev/md0` (done on the host: 3 counted substitutions, `apfsck` clean); loader/payload variant with the 4 MiB small root as `md0`; the same delivery loader (NAT-079) | one run: the kernel log shows the APFS root mounted and stage0 printing its lines on the host chain; the whole-image digest matches the host's (NAT-081 probe fix) | root image, stage0, loader variant, packaging, decision file, analyser, tests |
+| **B2 PID 1 that stays alive** (NAT-071/072) | the kernel returns after a timeout or on panic; the 83 s watchdog is fed only by the loader; kernel text reaches the host only at return | NAT-068/075/078: returns at 45-150 s; NAT-078: unpetted kernel ran 45 s without SEC_UPLOAD | kernel-side watchdog pet with a boot-arg deadline; heartbeat PID 1 | one run: heartbeat lines ≥2 spaced 5 s, the loader's return reason in its note, host receives the text, no watchdog reset before the deadline | patch against the pinned kernel, host tests, decision draft |
+| **B3 dyld/launchd kernel gaps** | 22 `nosys` syscalls, 3 commpage offsets, 2 Apple system registers, stand-in AMFI/Seatbelt | IOS-012 static list; first run of Apple's `dyld` will name the actual first stop | implement or stub exactly the entries the first stops name; no wholesale clone of the donor series | `dyld` runs a dynamically linked test program to `exit(0)` and prints, on the S24 | donor-delta matrix per syscall/sysreg (IOS-003), unit tests of each stub against Apple's call sites |
+| **B4 scan-out** (NAT-070 done, see the reading below) | whether a CPU write to `0xfa200000` reaches the panel; the exact trigger/shadow-update registers on the S24 (the dump had no `HW_SW_TRIG_CONTROL`, `SHADOW_REG_UPDATE_REQ`, `DATA_PATH_CONTROL`, IDMA IRQ words) | NAT-070 (native-device): DECON0 in command mode and running (`GLOBAL_CON` 0x133, frame counter 1,686), windows 2 and 3 on, full-screen, mapped to channels 0 and 1; RDMA0/1 are set to 1080x2340 at 0xfa200000, the console framebuffer; DSIM0/1 in stop state (no video mode) - the same structure the donor documents for the S9 (S-Boot leaves a command-mode DECON0 reading the boot framebuffer) | take the donor's baseline: draw into the boot framebuffer; later the tear-free flip (IDMA base address + `SHADOW_REG_UPDATE_REQ`) after a second dump that adds those registers | a user-process frame visible on the panel (needs one look at the panel or a second observable; see below) | donor-driver comparison, register-decode fix in the dump, next dump variant |
+| **B5 userland graphics path** | selector coverage (63/16 and 43/18), 1125x2436 vs 1080x2340 scaling, backboardd's Metal dependency | IOS-013 counts; a dynamic test program's first failing selector | extend the stand-in services only for selectors the test program/backboardd actually fails on; scale or crop decision | `backboardd` alive with a layer tree; one IOSurface frame copied to the scanned-out buffer | selector tables, a pure-C test program for the copy path |
+| **B6 memory budget** | ~1.61 GiB free after the 2.31 GiB reserve; the working set of SpringBoard on this kernel is unmeasured | NAT-078 kernel text: 105,775 free + 156,369 wired pages of 16 KiB | measure; if needed raise the loader window above 4 GiB or trim the root | `vm_stat`-equivalent from a running userland shows ≥300 MiB free with SpringBoard up | loader window analysis; root trim list (apps not needed for the lock screen) |
+
+### Milestones against the vocabulary
+
+| # | Milestone | highest rung reached | Not reached |
+| --- | --- | --- | --- |
+| 1 | stable minimal XNU, user process, diagnostics | ran on S24 (own PID 1, text on the host) | PID 1 stays alive; timed return (B2) |
+| 2 | compatible dyld + dynamically linked program | built (the files exist in the image) | mounted, run (B1, B3) |
+| 3 | Apple launchd + minimal services | built | run (B1-B3) |
+| 4 | user process → S24 panel (buffers, interfaces, presentation) | ran on S24: registers read (NAT-070); written: stand-in `MiniIOMobileFramebuffer` | whether the panel shows CPU writes (B4); user-space path (B5) |
+| 5 | backboardd + real SpringBoard | none | milestones 2-4 |
+| 6 | real lock screen, input, home screen | none | milestone 5; touch driver GPIO defect |
+| 7 | icons, one real app, home, re-lock | none | milestone 6 |
+| 8 | stability, GPU, smoothness, power, other devices | none | milestone 7 |
+
 ## 1. Audit of the selected profile and local components
 
 Selected profile (docs/implementation.md, CAPABILITIES.md): **iPhone X (iPhone10,3, D22AP, t8015) iOS 16.5 (build 20F66)** userland on **XNU 8796.121.2** (HackiOS base d82c64a3) for **SM-S921B/e1s**.
@@ -82,6 +166,8 @@ The scan-out fork (milestone 4) that can be decided on the host plus one run:
 | the pipeline is idle or reads another buffer | milestone 4 needs a real display driver (UI-003) before any iOS frame can appear; schedule it ahead of milestone 5 |
 | a register read faults or hangs | the display block is not reachable in the loader's power/clock state; the fix is a loader-side power-domain step (separate task) |
 
+**Result (NAT-070, 2026-11-12, native-device):** no read faulted or hung; the formal label was `decon-running-no-enabled-rdma`, and the reading of the same numbers against the S9 donor supports the first row provisionally. See section 0b for the numbers, what is not established, and the visibility check that can reverse it.
+
 ## 4. External inputs (the only items the owner has to supply)
 
 | ID | File / data set | Purpose | Lawful way to obtain | Completion check |
@@ -113,7 +199,7 @@ Nothing else is requested. Firmware from the phone and every other input already
 
 | Task | Question | Observable | Decision |
 | --- | --- | --- | --- |
-| NAT-070 | Does the display engine scan out the loader's framebuffer? | parsed `e1s-display:` pipeline lines vs `phys 0xfa200000`; chain verdict PASS | section 3 table |
+| NAT-070 (DONE, native-device pass) | Does the display engine scan out the loader's framebuffer? | parsed `e1s-display:` pipeline lines vs `phys 0xfa200000`; chain verdict PASS | section 3 table; result in section 0b |
 | NAT-072 | Can a run last minutes with a verified stop, and does the timed return work? | heartbeat lines with kernel stamps >= 5 s apart; loader return reason; keepalive stop and no watchdog reset before the deadline | if yes: milestone 1 closed, launchd bring-up uses N-minute runs; if the keepalive does not hold the watchdog: stay with bounded < 57 s runs and put the USB-in-kernel log task on the path |
 
 ## 8. Task map
