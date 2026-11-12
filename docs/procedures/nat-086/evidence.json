@@ -1,0 +1,112 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "fail",
+ "recorded_at": "2026-11-12T12:50:00+00:00",
+ "commit": "ff2ffcf",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "decision": "docs/decisions/0033-nat085-loader-diag-xnu-ep-md1-single-run-2026-11-12.md",
+ "device_inventory": "devices/local-2026-11-12-nat086.json",
+ "summary": "One native run of loader-diag-xnu-ep-md1 (decision 0033). Analyser result: chain row 1b, stage row S4 (keybag skipped, launchd stopped), not S1. The ADT property /chosen/ephemeral-storage=1 worked on the phone: keybagd printed 'DEVICE HAS EPHEMERAL DATA VOLUME, SKIP INIT' (twice, for keybag and usermanagerd) and Apple's launchd ran 11 more boot tasks, then launchd_cache_loader aborted (SecStaticCodeRef errSecCSStaticCodeNotFound, because /System/Library/xpc/launchd.plist does not exist in the donor-built root) and XNU panicked by design (a critical boot task exited). The job com.nat085.ps never ran. The task's question (two job intervals) is therefore answered 'no, at row S4'; per its acceptance a non-S1 row is recorded as the finding and does not complete the task.",
+ "acceptance": {
+  "one_run_under_its_own_decision": "decision 0033 committed in ff2ffcf before any device access; one RECOVERY write (readback fe216cd3...), one reboot, no retry",
+  "restored_and_checked": "NAT-013 restore with the pyusb venv python (outcome awaiting-readback), check_android pass (recovery_hash_match true, user data directories present, sys.boot_completed 1), assess pass (six stages true)",
+  "judged_by_unchanged_analyser": "analyze_nat085.py sha256 eb6d2726174ec84bdce3df46f4d6744da2b0844f1e3e2b5be2e49d54101a3160 (the analyser of docs/procedures/nat-085, not edited after the run): chain row 1b, stage row 4",
+  "non_s1_row_recorded_as_finding": "yes; task not completed"
+ },
+ "findings": [
+  "S4: keybagd skipped its init on the S24 (hypothesis of NAT-085 confirmed on the phone): ADT /chosen/ephemeral-storage=1 -> sysctl hw.ephemeral_storage -> os_variant_uses_ephemeral_storage.",
+  "launchd ran, after keybag, usermanagerd, dirs_cleaner (dc_reset: /tmp, /var/run: Invalid argument), xpcroleaccountd, init_featureflags, auearlyboot (Early Boot: no accessories), tzinit (zoneinfo link missing, symlink reset attempted), finish-restore, finish-demo-restore, sysstatuscheck, prng_seedctl (kernel prng seed and virtual random not loadable), launchd_cache_loader.",
+  "launchd_cache_loader: launchd logged 'Unable to open /System/Library/xpc/launchd.plist [2:No such file or directory]' and 'Skipping setting up shared memory with cache loader'; the loader then aborted with errSecCSStaticCodeNotFound and the kernel panicked ('launchd_cache_loader[28] exited -- exit reason namespace 7 subcode 0x1'). References/apple-xnu bsd/kern/kern_exit.c: proc_handle_critical_exit panics for a boot task spawned with the panic-on-crash behaviour; by-design.",
+  "The absence of launchd.plist is a property of the donor recipe's system image (build.sh deletes it), not of the delivery (delivery outcome 'delivered', 2,475,720,704 B at 17.055 MB/s; whole-image digest still open under NAT-078).",
+  "Host disassembly of the pinned launchd: boot tasks are skipped in launchd's restore/ramdisk mode, which strstr(kern.bootargs, \"rd=md0\") switches on; this run had rd=md1. Not yet observed on the phone.",
+  "A 5,321-byte gap in the returned log (head 8192 + tail 32768) lies between the libignition configuration lines and the FIPS lines; the stage judgement used lines that are present in the tail; absence in the gap is 'not established'."
+ ],
+ "established": [
+  "native-device: ADT ephemeral-storage=1 makes Apple's keybagd skip its initialisation on the S24 under the project XNU.",
+  "native-device: Apple's launchd gets through 11 further boot tasks after keybag, including auearlyboot, tzinit, sysstatuscheck and prng_seedctl user-space programs, before launchd_cache_loader.",
+  "native-device: the kernel panics when launchd_cache_loader exits abnormally; the run ended in Download Mode at dt 380.66 s (analyser class cap-reset)."
+ ],
+ "not_established": [
+  "whether launchd survives the boot-task phase and runs a job (needs the cache-loader task not to fail)",
+  "whether the restore/ramdisk mode of launchd (rd=md0 in the boot-args) skips the boot tasks on the phone",
+  "anything about a UI, display or GPU"
+ ],
+ "disclosures": [
+  "The first `assess` call used the wrong arguments (argparse exit 2, nothing executed) and was repeated correctly.",
+  "The analyser was run only after the collector and watcher had exited and manifest.json existed."
+ ],
+ "commands": [
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-085/session_nat085.py --image loader-diag-xnu-ep-md1 --out artifacts/nat-085/run-001 --execute",
+   "exit": 0,
+   "note": "report.json outcome native-attempt-started"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py restore --bus B --address D --out artifacts/nat-085/restore-tool-001",
+   "exit": 0,
+   "note": "outcome awaiting-readback"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-012/check_android.py artifacts/nat-085/check-android.json",
+   "exit": 0
+  },
+  {
+   "cmd": "restore_stock.py assess --report artifacts/nat-085/restore-tool-001/report.json --readback artifacts/nat-085/check-android.json",
+   "exit": 0,
+   "note": "preceded by one call with wrong arguments (exit 2, no effect)"
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-085/analyze_nat085.py --archive artifacts/nat-085/run-001/archive ... --out artifacts/nat-085/run-001/analysis.json --log-out artifacts/nat-085/run-001/kernel-log.txt",
+   "exit": 0,
+   "note": "verdict PASS (the capture), chain row 1b, stage row S4"
+  }
+ ],
+ "artifacts": [
+  {
+   "path": "artifacts/nat-085/run-001/analysis.json",
+   "sha256": "e7d0843d9ddd11a4c33c9fcc4da09b49abd38165ccce7514b2ed33b847cb9359"
+  },
+  {
+   "path": "artifacts/nat-085/run-001/kernel-log.txt",
+   "sha256": "1860f6ffdcca4f46db840be8dcad571936272f1cfcdb0984b801cac5f7cc8cd3"
+  },
+  {
+   "path": "artifacts/nat-085/run-001/report.json",
+   "sha256": "91357a49b6e6f8ba460eb445d708f7b9c303e86db4ca817a7b7917369814055e"
+  },
+  {
+   "path": "artifacts/nat-085/run-001/usb-events.jsonl",
+   "sha256": "245f75ec55f9f44e1dfd33c40d690a5b4ed3f0fb9452ee48901f99d5756ca54e"
+  },
+  {
+   "path": "artifacts/nat-085/run-001/delivery.stdout",
+   "sha256": "6edef3cbaabcf4faf967dbbc5b5983377158cabfaea65c6188a63a6d7396ed6c"
+  },
+  {
+   "path": "artifacts/nat-085/restore-tool-001/report.json",
+   "sha256": "e51d6ab4d7a5ce02c2f36f9a91c94f2dff677d3031c394911d2c16760814ee50"
+  },
+  {
+   "path": "artifacts/nat-085/check-android.json",
+   "sha256": "a407f75bfaf099b2e18b71aaa7ec370f58da1c4784ad034bc841286241aa4414"
+  },
+  {
+   "path": "artifacts/nat-085/assess-001.stdout",
+   "sha256": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a"
+  },
+  {
+   "path": "docs/procedures/nat-086/launchd-console.txt",
+   "sha256": "abdc8f973a373222f96d599f31574e3189350e8ab3bc047bbe2a6efaf315ab17"
+  },
+  {
+   "path": "docs/procedures/nat-085/analyze_nat085.py",
+   "sha256": "eb6d2726174ec84bdce3df46f4d6744da2b0844f1e3e2b5be2e49d54101a3160"
+  }
+ ],
+ "cause_review": {
+  "why_launchd_could_not_open_launchd_plist": "The delivered root was built by the donor recipe (artifacts/nat-083/recipe/userland/build.sh, 'launchd must load our choice of jobs, not all 500 that Darwin has'), which deletes System/Library/xpc/launchd.plist (and LaunchDaemons, NanoLaunchDaemons, LaunchAngels) from the system image. So the file's absence is by that recipe, not a delivery fault.",
+  "why_the_cache_loader_task_ran": "launchd's Boot dictionary (the plist embedded in /sbin/launchd, section __TEXT,__config) lists launchd_cache_loader with RequireRun+RequireSuccess; launchd decides per task in a predicate (0x10003b8c8): PerformAlways -> run; userspace-reboot flag -> only PerformAfterUserspaceReboot; flag B (restore/ramdisk) and no PerformInRestore -> skip; else run. Flag B is set when strstr(kern.bootargs, \"rd=md0\") (import _strstr resolved through the chained fixups) or the strings Restore/Ramdisk/RamDisk match. The cmdline of this run had rd=md1, so B was 0 and every boot task ran.",
+  "status": "source/disassembly review of the binary on the host (capstone over the pinned IPSW launchd); not yet observed on the phone"
+ }
+}

@@ -1,0 +1,85 @@
+{
+ "run": {
+  "image": "loader-diag-xnu-ep-md1",
+  "decision": "docs/decisions/0033-nat085-loader-diag-xnu-ep-md1-single-run-2026-11-12.md",
+  "recovery_sha256": "fe216cd39eb68105b31dfca583a13a8e34a67287cd8a88466f4d39b6262e5593",
+  "reboot_requested_at": "2026-11-12T12:10:22.560093+00:00",
+  "delivery": {
+   "outcome": "delivered",
+   "committed_bytes": 2475720704,
+   "mb_per_s": 17.055
+  },
+  "first_usb_return": {
+   "dt_s": 380.66,
+   "class": "download",
+   "analyser_class": "cap-reset"
+  },
+  "usb_log_covers_s": 597.65,
+  "collector": {
+   "boots": 1,
+   "records": 618,
+   "drops": 0,
+   "faults": 0,
+   "resets": 0
+  },
+  "stream": {
+   "bytes_received": 266524,
+   "stop": "eof"
+  }
+ },
+ "analysis": {
+  "analyser": "docs/procedures/nat-085/analyze_nat085.py",
+  "sha256": "eb6d2726174ec84bdce3df46f4d6744da2b0844f1e3e2b5be2e49d54101a3160",
+  "chain_row": "1b",
+  "stage_row": 4,
+  "stage_name": "keybag-skipped-launchd-stopped",
+  "stage_S1_reached": false
+ },
+ "launchd_text": {
+  "bytes_after_exec": 4545,
+  "lines": 71,
+  "launchd_lines": 34,
+  "log_gap_bytes": 5321,
+  "gap_position": "after the libignition configuration lines, before the FIPS lines",
+  "keybag_skip_lines": 2,
+  "keybag_skip_text": "****** DEVICE HAS EPHEMERAL DATA VOLUME, SKIP INIT ****",
+  "boot_tasks_seen_in_order": [
+   "keybag",
+   "usermanagerd",
+   "dirs_cleaner",
+   "xpcroleaccountd",
+   "init_featureflags",
+   "auearlyboot",
+   "tzinit",
+   "finish-restore",
+   "finish-demo-restore",
+   "sysstatuscheck",
+   "prng_seedctl",
+   "launchd_cache_loader"
+  ],
+  "tasks_after_keybag": 11,
+  "job_runs_com_nat085_ps": 0,
+  "fips_all_passed": true
+ },
+ "end": {
+  "panic": "launchd_cache_loader[28] exited -- exit reason namespace 7 subcode 0x1 description: Failed to create SecStaticCodeRef [-67068|errSecCSStaticCodeNotFound]",
+  "kernel_time_of_keybag_task_s": 184.69,
+  "kernel_time_of_panic_s": 185.57
+ },
+ "notable_after_keybag": [
+  "tzinit: Bad zoneinfo link /usr/share/zoneinfo: No such file or directory",
+  "failed to load kernel prng seed: (-76) (2) No such file or directory",
+  "failed to load virtual random: (-147) (-536870212)",
+  "dc_reset: /tmp: Invalid argument",
+  "dc_reset: /var/run: Invalid argument",
+  "launchd: Unable to open /System/Library/xpc/launchd.plist [2:No such file or directory]",
+  "launchd: Skipping setting up shared memory with cache loader",
+  "launchd_cache_loader: Code: /System/Library/xpc/launchd.plist Sig: /System/Library/xpc/launchd.plist.sig",
+  "launchd_cache_loader: abort: Failed to create SecStaticCodeRef [-67068|errSecCSStaticCodeNotFound]"
+ ],
+ "restore": {
+  "tool": "docs/procedures/nat-013/restore_stock.py (pyusb venv python)",
+  "assess": "pass, six stages true",
+  "check_android": "pass: recovery sha256 = pinned stock 96620b8b..., user data directories present, sys.boot_completed 1"
+ }
+}

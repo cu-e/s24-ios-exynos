@@ -1,0 +1,18 @@
+{
+  "id": "NAT-085",
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "priority": 96,
+  "depends_on": ["NAT-084"],
+  "title": "Next image after the NAT-084 finding: ADT /chosen/ephemeral-storage=1 (so keybagd --init skips instead of rebooting the system) plus one launchd job (/bin/ps -A to the console) in the small root; build, derive the session driver, analyser rows for the launchd stage, decision draft",
+  "paths": ["docs/procedures/nat-085", "artifacts/nat-085"],
+  "sources": ["s24-port"],
+  "acceptance": [
+    "The ADT used by the image equals the pinned e1s.adt plus exactly one /chosen property ephemeral-storage = u32 1 (parsed back, tested); the payload builds through the NAT-083 chain with that single substitution counted.",
+    "The os_variant path is documented from the shared cache disassembly: hw.ephemeral_storage (sysctl, from the ADT) decides os_variant_uses_ephemeral_storage, which keybagd --init checks before MKB_INIT.",
+    "A session driver derived from NAT-083's by counted substitutions and an analyser for the launchd stage (keybag skipped, boot tasks reached, job spawned, launchd alive or not) tested over the real NAT-084 log; decision draft with hashes. Nothing here measures the phone."
+  ],
+  "steps": ["Derive ADT", "Build image and small root with one job", "Driver and analyser", "Decision draft"],
+  "status": "pending",
+  "owner": null
+}
