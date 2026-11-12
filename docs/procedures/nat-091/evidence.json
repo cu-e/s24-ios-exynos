@@ -1,0 +1,119 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "inconclusive",
+ "recorded_at": "2026-11-12T16:44:22+00:00",
+ "commit": "cd0c64187c4bc301b31efa2505f21b7f2bdce24f",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "decision": "docs/decisions/0035-nat090-loader-diag-xnu-sa-md1-single-run-2026-11-12.md",
+ "device_inventory": "devices/local-2026-11-12-nat091.json",
+ "summary": "loader-diag-xnu-sa-md1 ran once on the S24 (decision 0035, RECOVERY only, restored from the pinned stock, Android checked) and did NOT reach its question: the root delivery stopped at the 225 s cap with 2,273,312,768 of 2,475,720,704 bytes (91.82%) at 10.10 MB/s (NAT-078/083/085/087 delivered the whole root at 15.0-17.1 MB/s in 145-165 s), the kernel then booted on a root whose last 202,407,936 bytes were never written; the Stage A small root (md0) mounted and showed all 20 plists, init passed 35 of 35 checks, but /bin/df, /sbin/mount, /bin/ps and /sbin/launchd.darwin failed with `Input/output error` (exit 127), vm_stat was killed by signal 9, init finished and the kernel shut down at kernel time 276.54 s. Chain row 7 (not fully delivered: the launchd stage is not evaluated); Stage A ladder row A8 (no launchd line). No Apple daemon was started; the question of decision 0035 is unanswered.",
+ "acceptance": {
+  "1_run_and_restore": "One run under decision 0035 (committed 7630d56 before the launch): RECOVERY written once (reboot requested 2026-11-12T16:29:22.914Z), loader appeared +18.5 s, the loader's 360 s deadline returned the phone to Download Mode (`SAMSUNG USB`, +379.5 s on the watcher's clock), NAT-013 restore with the pyusb venv python, `assess` pass (pit validated, upload acknowledged, session end confirmed, reboot confirmed, android booted, recovery readback matches), check_android: SM-S921B/e1s/S921BXXS9BYH3, boot_completed 1, user data directories present, RECOVERY hash equals the pinned stock. No retry of this image: the one-shot marker exists. A first launch at 16:02:48Z stopped at the driver's adb check before any write (phone left the USB bus; report.json device_write_started false, reboot_sent false) and did not consume the attempt.",
+  "2_analysers": "analyze_nat087.py and analyze_nat089.py were run unchanged after the collector and watcher exited: chain row 7 and Stage A row A8 (not-evaluated: no launchd line). The tables of both are empty: no launchd line exists.",
+  "3_row_other_than_A1": "Recorded as the finding, task NOT completed (a non-pass outcome)."
+ },
+ "findings": [
+  "Delivery shortfall: 2,273,312,768 B in 225.1 s = 10.10 MB/s (the loader's receive cap is 240 s). The rate was flat at 9.2-10.7 MB/s from the first seconds, so it is not a stall; rx errors, aborts, resets, gaps were all 0. At the 15-17 MB/s of the four earlier runs the whole root needs 145-165 s. The host was heavily loaded (at 16:42Z, after the run: load average 30.5 / 28.5 / 21.0 over 1 / 5 / 15 min on 12 cores): three leaked mutant-test processes of MY OWN earlier NAT-089 mutation pass (killed at 16:42Z after this run was analysed; they had run for 69-70 minutes at ~95% CPU each, i.e. during the whole run) plus the owner's Java/gradle work. That the load caused the rate drop is a likely explanation, not a measurement.",
+  "The kernel did not wait for or check the missing tail: it booted at the cap and mounted the APFS root (md1) with the delivered 91.82% in place; the first four rc programs and launchd.darwin read as `Input/output error`, which is consistent with their data lying in the undelivered tail but was not checked against the image's extent map.",
+  "New positive observation: the 4 MiB Stage A small root (md0) built by NAT-089 is mounted by the S24 kernel and lists all 20 plists (19 Apple + com.nat085.ps) under /redwood/LaunchDaemons, with the sizes of the host files: the APFS container of NAT-089 holds the plists (NAT-090 could not tie them to the container by a byte search).",
+  "The transport worked: 1 boot, 455 frames, 453 records, 0 drops, 0 faults, 0 stalls, dump why=2 of 24,315 bytes (head 8,192 + tail 16,123, gap 0, closed): all of the kernel's text from init up to CPU halted."
+ ],
+ "established": [
+  "The run happened as described and the phone is back on the stock RECOVERY with Android and user data intact.",
+  "A root delivered to 91.82% does not boot launchd: a delivered-bytes check is needed before the kernel starts (the loader proceeded at the cap).",
+  "The Stage A small root mounts and holds the plists on the S24."
+ ],
+ "not_established": [
+  "Anything about Apple daemons under restore-mode launchd: launchd was never executed.",
+  "That the load on the host caused the slower delivery; that the five failing files lie in the undelivered tail.",
+  "Whether a complete delivery at 15 MB/s would have run the same chain as NAT-088 (it is expected, not shown)."
+ ],
+ "disclosures": [
+  "adb: the first `adb devices` of this session hung (server start in the agent shell); a server was started with `setsid nohup adb nodaemon server`.",
+  "Leaked processes of my own NAT-089 first mutation pass (3 mutants stuck in loops) ran during this run; found only after the delivery cap was reached; not detected earlier because the pass had been stopped by killing its parent.",
+  "Restore used NAT-013's restore_stock.py (not the driver's --restore), as the protocol of decision 0035 states.",
+  "The NAT-089/090 evidence files carry recorded_at times that are local time labelled UTC (see docs/procedures/nat-090/ERRATA.md)."
+ ],
+ "commands": [
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-090/session_nat090.py --image loader-diag-xnu-sa-md1 --out artifacts/nat-090/preflight-001",
+   "exit": 0,
+   "note": "ready-read-only"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-090/session_nat090.py --image loader-diag-xnu-sa-md1 --out artifacts/nat-090/run-001 --execute",
+   "exit": 2,
+   "note": "stopped at the adb check (phone left the bus): no write, no reboot"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-090/session_nat090.py --image loader-diag-xnu-sa-md1 --out artifacts/nat-090/preflight-002",
+   "exit": 0,
+   "note": "ready-read-only"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-090/session_nat090.py --image loader-diag-xnu-sa-md1 --out artifacts/nat-090/run-002 --execute",
+   "exit": 0,
+   "note": "native-attempt-started, reboot requested 16:29:22.914Z"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py restore --bus 5 --address 14 --out artifacts/nat-090/restore-002",
+   "exit": 0,
+   "note": "awaiting-readback"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-012/check_android.py artifacts/nat-090/android-after-002.json",
+   "exit": 0,
+   "note": "outcome pass"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-090/restore-002/report.json --readback artifacts/nat-090/android-after-002.json",
+   "exit": 0,
+   "note": "outcome pass"
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-087/analyze_nat087.py --archive artifacts/nat-090/run-002/archive --events .../usb-events.jsonl --report .../report.json --delivery .../delivery/delivery.json --root artifacts/nat-083/system-padded.apfs --size 2475720704 --sha256 4377e988... --image loader-diag-xnu-sa-md1 --out .../analysis.json --log-out .../kernel-log.txt",
+   "exit": 0,
+   "note": "chain row 7"
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-089/analyze_nat089.py --archive artifacts/nat-090/run-002/archive --jobs-dir artifacts/nat-089/pid1-stageA/root/LaunchDaemons --out .../analysis-nat089.json",
+   "exit": 0,
+   "note": "row A8 not-evaluated"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-090/preflight-002/report.json",
+  "artifacts/nat-090/run-001/report.json",
+  "artifacts/nat-090/run-002/report.json",
+  "artifacts/nat-090/native-attempt-loader-diag-xnu-sa-md1-used.json",
+  "artifacts/nat-090/run-002/usb-events.jsonl",
+  "artifacts/nat-090/run-002/delivery/delivery.json",
+  "artifacts/nat-090/run-002/delivery/delivery.jsonl",
+  "artifacts/nat-090/run-002/kernel-log.txt",
+  "artifacts/nat-090/run-002/analysis.json",
+  "artifacts/nat-090/run-002/analysis-nat089.json",
+  "artifacts/nat-090/restore-002/report.json",
+  "artifacts/nat-090/android-after-002.json",
+  "artifacts/nat-090/assess-002.stdout",
+  "devices/local-2026-11-12-nat091.json",
+  "docs/procedures/nat-091/init-rc-console.txt"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-090/preflight-002/report.json": "355056965e970c07e9592661c76b97b5dcec601417e4c22cdfbc77ae40e8f5f1",
+  "artifacts/nat-090/run-001/report.json": "24d8dae706909dd63fdc30ba1fc51ce14032eab3857e911ee533a66fe05fd03f",
+  "artifacts/nat-090/run-002/report.json": "778d53a6639ae251d03c71657fc6e3497b13aca28fd421d6e9fdb72f818f24f4",
+  "artifacts/nat-090/native-attempt-loader-diag-xnu-sa-md1-used.json": "9d6a803437789922178f9c53f6a81ecba872e80080bc0f782ece37467f246ccd",
+  "artifacts/nat-090/run-002/usb-events.jsonl": "cf51e6df26f23bbeb8aefdeff36ab0b80d19b64f3cb918bded5eb38977e4516d",
+  "artifacts/nat-090/run-002/delivery/delivery.json": "cfe686b3f8ed30eb8bb4a27cbf8350c522420063b4de7108edececfce152aebc",
+  "artifacts/nat-090/run-002/delivery/delivery.jsonl": "4b345b7d607609ded11873ebbf87583e2e9d8a23477c943d89b7437a96c23c17",
+  "artifacts/nat-090/run-002/kernel-log.txt": "89ea4dd20989bb59e4a45cef42c2b7e69c51035522a1b30b8bce444148450c48",
+  "artifacts/nat-090/run-002/analysis.json": "5ce373f3f5c1586a36500d50d1132e941e9b16f21b5ff138273db9126aa9ca72",
+  "artifacts/nat-090/run-002/analysis-nat089.json": "3bdbc49d1acc69dff0efd1cb36f63969382ed535717566199bbfe7600f1fae3c",
+  "artifacts/nat-090/restore-002/report.json": "1391a8faa8ecd9df8143bef1e853ad336d2b98face88ef25447a88be307def44",
+  "artifacts/nat-090/android-after-002.json": "1ab127275296d8904d955edf69efa6054cdf6645079780d464419592ec1410b0",
+  "artifacts/nat-090/assess-002.stdout": "8de3d4ed0b2ba96ebdf3fcfab36737a9cab4e9c8ea14f6251a2c5cc10607ee81",
+  "devices/local-2026-11-12-nat091.json": "faa354a0ddbd1bf0b9b2ea8c95b7b4c1f711a780ae9cf274836b2b59300ef6b9",
+  "docs/procedures/nat-091/init-rc-console.txt": "4f2ca2321b0e9d794d3571ec458893601af7736200c7a5568c8575a05343e4cf"
+ }
+}
