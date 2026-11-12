@@ -156,6 +156,37 @@ What the image tells us about what is *not* there (host check of the IPSW root t
 
 First frame **without** a full GPU driver: still *plausible, not proven* (QuartzCore's software renderer is reported working by the donor for other phones; here nothing ran). No software-rendering promise is made until backboardd or a test program shows it.
 
+## 0d. Status update, 2026-11-12 after NAT-091/092/093 (this section replaces 0c where they differ)
+
+NAT-091 ran the Stage A image once and the delivery stopped at the 240 s cap (91.82% at 10.10 MB/s, host load ~30), so launchd never executed. NAT-092 built the documented re-run image (byte-for-byte NAT-090's payload except name and tag). **NAT-093 ran it once** (decision 0036, 2026-11-12 16:59Z, host load 3.89): the whole root arrived (179.5 s, 13.79 MB/s). Pre-registered ladder rows: chain row 9, Stage A row **A8** (outcome *inconclusive*; the task stays open).
+
+| Item | written | built | model-tested | ran on S24 | real iOS UI |
+| --- | --- | --- | --- | --- | --- |
+| Whole 2,475,720,704 B root delivered inside the 240 s cap | yes | yes | yes | **yes** (NAT-093; NAT-091's shortfall coincided with host load ~30, cause not proven) | no |
+| Kernel mounts the delivered root; stage0/init 35/35 checks; Apple's `df`, `mount`, `ps`, `vm_stat` print (no EIO, unlike NAT-091) | yes | yes | yes | **yes** (NAT-093, head of the dump) | no |
+| An Apple daemon other than launchd runs: `lsd` as pid 21, seen only as the kernel's CPU-monitor message (osfmk/kern/task_policy.c `task_set_cpuusage`) | plist in the image | yes | static only | **yes** (first Apple daemon observed; launchd's own spawn line for it was not seen) | no |
+| The seven self-starting jobs, the `ps -A` lists, PID 1 survival to the end | yes | yes | yes | **not observed** (log window) | no |
+| backboardd, SpringBoard, graphics | as in 0c | - | - | **no** | no |
+
+What the surviving text shows (post-hoc reading, `docs/procedures/nat-093/`, written after the pre-registered analysers returned A8, not a ladder row): the collector's second boot kept 345 of 428 records, including 83 lost to ring-overrun drops with the `KL begin` record (NAT-089's reader needs it, hence A8). The dump is 170,097 bytes = an 8 KiB head (ends inside rc's `vm_stat` output, before launchd's first line) + a 32 KiB tail, with 129,137 bytes between them not sent. The tail (kernel clock 254.1-276.7 s) is 235 repeats of `process lsd[21] denied attempt to escape CPU monitor (missing required entitlement).` (about 10 per second) plus memorystatus lines for pids 26 and 27. No panic line and no PID 1 exit line is in the surviving 25 KiB; that is an absence in a window with holes, not a negative.
+
+**The earliest unsolved blocker is still B7, now narrower: whether the seven self-starting Apple daemons stay up under restore-mode launchd.** One daemon is known to run. It is not known which others do, or whether PID 1 survives to the timed return in this configuration. The binding constraint on knowing is B8, not B7's cause.
+
+| Blocker | a. Missing / broken | b. Confirming observation | c. Minimal change / input | d. Ready when | e. Without the phone |
+| --- | --- | --- | --- | --- | --- |
+| **B8 log window** (now binding) | head 8 KiB + tail 32 KiB of a 170 KB log; one chatty daemon (`lsd`, ~1 KB/s) fills the tail; the dump drops records when the producer overruns (collector start failures 205, timeouts 1280); the reader refuses a dump whose `begin` record is lost | NAT-093: 235 of 243 timestamped tail lines are one message; 83 of 428 records lost | (1) NAT-094: a Stage A small root without the `com.apple.lsd` job (deterministic for `lsd`; if another daemon floods the same way the row says so); (2) reader v2 that analyses a begin-less dump from the end line's geometry instead of discarding it (host-only); (3) later, per-daemon `StandardErrorPath` into a RAM file system plus a project-owned reader job | a text whose tail holds launchd's last lines and a `ps -A` list, no flood | NAT-094 build + tests, reader v2 |
+| **B11 kernel privilege provider (hypothesis)** | the message means `priv_check_cred(PRIV_PROC_CPUMON_OVERRIDE)` (bsd/kern/process_policy.c `handle_cpuuse`) failed for the caller; on a real device AMFI grants it from an entitlement. The project's kernel loads an AMFI *stand-in* (log line in NAT-068). If the stand-in grants nothing, every entitlement-gated check in Apple's daemons fails the same way | the repeated message itself (consistent, not a proof: `lsd` may genuinely lack the entitlement, and the request might be the unconditional "disable monitor" path, which warns whatever the cap) | read what the stand-in's `mac_priv_check` and entitlement lookups return; decide per later failing daemon; raising `max_cpumon_*` caps through the ADT `/defaults` node (the pinned ADT has one; the command line has 19 spare bytes of 255) helps only if the request is over-cap, not if it is a disable request | the first daemon that exits on an entitlement check names the needed grant | source review of the stand-in policy module and of `csproc_get_entitlements` in the built payload |
+| **B7** | see 0c | NAT-093 row A8: no ladder row | NAT-094 | A1: the seven self-starting daemons in a last complete `ps -A` list | NAT-094 |
+| **B9, B10** | unchanged from 0c: no frame on the panel; `libhakios.dylib` not built (needs the iPhoneOS 16.5 SDK + a Darwin `ld64`, or assembly from open-source headers with `-undefined dynamic_lookup`) | - | owner download of the SDK (Apple's licence) or the open-source route | - | header/`ld64` pinning, compile-only pass |
+
+Shortest justified path from the current PID 1 to the first real lock-screen/SpringBoard frame (each step is *planned* unless a rung is named):
+1. **Make the Stage A text readable** (NAT-094 image without the `lsd` job under a new decision; reader v2). Outcome by row: A1 -> step 2; A2/A3 -> the earliest exit's cause is the next kernel/stub change (probably B11); A4 -> persona/session type first.
+2. **Stage B**: backboardd (+ `libhakios.dylib` once it exists, B10) under the same launchd; first backboardd lines, first failing selector (B9).
+3. **A frame on the panel** (B4/B9): scan-out reuse (NAT-070 reading is provisional) with the first-frame-without-GPU question answered by backboardd itself.
+4. **SpringBoard**, then lock screen. Touch (driver GPIO defect) is after the first frame.
+
+Rung status of this path today: steps 1-4 are *written/built/model-tested* in parts (images, analysers, stand-ins); *ran on S24*: PID 1, Apple launchd, one Apple daemon; *showed real iOS UI*: nothing. No date is promised.
+
 ## 1. Audit of the selected profile and local components
 
 Selected profile (docs/implementation.md, CAPABILITIES.md): **iPhone X (iPhone10,3, D22AP, t8015) iOS 16.5 (build 20F66)** userland on **XNU 8796.121.2** (HackiOS base d82c64a3) for **SM-S921B/e1s**.
