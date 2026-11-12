@@ -1,0 +1,172 @@
+{
+ "kind": "native-device",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T10:31:33+00:00",
+ "commit": "9202a9a12ea1b7c5f8d037b846e6830ec0f027cb",
+ "tree_state": "docs/procedures/nat-070 files listed under sha256 were uncommitted at recording time and are committed in the commit that follows; the recorded commit is its parent",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "decision": "docs/decisions/0031-nat069-loader-diag-xnu-ne2-usb-single-run-2026-11-12.md",
+ "summary": "One native run of loader-diag-xnu-ne2-usb (decision 0031, e1sdisp=2). The payload kernel mapped seven display register windows read-only and printed 24 lines (no abort, no hang, no cannot-map); the chain verdict is PASS (27 stops, the kernel's own return, 25,456 bytes of kernel text on the host, one boot, no drop) and the project's probe ran as PID 1 (exit 81, as in NAT-068). Pre-registered display.fork: decon-running-no-enabled-rdma. The values: DECON0 in command mode, running, frame counter 1686; windows 2 and 3 on, full-screen, channels 0 and 1; RDMA0/1 set to 1080x2340 at 0xfa200000 (the console framebuffer); DSIM0/1 in stop state; DCPHY0 locked. The analyser's 'RDMA on = bit 0' is an assumption that the Samsung-derived sources do not support, so the label is formal and the structure matches the S9 donor's description of the bootloader scan-out; whether the panel shows CPU writes was not observed. Download Mode at +79.84 s, stock RECOVERY restored with NAT-013, Android verified.",
+ "acceptance": {
+  "one_run_under_its_own_decision": "decision 0031 was committed in 9202a9a before any device access; the native permit cited it; one RECOVERY write with readback, one reboot, no retry; NAT-069 driver was the only launcher",
+  "host_collector_archive_and_analysis": "448 records in one boot; verdict PASS from the chain rules; display reading from the kernel text (24 lines); numbers.json holds the parsed figures",
+  "restored_and_checked": "NAT-013 restore (pyusb venv python) exit 0; check_android pass; assess pass"
+ },
+ "findings": [
+  "All seven display windows (DECON0 main/windows/window control, DMA0, DSIM0, DSIM1, DCPHY0, DISP_SS) are readable in the state the loader leaves; no abort, SError or hang occurred.",
+  "DECON0 is running in command mode (GLOBAL_CON 0x133) with frame counter 1686; DECON1-3 idle. Windows 2 and 3 are on, full-screen, mapped to channels 0 and 1.",
+  "RDMA0 and RDMA1 hold 1080x2340 and base 0xfa200000 = the console framebuffer; RDMA2/3 are empty. The enable word is 0x40000000 on all four channels, so it does not distinguish used from unused channels; bit 0 is not an enable bit in the sources read (the S9 donor defines bit 2 busy, bit 4 SFR update force).",
+  "DSIM0/1 are not in video mode (stop state); DCPHY0 PLL locked and ready; DPU_MIPI_PHY_CON 1.",
+  "The kernel with e1sdisp=2 still runs the probe as PID 1 to its designed exit: the extra reads did not regress NAT-068.",
+  "Download Mode came at +79.84 s (loader deadline_s=60), not SEC_UPLOAD; the collector had one boot, no capture error."
+ ],
+ "established": [
+  "native-device: the display engine's register windows are readable by the payload kernel after the loader, and hold the values listed in numbers.json.",
+  "native-device: DECON0 runs in command mode and both active RDMA channels are configured for the console framebuffer's address and size."
+ ],
+ "not_established": [
+  "That the panel shows what the CPU writes to 0xfa200000 (no one observed the panel; the dump has no trigger/shadow/IRQ registers).",
+  "That the frame counter keeps advancing after the loader stops (read once).",
+  "The meaning of bit 30 of the RDMA enable word and the exact decode of the DSIM status bits (assumptions of the pinned patch).",
+  "That any Apple code runs; anything about input or GPU."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-B",
+    "-I",
+    "docs/procedures/nat-069/session_nat069.py",
+    "--image",
+    "loader-diag-xnu-ne2-usb",
+    "--out",
+    "artifacts/nat-070/preflight-001"
+   ],
+   "exit_code": 0,
+   "result": "outcome ready-read-only (battery level 84), decision file named both hashes and decision 0019"
+  },
+  {
+   "argv": [
+    "python3",
+    "-B",
+    "-I",
+    "docs/procedures/nat-069/session_nat069.py",
+    "--image",
+    "loader-diag-xnu-ne2-usb",
+    "--out",
+    "artifacts/nat-070/run-001",
+    "--execute"
+   ],
+   "exit_code": 0,
+   "result": "outcome native-attempt-started; RECOVERY written and read back; watcher + collector started; one adb reboot recovery at 2026-11-12T10:21:01.448485+00:00"
+  },
+  {
+   "argv": [
+    "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "restore",
+    "--bus",
+    "5",
+    "--address",
+    "115",
+    "--out",
+    "artifacts/nat-070/restore-001"
+   ],
+   "exit_code": 0,
+   "result": "outcome awaiting-readback; Download Mode device 04e8:685d, iProduct SAMSUNG USB"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-012/check_android.py",
+    "artifacts/nat-070/restore-001/android-check.json"
+   ],
+   "exit_code": 0,
+   "result": "outcome pass: RECOVERY hash equals the pinned stock, user data directories present, Android booted"
+  },
+  {
+   "argv": [
+    "artifacts/recovery-rescue-20261110-01/venv/bin/python",
+    "-I",
+    "docs/procedures/nat-013/restore_stock.py",
+    "assess",
+    "--report",
+    "artifacts/nat-070/restore-001/report.json",
+    "--readback",
+    "artifacts/nat-070/restore-001/android-check.json"
+   ],
+   "exit_code": 0,
+   "result": "assess pass"
+  },
+  {
+   "argv": [
+    "python3",
+    "-B",
+    "-I",
+    "docs/procedures/nat-069/analyze_nat069.py",
+    "--archive",
+    "artifacts/nat-070/run-001/archive",
+    "--events",
+    "artifacts/nat-070/run-001/usb-events.jsonl",
+    "--report",
+    "artifacts/nat-070/run-001/report.json",
+    "--out",
+    "artifacts/nat-070/run-001/analysis.json",
+    "--log-out",
+    "artifacts/nat-070/run-001/kernel-log.txt"
+   ],
+   "exit_code": 0,
+   "result": "verdict PASS; display.fork decon-running-no-enabled-rdma; root probe-ran-to-exit 81 (analyser unchanged since before the run; run after the collector's window closed)"
+  }
+ ],
+ "sha256": {
+  "docs/procedures/nat-070/README.md": "b419ace2af4c74e66c72275cabdf9ae365c6dd469f189cbb0e18a7026a08e624",
+  "docs/procedures/nat-070/numbers.json": "4d26c40f6ddb62a87d3c0ac7f8ee60f2611af808ac68b25d099e57b62c016234",
+  "docs/decisions/0031-nat069-loader-diag-xnu-ne2-usb-single-run-2026-11-12.md": "b6a99c962e5690d9a9d9bd7977cae2e219e405cc57672f68400d8bc4ab381a56",
+  "docs/procedures/nat-069/analyze_nat069.py": "af7b00b88e18822ae9497dd3177bc3547293bcf3ad2dbd4c88abbf4729b101bb",
+  "docs/procedures/nat-069/session_nat069.py": "70ddbee120323cc1908c659f1aae7f5e8046a1f94379f1712f1343c1fab824c9"
+ },
+ "artifacts": [
+  "artifacts/nat-069/native-attempt-loader-diag-xnu-ne2-usb-used.json",
+  "artifacts/nat-070/preflight-001/report.json",
+  "artifacts/nat-070/run-001/report.json",
+  "artifacts/nat-070/run-001/usb-events.jsonl",
+  "artifacts/nat-070/run-001/archive/manifest.json",
+  "artifacts/nat-070/run-001/archive/events.jsonl",
+  "artifacts/nat-070/run-001/archive/attempt.json",
+  "artifacts/nat-070/run-001/archive/collector-summary.json",
+  "artifacts/nat-070/run-001/analysis.json",
+  "artifacts/nat-070/run-001/analysis.stdout",
+  "artifacts/nat-070/run-001/analysis-early.json",
+  "artifacts/nat-070/run-001/kernel-log.txt",
+  "artifacts/nat-070/run-001/kernel-log-early.txt",
+  "artifacts/nat-070/restore-001/report.json",
+  "artifacts/nat-070/restore-001/android-check.json",
+  "artifacts/nat-070/restore-001.stdout",
+  "artifacts/nat-070/check-android.stdout",
+  "artifacts/nat-070/assess-001.stdout"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-069/native-attempt-loader-diag-xnu-ne2-usb-used.json": "5cc991f9fd4e2ee2d0bbede5917c1a498bf0bdd3b0a90a9e9b6ad1f9939dae21",
+  "artifacts/nat-070/preflight-001/report.json": "221a3fea9a69297b06a6967aeff119d4a128a572fe864db4cbbe1f1c194c2d5a",
+  "artifacts/nat-070/run-001/report.json": "035cfb11ffa87156b071ce9b4ba8c8a0728fbfa79dbf306a84c9382b185d7575",
+  "artifacts/nat-070/run-001/usb-events.jsonl": "8b1d074ba75ec2919a1b1d68fcf0fc654d539ea49ba53f849968353b48356f66",
+  "artifacts/nat-070/run-001/archive/manifest.json": "7184daf79e3cda3b45199221dc34282a6f60bbe6ab2d4b8fee47fb2a0b8192b9",
+  "artifacts/nat-070/run-001/archive/events.jsonl": "1fe66909414e63ddc058de19c93b15e400ffc71be088f7becac514633adc0a4d",
+  "artifacts/nat-070/run-001/archive/attempt.json": "519a48567a04c2720e3c803eb47902373a36a4238e73c92fada6693e5dc77984",
+  "artifacts/nat-070/run-001/archive/collector-summary.json": "0960f9699ac62741a1456839f311831839a0f9536c76795b002d2ee33faaeef2",
+  "artifacts/nat-070/run-001/analysis.json": "2f7130cefddc333154cbff0fd1f76eec371ae1de5582c7bf3cf2518d2debfbfe",
+  "artifacts/nat-070/run-001/analysis.stdout": "2f7130cefddc333154cbff0fd1f76eec371ae1de5582c7bf3cf2518d2debfbfe",
+  "artifacts/nat-070/run-001/analysis-early.json": "b9f151fa9e6c683165a9e43b29554e60b441a1b69c5e73414676ae485db55074",
+  "artifacts/nat-070/run-001/kernel-log.txt": "002ec190c3d7025c68799a5eb35d1e19e6ed6761bf794a20bd42298cd9074772",
+  "artifacts/nat-070/run-001/kernel-log-early.txt": "002ec190c3d7025c68799a5eb35d1e19e6ed6761bf794a20bd42298cd9074772",
+  "artifacts/nat-070/restore-001/report.json": "190a31a47bbcc2cf71482d9b2b197afc04ac43d9a788b70634087d9b39923a09",
+  "artifacts/nat-070/restore-001/android-check.json": "f011da418aea6c4cacc8e02d1bc6cd9e07f5497c92954d3f8e8e80a62ca8d305",
+  "artifacts/nat-070/restore-001.stdout": "f38d1235d693d8679cf0fe2c24e87f8997d6473feecf037b6757a5c2931e5114",
+  "artifacts/nat-070/check-android.stdout": "f9c2b7d526e4e4ad315e0557b6668f31e24de39962e9e1729bea61c5310b0688",
+  "artifacts/nat-070/assess-001.stdout": "69ef214d2d5524f9832a111d4da78c004646fed6227540a19af598afc58e4700"
+ }
+}
