@@ -263,8 +263,12 @@ NAT-106 built `loader-diag-xnu-sb2-md1` (29-file Stage B + `hb` `md0` root combi
 
 **Stage B is closed (`B10` donor injection + `backboardd` stability + `IOSurface` + `IOMobileFramebuffer` software-render swap pipeline all verified on hardware with `867` MB free / `1,504` MB available RAM).**
 
-**Earliest remaining blockers on the path to the first real iOS UI frame:**
-1. **Stage C (`SpringBoard` + UI support daemons + `fb_diff > 0` / panel update check):** add `SpringBoard` and the required donor-recipe services (`lsd` / LaunchServices vs CPU-monitor spam check, `runningboardd`/`frontboard`, fonts/services, `inject.conf` targets if needed) while verifying why `diff_positive=0` turns positive when `SpringBoard` draws, AND verifying `e1s-display` CPU scan-out (`B4`: `DECON`/`RDMA`/`0xfa200000`) when pixels change.
+## 0i. Status update, 2026-11-13 after NAT-108 host build (Stage C1 prepared)
+
+**NAT-108** (`host-test`, `pass`) statically audited donor `libhakios.sb.dylib` (`90,656` B, `sha256 d4f1c6b0...b232`, `arm64`, `0` direct `svc`, initializer `_hakios_springboard_init` at `0x4000`, zero `unlink/rename/mount/exec/socket` imports) and built `loader-diag-xnu-sc1-md1` (`recovery.img` `sha256 90eecfbc...cdbb`) with `fb_diff=1` (`246`-byte cmdline) and a `423`-file `4 MiB` `md0` root (`bb02a20b...9725`, `423/423` kernel `apfs_lib` readback `ok`): `NAT-106` `pid1-sb2-hb` + full donor `22 DARWIN_JOBS` + `382 --rest` on-demand `LaunchDaemons`/`LaunchAngels` (`405` plists) + `lib/libhakios.sb.dylib` (`0755`) + 2-line `etc/inject.conf` (`backboardd` + `SpringBoard`) + `8` `var/` preference plists (`0644`, `SetupDone=True`, `BKNoWatchdogs=True`, `FBLaunchWatchdogScale=20.0`) + fixed `zoneinfo.default`/`UTC` and `var.skel` dirs. Verified via `derive108.py --check` (`9` substitutions), `test_nat108.py` (`12/12` passing), and `mutate_nat108.py` (`623` mutants: `584` killed, `4` equivalent in `equivalent.json`, `35` invalid, `0` unexplained survivors), with single-run decision `docs/decisions/0041-nat108-loader-diag-xnu-sc1-md1-single-run-2026-11-13.md`.
+
+**Immediate next step on the path to the first real iOS UI frame:**
+1. **Run Stage C1 once (`NAT-109`, `native`):** execute `loader-diag-xnu-sc1-md1` under decision `0041` and classify with `analyze_nat108.py --mode stage-c` (`C0`-`C7`), checking whether `SpringBoard` stays alive (`C5`), drives `MiniIOMobileFramebuffer` swaps (`C6`), and flips `fb_diff > 0` (`C7`, proving `SpringBoard` renders non-empty pixels into the framebuffer before `e1s-display` scan-out verification).
 2. **Touch input (`e1s-touch` GPIO defect / `devfs` node alignment with `libhakios.dylib`)**: after the first real `SpringBoard` lock screen frame.
 
 ## 1. Audit of the selected profile and local components

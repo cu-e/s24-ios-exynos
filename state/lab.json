@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-12T22:10:06+00:00",
+  "updated_at": "2026-11-12T22:33:42+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -16349,6 +16349,44 @@
       "evidence": "docs/procedures/nat-107/evidence.json",
       "evidence_sha256": "8f29a1f12747b74ad873483e626e1dfc9081ef7a9fe782231ec782830cc2771b",
       "finished_at": "2026-11-12T22:09:55+00:00"
+    },
+    {
+      "id": "NAT-108",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 100,
+      "depends_on": [
+        "NAT-106",
+        "NAT-107",
+        "IOS-014"
+      ],
+      "title": "Build and test Stage C1+hb image loader-diag-xnu-sc1-md1: full donor DARWIN_JOBS + --rest LaunchDaemons/LaunchAngels, libhakios.sb.dylib, var/ preferences, fb_diff=1, Stage C analyser (C0-C7) and single-run decision draft",
+      "paths": [
+        "docs/procedures/nat-108",
+        "artifacts/nat-108"
+      ],
+      "sources": [
+        "s24-port",
+        "hakios"
+      ],
+      "acceptance": [
+        "build_sc1_hb_root.py builds artifacts/nat-108/pid1-sc1-hb/root.apfs (4 MiB / 4194304 B) cleanly on NAT-106's pid1-sb2-hb base with full 22 DARWIN_JOBS + --rest on-demand LaunchDaemons/LaunchAngels, pinned prebuilt libhakios.sb.dylib (0755), two-line etc/inject.conf, pinned var/ preference plists, fixed zoneinfo symlinks and etc/var.skel entries, verified by verify.py content and kernel apfs_lib readback.",
+        "build.py packages loader-diag-xnu-sc1-md1 (tag nat_attempt=NAT108-sc1 + fb_diff=1 boot-arg, cmdline < 256 bytes, NAT-106 512 KiB KL tail/burst/settle) into artifacts/nat-108/package-001/recovery.img.",
+        "derive108.py --check matches session_nat108.py; analyze_nat108.py (--mode stage-c/stage-b/hb/stage-a/chain) classifies C0-C7 cleanly; test_nat108.py and mutate_nat108.py pass with 0 unexplained survivors; decision 0041 drafted with built hashes."
+      ],
+      "steps": [
+        "Build and verify artifacts/nat-108/pid1-sc1-hb/root.apfs (with static inspection of libhakios.sb.dylib preserved)",
+        "Implement build.py, derive108.py -> session_nat108.py, analyze_nat108.py, test_nat108.py",
+        "Run build, packaging, tests, mutation pass, and record decision 0041 and NAT-108 evidence"
+      ],
+      "status": "done",
+      "owner": "gemini-ios-20261113-a",
+      "started_at": "2026-11-12T22:16:54+00:00",
+      "last_heartbeat": "2026-11-12T22:16:54+00:00",
+      "updated_at": "2026-11-12T22:33:42+00:00",
+      "evidence": "docs/procedures/nat-108/evidence.json",
+      "evidence_sha256": "3571ccfbf0f0546b42eeed9d2bf8c4a3f011bc0593b2659ff33c7fcfb7d5b5f7",
+      "finished_at": "2026-11-12T22:33:42+00:00"
     }
   ],
   "experiments": [
@@ -64612,6 +64650,47 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-12T22:16:43+00:00",
+      "action": "task.add:NAT-108",
+      "owner": "gemini-ios-20261113-a",
+      "tasks": [
+        {
+          "id": "NAT-108",
+          "status": "pending",
+          "owner": null,
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T22:16:54+00:00",
+      "action": "task.claim:NAT-108",
+      "owner": "gemini-ios-20261113-a",
+      "tasks": [
+        {
+          "id": "NAT-108",
+          "status": "in_progress",
+          "owner": "gemini-ios-20261113-a",
+          "priority": 100,
+          "last_heartbeat": "2026-11-12T22:16:54+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T22:33:42+00:00",
+      "action": "task.done:NAT-108",
+      "owner": "gemini-ios-20261113-a",
+      "tasks": [
+        {
+          "id": "NAT-108",
+          "status": "done",
+          "owner": "gemini-ios-20261113-a",
+          "priority": 100,
+          "last_heartbeat": "2026-11-12T22:16:54+00:00"
+        }
+      ]
     }
   ]
 }
