@@ -1,17 +1,18 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-11T23:46:14+00:00",
-  "ledger_updated_at": "2026-11-11T23:45:45+00:00",
-  "registry_sha256": "c6c49e84c6ac2c7f12e6549a5c0d547be626e527a42396988ec2e6ce61e67d36",
+  "generated_at": "2026-11-12T00:29:42+00:00",
+  "ledger_updated_at": "2026-11-12T00:27:58+00:00",
+  "registry_sha256": "25c39f1d4cf02cb925323ea878532699addb14c63d6d82d53ee7614b4852cb85",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
-      "IOS-004",
+      "IOS-010",
       "NAT-071",
+      "IOS-012",
       "NAT-054",
       "NAT-055",
       "NAT-073",
-      "IOS-007"
+      "IOS-013"
     ],
     "in_progress": [],
     "blocked": [
@@ -21,11 +22,13 @@
       "KRN-008",
       "KRN-026",
       "NAT-050",
+      "IOS-005",
       "KRN-003",
       "KRN-004",
       "ODIN-001",
       "KRN-034",
       "NAT-009",
+      "IOS-007",
       "KRN-001",
       "CELL-010",
       "ESIM-004",
@@ -35,7 +38,6 @@
       "GPU-005"
     ],
     "waiting": [
-      "IOS-005",
       "NAT-056",
       "IOS-006",
       "NAT-011",
@@ -167,6 +169,7 @@
       "REV-023",
       "REV-024",
       "STR-030",
+      "IOS-009",
       "KRN-007",
       "KRN-011",
       "KRN-017",
@@ -204,6 +207,8 @@
       "NAT-040",
       "NAT-041",
       "IOS-001",
+      "IOS-004",
+      "IOS-011",
       "KRN-005",
       "REV-004",
       "REV-011",
@@ -4342,6 +4347,45 @@
       "card_path": "planning/tasks/STR-030.md"
     },
     {
+      "id": "IOS-009",
+      "title": "Select the iOS 16.5 userland preparation route by reusing donor tools: record the variants checked and why each was kept or rejected, extend the pinned hakios review files with the unpack/select/mkapfs recipe, and run the donor sysimage/unpack.sh unmodified on the owner's IPSW (staged copy, pinned files hash-checked).",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "IOS-003"
+      ],
+      "paths": [
+        "research/notes/IOS-009-userland-recipe-selection.md",
+        "research/sources.json",
+        "tools/ios/stage_hakios_recipe.py",
+        "docs/procedures/ios-009"
+      ],
+      "sources": [],
+      "acceptance": [
+        "The note lists every variant checked (own readers, stock 7-Zip, HackiOS recipe, y2sios, ios-lemonadep, ios-apollo, unused tools) with how it was checked and why it was adopted, kept as reference or rejected; provenance and licences of the adopted tools are stated and tools/sources.py verify hakios is clean after the review list was widened (append only).",
+        "The donor unpack.sh ran unmodified from a staged copy of the pinned files on the owner's IPSW (size 6165698198) with exit 0; the note records the numbers it printed and the presence of /sbin/launchd, /usr/lib/dyld, backboardd and SpringBoard, and says that presence is not compatibility.",
+        "The note names the confirmed gaps where own code is justified (each with the observation that confirms it) and what is not established; the registry is updated to the chosen path."
+      ],
+      "steps": [
+        "Check variants",
+        "Widen the pin and stage the recipe",
+        "Run unpack.sh",
+        "Write the note and update the registry"
+      ],
+      "status": "done",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-12T00:15:08+00:00",
+      "last_heartbeat": "2026-11-12T00:15:08+00:00",
+      "updated_at": "2026-11-12T00:17:16+00:00",
+      "evidence": "docs/procedures/ios-009/evidence.json",
+      "evidence_sha256": "d2a6b8ba93bfb71bc9ca2a9ae407b35725118438d697dc35e9fec02c04fb542b",
+      "finished_at": "2026-11-12T00:17:16+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/IOS-009.md"
+    },
+    {
       "id": "KRN-007",
       "title": "Generate witnessed selected XNU component configuration and compile actual kernel units",
       "status": "done",
@@ -5241,6 +5285,40 @@
       "card_path": "planning/tasks/NAT-038.md"
     },
     {
+      "id": "IOS-010",
+      "title": "Build the resident root image with the donor tools: userland/build.sh system step reproduced on the host (hard-link sysroot from the unpacked rootfs, cryptex trees and dyld cache, launchd moved to launchd.darwin, LaunchDaemons link), tools/apfs/mkapfs.py -z, then tools/apfs/check-image.sh (apfsck at its pinned commit plus the kernel's apfs_lib). Records the real image size against the donor's 2.5 GB claim and the RAM/USB budget.",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 98,
+      "depends_on": [
+        "IOS-009",
+        "IOS-011"
+      ],
+      "paths": [
+        "docs/procedures/ios-010",
+        "tools/ios/build_system_image.py",
+        "research/sources.json"
+      ],
+      "sources": [],
+      "acceptance": [
+        "apfsprogs (linux-apfs, GPL-2.0, checker only) is pinned at a full SHA in research/sources.json with its licence notes and verified; no script from it other than the project-reviewed build of apfsck is run.",
+        "system.apfs is produced from the IOS-009 unpack tree by the unmodified pinned mkapfs.py; apfsck exits clean and apfs-tool reads every volume back; the size, file count, compressed-versus-raw split and build time are recorded.",
+        "The evidence states the figure against the donor's 2.5 GB claim, the 96 MiB recovery slot and the USB budget in NAT-073, without presenting the image as bootable."
+      ],
+      "steps": [
+        "Pin apfsprogs",
+        "Compose sysroot",
+        "Run mkapfs.py",
+        "Check the image",
+        "Record size and budget"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/IOS-010.md"
+    },
+    {
       "id": "KRN-006",
       "title": "Harden experimental XNU compiler AST and whole-kernel expression coverage",
       "priority": 97,
@@ -6027,11 +6105,55 @@
         "Synthetic-image tests and mutants",
         "Smoke check on the local image, record throughput"
       ],
-      "status": "pending",
-      "owner": null,
-      "column": "ready",
+      "status": "done",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-11T23:46:30+00:00",
+      "last_heartbeat": "2026-11-11T23:46:30+00:00",
+      "updated_at": "2026-11-12T00:24:49+00:00",
+      "evidence": "docs/procedures/ios-004/evidence.json",
+      "evidence_sha256": "94482c900285375e4e42d0e76fdc0c75773eddd94da5385ba5716af922fdd080",
+      "finished_at": "2026-11-12T00:24:49+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/IOS-004.md"
+    },
+    {
+      "id": "IOS-011",
+      "title": "Build the PID 1 chain for the payload kernel with the project's own freestanding arm64 toolchain: add userland/libmini to the pinned review files, build stage0 (as /sbin/launchd), init, etc/rc (rc.launchd) and the mkjobs.py job set, and make the small root.apfs (md1) with mkapfs.py. Replaces the donor's xnu-clang/Theos build only where this host lacks it; the sources stay the donor's.",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "IOS-009"
+      ],
+      "paths": [
+        "docs/procedures/ios-011",
+        "tools/ios/build_pid1_chain.py",
+        "research/sources.json"
+      ],
+      "sources": [],
+      "acceptance": [
+        "The donor sources used (stage0.c, init.c, libmini, rc.launchd, mkjobs.py) are pinned review files; each deviation from the donor build (compiler, linker, flags) is listed with the reason.",
+        "stage0 and init are static arm64 Mach-O executables whose load commands, entry point and imports are listed by an independent reader and contain no dynamic dependency; root.apfs is produced by mkapfs.py and read back by apfs-tool.",
+        "The evidence is host-test only: nothing ran on the phone and nothing says the kernel mounts it."
+      ],
+      "steps": [
+        "Widen review files",
+        "Build with project toolchain",
+        "Make root.apfs",
+        "Check with independent reader"
+      ],
+      "status": "done",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-12T00:18:05+00:00",
+      "last_heartbeat": "2026-11-12T00:18:05+00:00",
+      "updated_at": "2026-11-12T00:25:04+00:00",
+      "evidence": "docs/procedures/ios-011/evidence.json",
+      "evidence_sha256": "70ee3201ad8651aaffe5fd77dc3b567c0d215ac7ee028f2958c018ed29be4a2a",
+      "finished_at": "2026-11-12T00:25:04+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/IOS-011.md"
     },
     {
       "id": "KRN-005",
@@ -6918,13 +7040,50 @@
         "Inventory of the three images",
         "Tests"
       ],
+      "status": "blocked",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-12T00:26:59+00:00",
+      "last_heartbeat": "2026-11-12T00:27:58+00:00",
+      "updated_at": "2026-11-12T00:27:58+00:00",
+      "blocked_reason": "Superseded by the IOS-009 route (decision note research/notes/IOS-009-userland-recipe-selection.md, 2026-11-12): the owner directed reuse of ready tools, so the root is listed and extracted by stock 7-Zip 26.04 plus the pinned HackiOS recipe (IOS-010..012 build and check the image from the donor tools); no own APFS reader is written. The inventory this task asked for is covered by the donor unpack (docs/procedures/ios-009/unpack-summary.json) and IOS-012. Nothing was started; no files were created for IOS-005.",
+      "column": "blocked",
+      "reasons": [
+        "Superseded by the IOS-009 route (decision note research/notes/IOS-009-userland-recipe-selection.md, 2026-11-12): the owner directed reuse of ready tools, so the root is listed and extracted by stock 7-Zip 26.04 plus the pinned HackiOS recipe (IOS-010..012 build and check the image from the donor tools); no own APFS reader is written. The inventory this task asked for is covered by the donor unpack (docs/procedures/ios-009/unpack-summary.json) and IOS-012. Nothing was started; no files were created for IOS-005."
+      ],
+      "card_path": "planning/tasks/IOS-005.md",
+      "report_health": "recent"
+    },
+    {
+      "id": "IOS-012",
+      "title": "Audit the unpacked iOS 16.5 userland for launchd/dyld readiness: Mach-O load commands and LC_LOAD_DYLIB closure of /sbin/launchd, /usr/lib/dyld, backboardd and SpringBoard against the shared cache image list, minimum OS and platform, and the system-call stubs used by libsystem_kernel in the cache against the project kernel's syscalls.master. Read-only; uses the extracted files and, if needed, a pip-installed Mach-O parser in a venv.",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [
+        "IOS-009"
+      ],
+      "paths": [
+        "docs/procedures/ios-012",
+        "tools/ios/macho_audit.py",
+        "tests/test_macho_audit.py"
+      ],
+      "sources": [],
+      "acceptance": [
+        "For each of the four programs the report lists load commands, platform/minos, dyld info type, imported libraries, and which of them are present in the dyld shared cache image list; missing items are named.",
+        "The system-call numbers invoked by the cache's libsystem_kernel stubs are listed and compared with the project kernel's table; every mismatch is named, and the result is labelled as a static comparison, not a runtime test.",
+        "Dyld's expectations of the kernel (commpage fields, shared-region mapping, entitlements and code-signing checks it queries) are listed from the extracted binaries and tied to the IOS-003 rows."
+      ],
+      "steps": [
+        "Parse the four programs",
+        "Map the closure to the cache",
+        "Compare syscall numbers",
+        "Write the report"
+      ],
       "status": "pending",
       "owner": null,
-      "column": "waiting",
-      "reasons": [
-        "Dependencies: IOS-004"
-      ],
-      "card_path": "planning/tasks/IOS-005.md"
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/IOS-012.md"
     },
     {
       "id": "USB-001",
@@ -10870,6 +11029,35 @@
       "card_path": "planning/tasks/IOS-006.md"
     },
     {
+      "id": "IOS-013",
+      "title": "Can the iOS 16.5 graphics stack present a first frame without a full GPU driver? Source and static review of the extracted backboardd/SpringBoard/QuartzCore/IOMobileFramebuffer path and the donor Mesa/OSMesa route (HackiOS GL=1) against the project's MiniIOMobileFramebuffer/MiniIOSurface; no software rendering is promised.",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 90,
+      "depends_on": [
+        "IOS-009"
+      ],
+      "paths": [
+        "research/notes/IOS-013-first-frame-without-gpu.md"
+      ],
+      "sources": [],
+      "acceptance": [
+        "The note traces, with file or image-name evidence, what backboardd needs from the kernel to put a frame on a panel (IOMobileFramebuffer calls, IOSurface, a renderer) and which of these the project kernel's stand-ins implement or lack.",
+        "It states what the donor path (OpenGL ES through Mesa/OSMesa, boot-arg gpu) proves on its own hardware and what it leaves open here; claims stay claims.",
+        "It names the cheapest observation on the S24 that would decide whether a frame can be presented without a GPU, and what can be prepared on the host."
+      ],
+      "steps": [
+        "Trace the display path",
+        "Read the donor GL route",
+        "Write the note"
+      ],
+      "status": "pending",
+      "owner": null,
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/IOS-013.md"
+    },
+    {
       "id": "KRN-033",
       "title": "Implement source-qualified AES-GCM streaming modes and managed nonce helpers",
       "priority": 89,
@@ -11138,8 +11326,7 @@
         "IOS-003"
       ],
       "paths": [
-        "research/notes/IOS-007-hackios-userland-review.md",
-        "research/sources.json"
+        "research/notes/IOS-007-hackios-userland-review.md"
       ],
       "sources": [],
       "acceptance": [
@@ -11152,11 +11339,33 @@
         "Read the builder and job list",
         "Write the note"
       ],
-      "status": "pending",
-      "owner": null,
-      "column": "ready",
-      "reasons": [],
-      "card_path": "planning/tasks/IOS-007.md"
+      "status": "blocked",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-12T00:15:29+00:00",
+      "updated_at": "2026-11-12T00:15:39+00:00",
+      "released_at": "2026-11-12T00:13:35+00:00",
+      "path_history": [
+        {
+          "from": [
+            "research/notes/IOS-007-hackios-userland-review.md",
+            "research/sources.json"
+          ],
+          "to": [
+            "research/notes/IOS-007-hackios-userland-review.md"
+          ],
+          "reason": "Route chosen in IOS-009: the userland tooling lives in the already pinned hakios tree; the hackios-userland repository is only a README pointer. The sources.json reservation moves to IOS-009.",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "at": "2026-11-12T00:13:48+00:00"
+        }
+      ],
+      "last_heartbeat": "2026-11-12T00:15:39+00:00",
+      "blocked_reason": "Superseded by IOS-009 (2026-11-12 owner direction to reuse ready tools). The repository named in the acceptance (oosexgang/hackios-xnu-userland) is only a README pointer; the userland tooling is in the already pinned hakios tree, reviewed in research/notes/IOS-009-userland-recipe-selection.md. Not completed under this ID because acceptance 1 (a hackios-userland sources.json entry) is not met and will not be. Missing fact: none; reopen only if the pointer repository gains content.",
+      "column": "blocked",
+      "reasons": [
+        "Superseded by IOS-009 (2026-11-12 owner direction to reuse ready tools). The repository named in the acceptance (oosexgang/hackios-xnu-userland) is only a README pointer; the userland tooling is in the already pinned hakios tree, reviewed in research/notes/IOS-009-userland-recipe-selection.md. Not completed under this ID because acceptance 1 (a hackios-userland sources.json entry) is not met and will not be. Missing fact: none; reopen only if the pointer repository gains content."
+      ],
+      "card_path": "planning/tasks/IOS-007.md",
+      "report_health": "recent"
     },
     {
       "id": "KRN-035",
@@ -15220,7 +15429,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-005, IOS-007"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -15259,7 +15468,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-007"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -16247,6 +16456,30 @@
         "worktree": null
       }
     ],
+    "claude-nat065-20261112-ramdisk": [
+      {
+        "id": "IOS-005",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-12T00:27:58+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": null,
+        "worktree": null
+      },
+      {
+        "id": "IOS-007",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-12T00:15:39+00:00",
+        "report_health": "recent",
+        "progress_note": null,
+        "next_step": null,
+        "handoff": null,
+        "branch": null,
+        "worktree": null
+      }
+    ],
     "codex-e1s-dependencies-20261105-k": [
       {
         "id": "KRN-003",
@@ -16302,255 +16535,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-11T22:40:07+00:00",
-      "action": "task.add:IOS-001",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-001",
-          "status": "pending",
-          "owner": null,
-          "priority": 97
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T22:40:25+00:00",
-      "action": "task.add:IOS-003",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-003",
-          "status": "pending",
-          "owner": null,
-          "priority": 92
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T22:40:36+00:00",
-      "action": "task.add:NAT-071",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "NAT-071",
-          "status": "pending",
-          "owner": null,
-          "priority": 96
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T22:40:46+00:00",
-      "action": "task.add:NAT-072",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "NAT-072",
-          "status": "pending",
-          "owner": null,
-          "priority": 93
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T22:40:58+00:00",
-      "action": "task.add:NAT-073",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "NAT-073",
-          "status": "pending",
-          "owner": null,
-          "priority": 91
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T22:41:24+00:00",
-      "action": "task.claim:IOS-001",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-001",
-          "status": "in_progress",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 97,
-          "last_heartbeat": "2026-11-11T22:41:24+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T22:41:40+00:00",
-      "action": "task.block:IOS-001",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-001",
-          "status": "blocked",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 97,
-          "blocked_reason": "Missing external file: the iPhone X (iPhone10,3/D22AP) iOS 16.5 build 20F66 restore image (*_Restore.ipsw, several GB; Apple publishes it on its update CDN) must be downloaded by the owner into artifacts/apple-inputs/ (git-ignored). It is the only source of Apple's OS/SystemOS/AppOS images (rootfs, dyld, shared cache, launchd, backboardd, SpringBoard), the D22AP DeviceTree and the kernelcache version string. Nothing local contains any of it (search 2026-11-12: repo, references/, artifacts/, home to depth 4). See docs/strategy/2026-11-12-ios-critical-path.md section 4. Check with tools/ios/ipsw_inspect.py (IOS-002) once it exists.",
-          "last_heartbeat": "2026-11-11T22:41:40+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T22:41:51+00:00",
-      "action": "task.update:NAT-069",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "NAT-069",
-          "status": "in_progress",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 95,
-          "progress_note": "Serves critical-path milestone 4 (docs/strategy/2026-11-12-ios-critical-path.md section 3): the question is whether the display engine scans out the loader's framebuffer (phys 0xfa200000, 1080x2340, stride 4320). Observable: parsed e1s-display pipeline lines. Decision it feeds: enabled RDMA reading that buffer -> copy-into-bootloader-framebuffer path, UI-003 stays off the critical path; idle or other buffer -> UI-003 (real DECON/DSIM driver) moves ahead of milestone 5; fault/hang -> loader-side power-domain task. Build, package, derived driver done; analyser/tests/mutants/decision draft remain.",
-          "next_step": "write analyze_nat069.py, test_nat069.py, mutants.py, decision-draft.md, evidence.json",
-          "last_heartbeat": "2026-11-11T22:41:51+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T22:56:47+00:00",
-      "action": "task.done:NAT-069",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "NAT-069",
-          "status": "done",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 95,
-          "progress_note": "Serves critical-path milestone 4 (docs/strategy/2026-11-12-ios-critical-path.md section 3): the question is whether the display engine scans out the loader's framebuffer (phys 0xfa200000, 1080x2340, stride 4320). Observable: parsed e1s-display pipeline lines. Decision it feeds: enabled RDMA reading that buffer -> copy-into-bootloader-framebuffer path, UI-003 stays off the critical path; idle or other buffer -> UI-003 (real DECON/DSIM driver) moves ahead of milestone 5; fault/hang -> loader-side power-domain task. Build, package, derived driver done; analyser/tests/mutants/decision draft remain.",
-          "next_step": "write analyze_nat069.py, test_nat069.py, mutants.py, decision-draft.md, evidence.json",
-          "last_heartbeat": "2026-11-11T22:41:51+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T22:58:10+00:00",
-      "action": "task.resume:IOS-001",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-001",
-          "status": "in_progress",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 97,
-          "last_heartbeat": "2026-11-11T22:58:10+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T22:58:20+00:00",
-      "action": "task.claim:IOS-002",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-002",
-          "status": "in_progress",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 96,
-          "last_heartbeat": "2026-11-11T22:58:20+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T22:58:29+00:00",
-      "action": "task.claim:IOS-003",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-003",
-          "status": "in_progress",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 92,
-          "last_heartbeat": "2026-11-11T22:58:29+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T23:17:22+00:00",
-      "action": "task.done:IOS-002",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-002",
-          "status": "done",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 96,
-          "last_heartbeat": "2026-11-11T22:58:20+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T23:17:33+00:00",
-      "action": "task.done:IOS-001",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-001",
-          "status": "done",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 97,
-          "last_heartbeat": "2026-11-11T22:58:10+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T23:39:13+00:00",
-      "action": "task.done:IOS-003",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-003",
-          "status": "done",
-          "owner": "claude-nat065-20261112-ramdisk",
-          "priority": 92,
-          "last_heartbeat": "2026-11-11T22:58:29+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T23:45:05+00:00",
-      "action": "task.add:IOS-004",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-004",
-          "status": "pending",
-          "owner": null,
-          "priority": 97
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T23:45:14+00:00",
-      "action": "task.add:IOS-005",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-005",
-          "status": "pending",
-          "owner": null,
-          "priority": 96
-        }
-      ]
-    },
-    {
-      "at": "2026-11-11T23:45:23+00:00",
-      "action": "task.add:IOS-006",
-      "owner": "claude-nat065-20261112-ramdisk",
-      "tasks": [
-        {
-          "id": "IOS-006",
-          "status": "pending",
-          "owner": null,
-          "priority": 90
-        }
-      ]
-    },
-    {
       "at": "2026-11-11T23:45:33+00:00",
       "action": "task.add:IOS-007",
       "owner": "claude-nat065-20261112-ramdisk",
@@ -16575,11 +16559,261 @@
           "priority": 89
         }
       ]
+    },
+    {
+      "at": "2026-11-11T23:46:30+00:00",
+      "action": "task.claim:IOS-004",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-004",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T23:46:30+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T23:56:16+00:00",
+      "action": "task.claim:IOS-007",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-007",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 88,
+          "last_heartbeat": "2026-11-11T23:56:16+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:13:35+00:00",
+      "action": "task.release:IOS-007",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-007",
+          "status": "pending",
+          "owner": null,
+          "priority": 88
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:13:48+00:00",
+      "action": "task.narrow:IOS-007",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-007",
+          "status": "pending",
+          "owner": null,
+          "priority": 88,
+          "paths": [
+            "research/notes/IOS-007-hackios-userland-review.md"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:13:59+00:00",
+      "action": "task.add:IOS-009",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-009",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:14:17+00:00",
+      "action": "task.add:IOS-011",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-011",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:14:28+00:00",
+      "action": "task.add:IOS-012",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-012",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:14:38+00:00",
+      "action": "task.add:IOS-013",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-013",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:14:54+00:00",
+      "action": "task.add:IOS-010",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-010",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:15:08+00:00",
+      "action": "task.claim:IOS-009",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-009",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 99,
+          "last_heartbeat": "2026-11-12T00:15:08+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:15:29+00:00",
+      "action": "task.claim:IOS-007",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-007",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 88,
+          "last_heartbeat": "2026-11-12T00:15:29+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:15:39+00:00",
+      "action": "task.block:IOS-007",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-007",
+          "status": "blocked",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 88,
+          "blocked_reason": "Superseded by IOS-009 (2026-11-12 owner direction to reuse ready tools). The repository named in the acceptance (oosexgang/hackios-xnu-userland) is only a README pointer; the userland tooling is in the already pinned hakios tree, reviewed in research/notes/IOS-009-userland-recipe-selection.md. Not completed under this ID because acceptance 1 (a hackios-userland sources.json entry) is not met and will not be. Missing fact: none; reopen only if the pointer repository gains content.",
+          "last_heartbeat": "2026-11-12T00:15:39+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:17:16+00:00",
+      "action": "task.done:IOS-009",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-009",
+          "status": "done",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 99,
+          "last_heartbeat": "2026-11-12T00:15:08+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:18:05+00:00",
+      "action": "task.claim:IOS-011",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-011",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 97,
+          "last_heartbeat": "2026-11-12T00:18:05+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:24:49+00:00",
+      "action": "task.done:IOS-004",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-004",
+          "status": "done",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T23:46:30+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:25:04+00:00",
+      "action": "task.done:IOS-011",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-011",
+          "status": "done",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 97,
+          "last_heartbeat": "2026-11-12T00:18:05+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:26:59+00:00",
+      "action": "task.claim:IOS-005",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-005",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 96,
+          "last_heartbeat": "2026-11-12T00:26:59+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:27:58+00:00",
+      "action": "task.block:IOS-005",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-005",
+          "status": "blocked",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 96,
+          "blocked_reason": "Superseded by the IOS-009 route (decision note research/notes/IOS-009-userland-recipe-selection.md, 2026-11-12): the owner directed reuse of ready tools, so the root is listed and extracted by stock 7-Zip 26.04 plus the pinned HackiOS recipe (IOS-010..012 build and check the image from the donor tools); no own APFS reader is written. The inventory this task asked for is covered by the donor unpack (docs/procedures/ios-009/unpack-summary.json) and IOS-012. Nothing was started; no files were created for IOS-005.",
+          "last_heartbeat": "2026-11-12T00:27:58+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "240376d3ac28b95b1a285038752f95e77974d689a73072fce0354f1cf691592a",
-    "BOARD.md": "c92a4f2add9afc8318c518102f769a485bbb95b708fe36d31f0618a2db8eb046",
+    "STATUS.md": "d818c4fa4c555ccd43cea429e89904a34b23a734008d0a4b075fe52d468efb9a",
+    "BOARD.md": "b03089ce1d5741f497d8856912d976449ba54d8b6bfe05a75e5641917a8d20e1",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -16669,6 +16903,7 @@
     "planning/tasks/REV-023.md": "eb5759f919701527d2a65dbd6164118ababbd6ddbba6d5336c654983e7b0b9ec",
     "planning/tasks/REV-024.md": "dce7e980d59889c187c8d99af9b7d2e91bc76287fe8018b94e1ad2f2d6d1a7c7",
     "planning/tasks/STR-030.md": "2fd8ca8a88608c79df51d8c6f44d5c21ffccc3c05ab9f3eef8e8584f1d14a8f5",
+    "planning/tasks/IOS-009.md": "a8e229dd5d8b2eb55d98b7d28d44345c3c5d3fa4e903c91fd5b5353ac020c839",
     "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-011.md": "9b8014abd8d019af80fad695e0d0df9de9523d36a222553327384f7f00e8a901",
     "planning/tasks/KRN-017.md": "86a29485c4c3ed3a62f7ecf64f5e2bb303bb0bd7ac5fd661482bf024004f407d",
@@ -16690,6 +16925,7 @@
     "planning/tasks/NAT-033.md": "d0bb7900f60f042c1041f2227a5a090ae752976884f42f383976903cc78d1479",
     "planning/tasks/NAT-034.md": "9ab0d17a38a617dce664c8033f055e4f2e34f7edf42223b7e233312e4d0c807f",
     "planning/tasks/NAT-038.md": "9c3907d3c8652343cf3a424867a47b7426bc6b37e9f1a3517c8131eac1c75f1b",
+    "planning/tasks/IOS-010.md": "f01548ec5c24b0cd814649ce1ea8f16eeafb23052300a0377c2ba7a6f1f74c03",
     "planning/tasks/KRN-006.md": "17787b37e62d7cb230c248532450af8108a583aca6b6e955cee29637f8e981a1",
     "planning/tasks/KRN-014.md": "373bcf06587ce0b77bbacdfa023baa6c9b888953717dafa33267ff49a60ea753",
     "planning/tasks/KRN-015.md": "28783b6b5313987331209c84d30f10ddeab6ee7f41bf6bf1d963790545460926",
@@ -16709,7 +16945,8 @@
     "planning/tasks/NAT-041.md": "a3421dc1c461e0ce04af4851d361af8888a14702f98652555347c1bfc5cae630",
     "planning/tasks/NAT-050.md": "3aa5fc869a2e660813bf581fad15a20e073f1fa817104f9f9d36ae2e38a45953",
     "planning/tasks/IOS-001.md": "dbdfb1339de19dd1230932bcca18ccb449c4ab1ff6efaa4e20344d8980873bad",
-    "planning/tasks/IOS-004.md": "d698fcf93dce751394e7c7c98e865207aea18aae2742adfddbcfcc4a0d78324c",
+    "planning/tasks/IOS-004.md": "4e349c7299ccfbd444c321fafa5dfebc73fce4c38f40a046082bad50a8679025",
+    "planning/tasks/IOS-011.md": "00adb815ba159bb1efba55984902fc4660f92ae84f6925a0f56eecd83a6b2556",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/REV-004.md": "8c7b273845208b121b2d6d1f05038b627689d3f97b766a765a91cdf23082bdb1",
     "planning/tasks/REV-011.md": "5ea2857fe5caca100edd1f7f53667f0b2a27de4b576000ecd14e2a55f1e7d51b",
@@ -16731,7 +16968,8 @@
     "planning/tasks/NAT-067.md": "e4ba0decee57e5e187eaf810a70aff8f9098b389c9a24e7576403c9c757da6f0",
     "planning/tasks/IOS-002.md": "5bf4ead31f8c9e395260b578f5c5b541754ed539c591df88faf833dc2d6d6520",
     "planning/tasks/NAT-071.md": "134aa9042ed8970145b748856d6832ec50412d6b3f80ea437c12721fd4be178d",
-    "planning/tasks/IOS-005.md": "281a07f8543611be47bd0237182c4c20638a1c33a033b26252c12662bdacd841",
+    "planning/tasks/IOS-005.md": "73324f23dc9f5eef55222d1dc875d56992fe3f49b31cf44d9d7022ef581a8d85",
+    "planning/tasks/IOS-012.md": "8a13675aab360b547c8903b187054c42a30b998af71e25c05a76b9f006166b01",
     "planning/tasks/USB-001.md": "19299959cb09f2aa3b00ffa299face5e25f485c75dfcc2e5f1879b39d435471a",
     "planning/tasks/RES-008.md": "f4b54e21613d0ebdc025e010e25ffd12dfa6a50abcf2cb02c3597e7de01d876d",
     "planning/tasks/KRN-002.md": "28d02708f1023de88e06afa386fb070f46ea0ab5b32978668eacfb5bab77653d",
@@ -16822,13 +17060,14 @@
     "planning/tasks/NAT-008.md": "0c608898e59aa41112423e268085e55a1010b958e7ac36e7ee64211ccc82a0a3",
     "planning/tasks/VM-055.md": "fe28b385b930f00cd778325365baf0ac4f48ec8512078e17196762089ecc652a",
     "planning/tasks/IOS-006.md": "3bb2991ec29be38928d0445b6a38a5e5a7e68b097a093e9a5efb15f4fe51de92",
+    "planning/tasks/IOS-013.md": "b14d39614bd0c70023901cb746509cdd16156f2b37d4b8ac8133679c4c081358",
     "planning/tasks/KRN-033.md": "65895b5673cb8432d904647391ec6378b6eafcac42e79bfd6cef92a0dcc4b83f",
     "planning/tasks/NAT-011.md": "13d5b59a05e410c27749dd20732dbe9312dda69ca349e32845cd4b144be9aaa3",
     "planning/tasks/NAT-014.md": "8ab44f96da942083ed04d834447e25cd58e8ddda08c83b2f1ca4e44327720c71",
     "planning/tasks/IOS-008.md": "88e853e93b86ad0d1bff04b257002fc9a9af199f1d2c6356d1a496630a9e084a",
     "planning/tasks/KRN-034.md": "216955769016c966a7b2ed1191501a2967d901d5371a7e1ec31f2230896ac5cc",
     "planning/tasks/NAT-009.md": "7fcd0c6655888c3515a10871a2f5a8f5c0455ef3e61c149f65b42f7ebd9d5f3b",
-    "planning/tasks/IOS-007.md": "8435cdfa0fcafe3cba0bf911b75468e129763fcb4cb9d751a5fe216973533db0",
+    "planning/tasks/IOS-007.md": "261cf83c5b83dc8ea1988060d5d9bb33bc0d3bf5b621d5801b100b6c6763103e",
     "planning/tasks/KRN-035.md": "73d3fdfa9f6c3f1f76fe0f244208e46b40bf7343bf78e2f78223ea9c1c7a98a7",
     "planning/tasks/KRN-036.md": "43b1fb9c66ca2aa223235ea38bf2e400888380c3822a4aca35e67b96cd532020",
     "planning/tasks/KRN-001.md": "554587c78270501a0d958373741a231572c7bb821291875740611622113b3242",
@@ -16919,8 +17158,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "900c9899f056f923a302eefcd803e5614e23ba4cd956b217a3299a49c572a47e",
-    "planning/tasks/DRV-003.md": "9cc6f782ab4b835cb0dedba9881bf8c175a6cd88b96a4243572f754d8c44465a",
+    "planning/tasks/NAT-003.md": "48f9078cfb3ae6e85a498a841355672a5fdd3302f22807a04b70bc9199476f39",
+    "planning/tasks/DRV-003.md": "084496cdd5ef1f6af6c1b3292acc5c9beefa0de4bbda17d3632bc3ec9c888760",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",

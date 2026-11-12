@@ -1,0 +1,56 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T00:24:41+00:00",
+ "commit": "f914847a92a3f75688a44aaa452078c5b5dc15b2",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "tree_state": "all listed files are committed at the recorded commit",
+ "summary": "tools/ios/udif.py, an own read-only UDIF reader, passes 29 host tests built from the public format, was mutation-tested (46 mutants, 37 killed, 9 survived, listed below) and was smoke-checked on the owner's real rootfs image 096-04088-077.dmg: 6 partitions, chunk histogram lzfse 3257 / raw 373 / ignore 3 (7-Zip reports Blocks = 3633, the same total), partition sizes sum to 5,628,790,272 bytes (7-Zip: unpack-size 5628790272), NXSB at offset 32 of the Apple_APFS partition, 256 MiB decompressed in 4.34 s with 32.5 MiB peak RSS. After the 2026-11-12 owner direction to reuse ready tools (IOS-009) the reader is a cross-check, not a dependency of the chosen path.",
+ "evidence_category": "host-test only. The reader decodes LZFSE by tools/ios/lzfse_py.py (IOS-002). No upstream code was compiled or executed for this task; 7-Zip was run only to read the numbers quoted for comparison.",
+ "acceptance": {
+  "1_parser_bounds": "tests/test_udif.py: trailer, plist, mish and chunk faults, truncation/corruption fuzz, decompression bombs bounded by tracemalloc, zero-run and stored-chunk reads by slice; every fault ends in UdifError.",
+  "2_mutation_pass": "46 mutants: 37 killed (one of them, find_chunk upper-bound off-by-one, by a test hang that the runner counts after a 90 s timeout), 9 survived. Survivors are test gaps, none judged equivalent: empty property list accepted; no upper bound on the property list; property list may run past the trailer; mish partition start beyond the image; chunk data before the data fork; chunk data longer than the fork; chunk cache key ignoring the chunk offset (needs two partitions with compressed chunks at the same relative sector); find_chunk bisect moving lo = mid (needs three or more chunks with the target in the last); local zip header extra field ignored (test archives carry none). They are not fixed because the reader is superseded as the main path.",
+  "3_smoke_on_real_image": "docs/procedures/ios-004/smoke-rootfs.json; only counts, sizes, one SHA-256 of a 256 MiB range and timings; no Apple data in Git."
+ },
+ "commands": [
+  {
+   "cmd": "ulimit -v 4000000; python3 -m unittest discover -s tests -p test_udif.py",
+   "exit": 0,
+   "result": "Ran 29 tests, OK (3.4 s)"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/ios-004/mutants.py --json docs/procedures/ios-004/mutants-result.json",
+   "exit": 1,
+   "result": "mutants 46 killed 37 survived 9 invalid 0 (exit 1 by design when a mutant survives); the first run crashed on a 600 s subprocess timeout (runner bug, fixed to count a hang as detection) and was rerun"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/ios-004/smoke.py artifacts/ios-root/recipe/sysimage/rootfs.dmg 256 (ulimit -v 4000000)",
+   "exit": 0,
+   "result": "see smoke-rootfs.json"
+  }
+ ],
+ "sha256": {
+  "tools/ios/udif.py": "49910cbbc97238f6192f4215e191c3c4678926c1c1e773df676fafc8a6223619",
+  "tests/test_udif.py": "c523f60db8de8636bd56ce629992c7b65388b87655f51e1406973c5474a36383",
+  "docs/procedures/ios-004/mutants.py": "37e47786cbdcd3afb9e4c1286b66abe7027a5851b412b7d24b4ef3cece07a4b3",
+  "docs/procedures/ios-004/mutants-result.json": "23c8decebb4f6e6d6aeca060e76bad03e10825ec0419eec1b8e9756ba7afdf5a",
+  "docs/procedures/ios-004/smoke.py": "ee3e607c64148f0886bd9f64559488c32d08039b379a6a9c05ad77ddcba93057",
+  "docs/procedures/ios-004/smoke-rootfs.json": "d65e284f8850f001666f0a4e70d4dd8aa57b0767cfa02625bf34cb1c4bea3bc7"
+ },
+ "limits": [
+  "9 surviving mutants (test gaps) are listed, not fixed.",
+  "The reader is not used by the chosen path; 7-Zip 26.04 and the donor tools do the extraction (research/notes/IOS-009-userland-recipe-selection.md).",
+  "Only the rootfs image was read; the SystemOS and AppOS cryptex images were not read with this reader.",
+  "Classifier-stop disclosure unchanged from IOS-003 (2026-11-11T23:05Z, session 6d8d2b72); no new stop in this task."
+ ],
+ "artifacts": [
+  "tools/ios/udif.py",
+  "tests/test_udif.py",
+  "docs/procedures/ios-004/mutants.py",
+  "docs/procedures/ios-004/mutants-result.json",
+  "docs/procedures/ios-004/smoke.py",
+  "docs/procedures/ios-004/smoke-rootfs.json",
+  "docs/procedures/ios-004/task.json"
+ ]
+}

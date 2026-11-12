@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-11T23:45:45+00:00",
+  "updated_at": "2026-11-12T00:27:58+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -14515,8 +14515,14 @@
         "Synthetic-image tests and mutants",
         "Smoke check on the local image, record throughput"
       ],
-      "status": "pending",
-      "owner": null
+      "status": "done",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-11T23:46:30+00:00",
+      "last_heartbeat": "2026-11-11T23:46:30+00:00",
+      "updated_at": "2026-11-12T00:24:49+00:00",
+      "evidence": "docs/procedures/ios-004/evidence.json",
+      "evidence_sha256": "94482c900285375e4e42d0e76fdc0c75773eddd94da5385ba5716af922fdd080",
+      "finished_at": "2026-11-12T00:24:49+00:00"
     },
     {
       "id": "IOS-005",
@@ -14544,8 +14550,12 @@
         "Inventory of the three images",
         "Tests"
       ],
-      "status": "pending",
-      "owner": null
+      "status": "blocked",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-12T00:26:59+00:00",
+      "last_heartbeat": "2026-11-12T00:27:58+00:00",
+      "updated_at": "2026-11-12T00:27:58+00:00",
+      "blocked_reason": "Superseded by the IOS-009 route (decision note research/notes/IOS-009-userland-recipe-selection.md, 2026-11-12): the owner directed reuse of ready tools, so the root is listed and extracted by stock 7-Zip 26.04 plus the pinned HackiOS recipe (IOS-010..012 build and check the image from the donor tools); no own APFS reader is written. The inventory this task asked for is covered by the donor unpack (docs/procedures/ios-009/unpack-summary.json) and IOS-012. Nothing was started; no files were created for IOS-005."
     },
     {
       "id": "IOS-006",
@@ -14587,8 +14597,7 @@
         "IOS-003"
       ],
       "paths": [
-        "research/notes/IOS-007-hackios-userland-review.md",
-        "research/sources.json"
+        "research/notes/IOS-007-hackios-userland-review.md"
       ],
       "sources": [],
       "acceptance": [
@@ -14601,8 +14610,27 @@
         "Read the builder and job list",
         "Write the note"
       ],
-      "status": "pending",
-      "owner": null
+      "status": "blocked",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-12T00:15:29+00:00",
+      "updated_at": "2026-11-12T00:15:39+00:00",
+      "released_at": "2026-11-12T00:13:35+00:00",
+      "path_history": [
+        {
+          "from": [
+            "research/notes/IOS-007-hackios-userland-review.md",
+            "research/sources.json"
+          ],
+          "to": [
+            "research/notes/IOS-007-hackios-userland-review.md"
+          ],
+          "reason": "Route chosen in IOS-009: the userland tooling lives in the already pinned hakios tree; the hackios-userland repository is only a README pointer. The sources.json reservation moves to IOS-009.",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "at": "2026-11-12T00:13:48+00:00"
+        }
+      ],
+      "last_heartbeat": "2026-11-12T00:15:39+00:00",
+      "blocked_reason": "Superseded by IOS-009 (2026-11-12 owner direction to reuse ready tools). The repository named in the acceptance (oosexgang/hackios-xnu-userland) is only a README pointer; the userland tooling is in the already pinned hakios tree, reviewed in research/notes/IOS-009-userland-recipe-selection.md. Not completed under this ID because acceptance 1 (a hackios-userland sources.json entry) is not met and will not be. Missing fact: none; reopen only if the pointer repository gains content."
     },
     {
       "id": "IOS-008",
@@ -14629,6 +14657,163 @@
         "Closure and manifest",
         "Format decision note",
         "Budget against watchdog and USB rate"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "IOS-009",
+      "title": "Select the iOS 16.5 userland preparation route by reusing donor tools: record the variants checked and why each was kept or rejected, extend the pinned hakios review files with the unpack/select/mkapfs recipe, and run the donor sysimage/unpack.sh unmodified on the owner's IPSW (staged copy, pinned files hash-checked).",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "IOS-003"
+      ],
+      "paths": [
+        "research/notes/IOS-009-userland-recipe-selection.md",
+        "research/sources.json",
+        "tools/ios/stage_hakios_recipe.py",
+        "docs/procedures/ios-009"
+      ],
+      "sources": [],
+      "acceptance": [
+        "The note lists every variant checked (own readers, stock 7-Zip, HackiOS recipe, y2sios, ios-lemonadep, ios-apollo, unused tools) with how it was checked and why it was adopted, kept as reference or rejected; provenance and licences of the adopted tools are stated and tools/sources.py verify hakios is clean after the review list was widened (append only).",
+        "The donor unpack.sh ran unmodified from a staged copy of the pinned files on the owner's IPSW (size 6165698198) with exit 0; the note records the numbers it printed and the presence of /sbin/launchd, /usr/lib/dyld, backboardd and SpringBoard, and says that presence is not compatibility.",
+        "The note names the confirmed gaps where own code is justified (each with the observation that confirms it) and what is not established; the registry is updated to the chosen path."
+      ],
+      "steps": [
+        "Check variants",
+        "Widen the pin and stage the recipe",
+        "Run unpack.sh",
+        "Write the note and update the registry"
+      ],
+      "status": "done",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-12T00:15:08+00:00",
+      "last_heartbeat": "2026-11-12T00:15:08+00:00",
+      "updated_at": "2026-11-12T00:17:16+00:00",
+      "evidence": "docs/procedures/ios-009/evidence.json",
+      "evidence_sha256": "d2a6b8ba93bfb71bc9ca2a9ae407b35725118438d697dc35e9fec02c04fb542b",
+      "finished_at": "2026-11-12T00:17:16+00:00"
+    },
+    {
+      "id": "IOS-011",
+      "title": "Build the PID 1 chain for the payload kernel with the project's own freestanding arm64 toolchain: add userland/libmini to the pinned review files, build stage0 (as /sbin/launchd), init, etc/rc (rc.launchd) and the mkjobs.py job set, and make the small root.apfs (md1) with mkapfs.py. Replaces the donor's xnu-clang/Theos build only where this host lacks it; the sources stay the donor's.",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "IOS-009"
+      ],
+      "paths": [
+        "docs/procedures/ios-011",
+        "tools/ios/build_pid1_chain.py",
+        "research/sources.json"
+      ],
+      "sources": [],
+      "acceptance": [
+        "The donor sources used (stage0.c, init.c, libmini, rc.launchd, mkjobs.py) are pinned review files; each deviation from the donor build (compiler, linker, flags) is listed with the reason.",
+        "stage0 and init are static arm64 Mach-O executables whose load commands, entry point and imports are listed by an independent reader and contain no dynamic dependency; root.apfs is produced by mkapfs.py and read back by apfs-tool.",
+        "The evidence is host-test only: nothing ran on the phone and nothing says the kernel mounts it."
+      ],
+      "steps": [
+        "Widen review files",
+        "Build with project toolchain",
+        "Make root.apfs",
+        "Check with independent reader"
+      ],
+      "status": "done",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "started_at": "2026-11-12T00:18:05+00:00",
+      "last_heartbeat": "2026-11-12T00:18:05+00:00",
+      "updated_at": "2026-11-12T00:25:04+00:00",
+      "evidence": "docs/procedures/ios-011/evidence.json",
+      "evidence_sha256": "70ee3201ad8651aaffe5fd77dc3b567c0d215ac7ee028f2958c018ed29be4a2a",
+      "finished_at": "2026-11-12T00:25:04+00:00"
+    },
+    {
+      "id": "IOS-012",
+      "title": "Audit the unpacked iOS 16.5 userland for launchd/dyld readiness: Mach-O load commands and LC_LOAD_DYLIB closure of /sbin/launchd, /usr/lib/dyld, backboardd and SpringBoard against the shared cache image list, minimum OS and platform, and the system-call stubs used by libsystem_kernel in the cache against the project kernel's syscalls.master. Read-only; uses the extracted files and, if needed, a pip-installed Mach-O parser in a venv.",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 96,
+      "depends_on": [
+        "IOS-009"
+      ],
+      "paths": [
+        "docs/procedures/ios-012",
+        "tools/ios/macho_audit.py",
+        "tests/test_macho_audit.py"
+      ],
+      "sources": [],
+      "acceptance": [
+        "For each of the four programs the report lists load commands, platform/minos, dyld info type, imported libraries, and which of them are present in the dyld shared cache image list; missing items are named.",
+        "The system-call numbers invoked by the cache's libsystem_kernel stubs are listed and compared with the project kernel's table; every mismatch is named, and the result is labelled as a static comparison, not a runtime test.",
+        "Dyld's expectations of the kernel (commpage fields, shared-region mapping, entitlements and code-signing checks it queries) are listed from the extracted binaries and tied to the IOS-003 rows."
+      ],
+      "steps": [
+        "Parse the four programs",
+        "Map the closure to the cache",
+        "Compare syscall numbers",
+        "Write the report"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "IOS-013",
+      "title": "Can the iOS 16.5 graphics stack present a first frame without a full GPU driver? Source and static review of the extracted backboardd/SpringBoard/QuartzCore/IOMobileFramebuffer path and the donor Mesa/OSMesa route (HackiOS GL=1) against the project's MiniIOMobileFramebuffer/MiniIOSurface; no software rendering is promised.",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 90,
+      "depends_on": [
+        "IOS-009"
+      ],
+      "paths": [
+        "research/notes/IOS-013-first-frame-without-gpu.md"
+      ],
+      "sources": [],
+      "acceptance": [
+        "The note traces, with file or image-name evidence, what backboardd needs from the kernel to put a frame on a panel (IOMobileFramebuffer calls, IOSurface, a renderer) and which of these the project kernel's stand-ins implement or lack.",
+        "It states what the donor path (OpenGL ES through Mesa/OSMesa, boot-arg gpu) proves on its own hardware and what it leaves open here; claims stay claims.",
+        "It names the cheapest observation on the S24 that would decide whether a frame can be presented without a GPU, and what can be prepared on the host."
+      ],
+      "steps": [
+        "Trace the display path",
+        "Read the donor GL route",
+        "Write the note"
+      ],
+      "status": "pending",
+      "owner": null
+    },
+    {
+      "id": "IOS-010",
+      "title": "Build the resident root image with the donor tools: userland/build.sh system step reproduced on the host (hard-link sysroot from the unpacked rootfs, cryptex trees and dyld cache, launchd moved to launchd.darwin, LaunchDaemons link), tools/apfs/mkapfs.py -z, then tools/apfs/check-image.sh (apfsck at its pinned commit plus the kernel's apfs_lib). Records the real image size against the donor's 2.5 GB claim and the RAM/USB budget.",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 98,
+      "depends_on": [
+        "IOS-009",
+        "IOS-011"
+      ],
+      "paths": [
+        "docs/procedures/ios-010",
+        "tools/ios/build_system_image.py",
+        "research/sources.json"
+      ],
+      "sources": [],
+      "acceptance": [
+        "apfsprogs (linux-apfs, GPL-2.0, checker only) is pinned at a full SHA in research/sources.json with its licence notes and verified; no script from it other than the project-reviewed build of apfsck is run.",
+        "system.apfs is produced from the IOS-009 unpack tree by the unmodified pinned mkapfs.py; apfsck exits clean and apfs-tool reads every volume back; the size, file count, compressed-versus-raw split and build time are recorded.",
+        "The evidence states the figure against the donor's 2.5 GB claim, the 96 MiB recovery slot and the USB budget in NAT-073, without presenting the image as bootable."
+      ],
+      "steps": [
+        "Pin apfsprogs",
+        "Compose sysroot",
+        "Run mkapfs.py",
+        "Check the image",
+        "Record size and budget"
       ],
       "status": "pending",
       "owner": null
@@ -60533,6 +60718,256 @@
           "status": "pending",
           "owner": null,
           "priority": 89
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T23:46:30+00:00",
+      "action": "task.claim:IOS-004",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-004",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T23:46:30+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-11T23:56:16+00:00",
+      "action": "task.claim:IOS-007",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-007",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 88,
+          "last_heartbeat": "2026-11-11T23:56:16+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:13:35+00:00",
+      "action": "task.release:IOS-007",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-007",
+          "status": "pending",
+          "owner": null,
+          "priority": 88
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:13:48+00:00",
+      "action": "task.narrow:IOS-007",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-007",
+          "status": "pending",
+          "owner": null,
+          "priority": 88,
+          "paths": [
+            "research/notes/IOS-007-hackios-userland-review.md"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:13:59+00:00",
+      "action": "task.add:IOS-009",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-009",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:14:17+00:00",
+      "action": "task.add:IOS-011",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-011",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:14:28+00:00",
+      "action": "task.add:IOS-012",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-012",
+          "status": "pending",
+          "owner": null,
+          "priority": 96
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:14:38+00:00",
+      "action": "task.add:IOS-013",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-013",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:14:54+00:00",
+      "action": "task.add:IOS-010",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-010",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:15:08+00:00",
+      "action": "task.claim:IOS-009",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-009",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 99,
+          "last_heartbeat": "2026-11-12T00:15:08+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:15:29+00:00",
+      "action": "task.claim:IOS-007",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-007",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 88,
+          "last_heartbeat": "2026-11-12T00:15:29+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:15:39+00:00",
+      "action": "task.block:IOS-007",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-007",
+          "status": "blocked",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 88,
+          "blocked_reason": "Superseded by IOS-009 (2026-11-12 owner direction to reuse ready tools). The repository named in the acceptance (oosexgang/hackios-xnu-userland) is only a README pointer; the userland tooling is in the already pinned hakios tree, reviewed in research/notes/IOS-009-userland-recipe-selection.md. Not completed under this ID because acceptance 1 (a hackios-userland sources.json entry) is not met and will not be. Missing fact: none; reopen only if the pointer repository gains content.",
+          "last_heartbeat": "2026-11-12T00:15:39+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:17:16+00:00",
+      "action": "task.done:IOS-009",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-009",
+          "status": "done",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 99,
+          "last_heartbeat": "2026-11-12T00:15:08+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:18:05+00:00",
+      "action": "task.claim:IOS-011",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-011",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 97,
+          "last_heartbeat": "2026-11-12T00:18:05+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:24:49+00:00",
+      "action": "task.done:IOS-004",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-004",
+          "status": "done",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 97,
+          "last_heartbeat": "2026-11-11T23:46:30+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:25:04+00:00",
+      "action": "task.done:IOS-011",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-011",
+          "status": "done",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 97,
+          "last_heartbeat": "2026-11-12T00:18:05+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:26:59+00:00",
+      "action": "task.claim:IOS-005",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-005",
+          "status": "in_progress",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 96,
+          "last_heartbeat": "2026-11-12T00:26:59+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T00:27:58+00:00",
+      "action": "task.block:IOS-005",
+      "owner": "claude-nat065-20261112-ramdisk",
+      "tasks": [
+        {
+          "id": "IOS-005",
+          "status": "blocked",
+          "owner": "claude-nat065-20261112-ramdisk",
+          "priority": 96,
+          "blocked_reason": "Superseded by the IOS-009 route (decision note research/notes/IOS-009-userland-recipe-selection.md, 2026-11-12): the owner directed reuse of ready tools, so the root is listed and extracted by stock 7-Zip 26.04 plus the pinned HackiOS recipe (IOS-010..012 build and check the image from the donor tools); no own APFS reader is written. The inventory this task asked for is covered by the donor unpack (docs/procedures/ios-009/unpack-summary.json) and IOS-012. Nothing was started; no files were created for IOS-005.",
+          "last_heartbeat": "2026-11-12T00:27:58+00:00"
         }
       ]
     }

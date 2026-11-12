@@ -1,0 +1,90 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T00:24:41+00:00",
+ "commit": "f914847a92a3f75688a44aaa452078c5b5dc15b2",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "tree_state": "all listed files are committed at the recorded commit",
+ "summary": "The donor PID 1 chain (libmini, stage0, init, child from references/hakios @ 87bf4851...) builds with the project's own clang 17 and cctools ld as three static arm64 Mach-O executables (LC_UNIXTHREAD, no LC_LOAD_DYLIB or LC_LOAD_DYLINKER, compiled without a diagnostic), and the donor's mkapfs.py makes the small root image root.apfs (4 MiB, byte-for-byte reproducible: same SHA-256 on two runs) in two variants: rc.darwin (Darwin programs, no jobs) and rc.launchd with 22 stock job plists including com.apple.backboardd and com.apple.SpringBoard. The kernel's own apfs_lib (the same .c files the payload kernel is built from, compiled for this host by the donor's build-tool.sh) reads every file back: contents and modes equal the source directory (6/6 and 28/28 files, 0 mismatches), and the donor reader verify.py agrees.",
+ "evidence_category": "host-test. Nothing ran on the S24; the kernel was not run; a host build of the kernel's APFS reader is not the kernel mounting a RAM disk.",
+ "acceptance": {
+  "1_pins_and_deviations": "All sources are pinned review files of hakios (child.c, libmini, init.c, stage0.c, rc.*, mkjobs.py, tools/apfs, xnu/files/bsd/miscfs/apfs). Deviations from the donor build.sh, all in the compiler driver: xnu-clang -> the project's clang 17 with --target=arm64-apple-ios16.5, -nostdinc and the project's clang builtin headers, -fno-pic -fno-pie; ld64 via the clang driver -> aarch64-apple-darwin-ld with -arch arm64 -static -e _start -pagezero_size 0x100000000 -iphoneos_version_min 16.5. Reason: neither xnu-clang nor ld64 exists on this host. The donor's other build steps (hello_dyn, injection libraries, Metal, Mesa) are not part of this image.",
+  "2_static_and_readback": "Load commands from aarch64-apple-darwin-otool for stage0, init, child; root.apfs written by mkapfs.py and read back by apfs-tool (kernel apfs_lib on the host) and by the donor reader verify.py content.",
+  "3_host_test_only": "Stated in evidence_category."
+ },
+ "results": {
+  "darwin_root_apfs_sha256": "e0c5d5a4815a2927922bf38a349d80f52cdad5cd1cb42d0b4dc9259c05176912",
+  "launchd_root_apfs_sha256": "434c657cad62fcfc7036dcfb575377b8065003902ecb987263270a8f513a0779",
+  "programs": {
+   "child": {
+    "bytes": 34520,
+    "sha256": "3c50ffce974e1b4b92faf2a1f3124cd4f323921d876ae4b57e8b8852eb0998ad"
+   },
+   "init": {
+    "bytes": 52408,
+    "sha256": "454149bdad5d4b9d3fada1d807626f9336c099e0ef0dbb5b495068d260ae4995"
+   },
+   "stage0": {
+    "bytes": 34560,
+    "sha256": "0c2e9deaec133b9a14dc4ec2f8696906ac3b7bf17890620ce8b01ee584379b34"
+   }
+  },
+  "kernel_apfs_lib_readback": {
+   "darwin": {
+    "entries": 11,
+    "files_compared": 6,
+    "local_files": 6,
+    "mismatches": [],
+    "ok": true
+   },
+   "launchd": {
+    "entries": 33,
+    "files_compared": 28,
+    "local_files": 28,
+    "mismatches": [],
+    "ok": true
+   }
+  }
+ },
+ "commands": [
+  {
+   "cmd": "python3 -I tools/ios/build_pid1_chain.py artifacts/ios-root/pid1-darwin --rc rc.darwin --report docs/procedures/ios-011/build-report-darwin.json",
+   "exit": 0,
+   "result": "14 sub-commands, all exit 0"
+  },
+  {
+   "cmd": "python3 -I tools/ios/build_pid1_chain.py artifacts/ios-root/pid1-launchd --rc rc.launchd --jobs --report docs/procedures/ios-011/build-report-launchd.json",
+   "exit": 0,
+   "result": "22 plists; kernel apfs_lib readback ok"
+  },
+  {
+   "cmd": "bash artifacts/ios-root/recipe/tools/apfs/build-tool.sh (run by the script)",
+   "exit": 0,
+   "result": "apfs-work/apfs-tool built; no vfs_unicode.c so non-ASCII names go through directory reading"
+  }
+ ],
+ "sha256": {
+  "tools/ios/build_pid1_chain.py": "688d003e005e022abf31c2916a2c9097c5fae1c32dafa28001c11aae05140dc1",
+  "tools/ios/stage_hakios_recipe.py": "7f2bcfd6467054a7fe4d2a03e5d9c80047d28ef0dab02c31420429270514f374",
+  "docs/procedures/ios-011/recipe-manifest.json": "6f6a5be5123804fedb649aab4dfb8314898247c8f33ad4a4c7a64d40e9a19e6a",
+  "docs/procedures/ios-011/build-report-darwin.json": "9b522dc7d65d15669cee76d104da79898355b86f5dbe1d4f22e58f35666b2b9c",
+  "docs/procedures/ios-011/build-report-launchd.json": "2f3282cdab80b906a9ea36b5c0c36b3482d84bb58d6ba0860539c40ee51d3cb5",
+  "research/sources.json": "79fce7b02b1c49767c940b643778f0663501ab3826ed010dc194369c37ad0c31"
+ },
+ "limits": [
+  "The independent checker apfsck (linux-apfs/apfsprogs) was not run: it is pinned and run in IOS-010. The two readers used here are the donor's own, the kernel's apfs_lib and the Python apfs.py.",
+  "rc.darwin names /redwood/bin/hello_dyn, which needs an iOS SDK build that does not exist here; init will report that line as failed. The real dynamically linked programs of the run are Apple's own /bin/df, /sbin/mount, /bin/ps, /usr/bin/vm_stat, /usr/sbin/ioreg.",
+  "The job plists are copies of the donor's selection from the owner's IPSW, adjusted by mkjobs.py; no Apple file is committed.",
+  "The project's clang 17 and cctools ld were built earlier by other tasks; they were not rebuilt or re-reviewed here (hashes in the build reports)."
+ ],
+ "artifacts": [
+  "tools/ios/build_pid1_chain.py",
+  "tools/ios/stage_hakios_recipe.py",
+  "docs/procedures/ios-011/recipe-manifest.json",
+  "docs/procedures/ios-011/build-report-darwin.json",
+  "docs/procedures/ios-011/build-report-launchd.json",
+  "research/sources.json",
+  "docs/procedures/ios-011/task.json"
+ ]
+}
