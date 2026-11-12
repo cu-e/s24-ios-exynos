@@ -123,6 +123,38 @@ The earliest unresolved blocker is step 1 (the APFS root has never been mounted 
 | 7 | icons, one real app, home, re-lock | none | milestone 6 |
 | 8 | stability, GPU, smoothness, power, other devices | none | milestone 7 |
 
+## 0c. Status update, 2026-11-12 after NAT-084/086/088/089/090 (this section replaces 0b where they differ)
+
+What changed since 0b (every row names its highest rung with the five words of the vocabulary):
+
+| Item | written | built | model-tested | ran on S24 | real iOS UI |
+| --- | --- | --- | --- | --- | --- |
+| Delivered 2.31 GiB APFS root mounted by the kernel as root from RAM (donor `apfs` VFS) | yes | yes | yes | **yes** (NAT-084, decision 0032) | no |
+| stage0/init, then Apple's own `df`, `mount`, `ps`, `vm_stat` (IPSW programs, run through Apple's dyld and the shared cache) | yes | yes | yes | **yes** (NAT-084) | no |
+| Apple's `launchd.darwin` as PID 1: boot tasks `fsck` .. `fips` (corecrypto FIPS self-test 18 of 18 passed), the keybag task died on the missing SEP-owned keybag | - | - | - | **yes** (NAT-084) | no |
+| `ephemeral-storage=1` from the ADT: keybagd skipped, 11 more boot tasks, then `launchd_cache_loader` aborted (no `xpc/launchd.plist`) and XNU panicked by design | yes | yes | yes | **yes** (NAT-086) | no |
+| Restore-mode launchd (last cmdline token ` xrd=md0`): 20 of 23 boot tasks skipped, 3 ran, one job (`ps -A` heartbeat) respawned every 10 s to kernel 244 s, timed return with a **live PID 1**, no panic | yes | yes | yes | **yes** (NAT-088; ladder row R9 = inconclusive, read by hand beyond the ladder) | no |
+| Reader without the replay refusal, launchd boot-task analyser rows A1-A8, Stage A small root (19 Apple plists + heartbeat) | yes | yes | **yes** (NAT-089: 60 tests, mutation 535 candidates; the real NAT-088 text reads 3 ran / 20 skipped) | no | no |
+| Stage A image `loader-diag-xnu-sa-md1` + session driver + decision 0035 | yes | yes | **yes** (NAT-090: byte-for-byte against NAT-087, 34 tests, mutation 105) | **no** (NAT-091 not run: the phone left the USB bus at 16:02Z, no write and no reboot, attempt unspent) | no |
+| backboardd, SpringBoard, any Apple daemon but the heartbeat | present in the image | - | static audit only | **no** | no |
+| Graphics: IOMobileFramebuffer/IOSurface stand-ins, a frame on the panel | yes | yes | host tests | registers read (NAT-070); **no frame** | no |
+
+Milestones now: 1 reached (stable minimal XNU, user processes; a PID 1 that stays alive for the 63 s window); 2 reached for the four Apple programs that ran (dyld + shared cache + libSystem; whether any of the 22 `nosys` syscalls was called by them is not recorded, so this says nothing about daemons); 3 started: Apple launchd runs in restore mode with one job, no Apple daemon has run; 4-8 not reached.
+
+**The earliest unsolved blocker is B7: no Apple daemon has ever run under this launchd.** Stage A (NAT-091) is the experiment that measures it; it was prepared and gated (preflight `ready-read-only`) and stopped before any write only because the phone left the bus.
+
+What the image tells us about what is *not* there (host check of the IPSW root tree, `sbin/`, `bin/`, `usr/bin`): `/bin` holds only `df` and `ps`; there is **no shell, no `cat`, no `grep`, no `tail`, no `launchctl`** in the root. So no job can print a file or filter a log: every daemon's stderr (the plists send it to `/dev/console`) and launchd's own lines are the only reporters, and `ps -A` is the only state query. `backboardd`, `hidd`, `thermalmonitord`, `configd`, `lockdownd`, `SpringBoard.app` and the frameworks BackBoardServices, FrontBoard, IOMobileFramebuffer, IOSurfaceAccelerator and SpringBoard* are present; AGX frameworks are present as files, but the S24 has a different GPU (no AGX hardware), so nothing may be claimed about rendering through them.
+
+### Blocker blocks, new rows (a: missing/broken, b: confirming observation, c: minimal change or input, d: ready when, e: prepared without the phone)
+
+| Blocker | a | b | c | d | e |
+| --- | --- | --- | --- | --- | --- |
+| **B7 Apple daemons under restore-mode launchd** (earliest) | unknown whether the plists load at all: `LimitLoadToSessionType` on 8 plists vs the `user/501` domain seen in NAT-088; `Unable to find persona with type 6` (PERSONA_SYSTEM_PROXY: the project's XNU creates no persona); 22 `nosys` syscalls, AMFI/sandbox stand-ins | NAT-091: per-label spawns, exit lines with launchd's wording, domains, the last `ps -A` list, read by analyser rows A1-A8 | by the row: A2/A3 -> the earliest exit's cause is the next kernel/stub change; A4 -> create the persona or the session type before any daemon; A1 -> Stage B | A1: the seven self-starting daemons are in the last complete `ps -A` list, no panic | NAT-089/090, decision 0035, driver, gates (all done) |
+| **B8 log window** | head 8 KiB + tail 32 KiB of the kernel buffer, run window ~63 s; donor reports ~1 MB of SpringBoard output in half a minute; no `cat`/`tail`/`grep` in the root | A8 rows (holes and gap sizes) in a real Stage A/B text | before Stage B: either per-daemon `StandardErrorPath` into a RAM file system plus a project-owned tiny reader job (own code, a confirmed gap: the root has no `cat`), or a larger return path; decide from NAT-091's measured volume | a Stage B text with the first backboardd lines without holes | measure Stage A output volume per label from NAT-091; design the reader job as a static Mach-O (NAT-077's mkstatic pattern) |
+| **B9 graphics, still unproven** | no frame on the panel; whether a CPU write reaches it (B4); IOMobileFramebuffer 63 selectors / IOSurface 43 asked, 16 / 18 handled; AGX absent | a dynamically linked test program's first failing selector (needs an iPhoneOS SDK **or** an Apple-signed test program from the IPSW) | `hello_dyn` needs the iPhoneOS SDK, absent here: lawful routes are the owner's Apple Developer download of Xcode's iPhoneOS SDK (Apple's licence, stays under gitignored `artifacts/`), or reading backboardd's own first failing call instead of building a program | one frame of anything on the panel, observed by one look or a second observable | selector tables; a pure-C copy path to the boot framebuffer |
+
+First frame **without** a full GPU driver: still *plausible, not proven* (QuartzCore's software renderer is reported working by the donor for other phones; here nothing ran). No software-rendering promise is made until backboardd or a test program shows it.
+
 ## 1. Audit of the selected profile and local components
 
 Selected profile (docs/implementation.md, CAPABILITIES.md): **iPhone X (iPhone10,3, D22AP, t8015) iOS 16.5 (build 20F66)** userland on **XNU 8796.121.2** (HackiOS base d82c64a3) for **SM-S921B/e1s**.
