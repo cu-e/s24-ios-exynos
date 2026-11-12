@@ -1,0 +1,135 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T19:55:00+00:00",
+ "commit": "38a250fcd3fa93483d08efd6a4beffe0fef7542b",
+ "tree_state": "NAT-101 files (including README.md, mutation.json, evidence.json) are uncommitted at recording and committed immediately after completion; unrelated dirty registry/view files in the working tree are not part of this commit.",
+ "owner": "gemini-ios-20261113-a",
+ "previous_owner": "claude-nat065-20261112-ramdisk",
+ "transfer_decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
+ "summary": "Host-side observability small root (pid1-hb) and launchd-independent heartbeat program (hb). src/hb.c builds with NAT-077's clang + lld + mkstatic pipeline into a 16,635-byte static arm64 Mach-O (sha256 1819a4a89ec06403fa21df2facd73ff9723c2debd03c2ec6df9d7f6717103163) that is byte-identical with and without the #ifdef HOST_TEST code in src/hb.c. build_hb_root.py builds artifacts/nat-101/pid1-hb/root.apfs (4,194,304 bytes, sha256 97f9b5d8a5c7d02ebf2d527dedddbc6a043d69a7191339d8d5dbe4fe7144e58c) from NAT-096's pinned Stage A small root (62801cecc5cdf1e2bfaff8c056bd02e2539295e516fe2011b82fa3d2a5a37057, 25 files), differing only in bin/hb (added, 0755) and etc/rc (3 comment lines + `/redwood/bin/hb &` immediately before `exec /sbin/launchd.darwin`). verify.py content (26 identical, 0 differing) and the kernel's apfs_lib readback (26/26 files, 0 mismatches) pass. test_nat101.py passes 39/39 tests. Merged and annotated mutation results in docs/procedures/nat-101/mutation.json show 0 unexplained survivors (hb.c 244 killed / 11 explained / 56 invalid; build_hb_root.py 199 killed / 0 survived / 9 invalid; build_hb.py 147 killed / 1 explained / 4 invalid). Nothing ran on a phone, and the raw Darwin system-call layer is not covered by the HOST_TEST libc model.",
+ "acceptance": {
+  "1_hb_build_and_audit": "build_hb.py compiles src/hb.c (92f99762ec659a21513255e9792e2d60bb9a77a8a76e1786fbcb76024cb21361) into artifacts/nat-101/hb-build-001/hb (16,635 B, sha256 1819a4a89ec06403fa21df2facd73ff9723c2debd03c2ec6df9d7f6717103163) with __PAGEZERO/__TEXT/__LINKEDIT, LC_UNIXTHREAD, no LC_MAIN/LC_LOAD_DYLIB/LC_LOAD_DYLINKER, recorded in hb.json (046b8f25be48af2e3de9397cc61524237f54a2fdcabe01b586f2dabdb9eb5f71). test_the_host_model_code_is_not_part_of_the_darwin_binary verifies byte-identical output with #ifdef HOST_TEST blocks stripped.",
+  "2_small_root_build_and_readback": "build_hb_root.py builds artifacts/nat-101/pid1-hb/root.apfs (4,194,304 B, sha256 97f9b5d8a5c7d02ebf2d527dedddbc6a043d69a7191339d8d5dbe4fe7144e58c) from NAT-096's root, refuses unpinned bases, non-static hb, misplaced exec line, and existing output directories, verifies tree_diff equals added=['bin/hb'], changed=['etc/rc'], removed=[], passes verify.py content (26 identical) and apfs-tool apfs_lib readback (26/26, 0 mismatches), recorded in build.json (7be59ef4753b500ddf0eec799f69b4307258a5adc568a9585c8ceccec733e0c0).",
+  "3_host_tests_and_mutation": "test_nat101.py passes 39/39 tests (normal rounds, hung ps killed after timeout, missing ps exit 127, missing /dev/console exit 2, failing fork, structural Mach-O/capstone disassembly checks, builder refusals, tree comparison, and host-model stripping identity). Merged mutation pass (docs/procedures/nat-101/mutation.json, 3bb4cd54b57fe75910314413a5cfe9f539b8c9ddf8b7e41fb2c0d87c74375ff6) has 0 unexplained survivors (12 explained in equivalent.json); the 39th test was added after the mutation pass with no change to the mutated targets."
+ },
+ "established": [
+  "Static arm64 Mach-O hb (16,635 B) builds deterministically without host-model code and carries only the 12 intended Darwin svc #0x80 calls.",
+  "Observability small root pid1-hb differs from NAT-096's Stage A root only in bin/hb and the 4-line addition before exec in etc/rc, and reads back identically via verify.py and apfs_lib.",
+  "Under the HOST_TEST libc model, hb prints formatted markers, alternates `ps -A` and `ps -Ao pid,ppid,stat,comm`, kills a hung child after timeout, and handles missing ps/console and fork errors."
+ ],
+ "not_established": [
+  "Raw Darwin system-call layer correctness (syscall numbers, x1 != 0 child flag in fork, carry-flag error return, select timeval ABI) is not tested by HOST_TEST (covered by NAT-102's Unicorn model, and tested natively only on the S24).",
+  "That hb starts from /etc/rc on the S24, that its writes to /dev/console survive logd startup, or anything about Apple's launchd/daemons/display/UI."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "docs/procedures/nat-101/build_hb.py",
+    "--out",
+    "artifacts/nat-101/hb-build-001"
+   ],
+   "exit_code": 0,
+   "note": "built hb (16,635 B) and hb.json by previous owner"
+  },
+  {
+   "argv": [
+    "docs/procedures/nat-101/build_hb_root.py",
+    "--out",
+    "artifacts/nat-101/pid1-hb",
+    "--hb",
+    "artifacts/nat-101/hb-build-001/hb"
+   ],
+   "exit_code": 0,
+   "note": "built root.apfs (4,194,304 B) and verified 26/26 via verify.py and apfs-tool"
+  },
+  {
+   "argv": [
+    "artifacts/nat-065/venv/bin/python",
+    "-B",
+    "-W",
+    "ignore",
+    "-I",
+    "docs/procedures/nat-101/test_nat101.py",
+    "-v"
+   ],
+   "exit_code": 0,
+   "note": "Ran 39 tests in 20.804s, OK (re-verified after task transfer; matches artifacts/nat-101/test-nat101.*)"
+  },
+  {
+   "argv": [
+    "docs/procedures/nat-101/mutate_nat101.py",
+    "--annotate",
+    "artifacts/nat-101/mutation-merged/mutation.json",
+    "--out",
+    "artifacts/nat-101/mutation-final"
+   ],
+   "exit_code": 0,
+   "note": "annotated merged pass (pass 1 hb.c + pass 2/3 builders with --mem-mib 2560); copied to docs/procedures/nat-101/mutation.json; 0 unexplained survivors"
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-101/README.md",
+  "docs/procedures/nat-101/src/hb.c",
+  "docs/procedures/nat-101/build_hb.py",
+  "docs/procedures/nat-101/build_hb_root.py",
+  "docs/procedures/nat-101/test_nat101.py",
+  "docs/procedures/nat-101/mutate_nat101.py",
+  "docs/procedures/nat-101/merge_mutation.py",
+  "docs/procedures/nat-101/equivalent.json",
+  "docs/procedures/nat-101/mutation.json",
+  "artifacts/nat-101/hb-build-001/hb",
+  "artifacts/nat-101/hb-build-001/hb.json",
+  "artifacts/nat-101/pid1-hb/root.apfs",
+  "artifacts/nat-101/pid1-hb/build.json",
+  "artifacts/nat-101/test-nat101.stdout",
+  "artifacts/nat-101/test-nat101.stderr",
+  "artifacts/nat-101/test-nat101.exit"
+ ],
+ "artifact_sha256": {
+  "docs/procedures/nat-101/src/hb.c": "92f99762ec659a21513255e9792e2d60bb9a77a8a76e1786fbcb76024cb21361",
+  "docs/procedures/nat-101/build_hb.py": "69a5061414ba021d9f00f863f9b38f0296329edf9d4f0f12e44d10de82beb5af",
+  "docs/procedures/nat-101/build_hb_root.py": "8a0c753b76a0bfabe55ed751dd8a093a1055c3330bd27adbc3d8ef0e6e930af0",
+  "docs/procedures/nat-101/test_nat101.py": "611d71382aa7103e4dad3a27ed8fdcd810baaa6c59bf22d8d62f507b594702d1",
+  "docs/procedures/nat-101/mutate_nat101.py": "7697bc51ca3608389c899cd8b17665d52134ae658ea7734d3e64c1ad8714dac1",
+  "docs/procedures/nat-101/merge_mutation.py": "2b2f8af8bf4c417e224673168d8e8adecca5568524260704f5baae69f812ea2b",
+  "docs/procedures/nat-101/equivalent.json": "53985346f407362f000e6825a3d1ab6441c900fb7bc466d6ff2186653dc62882",
+  "docs/procedures/nat-101/mutation.json": "3bb4cd54b57fe75910314413a5cfe9f539b8c9ddf8b7e41fb2c0d87c74375ff6",
+  "artifacts/nat-101/hb-build-001/hb": "1819a4a89ec06403fa21df2facd73ff9723c2debd03c2ec6df9d7f6717103163",
+  "artifacts/nat-101/hb-build-001/hb.json": "046b8f25be48af2e3de9397cc61524237f54a2fdcabe01b586f2dabdb9eb5f71",
+  "artifacts/nat-101/pid1-hb/root.apfs": "97f9b5d8a5c7d02ebf2d527dedddbc6a043d69a7191339d8d5dbe4fe7144e58c",
+  "artifacts/nat-101/pid1-hb/build.json": "7be59ef4753b500ddf0eec799f69b4307258a5adc568a9585c8ceccec733e0c0",
+  "artifacts/nat-101/test-nat101.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-101/test-nat101.stderr": "d3c14dc91d1f8fd8c59359ddac235f1aa536ac0b356b9a1b2e02d2daa8905440",
+  "artifacts/nat-101/test-nat101.exit": "19eaf43821a7660ec323a87c8457bf74823beb296c39f5e01aa8a683aa50f061"
+ },
+ "mutation_summary": {
+  "summary": {
+   "docs/procedures/nat-101/build_hb.py": {
+    "total": 152,
+    "killed": 147,
+    "survived": 1,
+    "survived_unexplained": 0,
+    "invalid": 4,
+    "timeout": 0
+   },
+   "docs/procedures/nat-101/build_hb_root.py": {
+    "total": 208,
+    "killed": 199,
+    "survived": 0,
+    "survived_unexplained": 0,
+    "invalid": 9,
+    "timeout": 0
+   },
+   "docs/procedures/nat-101/src/hb.c": {
+    "total": 311,
+    "killed": 244,
+    "survived": 11,
+    "survived_unexplained": 0,
+    "invalid": 56,
+    "timeout": 0
+   }
+  }
+ }
+}

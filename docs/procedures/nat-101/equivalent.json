@@ -1,0 +1,74 @@
+[
+ {
+  "file": "docs/procedures/nat-101/src/hb.c",
+  "line": 81,
+  "desc": "< -> <=",
+  "reason": "Mutation of the HOST_TEST wrapper (the `#ifdef HOST_TEST` half of hb.c, which only the host model compiles): the Darwin binary is built from the `#else` half and does not contain this line. The mutant differs from the original only at the boundary value (p == 0, the child of a fork: the original returns 0, the mutant returns -errno) and only if errno is non-zero at that moment; no host test reaches that state (no failing call precedes it in a process that then continues). The Darwin wrappers' own error convention (carry flag, errno in x0) is covered by NAT-102's ABI mutants (carry-ignored, carry-inverted, fork-carry-ignored), not by this line."
+ },
+ {
+  "file": "docs/procedures/nat-101/src/hb.c",
+  "line": 81,
+  "desc": "literal 0 -> 1",
+  "reason": "Mutation of the HOST_TEST wrapper (the `#ifdef HOST_TEST` half of hb.c, which only the host model compiles): the Darwin binary is built from the `#else` half and does not contain this line. The mutant differs from the original only at the boundary value (p == 0, the child of a fork: the original returns 0, the mutant returns -errno) and only if errno is non-zero at that moment; no host test reaches that state (no failing call precedes it in a process that then continues). The Darwin wrappers' own error convention (carry flag, errno in x0) is covered by NAT-102's ABI mutants (carry-ignored, carry-inverted, fork-carry-ignored), not by this line."
+ },
+ {
+  "file": "docs/procedures/nat-101/src/hb.c",
+  "line": 84,
+  "desc": "< -> <=",
+  "reason": "Mutation of the HOST_TEST wrapper (the `#ifdef HOST_TEST` half of hb.c, which only the host model compiles): the Darwin binary is built from the `#else` half and does not contain this line. The mutant differs from the original only at the boundary value (r == 0, open() returning descriptor 0, which needs a closed stdin: the original returns 0, the mutant -errno) and only if errno is non-zero at that moment; no host test reaches that state (no failing call precedes it in a process that then continues). The Darwin wrappers' own error convention (carry flag, errno in x0) is covered by NAT-102's ABI mutants (carry-ignored, carry-inverted, fork-carry-ignored), not by this line."
+ },
+ {
+  "file": "docs/procedures/nat-101/src/hb.c",
+  "line": 84,
+  "desc": "literal 0 -> 1",
+  "reason": "Mutation of the HOST_TEST wrapper (the `#ifdef HOST_TEST` half of hb.c, which only the host model compiles): the Darwin binary is built from the `#else` half and does not contain this line. The mutant differs from the original only at the boundary value (r == 0, open() returning descriptor 0, which needs a closed stdin: the original returns 0, the mutant -errno) and only if errno is non-zero at that moment; no host test reaches that state (no failing call precedes it in a process that then continues). The Darwin wrappers' own error convention (carry flag, errno in x0) is covered by NAT-102's ABI mutants (carry-ignored, carry-inverted, fork-carry-ignored), not by this line."
+ },
+ {
+  "file": "docs/procedures/nat-101/src/hb.c",
+  "line": 94,
+  "desc": "literal 0 -> 1",
+  "reason": "Host wrapper sys_gettimeofday: its return value is discarded at all three call sites (hb.c lines 202, 218, 271), so 0 and 1 are indistinguishable; the Darwin wrapper is a different line"
+ },
+ {
+  "file": "docs/procedures/nat-101/src/hb.c",
+  "line": 96,
+  "desc": "< -> <=",
+  "reason": "Mutation of the HOST_TEST wrapper (the `#ifdef HOST_TEST` half of hb.c, which only the host model compiles): the Darwin binary is built from the `#else` half and does not contain this line. The mutant differs from the original only at the boundary value (r == 0, wait4(WNOHANG) with the child still running: the original returns 0, the mutant -errno) and only if errno is non-zero at that moment; no host test reaches that state (no failing call precedes it in a process that then continues). The Darwin wrappers' own error convention (carry flag, errno in x0) is covered by NAT-102's ABI mutants (carry-ignored, carry-inverted, fork-carry-ignored), not by this line."
+ },
+ {
+  "file": "docs/procedures/nat-101/src/hb.c",
+  "line": 96,
+  "desc": "literal 0 -> 1",
+  "reason": "Mutation of the HOST_TEST wrapper (the `#ifdef HOST_TEST` half of hb.c, which only the host model compiles): the Darwin binary is built from the `#else` half and does not contain this line. The mutant differs from the original only at the boundary value (r == 0, wait4(WNOHANG) with the child still running: the original returns 0, the mutant -errno) and only if errno is non-zero at that moment; no host test reaches that state (no failing call precedes it in a process that then continues). The Darwin wrappers' own error convention (carry flag, errno in x0) is covered by NAT-102's ABI mutants (carry-ignored, carry-inverted, fork-carry-ignored), not by this line."
+ },
+ {
+  "file": "docs/procedures/nat-101/src/hb.c",
+  "line": 106,
+  "desc": "literal 0 -> 1",
+  "reason": "Host wrapper sys_select_sleep: select(nfds, NULL, NULL, NULL, &tv) with all three descriptor sets null sleeps for the timeout whatever nfds is; the Darwin wrapper is a different line"
+ },
+ {
+  "file": "docs/procedures/nat-101/src/hb.c",
+  "line": 180,
+  "desc": "< -> <=",
+  "reason": "ld(): `v < 0 ? -v : v` and `v <= 0 ? -v : v` differ only at v == 0, where -0 == 0; the next line's sign test is a separate expression and unchanged"
+ },
+ {
+  "file": "docs/procedures/nat-101/src/hb.c",
+  "line": 180,
+  "desc": "literal 0 -> 1",
+  "reason": "ld(): `v < 1` differs from `v < 0` only at v == 0, where -0 == 0 (same value in u); the sign test two lines below is a separate expression and unchanged"
+ },
+ {
+  "file": "docs/procedures/nat-101/src/hb.c",
+  "line": 310,
+  "desc": "literal 0 -> 1",
+  "reason": "`return` after sys_exit(0) in the HOST_TEST main: sys_exit is _exit() and never returns, so the line is unreachable; the Darwin build has no such line"
+ },
+ {
+  "file": "docs/procedures/nat-101/build_hb.py",
+  "line": 29,
+  "desc": "statement deleted",
+  "reason": "_load() registers the module in sys.modules before exec_module; the only module build_hb.py loads is nat-077/build.py, which imports only argparse, hashlib, json, subprocess, sys, tempfile, pathlib and mkstatic (by its own name, not by the registered one) and uses no dataclass, pickle or typing.get_type_hints (read at this commit), so exec_module works without the registration. The same line in build_hb_root.py was killed by test_build_hb_root_main_builds_the_recorded_image_with_the_default_base_and_recipe; why that one depends on the registration was not investigated"
+ }
+]
