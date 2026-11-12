@@ -1,0 +1,62 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T18:22:11+00:00",
+ "commit": "33039fb48cd94c9945539db9540ad93d130bf0fa",
+ "tree_state": "NAT-099 files uncommitted at recording (committed right after; the registry and generated views are not part of that commit)",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "summary": "Host-side Stage B small root: NAT-096's Stage A small root (pinned by root.apfs SHA-256 62801cec...7057, 25 files) plus the three files the donor's injection needs: LaunchDaemons/com.apple.backboardd.plist (Apple's plist plus StandardErrorPath=/dev/console, as mkjobs.py writes it), lib/libhakios.dylib (the donor's tracked prebuilt of IOS-014, pinned SHA-256 530c2e68...4dad6) and etc/inject.conf (one line: /redwood/lib/libhakios.dylib backboardd containermanagerd containermanagerd_system). Built by the donor's mkapfs.py (4,194,304 bytes = the md0 region size, SHA-256 c22b3867...31d5, 28 files) and read back by the donor's verify.py (28 of 28 identical) and by the kernel's apfs_lib (28 of 28, no mismatch). 19 tests pass, 9 synthetic (every refusal with its exact message) and 8 against the real artifacts. Nothing ran on a phone; no image, driver or decision exists yet.",
+ "acceptance": {
+  "1_builder": "build_stage_b_root.py builds artifacts/nat-099/pid1-sb2/root.apfs from the pinned base and refuses: another base image, another dylib, a backboardd plist that is not Apple's plus the single StandardErrorPath key (exact messages tested), and an existing output directory; build.json records the input and output hashes.",
+  "2_tree": "The tree differs from NAT-096's in the three files and in the new directory lib that holds the dylib (the task text said three paths; the directory is the parent of one of them); every other file is byte- and mode-identical (25 -> 28 files, tree_diff test). Kernel apfs_lib readback and verify.py content check: clean.",
+  "3_tests": "test_nat099.py: 19 tests, exit 0 (artifacts/nat-099/test-nat099.*): tree difference, inject.conf bytes, its library path equals the dylib's LC_ID_DYLIB install name (read with tools/ios/macho_audit.py), every injected name is the program of a job plist in the image, the backboardd plist equals Apple's plus the error path, the pinned hashes, the image record, the 4096-byte read buffer of the donor's init. NAT-096's image and md0 are untouched."
+ },
+ "findings": [
+  "The donor's list names containermanagerd and containermanagerd_system too; both are programs of job plists in the image (containermanagerd and containermanagerd.system), so the injection would apply to a self-starting daemon (containermanagerd, which NAT-098 saw running) as well as to backboardd.",
+  "The Stage B root has 916 free blocks of 1024: room is not a constraint for adding files."
+ ],
+ "established": [
+  "host-test: the Stage B small root exists, is a byte-checked superset of the Stage A root by exactly the three files, and the kernel's APFS library reads it back."
+ ],
+ "not_established": [
+  "That the donor's init reaches configure_inject in this project's chain and the kernel accepts the list; that dyld inserts the library; that backboardd starts or survives (UserName=mobile, B11 hypothesis); that backboardd's stderr leaves room in the log window; anything about display, input, GPU or a frame.",
+  "How many assertions of the tests would catch a mutated builder: no mutation pass was run on build_stage_b_root.py or test_nat099.py."
+ ],
+ "commands": [
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-099/build_stage_b_root.py --out artifacts/nat-099/pid1-sb2",
+   "exit": 0,
+   "note": "root.apfs sha256 c22b3867...31d5, 28 files, kernel readback ok"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-099/test_nat099.py",
+   "exit": 0,
+   "note": "Ran 19 tests, OK"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-099/pid1-sb2/build.json",
+  "artifacts/nat-099/pid1-sb2/root.apfs",
+  "artifacts/nat-099/build.stdout",
+  "artifacts/nat-099/build.stderr",
+  "artifacts/nat-099/build.exit",
+  "artifacts/nat-099/test-nat099.stdout",
+  "artifacts/nat-099/test-nat099.stderr",
+  "artifacts/nat-099/test-nat099.exit",
+  "docs/procedures/nat-099/build_stage_b_root.py",
+  "docs/procedures/nat-099/test_nat099.py"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-099/pid1-sb2/build.json": "db63d74e747fa58b89d8780ee9c8818703bb851302534a95fb66b53a45399eeb",
+  "artifacts/nat-099/pid1-sb2/root.apfs": "c22b386774831c3bb83b28eb2593b23ccb3a5d1ab8f9fe18dfd00da37f2e31d5",
+  "artifacts/nat-099/build.stdout": "7855b86ac806ce19a27b2b1c148c04e535feeb1710f6d768ce5e85eb0b0e38a1",
+  "artifacts/nat-099/build.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-099/build.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+  "artifacts/nat-099/test-nat099.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifacts/nat-099/test-nat099.stderr": "4a524af42e7f5852f848bfb98b06317d148e05d14568e5b3e389b188d1061d43",
+  "artifacts/nat-099/test-nat099.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+  "docs/procedures/nat-099/build_stage_b_root.py": "ebd7340c610c7aba6ad0c8ba8f5c778a89ca6c5a3e553f01cf54ca3f4ae1f71e",
+  "docs/procedures/nat-099/test_nat099.py": "8031c0d3f5e473372e9c46be33355764a2d9583a9204032de443d71555bc344d"
+ }
+}

@@ -1,0 +1,152 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "inconclusive",
+ "recorded_at": "2026-11-12T18:21:07+00:00",
+ "commit": "33039fb48cd94c9945539db9540ad93d130bf0fa",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "decision": "docs/decisions/0037-nat096-loader-diag-xnu-sq-md1-single-run-2026-11-12.md",
+ "device_inventory": "devices/local-2026-11-12-nat098.json",
+ "summary": "loader-diag-xnu-sq-md1 (the quiet Stage A image: NAT-092's image without the com.apple.lsd job) ran once on the S24 (decision 0037, RECOVERY only, restored from the pinned stock, Android checked). The pre-registered analysers, run unchanged on the final archive, give chain row 9 (PARTIAL: two boots of the image, two producer drops, the kernel text sits in the second boot, as in NAT-093) and Stage A row A8 (not evaluated: `no launchd line in the returned text`; reader v2 inferred the lost KL begin; NAT-089's own reader finds no dump). Task NAT-098 stays open. What the run showed, by the delivery journal and by a post-hoc reading of the returned text (outside the pre-registered rows): the whole 2,475,720,704-byte root arrived (179.2 s, 13.81 MB/s, load 3.47 at launch); the CPU-monitor flood of NAT-093 is gone (0 of 304 timestamped lines; NAT-093 had 235 of 243), so the window is no longer one repeated message; the kernel text is continuous from kernel clock 215.1 s to its last line at 268.5 s (the unsent middle and both holes lie before 216 s); launchd ran exactly the three boot tasks of NAT-088 and skipped 20 (`Early boot complete` at 217.917 s); eight processes (pids 9-16) were created within 22 ms, which matches the seven self-starting Apple jobs plus the heartbeat, and the kernel's own minisandbox lines name two of them: containermanager[12] and logd[16]; pids 17-25 followed, the last four at a 10.0 s cadence (238.4, 248.4, 258.5, 268.5 s); no panic and no PID 1 exit line. What did NOT appear, unlike NAT-088: launchd's own console-form lines (no `com.apple.xpc.launchd|` line, no `Unable to find persona with type 6`, no xpcproxy line) and every `ps -A` list of the heartbeat (the only list in the text is rc's, before launchd). So the ladder cannot see spawns or exits, and which of the other daemons stayed up is still unknown. Hypothesis, not tested: once Apple's logd runs, launchd's console-form logging and the jobs' console output no longer reach the kernel log.",
+ "acceptance": {
+  "1_run_and_restore": "One run under decision 0037 (HEAD 33039fb at launch, decision committed at 07ca332): host 1-minute load average 3.47 at launch (18:07:18Z; 3.44 and 3.38 minutes before; no build, test or mutation process of the agent running, ps checked; during the delivery only text files were written); RECOVERY written once, reboot requested 2026-11-12T18:07:32.851Z; the loader appeared +19.2 s; the 360 s deadline returned the phone to Download Mode (`SAMSUNG USB`, 04e8:685d, +380.19 s on the watcher's clock, not SEC_UPLOAD); NAT-013 restore 18:14:07Z-18:14:11Z with the pyusb venv python (bus 5 address 21, 100,663,296 bytes acknowledged, stock sha 96620b8b...3abf67), Android up by 18:14:44Z; check_android outcome pass and assess outcome pass (RECOVERY readback equals the pinned stock, user data directories present). One-shot marker created; no retry.",
+  "2_analysers": "analyze_nat087.py: chain row 9 (chain-verdict-not-pass: PARTIAL, 2 boots of this image, collector manifest `incomplete` with 3 capture errors: start-failed, 2x producer-reported-drop). analyze_nat097.py: row A8 not-evaluated (`no launchd line in the returned text`), dump read by inference (begin_inferred true): length 111,842, head 8,192, tail 32,768, unsent gap 70,882, 345 of 428 records, holes [79074,83970) and [87330,90402) = 7,968 bytes, no conflicts. analyze_nat089.py: row A8 (`no why=2 kernel-log dump with text in the archive`, because its reader needs the begin line). All three run unchanged; the first pass was made while the collector was still running (see disclosures) and gave the same rows.",
+  "3_reported_items": "Per-label table: 0 spawns for all 18 Apple labels (the analyser counts only console-form launchd lines; none exist in the text), com.nat085.ps `alive_in_last_list` true only because the one list is rc's, before launchd. Boot tasks in order: skipped fsck, mount-phase-1, data-protection, finish-obliteration, detect-installed-roots; ran commit-boot-mode, restore-datapartition (`optional boot task not present`), init-with-data-volume; skipped the other 15 (20 skipped, exactly NAT-088's list). Last process list: rc's (2 rows). Failure-word lines after the first spawn: 2 (`minisandbox: privilege 1002 refused to logd[16] (first time)` at 227.720 s; `PMRD: getAggressiveness type 0x1 not found` at 229.322 s). CPU-monitor message lines: 0 (0 per process name; 0% of 304 timestamped lines). Ending: PID 1 exit none, panic none; the phone was in Download Mode 380.19 s after the reboot request (deadline reset). Delivery: delivered, 179.232 s, 13.813 MB/s, 296 chunks, retries 0, device rx errors/aborts/gaps/rejects/resets 0."
+ },
+ "findings": [
+  "Pre-registered result: chain row 9 / Stage A row A8. Cause on the host side is again the log: boot 1 ends when the kernel takes the USB controller; boot 2 (the loader after its timed return) carries the kernel text, 517 frames, `KL end why=2`, two ring-overrun drops took 83 of 428 records including the KL begin line. NAT-097's reader v2 recovered the dump (geometry inferred and verified) and gave the first complete reading of this kind; the row is A8 because no console-form launchd line exists in it.",
+  "The CPU-monitor flood is gone: the message `denied attempt to escape CPU monitor` occurs 0 times in 304 timestamped lines (NAT-093: 235 of 243, 234 naming lsd[21]). The only change between the two images is the missing com.apple.lsd plist, so in this run lsd was the source (it is not shown that no other daemon could produce the message).",
+  "The surviving kernel text is continuous from kernel clock 215.1 s to the last line at 268.5 s: the unsent middle (70,882 bytes) and both holes (4,896 and 3,072 bytes) lie before 216 s, at the kernel's boot banner. Absence of a line in 216-268.5 s is therefore an absence from the kernel log and not a window artifact (it does not show absence from the system: console output that never reaches the kernel log is not covered).",
+  "launchd (restore mode, as NAT-088) skipped 20 of 23 boot tasks and logged `Early boot complete. Continuing system boot.` at 217.917 s. memorystatus_update lines show pids 9-16 created at 217.328-217.350 s (eight processes in 22 ms; seven self-starting Apple jobs plus the heartbeat is eight), a second memorystatus update for pids 16, 12, 15, 14, 13 at 217.64-217.70 s and for 10, 11, 9 at 220.66-221.08 s, then pids 17 (217.82), 18 (218.41), 19 (227.42), 20 (229.09), 21 (229.84), 22 (238.40), 23 (248.44), 24 (258.48), 25 (268.52). The four last pids are 10.0 s apart, which is the ThrottleInterval of the heartbeat; that they are the heartbeat is an inference from the cadence, not an observation (no ps list came with them).",
+  "Two Apple daemons are identified by name by the kernel's own minisandbox lines: containermanager[12] (`request 16/15 allowed`, 227.93 s) and logd[16] (`privilege 1002 refused (first time)`, 227.72 s). First named Apple daemons besides lsd; the project's kernel stand-in refused logd one privilege class and the daemon went on (no exit line is in the text).",
+  "Unlike NAT-088 (three complete `ps -A` lists, launchd's own console lines and `Unable to find persona with type 6` before every spawn) this text has none of them: no `com.apple.xpc.launchd|` line, no `persona`, no `xpcproxy`, no `launchd.darwin`, one `PID TTY` list (rc's, before launchd). The difference between the two images is the 18 Apple plists (the seven self-starting jobs include logd). Hypothesis H-logd: with logd running, launchd's os_log output goes to logd instead of the console, and the jobs' console output does not reach the kernel log either. Not tested.",
+  "PMRD (kernel power management) lines at 229.05-230.73 s (power events, `SleepWake UUID queued`, aggressiveness changes) and `GenericARMPE: the slower cores started too: 1 processors running` at 244.02 s are the only other kernel activity in the window; nothing about display, IOMobileFramebuffer, IOSurface or GPU appears."
+ ],
+ "established": [
+  "native-device: the quiet Stage A image booted on the S24 to Apple's launchd in restore mode again (boot tasks as NAT-088) with the 18 Apple plists in the small root; the whole root arrived (13.81 MB/s at load 3.47), and the kernel stayed up with no panic until the timed return.",
+  "native-device: removing the com.apple.lsd job removed the CPU-monitor flood from the returned window (0 of 304 timestamped lines).",
+  "native-device: Apple's logd (pid 16) and containermanagerd (pid 12) ran on the S24 under launchd and called into the kernel's minisandbox; at least 17 processes (pids 9-25) were created between 217.3 and 268.5 s; process creation continued to the end of the window (pids at 10.0 s steps).",
+  "host-test + native-device: NAT-097's reader v2, written before this run, read a dump whose KL begin was lost and its text equals the hand reading's lines (same offsets, same holes as the post-hoc script)."
+ ],
+ "not_established": [
+  "Which of the seven self-starting daemons other than logd and containermanagerd ran, whether any is healthy or died, whether the heartbeat ran (no list came back), or why launchd's console-form lines and the lists are missing (H-logd is a hypothesis).",
+  "That launchd was alive at the end of the window other than by the continued creation of pids; no ps list, no launchd line.",
+  "Anything about backboardd, SpringBoard, display, input, GPU or a frame: none was run and none appears.",
+  "That the flood cannot return with another daemon: only lsd was removed."
+ ],
+ "disclosures": [
+  "The three pre-registered analysers were first run at about 18:15-18:17Z, while the collector was still running (its manifest.json was written 18:17Z); they gave the same rows (chain 9, A8, A8) and differed only in the reason text `collector did not finish`. Those outputs are kept as artifacts/nat-098/run-001/early-*; the rows above are from a rerun after the collector and the USB watcher had exited (watcher stop 18:17:28Z). Decision 0037 required the analysers to run after the run; the early pass is a procedural slip, with no effect on the rows.",
+  "The post-hoc reader (docs/procedures/nat-093/posthoc_boot2.py, unchanged) and the hand reading of the text were run AFTER the pre-registered analysers returned A8; the verdict rows stay chain 9 / A8. No threshold or rule was changed after the result.",
+  "Host load: 3.47 at launch, 3.79 at 18:13:54Z; the agent started no build, test or mutation process during the run and only wrote text files while the delivery was running. The NAT-099 host work (Stage B small-root builder and tests) was done in the same session before the launch; it is not part of this run.",
+  "The returned text contains the host's user name (kernel version line) and is kept only under artifacts/; docs/procedures/nat-098/kernel-text-excerpt.txt is the sanitized excerpt produced by posthoc_boot2.py (grep for the host name, home path and serial: 0 hits)."
+ ],
+ "commands": [
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-096/session_nat096.py --image loader-diag-xnu-sq-md1 --out artifacts/nat-098/preflight-001",
+   "exit": 0,
+   "note": "ready-read-only-registry-closed"
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-096/session_nat096.py --image loader-diag-xnu-sq-md1 --out artifacts/nat-098/run-001 --execute",
+   "exit": 0,
+   "note": "native-attempt-started, reboot requested 18:07:32.851Z, load 3.47 at 18:07:18Z"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py restore --bus 5 --address 21 --out artifacts/nat-098/restore-001",
+   "exit": 0,
+   "note": "awaiting-readback"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-012/check_android.py artifacts/nat-098/android-after-001.json",
+   "exit": 0,
+   "note": "outcome pass"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-098/restore-001/report.json --readback artifacts/nat-098/android-after-001.json",
+   "exit": 0,
+   "note": "outcome pass"
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-087/analyze_nat087.py --archive artifacts/nat-098/run-001/archive --events .../usb-events.jsonl --report .../report.json --delivery .../delivery/delivery.json --root artifacts/nat-083/system-padded.apfs --size 2475720704 --sha256 4377e988...62f6 --image loader-diag-xnu-sq-md1 --out .../analysis.json --log-out .../kernel-log.txt",
+   "exit": 0,
+   "note": "chain row 9"
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-097/analyze_nat097.py --archive artifacts/nat-098/run-001/archive --jobs-dir artifacts/nat-096/pid1-sq/root/LaunchDaemons --out .../analysis-nat097.json",
+   "exit": 0,
+   "note": "row A8 not-evaluated, begin inferred"
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-089/analyze_nat089.py --archive artifacts/nat-098/run-001/archive --jobs-dir artifacts/nat-096/pid1-sq/root/LaunchDaemons --out .../analysis-nat089.json",
+   "exit": 0,
+   "note": "row A8 not-evaluated"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-093/posthoc_boot2.py --archive artifacts/nat-098/run-001/archive --boot-glob '000002-*' --out-text .../kernel-log-boot2-posthoc.txt --out-excerpt .../kernel-text-excerpt.txt --out-json .../posthoc.json",
+   "exit": 0,
+   "note": "post-hoc, not a ladder row"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-098/preflight-001/report.json",
+  "artifacts/nat-098/run-001/report.json",
+  "artifacts/nat-096/native-attempt-loader-diag-xnu-sq-md1-used.json",
+  "artifacts/nat-098/launch-time.txt",
+  "artifacts/nat-098/driver-launch.out",
+  "artifacts/nat-098/run-001/usb-events.jsonl",
+  "artifacts/nat-098/run-001/delivery/delivery.json",
+  "artifacts/nat-098/run-001/delivery/delivery.jsonl",
+  "artifacts/nat-098/run-001/collector-heartbeat.jsonl",
+  "artifacts/nat-098/run-001/archive/manifest.json",
+  "artifacts/nat-098/run-001/analysis.json",
+  "artifacts/nat-098/run-001/analysis.stdout",
+  "artifacts/nat-098/run-001/analysis-nat097.json",
+  "artifacts/nat-098/run-001/analysis-nat097.stdout",
+  "artifacts/nat-098/run-001/analysis-nat089.json",
+  "artifacts/nat-098/run-001/analysis-nat089.stdout",
+  "artifacts/nat-098/run-001/kernel-log.txt",
+  "artifacts/nat-098/run-001/kernel-log-v2-marked.txt",
+  "artifacts/nat-098/run-001/kernel-log-boot2-posthoc.txt",
+  "artifacts/nat-098/run-001/posthoc.json",
+  "artifacts/nat-098/run-001/kernel-text-excerpt.txt",
+  "artifacts/nat-098/run-001/early-analysis.json",
+  "artifacts/nat-098/run-001/early-analysis-nat097.json",
+  "artifacts/nat-098/run-001/early-analysis-nat089.json",
+  "artifacts/nat-098/restore-001/report.json",
+  "artifacts/nat-098/restore-001.stdout",
+  "artifacts/nat-098/android-after-001.json",
+  "artifacts/nat-098/assess-001.stdout",
+  "devices/local-2026-11-12-nat098.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-098/preflight-001/report.json": "c086e78d79bbc37ea7ffbaeb2f52a1439fff01018ff4add6a72bb91c2d9a1287",
+  "artifacts/nat-098/run-001/report.json": "bedd1a7c636014792cf4c0cb2c430bc18341fde11ff3f089d8c0dad32f87b308",
+  "artifacts/nat-096/native-attempt-loader-diag-xnu-sq-md1-used.json": "5f6aaed6dcde7bb3fa4100f66651aae53f8b19977e10e46fc11ac8512bc2094f",
+  "artifacts/nat-098/launch-time.txt": "3168aa82e16ecfc3a92566f72ea84ec8148b65510ef84d36578746c40b27a77f",
+  "artifacts/nat-098/driver-launch.out": "d12ad542305e5ce02cd6d959972a65809ff0f4646f7a51a352c13ede3b451a03",
+  "artifacts/nat-098/run-001/usb-events.jsonl": "f3c3944ac274085619362a849658c91e945c8cfb3430aacb74f5323662aa6ed4",
+  "artifacts/nat-098/run-001/delivery/delivery.json": "2dcf7f685657a10a824613ea3734818cbce7f0d2b7595e9bc0e953199700c4a2",
+  "artifacts/nat-098/run-001/delivery/delivery.jsonl": "7170e83fd815a9c06cd9abb38746d7b9c92214144e230a824a1165207b6c0dd7",
+  "artifacts/nat-098/run-001/collector-heartbeat.jsonl": "15e0843c741c1fc8adbb3418746fc61cb4b805d31719cf6aa283038b4f87dcdf",
+  "artifacts/nat-098/run-001/archive/manifest.json": "abaa350a6ddd33676c6cb7cf5b5116b0ef60c797cc7fd55372408abda06b7e7c",
+  "artifacts/nat-098/run-001/analysis.json": "b65c73805fb76270d4ccdaf82f231a251c6b9352b7ce7aa05b960dad49fc0072",
+  "artifacts/nat-098/run-001/analysis.stdout": "b65c73805fb76270d4ccdaf82f231a251c6b9352b7ce7aa05b960dad49fc0072",
+  "artifacts/nat-098/run-001/analysis-nat097.json": "d5deab8b7dff79d2a6f279ef05dfb07ebb34947e5e39f3105f94f03a1d259f4a",
+  "artifacts/nat-098/run-001/analysis-nat097.stdout": "0a7b364a41cc99853116ddbf9b34427995fc4a57097f952f8d8f0ac35f8495ea",
+  "artifacts/nat-098/run-001/analysis-nat089.json": "6137c36d634798f927959a7f1a3dab01375ba4d99d862a78818e42e7efa63e7d",
+  "artifacts/nat-098/run-001/analysis-nat089.stdout": "495b1b9aa4bd71a074f7b372b329ff318aaf85a99d4e72d1eb9b7164deaa582c",
+  "artifacts/nat-098/run-001/kernel-log.txt": "f8b87c02e9ba84b3bf4ea1b1a923468a89877f85b1a6453b2a45a78e515268e6",
+  "artifacts/nat-098/run-001/kernel-log-v2-marked.txt": "98b06972fcca67013eb91f1868be617ed91a57429123e68d0927934663052746",
+  "artifacts/nat-098/run-001/kernel-log-boot2-posthoc.txt": "28b5f36e8bbdb0d23bb88484877a0e7a7fc5cadcd3559a12e7994b69d879efc8",
+  "artifacts/nat-098/run-001/posthoc.json": "91ccd9653042482db6bcc92ee2294bbecee14fd867f8d4571ec5f863462dc6bc",
+  "artifacts/nat-098/run-001/kernel-text-excerpt.txt": "f87976ecad6ecf24f258072d830302969867196000aeeba9d38e64c04a0a331a",
+  "artifacts/nat-098/run-001/early-analysis.json": "e31ddbde470f64219ce5f53f8a10b3b6355e18c2e170d40efebae401780eec2b",
+  "artifacts/nat-098/run-001/early-analysis-nat097.json": "d5deab8b7dff79d2a6f279ef05dfb07ebb34947e5e39f3105f94f03a1d259f4a",
+  "artifacts/nat-098/run-001/early-analysis-nat089.json": "6137c36d634798f927959a7f1a3dab01375ba4d99d862a78818e42e7efa63e7d",
+  "artifacts/nat-098/restore-001/report.json": "a461cd43eb9a838be7d0d36695c05753c9dfa73f2c1dc8c5fb122c832ac3e394",
+  "artifacts/nat-098/restore-001.stdout": "9dc8bd160c29f3ee2737f24220227ec229179ae075c9fe7977b73d4d98ed6651",
+  "artifacts/nat-098/android-after-001.json": "7fae10f0c4a7052030986168836b59df4975a98fd8c95558e96d50808425cf66",
+  "artifacts/nat-098/assess-001.stdout": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "devices/local-2026-11-12-nat098.json": "69b0188e375bc58957d601916ab0c092672652e52837035545b201ca4c5c4e8d"
+ }
+}
