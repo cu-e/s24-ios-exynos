@@ -1,0 +1,50 @@
+{
+  "kind": "source-review",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-12T07:10:00+00:00",
+  "commit": "ad210b16c5f36b13d638fe085db47615158cd3e3",
+  "owner": "claude-nat065-20261112-ramdisk",
+  "summary": "Root delivery design for the 2,475,712,512-byte donor system.apfs without Android partitions. Host arithmetic on existing records of this S24 (runtime device-tree facts, NAT-068 loader and kernel logs) and on the loader/kernel sources. Findings: the loader caps the kernel's RAM window at 512 MiB while the device tree offers a free contiguous 4908 MiB gap once touching memory nodes are merged; the NAT-068 kernel ran with 4 KiB pages (131072 pages = 512 MiB) because arm_init selects 16 KiB only above 1 GiB; the loader's MMU-off clear (75 MB/s) would take 68 s for the big window; and three independent clocks bound a run (57 s software deadline reset = planned exit to Download Mode, 83 s hardware watchdog = SEC_UPLOAD failsafe, kernel timed return untested). Recommendation: loader-staged root over a new bulk-OUT endpoint into an enlarged window, bounded receive phase, small clear; first run with no transfer (NAT-075). Child tasks NAT-074..078 registered with acceptance criteria.",
+  "evidence_category": "source-review / host arithmetic. Nothing ran on the S24 for this task. Transfer rates other than the donor's 28 MB/s figure are assumptions and are labelled so in the document. The iOS working set, 16 KiB-page boot, skipping the full clear, and the effect of a watchdog pet on this SoC are unmeasured.",
+  "acceptance": {
+    "1_ram_budget": "Met. Section 2 of the document and budget.json: 8033 MiB DRAM in 7 nodes, merged high region 6144 MiB, free gap 0x8cb800000-0x9fe400000 = 4908 MiB; replay of the loader's choose_window rule on the same facts reproduces the observed NAT-068 window (0x9de400000, 512 MiB); kernel page count 131072 = 512 MiB at 4 KiB. The root size is measured (IOS-010); the working-set margins are labelled estimates.",
+    "2_options_with_time_and_failure_modes": "Met. Section 4 compares A1 control-OUT, A2 bulk-OUT, B kernel USB block device and C smaller root for what must be written, host-testability and failure mode; section 3 gives the transfer-time table (assumed rates labelled) against the three measured/recorded bounds. The watchdog bound is taken from NAT-019/020/044/046 records; NAT-071 is not yet done and its kernel-side keepalive is named as a separate requirement.",
+    "3_recommendation_and_first_tasks": "Met. Section 5: one recommendation, NAT-074..NAT-078 with acceptance criteria, exact loader/ADT/boot-arg changes. No option uses an Android partition."
+  },
+  "corrections_made_during_review": [
+    "First draft attributed the +83.9 s reset in NAT-068 to the hardware watchdog and said the watchdog leads to Download Mode. The run records (NAT-044/046/058/068) show the software deadline reset ended those runs and that a watchdog reset gives SEC_UPLOAD; section 3 was rewritten.",
+    "Removed three figures that had no source in the repository (trial compression ratios, a /System uncompressed size, a '13 s to PID 1' offset) and a made-up RAMDisk address."
+  ],
+  "commands": [
+    {"cmd": "python3 -I docs/procedures/nat-073/budget.py docs/procedures/nat-073/budget.json", "exit": 0, "result": "budget.json regenerated, replay_of_loader_rule_matches_observed true"},
+    {"cmd": "python3 -I docs/procedures/nat-073/test_budget.py", "exit": 0, "result": "Ran 13 tests, OK"},
+    {"cmd": "python3 tools/lab.py board --check", "exit": 0, "result": "OK: planning views match the current registry"},
+    {"cmd": "TMPDIR=/home/egor/.cache/nat059-tmp make check", "exit": 0, "result": "Ran 355 tests, OK"}
+  ],
+  "sha256": {
+    "docs/strategy/2026-11-12-root-delivery.md": "fbafbc1424c400a3d4f9ad2335f1e6e7ed97006c32d91a233c1f3c8b4c6ee06b",
+    "docs/procedures/nat-073/budget.py": "b9cd202caf072bdc92d229df31e347bc804928de710ad9575059ffc5b0fd8de7",
+    "docs/procedures/nat-073/budget.json": "256428c05c041b0164bb2b58f055b8bab46bb667091677b690e49718d6adff29",
+    "docs/procedures/nat-073/test_budget.py": "c1ac755ccf2bff1e1324867618383ed014184ccae4a17995349fefbe9b817751",
+    "inputs (local, gitignored; hashes also in budget.json)": "runtime_fdt_facts b7e8cd93a6f54febfbd46b8daa952186ede49bb69acb0d7edd8eaa52af87aeb0; nat068_kernel_log cb16116895e0bfa595ca029916843fb6c42a226826dfe92fd03352a4302157b9; nat068_loader_stream 267752cc92e6399a55e561f420ef50fa95da78358495dda064936a509ebe7447"
+  },
+  "limits": [
+    "Rates for bulk-OUT and control-OUT are assumptions except the donor's 28 MB/s figure (another device and controller).",
+    "Whether the kernel boots with a 4908 MiB window and 16 KiB pages, whether skipping the full clear is safe, and whether the watchdog pet reloads the counter on this SoC are open until NAT-075.",
+    "The iOS working set against the 2427 MiB margin is not measured.",
+    "The 120 MiB kernel allowance is an estimate scaled from 81 MiB wired at 512 MiB.",
+    "The constant of the NAT-044 deadline in the NAT-067 image was not re-derived; the document uses the 57.1-57.2 s measured after enumeration."
+  ],
+  "artifacts": [
+    "docs/strategy/2026-11-12-root-delivery.md",
+    "docs/procedures/nat-073/budget.py",
+    "docs/procedures/nat-073/budget.json",
+    "docs/procedures/nat-073/test_budget.py",
+    "docs/procedures/nat-074/task.json",
+    "docs/procedures/nat-075/task.json",
+    "docs/procedures/nat-076/task.json",
+    "docs/procedures/nat-077/task.json",
+    "docs/procedures/nat-078/task.json"
+  ]
+}
