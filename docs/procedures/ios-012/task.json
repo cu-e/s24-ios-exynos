@@ -1,0 +1,29 @@
+{
+ "id": "IOS-012",
+ "title": "Audit the unpacked iOS 16.5 userland for launchd/dyld readiness: Mach-O load commands and LC_LOAD_DYLIB closure of /sbin/launchd, /usr/lib/dyld, backboardd and SpringBoard against the shared cache image list, minimum OS and platform, and the system-call stubs used by libsystem_kernel in the cache against the project kernel's syscalls.master. Read-only; uses the extracted files and, if needed, a pip-installed Mach-O parser in a venv.",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 96,
+ "depends_on": [
+  "IOS-009"
+ ],
+ "paths": [
+  "docs/procedures/ios-012",
+  "tools/ios/macho_audit.py",
+  "tests/test_macho_audit.py"
+ ],
+ "sources": [],
+ "acceptance": [
+  "For each of the four programs the report lists load commands, platform/minos, dyld info type, imported libraries, and which of them are present in the dyld shared cache image list; missing items are named.",
+  "The system-call numbers invoked by the cache's libsystem_kernel stubs are listed and compared with the project kernel's table; every mismatch is named, and the result is labelled as a static comparison, not a runtime test.",
+  "Dyld's expectations of the kernel (commpage fields, shared-region mapping, entitlements and code-signing checks it queries) are listed from the extracted binaries and tied to the IOS-003 rows."
+ ],
+ "steps": [
+  "Parse the four programs",
+  "Map the closure to the cache",
+  "Compare syscall numbers",
+  "Write the report"
+ ],
+ "status": "pending",
+ "owner": null
+}

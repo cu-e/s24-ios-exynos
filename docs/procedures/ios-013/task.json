@@ -1,0 +1,26 @@
+{
+ "id": "IOS-013",
+ "title": "Can the iOS 16.5 graphics stack present a first frame without a full GPU driver? Source and static review of the extracted backboardd/SpringBoard/QuartzCore/IOMobileFramebuffer path and the donor Mesa/OSMesa route (HackiOS GL=1) against the project's MiniIOMobileFramebuffer/MiniIOSurface; no software rendering is promised.",
+ "scope": "host",
+ "evidence_kind": "source-review",
+ "priority": 90,
+ "depends_on": [
+  "IOS-009"
+ ],
+ "paths": [
+  "research/notes/IOS-013-first-frame-without-gpu.md"
+ ],
+ "sources": [],
+ "acceptance": [
+  "The note traces, with file or image-name evidence, what backboardd needs from the kernel to put a frame on a panel (IOMobileFramebuffer calls, IOSurface, a renderer) and which of these the project kernel's stand-ins implement or lack.",
+  "It states what the donor path (OpenGL ES through Mesa/OSMesa, boot-arg gpu) proves on its own hardware and what it leaves open here; claims stay claims.",
+  "It names the cheapest observation on the S24 that would decide whether a frame can be presented without a GPU, and what can be prepared on the host."
+ ],
+ "steps": [
+  "Trace the display path",
+  "Read the donor GL route",
+  "Write the note"
+ ],
+ "status": "pending",
+ "owner": null
+}

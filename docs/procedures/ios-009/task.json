@@ -1,0 +1,30 @@
+{
+ "id": "IOS-009",
+ "title": "Select the iOS 16.5 userland preparation route by reusing donor tools: record the variants checked and why each was kept or rejected, extend the pinned hakios review files with the unpack/select/mkapfs recipe, and run the donor sysimage/unpack.sh unmodified on the owner's IPSW (staged copy, pinned files hash-checked).",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 99,
+ "depends_on": [
+  "IOS-003"
+ ],
+ "paths": [
+  "research/notes/IOS-009-userland-recipe-selection.md",
+  "research/sources.json",
+  "tools/ios/stage_hakios_recipe.py",
+  "docs/procedures/ios-009"
+ ],
+ "sources": [],
+ "acceptance": [
+  "The note lists every variant checked (own readers, stock 7-Zip, HackiOS recipe, y2sios, ios-lemonadep, ios-apollo, unused tools) with how it was checked and why it was adopted, kept as reference or rejected; provenance and licences of the adopted tools are stated and tools/sources.py verify hakios is clean after the review list was widened (append only).",
+  "The donor unpack.sh ran unmodified from a staged copy of the pinned files on the owner's IPSW (size 6165698198) with exit 0; the note records the numbers it printed and the presence of /sbin/launchd, /usr/lib/dyld, backboardd and SpringBoard, and says that presence is not compatibility.",
+  "The note names the confirmed gaps where own code is justified (each with the observation that confirms it) and what is not established; the registry is updated to the chosen path."
+ ],
+ "steps": [
+  "Check variants",
+  "Widen the pin and stage the recipe",
+  "Run unpack.sh",
+  "Write the note and update the registry"
+ ],
+ "status": "pending",
+ "owner": null
+}

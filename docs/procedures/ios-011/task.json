@@ -1,0 +1,29 @@
+{
+ "id": "IOS-011",
+ "title": "Build the PID 1 chain for the payload kernel with the project's own freestanding arm64 toolchain: add userland/libmini to the pinned review files, build stage0 (as /sbin/launchd), init, etc/rc (rc.launchd) and the mkjobs.py job set, and make the small root.apfs (md1) with mkapfs.py. Replaces the donor's xnu-clang/Theos build only where this host lacks it; the sources stay the donor's.",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 97,
+ "depends_on": [
+  "IOS-009"
+ ],
+ "paths": [
+  "docs/procedures/ios-011",
+  "tools/ios/build_pid1_chain.py",
+  "research/sources.json"
+ ],
+ "sources": [],
+ "acceptance": [
+  "The donor sources used (stage0.c, init.c, libmini, rc.launchd, mkjobs.py) are pinned review files; each deviation from the donor build (compiler, linker, flags) is listed with the reason.",
+  "stage0 and init are static arm64 Mach-O executables whose load commands, entry point and imports are listed by an independent reader and contain no dynamic dependency; root.apfs is produced by mkapfs.py and read back by apfs-tool.",
+  "The evidence is host-test only: nothing ran on the phone and nothing says the kernel mounts it."
+ ],
+ "steps": [
+  "Widen review files",
+  "Build with project toolchain",
+  "Make root.apfs",
+  "Check with independent reader"
+ ],
+ "status": "pending",
+ "owner": null
+}

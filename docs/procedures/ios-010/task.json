@@ -1,0 +1,31 @@
+{
+ "id": "IOS-010",
+ "title": "Build the resident root image with the donor tools: userland/build.sh system step reproduced on the host (hard-link sysroot from the unpacked rootfs, cryptex trees and dyld cache, launchd moved to launchd.darwin, LaunchDaemons link), tools/apfs/mkapfs.py -z, then tools/apfs/check-image.sh (apfsck at its pinned commit plus the kernel's apfs_lib). Records the real image size against the donor's 2.5 GB claim and the RAM/USB budget.",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 98,
+ "depends_on": [
+  "IOS-009",
+  "IOS-011"
+ ],
+ "paths": [
+  "docs/procedures/ios-010",
+  "tools/ios/build_system_image.py",
+  "research/sources.json"
+ ],
+ "sources": [],
+ "acceptance": [
+  "apfsprogs (linux-apfs, GPL-2.0, checker only) is pinned at a full SHA in research/sources.json with its licence notes and verified; no script from it other than the project-reviewed build of apfsck is run.",
+  "system.apfs is produced from the IOS-009 unpack tree by the unmodified pinned mkapfs.py; apfsck exits clean and apfs-tool reads every volume back; the size, file count, compressed-versus-raw split and build time are recorded.",
+  "The evidence states the figure against the donor's 2.5 GB claim, the 96 MiB recovery slot and the USB budget in NAT-073, without presenting the image as bootable."
+ ],
+ "steps": [
+  "Pin apfsprogs",
+  "Compose sysroot",
+  "Run mkapfs.py",
+  "Check the image",
+  "Record size and budget"
+ ],
+ "status": "pending",
+ "owner": null
+}
