@@ -1,0 +1,145 @@
+
+=== init: process 1, started as /redwood/sbin/init ===
+Darwin 22.5.0 iPhone10,3
+memory 4096 MB, page size 16384, 1 cpu
+
+[ ok ] sysctl: kernel identifies itself
+
+-- writable filesystem --
+[ ok ] mount a memory filesystem on /private/var
+  110 directories, 0 files
+[ ok ] create the directories of the data volume
+
+-- read-only filesystem --
+  drwxr-xr-x  2        0 /redwood/bin
+  drwxr-xr-x  2        0 /redwood/sbin
+  drwxr-xr-x  2        0 /redwood/etc
+  drwxr-xr-x  2        0 /redwood/LaunchDaemons
+  drwxr-xr-x  2        0 /redwood/share
+  -rwxr-xr-x  1    34520 /redwood/bin/child
+  -rwxr-xr-x  1    52408 /redwood/sbin/init
+  -rw-r--r--  1     4813 /redwood/etc/var.skel
+  -rw-r--r--  1      709 /redwood/etc/rc
+  -rw-r--r--  1       86 /redwood/etc/motd
+  -rw-r--r--  1      457 /redwood/LaunchDaemons/com.apple.notifyd.plist
+  -rw-r--r--  1      377 /redwood/LaunchDaemons/com.apple.syslogd.plist
+  -rw-r--r--  1      692 /redwood/LaunchDaemons/com.apple.containermanagerd.system.plist
+  -rw-r--r--  1      285 /redwood/LaunchDaemons/com.apple.mobilegestalt.xpc.plist
+  -rw-r--r--  1      861 /redwood/LaunchDaemons/com.apple.logd.plist
+  -rw-r--r--  1      377 /redwood/LaunchDaemons/com.apple.cfprefsd.xpc.daemon.plist
+  -rw-r--r--  1      530 /redwood/LaunchDaemons/com.apple.cfprefsd.xpc.daemon.system.plist
+  -rw-r--r--  1      270 /redwood/LaunchDaemons/com.apple.pluginkit.pkd.plist
+  -rw-r--r--  1      400 /redwood/LaunchDaemons/com.apple.fseventsd.plist
+  -rw-r--r--  1     1218 /redwood/LaunchDaemons/com.nat085.ps.plist
+  -rw-r--r--  1      475 /redwood/LaunchDaemons/com.apple.diagnosticd.plist
+  -rw-r--r--  1      488 /redwood/LaunchDaemons/com.apple.powerd.plist
+  -rw-r--r--  1      926 /redwood/LaunchDaemons/com.apple.containermanagerd.plist
+  -rw-r--r--  1      424 /redwood/LaunchDaemons/com.apple.iconservices.iconservicesagent.plist
+  -rw-r--r--  1      504 /redwood/LaunchDaemons/com.apple.analyticsd.plist
+  -rw-r--r--  1      616 /redwood/LaunchDaemons/com.apple.distnoted.xpc.daemon.plist
+  -rw-r--r--  1      792 /redwood/LaunchDaemons/com.apple.lsd.plist
+  -rw-r--r--  1      415 /redwood/LaunchDaemons/com.apple.logd_helper.plist
+  -rw-r--r--  1      636 /redwood/LaunchDaemons/com.apple.mobile.usermanagerd.plist
+  -rw-r--r--  1      412 /redwood/LaunchDaemons/com.apple.runningboardd.plist
+  -rw-r--r--  1   300000 /redwood/share/pattern.bin
+[ ok ] walk our image (readdir, lstat, readlink)
+[ ok ] the system image has the dynamic linker
+  etc/motd: Darwin userland 16.5 on the S24 project: image built by tools/ios/build_pid1_chain.py
+[ ok ] read a small file
+[ ok ] follow a symlink to a directory
+[ ok ] missing file gives ENOENT
+[ ok ] creating a file gives EROFS
+[ ok ] read a 300 KB file and verify every byte
+[ ok ] seek into the middle and read
+[ ok ] mmap the file and verify every byte (page-in)
+
+-- writing files --
+[ ok ] create a file, write 100 KB, read it back
+[ ok ] overwrite in the middle
+[ ok ] append
+[ ok ] truncate, then extend: the new part reads as zeros
+[ ok ] rename
+[ ok ] hard link, remove the first name
+[ ok ] a removed file stays usable while it is open
+[ ok ] symbolic link
+[ ok ] directories: nest, refuse to remove a full one, rename, remove
+[ ok ] shared mapping: what is stored through memory is seen by read()
+[ ok ] and what write() stores is seen through the mapping
+[ ok ] bind a local socket to a name
+[ ok ] 300 files in one directory: create, list, remove
+  lrwxr-xr-x  1       15 /tmp/t/symlink -> some/where else
+  -rw-------  1    65536 /tmp/t/mapped
+  srwxr-xr-x  1        0 /tmp/t/socket
+
+-- memory --
+[ ok ] 64 MB of anonymous memory: touch every page, read it back
+[ ok ] unmap it
+
+-- processes --
+[ ok ] fork
+  child: pid 2, parent 1, 3 arguments: [/redwood/bin/child] [one] [two]
+  child: environment: [GREETING=hello from init]
+[ ok ] exec a second program from the image, collect its exit status
+[ ok ] pipe from a child process
+
+-- devices --
+  (the /dev listing is omitted here)
+[ ok ] devfs is mounted on /dev
+[ ok ] /dev/zero
+[ ok ] /dev/null
+  /dev/random: 5c e6 3c 96 3b c2 46 e7 40 87 e6 5a 8a 59 92 d8
+[ ok ] /dev/random
+
+-- time --
+  slept 200 ms, the clock advanced 206 ms
+[ ok ] sleep and wall clock agree
+
+=== 35 checks, 0 failed ===
+init: up to 32768 vnodes
+
+=== /redwood/etc/rc ===
+
+$ /bin/df
+Filesystem  512-blocks    Used Available Capacity iused ifree %iused  Mounted on
+root_device    4835376 4813576         0   100%   61589     0  100%   /
+devfs               78      78         0   100%     136     0  100%   /dev
+/dev/md0          8192     144         0   100%      31     0  100%   /redwood
+ramfs          2097152      64   2097088     1%     120 65416    0%   /private/var
+
+$ /sbin/mount
+root_device on / (apfs, local, read-only)
+devfs on /dev (devfs, local, nobrowse)
+/dev/md0 on /redwood (apfs, local, read-only)
+ramfs on /private/var (ramfs, local)
+
+$ /bin/ps -A
+  PID TTY           TIME CMD
+    1 ??         0:00.11 /redwood/sbin/init
+    6 ??         0:00.01 /bin/ps -A
+
+$ /usr/bin/vm_stat
+Mach Virtual Memory Statistics: (page size of 16384 bytes)
+Pages free:                              104459.
+Pages active:                               550.
+Pages inactive:                              55.
+Pages speculative:                         1382.
+Pages throttled:                              0.
+Pages wired down:                        155574.
+Pages purgeable:                              2.
+"Translation faults":                      5042.
+Pages copy-on-write:                         66.
+Pages zero filled:                         4208.
+Pages reactivated:                            0.
+Pages purged:            
+
+#### the surviving tail, reduced (offsets and the missing ranges: posthoc.json)
+kernel clock 254.1017967 s .. 276.656153 s; 243 timestamped lines, 235 of them `process lsd[21] denied attempt to escape CPU monitor (missing required entitlement).`
+  1 x [T]: memorystatus_update(enter): pid 26, priority 210, dirty=0x0, Active(-1MB NF), Inactive(-1MB, NF)
+  1 x [T]: memorystatus_update: init: limit on pid 26 (-1MB F ) targeting priority(210) dirty?=0x0 
+  1 x [T]: memorystatus_update(enter): pid 26, priority 30, dirty=0x0, Active(-1MB NF), Inactive(-1MB, NF)
+  1 x [T]: memorystatus_update: init: limit on pid 26 (-1MB F ) targeting priority(30) dirty?=0x0 
+  1 x [T]: memory: free 857, files 640, programs 35, wired 2561 (0 surfaces 0, ramfs 113), compressor 0 (holding 0) MB; available 1497, kills below 165 (the idle) and 82 (anybody)
+  1 x [T]: memorystatus_update(enter): pid 27, priority 210, dirty=0x0, Active(-1MB NF), Inactive(-1MB, NF)
+  1 x [T]: memorystatus_update: init: limit on pid 27 (-1MB F ) targeting priority(210) dirty?=0x0 
+  1 x [T]: memorystatus_update(enter): pid 27, priority 30, dirty=0x0, Active(-1MB NF), Inactive(-1MB, NF)
+  1 x [T]: memorystatus_update: init: limit on pid 27 (-1MB F ) targeting priority(30) dirty?=0x0 

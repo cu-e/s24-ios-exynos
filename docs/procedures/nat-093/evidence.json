@@ -1,0 +1,131 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "inconclusive",
+ "recorded_at": "2026-11-12T17:14:25+00:00",
+ "commit": "0344d11674ad04fffda9662f493b98f0ec3b25f7",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "decision": "docs/decisions/0036-nat092-loader-diag-xnu-sb-md1-single-run-2026-11-12.md",
+ "device_inventory": "devices/local-2026-11-12-nat093.json",
+ "summary": "loader-diag-xnu-sb-md1 (the documented Stage A re-run) ran once on the S24 (decision 0036, RECOVERY only, restored from the pinned stock, Android checked). The pre-registered analysers, run unchanged, give chain row 9 and Stage A row A8 (not evaluated): the kernel text of the run sits in the collector's second boot and the `KL begin` record of that dump was lost to a ring-overrun drop, so NAT-089's reader finds no dump with text. What the run did show, by the delivery journal and by a post-hoc reading of the surviving records (outside the pre-registered rows): the whole 2,475,720,704-byte root arrived (179.5 s, 13.79 MB/s, device counters without errors; host 1-minute load average 3.89 at launch), so the NAT-091 shortfall did not recur; the kernel mounted it, init passed 35/35 and df, mount, ps and vm_stat printed (no EIO); and Apple's own `lsd` ran as pid 21 under launchd and printed `denied attempt to escape CPU monitor (missing required entitlement)` about 10 times a second (235 of the 243 timestamped lines in the surviving tail, 234 of them naming lsd[21]; kernel clock 254.1-276.7 s). The flood fills the 32 KiB tail window, so the launchd lines, the `ps -A` lists and every other daemon's output are in the 129,137-byte middle that the dump format does not send. No daemon other than lsd is shown to have run; the ladder rows A1-A7 cannot be evaluated.",
+ "acceptance": {
+  "1_run_and_restore": "One run under decision 0036 (commit 0344d11 before the launch): host 1-minute load average 3.89 at launch (no agent build/test/mutation process, checked by ps; another workload's Java process was running at 170-240% CPU of one core); RECOVERY written once, reboot requested 2026-11-12T16:59:23.146Z; the loader appeared +19.4 s; its 360 s deadline returned the phone to Download Mode (`SAMSUNG USB`, +380.4 s on the watcher's clock); NAT-013 restore at 17:05:58Z with the pyusb venv python (bus 5 address 17), Android up 17:06:38Z; check_android outcome pass, assess outcome pass (RECOVERY readback equals the pinned stock, user data directories present). One-shot marker created; no retry.",
+  "2_analysers": "analyze_nat087.py: chain row 9 (chain-verdict-not-pass: PARTIAL because the archive has 2 boots of this image and the collector's manifest says incomplete: 3 capture errors, 2 drops). analyze_nat089.py: row A8 not-evaluated (`no why=2 kernel-log dump with text in the archive`). Both run unchanged after the collector and watcher exited (600 s).",
+  "3_row_other_than_A1": "Recorded as the finding; task NOT completed (a non-pass outcome)."
+ },
+ "findings": [
+  "Delivery: 2,475,720,704 of 2,475,720,704 bytes, sha256 equal to the root's (4377e988...62f6), 179.5 s, 13.79 MB/s, 296 chunks, retries 0, device rx_errors/aborts/gaps/rejects/resets 0. NAT-091's 91.82% at 10.10 MB/s did not recur on a host with a 1-minute load average of 3.89 (it was ~30 then): consistent with host load being the cause, not proven.",
+  "Log transport: boot 1 = 189 records until +254.85 s (then `unresponsive`, as in earlier runs: the kernel took the USB controller); boot 2 (the loader after its timed return) at +285 s = 517 frames, `KL end why=2 recs=428 bytes=40960`. 83 of the 428 records (7,968 bytes) were lost to 2 producer-reported ring-overrun drops (collector: 205 start failures, 1280 timeouts, 10,716 transfers), among them the `KL begin` record and the first 50 tail records. The same pattern as NAT-088's second boot; NAT-089's reader needs `begin` and therefore yields no dump.",
+  "Post-hoc reading (docs/procedures/nat-093/posthoc_boot2.py, written after the result; not a ladder row): the dump length is 170,097 bytes (end of the last record; geometry matches the end line's 428 records), head 8,192 bytes complete (init, the 35 checks, df, mount, ps, vm_stat up to `Pages purged:`), tail range 137,329-170,097 with 345 of 428 records present: 0x21871-0x22b31 and 0x23851-0x244b1 missing.",
+  "Apple's lsd ran: the kernel prints `process lsd[21] denied attempt to escape CPU monitor (missing required entitlement).` 234 times in the 22.5 s of surviving tail (kernel clock 254.10-276.66 s), ~10 per second. The message is the printf in osfmk/kern/task_policy.c (apple-xnu reference) that a non-entitled task triggers by asking for a CPU monitor above the global cap (percentage above proc_max_cpumon_percentage, default 50, or an interval above proc_max_cpumon_interval, default 180 s); the kernel clamps the values and goes on, so the message is noise, not a failure, but it is repeated by lsd and fills the log window.",
+  "The 8 KiB head ends inside rc's vm_stat output, i.e. before launchd; launchd's own lines, the xpcproxy spawn lines, boot tasks and every other daemon's output are in the 129,137-byte middle of the log (170,097 - 8,192 - 32,768) that the dump does not send. The heartbeat's `ps -A` lists are not in the surviving window either (two memorystatus enter events for pids 26 and 27 at kernel clock 259.31 s and 269.37 s, 10.06 s apart, match the heartbeat's 10 s throttle but are not shown to be it).",
+  "In the surviving 25 KiB of tail there is no panic line and no PID 1 exit line (kernel clock up to 276.66 s); that is an absence in a window with holes, not a negative."
+ ],
+ "established": [
+  "The whole root was delivered and the kernel booted on it: init 35 checks 0 failed; df/mount/ps/vm_stat printed, no EIO (head text).",
+  "An Apple daemon other than launchd (`lsd`, pid 21, name from the kernel's proc name; its plist com.apple.lsd is in the small root and it is not one of the seven self-starting jobs) executed on the S24 under launchd and called into the kernel (the CPU-monitor request). First Apple daemon seen to run on this kernel.",
+  "The run happened as described; the phone is back on the stock RECOVERY with Android and user data intact."
+ ],
+ "not_established": [
+  "Whether the seven self-starting Apple jobs ran, which other daemons ran or died, whether PID 1 was alive at the end: the launchd lines and the process lists are in the unsent middle or in the lost records.",
+  "Why lsd repeats the request ten times a second (a retry loop, a failed XPC lookup, or its normal behaviour under this kernel); that the flood is the only thing hiding the rest (the middle is 129 KB; the flood alone, ~100 B per line at ~10 lines/s, is about 1 KB/s).",
+  "That the host load caused the NAT-091 shortfall."
+ ],
+ "disclosures": [
+  "The post-hoc reader and the lsd reading were written AFTER the pre-registered analysers returned A8; the verdict rows stay chain 9 / A8. No threshold was changed after the result.",
+  "Another workload's Java process (170-240% of one core) and two small services were running on the host during the run; the 1-minute load average was 3.89 at launch and about 4 during the delivery (monitor samples 3.3-4.6).",
+  "Decision 0036's idle-host condition (load average below 6, no agent build/test/mutation process) held at launch (3.89; ps checked)."
+ ],
+ "commands": [
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-092/session_nat092.py --image loader-diag-xnu-sb-md1 --out artifacts/nat-092/preflight-001",
+   "exit": 0,
+   "note": "ready-read-only"
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-092/session_nat092.py --image loader-diag-xnu-sb-md1 --out artifacts/nat-092/run-001 --execute",
+   "exit": 0,
+   "note": "native-attempt-started, reboot requested 16:59:23.146Z"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py restore --bus 5 --address 17 --out artifacts/nat-092/restore-001",
+   "exit": 0,
+   "note": "awaiting-readback"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-012/check_android.py artifacts/nat-092/android-after-001.json",
+   "exit": 0,
+   "note": "outcome pass"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-092/restore-001/report.json --readback artifacts/nat-092/android-after-001.json",
+   "exit": 0,
+   "note": "outcome pass"
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-087/analyze_nat087.py --archive artifacts/nat-092/run-001/archive --events .../usb-events.jsonl --report .../report.json --delivery .../delivery/delivery.json --root artifacts/nat-083/system-padded.apfs --size 2475720704 --sha256 4377e988... --image loader-diag-xnu-sb-md1 --out .../analysis.json --log-out .../kernel-log.txt",
+   "exit": 0,
+   "note": "chain row 9"
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-089/analyze_nat089.py --archive artifacts/nat-092/run-001/archive --jobs-dir artifacts/nat-089/pid1-stageA/root/LaunchDaemons --out .../analysis-nat089.json",
+   "exit": 0,
+   "note": "row A8 not-evaluated"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-093/posthoc_boot2.py --archive artifacts/nat-092/run-001/archive --boot-glob '000002-*' --out-text .../kernel-log-boot2-posthoc.txt --out-excerpt docs/procedures/nat-093/kernel-text-excerpt.txt --out-json docs/procedures/nat-093/posthoc.json",
+   "exit": 0,
+   "note": "post-hoc, not a ladder row"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-092/preflight-001/report.json",
+  "artifacts/nat-092/run-001/report.json",
+  "artifacts/nat-092/native-attempt-loader-diag-xnu-sb-md1-used.json",
+  "artifacts/nat-092/load-at-launch.txt",
+  "artifacts/nat-092/launch-time.txt",
+  "artifacts/nat-092/run-001/usb-events.jsonl",
+  "artifacts/nat-092/run-001/delivery/delivery.json",
+  "artifacts/nat-092/run-001/delivery/delivery.jsonl",
+  "artifacts/nat-092/run-001/collector-heartbeat.jsonl",
+  "artifacts/nat-092/run-001/analysis.json",
+  "artifacts/nat-092/run-001/analysis.stdout",
+  "artifacts/nat-092/run-001/analysis-nat089.json",
+  "artifacts/nat-092/run-001/analysis-nat089.stdout",
+  "artifacts/nat-092/run-001/kernel-log.txt",
+  "artifacts/nat-092/run-001/kernel-log-boot2-posthoc.txt",
+  "artifacts/nat-092/run-001/posthoc.stdout",
+  "artifacts/nat-092/restore-001/report.json",
+  "artifacts/nat-092/android-after-001.json",
+  "artifacts/nat-092/assess-001.stdout",
+  "devices/local-2026-11-12-nat093.json",
+  "docs/procedures/nat-093/posthoc_boot2.py",
+  "docs/procedures/nat-093/posthoc.json",
+  "docs/procedures/nat-093/kernel-text-excerpt.txt"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-092/preflight-001/report.json": "46e12f0a427ae0ec30ae0c6b996945e641f07ef856874785ea27701fc8c6c63e",
+  "artifacts/nat-092/run-001/report.json": "bc4ed720aadb57d1c12ecc9c8ef76d5d9d0658b315440a5609196643e4ba958a",
+  "artifacts/nat-092/native-attempt-loader-diag-xnu-sb-md1-used.json": "bd5dfb42539a58442388ca69210931e99d6b7d25774ca83ca3acb9439be4cbbd",
+  "artifacts/nat-092/load-at-launch.txt": "c1ba7557f8e00e5da59c7edcd55233e3c41914ad61d639bf8e86ce7d84f0ecb2",
+  "artifacts/nat-092/launch-time.txt": "d95b1aadb91e8144439d926fe4c4e855dbfdc872a75e0b4b3ec58ff96d821abc",
+  "artifacts/nat-092/run-001/usb-events.jsonl": "8a33a8f3bcc62c695451b2266058baad325dac5f1c94e0b95659dc357411546b",
+  "artifacts/nat-092/run-001/delivery/delivery.json": "04f9fe4731d506c6c8cfc06420e67de93bd499d04afecb6a8bc2e3132e0aa6fe",
+  "artifacts/nat-092/run-001/delivery/delivery.jsonl": "981550850321d553b4a289152e3b0000d97065b690327cfda7eea7c8d7d795ae",
+  "artifacts/nat-092/run-001/collector-heartbeat.jsonl": "beaebcd7abba0d2dd4fe59e941418d75469bf6792cb4e99a6ae211a498975e32",
+  "artifacts/nat-092/run-001/analysis.json": "d513f1f4c36580faa75bf24361a0ef7af60e8ca43fa7340d02b10b7e7d8e881f",
+  "artifacts/nat-092/run-001/analysis.stdout": "d513f1f4c36580faa75bf24361a0ef7af60e8ca43fa7340d02b10b7e7d8e881f",
+  "artifacts/nat-092/run-001/analysis-nat089.json": "6137c36d634798f927959a7f1a3dab01375ba4d99d862a78818e42e7efa63e7d",
+  "artifacts/nat-092/run-001/analysis-nat089.stdout": "495b1b9aa4bd71a074f7b372b329ff318aaf85a99d4e72d1eb9b7164deaa582c",
+  "artifacts/nat-092/run-001/kernel-log.txt": "f8b87c02e9ba84b3bf4ea1b1a923468a89877f85b1a6453b2a45a78e515268e6",
+  "artifacts/nat-092/run-001/kernel-log-boot2-posthoc.txt": "b8c0c5fac59515be196974bf5803b8cbc85a7caee0f17cf8aa0a1b7a9b0ea40d",
+  "artifacts/nat-092/run-001/posthoc.stdout": "7ebcaff423577b3c195fd1642f08442f714021fe3c2a9909dc13510d98bb810e",
+  "artifacts/nat-092/restore-001/report.json": "89dc39405820226f934dd1fb85fb81a1f4ab97a5e20d33275ff437ec976d4518",
+  "artifacts/nat-092/android-after-001.json": "5877a38d2c2c24f93506b5c79d7ec147cc4a37813a6ab81a62bff2f829778774",
+  "artifacts/nat-092/assess-001.stdout": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "devices/local-2026-11-12-nat093.json": "4942b2a6af2ec73d5637a5bb23b1ad1a4973505ef30144a343fe02a4e316211c",
+  "docs/procedures/nat-093/posthoc_boot2.py": "fbc240ba711d010d9e1ef9e04b18ffa7adb51315714a478d00c8ed1360f39c85",
+  "docs/procedures/nat-093/posthoc.json": "f39533c85ad986b32e713d3494327ccc7ab92cd311d6f42413f4f26a9a3e0fd3",
+  "docs/procedures/nat-093/kernel-text-excerpt.txt": "fbce2b8a1b18787c57d34f409145f10b091ec7b598dfb02e90ec3a14a71e42be"
+ }
+}
