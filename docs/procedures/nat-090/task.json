@@ -1,0 +1,18 @@
+{
+  "id": "NAT-090",
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "priority": 97,
+  "depends_on": ["NAT-089"],
+  "title": "Stage A image: NAT-087's restore-mode image with NAT-089's small root (19 Apple LaunchDaemons plists from the donor set minus wifid, backboardd and SpringBoard, plus the ps -A heartbeat) as md0; build, package, derive the session driver, tests over the payload byte for byte against NAT-087's, mutation pass, decision draft with the pre-registered A1-A8 table",
+  "paths": ["docs/procedures/nat-090", "artifacts/nat-090"],
+  "sources": ["s24-port"],
+  "acceptance": [
+    "The built payload equals NAT-087's byte for byte except the command-line tag (NAT090-sa1) and the 4 MiB md0 region, which equals NAT-089's Stage A small root (sha256 recorded); the loader differs only in the words that encode the image name; the packaged RECOVERY and payload hashes are recorded.",
+    "The small root's source tree holds exactly the 19 Apple plists of NAT-089's job table plus the heartbeat, each with the recorded sha256, its label and program; the stock `Disabled` keys (syslogd true; two feature-flag conditionals) are listed and the analyser's self-starting set excludes disabled jobs.",
+    "A session driver derived from NAT-087's by counted substitutions (derive90.py --check), tests, a mutation pass over build.py and derive90.py, and a decision draft with every hash recomputed and the A1-A8 ladder fixed in advance. Nothing here measures the phone."
+  ],
+  "steps": ["Build and package the image", "Derive the driver", "Tests and mutation pass", "Decision"],
+  "status": "pending",
+  "owner": null
+}
