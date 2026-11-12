@@ -1,0 +1,169 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-12T04:43:50+00:00",
+ "commit": "5a65789cfa5614ac05dbe5366995a962d8ab1cc9",
+ "tree_state": "all files listed under sha256 except task.json were uncommitted at recording time and are committed in the commit that follows this record; the recorded commit is its parent",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "summary": "A bulk-OUT receive path for root delivery as a variant of the NAT-041 DWC3 engine (freestanding C, 16363 bytes of text for aarch64), its model, 227 engine tests, the resumable host sender tools/ios/root_send.py with 93 tests, and a mutation pass of 1010 candidates (901 valid, 865 killed, 36 survivors, each examined and recorded as equivalent with a reason). Nothing was run on the phone; the model is one reading of the vendor driver; no host-to-phone rate was measured.",
+ "acceptance": {
+  "1_engine_and_model_tests": "docs/procedures/nat-076/test_rx.py: 227 tests, exit 0 (artifacts/nat-076/logs/test-rx.stderr). Seeded defects: short packet, TRB error, bus error, residual-only, the three 'all bytes arrive but only one failure indicator is reported' cases, host disconnect/bus reset mid-transfer, duplicate offset, gap, wrong length, flags, capacity, plus 38 engine-source mutations in SeededDefectTests. Endpoint and register values are re-read from the pinned vendor headers (references/s24-linux at 417484173abc2c4fa93e738ea82ad9f2e84911b1) by test_dwc3_constants_match_the_pinned_vendor_headers, and that check is itself tested with a wrong value. Endpoint-lifecycle tests check the exact command sequence, resource indices, DALEPENA writes and ring-slot contents, and that the engine's and the controller's record of an active transfer agree.",
+  "2_sender": "tools/ios/root_send.py: sends by offset with bounded write size (--write-size, multiple of 512), resumes after an injected failure (BUSERR, TRB error, short packet, host disconnect, lost status read), refuses a file whose size is not a multiple of 16 KiB before any I/O, refuses unaligned base/chunk/write size, and prints the byte count the device reports (committed, rx_bytes, rx_trbs, rx_errors). 93 tests in tests/test_root_send.py, exit 0, run in make check (448 tests, exit 0). The tests drive the real engine through the model and derive expected values from the protocol and device counters, not from sender arithmetic; a mutation pass over the sender killed 434 of 442 valid mutants.",
+  "3_mutation_pass": "docs/procedures/nat-076/mutate_rx.py, final run artifacts/nat-076/mutation-run5/mutation.json (copy: docs/procedures/nat-076/mutation.json): usbmon.c 560 candidates, 101 invalid, 431 killed (3 by timeout), 28 survived; root_send.py 450 candidates, 8 invalid, 434 killed (5 by timeout), 8 survived. survived_unexplained 0 for both: the 36 survivors are listed with reasons in docs/procedures/nat-076/equivalent.json. No native run was made in this task; the host-to-phone rate is left to NAT-078."
+ },
+ "findings": [
+  "Mutation triage found an engine defect: a bus reset arriving while an ENDTRANSFER was pending made rx_end issue a second ENDTRANSFER (model violation 'ENDTRANSFER on ep 2 with no transfer started'). Fixed in engine/usbmon.c (rx_end returns while rx_end_pending, as the vendor dwc3_stop_active_transfer does); regression test test_a_reset_while_an_end_is_pending_does_not_end_the_transfer_twice_and_nothing_restarts_afterwards.",
+  "Mutation triage found a second defect: an XferComplete while nothing was armed left the endpoint enabled with no transfer started, so the next RX_BEGIN would have sent UPDATETRANSFER to an ended endpoint. The engine now starts a fresh empty transfer (tests: ..._is_replaced_by_a_fresh_one and the failing-start variant). The real controller is not expected to produce that event.",
+  "The two terms !rx_end_pending and !rx_restart of the stray-completion guard imply each other; each can be removed alone without a test failing (checked by hand; the mutation tool does not delete single terms of a condition)."
+ ],
+ "established": [
+  "Against the model, the engine enumerates, enables the bulk-OUT endpoint with the vendor command sequence, accepts strictly sequential chunks by RX_BEGIN/bulk/GET_RX, commits a chunk only after status OK, residual 0 and no short/bus-error bit, publishes offset/length/checksum of the last chunk, fails and restarts the endpoint on every injected fault without committing, survives bus resets and reconnects with the committed offset intact, and keeps the NAT-041 requests working (CompatibilityTests).",
+  "In staged mode the CPU copy into the destination is verified against a destination pre-filled with 0xEE; in direct mode lost DMA writes from a chosen offset are noticed through the checksum read back from the destination.",
+  "The engine builds with zig cc -target aarch64-freestanding -ffreestanding -fno-builtin -O2 -Wall -Wextra -Werror (exit 0, 16363 bytes of text, no undefined symbols).",
+  "The sender sends, resumes, refuses and reports as listed in acceptance 2, against the same model.",
+  "make check passes with the new tests (448 tests, exit 0)."
+ ],
+ "not_established": [
+  "Anything about the S24: that its DWC3 behaves as the model does (event ordering, short-packet behaviour at the end of a TRB, UPDATETRANSFER while a transfer is active), that the PHY and clocks are in the state the loader leaves them for bulk traffic, or that the endpoint enumerates on the real bus.",
+  "NAT-040 item U5: whether DWC3 DMA reaches the 2.31 GiB reservation above 4 GiB behind the S2MPU/PMMU. Staged mode (DMA into a loader page below 4 GiB, CPU copy) is the default for that reason; the CPU copy still needs the reservation to be mapped for the loader, which NAT-078 must check by writing and reading back a pattern before trusting any count.",
+  "The host-to-phone rate (2.31 GiB in 120 s needs at least 20.6 MB/s sustained, including the CPU copy), watchdog feeding while the loader serves bulk transfers for minutes (NAT-071), and pyusb reset() plus set_configuration(1) on a real disconnect (the tests use a fake usb.core).",
+  "That the model is faithful: it is my reading of the vendor driver. The mutation pass shows these tests notice changes to the engine and sender; it does not mutate the model.",
+  "The loader does not contain this engine yet; the receive path was never linked into the loader (NAT-078).",
+  "The mutation script's own exit status for run 5 was not captured (it ran detached); the result is the file mutation.json with survived_unexplained 0."
+ ],
+ "commands": [
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-076/test_rx.py"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; stderr artifacts/nat-076/logs/test-rx.stderr: Ran 227 tests, OK"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests",
+    "-p",
+    "test_root_send.py"
+   ],
+   "exit_code": 0,
+   "note": "stderr artifacts/nat-076/logs/test-root-send.stderr: Ran 93 tests, OK"
+  },
+  {
+   "argv": [
+    "zig",
+    "cc",
+    "-target",
+    "aarch64-freestanding",
+    "-ffreestanding",
+    "-fno-builtin",
+    "-fno-stack-protector",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-c",
+    "-I",
+    "docs/procedures/nat-076/engine",
+    "docs/procedures/nat-076/engine/usbmon.c",
+    "-o",
+    "artifacts/nat-076/logs/usbmon-aarch64.o"
+   ],
+   "exit_code": 0,
+   "note": "size: text 16363, data 0, bss 0"
+  },
+  {
+   "argv": [
+    "python3",
+    "-I",
+    "docs/procedures/nat-076/mutate_rx.py",
+    "--out",
+    "artifacts/nat-076/mutation-run5",
+    "--jobs",
+    "10"
+   ],
+   "exit_code": null,
+   "note": "run detached with nohup; exit status not captured; log artifacts/nat-076-mutation-run5.log; result artifacts/nat-076/mutation-run5/mutation.json"
+  },
+  {
+   "argv": [
+    "make",
+    "check"
+   ],
+   "exit_code": 0,
+   "note": "TMPDIR=/home/egor/.cache/nat059-tmp; artifacts/nat-076/logs/make-check.exit; 448 tests OK in the unittest discovery step"
+  }
+ ],
+ "sha256": {
+  "docs/procedures/nat-076/README.md": "08d6ed3d9d403d944604f7ba1cfc7670234c9d45c309900dab8f92d12773d6e3",
+  "docs/procedures/nat-076/cdefs.py": "c48268496f04e750d8e96f819bf52c6d2fc9263b43f40542ac1ecee328288a27",
+  "docs/procedures/nat-076/equivalent.json": "2dd6c931256baf31c40575740b4f26928cbf7d1f9d99d15a65a916ca77605c70",
+  "docs/procedures/nat-076/modelhost.py": "9b064fadcf072856e4eee9009b7731b704b0fe3c06e05b971d7e272aab49c82b",
+  "docs/procedures/nat-076/mutate_rx.py": "a124a587afcd490a2daabc06eae1b6edce7a3bc2a34df66ff97abc523cf1f7d0",
+  "docs/procedures/nat-076/mutation.json": "022a8e140d2652989de4e9643efbe519db2ab9e0afd601f544db7b034410708d",
+  "docs/procedures/nat-076/test_rx.py": "be97616d617f273aa1fc3eab76095d5d768d7c9478107b28a2e7c8008b13b74d",
+  "docs/procedures/nat-076/task.json": "7a38512154f3314138cf52861d2d6ced6b053e94389c7daeef43794ca8e74b5e",
+  "docs/procedures/nat-076/engine/dwc3_regs.h": "d5751778ba50fc85390da5fb7dbec723b8cf39377cb8d6873a4b22ac55069db3",
+  "docs/procedures/nat-076/engine/port_aarch64.h": "ad105fa449f24fa7b87c4c2c0b114e2abf55d47aa09499e0bb655e081285e302",
+  "docs/procedures/nat-076/engine/usbmon.c": "5915a5d8a1f9e7595570096e396e2bc4185021e5c9786c759ce8d8b63bbd9505",
+  "docs/procedures/nat-076/engine/usbmon.h": "b9496be67af84b86aca17c310ba5ab4463448b1fcd8f2383d5f246e728f5c09b",
+  "docs/procedures/nat-076/engine/usbmon_port.h": "915d5de8bb073d0e4f10ed6eed1df166b8260f9f9d1b766dfed2401da067354c",
+  "docs/procedures/nat-076/model/host_port.h": "136981a3c7a9a08e7956b7950c5893dd2eab6de8764f773f43a7d4eec8c3a5da",
+  "docs/procedures/nat-076/model/model.c": "ae4bbeb6c921c8d57bfef0c67e361ea46f863124ae13d0a46c1a944bb9ceeef5",
+  "tools/ios/root_send.py": "a07b9ba94a2b5c37723cac76439a305669d4825042d2e2c520e76a66b83e69ef",
+  "tests/test_root_send.py": "22bf60f8184451372a9d75973645a48ddb46e5ff3320770677bf8ef793f3edaf"
+ },
+ "artifacts": [
+  "docs/procedures/nat-076/README.md",
+  "docs/procedures/nat-076/cdefs.py",
+  "docs/procedures/nat-076/equivalent.json",
+  "docs/procedures/nat-076/modelhost.py",
+  "docs/procedures/nat-076/mutate_rx.py",
+  "docs/procedures/nat-076/mutation.json",
+  "docs/procedures/nat-076/test_rx.py",
+  "docs/procedures/nat-076/task.json",
+  "docs/procedures/nat-076/engine/dwc3_regs.h",
+  "docs/procedures/nat-076/engine/port_aarch64.h",
+  "docs/procedures/nat-076/engine/usbmon.c",
+  "docs/procedures/nat-076/engine/usbmon.h",
+  "docs/procedures/nat-076/engine/usbmon_port.h",
+  "docs/procedures/nat-076/model/host_port.h",
+  "docs/procedures/nat-076/model/model.c",
+  "tools/ios/root_send.py",
+  "tests/test_root_send.py",
+  "artifacts/nat-076/mutation-run5/mutation.json",
+  "artifacts/nat-076-mutation-run5.log",
+  "artifacts/nat-076/mutation-run4/mutation.json",
+  "artifacts/nat-076/mutation-run3/mutation.json",
+  "artifacts/nat-076/mutation-run2/mutation.json",
+  "artifacts/nat-076/mutation-run1/mutation.json",
+  "artifacts/nat-076/logs/test-rx.stderr",
+  "artifacts/nat-076/logs/test-root-send.stderr",
+  "artifacts/nat-076/logs/usbmon-aarch64.o",
+  "artifacts/nat-076/logs/make-check.stdout",
+  "artifacts/nat-076/logs/make-check.stderr",
+  "artifacts/nat-076/logs/make-check.exit"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-076/mutation-run5/mutation.json": "ad9933c29b9685bed4d12e1538d41cb9560897e649287d81a1f75ef43e18c277",
+  "artifacts/nat-076-mutation-run5.log": "bc31de707cc09b3743282f2cd9720a14ab3f31d8a3d3d6e598c1133eacc2402c",
+  "artifacts/nat-076/mutation-run4/mutation.json": "21d260a46d981cd89689abd97b01f617cd8fa5a529bedec8b74d5b1c60f0da4c",
+  "artifacts/nat-076/mutation-run3/mutation.json": "30138c13209c03b71a73f61dad9246aede8f8d0476e5b5c48556656714fcf7e4",
+  "artifacts/nat-076/mutation-run2/mutation.json": "4b7b6a2088f541c1c7345d566027de462fac97558234157a3a0f563a7bc9ac70",
+  "artifacts/nat-076/mutation-run1/mutation.json": "8638d6a89d1e8a170a9948ca2c34b2a1a7cfcbcef319b4815a1aa79e4778f0e4",
+  "artifacts/nat-076/logs/test-rx.stderr": "63ee2662981e179600cf1539db3ef71b95159dcf5317a164d1c3bf91151bfb75",
+  "artifacts/nat-076/logs/test-root-send.stderr": "9c28f7556c6adfbfb78dabb5e045808c95de1dbcce8a8626e6b190e74f9fb31f",
+  "artifacts/nat-076/logs/usbmon-aarch64.o": "a3ced579db78e04e6f7aa7b1f631911d753db811d387684955283d26fe1c5c6d",
+  "artifacts/nat-076/logs/make-check.stdout": "d62369d99883c026c032b4f7a6f2bc9b74644b77db212eb7505ab7bf15a94d13",
+  "artifacts/nat-076/logs/make-check.stderr": "a141df627475e03b398830a2115598fa0b2ba1d32ee5014b0372d1ec7b21bde8",
+  "artifacts/nat-076/logs/make-check.exit": "684f663f82c1799758624c87f292e22b92d1f2215b53477cb2fcb6dd52711f02"
+ }
+}

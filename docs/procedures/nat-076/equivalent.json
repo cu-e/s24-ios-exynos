@@ -1,0 +1,206 @@
+[
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 383,
+  "desc": "statement deleted",
+  "reason": "after the loop above, t already points at slot USBMON_RX_TRBS - 1; the statement assigns the same pointer again"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 408,
+  "desc": "literal 1 -> 2",
+  "reason": "the field is only ever tested for truth, so 2 behaves as 1"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 438,
+  "desc": "literal 1 -> 2",
+  "reason": "the field is only ever tested for truth, so 2 behaves as 1"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 464,
+  "desc": "literal 1 -> 2",
+  "reason": "the field is only ever tested for truth, so 2 behaves as 1"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 477,
+  "desc": "literal 0 -> 1",
+  "reason": "the resource index of the receive endpoint is read only while a transfer is started (rx_end, rx_begin) and every STARTTRANSFER stores it again (dep_cmd); resetting it is hygiene, a stale value is never observed"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 477,
+  "desc": "statement deleted",
+  "reason": "the resource index of the receive endpoint is read only while a transfer is started (rx_end, rx_begin) and every STARTTRANSFER stores it again (dep_cmd); resetting it is hygiene, a stale value is never observed"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 479,
+  "desc": "condition forced true",
+  "reason": "ENDTRANSFER is issued only by rx_disable (which clears rx_enabled) and rx_restart (which sets rx_restart), so a completion with rx_restart clear always has rx_enabled clear and the inner rx_enabled test already prevents the restart"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 498,
+  "desc": "literal 24 -> 0",
+  "reason": "a non-zero byte 11 makes the length at least 2**24 (above every chunk limit) in the real engine and a value that is not a multiple of 512 in the mutant; both are refused with the same counter (rx_rejects) and the same stall, and a zero byte 11 reads the same either way"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 499,
+  "desc": "literal 16 -> 0",
+  "reason": "flags is only tested as flags != 0; moving a byte to another position inside the 32-bit word can neither hide a non-zero byte nor make a zero byte non-zero"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 499,
+  "desc": "literal 16 -> 17",
+  "reason": "flags is only tested as flags != 0; moving a byte to another position inside the 32-bit word can neither hide a non-zero byte nor make a zero byte non-zero"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 499,
+  "desc": "literal 24 -> 0",
+  "reason": "flags is only tested as flags != 0; moving a byte to another position inside the 32-bit word can neither hide a non-zero byte nor make a zero byte non-zero"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 499,
+  "desc": "literal 8 -> 0",
+  "reason": "flags is only tested as flags != 0; moving a byte to another position inside the 32-bit word can neither hide a non-zero byte nor make a zero byte non-zero"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 499,
+  "desc": "literal 8 -> 9",
+  "reason": "flags is only tested as flags != 0; moving a byte to another position inside the 32-bit word can neither hide a non-zero byte nor make a zero byte non-zero"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 503,
+  "desc": "literal 1 -> 2",
+  "reason": "rx_begin's result is only tested for non-zero by its caller (the EP0 handler stalls on any non-zero value); -1 and -2 are the same refusal"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 507,
+  "desc": "literal 1 -> 2",
+  "reason": "rx_begin's result is only tested for non-zero by its caller (the EP0 handler stalls on any non-zero value); -1 and -2 are the same refusal"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 511,
+  "desc": "literal 1 -> 2",
+  "reason": "rx_begin's result is only tested for non-zero by its caller (the EP0 handler stalls on any non-zero value); -1 and -2 are the same refusal"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 515,
+  "desc": "literal 1 -> 2",
+  "reason": "rx_begin's result is only tested for non-zero by its caller (the EP0 handler stalls on any non-zero value); -1 and -2 are the same refusal"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 534,
+  "desc": "literal 1 -> 2",
+  "reason": "rx_begin's result is only tested for non-zero by its caller (the EP0 handler stalls on any non-zero value); -1 and -2 are the same refusal"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 633,
+  "desc": "literal 0 -> 1",
+  "reason": "the resource index of the receive endpoint is read only while a transfer is started (rx_end, rx_begin) and every STARTTRANSFER stores it again (dep_cmd); resetting it is hygiene, a stale value is never observed"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 633,
+  "desc": "statement deleted",
+  "reason": "the resource index of the receive endpoint is read only while a transfer is started (rx_end, rx_begin) and every STARTTRANSFER stores it again (dep_cmd); resetting it is hygiene, a stale value is never observed"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 662,
+  "desc": "literal 0 -> 1",
+  "reason": "bit 0 is USBMON_RXF_PRESENT, which fill_rx always sets (GET_RX is served only when the receive path is present), so OR-ing 1 into the else branch of the PRESENT or the ENABLED term changes nothing; the else branch of the PRESENT term is unreachable"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 663,
+  "desc": "literal 0 -> 1",
+  "reason": "bit 0 is USBMON_RXF_PRESENT, which fill_rx always sets, so OR-ing 1 into the else branch of the DIRECT term changes nothing"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 982,
+  "desc": "<= -> <",
+  "reason": "the preceding conjunct fixes c.length at 16 and the EP0 maximum packet size is 64, so the comparison has the same result with < and <="
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 1144,
+  "desc": "literal 1 -> 2",
+  "reason": "the argument 'lost' is only tested for truth in rx_disable"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 1157,
+  "desc": "literal 1 -> 2",
+  "reason": "the argument 'lost' is only tested for truth in rx_disable"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 1302,
+  "desc": "literal 1 -> 2",
+  "reason": "the field is only ever tested for truth, so 2 behaves as 1"
+ },
+ {
+  "file": "docs/procedures/nat-076/engine/usbmon.c",
+  "line": 1305,
+  "desc": "literal 1 -> 2",
+  "reason": "the field is only ever tested for truth, so 2 behaves as 1"
+ },
+ {
+  "file": "tools/ios/root_send.py",
+  "line": 90,
+  "desc": "condition forced false",
+  "reason": "the pure-Python path computes the same sum as the numpy path (the checksum vectors are tested through both); the choice is only about speed"
+ },
+ {
+  "file": "tools/ios/root_send.py",
+  "line": 93,
+  "desc": "statement deleted",
+  "reason": "the numpy branch then falls through to the pure-Python computation, which gives the same value; only speed differs"
+ },
+ {
+  "file": "tools/ios/root_send.py",
+  "line": 99,
+  "desc": "literal 0 -> 1",
+  "reason": "size 1 is not a multiple of 16 KiB and is refused by the next test; 0 and 1 are refused either way"
+ },
+ {
+  "file": "tools/ios/root_send.py",
+  "line": 132,
+  "desc": "statement deleted",
+  "reason": "self.dev = None in __init__ is overwritten by _open() on the next line; it only declares the attribute"
+ },
+ {
+  "file": "tools/ios/root_send.py",
+  "line": 222,
+  "desc": "literal 0 -> 1",
+  "reason": "chunk 1 and write size 1 are not multiples of 512 and are refused by the following test; the same SizeError either way"
+ },
+ {
+  "file": "tools/ios/root_send.py",
+  "line": 242,
+  "desc": "<= -> <",
+  "reason": "off == base is already accepted by the first conjunct (off != base is false), so base <= off and base < off differ only where the outer test is already satisfied"
+ },
+ {
+  "file": "tools/ios/root_send.py",
+  "line": 262,
+  "desc": "statement deleted",
+  "reason": "rx is assigned by the first loop iteration, and with poll_limit 0 the for-else raises before rx is read; the initial None is never read"
+ }
+]
