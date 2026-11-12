@@ -1,0 +1,135 @@
+# NAT-088: launchd text of the run of loader-diag-xnu-rm-md1 (decision 0034), extracted by hand from the kernel-log dump (why=2) of the SECOND boot in the collector archive.
+# Provenance: native-device observation, post-hoc extraction (NOT a ladder result: the pre-registered analyser refused this boot as a replay because the ring lost 3,338 bytes).
+# Order: ascending dump offset, which is ring order and NOT chronological; every line carries its own timestamp (kernel seconds in [..] for System Event lines, launchd's clock otherwise).
+# Only lines that come from launchd, libignition or the ps job are kept; kernel lines (which contain the host user name) are not. The dump had a 16,705-byte gap between head and tail, so earlier launchd lines are NOT in this text.
+  PID TTY           TIME CMD
+    1 ??         0:00.11 /redwood/sbin/init
+    6 ??         0:00.01 /bin/ps -A
+$ exec /sbin/launchd.darwin
+Darwin Ignition Sequence Version 1.0.0: Mon Apr 24 20:19:10 PDT 2023; root:libignition-51~1538/libignition_core/RELEASE_ARM64
+libignition: 1: arguments           :
+libignition: 1:   ignition level    : 0x5
+libignition: 1:   force dylib root  : 0x0
+libignition: 1:   halt after stage  : n/a
+libignition: 1: ignition blob not available
+libignition: 1: configuration         :
+libignition: 1:   program             : launchd.darwin
+libignition: 1:   os environment      : n/a
+libignition: 1:   rd                  : md1
+libignition: 1:   arp0                : n/a
+libignition: 1:   rp                  : n/a
+libignition: 1:   pivot src           : n/a
+libignition: 1:   root ramdisk        : 0x0
+libignition: 1:   restore             : 0x0
+libignition: 1:   root device info    : 0x0
+libignition: 1:   can haz debugger    : 0x1
+libignition: 1:   rootfs mount flags  : 0x4005001
+libignition: 1:   ecid                : 0x0
+libignition: 1:   hardware target     :
+[... gap: 16705 bytes of the kernel buffer not returned by the dump ...]
+ctive: com.nat085.ps
+com.apple.xpc.launchd|1970-01-01 00:03:34.151951 (user/501/com.nat085.ps [11]) <Notice>: service state: not running
+com.apple.xpc.launchd|1970-01-01 00:03:34.151971 (user/501/com.nat085.ps) <Notice>: Service only ran for 0 seconds. Pushing respawn out by 10 seconds.
+com.apple.xpc.launchd|1970-01-01 00:03:34.152098 (user/501/com.nat085.ps) <Notice>: internal event: WILL_SPAWN, code = 0
+com.apple.xpc.launchd|1970-01-01 00:03:34.152164 (user/501/com.nat085.ps) <Notice>: service state: spawn scheduled
+com.apple.xpc.launchd|1970-01-01 00:03:34.152179 (user/501/com.nat085.ps) <Notice>: service throttled by 10 seconds
+com.apple.xpc.launchd|1970-01-01 00:03:34.152315 (pid/11 [ps]) <Notice>: shutting down
+com.apple.xpc.launchd|1970-01-01 00:03:34.152331 (pid/11 [ps]) <Notice>: cleaning up
+com.apple.xpc.launchd|1970-01-01 00:03:34.152352 (system) <Notice>: removing child: pid/11
+com.apple.xpc.launchd|1970-01-01 00:03:44.156274 (user/501/com.nat085.ps) <Notice>: service state: spawning
+com.apple.xpc.launchd|1970-01-01 00:03:44.156321 <Warning>: kpersona_find_by_type() failed with ret -1 errno 3 - No such process
+com.apple.xpc.launchd|1970-01-01 00:03:44.156330 (user/501) <Error>: Unable to find persona with type 6: 3 - No such process
+com.apple.xpc.launchd|1970-01-01 00:03:44.156345 (user/501/com.nat085.ps) <Notice>: launching: inefficient
+com.apple.xpc.launchd|1970-01-01 00:03:44.159344 (user/501/com.nat085.ps [12]) <Notice>: xpcproxy spawned with pid 12
+com.apple.xpc.launchd|1970-01-01 00:03:44.159383 (user/501/com.nat085.ps [12]) <Notice>: internal event: SPAWNED, code = 0
+com.apple.xpc.launchd|1970-01-01 00:03:44.159400 (user/501/com.nat085.ps [12]) <Notice>: service state: xpcproxy
+com.apple.xpc.launchd|1970-01-01 00:03:44.159417 (user/501/com.nat085.ps [12]) <Notice>: deferred event: domain spawn response: 0
+com.apple.xpc.launchd|1970-01-01 00:03:44.159439 (user/501/com.nat085.ps [12]) <Notice>: internal event: SOURCE_ATTACH, code = 0
+com.apple.xpc.launchd|1970-01-01 00:03:44.173759 <Warning>: kpersona_find_by_type() failed with ret -1 errno 3 - No such process
+com.apple.xpc.launchd|1970-01-01 00:03:44.173789 (user/501) <Error>: Unable to find persona with type 6: 3 - No such process
+com.apple.xpc.launchd|1970-01-01 00:03:44.177250 (user/501/com.nat085.ps [12]) <Notice>: service state: running
+com.apple.xpc.launchd|1970-01-01 00:03:44.177289 (user/501/com.nat085.ps [12]) <Notice>: internal event: INIT, code = 0
+com.apple.xpc.launchd|1970-01-01 00:03:44.177309 (user/501/com.nat085.ps [12]) <Notice>: Successfully spawned ps[12] because inefficient
+com.apple.xpc.launchd|1970-01-01 00:03:44.182664 (pid/12 [ps]) <Notice>: uncorking exec source upfront
+com.apple.xpc.launchd|1970-01-01 00:03:44.182702 (pid/12 [ps]) <Notice>: created
+  PID TTY           TIME CMD
+    1 ??         0:00.35 /sbin/launchd.darwin
+   12 ??         0:00.01 /bin/ps -A
+com.apple.xpc.launchd|1970-01-01 00:03:44.187625 (user/501/com.nat085.ps [12]) <Notice>: exited due to exit(0)
+com.apple.xpc.launchd|1970-01-01 00:03:44.187654 (user/501/com.nat085.ps [12]) <Notice>: service state: exited
+com.apple.xpc.launchd|1970-01-01 00:03:44.187673 (user/501/com.nat085.ps [12]) <Notice>: internal event: EXITED, code = 0
+com.apple.xpc.launchd|1970-01-01 00:03:44.187682 (user/501) <Notice>: service inactive: com.nat085.ps
+com.apple.xpc.launchd|1970-01-01 00:03:44.187700 (user/501/com.nat085.ps [12]) <Notice>: service state: not running
+com.apple.xpc.launchd|1970-01-01 00:03:44.187720 (user/501/com.nat085.ps) <Notice>: Service only ran for 0 seconds. Pushing respawn out by 10 seconds.
+com.apple.xpc.launchd|1970-01-01 00:03:44.187846 (user/501/com.nat085.ps) <Notice>: internal event: WILL_SPAWN, code = 0
+com.apple.xpc.launchd|1970-01-01 00:03:44.187911 (user/501/com.nat085.ps) <Notice>: service state: spawn scheduled
+com.apple.xpc.launchd|1970-01-01 00:03:44.187926 (user/501/com.nat085.ps) <Notice>: service throttled by 10 seconds
+com.apple.xpc.launchd|1970-01-01 00:03:44.188053 (pid/12 [ps]) <Notice>: shutting down
+com.apple.xpc.launchd|1970-01-01 00:03:44.188070 (pid/12 [ps]) <Notice>: cleaning up
+com.apple.xpc.launchd|1970-01-01 00:03:44.188091 (system) <Notice>: removing child: pid/12
+com.apple.xpc.launchd|1970-01-01 00:03:54.192869 (user/501/com.nat085.ps) <Notice>: service state: spawning
+com.apple.xpc.launchd|1970-01-01 00:03:54.192914 <Warning>: kpersona_find_by_type() failed with ret -1 errno 3 - No such process
+com.apple.xpc.launchd|1970-01-01 00:03:54.192923 (user/501) <Error>: Unable to find persona with type 6: 3 - No such process
+com.apple.xpc.launchd|1970-01-01 00:03:54.192938 (user/501/com.nat085.ps) <Notice>: launching: inefficient
+com.apple.xpc.launchd|1970-01-01 00:03:54.195860 (user/501/com.nat085.ps [13]) <Notice>: xpcproxy spawned with pid 13
+com.apple.xpc.launchd|1970-01-01 00:03:54.195898 (user/501/com.nat085.ps [13]) <Notice>: internal event: SPAWNED, code = 0
+com.apple.xpc.launchd|1970-01-01 00:03:54.195916 (user/501/com.nat085.ps [13]) <Notice>: service state: xpcproxy
+com.apple.xpc.launchd|1970-01-01 00:03:54.195934 (user/501/com.nat085.ps [13]) <Notice>: deferred event: domain spawn response: 0
+com.apple.xpc.launchd|1970-01-01 00:03:54.195956 (user/501/com.nat085.ps [13]) <Notice>: internal event: SOURCE_ATTACH, code = 0
+com.apple.xpc.launchd|1970-01-01 00:03:54.210167 <Warning>: kpersona_find_by_type() failed with ret -1 errno 3 - No such process
+com.apple.xpc.launchd|1970-01-01 00:03:54.210197 (user/501) <Error>: Unable to find persona with type 6: 3 - No such process
+com.apple.xpc.launchd|1970-01-01 00:03:54.213545 (user/501/com.nat085.ps [13]) <Notice>: service state: running
+com.apple.xpc.launchd|1970-01-01 00:03:54.213584 (user/501/com.nat085.ps [13]) <Notice>: internal event: INIT, code = 0
+com.apple.xpc.launchd|1970-01-01 00:03:54.213603 (user/501/com.nat085.ps [13]) <Notice>: Successfully spawned ps[13] because inefficient
+com.apple.xpc.launchd|1970-01-01 00:03:54.218992 (pid/13 [ps]) <Notice>: uncorking exec source upfront
+com.apple.xpc.launchd|1970-01-01 00:03:54.219029 (pid/13 [ps]) <Notice>: created
+  PID TTY           TIME CMD
+    1 ??         0:00.37 /sbin/launchd.darwin
+   13 ??         0:00.01 /bin/ps -A
+com.apple.xpc.launchd|1970-01-01 00:03:54.223961 (user/501/com.nat085.ps [13]) <Notice>: exited due to exit(0)
+com.apple.xpc.launchd|1970-01-01 00:03:54.223990 (user/501/com.nat085.ps [13]) <Notice>: service state: exited
+com.apple.xpc.launchd|1970-01-01 00:03:54.224009 (user/501/com.nat085.ps [13]) <Notice>: internal event: EXITED, code = 0
+com.apple.xpc.launchd|1970-01-01 00:03:54.224018 (user/501) <Notice>: service inactive: com.nat085.ps
+com.apple.xpc.launchd|1970-01-01 00:03:54.224036 (user/501/com.nat085.ps [13]) <Notice>: service state: not running
+com.apple.xpc.launchd|1970-01-01 00:03:54.224055 (user/501/com.nat085.ps) <Notice>: Service only ran for 0 seconds. Pushing respawn out by 10 seconds.
+com.apple.xpc.launchd|1970-01-01 00:03:54.224180 (user/501/com.nat085.ps) <Notice>: internal event: WILL_SPAWN, code = 0
+com.apple.xpc.launchd|1970-01-01 00:03:54.224245 (user/501/com.nat085.ps) <Notice>: service state: spawn scheduled
+com.apple.xpc.launchd|1970-01-01 00:03:54.224259 (user/501/com.nat085.ps) <Notice>: service throttled by 10 seconds
+com.apple.xpc.launchd|1970-01-01 00:03:54.224387 (pid/13 [ps]) <Notice>: shutting down
+com.apple.xpc.launchd|1970-01-01 00:03:54.224404 (pid/13 [ps]) <Notice>: cleaning up
+com.apple.xpc.launchd|1970-01-01 00:03:54.224425 (system) <Notice>: removing child: pid/13
+com.apple.xpc.launchd|1970-01-01 00:04:04.227431 (user/501/com.nat085.ps) <Notice>: service state: spawning
+com.apple.xpc.launchd|1970-01-01 00:04:04.227475 <Warning>: kpersona_find_by_type() failed with ret -1 errno 3 - No such process
+com.apple.xpc.launchd|1970-01-01 00:04:04.227484 (user/501) <Error>: Unable to find persona with type 6: 3 - No such process
+com.apple.xpc.launchd|1970-01-01 00:04:04.227499 (user/501/com.nat085.ps) <Notice>: launching: inefficient
+com.apple.xpc.launchd|1970-01-01 00:04:04.230491 (user/501/com.nat085.ps [14]) <Notice>: xpcproxy spawned with pid 14
+com.apple.xpc.launchd|1970-01-01 00:04:04.230528 (user/501/com.nat085.ps [14]) <Notice>: internal event: SPAWNED, code = 0
+com.apple.xpc.launchd|1970-01-01 00:04:04.230544 (user/501/com.nat085.ps [14]) <Notice>: service state: xpcproxy
+com.apple.xpc.launchd|1970-01-01 00:04:04.230561 (user/501/com.nat085.ps [14]) <Notice>: deferred event: domain spawn response: 0
+com.apple.xpc.launchd|1970-01-01{"at_offset":21093,"lost_bytes":3338,"reason":"ring-overrun"}
+[... {"at_offset":21093,"lost_bytes":3338,"reason":"ring-overrun"} ...]
+[  193.730621]: [System Event] [4959065237] [INFO] [Subsystem: launchd] [Event: fsck] Skipping boot-task
+[  193.731371]: [System Event] [4959084076] [INFO] [Subsystem: launchd] [Event: mount-phase-1] Skipping boot-task
+[  193.732123]: [System Event] [4959102877] [INFO] [Subsystem: launchd] [Event: data-protection] Skipping boot-task
+[  193.732870]: [System Event] [4959121525] [INFO] [Subsystem: launchd] [Event: finish-obliteration] Skipping boot-task
+[  193.733619]: [System Event] [4959140270] [INFO] [Subsystem: launchd] [Event: detect-installed-roots] Skipping boot-task
+[  193.734367]: [System Event] [4959159004] [INFO] [Subsystem: launchd] [Event: commit-boot-mode] Doing boot task
+[  193.735653]: [System Event] [4959191141] [INFO] [Subsystem: launchd] [Event: restore-datapartition] Doing boot task
+[  193.736440]: [System Event] [4959210756] [INFO] [Subsystem: launchd] [Event: restore-datapartition] optional boot task not present
+[  193.737187]: [System Event] [4959229478] [INFO] [Subsystem: launchd] [Event: mount-phase-2] Skipping boot-task
+[  193.737929]: [System Event] [4959248047] [INFO] [Subsystem: launchd] [Event: init-with-data-volume] Doing boot task
+[  193.738669]: [System Event] [4959266534] [INFO] [Subsystem: launchd] [Event: MSUEarlyBootTask] Skipping boot-task
+[  193.739406]: [System Event] [4959284983] [INFO] [Subsystem: launchd] [Event: fips] Skipping boot-task
+[  193.740156]: [System Event] [4959303723] [INFO] [Subsystem: launchd] [Event: keybag] Skipping boot-task
+[  193.740899]: [System Event] [4959322303] [INFO] [Subsystem: launchd] [Event: usermanagerd] Skipping boot-task
+[  193.741635]: [System Event] [4959340696] [INFO] [Subsystem: launchd] [Event: dirs_cleaner] Skipping boot-task
+[  193.742945]: [System Event] [4959373445] [INFO] [Subsystem: launchd] [Event: xpcroleaccountd] Skipping boot-task
+[  193.743725]: [System Event] [4959392927] [INFO] [Subsystem: launchd] [Event: init_featureflags] Skipping boot-task
+[  193.744518]: [System Event] [4959412757] [INFO] [Subsystem: launchd] [Event: auearlyboot] Skipping boot-task
+[  193.745278]: [System Event] [4959431783] [INFO] [Subsystem: launchd] [Event: tzinit] Skipping boot-task
+[  193.746045]: [System Event] [4959450934] [INFO] [Subsystem: launchd] [Event: finish-restore] Skipping boot-task
+[  193.746811]: [System Event] [4959470088] [INFO] [Subsystem: launchd] [Event: finish-demo-restore] Skipping boot-task
+[  193.747577]: [System Event] [4959489238] [INFO] [Subsystem: launchd] [Event: sysstatuscheck] Skipping boot-task
+[  193.748344]: [System Event] [4959508418] [INFO] [Subsystem: launchd] [Event: prng_seedctl] Skipping boot-task
+[  193.749655]: [System Event] [4959541185] [INFO] [Subsystem: launchd] [Event: launchd_cache_loader] Skipping boot-task
+[  193.752018]: [System Event] [4959600220] [INFO] [Subsystem: launchd] [Event: boot] Early boot complete. Continuing system boot.

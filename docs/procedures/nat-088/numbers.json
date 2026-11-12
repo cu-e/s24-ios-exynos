@@ -1,0 +1,122 @@
+{
+ "run": {
+  "image": "loader-diag-xnu-rm-md1",
+  "decision": "docs/decisions/0034-nat087-loader-diag-xnu-rm-md1-single-run-2026-11-12.md",
+  "recovery_sha256": "8827c97e365809932d5b9238913efbd72c13ae1d6ab3fb17394604e7eca1e667",
+  "reboot_requested_at": "2026-11-12T13:08:24.547277+00:00",
+  "delivery": {
+   "outcome": "delivered",
+   "committed": 2475720704,
+   "mb_per_s": 15.855
+  },
+  "first_usb_return": {
+   "dt_s": 379.72,
+   "class": "download",
+   "analyser_class": "cap-reset"
+  },
+  "collector": {
+   "boots": 2,
+   "records_boot1": 187,
+   "records_boot2": 583,
+   "capture_errors": [
+    "start-failed",
+    "producer-reported-drop",
+    "producer-reported-drop"
+   ],
+   "ring_overrun_lost_bytes": 3338
+  },
+  "timeline_utc": {
+   "delivery_started": "13:08:43",
+   "first_checkpoint": "13:11:32.7",
+   "last_checkpoint_of_boot1": "13:11:44.5 (n=27)",
+   "usb_stream_of_boot1_ends": "13:12:15.4 (UsbTimeout)",
+   "boot2_first_record": "13:12:45.6",
+   "boot2_checkpoints_1_to_28": "13:12:47.0-13:12:47.3 (replayed ring, not live)"
+  }
+ },
+ "analysis": {
+  "analyser": "docs/procedures/nat-087/analyze_nat087.py",
+  "sha256": "b3fa68b39fafe0309f225ca5e07fd1a95ec90c0154de724543ca9f59a0a907d7",
+  "verdict": "PARTIAL",
+  "chain_row": 9,
+  "chain_name": "chain-verdict-not-pass",
+  "restore_row": 9,
+  "restore_name": "not-evaluated",
+  "reasons": [
+   "2 boots of this image in the archive (the loader restarted?)",
+   "the collector's manifest says 'incomplete' with 3 capture error(s): start-failed, producer-reported-drop, producer-reported-drop",
+   "the collector counted 2 drop(s)",
+   "NO RETURN: the kernel did not hand control back after checkpoint 21 (no reason-0 arrival before the stream ended): the final dump is all the text there is"
+  ],
+  "replay_refusal": "boot 000002 does not start at device sequence 0 or is not contiguous: it is not a replay",
+  "early_analysis_note": "run on 2026-11-12T13:16Z while the collector and watcher were still running (they stop at 600 s); kept as early-analysis.*; the same analyser was rerun on the complete archive and gave the same rows"
+ },
+ "hand_reading_beyond_the_ladder": {
+  "source": "kernel-log dump why=2 (len=57665: head 8192 + gap 16705 + tail 32768) in boot 2 of the archive, records sorted by dump offset, text of 38,240 characters returned; 3,338 bytes lost to a ring overrun",
+  "skipped_boot_tasks": [
+   "fsck",
+   "mount-phase-1",
+   "data-protection",
+   "finish-obliteration",
+   "detect-installed-roots",
+   "mount-phase-2",
+   "MSUEarlyBootTask",
+   "fips",
+   "keybag",
+   "usermanagerd",
+   "dirs_cleaner",
+   "xpcroleaccountd",
+   "init_featureflags",
+   "auearlyboot",
+   "tzinit",
+   "finish-restore",
+   "finish-demo-restore",
+   "sysstatuscheck",
+   "prng_seedctl",
+   "launchd_cache_loader"
+  ],
+  "ran_boot_tasks": [
+   "commit-boot-mode",
+   "restore-datapartition",
+   "init-with-data-volume"
+  ],
+  "kernel_ts_first": 191.400765,
+  "kernel_ts_last": 244.253629,
+  "ps_blocks": 3,
+  "memorystatus_pids": [
+   9,
+   10,
+   11,
+   12,
+   13,
+   14
+  ],
+  "xpcproxy_spawns": [
+   [
+    "00:03:44.159344",
+    "12"
+   ],
+   [
+    "00:03:54.195860",
+    "13"
+   ],
+   [
+    "00:04:04.230491",
+    "14"
+   ]
+  ],
+  "panic_lines": [
+   "[  192.370933]: panic_trace: PE_arm_debug_enable_trace enter",
+   "[  192.370943]: panic_trace: PE_arm_debug_enable_trace exit"
+  ],
+  "reboot_lines": [],
+  "restore_line_count": 0,
+  "early_boot_complete": [
+   "[  193.752018]: [System Event] [4959600220] [INFO] [Subsystem: launchd] [Event: boot] Early boot complete. Continuing system boot."
+  ],
+  "optional_not_present": [
+   "[  193.736440]: [System Event] [4959210756] [INFO] [Subsystem: launchd] [Event: restore-datapartition] optional boot task not present"
+  ],
+  "not_in_the_text": "the line 'Restore environment starting.' (0 occurrences) - it may lie in the 16,705-byte gap or the 3,338 lost bytes; the head ends at libignition's configuration print (restore: 0x0 there is libignition's own flag for rd=md1)"
+ }
+}

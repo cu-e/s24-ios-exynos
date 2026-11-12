@@ -1,0 +1,147 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "inconclusive",
+ "recorded_at": "2026-11-12T13:25:12+00:00",
+ "commit": "1ec695a",
+ "owner": "claude-nat065-20261112-ramdisk",
+ "decision": "docs/decisions/0034-nat087-loader-diag-xnu-rm-md1-single-run-2026-11-12.md",
+ "device_inventory": "devices/local-2026-11-12-nat088.json",
+ "summary": "One native run of loader-diag-xnu-rm-md1 (decision 0034), RECOVERY only, restored from the pinned stock, Android and data checked. Under the PRE-REGISTERED analyser the result is chain row 9 / restore row R9 (not evaluated): the kernel's returned text is in a second collector boot (the loader restarted after the kernel's return) that NAT-081's replay rule refuses because the ring lost 3,338 bytes (non-contiguous), and the first boot has no return. This is not a pass and the task stays open. A hand reading beyond the ladder of the second boot's kernel-log dump (head 8192 + gap 16705 + tail 32768, 38,240 characters returned) shows, on the S24: launchd skipped exactly 20 boot tasks (all except commit-boot-mode, restore-datapartition and init-with-data-volume; keybag, tzinit, prng_seedctl and launchd_cache_loader among them), logged 'Early boot complete. Continuing system boot.' at kernel time 193.752 s, then ran the job com.nat085.ps (user/501 domain, xpcproxy-spawned pids 12, 13, 14 at 224, 234, 244 s, three complete ps process lists in the text) every 10 s; no panic, no reboot request; the kernel handed control back by itself at its loader_return_after=60 s (checkpoint 28), the first time a run returned with a live PID 1. The line 'Restore environment starting.' is NOT in the returned text (head ends at libignition's configuration, the middle 16,705 bytes and 3,338 more were not returned). The host prediction (only the three qualifying boot tasks run) matches the observed task list exactly.",
+ "acceptance": {
+  "one_run_under_its_own_decision": "decision 0034 committed in 1ec695a before any device access; one RECOVERY write, one reboot request at 2026-11-12T13:08:24Z, no retry.",
+  "restored_and_checked": "NAT-013 restore with the pyusb venv python (rc 0), check_android pass (recovery_hash_match true, user data directories present), assess pass (all six stages true).",
+  "judged_by_the_unchanged_analyser": "chain row 9 (chain-verdict-not-pass), restore row R9 (not-evaluated). Not a pass: the task is not completed.",
+  "result_recorded_as_a_finding": "yes; see findings and numbers.json"
+ },
+ "findings": [
+  "Pre-registered result: R9 (not evaluated). Cause on the host side: boot 2 (which holds the kernel's returned text) does not start at a contiguous device sequence 0 because the producer reported two drops ('ring-overrun', 3,338 bytes lost at offset 21093), so NAT-081's replay rule refuses it; boot 1 ends at checkpoint 27 with the stream lost (UsbTimeout) and has no return.",
+  "Second host-side finding: restore-mode launchd logs its boot tasks in the kernel format '[System Event] [..] [Subsystem: launchd] [Event: X] Skipping boot-task / Doing boot task', which lands in the kernel message buffer; analyze_nat087.py's TASK regex expects the console form '(task) <Notice>: Doing boot task' and reads only the console part after the exec echo, so even with the replay accepted it would not have counted the tasks. The ladder's reading needs a second source (System Event lines) before the next run.",
+  "On the phone (hand reading, not a ladder row): the launchd boot-task predicate behaves as the disassembly said. Skipped: fsck, mount-phase-1, data-protection, finish-obliteration, detect-installed-roots, mount-phase-2, MSUEarlyBootTask, fips, keybag, usermanagerd, dirs_cleaner, xpcroleaccountd, init_featureflags, auearlyboot, tzinit, finish-restore, finish-demo-restore, sysstatuscheck, prng_seedctl, launchd_cache_loader. Run: commit-boot-mode, restore-datapartition ('optional boot task not present'), init-with-data-volume.",
+  "launchd stayed alive and kept respawning the job every 10 s from kernel time 193.7 s to the last returned line at 244.25 s (>= 50 s); the job's process list shows launchd.darwin as PID 1 and ps. 'Unable to find persona with type 6' is logged before every spawn (not fatal).",
+  "First return with a live PID 1: checkpoint 28 (why=2) was reached by the kernel's own timer return (loader_return_after=60), not by a panic; the loader then restarted and the collector saw a second boot that replays the ring. The replay carries drops when the host reads it fast; it should be read with a gap-tolerant reader.",
+  "The token xrd=md0 did not change the kernel's root (rd=md1 mounted the delivered APFS: 'apfs: volume 0 \"redwood\"' is in the text) - consistent with the host-tested XNU parser claim."
+ ],
+ "established": [
+  "native-device: with ' xrd=md0' as the last kernel-command-line token, Apple's launchd of the iPhone10,3 16.5 userland skipped 20 of 23 boot tasks on the S24, including launchd_cache_loader, keybag and tzinit, and survived at least 50 s without a service cache (hand reading of the returned dump).",
+  "native-device: Apple's launchd loaded the project's one job and respawned it every 10 s (pids 12-14 visible, three complete process lists).",
+  "native-device: the kernel's timed return (loader_return_after) works with a live PID 1; no panic happened in the returned window.",
+  "host: the pre-registered analyser/replay rule cannot read this archive; the ladder result is R9."
+ ],
+ "not_established": [
+  "that launchd printed 'Restore environment starting.' (the line is not in the returned text) or that the restore flag, rather than another condition, caused the skips",
+  "launchd's lifetime beyond about 244 s of kernel time (the run ends at the timed return)",
+  "what happened in the 16,705-byte gap and the 3,338 lost bytes, including the first job runs (pids 9-11 are only visible as memorystatus lines)",
+  "anything about services other than the one job, display, input, GPU, backboardd or SpringBoard"
+ ],
+ "disclosures": [
+  "The first analyser run (early-analysis.*) happened at 13:16Z while the collector and watcher (600 s runs) were still alive; manifest.json did not exist yet. After they exited the same analyser was rerun on the complete archive; both runs give chain row 9.",
+  "The restore ran while the collector was still collecting (the phone was already in Download Mode); the collector then ended by its own 600 s deadline ('collector-note deadline', 'eof').",
+  "The hand reading was made after seeing the ladder result and is labelled as beyond the ladder; the sorted dump text is a local artifact (the kernel text contains the host user name) and only the launchd-only extract is committed."
+ ],
+ "commands": [
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-087/session_nat087.py --image loader-diag-xnu-rm-md1 --out artifacts/nat-087/run-001 --execute",
+   "exit": 0,
+   "note": "report.json outcome native-attempt-started; reboot requested 13:08:24Z"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py restore --bus 5 --address 7 --out artifacts/nat-087/run-001-restore",
+   "exit": 0,
+   "note": "awaiting-readback"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-012/check_android.py artifacts/nat-087/run-001-android-check.json",
+   "exit": 0,
+   "note": "pass; recovery_hash_match true"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-087/run-001-restore/report.json --readback artifacts/nat-087/run-001-android-check.json",
+   "exit": 0,
+   "note": "pass"
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-087/analyze_nat087.py --archive artifacts/nat-087/run-001/archive ... --out artifacts/nat-087/run-001/analysis.json",
+   "exit": 0,
+   "note": "chain row 9, restore row R9"
+  }
+ ],
+ "artifacts": [
+  {
+   "path": "artifacts/nat-087/run-001/analysis.json",
+   "sha256": "617d8ee73ececdb62089b274b7901c352b94fc978315bcd3036eee0e53be4e84"
+  },
+  {
+   "path": "artifacts/nat-087/run-001/early-analysis.json",
+   "sha256": "3fb5057f5035d21337f891fa91688105eaeeb917026de4c36779ec3b36cdd97c"
+  },
+  {
+   "path": "artifacts/nat-087/run-001/report.json",
+   "sha256": "c160582461642e7164b64ccc4e8af7dfbd98c2fddbd6defbb1e51fae614be0cd"
+  },
+  {
+   "path": "artifacts/nat-087/run-001/archive/manifest.json",
+   "sha256": "31b077041694a6eaca6ea8f7eaedbae1cfc154049960ba4f13bd4fa7fbf0d27e"
+  },
+  {
+   "path": "artifacts/nat-087/run-001/archive/collector-summary.json",
+   "sha256": "05f0a97d64143a492b5f114939f6660ea9f191ce8d38362e123d04aeb996342f"
+  },
+  {
+   "path": "artifacts/nat-087/run-001/usb-events.jsonl",
+   "sha256": "9132d94b2f4adcab3426f0ee10b353e4b6f56f5eaa967c7c71a9a17024132402"
+  },
+  {
+   "path": "artifacts/nat-087/run-001/delivery.stdout",
+   "sha256": "11049253851b8c051de46223fc543a803ff367cbb825881e45c6ed80b037a06b"
+  },
+  {
+   "path": "artifacts/nat-087/run-001/boot2-kernel-log-sorted.txt",
+   "sha256": "314f7969b035edad42d88b9aeafce44a04c8a0d82d1125a91e6bf579778e1d13"
+  },
+  {
+   "path": "artifacts/nat-087/run-001/boot2-kl2-raw.txt",
+   "sha256": "99453471a2fda320f78de2c06b8f4a0cecc719b9debff64c506818ec3d0df021"
+  },
+  {
+   "path": "artifacts/nat-087/run-001.session.stdout",
+   "sha256": "72468775947ecddc9822fa34ef71d7a1a37acb1ca8affaf89b3a91ebd68c6ea2"
+  },
+  {
+   "path": "artifacts/nat-087/run-001.session.exit",
+   "sha256": "d3445a6a03b28c809acfd0f195ce11d61b1b677a4022c6b43ff6cf46ee7d2145"
+  },
+  {
+   "path": "artifacts/nat-087/run-001-restore/report.json",
+   "sha256": "b6447157209cb4dcd88b4ed608276fd0302db7f74f4a2a6c217d5a80137df796"
+  },
+  {
+   "path": "artifacts/nat-087/run-001-restore.stdout",
+   "sha256": "9dc8bd160c29f3ee2737f24220227ec229179ae075c9fe7977b73d4d98ed6651"
+  },
+  {
+   "path": "artifacts/nat-087/run-001-android-check.json",
+   "sha256": "4b94fff8152ff4250e4e5eb98897e91cdfb2bfba0712e195474bdd9cadc3921e"
+  },
+  {
+   "path": "artifacts/nat-087/run-001-assess.stdout",
+   "sha256": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a"
+  },
+  {
+   "path": "docs/procedures/nat-088/launchd-console.txt",
+   "sha256": "c0ce63f283acf588981c14ae73d6591adc22918a9169ebfdd8e9cfb07773c23a"
+  },
+  {
+   "path": "docs/procedures/nat-088/numbers.json",
+   "sha256": "bca01d14b28722d4bab51b19ec76ea15515122ba90e967f258fb0a87a30ae4b0"
+  },
+  {
+   "path": "devices/local-2026-11-12-nat088.json",
+   "sha256": "0ac5297936a6aaf9aa7ea42098df640e47baadd6b9df5e59e70b09422b739667"
+  },
+  {
+   "path": "artifacts/nat-087/package-001/loader-diag-xnu-rm-md1/recovery.img",
+   "sha256": "8827c97e365809932d5b9238913efbd72c13ae1d6ab3fb17394604e7eca1e667"
+  }
+ ]
+}
