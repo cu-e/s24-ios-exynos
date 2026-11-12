@@ -230,6 +230,25 @@ Post-hoc inspection of `boot 000002` vs NAT-098 and `loader_return.c` / `glue62_
 
 **Immediate next blocker is still B8 (unsent 75 KiB console ring inside `loader_log`), NOT userland/daemon code:** before changing `hb` or daemons, return the missing console window (either widen `glue62_impl.h` / stream `loader_log` without the `75 KiB` gap and `4.8 KiB` initial overrun, OR add a non-console reader that sends console/RAMFS output cleanly after boot). Then re-run Stage A observability once cleanly to read `SWEET hb:` and `ps -A`/`ps -Ao` lists and answer **B7**.
 
+## 0g. Status update, 2026-11-13 after NAT-104/105 (this section replaces 0f where they differ)
+
+NAT-104 built `loader-diag-xnu-hb2-md1` (`glue62_impl.h`: `NAT062_BURST=4096u`, `NAT062_TAIL_RETURN=262144u`, `5s` USB settle wait at `why=2`; 20 tests, 254 mutants with 0 unexplained survivors). **NAT-105 ran it once** under decision 0039 (`SM-S921B/e1s`, RECOVERY only, restored from pinned stock `96620b8b...babf67`, Android & readback pass, host load 3.10 at launch). Full root arrived (`2,475,720,704` B in `196.925s`, `12.572 MB/s`, `0` retries/errors). Pre-registered analysers (`analyze_nat104.py`) reached **row H5 `hb-ps-lists`** (`hb_marks=6`, `ps_lists=13`, `rounds_with_logd=[2,3,4,5,6]`, `gap=0`, `hole=0`) and **row A1 `base-daemons-alive`** (`all 7 self-starting jobs are in the last complete ps list; alive in total: 11`). `NAT-105` is **`done` (`pass`, native-device)**.
+
+| Item | written | built | model-tested | ran on S24 | real iOS UI |
+| --- | --- | --- | --- | --- | --- |
+| Complete `loader_log` return (`116,093` B, `gap=0`, `hole=0`, `drops=0`, `1,405` contiguous frames) | yes | yes | yes (NAT-104) | **yes** (NAT-105) | no |
+| Apple `launchd` (`pid 1`) + all 7 self-starting + 4 on-demand/system Apple daemons (`11` alive at `up=51s`) | yes | yes | yes | **yes** (NAT-105: `runningboardd`, `powerd`, `containermanagerd`, `distnoted`, `usermanagerd`, `fseventsd`, `logd`, `notifyd`, `logd_helper`, `cfprefsd`, plus `datamigrator[24]` clean `exit(0)`) | no |
+| `/redwood/bin/hb` independent `SWEET hb:` + `ps -A`/`ps -Ao` observer | yes | yes | yes | **yes** (NAT-105, rounds `1..6`) | no |
+| Stage B (`backboardd` + donor `libhakios.dylib` + `etc/inject.conf`) | yes (`NAT-099` without `hb`) | yes (`pid1-sb2`) | host readback (NAT-099) | **no** | no |
+| Graphics / frame on panel (`MiniIOMobileFramebuffer` swaps -> `0xfa200000`) | yes | yes | selector scan (IOS-013) | scan-out registers only (NAT-070); **no swap/frame** | no |
+
+**Blockers B7 and B8 are closed.** All base Stage A Apple daemons run simultaneously and stay alive under restore-mode `launchd` with `998` MB free (`1,550` MB available) and zero panics over the 60s window.
+
+**Earliest remaining blockers on the path to the first real iOS UI frame:**
+1. **Stage B (`backboardd` + `libhakios.dylib` + `hb` observability, NAT-106 -> NAT-107):** combine `NAT-101`'s `pid1-hb` small root (`hb` independent observer) with `NAT-099`'s 3 Stage B additions (`com.apple.backboardd.plist`, prebuilt `libhakios.dylib`, `etc/inject.conf`) and widen `NAT062_TAIL_RETURN` (`524288u`, `512 KiB`, `% 96 = 32`) on `NAT-104`'s `glue62_impl.h` settle fix. Observe on hardware (`NAT-107`): whether `init` configures `kern.exec_inject`, whether `dyld` injects `libhakios.dylib` into `containermanagerd` and `backboardd`, whether `libhakios.dylib`'s 20F66 shared-cache offsets match at run time, what `backboardd` needs (`UserName=mobile`, HID/ALS/Mach lookups), and whether `MiniIOMobileFramebuffer` receives first `swap` / pixel changes (`B9`).
+2. **Graphics / scan-out (`B4`/`B9`):** decided directly by Stage B's `MiniIOMobileFramebuffer` swap/diff telemetry and a panel update check once `backboardd` runs.
+3. **`SpringBoard` + lock screen + touch (`UI-004`):** follows `backboardd` swap confirmation.
+
 ## 1. Audit of the selected profile and local components
 
 Selected profile (docs/implementation.md, CAPABILITIES.md): **iPhone X (iPhone10,3, D22AP, t8015) iOS 16.5 (build 20F66)** userland on **XNU 8796.121.2** (HackiOS base d82c64a3) for **SM-S921B/e1s**.

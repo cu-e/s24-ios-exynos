@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-12T21:28:28+00:00",
-  "ledger_updated_at": "2026-11-12T21:28:01+00:00",
-  "registry_sha256": "805877629579793a8688132241073840bf0d94e25eb0d8eac6e42e942876db93",
+  "generated_at": "2026-11-12T21:51:33+00:00",
+  "ledger_updated_at": "2026-11-12T21:51:15+00:00",
+  "registry_sha256": "0f1a020e1f228b08f89cef5709da8f938d8175508ebcef6b2ff1881f7824c142",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -161,6 +161,7 @@
       "NAT-020",
       "NAT-104",
       "NAT-105",
+      "NAT-106",
       "KRN-010",
       "KRN-012",
       "KRN-013",
@@ -3646,6 +3647,46 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-105.md"
+    },
+    {
+      "id": "NAT-106",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 100,
+      "depends_on": [
+        "NAT-104",
+        "NAT-101",
+        "NAT-099"
+      ],
+      "title": "Build and test Stage B+hb image loader-diag-xnu-sb2-md1: pid1-hb + NAT-099 (backboardd + libhakios.dylib + etc/inject.conf) + NAT-104 glue62_impl.h fix widened to 512 KiB tail, plus stage-b B0-B6 analyser and single-run decision draft",
+      "paths": [
+        "docs/procedures/nat-106",
+        "artifacts/nat-106"
+      ],
+      "sources": [
+        "s24-port"
+      ],
+      "acceptance": [
+        "build_sb2_hb_root.py adds NAT-099's three Stage B files cleanly onto NAT-101's pid1-hb root (26 -> 29 files), verified by verify.py content and kernel apfs_lib readback.",
+        "build.py packages loader-diag-xnu-sb2-md1 (tag nat_attempt=NAT106-sb2, burst 4096u, tail 524288u, 10*N62_WAIT() at why=2) into artifacts/nat-106/package-001/recovery.img.",
+        "derive106.py --check matches session_nat106.py; analyze_nat106.py --mode stage-b/hb/stage-a/chain diagnoses B0-B6 cleanly; test_nat106.py (including -DNAT062_HOST C harness) and mutate_nat106.py pass with 0 unexplained survivors; decision 0040 drafted with built hashes."
+      ],
+      "steps": [
+        "Build and verify artifacts/nat-106/pid1-sb2-hb/root.apfs",
+        "Implement build.py, derive106.py -> session_nat106.py, analyze_nat106.py, test_nat106.py",
+        "Run build, packaging, tests, mutation pass, and record decision 0040 and NAT-106 evidence"
+      ],
+      "status": "done",
+      "owner": "gemini-ios-20261113-a",
+      "started_at": "2026-11-12T21:32:13+00:00",
+      "last_heartbeat": "2026-11-12T21:32:13+00:00",
+      "updated_at": "2026-11-12T21:51:15+00:00",
+      "evidence": "docs/procedures/nat-106/evidence.json",
+      "evidence_sha256": "4f128bd63a6acf2324bfde1af7c846d234cd465735cfe781c21cf90e7a535c67",
+      "finished_at": "2026-11-12T21:51:15+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-106.md"
     },
     {
       "id": "KRN-008",
@@ -18005,44 +18046,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-12T20:21:26+00:00",
-      "action": "task.done:NAT-102",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-102",
-          "status": "done",
-          "owner": "gemini-ios-20261113-a",
-          "priority": 98,
-          "last_heartbeat": "2026-11-12T19:56:17+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T20:22:25+00:00",
-      "action": "task.add:NAT-103",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-103",
-          "status": "pending",
-          "owner": null,
-          "priority": 100
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T20:23:01+00:00",
-      "action": "project.permit:native",
-      "owner": "gemini-ios-20261113-a",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
       "at": "2026-11-12T20:23:16+00:00",
       "action": "task.claim:NAT-103",
       "owner": "gemini-ios-20261113-a",
@@ -18269,11 +18272,52 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-12T21:32:01+00:00",
+      "action": "task.add:NAT-106",
+      "owner": "gemini-ios-20261113-a",
+      "tasks": [
+        {
+          "id": "NAT-106",
+          "status": "pending",
+          "owner": null,
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T21:32:13+00:00",
+      "action": "task.claim:NAT-106",
+      "owner": "gemini-ios-20261113-a",
+      "tasks": [
+        {
+          "id": "NAT-106",
+          "status": "in_progress",
+          "owner": "gemini-ios-20261113-a",
+          "priority": 100,
+          "last_heartbeat": "2026-11-12T21:32:13+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-12T21:51:15+00:00",
+      "action": "task.done:NAT-106",
+      "owner": "gemini-ios-20261113-a",
+      "tasks": [
+        {
+          "id": "NAT-106",
+          "status": "done",
+          "owner": "gemini-ios-20261113-a",
+          "priority": 100,
+          "last_heartbeat": "2026-11-12T21:32:13+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "100b86022f73da8fdc62b198297702631c08b7d74bf4f9585f699608b7594f49",
-    "BOARD.md": "ae40c3cc94cd6ee78596e00e7487a80fd076656854126f2dd42342dc4b9791dc",
+    "STATUS.md": "8c2e8bcaf8b1579d7c7a7ae4aeef39bb0aa5126f2d22155b18324f42341b2fc7",
+    "BOARD.md": "658537ec842842e388017fbc628607f7f1dc1f9c0d58c0c0df7a269fabc4b45f",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -18347,6 +18391,7 @@
     "planning/tasks/NAT-103.md": "f21879c3abe77077bb59e2d4281cfb6cd611862136ae86e179215dd879d0b2a8",
     "planning/tasks/NAT-104.md": "533d93de6fb79f6539850c97598e2bc4961cfbd2ef3f85aacb5b6962dc1a82a1",
     "planning/tasks/NAT-105.md": "69e0b96625c3f01193962bef5eca9c7622ec5bf429e92f5252bd2a9700b9b908",
+    "planning/tasks/NAT-106.md": "dd4d6d79c97d6789f3926e7eef42e5477af4d745541922dbffa4e987751e5406",
     "planning/tasks/KRN-008.md": "36d33f795d9569f340f53a5e0a909dc8efcdc5024c9133ccd614a6de5af22894",
     "planning/tasks/KRN-010.md": "4f479284d71242353a2a95508bac0b5304468c6ee44704b7561bc32cee8e1832",
     "planning/tasks/KRN-012.md": "5639fd265337eacb414447c0f5aa26bb2ad600fead5ca21572bcdb2b96f7b4e8",

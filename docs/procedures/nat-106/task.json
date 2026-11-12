@@ -1,0 +1,31 @@
+{
+  "id": "NAT-106",
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "priority": 100,
+  "depends_on": [
+    "NAT-104",
+    "NAT-101",
+    "NAT-099"
+  ],
+  "title": "Build and test Stage B+hb image loader-diag-xnu-sb2-md1: pid1-hb + NAT-099 (backboardd + libhakios.dylib + etc/inject.conf) + NAT-104 glue62_impl.h fix widened to 512 KiB tail, plus stage-b B0-B6 analyser and single-run decision draft",
+  "paths": [
+    "docs/procedures/nat-106",
+    "artifacts/nat-106"
+  ],
+  "sources": [
+    "s24-port"
+  ],
+  "acceptance": [
+    "build_sb2_hb_root.py adds NAT-099's three Stage B files cleanly onto NAT-101's pid1-hb root (26 -> 29 files), verified by verify.py content and kernel apfs_lib readback.",
+    "build.py packages loader-diag-xnu-sb2-md1 (tag nat_attempt=NAT106-sb2, burst 4096u, tail 524288u, 10*N62_WAIT() at why=2) into artifacts/nat-106/package-001/recovery.img.",
+    "derive106.py --check matches session_nat106.py; analyze_nat106.py --mode stage-b/hb/stage-a/chain diagnoses B0-B6 cleanly; test_nat106.py (including -DNAT062_HOST C harness) and mutate_nat106.py pass with 0 unexplained survivors; decision 0040 drafted with built hashes."
+  ],
+  "steps": [
+    "Build and verify artifacts/nat-106/pid1-sb2-hb/root.apfs",
+    "Implement build.py, derive106.py -> session_nat106.py, analyze_nat106.py, test_nat106.py",
+    "Run build, packaging, tests, mutation pass, and record decision 0040 and NAT-106 evidence"
+  ],
+  "status": "pending",
+  "owner": null
+}
