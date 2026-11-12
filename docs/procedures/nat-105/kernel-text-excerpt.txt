@@ -1,0 +1,73 @@
+===== SANITIZED EXCERPT: artifacts/nat-105/run-001/kernel-log.txt (boot 000002, gap=0, hole=0) =====
+Note: Host username sanitized from Darwin kernel version banner lines ([host]). See local artifacts/nat-105/run-001/kernel-log.txt (1346 lines, sha256 3f73409f1e5c7a4583559fb93b0e65bddc8064d5f2289c3becac1b080b5047f6).
+
+--- Init / early checks ---
+=== init: process 1, started as /redwood/sbin/init ===
+Darwin 22.5.0 iPhone10,3
+Darwin Kernel Version 22.5.0: 2026-11-06T11:48:35.939333+00:00; [host]:s24-ios-exynos-local/STR012VERSION-001/DEVELOPMENT_ARM64_E1S
+memory 4096 MB, page size 16384, 1 cpu
+...
+=== 35 checks, 0 failed ===
+init: up to 32768 vnodes
+
+--- /redwood/etc/rc & mounts ---
+$ /sbin/mount
+root_device on / (apfs, local, read-only)
+devfs on /dev (devfs, local, nobrowse)
+/dev/md0 on /redwood (apfs, local, read-only)
+ramfs on /private/var (ramfs, local)
+
+$ /redwood/bin/hb &
+$ exec /sbin/launchd.darwin
+Darwin Ignition Sequence Version 1.0.0: Mon Apr 24 20:19:10 PDT 2023; root:libignition-51~1538/libignition_core/RELEASE_ARM64
+...
+libignition: 1: ignition boot failed: 25
+ignite() returned 25
+
+SWEET hb: start pid=8 ppid=1 period=10s rounds=60 ps_timeout=8s
+SWEET hb: n=1 pid=8 ppid=1 up=0
+
+--- launchd & base daemons ---
+com.apple.xpc.launchd|1970-01-01 00:04:02.794816 <Notice>: Darwin Bootstrapper Version 7.0.0: Mon Apr 17 16:36:10 PDT 2023; root:libxpc_executables-2462.120.4~11/launchd/RELEASE_ARM64
+com.apple.xpc.launchd|1970-01-01 00:04:02.795889 <Notice>: boot-args = rd=md1 e1sufs=0 e1sufs_probe=0 ufsrw=0 ufs_write=0 sweethw=0 nat_attempt=NAT104-hb2 debug=0xc serial=3 cpus=1 keepsyms=1 -v loader_return_after=60 launchdsuffix=release cs_enforcement_disable=1 e1stouch=0 e1sbattery=0 xrd=md0
+...
+com.apple.xpc.launchd|1970-01-01 00:04:02.821345 (boot) <Notice>: Early boot complete. Continuing system boot.
+1970-01-01 00:04:03.-213 distnoted[15:200] # distnote server daemon  absolute time: 6.239476903   civil time: Thu Jan  1 00:04:03 1970   pid: 15 uid: 241  root: yes
+com.apple.xpc.launchd|1970-01-01 00:04:03.161975 (system/com.apple.logd [18]) <Notice>: Successfully spawned logd[18] because speculative
+com.apple.xpc.launchd|1970-01-01 00:04:03.164952 (user/501/com.apple.distnoted.xpc.daemon [15]) <Notice>: Successfully spawned distnoted[15] because speculative
+com.apple.xpc.launchd|1970-01-01 00:04:03.174166 (system/com.apple.fseventsd [17]) <Notice>: Successfully spawned fseventsd[17] because speculative
+com.apple.xpc.launchd|1970-01-01 00:04:03.203383 (user/501/com.apple.mobile.usermanagerd [16]) <Notice>: Successfully spawned usermanagerd[16] because speculative
+com.apple.xpc.launchd|1970-01-01 00:04:03.224045 (user/501/com.apple.containermanagerd [14]) <Notice>: Successfully spawned containermanagerd[14] because speculative
+com.apple.xpc.launchd|1970-01-01 00:04:03.375221 (system/com.apple.notifyd [19]) <Notice>: Successfully spawned notifyd[19] because ipc (mach)
+com.apple.xpc.launchd|1970-01-01 00:04:03.949708 (system/com.apple.logd_helper [20]) <Notice>: Successfully spawned logd_helper[20] because ipc (mach)
+com.apple.xpc.launchd|1970-01-01 00:04:06.393444 (user/501/com.apple.powerd [13]) <Notice>: Successfully spawned powerd[13] because speculative
+com.apple.xpc.launchd|1970-01-01 00:04:06.611118 (user/501/com.apple.runningboardd [11]) <Notice>: Successfully spawned runningboardd[11] because speculative
+com.apple.xpc.launchd|1970-01-01 00:04:14.846279 (user/501/com.apple.cfprefsd.xpc.daemon [23]) <Notice>: Successfully spawned cfprefsd[23] because ipc (mach)
+com.apple.xpc.launchd|1970-01-01 00:04:15.379723 (user/501/com.apple.datamigrator [24]) <Notice>: Successfully spawned datamigrator[24] because ipc (mach)
+...
+com.apple.xpc.launchd|1970-01-01 00:04:26.754831 (user/501/com.apple.datamigrator [24]) <Notice>: exited due to exit(0)
+
+--- Final hb round (round 6, up=51s) ---
+SWEET hb: n=6 pid=8 ppid=1 up=51
+  PID  PPID STAT COMM
+    1     0 Ss   /sbin/launchd.darwin
+    8     1 S    /redwood/bin/hb
+   11     1 Ss   /usr/libexec/runningboardd
+   13     1 Ss   /System/Library/CoreServices/powerd.bundle/powerd
+   14     1 Ss   /usr/libexec/containermanagerd
+   15     1 Ss   /usr/sbin/distnoted
+   16     1 Ss   /usr/libexec/usermanagerd
+   17     1 Ss   /usr/libexec/fseventsd
+   18     1 Ss   /usr/libexec/logd
+   19     1 Ss   /usr/sbin/notifyd
+   20     1 Ss   /usr/libexec/logd_helper
+   23     1 Ss   /usr/sbin/cfprefsd
+   32     8 R    ps
+SWEET hb: n=6 ps pid=32 status=0 ms=101
+
+--- loader_return_after expired ---
+
+--- kernel message buffer highlights ---
+[  241.563699]: MiniIOMobileFramebuffer: display 1125x2436 on a panel of 1080x2340 (4320 bytes per row)
+[  241.671149]: e1s-display: framebuffer 1080x2340 depth 32 stride 4320 phys 0xfa200000 virt 0xfffffff1afa80000
+[  291.520211]: memory: free 998, files 552, programs 10, wired 2533 (0 surfaces 0, ramfs 98), compressor 0 (holding 0) MB; available 1550, kills below 165 (the idle) and 82 (anybody)

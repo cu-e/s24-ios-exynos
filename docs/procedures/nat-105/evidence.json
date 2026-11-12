@@ -1,0 +1,192 @@
+{
+ "task_id": "NAT-105",
+ "kind": "native-device",
+ "origin": "local-device",
+ "recorded_at": "2026-11-12T21:30:00+00:00",
+ "device_inventory": "devices/local-2026-11-13-nat105.json",
+ "outcome": "pass",
+ "decision": "docs/decisions/0039-nat104-loader-diag-xnu-hb2-md1-single-run-2026-11-12.md",
+ "image": "loader-diag-xnu-hb2-md1",
+ "commit": "6b3444ba565408bf160157af3e307c0192337a8d",
+ "summary": "loader-diag-xnu-hb2-md1 ran once on SM-S921B/e1s under decision 0039 (RECOVERY /dev/block/sda18 only; restored from Download Mode via NAT-013 using pinned stock 96620b8b...babf67 with full readback and Android verification; native permission closed). Host 1-min load at launch was 3.10 (< 6.0). The 2,475,720,704-byte padded APFS root (4377e988...) delivered in 196.925s (12.572 MB/s, 296 TRBs, 0 retries, 0 device rx errors). B8 is closed: glue62_impl.h (5s USB settle + 4096B burst + 256 KiB tail) returned the entire 116,093-byte dump of boot 000002 with 0 drops, hole_bytes=0, gap_bytes=0, and begin_inferred=false (1,405 contiguous frames). Pre-registered analysers reached row H5 hb-ps-lists (6 hb marks, 13 ps lists, rounds 2..6 all name logd) and row A1 base-daemons-alive (all 7 self-starting Apple jobs alive in the last complete ps list; 11 Apple daemons alive in total plus on-demand com.apple.datamigrator pid 24 exiting 0 cleanly).",
+ "host_launch": {
+  "loadavg_1m": 3.1,
+  "battery": "level=85 temperature=286",
+  "recovery_written_sha256": "540b64a5736d444bdf8c0f09a6897c0469b3fb36332dce87f3ff626377bb1963",
+  "reboot_requested_at": "2026-11-12T21:12:07.002551+00:00",
+  "one_shot_marker": "artifacts/nat-104/native-attempt-loader-diag-xnu-hb2-md1-used.json",
+  "one_shot_marker_sha256": "55eef43e1e75d14d4d5c279a70b2f60e8fe7c801c5b1efaac5d976583d015085"
+ },
+ "delivery": {
+  "outcome": "delivered",
+  "size": 2475720704,
+  "sha256": "4377e98854753f648afde01d884bde352f316acad172eb5e46d44717954262f6",
+  "seconds": 196.925,
+  "mb_per_s": 12.572,
+  "chunks": 296,
+  "retries": 0,
+  "rx_errors": 0,
+  "rx_aborts": 0,
+  "rx_gaps": 0,
+  "rx_rejects": 0,
+  "rx_resets": 0
+ },
+ "restore_and_android": {
+  "download_mode_dt_s": 387.71,
+  "restore_report": "artifacts/nat-105/restore-001/report.json",
+  "readback_report": "artifacts/nat-105/restore-001/readback.json",
+  "assess_outcome": "pass",
+  "recovery_hash_match": true,
+  "user_data_directories": "user_data_directories_present",
+  "sys_boot_completed": "1"
+ },
+ "pre_registered": {
+  "analyze_hb": {
+   "row": 5,
+   "name": "hb-ps-lists",
+   "hb_marks": 6,
+   "lists_after_hb_marker": 5,
+   "lists_not_from_hb": 8,
+   "console_after_logd": true,
+   "rounds_with_logd": [2, 3, 4, 5, 6],
+   "hole_bytes": 0,
+   "gap_bytes": 0,
+   "begin_inferred": false,
+   "last_list_round": 6,
+   "last_list_kind": "O",
+   "last_list_pids": 13
+  },
+  "analyze_stage_a": {
+   "row": 1,
+   "name": "base-daemons-alive",
+   "boot_tasks_ran": ["commit-boot-mode", "restore-datapartition", "init-with-data-volume"],
+   "boot_tasks_skipped_count": 20,
+   "early_boot_complete_kernel_s": 243.596908,
+   "launchd_lines": 311,
+   "ps_lists": 10,
+   "last_list_rows": 13,
+   "last_list_cut": false,
+   "alive": [
+    "com.apple.cfprefsd.xpc.daemon",
+    "com.apple.cfprefsd.xpc.daemon.system",
+    "com.apple.containermanagerd",
+    "com.apple.distnoted.xpc.daemon",
+    "com.apple.fseventsd",
+    "com.apple.logd",
+    "com.apple.logd_helper",
+    "com.apple.mobile.usermanagerd",
+    "com.apple.notifyd",
+    "com.apple.powerd",
+    "com.apple.runningboardd"
+   ],
+   "self_start": [
+    "com.apple.containermanagerd",
+    "com.apple.distnoted.xpc.daemon",
+    "com.apple.fseventsd",
+    "com.apple.logd",
+    "com.apple.mobile.usermanagerd",
+    "com.apple.powerd",
+    "com.apple.runningboardd"
+   ],
+   "hole_bytes": 0,
+   "gap_bytes": 0,
+   "panic": null,
+   "pid1_exit": null
+  },
+  "analyze_chain": {
+   "chain_verdict": "undetermined",
+   "nat087_restore_row": 9,
+   "nat087_restore_name": "not-evaluated",
+   "note": "collector reported 0 drops, 0 faults, 1405 contiguous records in boot 000002, and manifest outcome complete-received-stream (606895 bytes), while nat081 noted accepted manifest_original.errors=1 (start-failed timeout at USB teardown before Download Mode entry at dt 387.71s)."
+  }
+ },
+ "established_on_device": [
+  "Whole 2,475,720,704-byte padded APFS root delivered over USB in 196.925s (12.572 MB/s, 296 TRBs, 0 retries, 0 errors); init passed 35/35 checks; devfs/apfs/ramfs mounted cleanly.",
+  "B8 closed: glue62_impl.h 5s USB settle + 4096B burst + 256 KiB tail returned the full 116,093-byte dump (hole_bytes=0, gap_bytes=0, begin_inferred=false, 0 collector drops).",
+  "launchd ran through Early boot complete (243.596908s) and kept all 7 self-starting jobs plus 4 on-demand/system jobs alive simultaneously through hb round 6 (up=51s) alongside clean on-demand execution and exit(0) of datamigrator[24]."
+ ],
+ "commands": [
+  {
+   "step": "preflight",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-104/session_nat104.py --image loader-diag-xnu-hb2-md1 --out artifacts/nat-105/preflight-001",
+   "exit_code": 0,
+   "outcome": "ready-read-only-registry-closed"
+  },
+  {
+   "step": "execute",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-104/session_nat104.py --image loader-diag-xnu-hb2-md1 --out artifacts/nat-105/run-001 --execute",
+   "exit_code": 0,
+   "outcome": "native-attempt-started"
+  },
+  {
+   "step": "restore",
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py restore --bus 5 --address 29 --out artifacts/nat-105/restore-001",
+   "exit_code": 0,
+   "outcome": "awaiting-readback"
+  },
+  {
+   "step": "check_android",
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-105/restore-001/readback.json",
+   "exit_code": 0,
+   "outcome": "pass"
+  },
+  {
+   "step": "assess",
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py assess --restore artifacts/nat-105/restore-001/report.json --android artifacts/nat-105/restore-001/readback.json",
+   "exit_code": 0,
+   "outcome": "pass"
+  },
+  {
+   "step": "analyze_hb",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-104/analyze_nat104.py --mode hb --archive artifacts/nat-105/run-001/archive --jobs-dir artifacts/nat-101/pid1-hb/root/LaunchDaemons --out artifacts/nat-105/run-001/analysis-hb.json",
+   "exit_code": 0,
+   "outcome": "row H5 hb-ps-lists"
+  },
+  {
+   "step": "analyze_stage_a",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-104/analyze_nat104.py --mode stage-a --archive artifacts/nat-105/run-001/archive --jobs-dir artifacts/nat-101/pid1-hb/root/LaunchDaemons --out artifacts/nat-105/run-001/analysis-stage-a.json",
+   "exit_code": 0,
+   "outcome": "row A1 base-daemons-alive"
+  },
+  {
+   "step": "analyze_chain",
+   "cmd": "artifacts/nat-065/venv/bin/python -B -I docs/procedures/nat-104/analyze_nat104.py --mode chain --archive artifacts/nat-105/run-001/archive --events artifacts/nat-105/run-001/usb-events.jsonl --report artifacts/nat-105/run-001/report.json --root artifacts/nat-083/system-padded.apfs --size 2475720704 --sha256 4377e98854753f648afde01d884bde352f316acad172eb5e46d44717954262f6 --image loader-diag-xnu-hb2-md1 --out artifacts/nat-105/run-001/analysis-chain.json --log-out artifacts/nat-105/run-001/kernel-log.txt",
+   "exit_code": 0,
+   "outcome": "chain_row 9 / complete-received-stream 0 drops"
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-105/README.md",
+  "docs/procedures/nat-105/kernel-text-excerpt.txt",
+  "artifacts/nat-105/preflight-001/report.json",
+  "artifacts/nat-105/run-001/report.json",
+  "artifacts/nat-105/run-001/usb-events.jsonl",
+  "artifacts/nat-105/run-001/delivery/delivery.json",
+  "artifacts/nat-105/run-001/archive/manifest.json",
+  "artifacts/nat-105/run-001/analysis-hb.json",
+  "artifacts/nat-105/run-001/analysis-stage-a.json",
+  "artifacts/nat-105/run-001/analysis-chain.json",
+  "artifacts/nat-105/run-001/kernel-log.txt",
+  "artifacts/nat-105/restore-001/report.json",
+  "artifacts/nat-105/restore-001/readback.json",
+  "artifacts/nat-105/restore-001/assess.json",
+  "devices/local-2026-11-13-nat105.json"
+ ],
+ "artifact_sha256": {
+  "docs/procedures/nat-105/README.md": "5ed0a6a8aa362d1f0a9d1c3ab164a533cb6f6f99d7fe1e7f6c29c8f4a14a3bbd",
+  "docs/procedures/nat-105/kernel-text-excerpt.txt": "1f683ffcee5cc2b12da6361831622ae5ff763dd92954db1e49e909185444df16",
+  "artifacts/nat-105/preflight-001/report.json": "841c4ace5e81d12521408ce3340e918e45367ffc34a8433abce574628138270c",
+  "artifacts/nat-105/run-001/report.json": "4950121353e51e6ae7f999be1b48021c64b021661b0a6036890ca838416b032f",
+  "artifacts/nat-105/run-001/usb-events.jsonl": "7fd1d0f6f034e4715884e526d24a7f22346e98b2713c982987c40a5322316a5b",
+  "artifacts/nat-105/run-001/delivery/delivery.json": "572a95f581baa40a3ebeb1fddd7a2ff0c4fdf31b943bf43c77d60c44b8031849",
+  "artifacts/nat-105/run-001/archive/manifest.json": "993f7e6932c031add15dce060f10b098281ff73d72ab649b00f623b6cf0f1af5",
+  "artifacts/nat-105/run-001/analysis-hb.json": "5d8e8a1e4d4d458f661bf2e717c80a22bfaf5ecab3313513b91416913a219aab",
+  "artifacts/nat-105/run-001/analysis-stage-a.json": "1e6d989da47220692a5c55c529c3b0df9be3034d76d42556ed16b6275bf4d924",
+  "artifacts/nat-105/run-001/analysis-chain.json": "9d1f6133f6a116301821b139182850df6208ab9affdf7554d15cb964adbd18a3",
+  "artifacts/nat-105/run-001/kernel-log.txt": "3f73409f1e5c7a4583559fb93b0e65bddc8064d5f2289c3becac1b080b5047f6",
+  "artifacts/nat-105/restore-001/report.json": "601179c932b97c18e6f07e7a6a2198dbde8beedd9151455261ffb2ee3a0320c0",
+  "artifacts/nat-105/restore-001/readback.json": "93ccc5f1687a1f3dc736dbbddb4bf37ad6f316a7809bbc615fc9daf146ec578c",
+  "artifacts/nat-105/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "devices/local-2026-11-13-nat105.json": "e82ca109eec4f0209184894eca22e8b59e31d57421313717956ed11a1155c9d9"
+ }
+}

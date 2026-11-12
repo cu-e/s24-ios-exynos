@@ -1,0 +1,29 @@
+{
+  "id": "NAT-105",
+  "scope": "native",
+  "evidence_kind": "native-device",
+  "priority": 100,
+  "depends_on": [
+    "NAT-104"
+  ],
+  "title": "Native run of loader-diag-xnu-hb2-md1 (decision 0039), B8 log-window and USB settle fix: capture the complete console + hb + ps output after launchd starts (rows H0-H5) and diagnose B7/B10",
+  "paths": [
+    "docs/procedures/nat-105",
+    "artifacts/nat-105"
+  ],
+  "sources": [
+    "s24-port"
+  ],
+  "acceptance": [
+    "One run under decision 0039 (RECOVERY /dev/block/sda18 only), restored to pinned stock recovery.img (96620b8b...babf67) with full readback verification; Android and user data verified via check_android.py and restore_stock.py assess; no retry; host 1-min load < 6.0 at launch.",
+    "Post-run analysis runs after collector and watcher processes exit using analyze_nat104.py (--mode chain, stage-a, hb).",
+    "Return dump closes B8 (complete hb + ps visibility, H5 reached or definitive H3/H2/H1 diagnosis recorded in evidence.json)."
+  ],
+  "steps": [
+    "Add and claim NAT-105, run read-only preflight via session_nat104.py",
+    "Open native permission citing decision 0039, confirm idle host, execute single run",
+    "Restore stock RECOVERY, verify Android, close native permission, run analyze_nat104.py and record evidence"
+  ],
+  "status": "pending",
+  "owner": null
+}
