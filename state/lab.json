@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T17:59:50+00:00",
+  "updated_at": "2026-11-13T19:31:28+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -17385,7 +17385,7 @@
     },
     {
       "id": "NAT-129",
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude-opus-usb130-20261113",
       "title": "Host: package scA bounded touch ID with two-rail enable and keys disabled after owner yes; qualify cmdline and session gate",
       "scope": "host",
@@ -17405,7 +17405,7 @@
       ],
       "started_at": "2026-11-13T16:15:37+00:00",
       "last_heartbeat": "2026-11-13T16:44:12+00:00",
-      "updated_at": "2026-11-13T16:44:12+00:00",
+      "updated_at": "2026-11-13T19:31:18+00:00",
       "handoff": "docs/procedures/nat-129/task.json",
       "ownership_history": [
         {
@@ -17415,7 +17415,10 @@
           "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
           "at": "2026-11-13T16:44:12+00:00"
         }
-      ]
+      ],
+      "evidence": "docs/procedures/nat-129/evidence.json",
+      "evidence_sha256": "b22f549e964281fef7b8ba2d5f75ccae4ed434b9ebff15e276b167ef1cc199e9",
+      "finished_at": "2026-11-13T19:31:18+00:00"
     },
     {
       "id": "NAT-130",
@@ -17585,6 +17588,28 @@
       "updated_at": "2026-11-13T17:59:50+00:00",
       "progress_note": "Run consumed decision 0054: U4 DWC_usb31 1.90a, U5 PMU +0x620=0 (USBDP isolation set), CMU gates on, U11 NOEXTRDL=0; USBDP RST_CTRL read stalled at entry 35 -> probe stopped, no delivery; loader left at its deadline (+490.7 s) into Download Mode at 5000M; U7 not reached; inconclusive. Stock RECOVERY/Android/assess pass; permit closed. Evidence docs/procedures/nat-135/evidence.json",
       "next_step": "U7 and post-S3 USBDP/TCA reads move to NAT-136 (host) / NAT-137 (native); NAT-135 is not repeated"
+    },
+    {
+      "id": "NAT-137",
+      "status": "pending",
+      "owner": null,
+      "title": "Native run of loader-diag-xnu-scA-md1 (NAT-129): touch rails LDO18/LDO9 with exact readbacks, key thread off, three bounded read-only touch ID polls; userland/display as sc9; restore stock RECOVERY and check Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 99,
+      "depends_on": [
+        "NAT-129"
+      ],
+      "paths": [
+        "docs/procedures/nat-137",
+        "artifacts/nat-137"
+      ],
+      "acceptance": [
+        "Exactly one bounded run of the pinned scA package under decision 0055, RECOVERY write with full readback",
+        "analyze137 verdicts reported: power, touch (poll ids), keys, window/display",
+        "Stock RECOVERY restored with full hash match; Android boot_completed and user-data directories present",
+        "Dated native evidence; no input claim from an ID answer"
+      ]
     }
   ],
   "experiments": [
@@ -67821,6 +67846,34 @@
           "progress_note": "Run consumed decision 0054: U4 DWC_usb31 1.90a, U5 PMU +0x620=0 (USBDP isolation set), CMU gates on, U11 NOEXTRDL=0; USBDP RST_CTRL read stalled at entry 35 -> probe stopped, no delivery; loader left at its deadline (+490.7 s) into Download Mode at 5000M; U7 not reached; inconclusive. Stock RECOVERY/Android/assess pass; permit closed. Evidence docs/procedures/nat-135/evidence.json",
           "next_step": "U7 and post-S3 USBDP/TCA reads move to NAT-136 (host) / NAT-137 (native); NAT-135 is not repeated",
           "last_heartbeat": "2026-11-13T17:59:50+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T19:31:18+00:00",
+      "action": "task.done:NAT-129",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-129",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T16:44:12+00:00",
+          "handoff": "docs/procedures/nat-129/task.json"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T19:31:28+00:00",
+      "action": "task.add:NAT-137",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-137",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
         }
       ]
     }

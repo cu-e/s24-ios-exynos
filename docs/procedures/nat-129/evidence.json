@@ -1,0 +1,76 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-13T19:31:12.734411+00:00",
+  "task": "NAT-129",
+  "summary": "scA built and packaged: NAT-128 kernel, e1spmic=2, e1skeys=0, e1sufs_probe=0 dropped (243 B cmdline), NAT-130 engine; e1skeys=0 host-executed: no thread/PMIC/MMIO; PMIC 12 + SPI 1 + analyzer 7 tests OK; session_nat137 derived; decision 0055 quotes owner consent",
+  "commit": "1da0c7a142f46ea246b1a363f1ff89eeb272b931",
+  "checks": [
+    {
+      "cmd": "python3 -B -I docs/procedures/nat-129/build.py --out artifacts/nat-129/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+      "exit_code": 0
+    },
+    {
+      "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-129/build-001 --out artifacts/nat-129/package-001",
+      "exit_code": 0
+    },
+    {
+      "cmd": "python3 -B docs/procedures/nat-129/test_nat129.py",
+      "exit_code": 0,
+      "result": "5 OK"
+    },
+    {
+      "cmd": "python3 -B docs/procedures/nat-123/test_nat123.py",
+      "exit_code": 0,
+      "result": "12 OK"
+    },
+    {
+      "cmd": "python3 -B docs/procedures/nat-128/test_nat128.py",
+      "exit_code": 0,
+      "result": "1 OK"
+    },
+    {
+      "cmd": "python3 -B docs/procedures/nat-129/test_analyze137.py",
+      "exit_code": 0,
+      "result": "7 OK"
+    },
+    {
+      "cmd": "python3 -B docs/procedures/nat-129/derive137.py --check",
+      "exit_code": 0
+    },
+    {
+      "cmd": "make check",
+      "exit_code": 0,
+      "result": "448 OK"
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/nat-129/README.md",
+    "docs/procedures/nat-129/build.py",
+    "docs/procedures/nat-129/derive137.py",
+    "docs/procedures/nat-129/session_nat137.py",
+    "docs/procedures/nat-129/analyze137.py",
+    "docs/procedures/nat-129/test_nat129.py",
+    "docs/procedures/nat-129/test_analyze137.py",
+    "artifacts/nat-129/build-001/build.json",
+    "artifacts/nat-129/package-001/package.json",
+    "artifacts/nat-129/package-001/loader-diag-xnu-scA-md1/recovery.img",
+    "artifacts/nat-129/make-check.log",
+    "docs/decisions/0055-nat137-loader-diag-xnu-scA-md1-single-run-2026-11-14.md"
+  ],
+  "artifact_hashes": {
+    "docs/procedures/nat-129/README.md": "e12078ef3f50bd14933ae7146c74fb18825ef743e488854b82cf30cb86a1f094",
+    "docs/procedures/nat-129/build.py": "1b2d22383af20e54824e69b7387e90c5400197f9a282c85483ba47f7b3a6d46a",
+    "docs/procedures/nat-129/derive137.py": "13643fcddf0e411df2ffd364b3bacb3f5913a53392136e5125f30abd9b026b35",
+    "docs/procedures/nat-129/session_nat137.py": "c1af9a2823620f945b510f5bbd40416df190366d1ff3f2aff46e7a08ce2dd346",
+    "docs/procedures/nat-129/analyze137.py": "b2aedd5837306dedccd7bc3f1e30d47e4cba2a556cdf80e92b13ffcd91f3a6ed",
+    "docs/procedures/nat-129/test_nat129.py": "92c39b1b81ded9def99b0b11437356d2fb4486a6c8421ee06ee37b92d116869d",
+    "docs/procedures/nat-129/test_analyze137.py": "946205db0c02dd384ca6559a9405c66b12e402da9db7aead6a12e46348ee9941",
+    "artifacts/nat-129/build-001/build.json": "d2c1e301644ec2021f393b7c1e9cd303622f380045a87238a72966d7c21b0ebc",
+    "artifacts/nat-129/package-001/package.json": "3c101b6cf96bab8c15ab3d382a959049b89bbb8885df1fb6a98283292164e861",
+    "artifacts/nat-129/package-001/loader-diag-xnu-scA-md1/recovery.img": "a4809fe2704fe86b376016345ced17d669096483de892bc16c212735ce312826",
+    "artifacts/nat-129/make-check.log": "a101e1ab9d1b532034d27e1264e2e4d582caaf747b5ceeac97e48127c939abbd",
+    "docs/decisions/0055-nat137-loader-diag-xnu-scA-md1-single-run-2026-11-14.md": "bab336ea682a1ad2bb706f128b8f06d1a16557b976ce1f07022f0ec2051e82e2"
+  }
+}
