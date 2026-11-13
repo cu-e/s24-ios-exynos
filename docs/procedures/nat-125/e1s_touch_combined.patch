@@ -1,0 +1,84 @@
+--- a/e1s_touch.c
++++ b/e1s_touch.c
+@@ -14,18 +14,18 @@
+ extern void gic_v3_spi_unmask(uint32_t intid);
+ 
+ #define E1S_ALIVE_GPIO          0x12850000UL
+-#define E1S_GPA1_CON            (E1S_ALIVE_GPIO + 0x20)
+-#define E1S_GPA1_DAT            (E1S_ALIVE_GPIO + 0x24)
+-#define E1S_GPA1_PUD            (E1S_ALIVE_GPIO + 0x28)
+-#define E1S_GPA1_EINT_CON       (E1S_ALIVE_GPIO + 0x704)
+-#define E1S_GPA1_EINT_MASK      (E1S_ALIVE_GPIO + 0x904)
+-#define E1S_GPA1_EINT_PEND      (E1S_ALIVE_GPIO + 0xa04)
++#define E1S_GPA1_CON            (gpa1 + 0x20)
++#define E1S_GPA1_DAT            (gpa1 + 0x24)
++#define E1S_GPA1_PUD            (gpa1 + 0x28)
++#define E1S_GPA1_EINT_CON       (gpa1 + 0x704)
++#define E1S_GPA1_EINT_MASK      (gpa1 + 0x904)
++#define E1S_GPA1_EINT_PEND      (gpa1 + 0xa04)
+ 
+ #define E1S_PERIC1_GPIO         0x11030000UL
+-#define E1S_GPP9_CON            (E1S_PERIC1_GPIO + 0xe0)
+-#define E1S_GPP9_DAT            (E1S_PERIC1_GPIO + 0xe4)
+-#define E1S_GPP9_PUD            (E1S_PERIC1_GPIO + 0xe8)
+-#define E1S_GPP9_DRV            (E1S_PERIC1_GPIO + 0xec)
++#define E1S_GPP9_CON            (gpp9 + 0xe0)
++#define E1S_GPP9_DAT            (gpp9 + 0xe4)
++#define E1S_GPP9_PUD            (gpp9 + 0xe8)
++#define E1S_GPP9_DRV            (gpp9 + 0xec)
+ 
+ #define E1S_SPI_CLK_PIN         2
+ #define E1S_SPI_MOSI_PIN        1
+@@ -361,7 +361,9 @@
+ {
+ 	uint32_t enabled = 1;
+ 	uint32_t irq_enabled = 1;
++	uint32_t steps = 3;
+ 	uint8_t id[5] = { 0 };
++	const char *id_status;
+ 	uint8_t info[11] = { 0 };
+ 	kern_return_t kr;
+ 	thread_t thread;
+@@ -392,6 +394,19 @@
+ 		printf("e1s-touch: cannot map the PERIC1/ALIVE GPIO blocks\n");
+ 		return;
+ 	}
++	/*
++	 * NAT-121: boot-arg e1stouch_steps=N stops after step N. 1: read what S-Boot left (nothing written). 2: + the four gpp9 pins
++	 * to GPIO and one device-id transfer. 3 (default): + interrupt and the event thread.
++	 */
++	PE_parse_boot_argn("e1stouch_steps", &steps, sizeof(steps));
++	printf("e1s-touch: step 1: gpp9 con=%#x dat=%#x pud=%#x drv=%#x; gpa1 con=%#x dat=%#x pud=%#x eint con=%#x mask=%#x pend=%#x\n",
++	    gpio_rd(E1S_GPP9_CON), gpio_rd(E1S_GPP9_DAT), gpio_rd(E1S_GPP9_PUD), gpio_rd(E1S_GPP9_DRV),
++	    gpio_rd(E1S_GPA1_CON), gpio_rd(E1S_GPA1_DAT), gpio_rd(E1S_GPA1_PUD),
++	    gpio_rd(E1S_GPA1_EINT_CON), gpio_rd(E1S_GPA1_EINT_MASK), gpio_rd(E1S_GPA1_EINT_PEND));
++	if (steps <= 1) {
++		printf("e1s-touch: stopped after step 1 (e1stouch_steps=%u)\n", steps);
++		return;
++	}
+ 
+ 	/* CS high before it becomes an output, so the chip is not selected. */
+ 	pin_set(E1S_GPP9_DAT, E1S_SPI_CS_PIN, true);
+@@ -413,11 +428,21 @@
+ 	    gpio_rd(E1S_GPA1_EINT_CON), gpio_rd(E1S_GPA1_EINT_MASK),
+ 	    gpio_rd(E1S_GPA1_EINT_PEND));
+ 
++	/* Do the transfer before formatting: C argument evaluation order is unspecified. */
++	id_status = stm_chip_id(id);
+ 	printf("e1s-touch: device id: %s (%02x %02x %02x %02x %02x)\n",
+-	    stm_chip_id(id), id[0], id[1], id[2], id[3], id[4]);
++	    id_status, id[0], id[1], id[2], id[3], id[4]);
++	if (strcmp(id_status, "ok") != 0) {
++		printf("e1s-touch: controller unresponsive; IRQ and event thread not started\n");
++		return;
++	}
+ 	if (stm_read_address(STM_READ_PANEL_INFO, info, sizeof(info)) == 0 &&
+ 	    info[8] != 0 && info[9] != 0) {
+ 		printf("e1s-touch: panel %u x %u channels\n", info[8], info[9]);
++	}
++	if (steps <= 2) {
++		printf("e1s-touch: stopped after step 2 (e1stouch_steps=%u)\n", steps);
++		return;
+ 	}
+ 
+ 	if (irq_enabled) {

@@ -1,0 +1,26 @@
+--- a/e1s_touch.c
++++ b/e1s_touch.c
+@@ -363,6 +363,7 @@
+ 	uint32_t irq_enabled = 1;
+ 	uint32_t steps = 3;
+ 	uint8_t id[5] = { 0 };
++	const char *id_status;
+ 	uint8_t info[11] = { 0 };
+ 	kern_return_t kr;
+ 	thread_t thread;
+@@ -427,8 +428,14 @@
+ 	    gpio_rd(E1S_GPA1_EINT_CON), gpio_rd(E1S_GPA1_EINT_MASK),
+ 	    gpio_rd(E1S_GPA1_EINT_PEND));
+ 
++	/* Do the transfer before formatting: C argument evaluation order is unspecified. */
++	id_status = stm_chip_id(id);
+ 	printf("e1s-touch: device id: %s (%02x %02x %02x %02x %02x)\n",
+-	    stm_chip_id(id), id[0], id[1], id[2], id[3], id[4]);
++	    id_status, id[0], id[1], id[2], id[3], id[4]);
++	if (strcmp(id_status, "ok") != 0) {
++		printf("e1s-touch: controller unresponsive; IRQ and event thread not started\n");
++		return;
++	}
+ 	if (stm_read_address(STM_READ_PANEL_INFO, info, sizeof(info)) == 0 &&
+ 	    info[8] != 0 && info[9] != 0) {
+ 		printf("e1s-touch: panel %u x %u channels\n", info[8], info[9]);

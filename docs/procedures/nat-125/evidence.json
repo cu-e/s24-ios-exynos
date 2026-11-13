@@ -1,0 +1,49 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "task": "NAT-125",
+  "recorded_at": "2026-11-13T15:46:43.363229+00:00",
+  "summary": "Host reproduces no-response controller reaching IRQ/thread startup, fixes admission and unspecified printf evaluation order; four focused tests and actual five-object ARM64 link pass; 448 project tests pass; no native causal claim.",
+  "commit": "45f3db53ea41e014bd1a5044e330b98e6a02369e",
+  "checks": [
+    {
+      "cmd": "python3 -B -I docs/procedures/nat-125/test_nat125.py",
+      "exit_code": 0,
+      "result": "4 tests pass"
+    },
+    {
+      "cmd": "KRN-044 rebuild --out artifacts/nat-125/kernel-001 (exact argv in rebuild.json)",
+      "exit_code": 0,
+      "result": "undefined_symbols=0, 29 storage stubs"
+    },
+    {
+      "cmd": "make check",
+      "exit_code": 0,
+      "result": "448 tests pass"
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/nat-125/README.md",
+    "docs/procedures/nat-125/e1s_touch.patch",
+    "docs/procedures/nat-125/e1s_touch_combined.patch",
+    "docs/procedures/nat-125/test_nat125.py",
+    "artifacts/nat-125/kernel-001/rebuild.json",
+    "artifacts/nat-125/tests.log",
+    "artifacts/nat-125/make-check.log"
+  ],
+  "artifact_hashes": {
+    "docs/procedures/nat-125/README.md": "5303a702a027938dff4adfa76b346a00d8c544b6d40f1f715420570767bda87f",
+    "docs/procedures/nat-125/e1s_touch.patch": "6a188b3004c18a8bb9cf27f37f00b0f2b350b8946ddcb14db30813852992bda3",
+    "docs/procedures/nat-125/e1s_touch_combined.patch": "9886faf6115dba79fe21027acd3ac18f388be4758be16343e0af6e70136ba9b6",
+    "docs/procedures/nat-125/test_nat125.py": "889b28ddfa90922ead558fc54a180069d658638fe95c24e9ef87ce66a7a0989b",
+    "artifacts/nat-125/kernel-001/rebuild.json": "e02554f9687a38674973ff608957eeefc38c3a3a500e0f24abc5cd1ab539134f",
+    "artifacts/nat-125/tests.log": "f5dc1348997aa98ad6ad2698062695de0e21dd8cf2e0fe2f4a9ee0a94786dc51",
+    "artifacts/nat-125/make-check.log": "e39b3a5635c0dbff283e3f42d47d714e63814ecfb34f6e6638d6b5beaf757d84"
+  },
+  "limitations": [
+    "IRQ starvation remains a hypothesis",
+    "Synthetic SPI peer does not verify electrical SPI",
+    "No native test or second PMIC run"
+  ]
+}
