@@ -1,0 +1,139 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "pass",
+ "recorded_at": "2026-11-13T20:14:50.182593+00:00",
+ "task": "NAT-140",
+ "summary": "scB ran once: on the USI SPI9 map (CLK gpp9-0, MISO gpp9-2) the STM touch controller answered all three bounded ID polls identically (device id 53 54 40 36 03, hardware id 36 40 03 00 93 00 92 64) with both rails verified by exact readback (LDO18 0x18->0xd8, LDO9 0x30->0xf0); the 1 MiB msgbuf kept the whole kernel log; delivery 37.181 MB/s; W-ok/D2/F1; stock RECOVERY and Android verified. Chip answer only: no touch input, acceleration or FPS claim.",
+ "commit": "f7516f5",
+ "device_inventory": "devices/local-2026-11-14-nat140.json",
+ "decision": "docs/decisions/0056-nat140-loader-diag-xnu-scB-md1-single-run-2026-11-14.md",
+ "image": {
+  "recovery_sha256": "e9aa908ea4c4edf1938e5722d296ce38fb711c6520607ba47c3713d9c6bce431",
+  "payload_sha256": "d26656ac2d0ae97fe5befdd8aa4fd2203e0a369d2a8b9307dbeb248cdf3d24a2",
+  "kernel_sha256": "b5483e1de76d7c734aefa80ae27e75f0f8292c5221ddf6baa10e664f4e541617",
+  "root_sha256": "4377e98854753f648afde01d884bde352f316acad172eb5e46d44717954262f6"
+ },
+ "measurements": {
+  "bytes": 2475720704,
+  "seconds": 66.586,
+  "mb_per_s": 37.181,
+  "loader_bus": "7 (high-speed)",
+  "loader_appear_s": 14.0,
+  "loader_leave_s": 486.0,
+  "download_mode_appear_s": 490.1,
+  "android_back_s": 547.9,
+  "verdicts": {
+   "window": "W-ok",
+   "display": "D2-refreshing",
+   "ios": "F1-new-frame",
+   "touch": "T2-chip-answers",
+   "power": "P2-both-rails-verified",
+   "keys": "K0-disabled",
+   "spi_map": "MAP-ok",
+   "log": "L-pmic-kept"
+  },
+  "rails": [
+   {
+    "name": "LDO18",
+    "reg": "0x3d",
+    "before": "0x18",
+    "written": "0xd8",
+    "after": "0xd8"
+   },
+   {
+    "name": "LDO9",
+    "reg": "0x34",
+    "before": "0x30",
+    "written": "0xf0",
+    "after": "0xf0"
+   }
+  ],
+  "polls": {
+   "1": {
+    "device": "53 54 40 36 03",
+    "hardware": "36 40 03 00 93 00 92 64"
+   },
+   "2": {
+    "device": "53 54 40 36 03",
+    "hardware": "36 40 03 00 93 00 92 64"
+   },
+   "3": {
+    "device": "53 54 40 36 03",
+    "hardware": "36 40 03 00 93 00 92 64"
+   }
+  },
+  "miso": {
+   "cs_high": 0,
+   "cs_low": 0
+  },
+  "msgbuf_section_bytes": 149394,
+  "kernel_log_first_s": 98.33,
+  "cpu_monitor_flood_lines": 701,
+  "recorded_frames": 73
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-139/session_nat140.py --out artifacts/nat-140/run-001 --image loader-diag-xnu-scB-md1 --execute",
+   "exit_code": 0
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 10 --out artifacts/nat-140/restore-001/restore-trace",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-140/restore-001/android-check.json",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-140/restore-001/report.json --readback artifacts/nat-140/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "nat-097/kl_reader2.py read_archive2 why=2 dump -> analysis/kernel-text.txt; python3 -B docs/procedures/nat-113/decode113.py artifacts/nat-140/run-001/archive --json analysis/pixels.json --ppm analysis/panel-thumb.ppm",
+   "exit_code": 0,
+   "result": "P1-panel-has-pixels"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-139/analyze140.py --kernel-text artifacts/nat-140/analysis/kernel-text.txt --pixels artifacts/nat-140/analysis/pixels.json --out artifacts/nat-140/analysis/verdict.json",
+   "exit_code": 0,
+   "result": "W-ok D2 F1 T2 P2 K0 MAP-ok L-pmic-kept"
+  }
+ ],
+ "acceptance": {
+  "one_bounded_run": true,
+  "verdicts_reported": true,
+  "stock_restored_and_android_checked": true,
+  "no_input_claim": true
+ },
+ "limits": "The hardware id pair 36 40 differs from stm_reg.h STM_TS_ID0/ID1 (0x48/0x36); part identity not established. ID answer is not touch input.",
+ "artifacts": [
+  "docs/procedures/nat-140/README.md",
+  "docs/procedures/nat-139/session_nat140.py",
+  "artifacts/nat-140/run-001/report.json",
+  "artifacts/nat-140/run-001/delivery/delivery.json",
+  "artifacts/nat-140/run-001/usb-events.jsonl",
+  "artifacts/nat-140/analysis/kernel-text.txt",
+  "artifacts/nat-140/analysis/pixels.json",
+  "artifacts/nat-140/analysis/verdict.json",
+  "artifacts/nat-140/restore-001/report.json",
+  "artifacts/nat-140/restore-001/android-check.json",
+  "artifacts/nat-140/restore-001/assess.json",
+  "artifacts/nat-140/native-attempt-loader-diag-xnu-scB-md1-used.json"
+ ],
+ "artifact_hashes": {
+  "docs/procedures/nat-140/README.md": "f7e988f62c7f5f21e1925dedb06cf50ed21e61b58c3b736ff87263335995aef1",
+  "docs/procedures/nat-139/session_nat140.py": "e7814e16e3ab09ef532dd553e8059ee747b80425c86c6fa9bbae6e39bdb25633",
+  "artifacts/nat-140/run-001/report.json": "0133cf4d9c49b44d300d2b40b7357753e349f358a9b1cc70b0f398c33bf7aaf8",
+  "artifacts/nat-140/run-001/delivery/delivery.json": "89336104beb424f0f26f702e5766aca28a798aa71f39dc10675815bc6735b92f",
+  "artifacts/nat-140/run-001/usb-events.jsonl": "dad395c3a707812813c3bf1f508a2465ceb1429d3eba0cbbc83cf6ffe012f454",
+  "artifacts/nat-140/analysis/kernel-text.txt": "b3d372bcc9b3d13f70e3ba8be14b669a430f3f88159714e75663220b4213aae6",
+  "artifacts/nat-140/analysis/pixels.json": "316f866d5e2a487a0f71187f70068e7ee6c14e345ff022d8ba83c11279bc83e0",
+  "artifacts/nat-140/analysis/verdict.json": "133e829d04a7ab3442bb5cc346dc1849e326b42ea02db86244b027caeeb1481d",
+  "artifacts/nat-140/restore-001/report.json": "96b6bcb7d626ca462bda55110a3d012c85be8c26afd1b112aad6a4b63855b68e",
+  "artifacts/nat-140/restore-001/android-check.json": "556fef51a2d7ccf9f03c7b1f02ff9621cc38d4560ffbb08105ef612bc9345563",
+  "artifacts/nat-140/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "artifacts/nat-140/native-attempt-loader-diag-xnu-scB-md1-used.json": "70d446d45c462a7306a38d14cf1feda754524ecd3a9e913a1199739ec37ee647"
+ }
+}

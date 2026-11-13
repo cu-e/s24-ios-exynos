@@ -1,0 +1,42 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-13T20:16:41.291485+00:00",
+ "task": "GPU-017",
+ "summary": "Xclipse 940 SGPU bring-up from the pinned e1s kernel: PMUCAL g3dcore_on MMIO, SMC 0x82000410 (DTZPC), HVC 0xC6000108/110/111 (S2MPU restore, firmware verify, stage-2 grant), unified firmware vangogh_lite_unified_evt%d.bin, SMC 0x82000520(0,0,0) RLC self-load, GPU VM, HQD rings, WRITE_DATA scratch test, IRQ SPI 388. Starting the GPU needs secure-world and EL2 services; whether they answer under XNU is unknown.",
+ "commit": "f7516f5",
+ "source": {
+  "repo": "references/s24-linux",
+  "sha": "417484173abc2c4fa93e738ea82ad9f2e84911b1"
+ },
+ "checks": [
+  {
+   "cmd": "git -C references/s24-linux show HEAD:drivers/gpu/drm/samsung/gpu/sgpu/gfx_v10_0.c | grep -n \"vangogh_lite_unified\\|0x82000520\"",
+   "exit_code": 0,
+   "result": "343-346, 376, 474, 5495"
+  },
+  {
+   "cmd": "git -C references/s24-linux show HEAD:include/dt-bindings/interrupt-controller/s5e9945.h | grep -n INTREQ__GPU_INT",
+   "exit_code": 0,
+   "result": "420: 388"
+  },
+  {
+   "cmd": "git -C references/s24-linux show HEAD:arch/arm64/boot/dts/exynos/s5e9945-pm-domains.dtsi | sed -n 117,126p",
+   "exit_code": 0
+  },
+  {
+   "cmd": "git -C references/s24-linux show HEAD:drivers/gpu/drm/samsung/gpu/sgpu/gfx_v10_0.c | grep -n IS_ENABLED; e1s_defconfig 6725/6730",
+   "exit_code": 0,
+   "result": "IS_ENABLED guards; S2MPU=m selects the HVC verify path"
+  }
+ ],
+ "method": "Drafted by a delegated read-only reader; key citations re-checked by the task owner at the pinned SHA (listed in checks).",
+ "artifacts": [
+  "research/notes/GPU-017-sgpu-bringup.md"
+ ],
+ "artifact_hashes": {
+  "research/notes/GPU-017-sgpu-bringup.md": "020ceac4a0411be0a88113c04d26c12a4f18465b30549812f7fcc69344973746"
+ },
+ "limits": "Source review only; no device access; no native GPU claim."
+}
