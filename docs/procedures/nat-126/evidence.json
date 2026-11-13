@@ -1,0 +1,47 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "summary": "sc9 built with explicit e1spmic=0 and NAT-125 touch guard; host disabled-init test sends nothing, actual ARM64 object inspected, session derivation/negative gate and 448 project tests pass.",
+  "recorded_at": "2026-11-13T15:53:03.942585+00:00",
+  "commit": "857b3e9bc916ae78cb1f090c9d883bda0bd7f27b",
+  "artifacts": [
+    "docs/procedures/nat-126/README.md",
+    "artifacts/nat-125/kernel-001/rebuild.json",
+    "artifacts/nat-126/build-001/build.json",
+    "artifacts/nat-126/package-001/package.json",
+    "artifacts/nat-126/pmic-init-disassembly.json",
+    "artifacts/nat-126/gate-001/report.json",
+    "artifacts/nat-126/make-check.log"
+  ],
+  "artifact_hashes": {
+    "docs/procedures/nat-126/README.md": "772552315f15f78359cc9f76511f163ed81b412dc5ed0c477fc6d1c098d038e9",
+    "artifacts/nat-125/kernel-001/rebuild.json": "e02554f9687a38674973ff608957eeefc38c3a3a500e0f24abc5cd1ab539134f",
+    "artifacts/nat-126/build-001/build.json": "8c9c2c0299b635b0f43dc617e4962bdc312b6d26507580daee75a1b5d6006541",
+    "artifacts/nat-126/package-001/package.json": "e1929888325e626f6734540c309adda11e1e0902f429cafa61cf7e26451f378a",
+    "artifacts/nat-126/pmic-init-disassembly.json": "047d96440e44cf9cc1d15ee5a6eb1a060473cf574f575a9baca841443a675ba4",
+    "artifacts/nat-126/gate-001/report.json": "166c924052fa9eb12db057418496b4a1fa887a0e46b89e3f3c56981f742c53f4",
+    "artifacts/nat-126/make-check.log": "334bd34a2cd21117b389647b2fa2873d0449ac6b5cbff54c26eaca6646dad13f"
+  },
+  "checks": [
+    {
+      "cmd": "python3 -B -I docs/procedures/nat-126/test_nat126.py",
+      "exit_code": 0,
+      "result": "3 tests pass"
+    },
+    {
+      "cmd": "make check",
+      "exit_code": 0,
+      "result": "448 tests pass"
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-126/derive126.py --check",
+      "exit_code": 0
+    }
+  ],
+  "limitations": [
+    "No new native measurement",
+    "Two-path control cannot isolate regression cause",
+    "No new PMIC write authorization used"
+  ]
+}

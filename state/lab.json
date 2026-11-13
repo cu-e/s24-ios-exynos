@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T15:47:00+00:00",
+  "updated_at": "2026-11-13T15:54:02+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -8,7 +8,7 @@
       "host": true,
       "android-readonly": true,
       "android-app": true,
-      "native": false
+      "native": true
     },
     "facts": [
       {
@@ -650,6 +650,13 @@
         "decision": "docs/decisions/0050-nat124-loader-diag-xnu-sc8-md1-single-run-2026-11-13.md",
         "owner": "claude-opus-nat116-20261113",
         "at": "2026-11-13T15:33:32+00:00"
+      },
+      {
+        "scope": "native",
+        "value": true,
+        "decision": "docs/decisions/0051-nat127-loader-diag-xnu-sc9-md1-single-run-2026-11-13.md",
+        "owner": "claude-opus-nat116-20261113",
+        "at": "2026-11-13T15:53:52+00:00"
       }
     ]
   },
@@ -17218,6 +17225,59 @@
       "evidence": "docs/procedures/nat-125/evidence.json",
       "evidence_sha256": "bdd97696abcd3c936ef6fccc5ec1e60d2d77dc0dfa52121611d693c265df32d2",
       "finished_at": "2026-11-13T15:47:00+00:00"
+    },
+    {
+      "id": "NAT-126",
+      "status": "done",
+      "owner": "claude-opus-nat116-20261113",
+      "title": "Host: sc9 display recovery control, no ACPM/PMIC and fail-closed STM IRQ admission; prepare one diagnostic image and gate",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-125"
+      ],
+      "paths": [
+        "docs/procedures/nat-126",
+        "artifacts/nat-126"
+      ],
+      "acceptance": [
+        "Actual kernel compiles with NAT-125 guarded touch source; image command line explicitly e1spmic=0 and forbids e1spmic=2/3",
+        "PMIC init disabled path returns before probe or any read/write in host execution; negative guard control and responsive/unresponsive STM host tests pass",
+        "Image preserves product ADT, DECON kick, marker suppression, storage stubs, timed return and watchdog",
+        "Counted session derivation, no-decision refusal, binary/source checks and project tests pass; per-image decision and evidence saved"
+      ],
+      "started_at": "2026-11-13T15:49:50+00:00",
+      "last_heartbeat": "2026-11-13T15:49:50+00:00",
+      "updated_at": "2026-11-13T15:53:09+00:00",
+      "evidence": "docs/procedures/nat-126/evidence.json",
+      "evidence_sha256": "c087b4d1dc98e130ce1f83e08f5a7cd6086c464ffcf8fa8ca6fab000f3ad05e1",
+      "finished_at": "2026-11-13T15:53:09+00:00"
+    },
+    {
+      "id": "NAT-127",
+      "status": "in_progress",
+      "owner": "claude-opus-nat116-20261113",
+      "title": "Single sc9 native display-recovery control without PMIC; classify userland/frame recovery and restore stock Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 99,
+      "depends_on": [
+        "NAT-126"
+      ],
+      "paths": [
+        "docs/procedures/nat-127",
+        "artifacts/nat-127"
+      ],
+      "acceptance": [
+        "Exactly one pinned sc9 run under decision 0051 with full RECOVERY readback, bounded logging and restore",
+        "Actual returned log confirms PMIC disabled and physical-display observation is separated from memory/frame evidence",
+        "Userland/new-frame outcome analyzed against sc8; no causal claim from a two-path control",
+        "Stock RECOVERY full hash, Android boot completed and data directory checks pass; dated evidence and scope closure"
+      ],
+      "started_at": "2026-11-13T15:54:02+00:00",
+      "last_heartbeat": "2026-11-13T15:54:02+00:00",
+      "updated_at": "2026-11-13T15:54:02+00:00"
     }
   ],
   "experiments": [
@@ -66896,6 +66956,85 @@
           "next_step": "Prepare isolated polling/scheduler diagnostic plan; no further PMIC-writing run without fresh owner decision",
           "last_heartbeat": "2026-11-13T15:46:50+00:00",
           "handoff": "docs/procedures/nat-125/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T15:49:42+00:00",
+      "action": "task.add:NAT-126",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-126",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T15:49:50+00:00",
+      "action": "task.claim:NAT-126",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-126",
+          "status": "in_progress",
+          "owner": "claude-opus-nat116-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T15:49:50+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T15:53:09+00:00",
+      "action": "task.done:NAT-126",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-126",
+          "status": "done",
+          "owner": "claude-opus-nat116-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T15:49:50+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T15:53:44+00:00",
+      "action": "task.add:NAT-127",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-127",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T15:53:52+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-nat116-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-13T15:54:02+00:00",
+      "action": "task.claim:NAT-127",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-127",
+          "status": "in_progress",
+          "owner": "claude-opus-nat116-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T15:54:02+00:00"
         }
       ]
     }
