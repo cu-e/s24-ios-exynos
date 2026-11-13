@@ -1,0 +1,35 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-13T10:40:00+00:00",
+  "task": "KRN-044",
+  "owner": "claude-opus-krn044-20261113",
+  "summary": "One-object rebuild loop for the running kernel. Unchanged: the recompiled MiniIOMobileFramebuffer.cpo is byte-identical (189a9585...), the relink is byte-identical to STR-041's kernel.unstripped 4c9536d8... after normalizing the link-directory path in debug-map strings (0 bytes differ), and NAT-020's deny_storage on it gives exactly kernel.no-storage 7ceda59b.... Changed (one IOLog string): object 44b2eb5a..., kernel a36cfbcb... with the string present, segment VM layout unchanged, STR-041 checks pass, 29 stubs apply. No phone action.",
+  "acceptance_assessment": [
+    "1 met: unchanged relink reproduces kernel.unstripped; the differing bytes are listed and explained (absolute object paths in N_OSO strings; mtimes kept equal), and are 0 after path normalization",
+    "2 met: one source file changed (IOLog string), only its object recompiled with the executed argv, relinked, STR-041 checks pass, string in the binary",
+    "3 met: NAT-020's deny_storage applies unchanged (29 patches) to both rebuilt kernels; on the normalized unchanged one it reproduces 7ceda59b...",
+    "4 met: no phone action"
+  ],
+  "commands": [
+    {"command": "python3 docs/procedures/krn-044/rebuild.py --out artifacts/krn-044/unchanged-001", "exit_code": 0},
+    {"command": "python3 docs/procedures/krn-044/rebuild.py --out artifacts/krn-044/marker-001 --patch docs/procedures/krn-044/0001-krn044-marker-string.patch --expect-string 'KRN044 rebuilt: the recording begins at'", "exit_code": 0}
+  ],
+  "artifacts": [
+    "docs/procedures/krn-044/rebuild.py",
+    "docs/procedures/krn-044/0001-krn044-marker-string.patch",
+    "docs/procedures/krn-044/README.md",
+    "artifacts/krn-044/unchanged-001/rebuild.json",
+    "artifacts/krn-044/marker-001/rebuild.json",
+    "artifacts/krn-044/marker-001/kernel.no-storage"
+  ],
+  "hashes": {
+    "docs/procedures/krn-044/rebuild.py": "41ddc2907ccb9db719ce9fb5650b90d0a046c7cd3770d0d435ea8832ab5349c0",
+    "docs/procedures/krn-044/0001-krn044-marker-string.patch": "f119677bbeb201f0bd9d0e4f6a30ac500925fe8a6e7fd65e33f9e27af52765d8",
+    "artifacts/krn-044/unchanged-001/rebuild.json": "5e1f98316635eed944adb197b4e36ba23d0705d66eeacb4cfb9653efe0750de2",
+    "artifacts/krn-044/marker-001/rebuild.json": "245b01f47f0e3da2cb5240372de9ee2a7e3548fcd535597e45e3a12063976ded",
+    "artifacts/krn-044/marker-001/kernel.no-storage": "6f1c74777fa1c41daa3eaaf2284ec4775153fc7bb065a7fa5dc5138c34a6f38b"
+  },
+  "not_established": ["that a rebuilt kernel boots", "header changes (multi-object rebuild)", "check_all_exports / private37 ABI"]
+}
