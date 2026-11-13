@@ -1,0 +1,113 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "pass",
+ "recorded_at": "2026-11-13T20:39:30.587185+00:00",
+ "task": "NAT-142",
+ "summary": "scC ran once with the owner touching the screen: the STM accepted Samsung's screen-on start from XNU (READY, scan echo, sense on); 7380 coordinate events (91 presses/90 releases) were read by the XNU kernel and posted to /dev/redwood-touch; backboardd opened the node and its HakiOS input layer logged touch-screen samples. Delivery 37.266 MB/s; stock RECOVERY and Android verified. Not established: a SpringBoard UI reaction, coordinate mapping, IRQ, FPS.",
+ "commit": "d8c6b05",
+ "device_inventory": "devices/local-2026-11-14-nat142.json",
+ "decision": "docs/decisions/0057-nat142-loader-diag-xnu-scC-md1-single-run-2026-11-14.md",
+ "owner_participation": "owner at the phone, touched the screen during the stated window (\"\u042f \u0443 \u0442\u0435\u043b\u0435\u0444\u043e\u043d\u0430, \u0437\u0430\u043f\u0443\u0441\u043a\u0430\u0439\")",
+ "image": {
+  "recovery_sha256": "15b2d177cc0b3f061eec1a0064e3d1569a43b296ac2c8ca4a4ea4824da70b617",
+  "payload_sha256": "416826b3221355df31cc6daecb6ac82470e1011df8f33a56c76b149ad0348263",
+  "kernel_sha256": "9213cff4b675bb22d08aa7ef696ec82d8e0bf61c6206cfd6da0c537d4ae85914"
+ },
+ "measurements": {
+  "bytes": 2475720704,
+  "seconds": 66.433,
+  "mb_per_s": 37.266,
+  "verdicts": {
+   "window": "W-ok",
+   "display": "D2-refreshing",
+   "power": "P2-both-rails-verified",
+   "touch": "T2-chip-answers",
+   "start": "S3-sense-on",
+   "events": "E1-coordinates",
+   "reader": "R1-open pid 16",
+   "log": "L-pmic-kept"
+  },
+  "ready_event": "49 00 10 00 ...",
+  "scan_echo_reads": 3,
+  "coord_total": 7380,
+  "presses": 91,
+  "releases": 90,
+  "irq_low_polls": 3847,
+  "polls": 10000,
+  "first_coord": {
+   "t": 108.233,
+   "finger": 0,
+   "action": 1,
+   "x": 2695,
+   "y": 1203
+  },
+  "userland_samples": [
+   "hakios: input: touch screen service 0x115d3f080, buttons 0x115d3ff40",
+   "hakios: input: sample type 2 finger 0 at 20852 34455"
+  ]
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-141/session_nat142.py --out artifacts/nat-142/run-001 --image loader-diag-xnu-scC-md1 --execute",
+   "exit_code": 0
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 12 --out artifacts/nat-142/restore-001/restore-trace",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-142/restore-001/android-check.json",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-142/restore-001/report.json --readback artifacts/nat-142/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "nat-097/kl_reader2.py why=2 dump -> analysis/kernel-text.txt; nat-113/decode113.py",
+   "exit_code": 0,
+   "result": "P1-panel-has-pixels"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-141/analyze142.py --kernel-text artifacts/nat-142/analysis/kernel-text.txt --pixels artifacts/nat-142/analysis/pixels.json --out artifacts/nat-142/analysis/verdict.json",
+   "exit_code": 0,
+   "result": "S3 E1 7380 R1 P2"
+  }
+ ],
+ "acceptance": {
+  "one_bounded_run": true,
+  "verdicts_reported": true,
+  "stock_restored_and_android_checked": true,
+  "no_ui_claim": true
+ },
+ "artifacts": [
+  "docs/procedures/nat-142/README.md",
+  "docs/procedures/nat-141/session_nat142.py",
+  "artifacts/nat-142/run-001/report.json",
+  "artifacts/nat-142/run-001/delivery/delivery.json",
+  "artifacts/nat-142/run-001/usb-events.jsonl",
+  "artifacts/nat-142/analysis/kernel-text.txt",
+  "artifacts/nat-142/analysis/pixels.json",
+  "artifacts/nat-142/analysis/verdict.json",
+  "artifacts/nat-142/restore-001/report.json",
+  "artifacts/nat-142/restore-001/android-check.json",
+  "artifacts/nat-142/restore-001/assess.json",
+  "artifacts/nat-142/native-attempt-loader-diag-xnu-scC-md1-used.json"
+ ],
+ "artifact_hashes": {
+  "docs/procedures/nat-142/README.md": "cb2a18c3d6fc11381ef727e380531ba111a2bddbca91ec9deffa5cfbf8b96a68",
+  "docs/procedures/nat-141/session_nat142.py": "ced8653c205fc7cfefe742d09cd252ccce059808cdd1d9fb5293ad604c9ac84c",
+  "artifacts/nat-142/run-001/report.json": "7c422d4ab8415a8166e72aa091ee27d84c46dc2ac476c31860a474b2868d726d",
+  "artifacts/nat-142/run-001/delivery/delivery.json": "a9ff80ee8d6c6184b3012953de1f88a5e435ef9dd8b0fcab952af84bc4dbeac5",
+  "artifacts/nat-142/run-001/usb-events.jsonl": "57dd562d5ea39972396465d877f858927fe92a27af5d5ce378a67eddec5c5951",
+  "artifacts/nat-142/analysis/kernel-text.txt": "923345bda77fd059116b68de2613b85d774649c50ac19c2ae179b323fbd0f257",
+  "artifacts/nat-142/analysis/pixels.json": "2341b7fdbeb4c26f303a3247e11912b4cc6b03bf298b1e45b4cea333fa64237b",
+  "artifacts/nat-142/analysis/verdict.json": "4b0801217d33a44363e37070136f52ba22e7183d9c69eaaedad217f205956957",
+  "artifacts/nat-142/restore-001/report.json": "3e9e70f6878d9361dde0c749c1e7f4588a88de422868c502caa8f683db5f6cdb",
+  "artifacts/nat-142/restore-001/android-check.json": "6930e1a377fda1a4ee42fc50450d5c2b5cddeb49480af604776cedd26c11a5b5",
+  "artifacts/nat-142/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "artifacts/nat-142/native-attempt-loader-diag-xnu-scC-md1-used.json": "ee2fbac67a8a2cfb42b38187b161ead27ef5ad28e12f35ef49f4978e45212e89"
+ }
+}
