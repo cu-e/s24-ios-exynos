@@ -1,0 +1,108 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "inconclusive",
+ "recorded_at": "2026-11-13T19:50:23.721624+00:00",
+ "task": "NAT-137",
+ "summary": "scA ran once: delivery 37.136 MB/s (repeat of NAT-132), W-ok/D2/F1, keys disabled (K0), touch T1-no-response (00 then ff ff), power not observable: the 128 KiB msgbuf ring was overrun by 701 lsd CPU-monitor lines and lost the e1s-pmic lines (NAT-124 verified the same rail code). The pinned DT names gpp9-0 as the USI clock pad, so the driver's MISO=0/CLK=2 map is probably swapped. Stock RECOVERY and Android verified. No input, acceleration or FPS claim.",
+ "commit": "dc2295829892c1fda5001b6920efdf0392ae5b6d",
+ "device_inventory": "devices/local-2026-11-14-nat137.json",
+ "decision": "docs/decisions/0055-nat137-loader-diag-xnu-scA-md1-single-run-2026-11-14.md",
+ "image": {
+  "recovery_sha256": "a4809fe2704fe86b376016345ced17d669096483de892bc16c212735ce312826",
+  "payload_sha256": "332da1f8d464f11d19af19c9245947eae19001b88287aa1261501ffec0d9cbec",
+  "kernel_sha256": "d6d56001d32aadda5059ab0a2255b313d7ca2055da88d645d1610214bf284517",
+  "root_sha256": "4377e98854753f648afde01d884bde352f316acad172eb5e46d44717954262f6"
+ },
+ "measurements": {
+  "bytes": 2475720704,
+  "seconds": 66.666,
+  "mb_per_s": 37.136,
+  "loader_bus": "7 (high-speed)",
+  "loader_appear_after_android_s": 17.8,
+  "loader_leave_s": 489.9,
+  "download_mode_appear_s": 493.9,
+  "verdicts": {
+   "window": "W-ok",
+   "display": "D2-refreshing",
+   "ios": "F1-new-frame",
+   "touch": "T1-no-response",
+   "power": "P0-no-verified-rails (log gap, not a rail measurement)",
+   "keys": "K0-disabled"
+  },
+  "polls": {
+   "1": "device 00x5, hardware 00x8",
+   "2": "ff x5, ff x8",
+   "3": "ff x5, ff x8"
+  },
+  "msgbuf_section_bytes": 131102,
+  "console_section_bytes": 401427,
+  "cpu_monitor_flood_lines": 701,
+  "recorded_frames": 73
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-129/session_nat137.py --out artifacts/nat-137/run-001 --image loader-diag-xnu-scA-md1 --execute",
+   "exit_code": 0
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 8 --out artifacts/nat-137/restore-001/restore-trace",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-137/restore-001/android-check.json",
+   "exit_code": 0
+  },
+  {
+   "cmd": "nat-013/restore_stock.py assess --report restore-001/report.json --readback restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "nat-097/kl_reader2.py why=2 dump -> analysis/kernel-text.txt; nat-113/decode113.py -> analysis/pixels.json",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-129/analyze137.py --kernel-text artifacts/nat-137/analysis/kernel-text.txt --pixels artifacts/nat-137/analysis/pixels.json --out artifacts/nat-137/analysis/verdict.json",
+   "exit_code": 0,
+   "result": "W-ok D2-refreshing T1-no-response P0-no-verified-rails K0-disabled"
+  }
+ ],
+ "acceptance": {
+  "one_bounded_run": true,
+  "verdicts_reported": true,
+  "stock_restored_and_android_checked": true,
+  "no_input_claim": true,
+  "question_answered": false,
+  "why_inconclusive": "power not observable (ring overrun); touch result explained by a probable pin-map error, so the chip was not actually asked"
+ },
+ "artifacts": [
+  "docs/procedures/nat-137/README.md",
+  "docs/procedures/nat-129/session_nat137.py",
+  "artifacts/nat-137/run-001/report.json",
+  "artifacts/nat-137/run-001/delivery/delivery.json",
+  "artifacts/nat-137/run-001/usb-events.jsonl",
+  "artifacts/nat-137/analysis/kernel-text.txt",
+  "artifacts/nat-137/analysis/pixels.json",
+  "artifacts/nat-137/analysis/verdict.json",
+  "artifacts/nat-137/restore-001/report.json",
+  "artifacts/nat-137/restore-001/android-check.json",
+  "artifacts/nat-137/restore-001/assess.json",
+  "artifacts/nat-137/native-attempt-loader-diag-xnu-scA-md1-used.json"
+ ],
+ "artifact_hashes": {
+  "docs/procedures/nat-137/README.md": "b63abbf91bc8ca785bb635fd239c88b708621625aca398d4e1bf8d5d0e76dd92",
+  "docs/procedures/nat-129/session_nat137.py": "c1af9a2823620f945b510f5bbd40416df190366d1ff3f2aff46e7a08ce2dd346",
+  "artifacts/nat-137/run-001/report.json": "ed3e68f6d5cee06cc87b21565f055e24664f3085c5b056ee7bc80936b450aa2d",
+  "artifacts/nat-137/run-001/delivery/delivery.json": "808a305a6ad41523bea1f293c2c9a7fcc4e4bba81d38c50b6e7182a87d74b793",
+  "artifacts/nat-137/run-001/usb-events.jsonl": "a97201b36652e085435c7b574b44092af286408ce46d520df62145d2b3fdf24c",
+  "artifacts/nat-137/analysis/kernel-text.txt": "09cb5e55f8355bde7901a39ba04e06cff8af998b93ab81fb01b6df1a0c26bb16",
+  "artifacts/nat-137/analysis/pixels.json": "a6aba4e7960ba496026dbea08c3f3546fcb4a8b47753c0111be7036c4d260efe",
+  "artifacts/nat-137/analysis/verdict.json": "a287e15dde56cfbdaa30a813c39b6b41b3ea02c234013865f39ae0320c73c162",
+  "artifacts/nat-137/restore-001/report.json": "26ff19e3d4f4442ea646092c6f1aed76932ba3f22ec090d208c75e5fcecf745f",
+  "artifacts/nat-137/restore-001/android-check.json": "594c63483718856d954e766346a91755d3a39968568bbca3f5bab7c80f5762c8",
+  "artifacts/nat-137/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "artifacts/nat-137/native-attempt-loader-diag-xnu-scA-md1-used.json": "0266451019f7031d2821e7f7f90a1ee39aa82883b0f7a2f658b20cc17a5bfc6b"
+ },
+ "next": "NAT-138 host: USI pin map (CLK=gpp9-0, MOSI=1, MISO=2, CS=3), MISO level diagnostic, msgbuf=1048576; then one native run under its own decision"
+}

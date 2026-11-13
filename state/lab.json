@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T19:31:28+00:00",
+  "updated_at": "2026-11-13T19:50:46+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -720,6 +720,20 @@
         "decision": "docs/decisions/0054-nat135-loader-diag-xnu-pk1-md1-single-run-2026-11-13.md",
         "owner": "claude-opus-usb130-20261113",
         "at": "2026-11-13T17:59:41+00:00"
+      },
+      {
+        "scope": "native",
+        "value": true,
+        "decision": "docs/decisions/0055-nat137-loader-diag-xnu-scA-md1-single-run-2026-11-14.md",
+        "owner": "claude-opus-usb130-20261113",
+        "at": "2026-11-13T19:31:54+00:00"
+      },
+      {
+        "scope": "native",
+        "value": false,
+        "decision": "docs/decisions/0055-nat137-loader-diag-xnu-scA-md1-single-run-2026-11-14.md",
+        "owner": "claude-opus-usb130-20261113",
+        "at": "2026-11-13T19:50:46+00:00"
       }
     ]
   },
@@ -17591,8 +17605,8 @@
     },
     {
       "id": "NAT-137",
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "claude-opus-usb130-20261113",
       "title": "Native run of loader-diag-xnu-scA-md1 (NAT-129): touch rails LDO18/LDO9 with exact readbacks, key thread off, three bounded read-only touch ID polls; userland/display as sc9; restore stock RECOVERY and check Android",
       "scope": "native",
       "evidence_kind": "native-device",
@@ -17609,7 +17623,13 @@
         "analyze137 verdicts reported: power, touch (poll ids), keys, window/display",
         "Stock RECOVERY restored with full hash match; Android boot_completed and user-data directories present",
         "Dated native evidence; no input claim from an ID answer"
-      ]
+      ],
+      "started_at": "2026-11-13T19:32:04+00:00",
+      "last_heartbeat": "2026-11-13T19:50:36+00:00",
+      "updated_at": "2026-11-13T19:50:36+00:00",
+      "progress_note": "One run consumed decision 0055: delivery 37.136 MB/s, W-ok/D2/F1, K0, touch T1 (00 then ff ff); power not observable (msgbuf ring overrun by 701 lsd CPU-monitor lines). Pinned DT names gpp9-0 the USI clock pad: driver MISO=0/CLK=2 map probably swapped. Stock RECOVERY/Android/assess pass. Inconclusive, not done.",
+      "next_step": "NAT-138 host: USI pin map + MISO level diagnostic + msgbuf=1048576; then one native run under a new decision",
+      "handoff": "docs/procedures/nat-137/README.md"
     }
   ],
   "experiments": [
@@ -67876,6 +67896,59 @@
           "priority": 99
         }
       ]
+    },
+    {
+      "at": "2026-11-13T19:31:54+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-13T19:32:04+00:00",
+      "action": "task.claim:NAT-137",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-137",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T19:32:04+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T19:50:36+00:00",
+      "action": "task.update:NAT-137",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-137",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "progress_note": "One run consumed decision 0055: delivery 37.136 MB/s, W-ok/D2/F1, K0, touch T1 (00 then ff ff); power not observable (msgbuf ring overrun by 701 lsd CPU-monitor lines). Pinned DT names gpp9-0 the USI clock pad: driver MISO=0/CLK=2 map probably swapped. Stock RECOVERY/Android/assess pass. Inconclusive, not done.",
+          "next_step": "NAT-138 host: USI pin map + MISO level diagnostic + msgbuf=1048576; then one native run under a new decision",
+          "last_heartbeat": "2026-11-13T19:50:36+00:00",
+          "handoff": "docs/procedures/nat-137/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T19:50:46+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
     }
   ]
 }
