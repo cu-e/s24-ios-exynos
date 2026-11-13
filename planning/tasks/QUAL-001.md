@@ -6,7 +6,7 @@
 
 | Field | Value |
 |---|---|
-| State / column | pending / waiting |
+| State / column | pending / gated |
 | Owner | unassigned |
 | Priority | 50 (higher first; default 50) |
 | Scope / evidence | native / native-device |
@@ -14,7 +14,7 @@
 
 ## Readiness
 
-Dependencies: GPU-010, NET-003, BT-002, AUD-002, CAM-002, PWR-002, SEN-002, CELL-006, ESIM-003, BT-005
+Scope not authorized: native; Dependencies: GPU-010, NET-003, BT-002, AUD-002, CAM-002, PWR-002, SEN-002, CELL-006, ESIM-003, BT-005
 
 ## Reserved paths
 

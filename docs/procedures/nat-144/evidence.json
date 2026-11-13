@@ -1,0 +1,83 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "pass",
+ "recorded_at": "2026-11-13T21:18:07.195629+00:00",
+ "task": "NAT-144",
+ "summary": "scD on the S24: owner taps on the iOS home screen opened Clock (com.apple.mobiletimer, 0.35 s after a press at its icon) and Settings (com.apple.Preferences, 0.30 s after a press at its icon); final panel shows Settings; analyze144 U2-app-launched-after-press with clock_check ok (55 pairs, median -0.007 s); stock RECOVERY restored, Android verified.",
+ "commit": "b55d3e9",
+ "device_used": true,
+ "decision": "docs/decisions/0058-nat144-loader-diag-xnu-scD-md1-single-run-2026-11-14.md",
+ "image": {
+  "recovery_sha256": "da5c03c2c41af74332a054062de2a7e7de3e3bc987bc93e55ea2aafd68dc1cda",
+  "kernel_sha256": "6aa8b6eb27009e16d0e7a618c5e4becca6f36561ac5b632912bdda13078fd100"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-143/session_nat144.py --out artifacts/nat-144/run-001 --image loader-diag-xnu-scD-md1 --execute",
+   "exit_code": 0,
+   "result": "native-attempt-started; delivered 2475720704 B in 64.25 s"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 14 --out artifacts/nat-144/restore-001/restore-trace",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-144/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-144/restore-001/report.json --readback artifacts/nat-144/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "nat-097/kl_reader2.py why=2 dump -> analysis/kernel-text.txt; python3 -B -I docs/procedures/nat-113/decode113.py artifacts/nat-144/run-001/archive --json ... --ppm ...",
+   "exit_code": 0,
+   "result": "P1-panel-has-pixels"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-143/analyze144.py --kernel-text artifacts/nat-144/analysis/kernel-text.txt --pixels artifacts/nat-144/analysis/pixels.json --out artifacts/nat-144/analysis/verdict.json",
+   "exit_code": 0,
+   "result": "U2-app-launched-after-press, physical_input ui-action"
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-144/README.md",
+  "docs/procedures/nat-144/task.json",
+  "docs/decisions/0058-nat144-loader-diag-xnu-scD-md1-single-run-2026-11-14.md",
+  "artifacts/nat-144/run-001/report.json",
+  "artifacts/nat-144/run-001/usb-events.jsonl",
+  "artifacts/nat-144/run-001/delivery/delivery.json",
+  "artifacts/nat-144/analysis/kernel-text.txt",
+  "artifacts/nat-144/analysis/pixels.json",
+  "artifacts/nat-144/analysis/panel-thumb.ppm",
+  "artifacts/nat-144/analysis/verdict.json",
+  "artifacts/nat-144/restore-001/report.json",
+  "artifacts/nat-144/restore-001/android-check.json",
+  "artifacts/nat-144/restore-001/assess.json"
+ ],
+ "artifact_hashes": {
+  "docs/procedures/nat-144/README.md": "ab05b4b059922677292394940cb06761b585bb1cee7bb10fac2d179a25aea957",
+  "docs/procedures/nat-144/task.json": "b7afb14006cad7312cee0aac616a91607b28204dc3c0e9c500b9def4f981588e",
+  "docs/decisions/0058-nat144-loader-diag-xnu-scD-md1-single-run-2026-11-14.md": "db00197929fc6a6a1ca576df0969905fb1878ed60c6f0c06a99fa34c179227f2",
+  "artifacts/nat-144/run-001/report.json": "bd222d90eaa1416e96f41e7158c52a7dca075f7ba8d4c445190548e265b2e046",
+  "artifacts/nat-144/run-001/usb-events.jsonl": "c263899b169157a36e8c3a809e25518a93f0bc1f595d366832fecd513d382ec7",
+  "artifacts/nat-144/run-001/delivery/delivery.json": "2c69d0890e314233356e53bb9cc29ab18f756a175547f81639b6cb3663977ff3",
+  "artifacts/nat-144/analysis/kernel-text.txt": "b42395da66e7beb3d93611bae0c3b12dbdd352eabb48879263b620c2e89a76c3",
+  "artifacts/nat-144/analysis/pixels.json": "ddf140559ab44b1601e5213856bca8475742b47742d8914e187787cee1c26910",
+  "artifacts/nat-144/analysis/panel-thumb.ppm": "200b2e0a877a7a94ae60222f6f5ccee796724044b90f5fa445d86a6542709760",
+  "artifacts/nat-144/analysis/verdict.json": "f6c46a98325f9a539740077c3369619b28b7144a39ac7f7f7033ecff5d614ec9",
+  "artifacts/nat-144/restore-001/report.json": "b7a66e699dc326ed3fa5d8dad57f7c5aec11a2fe882b2e929fbc26b5bcf29202",
+  "artifacts/nat-144/restore-001/android-check.json": "b3f7da027e3c88d4e2a8e30709206f0998edb6122fd451a00721dae86cd5b2be",
+  "artifacts/nat-144/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a"
+ },
+ "limits": [
+  "Swipe-up from Settings did not return home (final panel Settings)",
+  "Input is polled every 10 ms, no IRQ",
+  "Software rendering; no GPU",
+  "Owner observation not yet recorded"
+ ],
+ "device_inventory": "devices/local-2026-11-14-nat144.json"
+}
