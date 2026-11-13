@@ -1,0 +1,88 @@
+{
+  "kind": "native-device",
+  "origin": "local-device",
+  "outcome": "pass",
+  "device_inventory": "devices/local-2026-11-13-nat118.json",
+  "recorded_at": "2026-11-13T13:10:00+00:00",
+  "task": "NAT-118",
+  "owner": "claude-opus-nat116-20261113",
+  "decision": "docs/decisions/0046-nat118-loader-diag-xnu-sc5-md1-single-run-2026-11-13.md",
+  "image": {
+    "name": "loader-diag-xnu-sc5-md1",
+    "recovery_sha256": "9696818ff9ccc3f38276a7196a8a934085da8860758e8ef25788a0bc581b0536",
+    "payload_sha256": "81b33e6de389b122e0e252d64d0cb221c3f6c5d3c4270a88472cc2cb298fd5c7"
+  },
+  "summary": "With the D22AP /product node in the ADT SpringBoard no longer aborts; backboardd swaps new content from 293.4 s at 6-7 frames/s (CPU renderer); 69 of 73 recorded frames differ from the logo; panel memory 0xfa200000 holds 1,149,581 non-black pixels whose thumbnail has the iOS home-screen layout (status bar, two widgets, 4x4 icons with labels, dock of 4). The donor hook answers unlock itself. Stock RECOVERY restored, Android booted, assess pass.",
+  "verdicts": {
+    "analyze118": "W-ok / F1-new-frame",
+    "decode113": "P1-panel-has-pixels"
+  },
+  "not_established": [
+    "physical panel visibility (nobody looked)",
+    "lock screen as a separate observed state (auto-unlock hook)",
+    "input",
+    "GPU acceleration",
+    "60 FPS (measured 6-7 frames/s)"
+  ],
+  "checks": [
+    {
+      "cmd": "python3 docs/procedures/nat-117/session_nat117.py --out artifacts/nat-118/preflight-002 --image loader-diag-xnu-sc5-md1",
+      "exit_code": 0,
+      "outcome": "ready-read-only"
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-117/session_nat117.py --out artifacts/nat-118/run-001 --image loader-diag-xnu-sc5-md1 --execute",
+      "exit_code": 0,
+      "outcome": "native-attempt-started"
+    },
+    {
+      "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 5 --address 47 --out artifacts/nat-118/restore-001/restore-trace",
+      "exit_code": 0,
+      "acknowledged_bytes": 100663296
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-118/restore-001/android-check.json",
+      "exit_code": 0,
+      "outcome": "pass"
+    },
+    {
+      "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-118/restore-001/report.json --readback artifacts/nat-118/restore-001/android-check.json",
+      "exit_code": 0,
+      "outcome": "pass"
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-113/decode113.py artifacts/nat-118/run-001/archive --json artifacts/nat-118/analysis/pixels.json --ppm artifacts/nat-118/analysis/panel-thumb.ppm",
+      "exit_code": 0,
+      "verdict": "P1-panel-has-pixels"
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-117/analyze118.py --kernel-text artifacts/nat-118/analysis/kernel-text.txt --pixels artifacts/nat-118/analysis/pixels.json --out artifacts/nat-118/analysis/verdict.json",
+      "exit_code": 0,
+      "verdict": "F1-new-frame"
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/nat-118/README.md",
+    "artifacts/nat-118/run-001/report.json",
+    "artifacts/nat-118/analysis/kernel-text.txt",
+    "artifacts/nat-118/analysis/pixels.json",
+    "artifacts/nat-118/analysis/panel-thumb.ppm",
+    "artifacts/nat-118/analysis/panel-thumb-ascii.txt",
+    "artifacts/nat-118/analysis/verdict.json",
+    "artifacts/nat-118/restore-001/report.json",
+    "artifacts/nat-118/restore-001/assess.json",
+    "artifacts/nat-118/restore-001/android-check.json"
+  ],
+  "artifact_hashes": {
+    "docs/procedures/nat-118/README.md": "98b2f823ddebd634000d1ad77b4a0b73ff4db5ba9d871c59e065b10509a06f5f",
+    "artifacts/nat-118/run-001/report.json": "f3c1a19a7aff4bcf1cc83db231437d7a6faea71245c1a9300e7c156ccd9dd3e8",
+    "artifacts/nat-118/analysis/kernel-text.txt": "fb8cb45e0e2e132d865bf12eb724c512ee8c0c1b378d8f7042dbff23c07d1e40",
+    "artifacts/nat-118/analysis/pixels.json": "dc51db404161c82f7d51b247f09c0e8219437a6c454af76b600750850fc3d618",
+    "artifacts/nat-118/analysis/panel-thumb.ppm": "cf32382d2c1f8026ac6cabb5ef1f0c11b238738de252775d94533bfe99fc24e0",
+    "artifacts/nat-118/analysis/panel-thumb-ascii.txt": "e104d65749b69f5f28bd85898f1f48d6365e6444f8a3fbdd29a59c64034cb2d2",
+    "artifacts/nat-118/analysis/verdict.json": "1bdc2e32362cfa26d40045bf9a629d2528b9030c70414d50848f462c00f36d66",
+    "artifacts/nat-118/restore-001/report.json": "4fcd2efdb4702777e9547b5096ae66497388777c20e83dd0d63508d140c81619",
+    "artifacts/nat-118/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+    "artifacts/nat-118/restore-001/android-check.json": "c8a593993249a3e7ea86cd534aa1fb75a1a51b1190ea1a7e8a2850bbccd153c1"
+  }
+}
