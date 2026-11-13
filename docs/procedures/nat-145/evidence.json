@@ -1,0 +1,78 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-13T21:37:52.976009+00:00",
+ "task": "NAT-145",
+ "summary": "scE image: scD (NAT-143) with all ten e1s CPUs in the ADT (donor mkadt smp table, checked against the pinned Samsung DT) and without cpus=1, so XNU starts cores 1-9 through PSCI CPU_ON; counted session driver for NAT-146; analyser for the processor count and the frame rate of the software display path (baseline on NAT-144 text: C0-one, best steady window 21.72 frames/s, half of the intervals under 57 ms). Host-test only; the native run needs an owner decision (PSCI CPU_ON is a secure call that powers CPU cores).",
+ "commit": "51a72f1",
+ "device_used": false,
+ "image": {
+  "recovery_sha256": "ffa91748d09482c3f34de61ff0c6e2538001624cf963652157cbcb8cf71ec80f",
+  "payload_sha256": "4384cf08fc876a03f6ef5ff0b4224a7e4942fe7d8437819678e9171a4a054bb8",
+  "payload_bytes": 26206640,
+  "loader_image_sha256": "c65dc2776032df714747bd554d384e020ad9f460bfbc4d2e29e9d3a9fa6c558b",
+  "payload_adt_sha256": "0c109c99f586cdb74cf504b6d4f64b4f011bcbc970b6b4e6730f07b1135d9bb6",
+  "kernel_sha256": "6aa8b6eb27009e16d0e7a618c5e4becca6f36561ac5b632912bdda13078fd100",
+  "cmdline_bytes": 239,
+  "return_after_s": 270,
+  "deadline_s": 595,
+  "rec_secs": 270,
+  "cpus_in_adt": 10
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/nat-145/build.py --out artifacts/nat-145/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-145/build-001 --out artifacts/nat-145/package-001",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-145/derive146.py --check",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-145/test_nat145.py",
+   "exit_code": 0,
+   "result": "10 OK (ADT equals donor mkadt smp cpu nodes except phandles; analyser on NAT-144 real text and synthetic lines)"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-145/analyze146.py --kernel-text artifacts/nat-144/analysis/kernel-text.txt --pixels artifacts/nat-144/analysis/pixels.json --out <scratch>",
+   "exit_code": 0,
+   "result": "smp C0-one, fps_best_window 21.72, fps_median_interval_ms 57, 8 steady windows"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "448 OK"
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-145/README.md",
+  "docs/procedures/nat-145/task.json",
+  "docs/procedures/nat-145/make_adt145.py",
+  "docs/procedures/nat-145/build.py",
+  "docs/procedures/nat-145/derive146.py",
+  "docs/procedures/nat-145/session_nat146.py",
+  "docs/procedures/nat-145/analyze146.py",
+  "docs/procedures/nat-145/test_nat145.py",
+  "artifacts/nat-145/build-001/build.json",
+  "artifacts/nat-145/package-001/package.json",
+  "artifacts/nat-145/package-001/loader-diag-xnu-scE-md1/recovery.img"
+ ],
+ "artifact_hashes": {
+  "docs/procedures/nat-145/README.md": "d0e1c80fd5f5ddc11884492c776e081ec98ecde43177194382c4307076a3ab9b",
+  "docs/procedures/nat-145/task.json": "a734c6281a2d9a648d550d9079788fc9364630558a269787158f3382f40d7d02",
+  "docs/procedures/nat-145/make_adt145.py": "12299de65e7d557b5747c9dacff2f4599d3ff154ee15752fce3743ac60f3af33",
+  "docs/procedures/nat-145/build.py": "6fc3c05917787a14ed04d675aa3e8694c692b60fe751f02e94236e55e63836ff",
+  "docs/procedures/nat-145/derive146.py": "054a33ba643ab0f7df95dd6bdd0dbddb002b6d189548f0761f230d677af1f7e4",
+  "docs/procedures/nat-145/session_nat146.py": "59a8002ffebe3f985450f9072701589589755548d7632f3ec682019d787ebb24",
+  "docs/procedures/nat-145/analyze146.py": "ba816dacf1b448fa24076e34a2c3c150c34bb1d94e264c557f29720e1e05f1b5",
+  "docs/procedures/nat-145/test_nat145.py": "9d5b666c1b70367a9339e4fe3e63d1fb1f5efae57a0473423dda6b7ddf9a2a41",
+  "artifacts/nat-145/build-001/build.json": "947ea239d08bc76be2984614e2f0230dc4e3133d4d8be7182051e9a7a2654b53",
+  "artifacts/nat-145/package-001/package.json": "cfcf88c6f891e8263627f133a77f630f941351e51458b78fdd00ba6e1cb7c45a",
+  "artifacts/nat-145/package-001/loader-diag-xnu-scE-md1/recovery.img": "ffa91748d09482c3f34de61ff0c6e2538001624cf963652157cbcb8cf71ec80f"
+ }
+}

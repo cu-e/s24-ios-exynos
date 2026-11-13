@@ -52,17 +52,22 @@ panel. The path is:
 
 The coordinate mapping is right without a flip.
 
+## Owner observation (added 2026-11-14, after the run)
+
+Asked what the screen did, the owner answered: «Открылись приложения, Свайп вверх работал» ("The apps opened, the swipe up worked").
+This is the owner's account and is not re-derived from the log. It agrees with the Clock case (Settings was tapped on the home screen
+after Clock, so the swipe up left Clock). The final recorded panel is Settings. The log alone does not say which swipe returned
+to the home screen, or whether Settings was opened again after one.
+
 ## Not established
 
-- Why the swipe up from the bottom edge did not leave Settings. The Clock case may have worked, since Settings was tapped on the
-  home screen afterwards, but a SpringBoard home gesture is not proven by the log.
-- The owner's own account of what the screen did (asked after the run).
-- Interrupt-driven input (still 10 ms polling), latency, GPU acceleration, sustained FPS.
+- From the log alone: which swipe made the home gesture. The owner reports that the swipe up worked (above).
+- Interrupt-driven input (still 10 ms polling), latency, GPU acceleration, sustained FPS (frames reached the panel at about
+  16–17 per second during continuous activity: `docs/procedures/nat-145/analyze146.py` on this run's text).
 
 ## Next
 
-1. Home gesture: check the HakiOS edge rule (`DIGITIZER_FROM_EDGE_TIP` for y > 1 − 34/812 of the height) against the presses' y. The
-   presses at y 4010–4082 / 4096 = 0.979–0.997 are inside the bottom strip (> 0.958), so the edge flag should have been set. Look for
-   SpringBoard's gesture handling instead.
+1. Frame rate: the software display path is about 16–17 frames per second on one Cortex-A520 (`cpus=1`). NAT-145 is the ten-CPU
+   image, and NAT-146 is its native run, which needs an owner decision. After that come the framebuffer scaling cost and the GPU
+   (GPU-017/018).
 2. IRQ on gpa1-2 instead of polling.
-3. GPU (GPU-017/018) for frame rate.
