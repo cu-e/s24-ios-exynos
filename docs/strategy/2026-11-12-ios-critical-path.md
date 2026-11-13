@@ -298,6 +298,14 @@ NAT-106 built `loader-diag-xnu-sb2-md1` (29-file Stage B + `hb` `md0` root combi
   2. **Window > 63 s** (NAT-071): the S5E9945 watchdog (83 s) is fed by nobody after the jump.
   3. **Kernel changes need a rebuild loop** (KRN-044) — every kernel change so far was a binary patch or a boot-arg.
   4. GPU chain (first frame / software / Xclipse / 60 FPS) re-mapped in `research/notes/GPU-chain-2026-11-13.md`.
+* Host work done after NAT-113 (same day): **KRN-044** — one-object rebuild loop for the running kernel, unchanged rebuild
+  byte-identical to STR-041 (after debug-map path normalization) and to NAT-020's `kernel.no-storage`; **NAT-071** — the kernel
+  feeds the S5E9945 watchdog (option A, a longer loader watchdog, is impossible: 83.88 s is the hardware maximum at 25.6 MHz),
+  with an in-kernel cut back to 63 s when the feed is not proven; **NAT-115** — `loader-diag-xnu-sc4-md1` (RECOVERY
+  `c0642059...`): 150 s window, a wait-state dump of SpringBoard/backboardd/lsd/... before the timed return, the pass rule
+  (P-window, then H1-frame / H2-cpu / H3-wait / H4-display / X-none) fixed in `docs/procedures/nat-115/analyze116.py`.
+* Next on the phone: **NAT-116**, one run of that image; needs its own decision file (draft:
+  `docs/procedures/nat-115/decision-draft.md`). NAT-072 (a run of a NAT-071 image) is superseded by NAT-116.
 
 ## 1. Audit of the selected profile and local components
 

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-13T11:36:47+00:00",
-  "ledger_updated_at": "2026-11-13T11:36:10+00:00",
-  "registry_sha256": "b06d181a1e0a48a50817191ca17e89273826347ff906ea26528e66f11d19042b",
+  "generated_at": "2026-11-13T11:37:49+00:00",
+  "ledger_updated_at": "2026-11-13T11:37:46+00:00",
+  "registry_sha256": "59177b2a5aeb303dd7d3811204fbe56ac3bc4823cac43d03ef81d4bc1d08ef00",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -13363,12 +13363,12 @@
         "Build in artifacts and retain actual exit codes; never mask export failures"
       ],
       "started_at": "2026-11-04T23:15:24+00:00",
-      "last_heartbeat": "2026-11-13T07:17:20+00:00",
-      "updated_at": "2026-11-13T07:17:20+00:00",
+      "last_heartbeat": "2026-11-13T11:37:46+00:00",
+      "updated_at": "2026-11-13T11:37:46+00:00",
       "branch": "main",
       "blocked_reason": "SDK premise superseded: STR-041 linked the 1042-body image without an SDK, and KRN-041/KRN-042 give the precise export result. Still missing: (a) a build tool that applies KRN-041 0001/0002 to the canonical image; (b) payload/ADT validation, which needs the D22AP /product tree from an Apple IPSW (owner decision) and is the in-progress NAT-006 work of agy-nat006-20261110-aca2. See docs/procedures/kernel-build.md, Reassessment of 2026-11-10.",
-      "progress_note": "Recheck 2026-11-10T08:15Z: NAT-006 was completed by codex-nat-priority-20261110-r1 as a host-only RECOVERY image build; its evidence has no ADT, D22AP /product tree or IPSW input, so blocker (b) is unchanged. Blocker (a) is KRN-043, stopped by the classifier.",
-      "next_step": "Owner runs or allows KRN-043 (python3 -I tools/build/e1s_kernel_exports.py --run canon-a, canon-b, then --compare); owner decides on supplying the D22AP /product tree for payload/ADT validation.",
+      "progress_note": "The kernel that runs on the phone is STR-041's link + NAT-020 stubs; KRN-044 (done) gives the reproducible one-object rebuild loop for it (docs/procedures/krn-044/rebuild.py), used by NAT-071/NAT-115. Kernel-side work (GPU-007 and the rest that list KRN-001) should depend on KRN-044 and the NAT-line kernel instead; see research/notes/GPU-chain-2026-11-13.md.",
+      "next_step": "Owner decision: retire KRN-001's SDK premise; the ledger CLI cannot rewrite GPU-007's dependency list",
       "handoff": "docs/procedures/kernel-build.md",
       "ownership_history": [
         {
@@ -13391,7 +13391,7 @@
         "SDK premise superseded: STR-041 linked the 1042-body image without an SDK, and KRN-041/KRN-042 give the precise export result. Still missing: (a) a build tool that applies KRN-041 0001/0002 to the canonical image; (b) payload/ADT validation, which needs the D22AP /product tree from an Apple IPSW (owner decision) and is the in-progress NAT-006 work of agy-nat006-20261110-aca2. See docs/procedures/kernel-build.md, Reassessment of 2026-11-10."
       ],
       "card_path": "planning/tasks/KRN-001.md",
-      "report_health": "stale"
+      "report_health": "recent"
     },
     {
       "id": "CELL-010",
@@ -18476,10 +18476,10 @@
       {
         "id": "KRN-001",
         "status": "blocked",
-        "last_heartbeat": "2026-11-13T07:17:20+00:00",
-        "report_health": "stale",
-        "progress_note": "Recheck 2026-11-10T08:15Z: NAT-006 was completed by codex-nat-priority-20261110-r1 as a host-only RECOVERY image build; its evidence has no ADT, D22AP /product tree or IPSW input, so blocker (b) is unchanged. Blocker (a) is KRN-043, stopped by the classifier.",
-        "next_step": "Owner runs or allows KRN-043 (python3 -I tools/build/e1s_kernel_exports.py --run canon-a, canon-b, then --compare); owner decides on supplying the D22AP /product tree for payload/ADT validation.",
+        "last_heartbeat": "2026-11-13T11:37:46+00:00",
+        "report_health": "recent",
+        "progress_note": "The kernel that runs on the phone is STR-041's link + NAT-020 stubs; KRN-044 (done) gives the reproducible one-object rebuild loop for it (docs/procedures/krn-044/rebuild.py), used by NAT-071/NAT-115. Kernel-side work (GPU-007 and the rest that list KRN-001) should depend on KRN-044 and the NAT-line kernel instead; see research/notes/GPU-chain-2026-11-13.md.",
+        "next_step": "Owner decision: retire KRN-001's SDK premise; the ledger CLI cannot rewrite GPU-007's dependency list",
         "handoff": "docs/procedures/kernel-build.md",
         "branch": "main",
         "worktree": null
@@ -18513,22 +18513,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-13T07:48:44+00:00",
-      "action": "task.done:NAT-112",
-      "owner": "claude-opus-nat112-20261113",
-      "tasks": [
-        {
-          "id": "NAT-112",
-          "status": "done",
-          "owner": "claude-opus-nat112-20261113",
-          "priority": 100,
-          "progress_note": "Analysis complete: fb_diff=0 is a measurement artifact (5s window never closed in NAT-111 with only 2 swaps). Commit path works correctly. No kernel patch needed.",
-          "next_step": "New owner decision for NAT-113: longer run (loader_return_after=120) + rec_secs=30 rec_start=30 rec_mb=64 rec_ring=1 to capture actual frames and confirm visible pixels",
-          "last_heartbeat": "2026-11-13T07:47:31+00:00"
-        }
-      ]
-    },
     {
       "at": "2026-11-13T08:06:43+00:00",
       "action": "task.add:NAT-113",
@@ -18781,11 +18765,30 @@
           "last_heartbeat": "2026-11-13T11:29:48+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-13T11:37:46+00:00",
+      "action": "task.update:KRN-001",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "KRN-001",
+          "status": "blocked",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 85,
+          "progress_note": "The kernel that runs on the phone is STR-041's link + NAT-020 stubs; KRN-044 (done) gives the reproducible one-object rebuild loop for it (docs/procedures/krn-044/rebuild.py), used by NAT-071/NAT-115. Kernel-side work (GPU-007 and the rest that list KRN-001) should depend on KRN-044 and the NAT-line kernel instead; see research/notes/GPU-chain-2026-11-13.md.",
+          "next_step": "Owner decision: retire KRN-001's SDK premise; the ledger CLI cannot rewrite GPU-007's dependency list",
+          "blocked_reason": "SDK premise superseded: STR-041 linked the 1042-body image without an SDK, and KRN-041/KRN-042 give the precise export result. Still missing: (a) a build tool that applies KRN-041 0001/0002 to the canonical image; (b) payload/ADT validation, which needs the D22AP /product tree from an Apple IPSW (owner decision) and is the in-progress NAT-006 work of agy-nat006-20261110-aca2. See docs/procedures/kernel-build.md, Reassessment of 2026-11-10.",
+          "last_heartbeat": "2026-11-13T11:37:46+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/kernel-build.md"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "35b4ba442c6e8e712d29e612d815edfe272175a3c55df6bfb0a9ea5aa6bb4510",
-    "BOARD.md": "1ef5b03f45a3f5ca77fd4feec0dac4ee92c4913987cc58984ffa722ffc3cf7e1",
+    "STATUS.md": "f73e47c4b780757ae8a46adb04de15d86d8e6c325265505cb3d5dd027183e4a4",
+    "BOARD.md": "7f490f690148be066a5bd88e1a5640357773271634c9ee31a3fe4720c1f7554b",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -19087,7 +19090,7 @@
     "planning/tasks/IOS-007.md": "c116ef8935d17ff7707c9cafacabad81273be3bcdeccaf872b742860b4aed9a5",
     "planning/tasks/KRN-035.md": "73d3fdfa9f6c3f1f76fe0f244208e46b40bf7343bf78e2f78223ea9c1c7a98a7",
     "planning/tasks/KRN-036.md": "43b1fb9c66ca2aa223235ea38bf2e400888380c3822a4aca35e67b96cd532020",
-    "planning/tasks/KRN-001.md": "85cab325158864a8d9ad5a519cef92933f1ff55283b28cdff363cbf1bfb732cb",
+    "planning/tasks/KRN-001.md": "ecb736bddb59bdab86f4b7a2c2e151521e789a64f83fc60e1a670d34030c8ce6",
     "planning/tasks/CELL-010.md": "b568b98c1ed5527ec0e2688452b4d1ec8b1193af6118ddccf7789cf30c19baeb",
     "planning/tasks/KRN-028.md": "e3a53637d27e69f4b0fe97812206275d0813012ff2cdf563ffa3c215c05830e5",
     "planning/tasks/VM-006.md": "c30be2df99fdbb5066a9add35b609dc2ac6ffbfff0632bb6051badf3d768b6e7",

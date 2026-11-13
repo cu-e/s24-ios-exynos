@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T11:36:10+00:00",
+  "updated_at": "2026-11-13T11:37:46+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -2694,12 +2694,12 @@
         "Build in artifacts and retain actual exit codes; never mask export failures"
       ],
       "started_at": "2026-11-04T23:15:24+00:00",
-      "last_heartbeat": "2026-11-13T07:17:20+00:00",
-      "updated_at": "2026-11-13T07:17:20+00:00",
+      "last_heartbeat": "2026-11-13T11:37:46+00:00",
+      "updated_at": "2026-11-13T11:37:46+00:00",
       "branch": "main",
       "blocked_reason": "SDK premise superseded: STR-041 linked the 1042-body image without an SDK, and KRN-041/KRN-042 give the precise export result. Still missing: (a) a build tool that applies KRN-041 0001/0002 to the canonical image; (b) payload/ADT validation, which needs the D22AP /product tree from an Apple IPSW (owner decision) and is the in-progress NAT-006 work of agy-nat006-20261110-aca2. See docs/procedures/kernel-build.md, Reassessment of 2026-11-10.",
-      "progress_note": "Recheck 2026-11-10T08:15Z: NAT-006 was completed by codex-nat-priority-20261110-r1 as a host-only RECOVERY image build; its evidence has no ADT, D22AP /product tree or IPSW input, so blocker (b) is unchanged. Blocker (a) is KRN-043, stopped by the classifier.",
-      "next_step": "Owner runs or allows KRN-043 (python3 -I tools/build/e1s_kernel_exports.py --run canon-a, canon-b, then --compare); owner decides on supplying the D22AP /product tree for payload/ADT validation.",
+      "progress_note": "The kernel that runs on the phone is STR-041's link + NAT-020 stubs; KRN-044 (done) gives the reproducible one-object rebuild loop for it (docs/procedures/krn-044/rebuild.py), used by NAT-071/NAT-115. Kernel-side work (GPU-007 and the rest that list KRN-001) should depend on KRN-044 and the NAT-line kernel instead; see research/notes/GPU-chain-2026-11-13.md.",
+      "next_step": "Owner decision: retire KRN-001's SDK premise; the ledger CLI cannot rewrite GPU-007's dependency list",
       "handoff": "docs/procedures/kernel-build.md",
       "ownership_history": [
         {
@@ -65801,6 +65801,25 @@
           "owner": "claude-opus-nat115-20261113",
           "priority": 99,
           "last_heartbeat": "2026-11-13T11:29:48+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T11:37:46+00:00",
+      "action": "task.update:KRN-001",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "KRN-001",
+          "status": "blocked",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 85,
+          "progress_note": "The kernel that runs on the phone is STR-041's link + NAT-020 stubs; KRN-044 (done) gives the reproducible one-object rebuild loop for it (docs/procedures/krn-044/rebuild.py), used by NAT-071/NAT-115. Kernel-side work (GPU-007 and the rest that list KRN-001) should depend on KRN-044 and the NAT-line kernel instead; see research/notes/GPU-chain-2026-11-13.md.",
+          "next_step": "Owner decision: retire KRN-001's SDK premise; the ledger CLI cannot rewrite GPU-007's dependency list",
+          "blocked_reason": "SDK premise superseded: STR-041 linked the 1042-body image without an SDK, and KRN-041/KRN-042 give the precise export result. Still missing: (a) a build tool that applies KRN-041 0001/0002 to the canonical image; (b) payload/ADT validation, which needs the D22AP /product tree from an Apple IPSW (owner decision) and is the in-progress NAT-006 work of agy-nat006-20261110-aca2. See docs/procedures/kernel-build.md, Reassessment of 2026-11-10.",
+          "last_heartbeat": "2026-11-13T11:37:46+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/kernel-build.md"
         }
       ]
     }

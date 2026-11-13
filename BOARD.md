@@ -2,9 +2,9 @@
 
 > Generated from state/lab.json. Use the CLI; do not edit this board or its task cards.
 
-Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-13T11:36:47+00:00.
+Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-13T11:37:49+00:00.
 
-Registry SHA256: `b06d181a1e0a48a50817191ca17e89273826347ff906ea26528e66f11d19042b`. Run `python3 tools/lab.py board --check` to detect stale files.
+Registry SHA256: `59177b2a5aeb303dd7d3811204fbe56ac3bc4823cac43d03ef81d4bc1d08ef00`. Run `python3 tools/lab.py board --check` to detect stale files.
 
 [Workflow](docs/planning.md) · [All task details](planning/README.md) · [Machine view](state/board.json) · [Status](STATUS.md)
 
@@ -366,7 +366,7 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 | claude-nat065-20261112-ramdisk | NAT-081 | in_progress | 2026-11-12T09:57:40+00:00 | stale | No progress note / Next step not reported | — |
 | claude-nat065-20261112-ramdisk | NAT-078 | in_progress | 2026-11-12T09:50:58+00:00 | stale | The single native run of loader-diag-xnu-rx-md1 (decision 0030) ran 2026-11-12 09:31Z and the phone was restored (NAT-013) and checked (Android up). Delivery PASS on hardware: 2,475,720,704 B in 152.98 s = 16.183 MB/s, 296 chunks, 0 errors/retries, DWC3 DMA into md1 at PA 0x902d7c000 (U5 answered). PID 1 probe: 11 prefix digests (59.6%) equal to the host&#x27;s; the kernel&#x27;s 45 s return cut the whole-image hash, so pre-registered row 3a, evidence outcome inconclusive, task NOT done. Collector archive has two boots and analyze_nat080.py reads the first (row 8 on the whole archive, row 3a on boot 2). Evidence: docs/procedures/nat-078/evidence.json, numbers.json, commit 94e7efe. / Do not rerun: a new run needs a new image and decision. Child tasks: analyser multi-boot fix + probe v2 (NAT-081), stage0 APFS mount of /dev/md1 + whole-image digest (NAT-082), then a native run under its own decision. Release NAT-078 as inconclusive or keep until a passing run of the same acceptance. | handoff: docs/procedures/nat-078/README.md |
 | claude-nat065-20261112-ramdisk | IOS-007 | blocked | 2026-11-12T00:15:39+00:00 | stale | No progress note / Next step not reported | — |
-| claude-opus-nat112-20261113 | KRN-001 | blocked | 2026-11-13T07:17:20+00:00 | stale | Recheck 2026-11-10T08:15Z: NAT-006 was completed by codex-nat-priority-20261110-r1 as a host-only RECOVERY image build; its evidence has no ADT, D22AP /product tree or IPSW input, so blocker (b) is unchanged. Blocker (a) is KRN-043, stopped by the classifier. / Owner runs or allows KRN-043 (python3 -I tools/build/e1s_kernel_exports.py --run canon-a, canon-b, then --compare); owner decides on supplying the D22AP /product tree for payload/ADT validation. | branch: main; handoff: docs/procedures/kernel-build.md |
+| claude-opus-nat112-20261113 | KRN-001 | blocked | 2026-11-13T11:37:46+00:00 | recent | The kernel that runs on the phone is STR-041&#x27;s link + NAT-020 stubs; KRN-044 (done) gives the reproducible one-object rebuild loop for it (docs/procedures/krn-044/rebuild.py), used by NAT-071/NAT-115. Kernel-side work (GPU-007 and the rest that list KRN-001) should depend on KRN-044 and the NAT-line kernel instead; see research/notes/GPU-chain-2026-11-13.md. / Owner decision: retire KRN-001&#x27;s SDK premise; the ledger CLI cannot rewrite GPU-007&#x27;s dependency list | branch: main; handoff: docs/procedures/kernel-build.md |
 | claude-takeover-20261110-6c8f | INT-002 | blocked | 2026-11-10T08:46:05+00:00 | stale | ROOT126 provider+036commonPASS MAIN5e1f;024126 is only remaining actualbody/root125running, no provisionalcredit. Runtime002PASS recordonceCLI0 capsule36e1/Misc0fa78;3programcurrentruntime c5bc exactld10+ROOT91clang5/setseg2, frozen4a8e/no loaderreplay. Immutable916index5e23/126ABSENT,035overrides explicit. Runtime001preparationFAIL retained; future3runtimecommits combinewithfinal024only. / Await ROOT125 terminal and ownerfinal024packet for independentactual126/join1042; then fresh minimalcandidate with exactruntimeb6d4/e663/4a8e source/evidence, rootgrantpub/common only. STR037consumer runtimec5bc/index916 delivered; no source/helper/flags changes/no target/common replay or foreignclosures. | branch: team/int-e1s-profile-20261106; worktree: worktrees/int-e1s-profile-20261106; handoff: worktrees/int-history-iokit-20261106/artifacts/integration-gate/handoff.md |
 | claude-takeover-20261110-6c8f | INT-003 | blocked | 2026-11-10T08:46:46+00:00 | stale | Independent native actual reviews frozen: wave88 osfmk-a26/160 and osfmk-b159/159; root93 libkern77/77; root98 provider315 filtered headers plus32 exact native signatures,315 full26-flag invocations,four export-MIG copies and Firehose14be accepted in6c61b4a. Root98 actual31 resource/cleanup records and665 input hashes matched. Original failed attempts preserved; provider4TUs/2archives and link/privateABI/runtime/hardware remain pending. / CM/root may integrate exact STR018 eight-commit header producer chain through29c11a69 plus independent header review after serialized grant; original SR18 separately prepares four native provider TUs and two archives. No target regeneration, common, publication or namespace mutation authorized by this review. | branch: team/int-platform-20261106; worktree: worktrees/int-platform-20261106; handoff: worktrees/int-platform-20261106/docs/integration/platform/native-provider-headers98-review/handoff.md |
 | claude-takeover-20261110-6c8f | KRN-008 | blocked | 2026-11-10T08:45:24+00:00 | stale | Checkpoint:679/978 actual component objects emit ARM64;925 real compile attempts,246 failures and53 missing generated sources. Four top-level direct objects/archives/link metadata are additional requirements. Independent audit verifies16383 code definitions,2598 dependency files and10674 artifact digests across15 capsules.132 repository tests pass; original10889 compiler sources/198 build inputs/5111 kernel sources and other owners/scopes unchanged. Task remains in_progress. / KRN-009 atomic metadata and KRN-010 coherent MIG generation are ready; preserve compile-session2 and recorded dependency graph, then resolve all remaining component/top-level/generated/link prerequisites. No native capability is qualified. | branch: main; handoff: docs/procedures/xnu-kernel-objects.md |
@@ -386,8 +386,6 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 
 ## Recent activity
 
-- 2026-11-13T07:48:44+00:00 · claude-opus-nat112-20261113 · task.done:NAT-112
-  - NAT-112: Analysis complete: fb_diff=0 is a measurement artifact (5s window never closed in NAT-111 with only 2 swaps). Commit path works correctly. No kernel patch needed.
 - 2026-11-13T08:06:43+00:00 · planner · task.add:NAT-113
   - NAT-113: pending
 - 2026-11-13T09:35:35+00:00 · claude-opus-nat112-20261113 · task.add:NAT-114
@@ -422,6 +420,8 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
   - NAT-115: in_progress
 - 2026-11-13T11:36:10+00:00 · claude-opus-nat115-20261113 · task.done:NAT-115
   - NAT-115: done
+- 2026-11-13T11:37:46+00:00 · claude-opus-nat112-20261113 · task.update:KRN-001
+  - KRN-001: The kernel that runs on the phone is STR-041&#x27;s link + NAT-020 stubs; KRN-044 (done) gives the reproducible one-object rebuild loop for it (docs/procedures/krn-044/rebuild.py), used by NAT-071/NAT-115. Kernel-side work (GPU-007 and the rest that list KRN-001) should depend on KRN-044 and the NAT-line kernel instead; see research/notes/GPU-chain-2026-11-13.md.
 
 Use a unique owner per agent session. Atomically take ready work:
 
