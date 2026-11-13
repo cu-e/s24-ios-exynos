@@ -1,0 +1,69 @@
+From: claude-opus-nat112-20261113
+Date: Wed, 13 Nov 2026 12:20:00 +0500
+Subject: [PATCH] Add MiniIOSurfaceDrawn stub for software renderer
+
+NAT-112: Software renderer surfaces have no GPU fence, so
+MiniIOSurfaceDrawn() should return true immediately when surface->drawn
+is 0 (no GPU work pending).
+
+This is a minimal stub extracted from references/s24-port RedwoodGPU.cpp
+for kernels without GPU support. When GPU backend is added, replace with
+full RedwoodGPU implementation.
+
+Reference: research/notes/NAT-111-root-cause.md
+Evidence: NAT-111 fb_diff=0 despite SpringBoard alive and 2 swaps
+
+---
+ .../iokit/Kernel/MiniIOSurfaceStub.cpp        | 43 +++++++++++++++++++
+ 1 file changed, 43 insertions(+)
+ create mode 100644 references/hakios/xnu/files/iokit/Kernel/MiniIOSurfaceStub.cpp
+
+diff --git a/references/hakios/xnu/files/iokit/Kernel/MiniIOSurfaceStub.cpp b/references/hakios/xnu/files/iokit/Kernel/MiniIOSurfaceStub.cpp
+new file mode 100644
+index 0000000..1234567
+--- /dev/null
++++ b/references/hakios/xnu/files/iokit/Kernel/MiniIOSurfaceStub.cpp
+@@ -0,0 +1,43 @@
++/*
++ * MiniIOSurfaceStub: minimal GPU fence stub for software renderer.
++ *
++ * Software-rendered IOSurfaces have no GPU work (surface->drawn == 0),
++ * so MiniIOSurfaceDrawn() returns true immediately, allowing
++ * MiniIOMobileFramebuffer::show() to copy pixels to framebuffer.
++ *
++ * When GPU backend is integrated, replace this stub with full
++ * RedwoodGPU.cpp from references/s24-port.
++ *
++ * See: NAT-112, research/notes/NAT-111-root-cause.md
++ */
++
++#include <IOKit/IOLib.h>
++#include "MiniIOSurface.h"
++
++/*
++ * Wait for GPU to finish drawing into a surface.
++ *
++ * Returns true when surface pixels are ready to be read/displayed.
++ *
++ * Software renderer path:
++ *   - CoreAnimation renders via CPU into IOSurface
++ *   - No GPU fence is set (surface->drawn remains 0)
++ *   - This function returns true immediately
++ *   - MiniIOMobileFramebuffer::show() proceeds to copy pixels
++ *
++ * Future GPU path:
++ *   - GPU sets surface->drawn to fence value
++ *   - This stub will block real GPU-rendered frames
++ *   - Replace with full RedwoodGPU implementation
++ */
++bool
++MiniIOSurfaceDrawn(MiniIOSurface * surface, uint64_t milliseconds)
++{
++	uint32_t fence = surface->drawn;
++
++	/* No GPU fence → CPU-rendered → ready immediately */
++	if (fence == 0) {
++		return true;
++	}
++
++	/* GPU fence present but no GPU backend: assume ready (TEMPORARY STUB) */

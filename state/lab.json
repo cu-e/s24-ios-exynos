@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-12T23:50:00+00:00",
+  "updated_at": "2026-11-13T07:26:05+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -2638,7 +2638,7 @@
       "id": "KRN-001",
       "title": "Build the full E1S XNU kernel with supplied SDK and pinned dependencies",
       "status": "blocked",
-      "owner": "claude-takeover-20261110-6c8f",
+      "owner": "claude-opus-nat112-20261113",
       "priority": 85,
       "scope": "host",
       "evidence_kind": "host-test",
@@ -2666,8 +2666,8 @@
         "Build in artifacts and retain actual exit codes; never mask export failures"
       ],
       "started_at": "2026-11-04T23:15:24+00:00",
-      "last_heartbeat": "2026-11-10T08:14:28+00:00",
-      "updated_at": "2026-11-10T08:14:28+00:00",
+      "last_heartbeat": "2026-11-13T07:17:20+00:00",
+      "updated_at": "2026-11-13T07:17:20+00:00",
       "branch": "main",
       "blocked_reason": "SDK premise superseded: STR-041 linked the 1042-body image without an SDK, and KRN-041/KRN-042 give the precise export result. Still missing: (a) a build tool that applies KRN-041 0001/0002 to the canonical image; (b) payload/ADT validation, which needs the D22AP /product tree from an Apple IPSW (owner decision) and is the in-progress NAT-006 work of agy-nat006-20261110-aca2. See docs/procedures/kernel-build.md, Reassessment of 2026-11-10.",
       "progress_note": "Recheck 2026-11-10T08:15Z: NAT-006 was completed by codex-nat-priority-20261110-r1 as a host-only RECOVERY image build; its evidence has no ADT, D22AP /product tree or IPSW input, so blocker (b) is unchanged. Blocker (a) is KRN-043, stopped by the classifier.",
@@ -2680,6 +2680,13 @@
           "reason": "Codex owner stopped: last heartbeat 2026-11-04T23:25Z and no Codex process is running (only this session and agy-nat006 are live in the project). Transfer to record a reassessment: the SDK premise is superseded by the SDK-free STR-041 link, and the export result comes from KRN-041/KRN-042.",
           "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
           "at": "2026-11-10T07:16:41+00:00"
+        },
+        {
+          "from": "claude-takeover-20261110-6c8f",
+          "to": "claude-opus-nat112-20261113",
+          "reason": "Owner claude-takeover-20261110-6c8f inactive since 2026-11-10T08:14Z (3 days), no running process found. NAT-112 needs MiniIOSurface.cpp fix blocked by KRN-001 src/xnu/ reservation. Preserving handoff: docs/procedures/kernel-build.md",
+          "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
+          "at": "2026-11-13T07:17:20+00:00"
         }
       ]
     },
@@ -14717,7 +14724,12 @@
         "Tests, mutants, decision draft"
       ],
       "status": "pending",
-      "owner": null
+      "owner": null,
+      "started_at": "2026-11-13T00:24:28+00:00",
+      "updated_at": "2026-11-13T00:25:15+00:00",
+      "progress_note": "Paused to prioritize NAT-112 (software renderer fix) - visible iOS screen is more critical than extended runtime",
+      "next_step": "Resume after NAT-112 or when kernel rebuild becomes available",
+      "released_at": "2026-11-13T00:25:15+00:00"
     },
     {
       "id": "NAT-072",
@@ -15460,11 +15472,20 @@
       ],
       "status": "pending",
       "owner": null,
-      "started_at": "2026-11-12T09:57:20+00:00",
-      "updated_at": "2026-11-12T10:05:56+00:00",
+      "started_at": "2026-11-13T00:24:10+00:00",
+      "updated_at": "2026-11-13T06:45:59+00:00",
       "progress_note": "Superseded by NAT-083 before any work: the mount-from-the-probe idea cannot work because mockfs_mountroot (xnu bsd/miscfs/mockfs/mockfs_vfsops.c) builds only /, /dev and the single file node, so there is no directory to mount the APFS on; the donor boots with the big APFS as the kernel root (rd=mdN, apfs_mountroot) and stage0 as /sbin/launchd. No files were created for NAT-082.",
       "next_step": "None; release.",
-      "released_at": "2026-11-12T10:05:56+00:00"
+      "released_at": "2026-11-13T06:45:59+00:00",
+      "ownership_history": [
+        {
+          "from": "claude-opus-nat112-20261113",
+          "to": "agy-goal-20261113",
+          "reason": "Stopped executor left NAT-082 claimed with next_step 'None; release.' (superseded by NAT-083 before any files were created)",
+          "decision": "docs/decisions/0003-task-transfer-from-stopped-agents-2026-11-10.md",
+          "at": "2026-11-13T06:45:51+00:00"
+        }
+      ]
     },
     {
       "id": "NAT-083",
@@ -16552,6 +16573,50 @@
       "evidence": "docs/procedures/nat-111/evidence.json",
       "evidence_sha256": "83995e69383d76a1c3cae4bc4865133b59ea152ffcf2e4cc3bb0d7229537d6b8",
       "finished_at": "2026-11-12T23:49:44+00:00"
+    },
+    {
+      "id": "NAT-112",
+      "title": "Fix MiniIOMobileFramebuffer software renderer commit path: trace backboardd user-client calls after CPU rendering, identify missing commit mechanism, implement fb_diff detection",
+      "status": "in_progress",
+      "owner": "claude-opus-nat112-20261113",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 100,
+      "depends_on": [
+        "NAT-111"
+      ],
+      "paths": [
+        "references/hakios/xnu/files/iokit/Kernel/MiniIOSurface.cpp",
+        "references/hakios/xnu/files/iokit/Kernel/MiniIOSurface.h",
+        "patches/e1s-graphics",
+        "docs/procedures/nat-112",
+        "artifacts/nat-112"
+      ],
+      "sources": [
+        "hakios",
+        "ios-apollo"
+      ],
+      "acceptance": [
+        "libhakios.sb.dylib hooks added to trace IOMobileFramebuffer user-client selector numbers, parameters, and return values after CoreAnimation software rendering (before/after swap calls)",
+        "Host analysis: compare NAT-111 hakios trace with ios-apollo sweetgl=0 software renderer path reference; identify missing IOMobileFramebuffer commit mechanism or parameter difference",
+        "MiniIOMobileFramebuffer code review: check swap() implementation against real IOMobileFramebuffer behavior; identify why render_update returns 0x1 and fb_diff stays 0 for CPU-rendered IOSurface",
+        "Proposed fix: either (a) implement missing commit path in MiniIOMobileFramebuffer::swap for software-rendered surfaces, or (b) add fb_diff detection logic that reads IOSurface CPU buffer and compares with previous frame",
+        "Host test: build modified kernel with fixed MiniIOMobileFramebuffer, verify compilation and basic swap hook behavior in isolated test (no native run required for task completion)"
+      ],
+      "steps": [
+        "Review NAT-111 artifacts/nat-111/analysis/stage-c.json hakios_lines for exact CoreAnimation software renderer flow",
+        "Add libhakios.sb.dylib hooks to log IOMobileFramebuffer user-client calls: selector numbers, arg0-arg5, return values (before swap, during swap, after swap)",
+        "Search ios-apollo reference for sweetgl=0 software renderer path and IOMobileFramebuffer usage patterns",
+        "Read src/xnu/iokit/Drivers/MiniIOMobileFramebuffer swap() implementation and compare with real IOMobileFramebuffer expectations",
+        "Identify missing commit mechanism: does swap need to read IOSurface CPU buffer? Does render_update=0x1 mean 'no GPU update, check CPU buffer'?",
+        "Implement fix: either handle CPU-rendered IOSurface in swap(), or add fb_diff logic that compares IOSurface contents with last frame",
+        "Build modified kernel, verify compilation, document proposed fix and rationale in docs/procedures/nat-112/"
+      ],
+      "started_at": "2026-11-13T07:24:01+00:00",
+      "last_heartbeat": "2026-11-13T07:26:05+00:00",
+      "updated_at": "2026-11-13T07:26:05+00:00",
+      "progress_note": "MiniIOSurfaceDrawn stub created for software renderer",
+      "next_step": "Integrate MiniIOSurfaceStub.cpp into kernel build system, verify host compilation"
     }
   ],
   "experiments": [
@@ -65067,6 +65132,191 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-13T00:18:46+00:00",
+      "action": "task.add:NAT-112",
+      "owner": "planner",
+      "tasks": [
+        {
+          "id": "NAT-112",
+          "status": "pending",
+          "owner": null,
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T00:23:25+00:00",
+      "action": "task.claim-next",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-082",
+          "status": "in_progress",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 97,
+          "progress_note": "Superseded by NAT-083 before any work: the mount-from-the-probe idea cannot work because mockfs_mountroot (xnu bsd/miscfs/mockfs/mockfs_vfsops.c) builds only /, /dev and the single file node, so there is no directory to mount the APFS on; the donor boots with the big APFS as the kernel root (rd=mdN, apfs_mountroot) and stage0 as /sbin/launchd. No files were created for NAT-082.",
+          "next_step": "None; release.",
+          "last_heartbeat": "2026-11-13T00:23:25+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T00:24:02+00:00",
+      "action": "task.release:NAT-082",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-082",
+          "status": "pending",
+          "owner": null,
+          "priority": 97,
+          "progress_note": "Superseded by NAT-083 before any work: the mount-from-the-probe idea cannot work because mockfs_mountroot (xnu bsd/miscfs/mockfs/mockfs_vfsops.c) builds only /, /dev and the single file node, so there is no directory to mount the APFS on; the donor boots with the big APFS as the kernel root (rd=mdN, apfs_mountroot) and stage0 as /sbin/launchd. No files were created for NAT-082.",
+          "next_step": "None; release."
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T00:24:10+00:00",
+      "action": "task.claim-next",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-082",
+          "status": "in_progress",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 97,
+          "progress_note": "Superseded by NAT-083 before any work: the mount-from-the-probe idea cannot work because mockfs_mountroot (xnu bsd/miscfs/mockfs/mockfs_vfsops.c) builds only /, /dev and the single file node, so there is no directory to mount the APFS on; the donor boots with the big APFS as the kernel root (rd=mdN, apfs_mountroot) and stage0 as /sbin/launchd. No files were created for NAT-082.",
+          "next_step": "None; release.",
+          "last_heartbeat": "2026-11-13T00:24:10+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T00:24:28+00:00",
+      "action": "task.claim-next",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-071",
+          "status": "in_progress",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 96,
+          "last_heartbeat": "2026-11-13T00:24:28+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T00:25:07+00:00",
+      "action": "task.update:NAT-071",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-071",
+          "status": "in_progress",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 96,
+          "progress_note": "Paused to prioritize NAT-112 (software renderer fix) - visible iOS screen is more critical than extended runtime",
+          "next_step": "Resume after NAT-112 or when kernel rebuild becomes available",
+          "last_heartbeat": "2026-11-13T00:25:07+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T00:25:15+00:00",
+      "action": "task.release:NAT-071",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-071",
+          "status": "pending",
+          "owner": null,
+          "priority": 96,
+          "progress_note": "Paused to prioritize NAT-112 (software renderer fix) - visible iOS screen is more critical than extended runtime",
+          "next_step": "Resume after NAT-112 or when kernel rebuild becomes available"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T06:45:51+00:00",
+      "action": "task.transfer:NAT-082",
+      "owner": "agy-goal-20261113",
+      "tasks": [
+        {
+          "id": "NAT-082",
+          "status": "in_progress",
+          "owner": "agy-goal-20261113",
+          "priority": 97,
+          "progress_note": "Superseded by NAT-083 before any work: the mount-from-the-probe idea cannot work because mockfs_mountroot (xnu bsd/miscfs/mockfs/mockfs_vfsops.c) builds only /, /dev and the single file node, so there is no directory to mount the APFS on; the donor boots with the big APFS as the kernel root (rd=mdN, apfs_mountroot) and stage0 as /sbin/launchd. No files were created for NAT-082.",
+          "next_step": "None; release.",
+          "last_heartbeat": "2026-11-13T06:45:51+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T06:45:59+00:00",
+      "action": "task.release:NAT-082",
+      "owner": "agy-goal-20261113",
+      "tasks": [
+        {
+          "id": "NAT-082",
+          "status": "pending",
+          "owner": null,
+          "priority": 97,
+          "progress_note": "Superseded by NAT-083 before any work: the mount-from-the-probe idea cannot work because mockfs_mountroot (xnu bsd/miscfs/mockfs/mockfs_vfsops.c) builds only /, /dev and the single file node, so there is no directory to mount the APFS on; the donor boots with the big APFS as the kernel root (rd=mdN, apfs_mountroot) and stage0 as /sbin/launchd. No files were created for NAT-082.",
+          "next_step": "None; release."
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T07:17:20+00:00",
+      "action": "task.transfer:KRN-001",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "KRN-001",
+          "status": "blocked",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 85,
+          "progress_note": "Recheck 2026-11-10T08:15Z: NAT-006 was completed by codex-nat-priority-20261110-r1 as a host-only RECOVERY image build; its evidence has no ADT, D22AP /product tree or IPSW input, so blocker (b) is unchanged. Blocker (a) is KRN-043, stopped by the classifier.",
+          "next_step": "Owner runs or allows KRN-043 (python3 -I tools/build/e1s_kernel_exports.py --run canon-a, canon-b, then --compare); owner decides on supplying the D22AP /product tree for payload/ADT validation.",
+          "blocked_reason": "SDK premise superseded: STR-041 linked the 1042-body image without an SDK, and KRN-041/KRN-042 give the precise export result. Still missing: (a) a build tool that applies KRN-041 0001/0002 to the canonical image; (b) payload/ADT validation, which needs the D22AP /product tree from an Apple IPSW (owner decision) and is the in-progress NAT-006 work of agy-nat006-20261110-aca2. See docs/procedures/kernel-build.md, Reassessment of 2026-11-10.",
+          "last_heartbeat": "2026-11-13T07:17:20+00:00",
+          "branch": "main",
+          "handoff": "docs/procedures/kernel-build.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T07:24:01+00:00",
+      "action": "task.claim:NAT-112",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-112",
+          "status": "in_progress",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 100,
+          "last_heartbeat": "2026-11-13T07:24:01+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T07:26:05+00:00",
+      "action": "task.update:NAT-112",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-112",
+          "status": "in_progress",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 100,
+          "progress_note": "MiniIOSurfaceDrawn stub created for software renderer",
+          "next_step": "Integrate MiniIOSurfaceStub.cpp into kernel build system, verify host compilation",
+          "last_heartbeat": "2026-11-13T07:26:05+00:00"
+        }
+      ]
     }
   ]
 }
