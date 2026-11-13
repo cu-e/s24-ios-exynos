@@ -1,0 +1,79 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-13T14:10:00+00:00",
+  "task": "NAT-119",
+  "owner": "claude-opus-nat116-20261113",
+  "summary": "Built loader-diag-xnu-sc6-md1: kernel DECON0 HW-form kick from the timed-window start and the 10 s heartbeat (writes only TRIG_CON/SHD_REG_UP_REQ, guarded, max 64), loader stops drawing marker bands after the kernel's return (flag; 18 inlined checks and 1 store in nat062_dump_log verified with capstone). RECOVERY e430d54e..., payload 4175a7ff....",
+  "not_established": [
+    "that the panel refreshes after the kernel's kick (NAT-120)",
+    "that the whole home screen becomes visible (owner observation in NAT-120)"
+  ],
+  "checks": [
+    {
+      "cmd": "python3 docs/procedures/krn-044/rebuild.py --out artifacts/nat-119/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-119/kernel-combined.patch --expect-string 'e1s_decon: kick %u GLOBAL_CON' --expect-string 'e1s_wdt: fed every 10 s for %u s'",
+      "exit_code": 0
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-119/build.py --out artifacts/nat-119/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+      "exit_code": 0,
+      "note": "first attempt (exit 1) applied the loader rule before glue113 was in; fixed to apply after"
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-044/package.py --build artifacts/nat-119/build-001 --out artifacts/nat-119/package-001",
+      "exit_code": 0
+    },
+    {
+      "cmd": "capstone scan of loader.elf for nat119_no_draw (0x5ea50)",
+      "exit_code": 0,
+      "output": "18 ldrb, 1 strb (0x12558 in nat062_dump_log)"
+    },
+    {
+      "cmd": "capstone scan of compiled loader_return.o _e1s_decon_kick stores",
+      "exit_code": 0,
+      "output": "MMIO stores at +0x30, +0x50, +0x30 only"
+    },
+    {
+      "cmd": "python3 -B -I docs/procedures/nat-119/test_nat119.py",
+      "exit_code": 0,
+      "output": "11 tests OK"
+    },
+    {
+      "cmd": "python3 -B -I docs/procedures/nat-119/mutate_nat119.py",
+      "exit_code": 0,
+      "output": "{\"total\": 7, \"killed\": 7, \"survived\": []}"
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-119/derive119.py --check; session_nat119.py without decision",
+      "exit_code": 2,
+      "output": "9 substitutions; stopped: decision missing, no device access"
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/nat-119/build.py",
+    "docs/procedures/nat-119/kernel-combined.patch",
+    "docs/procedures/nat-119/analyze120.py",
+    "docs/procedures/nat-119/test_nat119.py",
+    "docs/procedures/nat-119/mutate_nat119.py",
+    "docs/procedures/nat-119/derive119.py",
+    "docs/procedures/nat-119/session_nat119.py",
+    "artifacts/nat-119/kernel-001/rebuild.json",
+    "artifacts/nat-119/build-001/build.json",
+    "artifacts/nat-119/package-001/package.json",
+    "research/notes/NAT-118-owner-panel-observation.md"
+  ],
+  "artifact_hashes": {
+    "docs/procedures/nat-119/build.py": "5ce3fbb0b711cb9fcc93454e58c49794630dce4c7ed24e9b4dc72c66f636d9fa",
+    "docs/procedures/nat-119/kernel-combined.patch": "c5732d303af380f2d3e2d78dee78c0429a870162c36470472483bffdb8421385",
+    "docs/procedures/nat-119/analyze120.py": "b0718235f28488b74c6d701a5581c819576a7d43676ce5517c309d0fc0c80818",
+    "docs/procedures/nat-119/test_nat119.py": "61c574c190a5484b90df43c9cb2b28f361661e2819ec315b959a300fb1e4f10d",
+    "docs/procedures/nat-119/mutate_nat119.py": "665a88d621a7653c098b922798d6d2049ab800880876e1ce5ee22449faa1e69d",
+    "docs/procedures/nat-119/derive119.py": "0171fd9ac9f0cf409cdea459bc4b446dcdf4a503a145ca9f131a5045393827aa",
+    "docs/procedures/nat-119/session_nat119.py": "53af082d56d85d3bb2edc43757bb4ceab6222f6e4286916334deec6278bf5858",
+    "artifacts/nat-119/kernel-001/rebuild.json": "5227220e35af086986288857d560fd2cc739e699808280a4fdd480e45ab05d2f",
+    "artifacts/nat-119/build-001/build.json": "c28e1a663e911b463efb78c7cbd762dae026db0cb970c67df8f9318f366420f7",
+    "artifacts/nat-119/package-001/package.json": "6721a0426a421c337e930a816cfc5674013e36b7f2259488500174737bc5fdd0",
+    "research/notes/NAT-118-owner-panel-observation.md": "8e5cd65d9ac3c5f5efcc920eec6a09232272863be611a1682143e53d2b3c10cc"
+  }
+}
