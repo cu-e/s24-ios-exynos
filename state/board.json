@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-13T10:01:59+00:00",
-  "ledger_updated_at": "2026-11-13T09:58:43+00:00",
-  "registry_sha256": "287f764f9b852adb1cf8339ad966c70068635e11f6dfcf2c26291662ebb91c2c",
+  "generated_at": "2026-11-13T10:03:13+00:00",
+  "ledger_updated_at": "2026-11-13T10:02:30+00:00",
+  "registry_sha256": "4fb05b318f58119026734626b84e0cc0653efb5248d70d0a9349cceb28549cfa",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -14,7 +14,6 @@
     ],
     "in_progress": [
       "NAT-103",
-      "NAT-113",
       "NAT-098",
       "NAT-093",
       "NAT-088",
@@ -170,6 +169,7 @@
       "NAT-110",
       "NAT-111",
       "NAT-112",
+      "NAT-113",
       "NAT-114",
       "KRN-010",
       "KRN-012",
@@ -3948,7 +3948,7 @@
     {
       "id": "NAT-113",
       "title": "Stage C3: 120 s run with framebuffer recording — confirm visible iOS pixels",
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude-opus-nat113-run-20261113",
       "priority": 100,
       "scope": "native",
@@ -3979,11 +3979,13 @@
       "notes": "cpus=1 means loader pauses Samsung S5E9945 WDT before jumping to kernel — no hardware watchdog during kernel run, 120 s is safe. Recording extracted via new oem-recording USB path after loader_return. rec_mb=64 fits ~7 full 1125x2436 BGRA frames; rec_ring=1 keeps last 7. cmdline budget: 252 bytes.",
       "started_at": "2026-11-13T09:46:51+00:00",
       "last_heartbeat": "2026-11-13T09:46:51+00:00",
-      "updated_at": "2026-11-13T09:46:51+00:00",
-      "column": "in_progress",
+      "updated_at": "2026-11-13T10:02:21+00:00",
+      "evidence": "docs/procedures/nat-113/evidence.json",
+      "evidence_sha256": "3e3639910c3c968e7f82d6ffcd170a3e63b2ef0c49194a92269db1ab7702c444",
+      "finished_at": "2026-11-13T10:02:21+00:00",
+      "column": "done",
       "reasons": [],
-      "card_path": "planning/tasks/NAT-113.md",
-      "report_health": "recent"
+      "card_path": "planning/tasks/NAT-113.md"
     },
     {
       "id": "NAT-114",
@@ -17244,7 +17246,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-005, IOS-007, NAT-078, NAT-081, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103, NAT-113"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-005, IOS-007, NAT-078, NAT-081, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -17283,7 +17285,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-007, NAT-078, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103, NAT-113"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-007, NAT-078, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -18247,19 +18249,6 @@
         "worktree": "/home/egor/dev/pet/s24-ios-exynos"
       }
     ],
-    "claude-opus-nat113-run-20261113": [
-      {
-        "id": "NAT-113",
-        "status": "in_progress",
-        "last_heartbeat": "2026-11-13T09:46:51+00:00",
-        "report_health": "recent",
-        "progress_note": null,
-        "next_step": null,
-        "handoff": null,
-        "branch": null,
-        "worktree": null
-      }
-    ],
     "claude-nat065-20261112-ramdisk": [
       {
         "id": "NAT-098",
@@ -18454,51 +18443,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-13T00:24:02+00:00",
-      "action": "task.release:NAT-082",
-      "owner": "claude-opus-nat112-20261113",
-      "tasks": [
-        {
-          "id": "NAT-082",
-          "status": "pending",
-          "owner": null,
-          "priority": 97,
-          "progress_note": "Superseded by NAT-083 before any work: the mount-from-the-probe idea cannot work because mockfs_mountroot (xnu bsd/miscfs/mockfs/mockfs_vfsops.c) builds only /, /dev and the single file node, so there is no directory to mount the APFS on; the donor boots with the big APFS as the kernel root (rd=mdN, apfs_mountroot) and stage0 as /sbin/launchd. No files were created for NAT-082.",
-          "next_step": "None; release."
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T00:24:10+00:00",
-      "action": "task.claim-next",
-      "owner": "claude-opus-nat112-20261113",
-      "tasks": [
-        {
-          "id": "NAT-082",
-          "status": "in_progress",
-          "owner": "claude-opus-nat112-20261113",
-          "priority": 97,
-          "progress_note": "Superseded by NAT-083 before any work: the mount-from-the-probe idea cannot work because mockfs_mountroot (xnu bsd/miscfs/mockfs/mockfs_vfsops.c) builds only /, /dev and the single file node, so there is no directory to mount the APFS on; the donor boots with the big APFS as the kernel root (rd=mdN, apfs_mountroot) and stage0 as /sbin/launchd. No files were created for NAT-082.",
-          "next_step": "None; release.",
-          "last_heartbeat": "2026-11-13T00:24:10+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T00:24:28+00:00",
-      "action": "task.claim-next",
-      "owner": "claude-opus-nat112-20261113",
-      "tasks": [
-        {
-          "id": "NAT-071",
-          "status": "in_progress",
-          "owner": "claude-opus-nat112-20261113",
-          "priority": 96,
-          "last_heartbeat": "2026-11-13T00:24:28+00:00"
-        }
-      ]
-    },
     {
       "at": "2026-11-13T00:25:07+00:00",
       "action": "task.update:NAT-071",
@@ -18744,11 +18688,47 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-13T10:02:13+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-nat113-run-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-13T10:02:21+00:00",
+      "action": "task.done:NAT-113",
+      "owner": "claude-opus-nat113-run-20261113",
+      "tasks": [
+        {
+          "id": "NAT-113",
+          "status": "done",
+          "owner": "claude-opus-nat113-run-20261113",
+          "priority": 100,
+          "last_heartbeat": "2026-11-13T09:46:51+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T10:02:30+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-nat113-run-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
     }
   ],
   "view_sha256": {
-    "STATUS.md": "63e988d80a1a182753d7e5be08c74b099158cb42fecb55aba886cf748e6b8c99",
-    "BOARD.md": "d965b816b7c20587df5f513fec6d002bb23aeec9f014352e2ad10a10e2afd7bf",
+    "STATUS.md": "f17437253c5f91287837ac1ddd5f62978efac4918d3044765aca16023ea50cfe",
+    "BOARD.md": "0faa8a976373000a6564ceac51a6e30860c29b94cfedf1eb036e540a3e908813",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -18829,7 +18809,7 @@
     "planning/tasks/NAT-110.md": "565a63749f0db4046c0aab98d47cdc258d9127daec3a641e7fd6ad2704dc995c",
     "planning/tasks/NAT-111.md": "8f53f24a3313c7cf62b12e715e9722bd3dfec9649be85f1da79ecdad055bfc3f",
     "planning/tasks/NAT-112.md": "ce9c2bd831a8139c8db981ad222087f482df30d222072337bc4de67fe57493ac",
-    "planning/tasks/NAT-113.md": "089673ae10df6cfaf10b8303c0f87a59ea3b0bc7c4d89c8f2d60c3129df20a9a",
+    "planning/tasks/NAT-113.md": "b2dd584c65f0ad646c766b62e72b5f8c548f6e77b42b8c58e9771fe2d9ba4ab8",
     "planning/tasks/NAT-114.md": "6252561645d21f92395ec7d776106cc4fc182b9a07b53af3f8ae611aceb461f9",
     "planning/tasks/KRN-008.md": "36d33f795d9569f340f53a5e0a909dc8efcdc5024c9133ccd614a6de5af22894",
     "planning/tasks/KRN-010.md": "4f479284d71242353a2a95508bac0b5304468c6ee44704b7561bc32cee8e1832",
@@ -19136,8 +19116,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "b1f03bdc218632502dc878b3ced63258ffa8d26a24632fee64b890fb622b9d14",
-    "planning/tasks/DRV-003.md": "6c27f77314d1d36a28f45e026c8734b63b81ec04f215206d07109247e71e4bc3",
+    "planning/tasks/NAT-003.md": "ed6e4313d34cf7a5e229e72a5d510e0d70edd4a7e8aa552809a0cf3575f21883",
+    "planning/tasks/DRV-003.md": "299bf973366a5683809f3421690d310e78b46012ea1ebb9558738a6863d63c3d",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",
