@@ -1,0 +1,94 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "fail",
+ "recorded_at": "2026-11-13T22:09:03.517380+00:00",
+ "task": "NAT-146",
+ "summary": "scE (ten CPUs in the ADT, no cpus=1) ran once under decision 0059: root delivered at 38.114 MB/s, then both kernel boots stopped inside ml_parse_cpu_topology() (last loader checkpoint 35, NAT-144 passes to 12, 40, ...), before the console, watchdog feed and any PSCI call; bootloader watchdog reset ~86-89 s after the jump into SEC_UPLOAD, whose automatic restart booted RECOVERY again (loop broken by the owner into Download Mode). Source-review cause: all ten /cpus nodes have state \"running\", so ml_is_boot_cpu() takes cpu1 as a second boot CPU and assert(topology_info.boot_cpu == NULL) fails. Stock RECOVERY restored, Android verified.",
+ "commit": "46c4998",
+ "device_used": true,
+ "decision": "docs/decisions/0059-nat146-loader-diag-xnu-scE-md1-single-run-2026-11-14.md",
+ "device_inventory": "devices/local-2026-11-14-nat146.json",
+ "image": {
+  "recovery_sha256": "ffa91748d09482c3f34de61ff0c6e2538001624cf963652157cbcb8cf71ec80f",
+  "kernel_sha256": "6aa8b6eb27009e16d0e7a618c5e4becca6f36561ac5b632912bdda13078fd100",
+  "payload_adt_sha256": "0c109c99f586cdb74cf504b6d4f64b4f011bcbc970b6b4e6730f07b1135d9bb6"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-145/session_nat146.py --out artifacts/nat-146/preflight-001 --image loader-diag-xnu-scE-md1",
+   "exit_code": 0,
+   "result": "ready-read-only, stock RECOVERY 96620b8b\u2026bf67, battery 84"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/nat-145/session_nat146.py --out artifacts/nat-146/run-001 --image loader-diag-xnu-scE-md1 --execute",
+   "exit_code": 0,
+   "result": "native-attempt-started; readback ffa91748\u2026c80f; delivered 2475720704 B at 38.114 MB/s"
+  },
+  {
+   "cmd": "owner physical action: Volume Down + Side forced restart, then Volume Up + Volume Down, Volume Up (Download Mode)",
+   "exit_code": null,
+   "result": "Download Mode 04e8:685d \"SAMSUNG USB\" at 02:57:20 local"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 18 --out artifacts/nat-146/restore-001/restore-trace",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-146/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-146/restore-001/report.json --readback artifacts/nat-146/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "checkpoint records from archive/boots/*/payload.bin (CK n=... last=...)",
+   "exit_code": 0,
+   "result": "boot1 and boot2 last=35 at record 12; NAT-144 boot1 last=21 at record 27"
+  }
+ ],
+ "limits": [
+  "No kernel ring (no timed return, no log dump); the assertion is a source-review explanation pending NAT-147 model check",
+  "Nothing measured about PSCI, secondaries or frame rate",
+  "Boot loop through SEC_UPLOAD needed the owner's buttons"
+ ],
+ "artifacts": [
+  "docs/procedures/nat-146/README.md",
+  "docs/procedures/nat-146/task.json",
+  "docs/decisions/0059-nat146-loader-diag-xnu-scE-md1-single-run-2026-11-14.md",
+  "artifacts/nat-146/run-001/report.json",
+  "artifacts/nat-146/run-001/usb-events.jsonl",
+  "artifacts/nat-146/run-001/delivery/delivery.json",
+  "artifacts/nat-146/run-001/archive/collector-summary.json",
+  "artifacts/nat-146/run-001/archive/manifest.json",
+  "artifacts/nat-146/restore-001/report.json",
+  "artifacts/nat-146/restore-001/android-check.json",
+  "artifacts/nat-146/restore-001/assess.json",
+  "artifacts/nat-146/native-attempt-loader-diag-xnu-scE-md1-used.json",
+  "devices/local-2026-11-14-nat146.json",
+  "artifacts/nat-146/run-001/archive/boots/000001-ab7bfe42b43230e0f0afaf9b29872710-1fa8b819000000001344dc674365347c/payload.bin",
+  "artifacts/nat-146/run-001/archive/boots/000002-89c4761c5f49f1b86badf45362ab1e60-abab4711000000001344dc674365347c/payload.bin",
+  "artifacts/nat-146/run-001/archive/boots/000003-7fe119cdcdd7d34e6c8df1041f54945a-653b161f000000001344dc674365347c/payload.bin"
+ ],
+ "artifact_hashes": {
+  "docs/procedures/nat-146/README.md": "2ea701cc6741f1c90ec426340119fc91709cfb227969ece96f21d8ee2975c9ec",
+  "docs/procedures/nat-146/task.json": "87740112deb83ce2e3448963ac874f29651c32be85b448819f2998380d6c8bb4",
+  "docs/decisions/0059-nat146-loader-diag-xnu-scE-md1-single-run-2026-11-14.md": "09b4ef6cb51723b6aa2ab9fce4dcdd014881551a7692df7efdf5531bc88a13c4",
+  "artifacts/nat-146/run-001/report.json": "0632e8757d43b35998cfeef433237f678a0a9d81f95d9f3dcb78e9198a52cbe6",
+  "artifacts/nat-146/run-001/usb-events.jsonl": "568da13a51fc7573afcbc5922119dc87e463d0537987621c481684d22eda137c",
+  "artifacts/nat-146/run-001/delivery/delivery.json": "9fca2c0741aeed5e0d9124466d76db418e4ba2c49392b7c8f19531929bb3d342",
+  "artifacts/nat-146/run-001/archive/collector-summary.json": "01d3ebc5b35f9ed5708f58771915ff8fa4d23ba6e67968f0a01b390c33b60ff3",
+  "artifacts/nat-146/run-001/archive/manifest.json": "c604d8d7d31938408645f38412b6b6166ec427ce8b82073421effdfc3150aec2",
+  "artifacts/nat-146/restore-001/report.json": "6881aafdef45a381c61817d1962aa9e3aa6bc8f287c520113ec1a98c81194e69",
+  "artifacts/nat-146/restore-001/android-check.json": "6cd0783aac14f664c27dd3e4219816644c75501d3963df773466e466127a9568",
+  "artifacts/nat-146/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "artifacts/nat-146/native-attempt-loader-diag-xnu-scE-md1-used.json": "583b83b141f696d45f106ae4f6899e2d8f96e4d6f670346c8fa1f66a741f156f",
+  "devices/local-2026-11-14-nat146.json": "70111bb943af2bdd8d4034db7971a33eefaed9599a7dca3e11c9d988a435f196",
+  "artifacts/nat-146/run-001/archive/boots/000001-ab7bfe42b43230e0f0afaf9b29872710-1fa8b819000000001344dc674365347c/payload.bin": "3434dccf3c1ffd63985429fcacc0d80480ad5604cf36bee383f756ca5407d747",
+  "artifacts/nat-146/run-001/archive/boots/000002-89c4761c5f49f1b86badf45362ab1e60-abab4711000000001344dc674365347c/payload.bin": "1309d4ef333d176c9ad037a431de9d42809583df455e9c4eefb6316494475231",
+  "artifacts/nat-146/run-001/archive/boots/000003-7fe119cdcdd7d34e6c8df1041f54945a-653b161f000000001344dc674365347c/payload.bin": "acb34f0458bca008d6deae35c3cd164697db29d8817d18b5d08dd2c1de2a44ae"
+ }
+}
