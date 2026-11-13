@@ -1,0 +1,58 @@
+{
+  "kind": "native-device",
+  "origin": "local-device",
+  "outcome": "pass",
+  "recorded_at": "2026-11-13T16:08:04.864047+00:00",
+  "task": "NAT-127",
+  "summary": "No-PMIC sc9 restored launchd, retained 73 recording frames and owner-observed entire physical iOS home screen. STM no response; no input/acceleration/60 FPS claim. Stock RECOVERY and Android checks passed; permit closed.",
+  "commit": "54e6bc8f26eaf72062cd1fbaa79bb9f03a2b58d1",
+  "device_inventory": "devices/local-2026-11-13-nat127.json",
+  "owner_observation": "\u0412\u0438\u0434\u0435\u043b \u0434\u043e\u043c\u0430\u0448\u043d\u0438\u0439 \u044d\u043a\u0440\u0430\u043d iOS \u0446\u0435\u043b\u0438\u043a\u043e\u043c",
+  "decision": "docs/decisions/0051-nat127-loader-diag-xnu-sc9-md1-single-run-2026-11-13.md",
+  "checks": [
+    {
+      "cmd": "session_nat126.py --out artifacts/nat-127/run-001 --image loader-diag-xnu-sc9-md1 --execute",
+      "exit_code": 0
+    },
+    {
+      "cmd": "nat-012/restore_stock.py --bus 5 --address 59 --out artifacts/nat-127/restore-001/restore-trace",
+      "exit_code": 0
+    },
+    {
+      "cmd": "check_android.py artifacts/nat-127/restore-001/android-check.json",
+      "exit_code": 0
+    },
+    {
+      "cmd": "nat-013/restore_stock.py assess",
+      "exit_code": 0,
+      "result": "pass"
+    },
+    {
+      "cmd": "nat-123/analyze124.py",
+      "exit_code": 0,
+      "result": "W-ok D2-refreshing F1-new-frame T1-no-response P0-no-verified-rails"
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/nat-127/README.md",
+    "artifacts/nat-127/run-001/report.json",
+    "artifacts/nat-127/run-001/delivery/delivery.json",
+    "artifacts/nat-127/analysis/kernel-text.txt",
+    "artifacts/nat-127/analysis/pixels.json",
+    "artifacts/nat-127/analysis/verdict.json",
+    "artifacts/nat-127/restore-001/report.json",
+    "artifacts/nat-127/restore-001/android-check.json",
+    "artifacts/nat-127/restore-001/assess.json"
+  ],
+  "artifact_hashes": {
+    "docs/procedures/nat-127/README.md": "54f14f309b9c369790bd4d2490e3657d6eb5acd3daecc5fb0a078a45392ec71a",
+    "artifacts/nat-127/run-001/report.json": "5322f41829e6911ac6ce7d0ec240183da505ecb6da9ed804d5335108c4422137",
+    "artifacts/nat-127/run-001/delivery/delivery.json": "20ec62fc50d61ecc714523e13886219f8a1dbfec678ba8d3d3e8dccbe1e849ab",
+    "artifacts/nat-127/analysis/kernel-text.txt": "d8c1461283f1b78bc4d8862a02e13428ca1cea26a61055382c97fea1a7879781",
+    "artifacts/nat-127/analysis/pixels.json": "b48914d9378d3b22bce232f8bf34e8b24dc6fdac581023dbb4560d5750d9554a",
+    "artifacts/nat-127/analysis/verdict.json": "1682393026b64533a9273494ee9170135161d4618e5da482b182f71670481ec4",
+    "artifacts/nat-127/restore-001/report.json": "d57e9a62daed5749900eec009cd71affb93ef7bf5d00c8aee6543703f927df5b",
+    "artifacts/nat-127/restore-001/android-check.json": "b8587ede57363de0c35ec87b8db1a3b8bf12be3f1f9a5cecdd8f8d30a41929a5",
+    "artifacts/nat-127/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a"
+  }
+}
