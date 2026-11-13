@@ -1,0 +1,76 @@
+{
+  "kind": "native-device",
+  "origin": "local-device",
+  "outcome": "pass",
+  "device_inventory": "devices/local-2026-11-13-nat122.json",
+  "recorded_at": "2026-11-13T14:50:00+00:00",
+  "task": "NAT-122",
+  "owner": "claude-opus-nat116-20261113",
+  "decision": "docs/decisions/0048-nat122-loader-diag-xnu-sc7-md1-single-run-2026-11-13.md",
+  "image": {
+    "name": "loader-diag-xnu-sc7-md1",
+    "recovery_sha256": "f62c3c9ec38d0557492235cc00520c3e035f3b10ad883e9b7652dda376c2301b"
+  },
+  "summary": "Fixed touch driver ran steps 1-2 without fault; S-Boot leaves gpp9 as inputs with pull-down and the touch IRQ low; STM device id 00x5 (no response); backboardd opened /dev/hakios-touch and created the HID touch service. Display 120 Hz, iOS home screen. Stock RECOVERY restored.",
+  "verdicts": {
+    "analyze122": "W-ok / D2-refreshing / F1-new-frame / T1-no-response, reader_opened"
+  },
+  "not_established": [
+    "touch controller response (likely rails LDO9/LDO18 off)",
+    "touch reaching iOS"
+  ],
+  "checks": [
+    {
+      "cmd": "python3 docs/procedures/nat-121/session_nat121.py --out artifacts/nat-122/preflight-001 --image loader-diag-xnu-sc7-md1",
+      "exit_code": 0,
+      "outcome": "ready-read-only"
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-121/session_nat121.py --out artifacts/nat-122/run-001 --image loader-diag-xnu-sc7-md1 --execute",
+      "exit_code": 0
+    },
+    {
+      "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 5 --address 53 --out artifacts/nat-122/restore-001/restore-trace",
+      "exit_code": 0
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-122/restore-001/android-check.json",
+      "exit_code": 0,
+      "outcome": "pass"
+    },
+    {
+      "cmd": "nat-013/restore_stock.py assess",
+      "exit_code": 0,
+      "outcome": "pass"
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-121/analyze122.py --kernel-text artifacts/nat-122/analysis/kernel-text.txt --pixels artifacts/nat-122/analysis/pixels.json --out artifacts/nat-122/analysis/verdict.json",
+      "exit_code": 0
+    },
+    {
+      "cmd": "adb shell su -c 'cat /sys/class/regulator/*/{name,state,microvolts,num_users}' (vdd_ldo9, vdd_ldo18)",
+      "exit_code": 0,
+      "output": "both enabled in Android, 3.0 V / 1.8 V, 1 user"
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/nat-122/README.md",
+    "artifacts/nat-122/run-001/report.json",
+    "artifacts/nat-122/analysis/kernel-text.txt",
+    "artifacts/nat-122/analysis/pixels.json",
+    "artifacts/nat-122/analysis/verdict.json",
+    "artifacts/nat-122/restore-001/report.json",
+    "artifacts/nat-122/restore-001/assess.json",
+    "artifacts/nat-122/restore-001/android-check.json"
+  ],
+  "artifact_hashes": {
+    "docs/procedures/nat-122/README.md": "eca8c07e2bb1bf3e32c4a923b2f0eaad10f6cc8b501e7fb06e2ce34643efe70a",
+    "artifacts/nat-122/run-001/report.json": "242a9c17795e75295c7862108565df66ba7dcb73fb77f8e15f1eaf7beb26c4a8",
+    "artifacts/nat-122/analysis/kernel-text.txt": "d5c7794d14f7a3f2acc5f10134d9dacbc97d6727fe490d7aba47f47b31fa0356",
+    "artifacts/nat-122/analysis/pixels.json": "ca8a80eeb1a3f159492afe4998bc810fa288eee97edee7f67342c9f2b121ab38",
+    "artifacts/nat-122/analysis/verdict.json": "752c47eccb71e1409975d2edb7f4f5a05ba9d6cadabcec347796b5b667b9fc5e",
+    "artifacts/nat-122/restore-001/report.json": "0a25b8e75940ae23d954d41ec056622f2748517dcec9b6c7aea4831723e84054",
+    "artifacts/nat-122/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+    "artifacts/nat-122/restore-001/android-check.json": "9746d409a295555d9e4e8fae72ecdda36252f4503ae6a97cd026beb69fa1908b"
+  }
+}
