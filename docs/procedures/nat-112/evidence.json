@@ -1,0 +1,24 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-13T13:00:00+00:00",
+  "summary": "NAT-112 analysis: fb_diff=0 in NAT-111 is a measurement artifact. The 5-second statistics window never closed (only 2 swaps in 0.53s). drawLayer() was called with valid 1125x2436 BGRA surfaces. MiniIOSurfaceDrawn() returns true for CPU-rendered surfaces (fence==0). The commit path works correctly. No kernel patch needed. Stopped-executor takeover procedure documented in docs/agent-workflow.md.",
+  "task": "NAT-112",
+  "owner": "claude-opus-nat112-20261113",
+  "artifacts": [
+    "research/notes/NAT-112-corrected-analysis.md",
+    "research/notes/NAT-111-root-cause.md",
+    "docs/agent-workflow.md",
+    "patches/e1s-graphics/0001-software-renderer-fence-stub.patch"
+  ],
+  "findings": {
+    "fb_diff_mechanism": "Statistics printed only when nanos >= 5*NSEC_PER_SEC inside show(); NAT-111 had 2 swaps in 0.53s, window never closed",
+    "drawLayer_called": true,
+    "surface_format": "1125x2436 BGRA (valid)",
+    "MiniIOSurfaceDrawn_behavior": "Returns true when surface->drawn==0 (no GPU fence, CPU-rendered)",
+    "render_update_return": "0x1 (success)",
+    "commit_path_broken": false,
+    "next_experiment": "rec_secs=30 rec_start=30 rec_mb=64 rec_ring=1 with loader_return_after=120 to capture actual frames"
+  }
+}
