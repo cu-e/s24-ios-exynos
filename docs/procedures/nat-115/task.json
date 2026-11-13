@@ -1,0 +1,18 @@
+{
+  "id": "NAT-115",
+  "title": "Host: diagnose why no frame follows the Apple logo (NAT-113) and build the next image loader-diag-xnu-sc4-md1: KRN-044-rebuilt kernel with NAT-071's watchdog feed and a wait-state dump of SpringBoard/backboardd/lsd/... before the timed return, loader_return_after=150 (kernel cuts to 63 s itself if the feed is not proven), rec_secs=150; package, derived session driver, pass rule fixed in advance, decision draft; no phone action",
+  "status": "pending",
+  "owner": null,
+  "priority": 99,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": ["NAT-113", "KRN-044", "NAT-071"],
+  "paths": ["docs/procedures/nat-115", "artifacts/nat-115"],
+  "acceptance": [
+    "research/notes/NAT-115-post-logo-diagnosis.md lists what NAT-113's log shows after 229.18 s and hypotheses H1-H4 with the observation deciding each; none is claimed",
+    "the image is built from NAT-113's build by a wrapper that changes only the listed items (kernel swap counted exactly once; cmdline < 256 B checked; deadline 475 s); the kernel is KRN-044's rebuild of the committed patch, its hash recorded",
+    "host tests: NAT-071's feed tests pass on the combined patch; the wait dump compiles into the kernel and its strings are in the binary; session driver derived by counted substitutions and refusing without a decision file",
+    "decision draft with the pass rule P-window + H1-frame / H2-cpu / H3-wait / H4-display / X-none, the watchdog arithmetic and the restore"
+  ],
+  "notes": "Builds on NAT-113 (Apple logo in the panel memory). More time reaching the lock screen is a hypothesis (owner, 2026-11-13)."
+}

@@ -1,0 +1,122 @@
+--- lr_a.c	2026-11-13 15:42:28.897541228 +0500
++++ lr_b.c	2026-11-13 16:22:44.779159360 +0500
+@@ -407,6 +407,95 @@
+ }
+ 
+ /*
++ * boot-arg e1s_wdt_pet=1 (NAT-071): the e1s RECOVERY loader armed the S5E9945 CL0 watchdog (at most
++ * 83.9 s at 25.6 MHz) and fed it last just before the jump; nothing else feeds it while the kernel runs.
++ * Feed it from the 10 s heartbeat (hv_wdt_pet) -- the same two register writes as the loader's
++ * s5e_wdt_pet() --, only with a timed return (loader_return_after) and only until that time plus
++ * E1S_WDT_GRACE_S; then never again. A kernel that hangs makes no thread calls and stops feeding: the
++ * watchdog resets the phone at most 84 s later. The first feed must be seen to reload the counter;
++ * if anything is not as expected, nothing is fed and the timed return is cut back to
++ * E1S_WDT_UNFED_MAX_S, the window that is safe without a feed (the NAT-079 rule).
++ */
++#define E1S_WDT_PA              0x10040000ULL
++#define E1S_WDT_WTCON           (0x00 / 4)
++#define E1S_WDT_WTDAT           (0x04 / 4)
++#define E1S_WDT_WTCNT           (0x08 / 4)
++#define E1S_WDT_WTCLRINT        (0x0c / 4)
++#define E1S_WDT_ENABLED_RESET   0x21u
++#define E1S_WDT_GRACE_S         5
++#define E1S_WDT_UNFED_MAX_S     63
++
++static volatile uint32_t *e1s_wdt;
++static uint64_t e1s_wdt_until;          /* mach_absolute_time after which it is no longer fed */
++static uint32_t e1s_wdt_pets;
++static bool e1s_wdt_stopped;
++
++static void
++e1s_wdt_feed(void)
++{
++	if (e1s_wdt == NULL || e1s_wdt_stopped) {
++		return;
++	}
++	if (mach_absolute_time() >= e1s_wdt_until) {
++		e1s_wdt_stopped = true;
++		printf("e1s_wdt: no longer fed after %u feeds (loader_return_after + %u s passed)\n", e1s_wdt_pets, E1S_WDT_GRACE_S);
++		return;
++	}
++	e1s_wdt[E1S_WDT_WTCLRINT] = 0;
++	e1s_wdt[E1S_WDT_WTCNT] = e1s_wdt[E1S_WDT_WTDAT];
++	__builtin_arm_dsb(0xf);
++	e1s_wdt_pets++;
++}
++
++/* -> the timed return's length in seconds: `seconds` when the watchdog is being fed, else at most E1S_WDT_UNFED_MAX_S. */
++static uint32_t
++e1s_wdt_window(uint32_t seconds)
++{
++	uint32_t enabled = 0, con, dat, cnt0, cnt1;
++	uint64_t until;
++	volatile uint32_t *w;
++
++	if (!PE_parse_boot_argn("e1s_wdt_pet", &enabled, sizeof(enabled)) || enabled == 0) {
++		goto unfed;
++	}
++	w = (volatile uint32_t *)ml_io_map(E1S_WDT_PA, PAGE_SIZE);
++	if (w == NULL) {
++		printf("e1s_wdt: not fed: no mapping\n");
++		goto unfed;
++	}
++	con = w[E1S_WDT_WTCON];
++	dat = w[E1S_WDT_WTDAT];
++	if ((con & E1S_WDT_ENABLED_RESET) != E1S_WDT_ENABLED_RESET || dat < 64 || dat > 0xffff) {
++		printf("e1s_wdt: not fed: WTCON 0x%x WTDAT 0x%x\n", con, dat);
++		goto unfed;
++	}
++	cnt0 = w[E1S_WDT_WTCNT];
++	w[E1S_WDT_WTCLRINT] = 0;
++	w[E1S_WDT_WTCNT] = dat;
++	__builtin_arm_dsb(0xf);
++	cnt1 = w[E1S_WDT_WTCNT];
++	/* the counter runs at about 781 Hz: right after the reload it reads back within 1/64 of WTDAT */
++	if (cnt1 > dat || cnt1 < dat - (dat >> 6)) {
++		printf("e1s_wdt: not fed: WTCNT 0x%x -> 0x%x after reload to 0x%x\n", cnt0, cnt1, dat);
++		goto unfed;
++	}
++	clock_interval_to_deadline(seconds + E1S_WDT_GRACE_S, NSEC_PER_SEC, &until);
++	e1s_wdt_until = until;
++	e1s_wdt_pets = 1;
++	e1s_wdt = w;
++	printf("e1s_wdt: fed every 10 s for %u s (WTCON 0x%x WTDAT 0x%x WTCNT 0x%x -> 0x%x)\n", seconds + E1S_WDT_GRACE_S,
++	    con, dat, cnt0, cnt1);
++	return seconds;
++unfed:
++	if (seconds > E1S_WDT_UNFED_MAX_S) {
++		printf("e1s_wdt: loader_return_after %u cut to %u s: the watchdog is not fed\n", seconds, E1S_WDT_UNFED_MAX_S);
++		return E1S_WDT_UNFED_MAX_S;
++	}
++	return seconds;
++}
++/* end of e1s_wdt */
++
++/*
+  * boot-arg loader_return_after=<seconds>: hand control back to the loader
+  * after that long, whatever the kernel is doing. This is how the log gets out
+  * when the kernel does not panic but simply waits (e.g. for a root device).
+@@ -460,6 +549,7 @@
+ 	if (!PE_parse_boot_argn("loader_return_after", &seconds, sizeof(seconds)) || seconds == 0) {
+ 		return;
+ 	}
++	seconds = e1s_wdt_window(seconds);
+ 	thread_call_t call = thread_call_allocate(loader_return_timer, NULL);
+ 	clock_interval_to_deadline(seconds, NSEC_PER_SEC, &deadline);
+ 	thread_call_enter_delayed(call, deadline);
+@@ -509,6 +599,7 @@
+  */
+ #define VIRT_WDT_PET            0x86000007u
+ #define HV_WDT_PET_SECONDS      10
++_Static_assert(HV_WDT_PET_SECONDS == 10, "e1s_wdt says it is fed every 10 s");
+ 
+ static thread_call_t hv_wdt_call;
+ static uint32_t hv_wdt_enabled;
+@@ -574,6 +665,7 @@
+ 		__asm__ volatile ("smc #0" : "+r" (x0), "+r" (x1), "+r" (x2), "+r" (x3) : :
+ 		    "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17");
+ 	}
++	e1s_wdt_feed();
+ 	if (++loader_live.heartbeat % MEMORY_REPORT_BEATS == 0) {
+ 		memory_report();
+ 	}

@@ -1,0 +1,62 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-13T12:20:00+00:00",
+  "task": "NAT-115",
+  "owner": "claude-opus-nat115-20261113",
+  "summary": "Post-logo diagnosis written (H1 more time / H2 CPU / H3 a service never answers / H4 display path; none claimed; SpringBoard was sleeping, not runnable, in NAT-113's last ps lists while lsd took ~1/3 of the CPU). Next image loader-diag-xnu-sc4-md1 built: NAT-113's loader and root, the KRN-044-rebuilt kernel with NAT-071's watchdog feed and a read-only wait-state dump of named processes before the timed return, loader_return_after=150 (the kernel cuts it to 63 s itself unless the feed is proven), rec_secs=150, deadline 475 s, cmdline 246 B. Session driver derived (9 substitutions) and refusing without a decision; analyser with the pass rule fixed in advance, 17 tests, mutation 12/12; decision draft. No phone action.",
+  "image": {
+    "name": "loader-diag-xnu-sc4-md1",
+    "recovery_img": "artifacts/nat-115/package-001/loader-diag-xnu-sc4-md1/recovery.img",
+    "recovery_sha256": "c0642059a4ba21e1205461bedc1b448952779b27f841b750211eb1b3c3d553f9",
+    "payload_sha256": "85c2989b3ef7d5ba4774894c3bde0f2039ef61acfe4056a097890afc02582dc1",
+    "payload_bytes": 26138512,
+    "kernel_unstripped_sha256": "4741cb84388dfbd6a627533baca528f2a8b049006580856969409daf8aa12f33",
+    "kernel_no_storage_sha256": "cc952151c8d6007fa6ccd3c0e57d0320d85f329166fa23700930b8f2af680b18",
+    "kernel_uuid": "65A516DB-1628-3733-BEFC-A32B2947B7A8",
+    "cmdline": "rd=md1 e1sufs=0 e1sufs_probe=0 ufs_write=0 nat_attempt=NAT115-sc4 debug=0xc serial=3 cpus=1 -v loader_return_after=150 launchdsuffix=release cs_enforcement_disable=1 e1stouch=0 e1sbattery=0 rec_secs=150 rec_mb=64 e1s_wdt_pet=1 wait_dump=1 xrd=md0"
+  },
+  "commands": [
+    {"command": "python3 docs/procedures/krn-044/rebuild.py --out artifacts/nat-115/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-115/kernel-combined.patch --expect-string 'e1s_wdt: fed every 10 s for %u s' --expect-string 'waitdump: %s[%d] t%u tid' --expect-string 'threads %d slide 0x%x'", "exit_code": 0},
+    {"command": "python3 docs/procedures/nat-115/build.py --out artifacts/nat-115/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs", "exit_code": 0},
+    {"command": "python3 docs/procedures/nat-044/package.py --build artifacts/nat-115/build-001 --out artifacts/nat-115/package-001", "exit_code": 0},
+    {"command": "python3 docs/procedures/nat-115/derive115.py && python3 docs/procedures/nat-115/derive115.py --check", "exit_code": 0, "output": "ok: session_nat115.py equals the derivation (9 substitutions)"},
+    {"command": "artifacts/recovery-rescue-20261110-01/venv/bin/python -B -I docs/procedures/nat-115/session_nat115.py --out <scratch> --image loader-diag-xnu-sc4-md1", "exit_code": 1, "output": "stopped: decision file for loader-diag-xnu-sc4-md1 is missing or ambiguous (0 found): no device access; device_write_started=false, commands=[]"},
+    {"command": "python3 -B -I docs/procedures/nat-115/test_nat115.py", "exit_code": 0, "output": "Ran 17 tests OK (incl. NAT-071's 11 feed tests on the combined patch, and the real NAT-113 run read as X-window)"},
+    {"command": "python3 -B -I docs/procedures/nat-115/mutate_nat115.py", "exit_code": 0, "output": "{\"total\": 12, \"killed\": 12, \"survived\": []}"}
+  ],
+  "artifacts": [
+    "research/notes/NAT-115-post-logo-diagnosis.md",
+    "docs/procedures/nat-115/build.py",
+    "docs/procedures/nat-115/kernel-combined.patch",
+    "docs/procedures/nat-115/0002-wait-dump.patch",
+    "docs/procedures/nat-115/derive115.py",
+    "docs/procedures/nat-115/session_nat115.py",
+    "docs/procedures/nat-115/analyze116.py",
+    "docs/procedures/nat-115/test_nat115.py",
+    "docs/procedures/nat-115/mutate_nat115.py",
+    "docs/procedures/nat-115/decision-draft.md",
+    "artifacts/nat-115/kernel-001/rebuild.json",
+    "artifacts/nat-115/build-001/build.json",
+    "artifacts/nat-115/package-001/package.json"
+  ],
+  "hashes": {
+    "docs/procedures/nat-115/build.py": "0142315a04e791e10aeeb70b2c8c39a67c28fd97b39f7d7ea0cf0fb219c776a2",
+    "docs/procedures/nat-115/kernel-combined.patch": "76bd0a810c1958b031be328802a8ec91af385b315132120aa86f763934ae70f3",
+    "docs/procedures/nat-115/0002-wait-dump.patch": "0442714b5da26cb8a014d51af239bf7010a8ed3a2228e92ab0ed77d8fec0d199",
+    "docs/procedures/nat-115/derive115.py": "c41988730dfc4b40a8dd918f1dfc19bae7da7127493384226f9da334238a2408",
+    "docs/procedures/nat-115/session_nat115.py": "96359419d3d0a1e4ba89759aabeb40abf4ad01313e99bc2d9964ff245878fe16",
+    "docs/procedures/nat-115/analyze116.py": "79216631662c12c25b9d2281d833a7d3d2758e4a2ccaa6f336217515f3fda911",
+    "docs/procedures/nat-115/decision-draft.md": "4f778393e0f7ad69eda05bd2f740e4cacca0290488a1c32586f80fbbbdced73d",
+    "artifacts/nat-115/kernel-001/rebuild.json": "14fb7fea0dabba89b26e9af9a0f8e1ac17427ae64b99c36b34eb1ecdf425b68f",
+    "artifacts/nat-115/build-001/build.json": "7d9cc08ba8056a2a7d81e3ffce998ee78bcc558347501c168261ff29cef0d09b",
+    "artifacts/nat-115/package-001/package.json": "d6a18430319a4d15429550030197ec874a214da182c0b949f6454602e8dc1c71",
+    "research/notes/NAT-115-post-logo-diagnosis.md": "cdc2ba8fa592f5627a3995c5363c3ff595d8970aa2fa1c6dab7f63aff24f82ea"
+  },
+  "not_established": [
+    "that the kernel feed and the wait dump work on the phone (no run)",
+    "that any frame follows the logo",
+    "that kdp_* readers are safe outside the debugger context on this kernel: they are called with interrupts off and a try-locked task; a panic would return to the loader"
+  ]
+}

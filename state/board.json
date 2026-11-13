@@ -1,13 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-13T10:33:56+00:00",
-  "ledger_updated_at": "2026-11-13T10:33:53+00:00",
-  "registry_sha256": "e8a110c0858ffd442c2b8af0e7090567c5acc57b5c9558ce5f0a438d4a188d54",
+  "generated_at": "2026-11-13T11:36:47+00:00",
+  "ledger_updated_at": "2026-11-13T11:36:10+00:00",
+  "registry_sha256": "b06d181a1e0a48a50817191ca17e89273826347ff906ea26528e66f11d19042b",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
       "NAT-082",
-      "NAT-071",
       "NAT-054",
       "NAT-055"
     ],
@@ -67,6 +66,7 @@
       "UI-005"
     ],
     "gated": [
+      "NAT-116",
       "NAT-017",
       "NAT-072",
       "NAT-003",
@@ -189,6 +189,7 @@
       "REV-024",
       "STR-030",
       "IOS-009",
+      "NAT-115",
       "KRN-007",
       "KRN-011",
       "KRN-017",
@@ -260,6 +261,7 @@
       "NAT-065",
       "NAT-067",
       "IOS-002",
+      "NAT-071",
       "IOS-012",
       "NAT-085",
       "USB-001",
@@ -4968,6 +4970,65 @@
       "report_health": "stale"
     },
     {
+      "id": "NAT-115",
+      "title": "Host: diagnose why no frame follows the Apple logo (NAT-113) and build the next image loader-diag-xnu-sc4-md1: KRN-044-rebuilt kernel with NAT-071's watchdog feed and a wait-state dump of SpringBoard/backboardd/lsd/... before the timed return, loader_return_after=150 (kernel cuts to 63 s itself if the feed is not proven), rec_secs=150; package, derived session driver, pass rule fixed in advance, decision draft; no phone action",
+      "status": "done",
+      "owner": "claude-opus-nat115-20261113",
+      "priority": 99,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-113",
+        "KRN-044",
+        "NAT-071"
+      ],
+      "paths": [
+        "docs/procedures/nat-115",
+        "artifacts/nat-115"
+      ],
+      "acceptance": [
+        "research/notes/NAT-115-post-logo-diagnosis.md lists what NAT-113's log shows after 229.18 s and hypotheses H1-H4 with the observation deciding each; none is claimed",
+        "the image is built from NAT-113's build by a wrapper that changes only the listed items (kernel swap counted exactly once; cmdline < 256 B checked; deadline 475 s); the kernel is KRN-044's rebuild of the committed patch, its hash recorded",
+        "host tests: NAT-071's feed tests pass on the combined patch; the wait dump compiles into the kernel and its strings are in the binary; session driver derived by counted substitutions and refusing without a decision file",
+        "decision draft with the pass rule P-window + H1-frame / H2-cpu / H3-wait / H4-display / X-none, the watchdog arithmetic and the restore"
+      ],
+      "notes": "Builds on NAT-113 (Apple logo in the panel memory). More time reaching the lock screen is a hypothesis (owner, 2026-11-13).",
+      "started_at": "2026-11-13T11:29:48+00:00",
+      "last_heartbeat": "2026-11-13T11:29:48+00:00",
+      "updated_at": "2026-11-13T11:36:10+00:00",
+      "evidence": "docs/procedures/nat-115/evidence.json",
+      "evidence_sha256": "fbaf5dcf54ab46eeb9552a3b09c1f590755898bd1be472622a6db5f9951acfa6",
+      "finished_at": "2026-11-13T11:36:10+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-115.md"
+    },
+    {
+      "id": "NAT-116",
+      "title": "Native run of loader-diag-xnu-sc4-md1 (NAT-115) under its own decision file: 150 s kernel window with the kernel feeding the S5E9945 watchdog; does a frame other than the Apple logo follow, and where do SpringBoard and backboardd wait; restore stock RECOVERY, verify Android, analyse by the pass rule fixed in NAT-115",
+      "status": "pending",
+      "owner": null,
+      "priority": 99,
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "depends_on": [
+        "NAT-115"
+      ],
+      "paths": [
+        "docs/procedures/nat-116",
+        "artifacts/nat-116"
+      ],
+      "acceptance": [
+        "Decision file for this image committed before the run; native permit opened citing it and closed after; preflight and restore by the decision-0019 protocol; stock RECOVERY hash verified after, Android booted, data intact",
+        "Evidence reports P-window (feed line, feeds, timed return at 150 s or the cut to 63 s and why) and exactly one of H1-frame / H2-cpu / H3-wait / H4-display / X-none with the lines that decide it; no claim of a lock screen unless a recorded frame differs from the logo and shows it"
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-116.md"
+    },
+    {
       "id": "KRN-007",
       "title": "Generate witnessed selected XNU component configuration and compile actual kernel units",
       "status": "done",
@@ -8317,14 +8378,18 @@
         "Heartbeat init",
         "Tests, mutants, decision draft"
       ],
-      "status": "pending",
-      "owner": null,
-      "started_at": "2026-11-13T00:24:28+00:00",
-      "updated_at": "2026-11-13T00:25:15+00:00",
+      "status": "done",
+      "owner": "claude-opus-nat071-20261113",
+      "started_at": "2026-11-13T10:41:18+00:00",
+      "updated_at": "2026-11-13T11:27:52+00:00",
       "progress_note": "Paused to prioritize NAT-112 (software renderer fix) - visible iOS screen is more critical than extended runtime",
       "next_step": "Resume after NAT-112 or when kernel rebuild becomes available",
       "released_at": "2026-11-13T00:25:15+00:00",
-      "column": "ready",
+      "last_heartbeat": "2026-11-13T10:41:18+00:00",
+      "evidence": "docs/procedures/nat-071/evidence.json",
+      "evidence_sha256": "62be1675a752592ff1011c49e80c84ec7f51dea464d4f451b5dc07312f98bff3",
+      "finished_at": "2026-11-13T11:27:52+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-071.md"
     },
@@ -11129,8 +11194,7 @@
       "owner": null,
       "column": "gated",
       "reasons": [
-        "Scope not authorized: native",
-        "Dependencies: NAT-071"
+        "Scope not authorized: native"
       ],
       "card_path": "planning/tasks/NAT-072.md"
     },
@@ -18450,102 +18514,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-13T06:45:51+00:00",
-      "action": "task.transfer:NAT-082",
-      "owner": "agy-goal-20261113",
-      "tasks": [
-        {
-          "id": "NAT-082",
-          "status": "in_progress",
-          "owner": "agy-goal-20261113",
-          "priority": 97,
-          "progress_note": "Superseded by NAT-083 before any work: the mount-from-the-probe idea cannot work because mockfs_mountroot (xnu bsd/miscfs/mockfs/mockfs_vfsops.c) builds only /, /dev and the single file node, so there is no directory to mount the APFS on; the donor boots with the big APFS as the kernel root (rd=mdN, apfs_mountroot) and stage0 as /sbin/launchd. No files were created for NAT-082.",
-          "next_step": "None; release.",
-          "last_heartbeat": "2026-11-13T06:45:51+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T06:45:59+00:00",
-      "action": "task.release:NAT-082",
-      "owner": "agy-goal-20261113",
-      "tasks": [
-        {
-          "id": "NAT-082",
-          "status": "pending",
-          "owner": null,
-          "priority": 97,
-          "progress_note": "Superseded by NAT-083 before any work: the mount-from-the-probe idea cannot work because mockfs_mountroot (xnu bsd/miscfs/mockfs/mockfs_vfsops.c) builds only /, /dev and the single file node, so there is no directory to mount the APFS on; the donor boots with the big APFS as the kernel root (rd=mdN, apfs_mountroot) and stage0 as /sbin/launchd. No files were created for NAT-082.",
-          "next_step": "None; release."
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T07:17:20+00:00",
-      "action": "task.transfer:KRN-001",
-      "owner": "claude-opus-nat112-20261113",
-      "tasks": [
-        {
-          "id": "KRN-001",
-          "status": "blocked",
-          "owner": "claude-opus-nat112-20261113",
-          "priority": 85,
-          "progress_note": "Recheck 2026-11-10T08:15Z: NAT-006 was completed by codex-nat-priority-20261110-r1 as a host-only RECOVERY image build; its evidence has no ADT, D22AP /product tree or IPSW input, so blocker (b) is unchanged. Blocker (a) is KRN-043, stopped by the classifier.",
-          "next_step": "Owner runs or allows KRN-043 (python3 -I tools/build/e1s_kernel_exports.py --run canon-a, canon-b, then --compare); owner decides on supplying the D22AP /product tree for payload/ADT validation.",
-          "blocked_reason": "SDK premise superseded: STR-041 linked the 1042-body image without an SDK, and KRN-041/KRN-042 give the precise export result. Still missing: (a) a build tool that applies KRN-041 0001/0002 to the canonical image; (b) payload/ADT validation, which needs the D22AP /product tree from an Apple IPSW (owner decision) and is the in-progress NAT-006 work of agy-nat006-20261110-aca2. See docs/procedures/kernel-build.md, Reassessment of 2026-11-10.",
-          "last_heartbeat": "2026-11-13T07:17:20+00:00",
-          "branch": "main",
-          "handoff": "docs/procedures/kernel-build.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T07:24:01+00:00",
-      "action": "task.claim:NAT-112",
-      "owner": "claude-opus-nat112-20261113",
-      "tasks": [
-        {
-          "id": "NAT-112",
-          "status": "in_progress",
-          "owner": "claude-opus-nat112-20261113",
-          "priority": 100,
-          "last_heartbeat": "2026-11-13T07:24:01+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T07:26:05+00:00",
-      "action": "task.update:NAT-112",
-      "owner": "claude-opus-nat112-20261113",
-      "tasks": [
-        {
-          "id": "NAT-112",
-          "status": "in_progress",
-          "owner": "claude-opus-nat112-20261113",
-          "priority": 100,
-          "progress_note": "MiniIOSurfaceDrawn stub created for software renderer",
-          "next_step": "Integrate MiniIOSurfaceStub.cpp into kernel build system, verify host compilation",
-          "last_heartbeat": "2026-11-13T07:26:05+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T07:47:31+00:00",
-      "action": "task.update:NAT-112",
-      "owner": "claude-opus-nat112-20261113",
-      "tasks": [
-        {
-          "id": "NAT-112",
-          "status": "in_progress",
-          "owner": "claude-opus-nat112-20261113",
-          "priority": 100,
-          "progress_note": "Analysis complete: fb_diff=0 is a measurement artifact (5s window never closed in NAT-111 with only 2 swaps). Commit path works correctly. No kernel patch needed.",
-          "next_step": "New owner decision for NAT-113: longer run (loader_return_after=120) + rec_secs=30 rec_start=30 rec_mb=64 rec_ring=1 to capture actual frames and confirm visible pixels",
-          "last_heartbeat": "2026-11-13T07:47:31+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-13T07:48:44+00:00",
       "action": "task.done:NAT-112",
       "owner": "claude-opus-nat112-20261113",
@@ -18727,11 +18695,97 @@
           "last_heartbeat": "2026-11-13T10:26:42+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-13T10:41:18+00:00",
+      "action": "task.claim:NAT-071",
+      "owner": "claude-opus-nat071-20261113",
+      "tasks": [
+        {
+          "id": "NAT-071",
+          "status": "in_progress",
+          "owner": "claude-opus-nat071-20261113",
+          "priority": 96,
+          "progress_note": "Paused to prioritize NAT-112 (software renderer fix) - visible iOS screen is more critical than extended runtime",
+          "next_step": "Resume after NAT-112 or when kernel rebuild becomes available",
+          "last_heartbeat": "2026-11-13T10:41:18+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T11:27:52+00:00",
+      "action": "task.done:NAT-071",
+      "owner": "claude-opus-nat071-20261113",
+      "tasks": [
+        {
+          "id": "NAT-071",
+          "status": "done",
+          "owner": "claude-opus-nat071-20261113",
+          "priority": 96,
+          "progress_note": "Paused to prioritize NAT-112 (software renderer fix) - visible iOS screen is more critical than extended runtime",
+          "next_step": "Resume after NAT-112 or when kernel rebuild becomes available",
+          "last_heartbeat": "2026-11-13T10:41:18+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T11:29:30+00:00",
+      "action": "task.add:NAT-115",
+      "owner": "claude-opus-nat115-20261113",
+      "tasks": [
+        {
+          "id": "NAT-115",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T11:29:39+00:00",
+      "action": "task.add:NAT-116",
+      "owner": "claude-opus-nat115-20261113",
+      "tasks": [
+        {
+          "id": "NAT-116",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T11:29:48+00:00",
+      "action": "task.claim:NAT-115",
+      "owner": "claude-opus-nat115-20261113",
+      "tasks": [
+        {
+          "id": "NAT-115",
+          "status": "in_progress",
+          "owner": "claude-opus-nat115-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T11:29:48+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T11:36:10+00:00",
+      "action": "task.done:NAT-115",
+      "owner": "claude-opus-nat115-20261113",
+      "tasks": [
+        {
+          "id": "NAT-115",
+          "status": "done",
+          "owner": "claude-opus-nat115-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T11:29:48+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "111dc61d1113f041348d0281265fb9c05faba86794369c6ba41da8164f68baef",
-    "BOARD.md": "9c5481f91e47c1563c11032aa8fd378df62e156529fc53b18d93afe706f5c71c",
+    "STATUS.md": "35b4ba442c6e8e712d29e612d815edfe272175a3c55df6bfb0a9ea5aa6bb4510",
+    "BOARD.md": "1ef5b03f45a3f5ca77fd4feec0dac4ee92c4913987cc58984ffa722ffc3cf7e1",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -18835,6 +18889,8 @@
     "planning/tasks/STR-030.md": "2fd8ca8a88608c79df51d8c6f44d5c21ffccc3c05ab9f3eef8e8584f1d14a8f5",
     "planning/tasks/IOS-009.md": "a8e229dd5d8b2eb55d98b7d28d44345c3c5d3fa4e903c91fd5b5353ac020c839",
     "planning/tasks/NAT-098.md": "a9cef23e28220d6d2c7b706dd79b26663b8f3f93e86ad0787f34a2e2a2067457",
+    "planning/tasks/NAT-115.md": "3e3f62b5a31c13d9fa566bcc248a026e93b3e4fe3c6ea88df2a7e66f3dc73d62",
+    "planning/tasks/NAT-116.md": "e7fbaed02ce0291fc69351e7a77c99ad3f6aa3e69980b40caa239689277216cf",
     "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-011.md": "9b8014abd8d019af80fad695e0d0df9de9523d36a222553327384f7f00e8a901",
     "planning/tasks/KRN-017.md": "86a29485c4c3ed3a62f7ecf64f5e2bb303bb0bd7ac5fd661482bf024004f407d",
@@ -18916,7 +18972,7 @@
     "planning/tasks/NAT-065.md": "e46808c49fb7888f67ca05f5f186502fe066c6fa88c596c84d333af6146ac1a0",
     "planning/tasks/NAT-067.md": "e4ba0decee57e5e187eaf810a70aff8f9098b389c9a24e7576403c9c757da6f0",
     "planning/tasks/IOS-002.md": "5bf4ead31f8c9e395260b578f5c5b541754ed539c591df88faf833dc2d6d6520",
-    "planning/tasks/NAT-071.md": "2a0b0620dbd653fd019274c45c35ee11518e5542d7d074a870cfaf15cdf24420",
+    "planning/tasks/NAT-071.md": "216f561fabc00d4ea7df7d953526f7d619f308a5992920367df26368d1d3cf6c",
     "planning/tasks/IOS-005.md": "f74ca6a897e79a1f8df6d9d54da9580aac2c45103028c2267d56920520f98abd",
     "planning/tasks/IOS-012.md": "4308bace9cfa49b487c7b88e5438809ddbd8d7250097f7d9510b2dc0de5dfbff",
     "planning/tasks/NAT-085.md": "36c863f9f57269747ba3f3dc9dabd5b841639a00d68526c5432fcd569fc59075",
@@ -18980,7 +19036,7 @@
     "planning/tasks/ESIM-001.md": "4ff5511bf1b91ec562d46b9fa0fdbc4dc3ffd12af187060e75777f8fcde71bb6",
     "planning/tasks/VM-004.md": "e60d0c34c4cbc0e4c68b4a74b97657a569fe4a12f25e16efc01dcaa45ccc2b15",
     "planning/tasks/NAT-057.md": "5a5cfb72e8e8b6bf01995892e27a8f23c02e6de2f5ea24330a780c8dc156837a",
-    "planning/tasks/NAT-072.md": "a05940595ab31fe8d0d162c64e3f0d166baea9e5365df6a44a263e5ec688c381",
+    "planning/tasks/NAT-072.md": "f2b429f3d571a48c51951a7a0eaec6e38d9cd7c2d34a2e06890c71fb0d4c4bc9",
     "planning/tasks/NAT-081.md": "f71adff8df091fe52cea08c846dc3c1b530fadc4829b34ff83ae6edc7c827b04",
     "planning/tasks/SEN-001.md": "3c54f6f748160ba9c5b4c4f27f41576ddb90a5c2f73f0243805e189091695d2d",
     "planning/tasks/ODIN-001.md": "ac0ee966c510177f407059b9a1c47e89df084a5b1c873bb7eea122547f1d4f0a",

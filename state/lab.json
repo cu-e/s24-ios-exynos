@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T10:33:53+00:00",
+  "updated_at": "2026-11-13T11:36:10+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -14751,13 +14751,17 @@
         "Heartbeat init",
         "Tests, mutants, decision draft"
       ],
-      "status": "pending",
-      "owner": null,
-      "started_at": "2026-11-13T00:24:28+00:00",
-      "updated_at": "2026-11-13T00:25:15+00:00",
+      "status": "done",
+      "owner": "claude-opus-nat071-20261113",
+      "started_at": "2026-11-13T10:41:18+00:00",
+      "updated_at": "2026-11-13T11:27:52+00:00",
       "progress_note": "Paused to prioritize NAT-112 (software renderer fix) - visible iOS screen is more critical than extended runtime",
       "next_step": "Resume after NAT-112 or when kernel rebuild becomes available",
-      "released_at": "2026-11-13T00:25:15+00:00"
+      "released_at": "2026-11-13T00:25:15+00:00",
+      "last_heartbeat": "2026-11-13T10:41:18+00:00",
+      "evidence": "docs/procedures/nat-071/evidence.json",
+      "evidence_sha256": "62be1675a752592ff1011c49e80c84ec7f51dea464d4f451b5dc07312f98bff3",
+      "finished_at": "2026-11-13T11:27:52+00:00"
     },
     {
       "id": "NAT-072",
@@ -16763,6 +16767,57 @@
       "evidence": "docs/procedures/krn-044/evidence.json",
       "evidence_sha256": "d5bc3b175ed8d18c2415b23b3e66bba7d980ae71bf505e3f7829095b617d211c",
       "finished_at": "2026-11-13T10:33:53+00:00"
+    },
+    {
+      "id": "NAT-115",
+      "title": "Host: diagnose why no frame follows the Apple logo (NAT-113) and build the next image loader-diag-xnu-sc4-md1: KRN-044-rebuilt kernel with NAT-071's watchdog feed and a wait-state dump of SpringBoard/backboardd/lsd/... before the timed return, loader_return_after=150 (kernel cuts to 63 s itself if the feed is not proven), rec_secs=150; package, derived session driver, pass rule fixed in advance, decision draft; no phone action",
+      "status": "done",
+      "owner": "claude-opus-nat115-20261113",
+      "priority": 99,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-113",
+        "KRN-044",
+        "NAT-071"
+      ],
+      "paths": [
+        "docs/procedures/nat-115",
+        "artifacts/nat-115"
+      ],
+      "acceptance": [
+        "research/notes/NAT-115-post-logo-diagnosis.md lists what NAT-113's log shows after 229.18 s and hypotheses H1-H4 with the observation deciding each; none is claimed",
+        "the image is built from NAT-113's build by a wrapper that changes only the listed items (kernel swap counted exactly once; cmdline < 256 B checked; deadline 475 s); the kernel is KRN-044's rebuild of the committed patch, its hash recorded",
+        "host tests: NAT-071's feed tests pass on the combined patch; the wait dump compiles into the kernel and its strings are in the binary; session driver derived by counted substitutions and refusing without a decision file",
+        "decision draft with the pass rule P-window + H1-frame / H2-cpu / H3-wait / H4-display / X-none, the watchdog arithmetic and the restore"
+      ],
+      "notes": "Builds on NAT-113 (Apple logo in the panel memory). More time reaching the lock screen is a hypothesis (owner, 2026-11-13).",
+      "started_at": "2026-11-13T11:29:48+00:00",
+      "last_heartbeat": "2026-11-13T11:29:48+00:00",
+      "updated_at": "2026-11-13T11:36:10+00:00",
+      "evidence": "docs/procedures/nat-115/evidence.json",
+      "evidence_sha256": "fbaf5dcf54ab46eeb9552a3b09c1f590755898bd1be472622a6db5f9951acfa6",
+      "finished_at": "2026-11-13T11:36:10+00:00"
+    },
+    {
+      "id": "NAT-116",
+      "title": "Native run of loader-diag-xnu-sc4-md1 (NAT-115) under its own decision file: 150 s kernel window with the kernel feeding the S5E9945 watchdog; does a frame other than the Apple logo follow, and where do SpringBoard and backboardd wait; restore stock RECOVERY, verify Android, analyse by the pass rule fixed in NAT-115",
+      "status": "pending",
+      "owner": null,
+      "priority": 99,
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "depends_on": [
+        "NAT-115"
+      ],
+      "paths": [
+        "docs/procedures/nat-116",
+        "artifacts/nat-116"
+      ],
+      "acceptance": [
+        "Decision file for this image committed before the run; native permit opened citing it and closed after; preflight and restore by the decision-0019 protocol; stock RECOVERY hash verified after, Android booted, data intact",
+        "Evidence reports P-window (feed line, feeds, timed return at 150 s or the cut to 63 s and why) and exactly one of H1-frame / H2-cpu / H3-wait / H4-display / X-none with the lines that decide it; no claim of a lock screen unless a recorded frame differs from the logo and shows it"
+      ]
     }
   ],
   "experiments": [
@@ -65660,6 +65715,92 @@
           "owner": "claude-opus-krn044-20261113",
           "priority": 90,
           "last_heartbeat": "2026-11-13T10:26:42+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T10:41:18+00:00",
+      "action": "task.claim:NAT-071",
+      "owner": "claude-opus-nat071-20261113",
+      "tasks": [
+        {
+          "id": "NAT-071",
+          "status": "in_progress",
+          "owner": "claude-opus-nat071-20261113",
+          "priority": 96,
+          "progress_note": "Paused to prioritize NAT-112 (software renderer fix) - visible iOS screen is more critical than extended runtime",
+          "next_step": "Resume after NAT-112 or when kernel rebuild becomes available",
+          "last_heartbeat": "2026-11-13T10:41:18+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T11:27:52+00:00",
+      "action": "task.done:NAT-071",
+      "owner": "claude-opus-nat071-20261113",
+      "tasks": [
+        {
+          "id": "NAT-071",
+          "status": "done",
+          "owner": "claude-opus-nat071-20261113",
+          "priority": 96,
+          "progress_note": "Paused to prioritize NAT-112 (software renderer fix) - visible iOS screen is more critical than extended runtime",
+          "next_step": "Resume after NAT-112 or when kernel rebuild becomes available",
+          "last_heartbeat": "2026-11-13T10:41:18+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T11:29:30+00:00",
+      "action": "task.add:NAT-115",
+      "owner": "claude-opus-nat115-20261113",
+      "tasks": [
+        {
+          "id": "NAT-115",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T11:29:39+00:00",
+      "action": "task.add:NAT-116",
+      "owner": "claude-opus-nat115-20261113",
+      "tasks": [
+        {
+          "id": "NAT-116",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T11:29:48+00:00",
+      "action": "task.claim:NAT-115",
+      "owner": "claude-opus-nat115-20261113",
+      "tasks": [
+        {
+          "id": "NAT-115",
+          "status": "in_progress",
+          "owner": "claude-opus-nat115-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T11:29:48+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T11:36:10+00:00",
+      "action": "task.done:NAT-115",
+      "owner": "claude-opus-nat115-20261113",
+      "tasks": [
+        {
+          "id": "NAT-115",
+          "status": "done",
+          "owner": "claude-opus-nat115-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T11:29:48+00:00"
         }
       ]
     }

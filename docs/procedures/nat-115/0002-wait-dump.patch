@@ -1,0 +1,149 @@
+--- lr_b.c	2026-11-13 16:22:44.779159360 +0500
++++ lr_c.c	2026-11-13 16:26:34.111556671 +0500
+@@ -26,6 +26,13 @@
+ #include <pexpert/arm64/board_config.h>
+ #include <vm/vm_page.h>
+ #include <vm/vm_compressor.h>
++#include <kern/block_hint.h>
++#include <kern/kcdata.h>
++#include <kern/processor.h>
++#include <kern/task.h>
++#include <kern/thread.h>
++#include <kern/turnstile.h>
++#include <vm/vm_shared_region.h>
+ 
+ /*
+  * The console log handed back to the loader. A long session writes more than fits, and both
+@@ -514,6 +521,124 @@
+ 	loader_return();
+ }
+ 
++/*
++ * boot-arg wait_dump=1 (NAT-116): before the timed return, print one line per thread of a few named processes --
++ * state, block_hint, the scheduled priority, CPU time, the user pc/lr, and for a thread waiting on a Mach port or a
++ * turnstile the process that holds the other end -- the same reading the kernel's stackshot makes (kdp_* helpers),
++ * here from a thread call with interrupts off and the task list locked. Read-only; nothing is changed.
++ */
++#define WAIT_DUMP_MAX_THREADS   48
++static const char *const wait_dump_names[] = {
++	"SpringBoard", "backboardd", "lsd", "containermanagerd", "runningboardd", "launchd.darwin", "launchd", "cfprefsd",
++	"usermanagerd", "mediaserverd", "datamigrator", "iconservicesagent",
++};
++
++static bool
++wait_dump_wanted(const char *name)
++{
++	for (unsigned i = 0; i < sizeof(wait_dump_names) / sizeof(wait_dump_names[0]); i++) {
++		if (strncmp(name, wait_dump_names[i], 32) == 0) {
++			return true;
++		}
++	}
++	return false;
++}
++
++static void
++wait_dump_thread(int pid, const char *name, thread_t th, unsigned n)
++{
++	thread_waitinfo_v2_t wi = { 0 };
++	thread_turnstileinfo_v2_t ts = { 0 };
++	struct ipc_service_port_label *ispl = NULL;
++	struct turnstile *tsp;
++	const char *svc = "";
++	uint64_t pc = 0, lr = 0;
++	time_value_t ut = { 0, 0 }, st = { 0, 0 };
++	char tsw = '-';
++
++	wi.wait_type = th->block_hint;
++	if (th->state & TH_WAIT) {
++		switch (th->block_hint) {
++		case kThreadWaitPortReceive:
++			kdp_mqueue_recv_find_owner(th->waitq.wq_q, th->wait_event, &wi, &ispl);
++			break;
++		case kThreadWaitPortSend:
++			kdp_mqueue_send_find_owner(th->waitq.wq_q, th->wait_event, &wi, &ispl);
++			break;
++		default:
++			break;
++		}
++		tsp = thread_get_waiting_turnstile(th);
++		if (tsp != TURNSTILE_NULL) {
++			kdp_turnstile_fill_tsinfo(tsp, &ts, &ispl);
++			tsw = (ts.turnstile_flags & STACKSHOT_TURNSTILE_STATUS_BLOCKED_ON_TASK) ? 'P' :
++			    (ts.turnstile_flags & STACKSHOT_TURNSTILE_STATUS_THREAD) ? 'T' :
++			    (ts.turnstile_flags & STACKSHOT_TURNSTILE_STATUS_WORKQUEUE) ? 'W' : '?';
++		}
++		if (ispl != NULL) {
++			struct portlabel_info spl = { 0 };
++			const char *nm = NULL;
++
++			kdp_ipc_fill_splabel(ispl, &spl, &nm);
++			if (nm != NULL) {
++				svc = nm;
++			}
++		}
++	}
++	if (th->machine.upcb != NULL) {
++		pc = get_saved_state_pc(th->machine.upcb);
++		lr = get_saved_state_lr(th->machine.upcb);
++	}
++	thread_read_times(th, &ut, &st, NULL);
++	printf("waitdump: %s[%d] t%u tid %llu state 0x%x hint %u pri %d cpu %d.%02d+%d.%02d pc 0x%llx lr 0x%llx "
++	    "owner %lld ctx 0x%llx ts %c %llu hops %u svc %s\n",
++	    name, pid, n, thread_tid(th), th->state, (unsigned)th->block_hint, th->sched_pri,
++	    ut.seconds, ut.microseconds / 10000, st.seconds, st.microseconds / 10000, pc, lr,
++	    (long long)wi.owner, wi.context, tsw, ts.turnstile_context, ts.number_of_hops, svc);
++}
++
++static void
++wait_dump(void)
++{
++	uint32_t enabled = 0;
++	task_t task;
++
++	if (!PE_parse_boot_argn("wait_dump", &enabled, sizeof(enabled)) || enabled == 0) {
++		return;
++	}
++	printf("waitdump: begin at %llu\n", mach_absolute_time());
++	lck_mtx_lock(&tasks_threads_lock);
++	queue_iterate(&tasks, task, task_t, tasks) {
++		struct proc *p = get_bsdtask_info(task);
++		const char *name = p != NULL ? proc_best_name(p) : "?";
++		thread_t th;
++		unsigned n = 0;
++
++		if (p == NULL || !wait_dump_wanted(name)) {
++			continue;
++		}
++		/* thread creation takes task_lock before tasks_threads_lock: only try it here, never wait */
++		if (!task_lock_try(task)) {
++			printf("waitdump: %s[%d] busy (task lock held)\n", name, proc_pid(p));
++			continue;
++		}
++		vm_shared_region_t sr = task->shared_region;
++		printf("waitdump: %s[%d] threads %d slide 0x%x base 0x%llx\n", name, proc_pid(p), task->thread_count,
++		    sr != NULL ? sr->sr_slide : 0, sr != NULL ? (unsigned long long)sr->sr_base_address : 0ULL);
++		boolean_t istate = ml_set_interrupts_enabled(FALSE);
++		queue_iterate(&task->threads, th, thread_t, task_threads) {
++			if (n >= WAIT_DUMP_MAX_THREADS) {
++				break;
++			}
++			wait_dump_thread(proc_pid(p), name, th, n++);
++		}
++		ml_set_interrupts_enabled(istate);
++		task_unlock(task);
++	}
++	lck_mtx_unlock(&tasks_threads_lock);
++	printf("waitdump: end\n");
++}
++
+ static void
+ loader_return_timer(__unused thread_call_param_t p0, __unused thread_call_param_t p1)
+ {
+@@ -524,6 +649,7 @@
+ 		loader_log_putc(*c);
+ 	}
+ 	PE_parse_boot_argn("return_panic", &as_panic, sizeof(as_panic));
++	wait_dump();
+ 	if (!as_panic) {
+ 		redwood_var_save_on_return();   /* the data volume kept, while the system is still whole */
+ 		redwood_adreno_stop();          /* a GPU kept for the system is given back while there is a thread to wait in */

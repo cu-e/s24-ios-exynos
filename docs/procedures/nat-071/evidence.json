@@ -1,0 +1,37 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-13T11:40:00+00:00",
+  "task": "NAT-071",
+  "owner": "claude-opus-nat071-20261113",
+  "summary": "Feasibility decided from the loader source: option A (longer loader watchdog) is impossible (83.88 s is the hardware maximum at 25.6 MHz); option B chosen: the kernel feeds the S5E9945 CL0 watchdog the loader armed, from its existing 10 s heartbeat, only with a timed return and only until loader_return_after + 5 s; the first reload must read back, else nothing is fed and the kernel cuts loader_return_after to 63 s. Kernel built through KRN-044 (STR-041 checks pass, NAT-020 stubs apply). 11 host tests, 17/17 mutants killed. No phone action.",
+  "acceptance_assessment": [
+    "1 met: README compares A and B with the loader's real constants (guard.c 83 s, WTDAT 65355, prescaler, nat074 30 s pet, final pet) and picks B; one verified stop kept (the watchdog), plus the in-kernel fail-safe cut to 63 s",
+    "2 partly, differently: the change is a kernel patch built through the reproducible KRN-044 loop (pinned hashes below), not a loader image; no new image and no heartbeat PID 1 here: the existing hb small root (NAT-100/101) already prints heartbeats; the image is built in NAT-115/116",
+    "3 met for the feed: tests read back the constants from the patched source as compiled, mutation pass 17/17; disassembly shows 0x10040000/0x21/0x3f and the dsb; analyser verdicts belong to NAT-116's pass rule (research/notes/NAT-115-post-logo-diagnosis.md)",
+    "4 deferred to the image task: the decision draft states the run length 150 s, the cap, what ends a hang, and the pass rule"
+  ],
+  "commands": [
+    {"command": "python3 docs/procedures/krn-044/rebuild.py --out artifacts/nat-071/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-071/0001-e1s-wdt-pet.patch --expect-string 'e1s_wdt: fed every 10 s for %u s' --expect-string 'cut to %u s: the watchdog is not fed'", "exit_code": 0},
+    {"command": "python3 -B -I docs/procedures/nat-071/test_nat071.py", "exit_code": 0, "output": "Ran 11 tests OK"},
+    {"command": "python3 -B -I docs/procedures/nat-071/mutate_nat071.py", "exit_code": 0, "output": "{\"total\": 17, \"killed\": 17, \"survived\": []}"}
+  ],
+  "artifacts": [
+    "docs/procedures/nat-071/README.md",
+    "docs/procedures/nat-071/0001-e1s-wdt-pet.patch",
+    "docs/procedures/nat-071/test_nat071.py",
+    "docs/procedures/nat-071/mutate_nat071.py",
+    "artifacts/nat-071/kernel-001/rebuild.json",
+    "artifacts/nat-071/kernel-001/kernel.no-storage"
+  ],
+  "hashes": {
+    "docs/procedures/nat-071/0001-e1s-wdt-pet.patch": "3868234930e4102180768e06fb07ceb46c9273103ea8cf378cc67f53aeb327c0",
+    "docs/procedures/nat-071/test_nat071.py": "ccac42dbf45aa109eef36c6eae57ea6d6d11b007be22237a8b5b75fa1d3e84d5",
+    "docs/procedures/nat-071/mutate_nat071.py": "42b95d18222fab6266a291402ffe14e15a978eb20dcbd1c567f4d5f85e412087",
+    "docs/procedures/krn-044/rebuild.py": "5c99955c79beb936164d9666f930bce919b43dbac6416c7453cd5196a140597d",
+    "artifacts/nat-071/kernel-001/rebuild.json": "91a8ccecee8ed74fdc6105b6992dee58a08e4dbbf298c21bac24f9dc2d196a3c",
+    "artifacts/nat-071/kernel-001/kernel.no-storage": "3d57d66c8a345eee8deebcf92bea7213f5b328a94a9af061b86e8d9fa1328370"
+  },
+  "not_established": ["that the feed works on the phone", "that the kernel reaches loader_return_timer_init before 83 s on every run (it has in every run so far: EARLY_BOOT precedes PID 1)"]
+}

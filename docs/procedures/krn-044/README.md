@@ -45,3 +45,10 @@ python3 docs/procedures/krn-044/rebuild.py --out artifacts/<task>/kernel-NNN --o
 ```
 The output `kernel.no-storage` replaces `artifacts/nat-020/build-003/kernel.no-storage` in a NAT image build (its
 SHA-256 pin in `nat-065/build.py` must be overridden by the wrapping build, as other NAT builds override fields).
+
+## Later change to rebuild.py (2026-11-13, NAT-071/NAT-115)
+
+The source argument is found by suffix instead of being assumed last (osfmk-b's compile records put `-o` after the source), and a
+failing command reports its `error:` lines. With the changed tool the unchanged rebuild was rerun
+(`artifacts/krn-044/recheck-002`): object identical, kernel identical after path normalization, NAT-020's stubs reproduce
+`7ceda59b...`. The evidence hashes above refer to the first version of the tool.

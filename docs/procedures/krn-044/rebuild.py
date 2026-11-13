@@ -59,7 +59,8 @@ def run(argv, cwd, env, log):
     log.append(dict(argv=argv, cwd=str(cwd), exit_code=r.returncode, seconds=round(time.monotonic()-t, 2),
                     stderr_tail=r.stderr.decode(errors='replace')[-2000:]))
     if r.returncode:
-        raise SystemExit(f'command failed ({r.returncode}): {argv[0]}\n{r.stderr.decode(errors="replace")[-2000:]}')
+        errs = [l for l in r.stderr.decode(errors="replace").splitlines() if ' error: ' in l]
+        raise SystemExit(f'command failed ({r.returncode}): {argv[0]}\n' + '\n'.join(errs[:20]) + '\n' + r.stderr.decode(errors="replace")[-1000:])
     return r
 
 
@@ -75,7 +76,10 @@ def main():
     log = []
     assert fsha(STR041/'kernel/kernel.unstripped') == UNSTRIPPED_SHA, 'STR-041 image changed'
     plan, copy, proc = compile_record(a.object)
-    argv = list(proc['argv']); src = Path(argv[-1]); assert src.suffix in ('.c', '.cpp', '.s', '.S'), src
+    argv = list(proc['argv'])
+    srcs = [i for i, x in enumerate(argv) if Path(x).suffix in ('.c', '.cpp', '.s', '.S') and not x.startswith('-') and argv[i-1] not in ('-o', '-MF', '-MT', '-MQ')]
+    assert len(srcs) == 1, f'expected one source argument, found {[argv[i] for i in srcs]}'
+    si = srcs[0]; src = Path(argv[si])
     src_sha = fsha(src)
 
     # 1. compile (changed copy of the source when --patch)
@@ -83,9 +87,9 @@ def main():
         changed = out/'src'/src.name
         shutil.copyfile(src, changed)
         run(['patch', '--no-backup-if-mismatch', '-s', str(changed), str(a.patch.resolve())], out, None, log)
-        argv[-1] = str(changed)
+        argv[si] = str(changed)
         # quoted includes resolve relative to the source's directory first: keep the original directory searchable
-        argv.insert(len(argv)-1, '-iquote' + str(src.parent))
+        argv.insert(si, '-iquote' + str(src.parent))
     obj = out/'compile'/Path(argv[argv.index('-o')+1]).name
     argv[argv.index('-o')+1] = str(obj)
     if '-MF' in argv: argv[argv.index('-MF')+1] = str(out/'compile'/(obj.stem+'.d'))
