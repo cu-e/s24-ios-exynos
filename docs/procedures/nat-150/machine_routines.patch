@@ -1,0 +1,17 @@
+--- machine_routines.c.orig	2026-11-14 04:01:40.667171569 +0500
++++ machine_routines.c	2026-11-14 04:03:18.993484782 +0500
+@@ -967,6 +967,14 @@
+ 		if (topology_info.cpus[i].l2_access_penalty == 0) {
+ 			continue;
+ 		}
++		/*
++		 * NAT-150: never the boot processor. It runs from the start, and its partner might
++		 * never join (NAT-149: cpu 0 was paired with cpu 9, which did not come); a secondary
++		 * whose primary is not running is not a case the scheduler's SMT rules know.
++		 */
++		if (&topology_info.cpus[i] == topology_info.boot_cpu) {
++			continue;
++		}
+ 		/* the last fast core not yet taken; the boot core only if there is no other */
+ 		for (int j = (int)topology_info.num_cpus - 1; j >= 0; j--) {
+ 			if (topology_info.cpus[j].l2_access_penalty != 0 || taken[j]) {

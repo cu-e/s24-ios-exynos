@@ -1,0 +1,79 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-13T23:15:13.906061+00:00",
+ "task": "NAT-150",
+ "summary": "scG image: NAT-150 kernel with per-core early marks in the reset vector (entry, cpu data found / not found, start_cpu, before and after the MMU switch; by PA, cleaned to PoC), boot-CPU readback with PSCI AFFINITY_INFO, 1 s start wait, no boot-CPU slow pairing. Unicorn model of the built images: the started-core path equals NAT-143's plus 5 mark blocks (same registers bar x9-x12, same sysreg writes), no-cpu-data and null-handler cores spin as before with mark 3, the boot path gains exactly 2 cbz. analyze150 corrects the SMP rule (NAT-149 real text: C0-one, joined none). Payload differs from scF only in the kernel and the attempt tag; session_nat151 derived. Host-test only.",
+ "commit": "258d738 (base; evidence committed with the NAT-150 files)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scG-md1",
+  "recovery_sha256": "a9f0eed0175fc9f4aea26dd67a50b6f2ca5b62494cf70414250f3700d8dd6de0",
+  "payload_sha256": "a68fd474af6775d5c66c525edf66b0baf006ff9e169795f0c67bf1e70cd2c213",
+  "payload_bytes": 26206896,
+  "loader_image_sha256": "de0e0d87b2c7b47828257369d80ddb448be42d946b654eb4060fbde5b393afc0",
+  "kernel_sha256": "c84e72397f3bfad01e5fd305d15bc2340dc96629fe6517c81f00627aa2ee8901",
+  "cmdline_bytes": 239,
+  "session": "docs/procedures/nat-150/session_nat151.py",
+  "session_sha256": "7a8b73318297e7084a0e6db323644bc1d7d97a839a8641d7fbd6310c82a51ec4"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/krn-044/rebuild.py --out artifacts/nat-150/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-121/loader_return.patch --extra (NAT-143's four) --extra osfmk/start.o=docs/procedures/nat-150/start.patch --extra osfmk/psci_smp.o=docs/procedures/nat-150/psci_smp.patch --extra osfmk/machine_routines.o=docs/procedures/nat-150/machine_routines.patch --expect-string ... (6)",
+   "exit_code": 0,
+   "result": "0 undefined, 29 stubs; a first attempt with a 7th expect-string \"NAT-150\" (comment-only text) failed that check and was removed"
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B docs/procedures/nat-150/model_secondary.py --out artifacts/nat-150/model-secondary.json",
+   "exit_code": 0,
+   "result": "5 cases ok"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-150/build.py --out artifacts/nat-150/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "first attempt stopped at nat-123 \"expected the five-object kernel rebuild\"; build.py then shows that one check the record without the NAT-150 objects"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-150/build-001 --out artifacts/nat-150/package-001",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-150/derive151.py --check",
+   "exit_code": 0
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B docs/procedures/nat-150/test_nat150.py",
+   "exit_code": 0,
+   "result": "15 OK"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-150/test_nat150.py",
+   "exit_code": 0,
+   "result": "15 OK, 4 skipped (no unicorn)"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "448 tests OK"
+  }
+ ],
+ "sources": {
+  "docs/procedures/nat-150/start.patch": "3cca5aaaf60cfb9d767ed4ab549d8a51fa22a2c97e2f6f81e6408b3767cc0b45",
+  "docs/procedures/nat-150/psci_smp.patch": "317846b9b66c1c387a69a49a9bc71115c959683a4185225dc3c8893d3919f7c7",
+  "docs/procedures/nat-150/machine_routines.patch": "30ef9a93bb6986f1e2376661d7c52021934f0054c67cc136ffbf734c2e486a77",
+  "docs/procedures/nat-150/build.py": "ee5939618ad4ad657d0402ecde1c6485b716d49e598f8cacf1ce820ad1bdd01d",
+  "docs/procedures/nat-150/analyze150.py": "41a6cd42e1427228c13ed523804af37be9e8dcbccc5e97ac1a32b8b2f342d5f3",
+  "docs/procedures/nat-150/model_secondary.py": "b6b985b4f9e7bc8a85022a0dc7a371739d3a3120d276aa39d262eec8ba435e7f",
+  "docs/procedures/nat-150/derive151.py": "ff8e38b60ba5f9d9d65446bea82ebd2201f1fcb22d9d8cfece8d69ebd3b5ef66",
+  "docs/procedures/nat-150/test_nat150.py": "d4aebf0f0dab333d4a4457ffcf1aa6249212da5cb1a914edd9e11f93ba77001e",
+  "docs/procedures/nat-150/README.md": "3553d8f742be154c346f6fcd5625f9719bd833affdcdb574d424602c69eec5b3"
+ },
+ "artifacts": [
+  "artifacts/nat-150/kernel-001/rebuild.json",
+  "artifacts/nat-150/model-secondary.json",
+  "artifacts/nat-150/build-001/build.json",
+  "artifacts/nat-150/package-001/package.json"
+ ],
+ "not_established": "Firmware, Samsung EL2 layer, caches/coherency, real page tables and everything after the MMU switch are outside the model; a native run (NAT-151) needs its per-image decision file."
+}

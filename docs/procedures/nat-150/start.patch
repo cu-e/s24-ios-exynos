@@ -1,0 +1,111 @@
+--- start.s.orig	2026-11-14 04:01:40.660171556 +0500
++++ start.s	2026-11-14 04:02:31.567350535 +0500
+@@ -88,6 +88,35 @@
+ #endif /* defined(KERNEL_INTEGRITY_KTRR) */
+ .endmacro
+ 
++#if defined(GENERIC_PSCI_SMP)
++/*
++ * NAT-150: how far a core that PSCI CPU_ON started has got, for the boot processor to read
++ * (psci_smp_start_cpu()). Each core has 128 bytes of psci_smp_early_marks (psci_smp.c), found
++ * by its MPIDR Affinity1: [0] 0x5EC00000 | the last stage reached, [8] its MPIDR,
++ * [16 * stage] and [16 * stage + 8] the two registers given. Addressed as the core runs: by
++ * physical address with the MMU off (the store goes to memory), through the V=P mapping just
++ * after it is on; then cleaned to the point of coherency. Uses x9 and x10 only; flags unchanged.
++ */
++.macro PSCI_SMP_EARLY_MARK stage, ra, rb
++	mrs		x9, MPIDR_EL1
++	ubfx	x9, x9, #8, #4
++	adrp	x10, EXT(psci_smp_early_marks)@page
++	add		x10, x10, EXT(psci_smp_early_marks)@pageoff
++	add		x10, x10, x9, lsl #7
++	str		\ra, [x10, #(16 * \stage)]
++	str		\rb, [x10, #(16 * \stage + 8)]
++	mrs		x9, MPIDR_EL1
++	str		x9, [x10, #8]
++	movz	x9, #\stage
++	movk	x9, #0x5EC0, lsl #16
++	str		x9, [x10]
++	dc		cvac, x10
++	add		x10, x10, #64
++	dc		cvac, x10
++	dsb		sy
++.endm
++#endif /* defined(GENERIC_PSCI_SMP) */
++
+ /*
+  * Checks the reset handler for global and CPU-specific reset-assist functions,
+  * then jumps to the reset handler with boot args and cpu data. This is copied
+@@ -134,11 +163,14 @@
+ 	 * processor's early ones, which hand the exception to the boot loader:
+ 	 * that is not for this core to do.
+ 	 */
++	mrs		x11, CurrentEL						// (NAT-150: as the core came in)
++	mrs		x12, SCTLR_EL1
+ 	msr		DAIFSet, #(DAIFSC_ALL)				// Disable all interrupts
+ 	adrp	x0, EXT(LowSecondaryExceptionVectorBase)@page
+ 	add		x0, x0, EXT(LowSecondaryExceptionVectorBase)@pageoff
+ 	msr		VBAR_EL1, x0
+ 	isb
++	PSCI_SMP_EARLY_MARK 1, x11, x12				// stage 1: at the entry
+ 	// The MMU and the caches are off, says PSCI; of the rest of SCTLR it
+ 	// says nothing. Only the bits that must be set, until common_start.
+ 	MOV64	x0, 0x30D00800
+@@ -201,6 +233,9 @@
+ 	cmp		x0, x2
+ 	bne		Lskip_cpu_reset_handler
+ 1:
++#if defined(GENERIC_PSCI_SMP)
++	PSCI_SMP_EARLY_MARK 2, x21, x0				// stage 2: its cpu data and a valid handler found
++#endif
+ 
+ #if HAS_BP_RET
+ 	bl		EXT(set_bp_ret)
+@@ -217,6 +252,9 @@
+ 
+ 	blr		x0
+ Lskip_cpu_reset_handler:
++#if defined(GENERIC_PSCI_SMP)
++	PSCI_SMP_EARLY_MARK 3, x0, x3				// stage 3: no cpu data, or no valid handler (it hangs here)
++#endif
+ 	b		.									// Hang if the handler is NULL or returns
+ 
+ 	.align 3
+@@ -504,6 +542,9 @@
+ 	add		lr, lr, x22
+ 	sub		lr, lr, x23
+ 
++#if defined(GENERIC_PSCI_SMP)
++	PSCI_SMP_EARLY_MARK 4, lr, x23				// stage 4: start_cpu, stacks set
++#endif
+ 	b		common_start
+ 
+ /*
+@@ -957,6 +998,13 @@
+ 	PAC_INIT_KEY_STATE tmp=x0, tmp2=x1
+ #endif /* HAS_APPLE_PAC */
+ 
++#if defined(GENERIC_PSCI_SMP)
++	cbz		x21, 3f
++	mrs		x11, TTBR1_EL1
++	mrs		x12, TCR_EL1
++	PSCI_SMP_EARLY_MARK 5, x11, x12				// stage 5: a started core, just before its MMU is on
++3:
++#endif
+ 	cbnz	x21, 1f								// boot CPU cold start only
+ 	LOADER_CHECKPOINT 4
+ 	E1S_BOOT_MARK 4
+@@ -969,6 +1017,13 @@
+ 	LOADER_CHECKPOINT 5
+ 	MOV64   x0, SCTLR_EL1_DEFAULT				// restore what the checkpoint clobbered
+ 1:
++#if defined(GENERIC_PSCI_SMP)
++	cbz		x21, 3f
++	mrs		x11, SCTLR_EL1
++	mov		x12, sp
++	PSCI_SMP_EARLY_MARK 6, x11, x12				// stage 6: a started core, its MMU on (V=P)
++3:
++#endif
+ 
+ #if !VMAPPLE && !defined(E1S)
+ 	MOV64   x1, SCTLR_EL1_DEFAULT
