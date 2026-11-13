@@ -2,13 +2,13 @@
 
 > Generated from state/lab.json. Use the CLI; do not edit this board or its task cards.
 
-Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-13T21:19:52+00:00.
+Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-13T21:38:22+00:00.
 
-Registry SHA256: `594cbb9e6f8a13032d098c3b8d8d816b6e1c5af46a2c14df5acf424816227189`. Run `python3 tools/lab.py board --check` to detect stale files.
+Registry SHA256: `a7e617a0c26f09a436819bd69c1c5af26106893ded92e973fe99f88ae6dc034e`. Run `python3 tools/lab.py board --check` to detect stale files.
 
 [Workflow](docs/planning.md) · [All task details](planning/README.md) · [Machine view](state/board.json) · [Status](STATUS.md)
 
-| Ready (3) | In progress (11) | Blocked (20) | Waiting (22) | Needs authorization (23) | Done (363) |
+| Ready (3) | In progress (11) | Blocked (20) | Waiting (22) | Needs authorization (23) | Done (364) |
 | --- | --- | --- | --- | --- | --- |
 | [**NAT-082**](planning/tasks/NAT-082.md) · P97<br>Stage-0 PID 1 for the next native run: on the critical path to Apple dyld/launchd, read the delivered root from inside the kernel instead of hashing a prefix. A static arm64 Mach-O (md0, as the NAT-077 probe) that (1) mounts /dev/md1 read-only with the donor&#x27;s stage0 call (mount(&quot;apfs&quot;, &quot;/redwood&quot;, MNT_RDONLY, &quot;/dev/md1&quot;), pinned donor SHA 87bf485), (2) lists a fixed set of paths of the iOS root (/sbin/launchd, /usr/lib/dyld, the dyld shared cache, a handful of frameworks) with st_size, (3) reads named files and prints their SHA-256 with ARMv8 SHA-256 instructions (read and hash timed separately, the dyld shared cache is in the unread tail), all under 55 s so loader_return_after (max 63 s) needs no keepalive, (4) prints exit status 81; plus the host-side expected values read by apfs_lib from the same image. Host-test only (Unicorn and the existing apfs_lib), no phone action<br>host · unassigned | [**NAT-103**](planning/tasks/NAT-103.md) · P100<br>Native run of loader-diag-xnu-hb-md1 (decision 0038), the NAT-102 diagnostic image whose /etc/rc launches NAT-101&#x27;s hb before /sbin/launchd.darwin on an idle host: does hb start and print markers and ps -A / ps -Ao pid,ppid,stat,comm lists to /dev/console after launchd and logd start (rows H0-H5), and which self-starting Apple daemons are alive when console noise resumes?<br>native · gemini-ios-20261113-a | [**INT-002**](planning/tasks/INT-002.md) · P100<br>Coordinate kernel build boot and virtualization integration<br>host · claude-takeover-20261110-6c8f<br>Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance (its handoff says the role continues after the gate review). Its gate tool is in main (tools/integration_gate.py, docs/integration/kernel/test_gate.py). The work it waited for has since reached main by direct merges under decision 0002 (STR-024, STR-037, STR-041 1042-body link; VM-047 and REV-047 on 2026-11-10). Without root approval and the multi-integrator protocol it cannot pass its own acceptance. | [**NAT-138**](planning/tasks/NAT-138.md) · P99<br>Host: scB touch image: NAT-128 polling kernel with the USI SPI9 pin map (CLK gpp9-0, MOSI 1, MISO 2, CS 3) from the pinned DT, a read-only MISO level check, and msgbuf=1048576 so the PMIC rail readbacks survive the lsd CPU-monitor flood; package, session driver, analyser, decision draft<br>host · unassigned<br>Dependencies: NAT-137 | [**NAT-017**](planning/tasks/NAT-017.md) · P97<br>Qualify an independent early-log canary and per-reset retention before any further XNU attempt<br>native · unassigned<br>Scope not authorized: native | [**KRN-009**](planning/tasks/KRN-009.md) · P100<br>Implement actual atomic type metadata for genuine selected XNU allocator uses<br>host · codex-compiler-atomics-20261105-t |
 | [**NAT-054**](planning/tasks/NAT-054.md) · P94<br>Publish a sealed corrective supplement for the NAT-051 USB observer log whose recorded hash covers only its initial prefix<br>host · unassigned | [**NAT-098**](planning/tasks/NAT-098.md) · P99<br>Native run of loader-diag-xnu-sq-md1 (decision 0037), the quiet Stage A image: eighteen of Apple&#x27;s own LaunchDaemons plists (no com.apple.lsd) plus the ps heartbeat in the small root under restore-mode launchd on an idle host; does the returned log window now show launchd and the ps -A lists, which Apple daemons run, which died and why, which process names the CPU-monitor message names<br>native · claude-nat065-20261112-ramdisk | [**INT-003**](planning/tasks/INT-003.md) · P100<br>Coordinate crypto drivers and platform integration<br>host · claude-takeover-20261110-6c8f<br>Needs an owner decision to retire the role: a permanent coordination role with no terminal acceptance. It depends on the stopped root/CM approval protocol, so its acceptance (serialized grants, original owners closing their tasks) cannot be met any more. Remaining component work (provider TUs, archives, link and private ABI) belongs to those component tasks. Handoff: worktrees/int-platform-20261106/docs/integration/platform/native-provider-headers98-review/handoff.md. | [**NAT-094**](planning/tasks/NAT-094.md) · P98<br>Quiet Stage A image after NAT-093: NAT-092&#x27;s image with the com.apple.lsd job removed from the small root (md0), because lsd&#x27;s repeated CPU-monitor kernel message filled the 32 KiB log tail; image name loader-diag-xnu-sq-md1, tag NAT094-sq1; build, package, derive the driver, tests incl. byte-for-byte comparison with NAT-092&#x27;s build, mutation pass, decision draft<br>host · unassigned<br>Dependencies: NAT-093 | [**NAT-072**](planning/tasks/NAT-072.md) · P93<br>Single native run of the NAT-071 image under its own decision file: does the payload kernel stay alive for the new bound with PID 1 printing heartbeats, and does the timed loader_return path hand the log back; restore stock RECOVERY, verify Android, analyse<br>native · unassigned<br>Scope not authorized: native | [**KRN-025**](planning/tasks/KRN-025.md) · P100<br>Build and qualify genuine selected cc_kext compiler runtime<br>host · codex-team-cc-runtime-20261105-az |
@@ -131,6 +131,7 @@ Registry SHA256: `594cbb9e6f8a13032d098c3b8d8d816b6e1c5af46a2c14df5acf4248162271
 | — | — | — | — | — | [**NAT-142**](planning/tasks/NAT-142.md) · P99<br>Native run of loader-diag-xnu-scC-md1 (NAT-141): Samsung STM screen-on start sequence and polled touch events posted to /dev/hakios-touch, with the owner touching the screen; restore stock RECOVERY and check Android<br>native · claude-opus-usb130-20261113 |
 | — | — | — | — | — | [**NAT-143**](planning/tasks/NAT-143.md) · P99<br>Host: scD touch-to-UI image: scC (NAT-141) with a longer fed kernel window (loader_return_after 270, loader deadline 595, rec_secs 270) so the iOS home screen is up for about 2 minutes, every STM press/release logged with its time, Samsung&#x27;s coordinate nibble order in post_event; session driver (watcher/collector 720 s), analyser for touch-caused UI actions (TouchDetectionMode timeline, app launches other than the automatic Spotlight after a press), decision<br>host · claude-opus-usb130-20261113 |
 | — | — | — | — | — | [**NAT-144**](planning/tasks/NAT-144.md) · P99<br>Native run of loader-diag-xnu-scD-md1 (NAT-143): iOS home screen kept up for about two minutes with STM touch input; the owner taps app icons; does a touch make iOS launch an application (analyze144 U2)? Restore stock RECOVERY and check Android<br>native · claude-opus-usb130-20261113 |
+| — | — | — | — | — | [**NAT-145**](planning/tasks/NAT-145.md) · P99<br>Host: scE frame-rate image: scD (NAT-143) with all ten e1s CPUs (ADT cpu1-cpu9 from the donor mkadt smp table checked against the pinned Samsung DT, no cpus=1) so XNU starts them through PSCI CPU_ON; session driver for NAT-146 and an analyser for the processor count and the frame rate of the software display path<br>host · claude-opus-usb130-20261113 |
 | — | — | — | — | — | [**KRN-007**](planning/tasks/KRN-007.md) · P98<br>Generate witnessed selected XNU component configuration and compile actual kernel units<br>host · codex-kernel-config-20261105-r |
 | — | — | — | — | — | [**KRN-011**](planning/tasks/KRN-011.md) · P98<br>Qualify fixed-size vector metadata for genuine ARM NEON saved-state allocation<br>host · codex-compiler-vectors-20261105-x |
 | — | — | — | — | — | [**KRN-017**](planning/tasks/KRN-017.md) · P98<br>Qualify selected C++ reference-field and member-function-pointer metadata storage<br>host · codex-cxx-storage-20261105-ab |
@@ -414,12 +415,6 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 
 ## Recent activity
 
-- 2026-11-13T20:16:03+00:00 · claude-opus-usb130-20261113 · task.claim:GPU-017
-  - GPU-017: in_progress
-- 2026-11-13T20:16:47+00:00 · claude-opus-usb130-20261113 · task.done:GPU-017
-  - GPU-017: done
-- 2026-11-13T20:20:42+00:00 · claude-opus-usb130-20261113 · task.add:NAT-141
-  - NAT-141: pending
 - 2026-11-13T20:20:51+00:00 · claude-opus-usb130-20261113 · task.claim:NAT-141
   - NAT-141: in_progress
 - 2026-11-13T20:26:05+00:00 · claude-opus-usb130-20261113 · task.done:NAT-141
@@ -448,6 +443,12 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 - 2026-11-13T21:19:37+00:00 · claude-opus-usb130-20261113 · task.done:NAT-144
   - NAT-144: done
 - 2026-11-13T21:19:48+00:00 · claude-opus-usb130-20261113 · project.permit:native
+- 2026-11-13T21:35:24+00:00 · claude-opus-usb130-20261113 · task.add:NAT-145
+  - NAT-145: pending
+- 2026-11-13T21:35:39+00:00 · claude-opus-usb130-20261113 · task.claim:NAT-145
+  - NAT-145: in_progress
+- 2026-11-13T21:38:12+00:00 · claude-opus-usb130-20261113 · task.done:NAT-145
+  - NAT-145: done
 
 Use a unique owner per agent session. Atomically take ready work:
 

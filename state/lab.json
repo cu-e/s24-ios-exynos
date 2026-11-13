@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T21:19:48+00:00",
+  "updated_at": "2026-11-13T21:38:12+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -17904,6 +17904,35 @@
       "evidence": "docs/procedures/nat-144/evidence.json",
       "evidence_sha256": "5c77956157b0702c21dd977cac8f16ad90818d4f5fcf609ffcc94e9003e14b96",
       "finished_at": "2026-11-13T21:19:37+00:00"
+    },
+    {
+      "id": "NAT-145",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scE frame-rate image: scD (NAT-143) with all ten e1s CPUs (ADT cpu1-cpu9 from the donor mkadt smp table checked against the pinned Samsung DT, no cpus=1) so XNU starts them through PSCI CPU_ON; session driver for NAT-146 and an analyser for the processor count and the frame rate of the software display path",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-143",
+        "NAT-144"
+      ],
+      "paths": [
+        "docs/procedures/nat-145",
+        "artifacts/nat-145"
+      ],
+      "acceptance": [
+        "ADT /cpus equals the donor mkadt.build(smp=True) cpu nodes except phandles; phandles unique; the loader's MPIDR patch (gi.mpidr & 0xffff, NAT-036) leaves cpu0 reg 0 alone",
+        "Kernel, loader, root, md0 and every token are scD's except cpus=1; the build refuses cpus=/cpumask=; window arithmetic as scD (240 + 270 + 60 + 25 <= 595 <= 600); cmdline within 255 bytes",
+        "Counted session derivation from session_nat144.py; analyser tested on NAT-144's real text (baseline C0-one, best steady window about 17-22 frames/s) and synthetic additions; make check",
+        "Host evidence only; the native run (NAT-146) needs an owner decision because PSCI CPU_ON is a secure firmware call that powers CPU cores, which decision 0052 does not name"
+      ],
+      "started_at": "2026-11-13T21:35:39+00:00",
+      "last_heartbeat": "2026-11-13T21:35:39+00:00",
+      "updated_at": "2026-11-13T21:38:12+00:00",
+      "evidence": "docs/procedures/nat-145/evidence.json",
+      "evidence_sha256": "37caa124c8256db58a03b6d44e55fb56358152f472e1ae0f395b9f65f6c4f3f6",
+      "finished_at": "2026-11-13T21:38:12+00:00"
     }
   ],
   "experiments": [
@@ -68645,6 +68674,47 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-13T21:35:24+00:00",
+      "action": "task.add:NAT-145",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-145",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T21:35:39+00:00",
+      "action": "task.claim:NAT-145",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-145",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T21:35:39+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T21:38:12+00:00",
+      "action": "task.done:NAT-145",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-145",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T21:35:39+00:00"
+        }
+      ]
     }
   ]
 }
