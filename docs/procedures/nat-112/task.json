@@ -1,0 +1,37 @@
+{
+  "id": "NAT-112",
+  "title": "Fix MiniIOMobileFramebuffer software renderer commit path: trace backboardd user-client calls after CPU rendering, identify missing commit mechanism, implement fb_diff detection",
+  "status": "pending",
+  "owner": null,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "priority": 100,
+  "depends_on": ["NAT-111"],
+  "paths": [
+    "src/xnu/iokit/Drivers/MiniIOMobileFramebuffer",
+    "src/xnu/iokit/Drivers/MiniIOSurface",
+    "patches/hakios/libhakios.sb.dylib",
+    "docs/procedures/nat-112",
+    "artifacts/nat-112"
+  ],
+  "sources": [
+    "hakios",
+    "ios-apollo"
+  ],
+  "acceptance": [
+    "libhakios.sb.dylib hooks added to trace IOMobileFramebuffer user-client selector numbers, parameters, and return values after CoreAnimation software rendering (before/after swap calls)",
+    "Host analysis: compare NAT-111 hakios trace with ios-apollo sweetgl=0 software renderer path reference; identify missing IOMobileFramebuffer commit mechanism or parameter difference",
+    "MiniIOMobileFramebuffer code review: check swap() implementation against real IOMobileFramebuffer behavior; identify why render_update returns 0x1 and fb_diff stays 0 for CPU-rendered IOSurface",
+    "Proposed fix: either (a) implement missing commit path in MiniIOMobileFramebuffer::swap for software-rendered surfaces, or (b) add fb_diff detection logic that reads IOSurface CPU buffer and compares with previous frame",
+    "Host test: build modified kernel with fixed MiniIOMobileFramebuffer, verify compilation and basic swap hook behavior in isolated test (no native run required for task completion)"
+  ],
+  "steps": [
+    "Review NAT-111 artifacts/nat-111/analysis/stage-c.json hakios_lines for exact CoreAnimation software renderer flow",
+    "Add libhakios.sb.dylib hooks to log IOMobileFramebuffer user-client calls: selector numbers, arg0-arg5, return values (before swap, during swap, after swap)",
+    "Search ios-apollo reference for sweetgl=0 software renderer path and IOMobileFramebuffer usage patterns",
+    "Read src/xnu/iokit/Drivers/MiniIOMobileFramebuffer swap() implementation and compare with real IOMobileFramebuffer expectations",
+    "Identify missing commit mechanism: does swap need to read IOSurface CPU buffer? Does render_update=0x1 mean 'no GPU update, check CPU buffer'?",
+    "Implement fix: either handle CPU-rendered IOSurface in swap(), or add fb_diff logic that compares IOSurface contents with last frame",
+    "Build modified kernel, verify compilation, document proposed fix and rationale in docs/procedures/nat-112/"
+  ]
+}
