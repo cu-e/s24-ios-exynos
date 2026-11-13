@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T22:09:29+00:00",
+  "updated_at": "2026-11-13T22:19:59+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -17975,6 +17975,57 @@
       "progress_note": "Run consumed under 0059: outcome FAIL. Both scE kernel boots stopped inside ml_parse_cpu_topology (last checkpoint 35); watchdog reset into SEC_UPLOAD, auto-restart looped into RECOVERY; owner forced Download Mode; stock RECOVERY restored, Android verified (docs/procedures/nat-146/evidence.json). Cause (source review): all /cpus nodes state=running -> second boot CPU assertion.",
       "next_step": "NAT-147 host: state=waiting for cpu1-9, prove on NAT-035 model, rebuild scE; rerun needs a new decision",
       "handoff": "docs/procedures/nat-146/README.md"
+    },
+    {
+      "id": "NAT-147",
+      "status": "pending",
+      "owner": null,
+      "title": "Host: scF image: scE (NAT-145) with cpu1-cpu9 state \"waiting\" so XNU's ml_parse_cpu_topology sees one boot CPU (NAT-146 stopped at the second-boot-CPU assertion); the kernel's own topology code run on the NAT-035 model with the as-built and fixed ADTs; session driver for NAT-148",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-145",
+        "NAT-146"
+      ],
+      "paths": [
+        "docs/procedures/nat-147",
+        "artifacts/nat-147"
+      ],
+      "acceptance": [
+        "Model run of the kernel's ml_parse_cpu_topology from a checkpoint-35 stop: as-built ten-CPU ADT reaches _Assert(topology_info.boot_cpu == NULL); the make_adt147 ADT reaches checkpoint 12 with num_cpus 10, boot cpu 0, and the model chain to checkpoint 14; baseline one-CPU ADT reaches 12",
+        "Build changes only cpu1-cpu9 state against scE (payload ADT states checked); same kernel, loader, root, window; cmdline within 255 bytes",
+        "Counted session derivation from session_nat146.py; tests; make check",
+        "Host evidence only; a native rerun (NAT-148) needs a new owner decision that names the SEC_UPLOAD loop risk and its button recovery"
+      ]
+    },
+    {
+      "id": "NAT-148",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scF image: scE (NAT-145) with cpu1-cpu9 state \"waiting\" so XNU's ml_parse_cpu_topology sees one boot CPU (NAT-146 stopped at the second-boot-CPU assertion); the kernel's own topology code run on the NAT-035 model with the as-built and fixed ADTs; session driver for NAT-149 (re-registration of NAT-147, which named the failed NAT-146 as a dependency and cannot be claimed)",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-145"
+      ],
+      "paths": [
+        "docs/procedures/nat-148",
+        "artifacts/nat-148"
+      ],
+      "acceptance": [
+        "Model run of the kernel's ml_parse_cpu_topology from a checkpoint-35 stop: as-built ten-CPU ADT reaches _Assert(topology_info.boot_cpu == NULL); the make_adt148 ADT reaches checkpoint 12 with num_cpus 10, boot cpu 0, and the model chain to checkpoint 14; baseline one-CPU ADT reaches 12",
+        "Build changes only cpu1-cpu9 state against scE (payload ADT states checked); same kernel, loader, root, window; cmdline within 255 bytes",
+        "Counted session derivation from session_nat146.py; tests; make check",
+        "Host evidence only; a native rerun (NAT-149) needs a new owner decision that names the SEC_UPLOAD loop risk and its button recovery"
+      ],
+      "started_at": "2026-11-13T22:15:02+00:00",
+      "last_heartbeat": "2026-11-13T22:15:02+00:00",
+      "updated_at": "2026-11-13T22:19:59+00:00",
+      "evidence": "docs/procedures/nat-148/evidence.json",
+      "evidence_sha256": "c880edb977052c00c09abd5100d1911ec3d63a106a48ad79419b5fab8058e7f4",
+      "finished_at": "2026-11-13T22:19:59+00:00"
     }
   ],
   "experiments": [
@@ -68823,6 +68874,60 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-13T22:13:37+00:00",
+      "action": "task.add:NAT-147",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-147",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T22:14:45+00:00",
+      "action": "task.add:NAT-148",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-148",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T22:15:02+00:00",
+      "action": "task.claim:NAT-148",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-148",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T22:15:02+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T22:19:59+00:00",
+      "action": "task.done:NAT-148",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-148",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T22:15:02+00:00"
+        }
+      ]
     }
   ]
 }

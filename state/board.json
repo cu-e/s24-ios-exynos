@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-13T22:09:39+00:00",
-  "ledger_updated_at": "2026-11-13T22:09:29+00:00",
-  "registry_sha256": "4532f22631cf715e9eba588afd28ed3e868d74677d7103175fe5962b63459332",
+  "generated_at": "2026-11-13T22:20:20+00:00",
+  "ledger_updated_at": "2026-11-13T22:19:59+00:00",
+  "registry_sha256": "6c843f95e769b54a1727d932356fcd311314ca0e411c9c8ac01bbd2cc0bf18c2",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -48,6 +48,7 @@
     ],
     "waiting": [
       "NAT-138",
+      "NAT-147",
       "NAT-094",
       "NAT-095",
       "NAT-100",
@@ -218,6 +219,7 @@
       "NAT-143",
       "NAT-144",
       "NAT-145",
+      "NAT-148",
       "KRN-007",
       "KRN-011",
       "KRN-017",
@@ -5954,6 +5956,65 @@
       "reasons": [],
       "card_path": "planning/tasks/NAT-146.md",
       "report_health": "recent"
+    },
+    {
+      "id": "NAT-147",
+      "status": "pending",
+      "owner": null,
+      "title": "Host: scF image: scE (NAT-145) with cpu1-cpu9 state \"waiting\" so XNU's ml_parse_cpu_topology sees one boot CPU (NAT-146 stopped at the second-boot-CPU assertion); the kernel's own topology code run on the NAT-035 model with the as-built and fixed ADTs; session driver for NAT-148",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-145",
+        "NAT-146"
+      ],
+      "paths": [
+        "docs/procedures/nat-147",
+        "artifacts/nat-147"
+      ],
+      "acceptance": [
+        "Model run of the kernel's ml_parse_cpu_topology from a checkpoint-35 stop: as-built ten-CPU ADT reaches _Assert(topology_info.boot_cpu == NULL); the make_adt147 ADT reaches checkpoint 12 with num_cpus 10, boot cpu 0, and the model chain to checkpoint 14; baseline one-CPU ADT reaches 12",
+        "Build changes only cpu1-cpu9 state against scE (payload ADT states checked); same kernel, loader, root, window; cmdline within 255 bytes",
+        "Counted session derivation from session_nat146.py; tests; make check",
+        "Host evidence only; a native rerun (NAT-148) needs a new owner decision that names the SEC_UPLOAD loop risk and its button recovery"
+      ],
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: NAT-146"
+      ],
+      "card_path": "planning/tasks/NAT-147.md"
+    },
+    {
+      "id": "NAT-148",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scF image: scE (NAT-145) with cpu1-cpu9 state \"waiting\" so XNU's ml_parse_cpu_topology sees one boot CPU (NAT-146 stopped at the second-boot-CPU assertion); the kernel's own topology code run on the NAT-035 model with the as-built and fixed ADTs; session driver for NAT-149 (re-registration of NAT-147, which named the failed NAT-146 as a dependency and cannot be claimed)",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-145"
+      ],
+      "paths": [
+        "docs/procedures/nat-148",
+        "artifacts/nat-148"
+      ],
+      "acceptance": [
+        "Model run of the kernel's ml_parse_cpu_topology from a checkpoint-35 stop: as-built ten-CPU ADT reaches _Assert(topology_info.boot_cpu == NULL); the make_adt148 ADT reaches checkpoint 12 with num_cpus 10, boot cpu 0, and the model chain to checkpoint 14; baseline one-CPU ADT reaches 12",
+        "Build changes only cpu1-cpu9 state against scE (payload ADT states checked); same kernel, loader, root, window; cmdline within 255 bytes",
+        "Counted session derivation from session_nat146.py; tests; make check",
+        "Host evidence only; a native rerun (NAT-149) needs a new owner decision that names the SEC_UPLOAD loop risk and its button recovery"
+      ],
+      "started_at": "2026-11-13T22:15:02+00:00",
+      "last_heartbeat": "2026-11-13T22:15:02+00:00",
+      "updated_at": "2026-11-13T22:19:59+00:00",
+      "evidence": "docs/procedures/nat-148/evidence.json",
+      "evidence_sha256": "c880edb977052c00c09abd5100d1911ec3d63a106a48ad79419b5fab8058e7f4",
+      "finished_at": "2026-11-13T22:19:59+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-148.md"
     },
     {
       "id": "KRN-007",
@@ -19547,58 +19608,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-13T20:39:42+00:00",
-      "action": "task.done:NAT-142",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-142",
-          "status": "done",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 99,
-          "last_heartbeat": "2026-11-13T20:28:16+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T20:39:56+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-13T20:50:06+00:00",
-      "action": "task.add:NAT-143",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-143",
-          "status": "pending",
-          "owner": null,
-          "priority": 99
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T20:50:17+00:00",
-      "action": "task.claim:NAT-143",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-143",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 99,
-          "last_heartbeat": "2026-11-13T20:50:17+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-13T21:02:03+00:00",
       "action": "task.done:NAT-143",
       "owner": "claude-opus-usb130-20261113",
@@ -19803,11 +19812,65 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-13T22:13:37+00:00",
+      "action": "task.add:NAT-147",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-147",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T22:14:45+00:00",
+      "action": "task.add:NAT-148",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-148",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T22:15:02+00:00",
+      "action": "task.claim:NAT-148",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-148",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T22:15:02+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T22:19:59+00:00",
+      "action": "task.done:NAT-148",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-148",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T22:15:02+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "66ec163d40bf36cf1ccdf094eb613c9618cffc80f46dfd6afa8020ffeb450e5c",
-    "BOARD.md": "4c22c4cf66dd38f9160035466a9412d93516d643ac5bc987979fb608184c2234",
+    "STATUS.md": "f61d3bf4d3d8020dab2da6a8766fb6beeba59b79cd24d44b06d901b75151d067",
+    "BOARD.md": "e7e14b6531f0f7e3dbca81a424262e08cbd0bda466413541be39f075c53ae284",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -19941,6 +20004,8 @@
     "planning/tasks/NAT-144.md": "70d52857ad4cdbfddd4f35c8111fa6a652cd39872ef1d479749c31ee0939b2e8",
     "planning/tasks/NAT-145.md": "53626b217f13613f22694b42e47a8669620b5135c1d373d5595d18142192b9fe",
     "planning/tasks/NAT-146.md": "e5624e66158d2a2d347b889f8acff7874009cf3af6b12e6a29210f0226a02780",
+    "planning/tasks/NAT-147.md": "8bbdf1f990d2a22fb2f42984d367c7b3064304011f4dd5b9aa6592c340cb3612",
+    "planning/tasks/NAT-148.md": "ecf4349736a4c6b36e5a455d138a86e1ab07bf9c2df9abf6bf13c873900ff846",
     "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-011.md": "9b8014abd8d019af80fad695e0d0df9de9523d36a222553327384f7f00e8a901",
     "planning/tasks/KRN-017.md": "86a29485c4c3ed3a62f7ecf64f5e2bb303bb0bd7ac5fd661482bf024004f407d",
