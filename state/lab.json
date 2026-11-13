@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T22:19:59+00:00",
+  "updated_at": "2026-11-13T22:25:56+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -8,7 +8,7 @@
       "host": true,
       "android-readonly": true,
       "android-app": true,
-      "native": false
+      "native": true
     },
     "facts": [
       {
@@ -804,6 +804,13 @@
         "decision": "docs/decisions/0059-nat146-loader-diag-xnu-scE-md1-single-run-2026-11-14.md",
         "owner": "claude-opus-usb130-20261113",
         "at": "2026-11-13T22:09:29+00:00"
+      },
+      {
+        "scope": "native",
+        "value": true,
+        "decision": "docs/decisions/0060-nat149-loader-diag-xnu-scF-md1-single-run-2026-11-14.md",
+        "owner": "claude-opus-usb130-20261113",
+        "at": "2026-11-13T22:25:35+00:00"
       }
     ]
   },
@@ -18026,6 +18033,31 @@
       "evidence": "docs/procedures/nat-148/evidence.json",
       "evidence_sha256": "c880edb977052c00c09abd5100d1911ec3d63a106a48ad79419b5fab8058e7f4",
       "finished_at": "2026-11-13T22:19:59+00:00"
+    },
+    {
+      "id": "NAT-149",
+      "status": "in_progress",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Native run of loader-diag-xnu-scF-md1 (NAT-148): the touch-to-UI system with ten CPUs (one boot CPU in /cpus) started through PSCI CPU_ON; do the cores join (analyze146 C2/C1/C0) and does the software display path's frame rate rise above NAT-144's? Restore stock RECOVERY and check Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 99,
+      "depends_on": [
+        "NAT-148"
+      ],
+      "paths": [
+        "docs/procedures/nat-149",
+        "artifacts/nat-149"
+      ],
+      "acceptance": [
+        "Exactly one bounded run of the pinned scF package under decision 0060, RECOVERY write with full readback",
+        "analyze146 verdicts reported (smp, cpus, frame windows, fps against NAT-144 21.72/s and 57 ms), or the loader CK records if no kernel ring arrives",
+        "Stock RECOVERY restored with full hash match; Android boot_completed and user-data directories present",
+        "Dated native evidence; frame rate is the kernel's count, not a camera measurement; the owner's account recorded as an observation"
+      ],
+      "started_at": "2026-11-13T22:25:56+00:00",
+      "last_heartbeat": "2026-11-13T22:25:56+00:00",
+      "updated_at": "2026-11-13T22:25:56+00:00"
     }
   ],
   "experiments": [
@@ -68926,6 +68958,44 @@
           "owner": "claude-opus-usb130-20261113",
           "priority": 99,
           "last_heartbeat": "2026-11-13T22:15:02+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T22:25:13+00:00",
+      "action": "task.add:NAT-149",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-149",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T22:25:35+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-13T22:25:56+00:00",
+      "action": "task.claim:NAT-149",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-149",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T22:25:56+00:00"
         }
       ]
     }
