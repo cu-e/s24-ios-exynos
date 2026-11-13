@@ -1,0 +1,25 @@
+{
+  "id": "KRN-044",
+  "title": "One-object rebuild loop for the kernel that runs on the phone: recompile one changed source file of the STR-041 1042-object index with its recorded recipe, relink with STR-041's driver, rerun its checks and NAT-020's entry stubs; first prove an unchanged rebuild reproduces kernel.unstripped (4c9536d8...)",
+  "status": "pending",
+  "owner": null,
+  "priority": 90,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": ["STR-041"],
+  "paths": [
+    "docs/procedures/krn-044",
+    "artifacts/krn-044"
+  ],
+  "acceptance": [
+    "An unchanged relink from the STR-041 index reproduces kernel.unstripped byte-for-byte, or the differing bytes are listed and explained",
+    "One source file (a harmless IOLog string in MiniIOMobileFramebuffer.cpp) is changed, only its object is recompiled with the recorded argv, the kernel relinks, passes STR-041's segment/entry/import checks, and the string is in the binary",
+    "NAT-020's deny_storage stubs apply unchanged to the rebuilt kernel",
+    "No phone action"
+  ],
+  "steps": [
+    "Read STR-041 evidence/execution-plan.json for the object recipe format and the link driver",
+    "Relink unchanged, compare; then the one-file change"
+  ],
+  "notes": "Prerequisite for any kernel-side graphics change (MiniIOSurface fixes after NAT-113, GPU-007 IOService). See research/notes/GPU-chain-2026-11-13.md. KRN-043 is related but blocked by the auto-mode classifier on executing upstream build scripts; this task uses the project's own recorded recipes."
+}

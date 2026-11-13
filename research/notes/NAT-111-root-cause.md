@@ -1,138 +1,82 @@
-# NAT-111 Root Cause: surfaceReady() Blocks Software Renderer
+# NAT-111 Root Cause Analysis (corrected 2026-11-13)
 
 Date: 2026-11-13
-Owner: claude-opus-nat111-analysis-20261113
+Owner: claude-opus-nat112-20261113
+Status: Corrected — earlier fence hypothesis disproved by NAT-112 analysis
 
-## Problem
+## Correction Notice
 
-NAT-111 confirmed SpringBoard[13] alive and 2 MiniIOMobileFramebuffer swaps, but **fb_diff=0** (no visible pixels).
+An earlier version of this document (by claude-opus-nat111-analysis-20261113) claimed
+that `surfaceReady()`/`MiniIOSurfaceDrawn()` was the root cause of missing pixels, with
+fb_diff=0 as evidence. Both claims were wrong:
 
-**Root cause:** MiniIOMobileFramebuffer waits for GPU completion (`surfaceReady()`) before copying IOSurface pixels to framebuffer. Software renderer doesn't use GPU, so CPU-rendered IOSurfaces never signal "ready" → pixels never commit → no visible output.
+1. `MiniIOSurfaceDrawn()` returns `true` immediately when `surface->drawn == 0`
+   (the software renderer case). No GPU fence block. This is confirmed in
+   `references/s24-port/xnu/hackios/files/iokit/Kernel/RedwoodGPU.cpp`:
+       bool MiniIOSurfaceDrawn(MiniIOSurface * surface, uint64_t milliseconds) {
+           uint32_t fence = surface->drawn;
+           bool done = true;
+           if (fence != 0 && gGPULock != NULL) { ... }
+           return done;
+       }
+   For CPU-rendered surfaces: fence == 0 → returns true immediately.
 
-## Evidence Chain
+2. `fb_diff=0` was never measured — the string "N pixels of the panel changed a frame"
+   prints only after 5 seconds of accumulated stats AND a next swap. NAT-111 had 2
+   swaps in 0.53 s; the window never closed. `fb_pixel_diffs=[]` is a false negative
+   (measurement artifact, not evidence of zero pixel changes).
 
-### 1. libhakios hooks (NAT-111)
-```
-no accelerated renderer; the software one will draw
-render_update -> 0x1 (flags 0)
-```
+The kernel patch in `patches/e1s-graphics/0001-software-renderer-fence-stub.patch` was
+drafted based on this incorrect analysis and is not needed.
 
-### 2. MiniIOMobileFramebuffer.cpp code review
-```cpp
-// Line 1332: show() waits for GPU before copying
-/* A swap's surfaces onto the panel, once the GPU is done with them. */
-void IOMobileFramebuffer::show(const uint8_t * swap, MiniIOSurface ** surfaces)
-{
-    // Line 1344: timeout message if GPU not ready
-    IOLog("MiniIOMobileFramebuffer: swap %u: the GPU is not done with surface %u after %u ms; shown as it is\n", ...);
-}
-```
+## What NAT-111 established
 
-### 3. MiniIOSurface.h interface
-```cpp
-// Line 166: surfaceReady() checks GPU fence
-/* Wait, for so many milliseconds at most, until the GPU is done with a surface's pixels (hakios.gpu.cpp). */
-```
+- SpringBoard[13] stayed alive until kernel return (~195 s after boot)
+- backboardd[16] executed two MiniIOMobileFramebuffer::swap calls (234.93 s, 235.46 s)
+- drawLayer() was called with valid surface 1 (1125×2436 'BGRA') for both swaps
+- MiniIOSurfaceDrawn() returns true for CPU-rendered surfaces (surface->drawn == 0)
+- Software renderer path completed: begin_update → render_update(0x1) → finish_update(0)
+- No "GPU is not done with surface" timeout in NAT-111 log
+- Text console disabled: `fGraphics = true` (PE_initialize_console(NULL, kPEGraphicsMode))
 
-### 4. Behavior
-- Software renderer: CoreAnimation → IOSurface (CPU write) → MiniIOMobileFramebuffer::swap
-- MiniIOMobileFramebuffer::show() → calls `surfaceReady(surface, SWAP_GPU_MS)` (500ms)
-- surfaceReady() checks GPU fence → **no GPU fence for CPU-rendered surface** → returns false
-- Timeout → logs "shown as it is" → **but pixels never copied to framebuffer**
-- Result: fb_diff=0, no visible screen
+## What is NOT established
 
-## Fix Options
+- Whether the software renderer wrote non-zero pixels into the IOSurface
+- Whether drawLayer() read non-zero pixels and copied them to the panel framebuffer
+- Whether the physical display was updated (no visual observation, no recording)
 
-### Option A: Skip surfaceReady() for CPU-rendered surfaces
-**Approach:** Add flag to IOSurface marking CPU-only rendering, check in MiniIOMobileFramebuffer::show()
+## fb_diff=0 is NOT established
 
-**Implementation:**
-1. Add `cpu_rendered` bool to MiniIOSurface state
-2. Set flag when IOSurface created without GPU binding
-3. In MiniIOMobileFramebuffer::show(), skip `surfaceReady()` if `cpu_rendered == true`
-4. Copy pixels immediately for CPU-rendered surfaces
+The fb_diff statistics mechanism (MiniIOMobileFramebuffer.cpp:~1474):
 
-**Pros:**
-- Minimal kernel changes
-- Clear separation of GPU/CPU paths
-- No fake GPU fences
-
-**Cons:**
-- Need to track rendering mode per surface
-- CoreAnimation doesn't explicitly tell us it's CPU-only
-
-### Option B: Mark all IOSurfaces as ready immediately
-**Approach:** Make `surfaceReady()` return true for surfaces without GPU fence
-
-**Implementation:**
-1. In MiniIOSurface, check if surface has GPU fence
-2. If no fence (CPU-rendered), return true immediately from `surfaceReady()`
-3. MiniIOMobileFramebuffer unchanged
-
-**Pros:**
-- Single change point (MiniIOSurface)
-- Framebuffer logic unchanged
-- Works for both GPU and CPU rendering
-
-**Cons:**
-- Loses distinction between "ready" and "no GPU"
-- Could mask real GPU timeout issues
-
-### Option C: Force software renderer surfaces ready via libhakios
-**Approach:** Hook IOSurface creation in libhakios.sb.dylib, mark as ready
-
-**Implementation:**
-1. libhakios hooks IOSurfaceCreate
-2. Detect software renderer (no IOAccelerator binding)
-3. Call kernel to mark surface as GPU-ready
-4. MiniIOMobileFramebuffer unchanged
-
-**Pros:**
-- No kernel recompilation
-- Can be tested immediately with new libhakios.sb.dylib
-- Easy to toggle on/off
-
-**Cons:**
-- Userland hack, not clean kernel fix
-- Requires new syscall or ioctl to mark surface ready
-- Still needs kernel change to expose "mark ready" interface
-
-## Recommendation
-
-**Immediate:** Option B (surfaceReady() returns true if no GPU fence)
-
-Rationale:
-- Simplest kernel fix (single function change)
-- Works for current software renderer case
-- When GPU is added later, surfaces with fences will still wait correctly
-- No userland changes needed
-
-**Implementation:**
-```cpp
-// MiniIOSurface.cpp
-bool MiniIOSurface::surfaceReady(uint32_t timeout_ms)
-{
-    // If surface has no GPU fence, it's CPU-rendered → ready immediately
-    if (!this->fGPUFence) {
-        return true;
+    fStatFrames++;
+    if (fStatSince == 0) { fStatSince = began; }
+    absolutetime_to_nanoseconds(mach_absolute_time() - fStatSince, &nanos);
+    if (nanos >= 5 * NSEC_PER_SEC) {
+        // prints "N frames in M ms ..."
+        // if (fDiff > 0): prints "N pixels of the panel changed a frame"
     }
-    
-    // Wait for GPU fence (existing logic)
-    return waitForGPUFence(timeout_ms);
-}
-```
 
-## Next Steps
+NAT-111: swap 1 at 234.93 s, swap 2 at 235.46 s (Δ = 0.53 s). The 5-second window
+started at swap 1 and needed swap 3 to close. Swap 3 never came. The statistics block
+never executed. `fb_pixel_diffs=[]` means the line was never printed, not that zero
+pixels changed.
 
-1. Verify MiniIOSurface::surfaceReady() implementation in references/hakios
-2. Confirm IOSurface has GPU fence tracking (`fGPUFence` or similar)
-3. Implement Option B fix in src/xnu (blocked by KRN-001 path conflict)
-4. Alternative: document fix for manual kernel rebuild
-5. Build test kernel, verify fb_diff > 0 in next native run
+## Open question
+
+Whether the software renderer writes non-zero pixels into the IOSurface. The commit
+path (surface → drawLayer() → fBase) is confirmed working. The pixel content is unknown.
+
+## How NAT-113 resolves it
+
+NAT-113 adds `rec_secs=30 rec_mb=64 rec_ring=1` to capture actual frames.
+The recording format (RWREC003) stores width×height×3 bytes per frame with timestamps.
+One frame with any non-zero pixel confirms the render path produces output.
+All-zero pixels confirm the render path is broken (focus on IOSurface lock/write/unlock).
 
 ## Related
 
-- NAT-111: native run that exposed this issue
-- NAT-112: task for implementing fix (blocked by KRN-001)
-- IOS-006: CoreAnimation client code analysis (still valuable for GPU path)
-- GPU-007: Xclipse backend (not needed for first visible frame)
+- NAT-112: analysis task that corrected this document (done, pass)
+- NAT-113: next native run with framebuffer recording
+- docs/procedures/nat-113/decision-draft.md: proposed experiment
+- research/notes/NAT-112-corrected-analysis.md: authoritative corrected analysis

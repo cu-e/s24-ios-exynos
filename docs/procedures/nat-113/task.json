@@ -1,0 +1,31 @@
+{
+  "id": "NAT-113",
+  "title": "Stage C3: 120 s run with framebuffer recording — confirm visible iOS pixels",
+  "status": "pending",
+  "owner": null,
+  "priority": 100,
+  "scope": "native",
+  "evidence_kind": "native-device",
+  "depends_on": ["NAT-111"],
+  "paths": [
+    "docs/procedures/nat-113",
+    "artifacts/nat-113"
+  ],
+  "acceptance": [
+    "loader-diag-xnu-sc3-md1 image built, hashes pinned in evidence",
+    "loader oem-recording path implemented and host-tested",
+    "Single authorized run: kernel runs for 120 s, loader_return_after fires, recording extracted",
+    "Recording contains at least one frame with non-zero pixels (direct pixel evidence)",
+    "Stock RECOVERY restored, SHA-256 verified, Android boot confirmed",
+    "run-001/report.json and evidence.json saved with all provenance"
+  ],
+  "steps": [
+    "Implement oem recording download in e1s loader shim (adds USB bulk-IN for recording buffer)",
+    "Add rec_secs=30 rec_mb=64 rec_ring=1 to kernel cmdline; remove serial=3 keepsyms=1 fb_diff=1; set loader_return_after=120",
+    "Build loader-diag-xnu-sc3-md1; verify cmdline <= 256 B; run host tests",
+    "Draft and obtain owner decision for one native run",
+    "Execute run, extract recording, convert with tools/recording.py, verify pixels",
+    "Restore stock RECOVERY unconditionally, verify Android"
+  ],
+  "notes": "cpus=1 means loader pauses Samsung S5E9945 WDT before jumping to kernel — no hardware watchdog during kernel run, 120 s is safe. Recording extracted via new oem-recording USB path after loader_return. rec_mb=64 fits ~7 full 1125x2436 BGRA frames; rec_ring=1 keeps last 7. cmdline budget: 252 bytes."
+}

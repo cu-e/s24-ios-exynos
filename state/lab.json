@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T07:26:05+00:00",
+  "updated_at": "2026-11-13T09:43:38+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -16577,7 +16577,7 @@
     {
       "id": "NAT-112",
       "title": "Fix MiniIOMobileFramebuffer software renderer commit path: trace backboardd user-client calls after CPU rendering, identify missing commit mechanism, implement fb_diff detection",
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude-opus-nat112-20261113",
       "scope": "host",
       "evidence_kind": "host-test",
@@ -16613,10 +16613,116 @@
         "Build modified kernel, verify compilation, document proposed fix and rationale in docs/procedures/nat-112/"
       ],
       "started_at": "2026-11-13T07:24:01+00:00",
-      "last_heartbeat": "2026-11-13T07:26:05+00:00",
-      "updated_at": "2026-11-13T07:26:05+00:00",
-      "progress_note": "MiniIOSurfaceDrawn stub created for software renderer",
-      "next_step": "Integrate MiniIOSurfaceStub.cpp into kernel build system, verify host compilation"
+      "last_heartbeat": "2026-11-13T07:47:31+00:00",
+      "updated_at": "2026-11-13T07:48:44+00:00",
+      "progress_note": "Analysis complete: fb_diff=0 is a measurement artifact (5s window never closed in NAT-111 with only 2 swaps). Commit path works correctly. No kernel patch needed.",
+      "next_step": "New owner decision for NAT-113: longer run (loader_return_after=120) + rec_secs=30 rec_start=30 rec_mb=64 rec_ring=1 to capture actual frames and confirm visible pixels",
+      "evidence": "docs/procedures/nat-112/evidence.json",
+      "evidence_sha256": "24805137c061c6696069eb641120a6275bcf49e9114c1524d37eaa14e7c62b17",
+      "finished_at": "2026-11-13T07:48:44+00:00"
+    },
+    {
+      "id": "NAT-113",
+      "title": "Stage C3: 120 s run with framebuffer recording — confirm visible iOS pixels",
+      "status": "pending",
+      "owner": null,
+      "priority": 100,
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "depends_on": [
+        "NAT-111"
+      ],
+      "paths": [
+        "docs/procedures/nat-113",
+        "artifacts/nat-113"
+      ],
+      "acceptance": [
+        "loader-diag-xnu-sc3-md1 image built, hashes pinned in evidence",
+        "loader oem-recording path implemented and host-tested",
+        "Single authorized run: kernel runs for 120 s, loader_return_after fires, recording extracted",
+        "Recording contains at least one frame with non-zero pixels (direct pixel evidence)",
+        "Stock RECOVERY restored, SHA-256 verified, Android boot confirmed",
+        "run-001/report.json and evidence.json saved with all provenance"
+      ],
+      "steps": [
+        "Implement oem recording download in e1s loader shim (adds USB bulk-IN for recording buffer)",
+        "Add rec_secs=30 rec_mb=64 rec_ring=1 to kernel cmdline; remove serial=3 keepsyms=1 fb_diff=1; set loader_return_after=120",
+        "Build loader-diag-xnu-sc3-md1; verify cmdline <= 256 B; run host tests",
+        "Draft and obtain owner decision for one native run",
+        "Execute run, extract recording, convert with tools/recording.py, verify pixels",
+        "Restore stock RECOVERY unconditionally, verify Android"
+      ],
+      "notes": "cpus=1 means loader pauses Samsung S5E9945 WDT before jumping to kernel — no hardware watchdog during kernel run, 120 s is safe. Recording extracted via new oem-recording USB path after loader_return. rec_mb=64 fits ~7 full 1125x2436 BGRA frames; rec_ring=1 keeps last 7. cmdline budget: 252 bytes."
+    },
+    {
+      "id": "NAT-114",
+      "title": "Host build of loader-diag-xnu-sc3-md1 for NAT-113: the loader's PX/PR pixel report at the kernel's return (panel memory statistics + 108x234 thumbnail, screen-recording statistics), rec_secs=30 rec_mb=64, loader_return_after=63; host tests, mutation pass, session driver derivation, decision draft; no phone action",
+      "status": "done",
+      "owner": "claude-opus-nat112-20261113",
+      "priority": 100,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-111",
+        "NAT-112"
+      ],
+      "paths": [
+        "docs/procedures/nat-113/build.py",
+        "docs/procedures/nat-113/src",
+        "docs/procedures/nat-113/decode113.py",
+        "docs/procedures/nat-113/test_nat113.py",
+        "docs/procedures/nat-113/mutate_nat113.py",
+        "docs/procedures/nat-113/derive113.py",
+        "docs/procedures/nat-113/session_nat113.py",
+        "docs/procedures/nat-113/decision-draft.md",
+        "docs/procedures/nat-113/build-evidence.json",
+        "artifacts/nat-113/build-001",
+        "artifacts/nat-113/package-001"
+      ],
+      "acceptance": [
+        "Image built from NAT-110's chain with the NAT-113 changes; cmdline < 256 B checked; RECOVERY, Image.payload and loader hashes recorded",
+        "glue113.h compiled for the host against synthetic memory; tests cover counts, thumbnail, recording header/range refusals, pacing; mutation pass with no unexplained survivors",
+        "session_nat113.py derived from session_nat110.py by counted substitutions and checked; preflight without a decision file refuses before any device access",
+        "Decision draft states the watchdog bound, the measured return-channel rate, the pass rule and the restore protocol"
+      ],
+      "steps": [
+        "build.py, src/glue113.h, decode113.py, test_nat113.py, mutate_nat113.py, derive113.py in docs/procedures/nat-113 (NAT-113 stays the native run)",
+        "Run tests and a mutation pass; build and package; record hashes in evidence"
+      ],
+      "notes": "Corrects NAT-113's original acceptance: 120 s is not safe (this loader's S5E9945 watchdog is unfed after the jump; the 'WDT paused' claim came from the S9 loader in references/hakios-scion-full), and there is no bulk-IN path for a full recording (EP0 TEXT ~3.2 KB/s measured in NAT-111), so the loader sends statistics and a thumbnail instead.",
+      "started_at": "2026-11-13T09:35:42+00:00",
+      "last_heartbeat": "2026-11-13T09:35:42+00:00",
+      "updated_at": "2026-11-13T09:41:01+00:00",
+      "evidence": "docs/procedures/nat-113/build-evidence.json",
+      "evidence_sha256": "28858e1f78db208e67f31eb5736736186cbfec59785dd35dbc7a9fc8a6ec01c2",
+      "finished_at": "2026-11-13T09:41:01+00:00"
+    },
+    {
+      "id": "KRN-044",
+      "title": "One-object rebuild loop for the kernel that runs on the phone: recompile one changed source file of the STR-041 1042-object index with its recorded recipe, relink with STR-041's driver, rerun its checks and NAT-020's entry stubs; first prove an unchanged rebuild reproduces kernel.unstripped (4c9536d8...)",
+      "status": "pending",
+      "owner": null,
+      "priority": 90,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "STR-041"
+      ],
+      "paths": [
+        "docs/procedures/krn-044",
+        "artifacts/krn-044"
+      ],
+      "acceptance": [
+        "An unchanged relink from the STR-041 index reproduces kernel.unstripped byte-for-byte, or the differing bytes are listed and explained",
+        "One source file (a harmless IOLog string in MiniIOMobileFramebuffer.cpp) is changed, only its object is recompiled with the recorded argv, the kernel relinks, passes STR-041's segment/entry/import checks, and the string is in the binary",
+        "NAT-020's deny_storage stubs apply unchanged to the rebuilt kernel",
+        "No phone action"
+      ],
+      "steps": [
+        "Read STR-041 evidence/execution-plan.json for the object recipe format and the link driver",
+        "Relink unchanged, compare; then the one-file change"
+      ],
+      "notes": "Prerequisite for any kernel-side graphics change (MiniIOSurface fixes after NAT-113, GPU-007 IOService). See research/notes/GPU-chain-2026-11-13.md. KRN-043 is related but blocked by the auto-mode classifier on executing upstream build scripts; this task uses the project's own recorded recipes."
     }
   ],
   "experiments": [
@@ -65315,6 +65421,105 @@
           "progress_note": "MiniIOSurfaceDrawn stub created for software renderer",
           "next_step": "Integrate MiniIOSurfaceStub.cpp into kernel build system, verify host compilation",
           "last_heartbeat": "2026-11-13T07:26:05+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T07:47:31+00:00",
+      "action": "task.update:NAT-112",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-112",
+          "status": "in_progress",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 100,
+          "progress_note": "Analysis complete: fb_diff=0 is a measurement artifact (5s window never closed in NAT-111 with only 2 swaps). Commit path works correctly. No kernel patch needed.",
+          "next_step": "New owner decision for NAT-113: longer run (loader_return_after=120) + rec_secs=30 rec_start=30 rec_mb=64 rec_ring=1 to capture actual frames and confirm visible pixels",
+          "last_heartbeat": "2026-11-13T07:47:31+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T07:48:44+00:00",
+      "action": "task.done:NAT-112",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-112",
+          "status": "done",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 100,
+          "progress_note": "Analysis complete: fb_diff=0 is a measurement artifact (5s window never closed in NAT-111 with only 2 swaps). Commit path works correctly. No kernel patch needed.",
+          "next_step": "New owner decision for NAT-113: longer run (loader_return_after=120) + rec_secs=30 rec_start=30 rec_mb=64 rec_ring=1 to capture actual frames and confirm visible pixels",
+          "last_heartbeat": "2026-11-13T07:47:31+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T08:06:43+00:00",
+      "action": "task.add:NAT-113",
+      "owner": "planner",
+      "tasks": [
+        {
+          "id": "NAT-113",
+          "status": "pending",
+          "owner": null,
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T09:35:35+00:00",
+      "action": "task.add:NAT-114",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-114",
+          "status": "pending",
+          "owner": null,
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T09:35:42+00:00",
+      "action": "task.claim:NAT-114",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-114",
+          "status": "in_progress",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 100,
+          "last_heartbeat": "2026-11-13T09:35:42+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T09:41:01+00:00",
+      "action": "task.done:NAT-114",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-114",
+          "status": "done",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 100,
+          "last_heartbeat": "2026-11-13T09:35:42+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T09:43:38+00:00",
+      "action": "task.add:KRN-044",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "KRN-044",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
         }
       ]
     }

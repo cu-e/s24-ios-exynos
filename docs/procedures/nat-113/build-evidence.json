@@ -1,0 +1,62 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-13T09:50:00+00:00",
+  "task": "NAT-114",
+  "owner": "claude-opus-nat112-20261113",
+  "summary": "Built loader-diag-xnu-sc3-md1 for NAT-113 from NAT-110's chain: the loader sends a PX report (panel memory 0xfa200000 1080x2340: non-black count, FNV-1a, 108x234 RGB332 thumbnail) and a PR report (kernel screen recording, RWREC003 header and per-frame stats, range-checked against the NAT-111 XNU window) at the kernel's own return before the KL dump; cmdline adds rec_secs=30 rec_mb=64, drops keepsyms=1, no fb_diff, loader_return_after=63 (247 B). 24 host tests pass; 22/22 mutants killed; the session driver is session_nat110.py with 10 counted substitutions and refuses before any device access without a decision file. Nothing ran on a phone.",
+  "corrections": [
+    "120 s kernel window rejected: this loader's S5E9945 watchdog (83 s, guard.c) is petted for the last time before the jump (nat074_final_pet) and nothing feeds it afterwards; the 'paused WDT' claim came from references/hakios-scion-full (Galaxy S9 loader).",
+    "A full recording cannot be returned: the only return channel is EP0 TEXT, measured in NAT-111 at about 3.2 KB/s (380 KB of KL records in 117 s); hence statistics and a thumbnail.",
+    "serial=3 kept: kprintf reaches loader_log through serial_putc_crlf (redwood.patch, pexpert/arm/pe_kprintf.c)."
+  ],
+  "image": {
+    "name": "loader-diag-xnu-sc3-md1",
+    "recovery_img": "artifacts/nat-113/package-001/loader-diag-xnu-sc3-md1/recovery.img",
+    "recovery_bytes": 100663296,
+    "recovery_sha256": "aedbf05f6ea72f8bd20b3ccbb8e6fa018194a224274bee607872a1ccd8ff5880",
+    "payload_bytes": 26138384,
+    "payload_sha256": "2c3624a1c26f38b7de8a6573e2efe28e9b06f73aeaec6261fb81c8a7f98d97e0",
+    "loader_image_sha256": "6dff28e3159aad7bc36a4c4da37721eeb26770077f467d760b3ecbf7a4190fb6",
+    "md0_sha256": "6e9bdcef4ed6d4cd592ae004f1ec84013326242472be6f27074d5364a495583c",
+    "cmdline": "rd=md1 e1sufs=0 e1sufs_probe=0 ufsrw=0 ufs_write=0 sweethw=0 e1s.hold=0 nat_attempt=NAT113-sc3 debug=0xc serial=3 cpus=1 -v loader_return_after=63 launchdsuffix=release cs_enforcement_disable=1 e1stouch=0 e1sbattery=0 rec_secs=30 rec_mb=64 xrd=md0",
+    "cmdline_bytes": 247
+  },
+  "binary_check": "nat062_dump_log in 08-markerlib52.c.o grew from 2812 B (NAT-110) to 7800 B; its disassembly (capstone 5.0.7) loads 0xfa200000, 0x8fe400000, 0x9fe400000, the RWREC003 words and the loader_recording VA 0xfffffff007d10a08.",
+  "commands": [
+    {"command": "python3 docs/procedures/nat-113/build.py --out artifacts/nat-113/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs", "exit_code": 0},
+    {"command": "python3 docs/procedures/nat-044/package.py --build artifacts/nat-113/build-001 --out artifacts/nat-113/package-001", "exit_code": 0},
+    {"command": "python3 -B -I docs/procedures/nat-113/test_nat113.py", "exit_code": 0, "output": "Ran 24 tests, OK"},
+    {"command": "python3 -B -I docs/procedures/nat-113/mutate_nat113.py", "exit_code": 0, "output": "{\"total\": 22, \"killed\": 22, \"survived\": []}"},
+    {"command": "python3 docs/procedures/nat-113/derive113.py --check", "exit_code": 0, "output": "ok: session_nat113.py equals the derivation (10 substitutions)"},
+    {"command": "python3 docs/procedures/nat-113/session_nat113.py --out <scratch> --image loader-diag-xnu-sc3-md1", "exit_code": 1, "output": "stopped: decision file for loader-diag-xnu-sc3-md1 is missing or ambiguous (0 found): no device access; device_write_started=false, commands=[]"}
+  ],
+  "artifacts": [
+    "docs/procedures/nat-113/build.py",
+    "docs/procedures/nat-113/src/glue113.h",
+    "docs/procedures/nat-113/decode113.py",
+    "docs/procedures/nat-113/test_nat113.py",
+    "docs/procedures/nat-113/mutate_nat113.py",
+    "docs/procedures/nat-113/derive113.py",
+    "docs/procedures/nat-113/session_nat113.py",
+    "docs/procedures/nat-113/decision-draft.md",
+    "artifacts/nat-113/build-001/build.json",
+    "artifacts/nat-113/package-001/package.json",
+    "artifacts/nat-113/package-001/loader-diag-xnu-sc3-md1/recovery.img"
+  ],
+  "hashes": {
+    "docs/procedures/nat-113/build.py": "035bc3499f48109c799c30d3e090e29a2469b475121d6879c0ac5c7c3b5e2495",
+    "docs/procedures/nat-113/src/glue113.h": "b816d1e0d56d28b7b8c09240e918302469a48756e767a3907ba50bc44a651664",
+    "docs/procedures/nat-113/decode113.py": "c04708577dabd6d75d36ad6eeafde3b8619f3b049f78400cdad56f91ae6d8de3",
+    "docs/procedures/nat-113/derive113.py": "d595e086e5a0774446457e0da185cfd6e8a05fedfbd2f681405121a9b0f93e33",
+    "docs/procedures/nat-113/session_nat113.py": "bb4aaf7826a081de0a4732033d5a3b72ecae9f7d3aa081a42802aa29001abc73",
+    "artifacts/nat-113/build-001/build.json": "454897635522babbeb8c1da06cff64109da135b462d427ca39c972d5f8ac1c04"
+  },
+  "not_established": [
+    "that the panel memory at 0xfa200000 is still what the display scans after the kernel's e1s-display/MiniIOMobileFramebuffer ran (measured only as the address the kernel reported)",
+    "that cache lines the kernel left dirty reach RAM before the loader reads (loader_jump cleans loader_log and the recording, not the panel)",
+    "that the recording is allocated (64 MiB contiguous) on this phone",
+    "any pixel content: no run"
+  ]
+}

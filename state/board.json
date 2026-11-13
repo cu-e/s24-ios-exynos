@@ -1,19 +1,19 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-13T07:26:07+00:00",
-  "ledger_updated_at": "2026-11-13T07:26:05+00:00",
-  "registry_sha256": "0851dfd0dcc04b76ba93ab5818aa64e5961c4789688373aa1110ccf7570888f3",
+  "generated_at": "2026-11-13T09:43:40+00:00",
+  "ledger_updated_at": "2026-11-13T09:43:38+00:00",
+  "registry_sha256": "19bd513f99e63c08d4c31fd8092c830ac804e90cb76b97c133c011aa1f4e7fa4",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
       "NAT-082",
       "NAT-071",
       "NAT-054",
-      "NAT-055"
+      "NAT-055",
+      "KRN-044"
     ],
     "in_progress": [
       "NAT-103",
-      "NAT-112",
       "NAT-098",
       "NAT-093",
       "NAT-088",
@@ -68,6 +68,7 @@
       "UI-005"
     ],
     "gated": [
+      "NAT-113",
       "NAT-017",
       "NAT-072",
       "NAT-003",
@@ -168,6 +169,8 @@
       "NAT-109",
       "NAT-110",
       "NAT-111",
+      "NAT-112",
+      "NAT-114",
       "KRN-010",
       "KRN-012",
       "KRN-013",
@@ -3895,7 +3898,7 @@
     {
       "id": "NAT-112",
       "title": "Fix MiniIOMobileFramebuffer software renderer commit path: trace backboardd user-client calls after CPU rendering, identify missing commit mechanism, implement fb_diff detection",
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude-opus-nat112-20261113",
       "scope": "host",
       "evidence_kind": "host-test",
@@ -3931,14 +3934,100 @@
         "Build modified kernel, verify compilation, document proposed fix and rationale in docs/procedures/nat-112/"
       ],
       "started_at": "2026-11-13T07:24:01+00:00",
-      "last_heartbeat": "2026-11-13T07:26:05+00:00",
-      "updated_at": "2026-11-13T07:26:05+00:00",
-      "progress_note": "MiniIOSurfaceDrawn stub created for software renderer",
-      "next_step": "Integrate MiniIOSurfaceStub.cpp into kernel build system, verify host compilation",
-      "column": "in_progress",
+      "last_heartbeat": "2026-11-13T07:47:31+00:00",
+      "updated_at": "2026-11-13T07:48:44+00:00",
+      "progress_note": "Analysis complete: fb_diff=0 is a measurement artifact (5s window never closed in NAT-111 with only 2 swaps). Commit path works correctly. No kernel patch needed.",
+      "next_step": "New owner decision for NAT-113: longer run (loader_return_after=120) + rec_secs=30 rec_start=30 rec_mb=64 rec_ring=1 to capture actual frames and confirm visible pixels",
+      "evidence": "docs/procedures/nat-112/evidence.json",
+      "evidence_sha256": "24805137c061c6696069eb641120a6275bcf49e9114c1524d37eaa14e7c62b17",
+      "finished_at": "2026-11-13T07:48:44+00:00",
+      "column": "done",
       "reasons": [],
-      "card_path": "planning/tasks/NAT-112.md",
-      "report_health": "recent"
+      "card_path": "planning/tasks/NAT-112.md"
+    },
+    {
+      "id": "NAT-113",
+      "title": "Stage C3: 120 s run with framebuffer recording — confirm visible iOS pixels",
+      "status": "pending",
+      "owner": null,
+      "priority": 100,
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "depends_on": [
+        "NAT-111"
+      ],
+      "paths": [
+        "docs/procedures/nat-113",
+        "artifacts/nat-113"
+      ],
+      "acceptance": [
+        "loader-diag-xnu-sc3-md1 image built, hashes pinned in evidence",
+        "loader oem-recording path implemented and host-tested",
+        "Single authorized run: kernel runs for 120 s, loader_return_after fires, recording extracted",
+        "Recording contains at least one frame with non-zero pixels (direct pixel evidence)",
+        "Stock RECOVERY restored, SHA-256 verified, Android boot confirmed",
+        "run-001/report.json and evidence.json saved with all provenance"
+      ],
+      "steps": [
+        "Implement oem recording download in e1s loader shim (adds USB bulk-IN for recording buffer)",
+        "Add rec_secs=30 rec_mb=64 rec_ring=1 to kernel cmdline; remove serial=3 keepsyms=1 fb_diff=1; set loader_return_after=120",
+        "Build loader-diag-xnu-sc3-md1; verify cmdline <= 256 B; run host tests",
+        "Draft and obtain owner decision for one native run",
+        "Execute run, extract recording, convert with tools/recording.py, verify pixels",
+        "Restore stock RECOVERY unconditionally, verify Android"
+      ],
+      "notes": "cpus=1 means loader pauses Samsung S5E9945 WDT before jumping to kernel — no hardware watchdog during kernel run, 120 s is safe. Recording extracted via new oem-recording USB path after loader_return. rec_mb=64 fits ~7 full 1125x2436 BGRA frames; rec_ring=1 keeps last 7. cmdline budget: 252 bytes.",
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-113.md"
+    },
+    {
+      "id": "NAT-114",
+      "title": "Host build of loader-diag-xnu-sc3-md1 for NAT-113: the loader's PX/PR pixel report at the kernel's return (panel memory statistics + 108x234 thumbnail, screen-recording statistics), rec_secs=30 rec_mb=64, loader_return_after=63; host tests, mutation pass, session driver derivation, decision draft; no phone action",
+      "status": "done",
+      "owner": "claude-opus-nat112-20261113",
+      "priority": 100,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-111",
+        "NAT-112"
+      ],
+      "paths": [
+        "docs/procedures/nat-113/build.py",
+        "docs/procedures/nat-113/src",
+        "docs/procedures/nat-113/decode113.py",
+        "docs/procedures/nat-113/test_nat113.py",
+        "docs/procedures/nat-113/mutate_nat113.py",
+        "docs/procedures/nat-113/derive113.py",
+        "docs/procedures/nat-113/session_nat113.py",
+        "docs/procedures/nat-113/decision-draft.md",
+        "docs/procedures/nat-113/build-evidence.json",
+        "artifacts/nat-113/build-001",
+        "artifacts/nat-113/package-001"
+      ],
+      "acceptance": [
+        "Image built from NAT-110's chain with the NAT-113 changes; cmdline < 256 B checked; RECOVERY, Image.payload and loader hashes recorded",
+        "glue113.h compiled for the host against synthetic memory; tests cover counts, thumbnail, recording header/range refusals, pacing; mutation pass with no unexplained survivors",
+        "session_nat113.py derived from session_nat110.py by counted substitutions and checked; preflight without a decision file refuses before any device access",
+        "Decision draft states the watchdog bound, the measured return-channel rate, the pass rule and the restore protocol"
+      ],
+      "steps": [
+        "build.py, src/glue113.h, decode113.py, test_nat113.py, mutate_nat113.py, derive113.py in docs/procedures/nat-113 (NAT-113 stays the native run)",
+        "Run tests and a mutation pass; build and package; record hashes in evidence"
+      ],
+      "notes": "Corrects NAT-113's original acceptance: 120 s is not safe (this loader's S5E9945 watchdog is unfed after the jump; the 'WDT paused' claim came from the S9 loader in references/hakios-scion-full), and there is no bulk-IN path for a full recording (EP0 TEXT ~3.2 KB/s measured in NAT-111), so the loader sends statistics and a thumbnail instead.",
+      "started_at": "2026-11-13T09:35:42+00:00",
+      "last_heartbeat": "2026-11-13T09:35:42+00:00",
+      "updated_at": "2026-11-13T09:41:01+00:00",
+      "evidence": "docs/procedures/nat-113/build-evidence.json",
+      "evidence_sha256": "28858e1f78db208e67f31eb5736736186cbfec59785dd35dbc7a9fc8a6ec01c2",
+      "finished_at": "2026-11-13T09:41:01+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-114.md"
     },
     {
       "id": "KRN-008",
@@ -12745,6 +12834,36 @@
       "report_health": "stale"
     },
     {
+      "id": "KRN-044",
+      "title": "One-object rebuild loop for the kernel that runs on the phone: recompile one changed source file of the STR-041 1042-object index with its recorded recipe, relink with STR-041's driver, rerun its checks and NAT-020's entry stubs; first prove an unchanged rebuild reproduces kernel.unstripped (4c9536d8...)",
+      "status": "pending",
+      "owner": null,
+      "priority": 90,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "STR-041"
+      ],
+      "paths": [
+        "docs/procedures/krn-044",
+        "artifacts/krn-044"
+      ],
+      "acceptance": [
+        "An unchanged relink from the STR-041 index reproduces kernel.unstripped byte-for-byte, or the differing bytes are listed and explained",
+        "One source file (a harmless IOLog string in MiniIOMobileFramebuffer.cpp) is changed, only its object is recompiled with the recorded argv, the kernel relinks, passes STR-041's segment/entry/import checks, and the string is in the binary",
+        "NAT-020's deny_storage stubs apply unchanged to the rebuilt kernel",
+        "No phone action"
+      ],
+      "steps": [
+        "Read STR-041 evidence/execution-plan.json for the object recipe format and the link driver",
+        "Relink unchanged, compare; then the one-file change"
+      ],
+      "notes": "Prerequisite for any kernel-side graphics change (MiniIOSurface fixes after NAT-113, GPU-007 IOService). See research/notes/GPU-chain-2026-11-13.md. KRN-043 is related but blocked by the auto-mode classifier on executing upstream build scripts; this task uses the project's own recorded recipes.",
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/KRN-044.md"
+    },
+    {
       "id": "KRN-033",
       "title": "Implement source-qualified AES-GCM streaming modes and managed nonce helpers",
       "priority": 89,
@@ -13198,7 +13317,7 @@
         "SDK premise superseded: STR-041 linked the 1042-body image without an SDK, and KRN-041/KRN-042 give the precise export result. Still missing: (a) a build tool that applies KRN-041 0001/0002 to the canonical image; (b) payload/ADT validation, which needs the D22AP /product tree from an Apple IPSW (owner decision) and is the in-progress NAT-006 work of agy-nat006-20261110-aca2. See docs/procedures/kernel-build.md, Reassessment of 2026-11-10."
       ],
       "card_path": "planning/tasks/KRN-001.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "CELL-010",
@@ -17123,7 +17242,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-005, IOS-007, NAT-078, NAT-081, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103, NAT-112"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-005, IOS-007, NAT-078, NAT-081, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -17162,7 +17281,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-007, NAT-078, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103, NAT-112"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-007, NAT-078, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -18126,30 +18245,6 @@
         "worktree": "/home/egor/dev/pet/s24-ios-exynos"
       }
     ],
-    "claude-opus-nat112-20261113": [
-      {
-        "id": "NAT-112",
-        "status": "in_progress",
-        "last_heartbeat": "2026-11-13T07:26:05+00:00",
-        "report_health": "recent",
-        "progress_note": "MiniIOSurfaceDrawn stub created for software renderer",
-        "next_step": "Integrate MiniIOSurfaceStub.cpp into kernel build system, verify host compilation",
-        "handoff": null,
-        "branch": null,
-        "worktree": null
-      },
-      {
-        "id": "KRN-001",
-        "status": "blocked",
-        "last_heartbeat": "2026-11-13T07:17:20+00:00",
-        "report_health": "recent",
-        "progress_note": "Recheck 2026-11-10T08:15Z: NAT-006 was completed by codex-nat-priority-20261110-r1 as a host-only RECOVERY image build; its evidence has no ADT, D22AP /product tree or IPSW input, so blocker (b) is unchanged. Blocker (a) is KRN-043, stopped by the classifier.",
-        "next_step": "Owner runs or allows KRN-043 (python3 -I tools/build/e1s_kernel_exports.py --run canon-a, canon-b, then --compare); owner decides on supplying the D22AP /product tree for payload/ADT validation.",
-        "handoff": "docs/procedures/kernel-build.md",
-        "branch": "main",
-        "worktree": null
-      }
-    ],
     "claude-nat065-20261112-ramdisk": [
       {
         "id": "NAT-098",
@@ -18303,6 +18398,19 @@
         "worktree": "worktrees/krn-034-20261105"
       }
     ],
+    "claude-opus-nat112-20261113": [
+      {
+        "id": "KRN-001",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-13T07:17:20+00:00",
+        "report_health": "stale",
+        "progress_note": "Recheck 2026-11-10T08:15Z: NAT-006 was completed by codex-nat-priority-20261110-r1 as a host-only RECOVERY image build; its evidence has no ADT, D22AP /product tree or IPSW input, so blocker (b) is unchanged. Blocker (a) is KRN-043, stopped by the classifier.",
+        "next_step": "Owner runs or allows KRN-043 (python3 -I tools/build/e1s_kernel_exports.py --run canon-a, canon-b, then --compare); owner decides on supplying the D22AP /product tree for payload/ADT validation.",
+        "handoff": "docs/procedures/kernel-build.md",
+        "branch": "main",
+        "worktree": null
+      }
+    ],
     "codex-esim-frontend-20261105-l": [
       {
         "id": "ESIM-004",
@@ -18331,94 +18439,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-12T23:25:29+00:00",
-      "action": "task.done:NAT-110",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-110",
-          "status": "done",
-          "owner": "gemini-ios-20261113-a",
-          "priority": 100,
-          "last_heartbeat": "2026-11-12T23:05:55+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T23:27:09+00:00",
-      "action": "task.add:NAT-111",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-111",
-          "status": "pending",
-          "owner": null,
-          "priority": 100
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T23:27:59+00:00",
-      "action": "project.permit:native",
-      "owner": "gemini-ios-20261113-a",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-12T23:28:12+00:00",
-      "action": "task.claim:NAT-111",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-111",
-          "status": "in_progress",
-          "owner": "gemini-ios-20261113-a",
-          "priority": 100,
-          "last_heartbeat": "2026-11-12T23:28:12+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-12T23:40:22+00:00",
-      "action": "project.permit:native",
-      "owner": "gemini-ios-20261113-a",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-12T23:49:33+00:00",
-      "action": "project.permit:native",
-      "owner": "gemini-ios-20261113-a",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-12T23:49:44+00:00",
-      "action": "task.done:NAT-111",
-      "owner": "gemini-ios-20261113-a",
-      "tasks": [
-        {
-          "id": "NAT-111",
-          "status": "done",
-          "owner": "gemini-ios-20261113-a",
-          "priority": 100,
-          "last_heartbeat": "2026-11-12T23:28:12+00:00"
-        }
-      ]
-    },
     {
       "at": "2026-11-12T23:50:00+00:00",
       "action": "project.permit:native",
@@ -18614,11 +18634,110 @@
           "last_heartbeat": "2026-11-13T07:26:05+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-13T07:47:31+00:00",
+      "action": "task.update:NAT-112",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-112",
+          "status": "in_progress",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 100,
+          "progress_note": "Analysis complete: fb_diff=0 is a measurement artifact (5s window never closed in NAT-111 with only 2 swaps). Commit path works correctly. No kernel patch needed.",
+          "next_step": "New owner decision for NAT-113: longer run (loader_return_after=120) + rec_secs=30 rec_start=30 rec_mb=64 rec_ring=1 to capture actual frames and confirm visible pixels",
+          "last_heartbeat": "2026-11-13T07:47:31+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T07:48:44+00:00",
+      "action": "task.done:NAT-112",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-112",
+          "status": "done",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 100,
+          "progress_note": "Analysis complete: fb_diff=0 is a measurement artifact (5s window never closed in NAT-111 with only 2 swaps). Commit path works correctly. No kernel patch needed.",
+          "next_step": "New owner decision for NAT-113: longer run (loader_return_after=120) + rec_secs=30 rec_start=30 rec_mb=64 rec_ring=1 to capture actual frames and confirm visible pixels",
+          "last_heartbeat": "2026-11-13T07:47:31+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T08:06:43+00:00",
+      "action": "task.add:NAT-113",
+      "owner": "planner",
+      "tasks": [
+        {
+          "id": "NAT-113",
+          "status": "pending",
+          "owner": null,
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T09:35:35+00:00",
+      "action": "task.add:NAT-114",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-114",
+          "status": "pending",
+          "owner": null,
+          "priority": 100
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T09:35:42+00:00",
+      "action": "task.claim:NAT-114",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-114",
+          "status": "in_progress",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 100,
+          "last_heartbeat": "2026-11-13T09:35:42+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T09:41:01+00:00",
+      "action": "task.done:NAT-114",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "NAT-114",
+          "status": "done",
+          "owner": "claude-opus-nat112-20261113",
+          "priority": 100,
+          "last_heartbeat": "2026-11-13T09:35:42+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T09:43:38+00:00",
+      "action": "task.add:KRN-044",
+      "owner": "claude-opus-nat112-20261113",
+      "tasks": [
+        {
+          "id": "KRN-044",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "78efa038f47b0f31b258f7dade792e3cae68c823b9974cda2f4f525a3caaf2b3",
-    "BOARD.md": "c0b0cc3e4bd112b705688fb8806d17053a2e9c83b292fe742fe38270641a2e86",
+    "STATUS.md": "9e19573c2d290c6fc224f45778314e80d552fa3ddf04e40f65a9f640642b17ca",
+    "BOARD.md": "bda4e14caecaa54ec29bba327afe377350388d94a144899530074eb379802a1f",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -18698,7 +18817,9 @@
     "planning/tasks/NAT-109.md": "df54703729cddb89c501d88ec7d5a5cd6ee264e4ac797fec7433673890f82da5",
     "planning/tasks/NAT-110.md": "565a63749f0db4046c0aab98d47cdc258d9127daec3a641e7fd6ad2704dc995c",
     "planning/tasks/NAT-111.md": "8f53f24a3313c7cf62b12e715e9722bd3dfec9649be85f1da79ecdad055bfc3f",
-    "planning/tasks/NAT-112.md": "006aa2dfe1435bc99f9049d269885d1360c81255030e5e6dbfaf4e9979a9a409",
+    "planning/tasks/NAT-112.md": "ce9c2bd831a8139c8db981ad222087f482df30d222072337bc4de67fe57493ac",
+    "planning/tasks/NAT-113.md": "ec7a29fc6ab1800a7b57ee07bb3119f31010b758da7fdebd72ed6d53b1bf1335",
+    "planning/tasks/NAT-114.md": "6252561645d21f92395ec7d776106cc4fc182b9a07b53af3f8ae611aceb461f9",
     "planning/tasks/KRN-008.md": "36d33f795d9569f340f53a5e0a909dc8efcdc5024c9133ccd614a6de5af22894",
     "planning/tasks/KRN-010.md": "4f479284d71242353a2a95508bac0b5304468c6ee44704b7561bc32cee8e1832",
     "planning/tasks/KRN-012.md": "5639fd265337eacb414447c0f5aa26bb2ad600fead5ca21572bcdb2b96f7b4e8",
@@ -18906,6 +19027,7 @@
     "planning/tasks/NAT-076.md": "25a68d9d2102ab1d349a1d4eeb674b4371a9bee483a3c03747cd3d5dad75dc72",
     "planning/tasks/NAT-077.md": "e7beb3a0008bec46d4e9661bb436ff83699d74fba501ba3b83af1515cd89e269",
     "planning/tasks/NAT-078.md": "b8b6baee63a5fe316e0f0250b619b8ab72acc2911962b8058276b181f5aea8af",
+    "planning/tasks/KRN-044.md": "c67289a5dc51c897d8aa694ccc1254fad9fff8bcaa554a2d063bca61c8f30e55",
     "planning/tasks/KRN-033.md": "65895b5673cb8432d904647391ec6378b6eafcac42e79bfd6cef92a0dcc4b83f",
     "planning/tasks/NAT-011.md": "13d5b59a05e410c27749dd20732dbe9312dda69ca349e32845cd4b144be9aaa3",
     "planning/tasks/NAT-014.md": "8ab44f96da942083ed04d834447e25cd58e8ddda08c83b2f1ca4e44327720c71",
@@ -18915,7 +19037,7 @@
     "planning/tasks/IOS-007.md": "c116ef8935d17ff7707c9cafacabad81273be3bcdeccaf872b742860b4aed9a5",
     "planning/tasks/KRN-035.md": "73d3fdfa9f6c3f1f76fe0f244208e46b40bf7343bf78e2f78223ea9c1c7a98a7",
     "planning/tasks/KRN-036.md": "43b1fb9c66ca2aa223235ea38bf2e400888380c3822a4aca35e67b96cd532020",
-    "planning/tasks/KRN-001.md": "01095968ac66bf5f09bb3da8beeb93f60e4dc3df3584640b0d4978dc65766e8d",
+    "planning/tasks/KRN-001.md": "85cab325158864a8d9ad5a519cef92933f1ff55283b28cdff363cbf1bfb732cb",
     "planning/tasks/CELL-010.md": "b568b98c1ed5527ec0e2688452b4d1ec8b1193af6118ddccf7789cf30c19baeb",
     "planning/tasks/KRN-028.md": "e3a53637d27e69f4b0fe97812206275d0813012ff2cdf563ffa3c215c05830e5",
     "planning/tasks/VM-006.md": "c30be2df99fdbb5066a9add35b609dc2ac6ffbfff0632bb6051badf3d768b6e7",
@@ -19003,8 +19125,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "eb05f8f6007ca292659a44be1101a813bd830919dfa2190e77c7bab504aadcc2",
-    "planning/tasks/DRV-003.md": "58194b6081ef6339b20d07ee0ffc227b7367cbceba5f993690eb2758041737fe",
+    "planning/tasks/NAT-003.md": "ed6e4313d34cf7a5e229e72a5d510e0d70edd4a7e8aa552809a0cf3575f21883",
+    "planning/tasks/DRV-003.md": "299bf973366a5683809f3421690d310e78b46012ea1ebb9558738a6863d63c3d",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",

@@ -1,0 +1,37 @@
+{
+  "id": "NAT-114",
+  "title": "Host build of loader-diag-xnu-sc3-md1 for NAT-113: the loader's PX/PR pixel report at the kernel's return (panel memory statistics + 108x234 thumbnail, screen-recording statistics), rec_secs=30 rec_mb=64, loader_return_after=63; host tests, mutation pass, session driver derivation, decision draft; no phone action",
+  "status": "pending",
+  "owner": null,
+  "priority": 100,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": [
+    "NAT-111",
+    "NAT-112"
+  ],
+  "paths": [
+    "docs/procedures/nat-113/build.py",
+    "docs/procedures/nat-113/src",
+    "docs/procedures/nat-113/decode113.py",
+    "docs/procedures/nat-113/test_nat113.py",
+    "docs/procedures/nat-113/mutate_nat113.py",
+    "docs/procedures/nat-113/derive113.py",
+    "docs/procedures/nat-113/session_nat113.py",
+    "docs/procedures/nat-113/decision-draft.md",
+    "docs/procedures/nat-113/build-evidence.json",
+    "artifacts/nat-113/build-001",
+    "artifacts/nat-113/package-001"
+  ],
+  "acceptance": [
+    "Image built from NAT-110's chain with the NAT-113 changes; cmdline < 256 B checked; RECOVERY, Image.payload and loader hashes recorded",
+    "glue113.h compiled for the host against synthetic memory; tests cover counts, thumbnail, recording header/range refusals, pacing; mutation pass with no unexplained survivors",
+    "session_nat113.py derived from session_nat110.py by counted substitutions and checked; preflight without a decision file refuses before any device access",
+    "Decision draft states the watchdog bound, the measured return-channel rate, the pass rule and the restore protocol"
+  ],
+  "steps": [
+    "build.py, src/glue113.h, decode113.py, test_nat113.py, mutate_nat113.py, derive113.py in docs/procedures/nat-113 (NAT-113 stays the native run)",
+    "Run tests and a mutation pass; build and package; record hashes in evidence"
+  ],
+  "notes": "Corrects NAT-113's original acceptance: 120 s is not safe (this loader's S5E9945 watchdog is unfed after the jump; the 'WDT paused' claim came from the S9 loader in references/hakios-scion-full), and there is no bulk-IN path for a full recording (EP0 TEXT ~3.2 KB/s measured in NAT-111), so the loader sends statistics and a thumbnail instead."
+}
