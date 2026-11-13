@@ -283,6 +283,22 @@ NAT-106 built `loader-diag-xnu-sb2-md1` (29-file Stage B + `hb` `md0` root combi
 
 **Immediate next step (`NAT-110`, `host`):** read the full `NAT-109` kernel log between `backboardd`/`SpringBoard` startup and `hb` round 5 (`kernel-text.txt`) plus donor UI daemon requirements to determine why `SpringBoard` stalled after 2 swaps and how to shrink the boot/log footprint so the next Stage C2 image yields `fb_diff > 0` without hitting Download Mode.
 
+## 0k. Status update, 2026-11-13 after NAT-110..114 (this section replaces 0j where they differ)
+
+* **NAT-111** (Stage C2, native pass): 39 processes, SpringBoard alive, 2 swaps; `fb_pixel_diffs=[]` is a measurement artifact (the
+  statistic prints only for a swap >= 5 s after the first one), not missing pixels (NAT-112, `research/notes/NAT-112-corrected-analysis.md`).
+  The GPU-fence hypothesis was withdrawn: with `fence==0` `MiniIOSurfaceDrawn` returns true at once (`research/notes/NAT-111-root-cause.md`).
+* **NAT-113** (Stage C3, native pass, decision 0043): the loader reads back the panel memory at the kernel's return. Result:
+  **the Apple boot logo, 27,517 non-black pixels at 0xfa200000**, consistent with the kernel's recording of three identical
+  backboardd frames (229.03-229.18 s). Milestone "first iOS frame in the scanned memory" is reached on the software path.
+* Open, in order:
+  1. **No frame after the logo** in the remaining ~21 s. The lock screen needing only more time is a hypothesis; competing ones:
+     SpringBoard blocked on a service the small root lacks, a backboardd/SpringBoard wait on display/HID state, CPU starvation
+     on `cpus=1` (lsd CPU-monitor messages). NAT-115 decides between them from the NAT-111/113 kernel text and prepares the next image.
+  2. **Window > 63 s** (NAT-071): the S5E9945 watchdog (83 s) is fed by nobody after the jump.
+  3. **Kernel changes need a rebuild loop** (KRN-044) — every kernel change so far was a binary patch or a boot-arg.
+  4. GPU chain (first frame / software / Xclipse / 60 FPS) re-mapped in `research/notes/GPU-chain-2026-11-13.md`.
+
 ## 1. Audit of the selected profile and local components
 
 Selected profile (docs/implementation.md, CAPABILITIES.md): **iPhone X (iPhone10,3, D22AP, t8015) iOS 16.5 (build 20F66)** userland on **XNU 8796.121.2** (HackiOS base d82c64a3) for **SM-S921B/e1s**.

@@ -103,10 +103,10 @@
       "id": "display",
       "title": "Display and touch",
       "implementation": "host-tested",
-      "native_status": "not-tested",
-      "local_observation": "1080x2340 and10 input slots; historical stm_ts gpa1[2] Level activity; native mapping/orientation unverified",
+      "native_status": "partial",
+      "local_observation": "1080x2340 and 10 input slots; NAT-113 (2026-11-13): after iOS's backboardd swapped 3 software-rendered frames, the scanned panel memory 0xfa200000 held 27,517 non-black pixels forming the Apple boot logo (loader read-back, nobody looked at the screen); no frame after the logo in the remaining ~21 s; touch not tested",
       "upstream": "Pinned E1S STM nibble bug corrected and source-regressed; layout/event host model passes; real scanout/DSC/STM/OS integration missing",
-      "next_check": "UI-003 real panel/scanout, UI-004 actual STM SPI/IRQ/firmware and UI-005 selected iOS16.5 surfaces/HID before UI-002 native acceptance",
+      "next_check": "NAT-115: why no frame follows the logo (lock screen not reached; longer time is a hypothesis); NAT-071 kernel window > 63 s; observed panel (photo) for lit pixels; then UI-004 touch",
       "acceptance": "Correct actual pixels/scanout, brightness/power, calibrated ten-contact HID and Apple UI lifecycle",
       "tasks": [
         "UI-001",
@@ -116,7 +116,8 @@
         "UI-004",
         "UI-005",
         "UI-002",
-        "RES-007"
+        "RES-007",
+        "NAT-113"
       ],
       "sources": [
         "s24-port",
@@ -139,6 +140,12 @@
           "path": "state/evidence/TOUCHREG-002.json",
           "sha256": "ec698d19563718408170a8cea272efb9bd2701e3a47b1a2def320877b91173c5"
         }
+      ],
+      "native_evidence": [
+        {
+          "path": "docs/procedures/nat-113/evidence.json",
+          "sha256": "3e3639910c3c968e7f82d6ffcd170a3e63b2ef0c49194a92269db1ab7702c444"
+        }
       ]
     },
     {
@@ -148,7 +155,7 @@
       "native_status": "not-tested",
       "local_observation": "Xclipse 940; stock Vulkan 1.3.279; sgpu loaded",
       "upstream": "Pinned SGPU/RADV interface reviewed; compiled host transport and exact APK7 real SwiftShader guest fixture/16 runtime cases; native backend/OS frontend missing",
-      "next_check": "GPU-003 separately authorized primary-phone stock Vulkan after completed TST-002; GPU-007 actual XNU backend/winsys after KRN-001. Host guest does not qualify Xclipse or Metal",
+      "next_check": "C1 first frame reached on the software path (NAT-113, display capability); Xclipse acceleration not started: KRN-044 kernel rebuild loop, then GPU-007 retargeted to the NAT-line kernel (research/notes/GPU-chain-2026-11-13.md); 60 FPS not measured",
       "acceptance": "Native multiprocess Metal/CoreAnimation, correct pixels and cleanup",
       "tasks": [
         "GPU-001",
