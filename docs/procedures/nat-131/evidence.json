@@ -1,0 +1,114 @@
+{
+ "task": "NAT-131",
+ "evidence_kind": "source-review",
+ "recorded_at": "2026-11-13T17:09:21Z",
+ "recorded_by": "claude-opus-usb130-20261113",
+ "sources": [
+  {
+   "repo": "references/s24-linux",
+   "sha": "417484173abc2c4fa93e738ea82ad9f2e84911b1",
+   "files": [
+    "arch/arm64/boot/dts/exynos/s5e9945.dts",
+    "arch/arm64/boot/dts/exynos/s5e9945-usb.dtsi",
+    "arch/arm64/boot/dts/samsung/e1s/s5e9945-e1s_common.dtsi",
+    "arch/arm64/configs/e1s_defconfig",
+    "drivers/gpu/drm/samsung/dpu/displayport/exynos_drm_dp.c",
+    "drivers/phy/samsung/Makefile",
+    "drivers/phy/samsung/exynos-usb-blkcon.c",
+    "drivers/phy/samsung/exynos-usb-blkcon-sfr.h",
+    "drivers/phy/samsung/phy-exynos-snps-usbdp.c",
+    "drivers/phy/samsung/phy-exynos-usbdrd-eusb.c",
+    "drivers/phy/samsung/phy-samsung-usb-cal.h",
+    "drivers/phy/samsung/snps-usbdp-con-reg.h",
+    "drivers/phy/samsung/snps-usbdp-ram-code.h",
+    "drivers/phy/samsung/snps-usbdp-tca-reg.h",
+    "drivers/pinctrl/samsung/pinctrl-exynos-arm64.c",
+    "drivers/soc/samsung/cal-if/s5e9945/cmucal/cmucal-sfr.c",
+    "drivers/soc/samsung/cal-if/s5e9945/pmucal/flexpmu_cal_local_s5e9945.h",
+    "drivers/soc/samsung/exynos-pd/exynos-pd.c",
+    "drivers/usb/dwc3/core.c",
+    "drivers/usb/dwc3/core.h",
+    "drivers/usb/dwc3/debugfs.c",
+    "drivers/usb/dwc3/dwc3-exynos.c",
+    "drivers/usb/dwc3/dwc3-exynos.h",
+    "drivers/usb/dwc3/dwc3-exynos-otg.c",
+    "drivers/usb/dwc3/ep0.c",
+    "drivers/usb/dwc3/gadget.c",
+    "drivers/usb/host/xhci-exynos.c"
+   ]
+  },
+  {
+   "repo": "references/s24-bsp-reference",
+   "sha": "f85e53cf (short; compared only for byte identity of the SNPS PHY CAL, register headers, RAM code and usb dtsi)",
+   "files": [
+    "drivers/phy/samsung/phy-exynos-snps-usbdp.c",
+    "drivers/phy/samsung/snps-usbdp-ram-code.h",
+    "drivers/phy/samsung/snps-usbdp-con-reg.h",
+    "drivers/phy/samsung/snps-usbdp-tca-reg.h"
+   ]
+  },
+  {
+   "repo": "this repository (prior evidence, read only)",
+   "files": [
+    "docs/procedures/nat-039/capture-extract/udc-state.txt",
+    "docs/procedures/nat-040/README.md",
+    "docs/procedures/nat-045/README.md",
+    "docs/procedures/nat-076/engine/usbmon.c",
+    "artifacts/recovery-qualification/attempt-001/lsusb-04e8-685d-sec-upload.txt",
+    "artifacts/nat-043/run-002",
+    "artifacts/nat-058/run-001"
+   ]
+  }
+ ],
+ "commands": [
+  {
+   "cmd": "python3 -I -B docs/procedures/nat-131/check_cites.py",
+   "exit_code": 0,
+   "output": "204 citations, 0 mismatches (pin 417484173abc2c4fa93e738ea82ad9f2e84911b1)"
+  }
+ ],
+ "outcome": "pass",
+ "summary": "Source-review plan for USB 3 SuperSpeed Gen1 device mode from the bare-metal loader. It covers: (1) a 25-step ordered register sequence S0-S25 with physical addresses, values and pinned citations: GUSB3PIPECTL pre-setup, the GPC7_1 orientation read, PMU 0x12860620 isolation release, USBCON ready_to_pipe3, SNPS USB/DP combo-PHY reset/initiate/SRAM init, the 6144-word cp_int_ref_x2_code firmware load over the CR port, RX calibration, tuning, link de-emphasis, TCA NC->USB, core soft reset, the glue LLUCTL/FORCE_GEN1/LSKIPFREQ/GUCTL1 settings, DCFG=SS, U1/U2 off, and the SS protocol work in the engine. Every SS step is classed must-do; only the USB2 prerequisites are inherited. (2) The DWC3 behaviour when training fails: the vendor has no software fallback, the speed is taken from DSTS at CONNECTDONE, and reconnect needs a core soft reset. It gives a bounded polled fallback: P0 PHY deadlines, P1 T_SS about 1.5 s with an LTSSM trace, and FORCED = run_stop off + pipe3_disable + usbmon_init at HS, once per boot. (3) Twelve unknowns, each with a read-only check that uses no debugfs, and the four USB rails. (4) Effort/risk and a read-only native probe as the first experiment.",
+ "established": [
+  "The compiled e1s SS path is phy-exynos-usbdrd-eusb.c + exynos-usb-blkcon.c + phy-exynos-snps-usbdp.c (CONFIG_PHY_EXYNOS_USBDRD_EUSB=m)",
+  "The DT selects sub_phy_version 0x801 (RAM code cp_int_ref_x2_code, skip_check_ack), RAM mode, force_gen1 and dis-u1/u2 quirks",
+  "Orientation is read from GPIO gpc7-1 (PERIC2 0x11830000 bank 0x1a0) because CONFIG_CHECK_CTYPE_SIDE is not set",
+  "The probe resource map: USBCON 0x178a0000, USBDP ctrl 0x178d0000, TCA 0x178e0000, link 0x17900000; pipe3 PMU isolation at 0x12860620 bit 0",
+  "The vendor driver has no software SS->HS fallback; reconnect requires a core soft reset (gadget.c:2657-2662)",
+  "Prior repository evidence: NAT-039 Android current_speed=high-speed with maximum_speed=super-speed; S-Boot upload mode enumerated at 480 Mbps",
+  "The SNPS PHY CAL bounded loops differ from the BSP tree f85e53cf, and the RAM code, register headers, blkcon, eusb glue and usb dtsi are byte-identical between the two trees"
+ ],
+ "not_established": [
+  "Whether running firmware S921BXXS9BYH3 matches the pin",
+  "Any 5000 Mbit/s link on this phone (not in repository evidence; NAT-039 shows high-speed)",
+  "The GPC7_1 value versus plug orientation, and whether PERIC2 can be read at loader entry",
+  "The DWC_usb31 VER_NUMBER (decides whether the LLUCTL/FORCE_GEN1 branch applies)",
+  "The state at loader entry of the USBDP/TCA blocks, PMU 0x12860620 and the CMU gates",
+  "Whether the four USB rails are on at loader entry and which feeds the combo PHY",
+  "Whether a DWC31 core falls back to USB2 by itself when the PIPE is detached or the PHY does not answer",
+  "Whether the 16 MB/s ceiling is link-bound or engine-bound",
+  "The licensing decision for embedding the GPL-2.0 6144-word PHY firmware table",
+  "T_SS and the LTSSM timer values (recalled from the USB 3 specification, not verified)"
+ ],
+ "artifacts": [
+  "docs/procedures/nat-131/README.md",
+  "docs/procedures/nat-131/cites.tsv",
+  "docs/procedures/nat-131/check_cites.py"
+ ],
+ "device_actions": "none (no adb, no odin, no phone contact)",
+ "commit": "uncommitted (files written in the primary checkout; the caller commits)",
+ "kind": "source-review",
+ "origin": "local-host",
+ "artifact_hashes": {
+  "docs/procedures/nat-131/README.md": "a8b9b154964d87b1a2436fb5592d43982bdfb976f07d58ba76089a51dc33a1de",
+  "docs/procedures/nat-131/cites.tsv": "fcc49aeb150b67df639187870af48a81c5c93e3dc8c879d07cbfe710d0c3aa00",
+  "docs/procedures/nat-131/check_cites.py": "fd7bd4f41db1a98323b44bfc7c2890da2dd16f26f029cf90a88d99e228d46497"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-131/check_cites.py",
+   "exit_code": 0,
+   "result": "204 citations, 0 mismatches"
+  }
+ ]
+}

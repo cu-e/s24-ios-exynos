@@ -1,0 +1,8 @@
+{
+ "id":"NAT-130","status":"pending","owner":null,
+ "title":"Host: USB 2.0 root-delivery speed-up - per-chunk timing (host phases + device ticks via GET_RXT), selectable device checksum modes (baseline volatile LDR, unrolled LDP/LD1 uncached, MMU-on cached sum over 2 MiB-mapped range with invalidate-before-off, on-demand SUM request for post-verify), single-write chunks in the sender; image sc9 + new engine only",
+ "scope":"host","evidence_kind":"host-test","priority":100,
+ "depends_on":["NAT-127"],
+ "paths":["docs/procedures/nat-130","artifacts/nat-130"],
+ "acceptance":["Engine v2 keeps the v1 GET_RX/RX_BEGIN wire contract for flags=0; new flags/requests covered by model tests incl. faults, bus reset and abort","Sender records per-chunk host phase timings (rx_begin, bulk write, commit poll) and device ticks; a run plan does an A/B of sum modes on early chunks then verifies every chunk's sum (or post-verifies unsummed ones) before success","Image = sc9 with only the engine/loader-receive change, hashes and build diff recorded; Unicorn/model tests and make check pass","No claim of on-phone speed: host-test only"]
+}

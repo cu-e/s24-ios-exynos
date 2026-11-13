@@ -1,0 +1,97 @@
+{
+ "task": "NAT-130",
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-13T17:11:45.669646+00:00",
+ "commit": "a4f4f698a4054dcee84c6589353f6dd754adc776",
+ "summary": "NAT-130 engine (checksum modes PLAIN/FAST/CACHED/NONE, SUM, GET_RXT), sender with calibration/post-verify/background host sums, delivery wrapper and us1 image (sc9 + engine only) built and tested on host; no phone action.",
+ "checks": [
+  {
+   "cmd": "TMPDIR=/home/egor/.cache/nat130-tmp artifacts/nat-065/venv/bin/python -B -W ignore -I docs/procedures/nat-130/regress76.py",
+   "exit_code": 0,
+   "result": "227 run, 8 expected differences, 0 unexpected"
+  },
+  {
+   "cmd": "TMPDIR=/home/egor/.cache/nat130-tmp artifacts/nat-065/venv/bin/python -B -W ignore -I docs/procedures/nat-130/test_nat130.py",
+   "exit_code": 0,
+   "result": "34 pass"
+  },
+  {
+   "cmd": "TMPDIR=/home/egor/.cache/nat130-tmp artifacts/nat-065/venv/bin/python -B -W ignore -I docs/procedures/nat-130/test_port130.py",
+   "exit_code": 0,
+   "result": "8 pass (Unicorn MMU)"
+  },
+  {
+   "cmd": "TMPDIR=/home/egor/.cache/nat130-tmp artifacts/nat-065/venv/bin/python -B -W ignore -I docs/procedures/nat-130/test_sender130.py",
+   "exit_code": 0,
+   "result": "10 pass"
+  },
+  {
+   "cmd": "TMPDIR=/home/egor/.cache/nat130-tmp artifacts/nat-065/venv/bin/python -B -W ignore -I docs/procedures/nat-130/test_deliver130.py",
+   "exit_code": 0,
+   "result": "3 pass"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-126/build.py --out artifacts/nat-130/sc9-repro-001 ...",
+   "exit_code": 0,
+   "result": "sc9 Image 2f818b88... identical"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-130/build.py --out artifacts/nat-130/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-130/build-001 --out artifacts/nat-130/package-001",
+   "exit_code": 0
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "448 pass"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python: root_send.chunk_sum(8 MiB)",
+   "exit_code": 0,
+   "result": "0.12 s, no numpy in that venv"
+  }
+ ],
+ "images": {
+  "name": "loader-diag-xnu-us1-md1",
+  "image_sha256": "7c9c413e618e8bfe17cbe973a4089ed1a560812f9b542d31b6170689f83ff424",
+  "payload_sha256": "a338934c0f1363d2eb2ade3db72d9b71c6ab90293c48c533ccf1eb8a6748ea40",
+  "payload_bytes": 26199536,
+  "recovery_sha256": "364f26f8413cb8801f71e29d883554a021bc577df435d48e079a2865664a9cb2"
+ },
+ "artifacts": [
+  "docs/procedures/nat-130/README.md",
+  "docs/procedures/nat-130/engine/usbmon.c",
+  "docs/procedures/nat-130/engine/usbmon.h",
+  "docs/procedures/nat-130/engine/port_aarch64.h",
+  "docs/procedures/nat-130/model/model.c",
+  "docs/procedures/nat-130/root_send130.py",
+  "docs/procedures/nat-130/deliver130.py",
+  "docs/procedures/nat-130/build.py",
+  "artifacts/nat-130/build-001/build.json",
+  "artifacts/nat-130/package-001/package.json",
+  "artifacts/nat-130/make-check.log"
+ ],
+ "artifact_hashes": {
+  "docs/procedures/nat-130/README.md": "d54841a21e2ec91ea562846a27a9171f0ac03c4ed0dddae4f6f1c895f0c56edf",
+  "docs/procedures/nat-130/engine/usbmon.c": "b7df8e93729718c292d76c2cb7ef10f923719eedf58b4dce05d6e0cfce44c3a9",
+  "docs/procedures/nat-130/engine/usbmon.h": "47892c14fa649cd0134d21f1c4f76b69d505cc8799b720db28be87f806757cbf",
+  "docs/procedures/nat-130/engine/port_aarch64.h": "5a633cdd7935da0baf9d9094c938b138f9d60c6776f7f82dd08aef9573c71566",
+  "docs/procedures/nat-130/model/model.c": "da0ec3ede7e4f8bf5ae59afe80f7a111d0613fc1c4b55a64cd647a24bb2645bf",
+  "docs/procedures/nat-130/root_send130.py": "bd968ab040eecdb885dc9173f8c2533f8237bcdd9c246709f011e54496e7f2ce",
+  "docs/procedures/nat-130/deliver130.py": "e380dd959d76a2e18d03c6d388113cb60b913fa447ca4c0b245ba1fe68551359",
+  "docs/procedures/nat-130/build.py": "092c8f8e4bcade9ce6c35034184fe6f00a30ec9b1ae76b16c4933ac1791f1a35",
+  "artifacts/nat-130/build-001/build.json": "94400c0d7802dbcc5ed9cc6a466cea93e07eb865195314b389be7e01588ef34e",
+  "artifacts/nat-130/package-001/package.json": "7225915a6d1e48681551a1a24179a6b89e87c60845b253c0794261cb556e3495",
+  "artifacts/nat-130/make-check.log": "af73aa22396481aba587ccd5383f82c8eb2d5bf8945cb82b71ccdd2390591af5"
+ },
+ "limitations": [
+  "host-test only: no on-phone rate, no proof CACHED works on Exynos 2400 (EL2 traps, interconnect attributes)",
+  "Unicorn has no caches: clean/invalidate not observable",
+  "exception entry in the fault test is emulated by the harness"
+ ]
+}
