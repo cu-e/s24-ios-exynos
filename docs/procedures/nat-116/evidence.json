@@ -1,0 +1,95 @@
+{
+  "kind": "native-device",
+  "origin": "local-device",
+  "outcome": "pass",
+  "recorded_at": "2026-11-13T12:40:00+00:00",
+  "task": "NAT-116",
+  "owner": "claude-opus-nat116-20261113",
+  "decision": "docs/decisions/0045-nat116-loader-diag-xnu-sc4-md1-single-run-2026-11-13.md",
+  "commit_before_run": "ef9742dd8a5748ba7f655429669c887c1a3a4f9e",
+  "image": {
+    "name": "loader-diag-xnu-sc4-md1",
+    "recovery_sha256": "c0642059a4ba21e1205461bedc1b448952779b27f841b750211eb1b3c3d553f9",
+    "payload_sha256": "85c2989b3ef7d5ba4774894c3bde0f2039ef61acfe4056a097890afc02582dc1"
+  },
+  "summary": "One RECOVERY-only run. The kernel ran the full 150 s window (expired at 336.49 s kernel time, no watchdog reset), consistent with the NAT-071 feed; the feed line itself fell in the log gap. SpringBoard aborted 9 times (288-334 s) with NSInternalInconsistencyException 'Failed to load bounding path bitmap data from the asset manager for asset name: BoundingPathBitmap-1125x2436-375x812-3.00x' in -[_UIScreenComplexBoundingPathUtilities _loadBitmapForScreen:type:]; backboardd cleared its layer at 278.05 s; panel memory black at return; recording holds only the logo. The wait dump panicked the kernel (printf with interrupts disabled). Stock RECOVERY restored, readback matches, Android booted; assess pass.",
+  "verdicts": {
+    "pre_registered": "X-window (feed line not in the received tail) / X-none (wait dump panicked)",
+    "pixels": "R1-recording-has-pixels (logo only), panel_nonzero 0",
+    "established": "SpringBoard crash loop in UIKit bounding-path asset lookup"
+  },
+  "not_established": [
+    "the cause of the asset lookup failure (hypothesis: no /product node in the ADT)",
+    "that the panel lit pixels",
+    "input",
+    "GPU",
+    "frame rate"
+  ],
+  "checks": [
+    {
+      "step": "preflight",
+      "cmd": "python3 docs/procedures/nat-115/session_nat115.py --out artifacts/nat-116/preflight-001 --image loader-diag-xnu-sc4-md1",
+      "exit_code": 0,
+      "outcome": "ready-read-only"
+    },
+    {
+      "step": "execute",
+      "cmd": "python3 docs/procedures/nat-115/session_nat115.py --out artifacts/nat-116/run-001 --image loader-diag-xnu-sc4-md1 --execute",
+      "exit_code": 0,
+      "outcome": "native-attempt-started"
+    },
+    {
+      "step": "restore",
+      "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 5 --address 44 --out artifacts/nat-116/restore-001/restore-trace",
+      "exit_code": 0,
+      "acknowledged_bytes": 100663296
+    },
+    {
+      "step": "check_android",
+      "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-116/restore-001/android-check.json",
+      "exit_code": 0,
+      "outcome": "pass",
+      "recovery_hash_match": true
+    },
+    {
+      "step": "assess",
+      "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-116/restore-001/report.json --readback artifacts/nat-116/restore-001/android-check.json",
+      "exit_code": 0,
+      "outcome": "pass"
+    },
+    {
+      "step": "decode113",
+      "cmd": "python3 docs/procedures/nat-113/decode113.py artifacts/nat-116/run-001/archive --json artifacts/nat-116/analysis/pixels.json --ppm artifacts/nat-116/analysis/panel-thumb.ppm",
+      "exit_code": 0,
+      "verdict": "R1-recording-has-pixels"
+    },
+    {
+      "step": "analyze116",
+      "cmd": "python3 docs/procedures/nat-115/analyze116.py --kernel-text artifacts/nat-116/analysis/kernel-text.txt --pixels artifacts/nat-116/analysis/pixels.json --out artifacts/nat-116/analysis/verdict.json",
+      "exit_code": 0,
+      "verdict": "X-window"
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/nat-116/README.md",
+    "artifacts/nat-116/run-001/report.json",
+    "artifacts/nat-116/analysis/kernel-text.txt",
+    "artifacts/nat-116/analysis/pixels.json",
+    "artifacts/nat-116/analysis/panel-thumb.ppm",
+    "artifacts/nat-116/analysis/verdict.json",
+    "artifacts/nat-116/restore-001/report.json",
+    "artifacts/nat-116/restore-001/assess.json",
+    "artifacts/nat-116/restore-001/android-check.json"
+  ],
+  "artifact_hashes": {
+    "artifacts/nat-116/run-001/report.json": "3e0d2980f4c0cbd6953f5c350133e0f6a10cde30edc575b9f9e83ee816706e8d",
+    "artifacts/nat-116/analysis/kernel-text.txt": "b82e5d9d31f66a4d5c54a5e5d517284d6c5c92965bc9986412a73aa4f2ee3cfb",
+    "artifacts/nat-116/analysis/pixels.json": "22779f832684d48e5904cf870ff638b9f2458020ed58e3d9c0d7f93e0b0add57",
+    "artifacts/nat-116/analysis/panel-thumb.ppm": "2d559fd21ab04e423e97bf2e35b421d4b3c087c66d368ac4ae2a034467d62f60",
+    "artifacts/nat-116/analysis/verdict.json": "cef4d3e38c1c5d9acc5ad5e750798733a169d64d6b5b5fdd30bcfc4c6c34d3cb",
+    "artifacts/nat-116/restore-001/report.json": "4a7f70eedd219ebedc5b50eb0455da65cb27f074f211c2d0c5f31b7554ebadeb",
+    "artifacts/nat-116/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+    "artifacts/nat-116/restore-001/android-check.json": "d17c758f1345e65600bf033f2d2645430f81cfa914ee9c21e650af5bd38f2a3e"
+  },
+  "device_inventory": "devices/local-2026-11-13-nat116.json"
+}
