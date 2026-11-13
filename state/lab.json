@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T09:43:38+00:00",
+  "updated_at": "2026-11-13T09:46:51+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -8,7 +8,7 @@
       "host": true,
       "android-readonly": true,
       "android-app": true,
-      "native": false
+      "native": true
     },
     "facts": [
       {
@@ -482,6 +482,13 @@
         "decision": "docs/decisions/0042-nat110-loader-diag-xnu-sc2-md1-single-run-2026-11-13.md",
         "owner": "gemini-ios-20261113-a",
         "at": "2026-11-12T23:50:00+00:00"
+      },
+      {
+        "scope": "native",
+        "value": true,
+        "decision": "docs/decisions/0043-nat113-loader-diag-xnu-sc3-md1-single-run-2026-11-13.md",
+        "owner": "claude-opus-nat113-run-20261113",
+        "at": "2026-11-13T09:46:43+00:00"
       }
     ]
   },
@@ -16624,8 +16631,8 @@
     {
       "id": "NAT-113",
       "title": "Stage C3: 120 s run with framebuffer recording — confirm visible iOS pixels",
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "claude-opus-nat113-run-20261113",
       "priority": 100,
       "scope": "native",
       "evidence_kind": "native-device",
@@ -16652,7 +16659,10 @@
         "Execute run, extract recording, convert with tools/recording.py, verify pixels",
         "Restore stock RECOVERY unconditionally, verify Android"
       ],
-      "notes": "cpus=1 means loader pauses Samsung S5E9945 WDT before jumping to kernel — no hardware watchdog during kernel run, 120 s is safe. Recording extracted via new oem-recording USB path after loader_return. rec_mb=64 fits ~7 full 1125x2436 BGRA frames; rec_ring=1 keeps last 7. cmdline budget: 252 bytes."
+      "notes": "cpus=1 means loader pauses Samsung S5E9945 WDT before jumping to kernel — no hardware watchdog during kernel run, 120 s is safe. Recording extracted via new oem-recording USB path after loader_return. rec_mb=64 fits ~7 full 1125x2436 BGRA frames; rec_ring=1 keeps last 7. cmdline budget: 252 bytes.",
+      "started_at": "2026-11-13T09:46:51+00:00",
+      "last_heartbeat": "2026-11-13T09:46:51+00:00",
+      "updated_at": "2026-11-13T09:46:51+00:00"
     },
     {
       "id": "NAT-114",
@@ -65520,6 +65530,31 @@
           "status": "pending",
           "owner": null,
           "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T09:46:43+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-nat113-run-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-13T09:46:51+00:00",
+      "action": "task.claim:NAT-113",
+      "owner": "claude-opus-nat113-run-20261113",
+      "tasks": [
+        {
+          "id": "NAT-113",
+          "status": "in_progress",
+          "owner": "claude-opus-nat113-run-20261113",
+          "priority": 100,
+          "last_heartbeat": "2026-11-13T09:46:51+00:00"
         }
       ]
     }
