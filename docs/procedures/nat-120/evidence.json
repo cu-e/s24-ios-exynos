@@ -1,0 +1,81 @@
+{
+  "kind": "native-device",
+  "origin": "local-device",
+  "outcome": "pass",
+  "device_inventory": "devices/local-2026-11-13-nat120.json",
+  "recorded_at": "2026-11-13T14:20:00+00:00",
+  "task": "NAT-120",
+  "owner": "claude-opus-nat116-20261113",
+  "decision": "docs/decisions/0047-nat120-loader-diag-xnu-sc6-md1-single-run-2026-11-13.md",
+  "image": {
+    "name": "loader-diag-xnu-sc6-md1",
+    "recovery_sha256": "e430d54e302e4a4e3251022fe65ae026429ebf90e22c4c6704d2e1ead170b6ac",
+    "payload_sha256": "4175a7ff5aacdf48e561dd292e2ec685c5bc4e553fd1cc724a380c1b140620d1"
+  },
+  "owner_observation": "The whole iOS home screen (icons, background)",
+  "summary": "Owner saw the whole iOS 16.5 home screen on the physical panel. Kernel DECON0 kicks: FRAME_COUNT +1200 per 10 s = 120 Hz panel refresh throughout the iOS window (14 kicks). SpringBoard stable, 7 frames/s CPU rendering. Stock RECOVERY restored, Android booted, assess pass.",
+  "verdicts": {
+    "analyze120": "W-ok / D2-refreshing (120.0/s)",
+    "ios": "F1-new-frame"
+  },
+  "not_established": [
+    "lock screen as a separate state",
+    "input",
+    "GPU acceleration",
+    "60 FPS content (7 frames/s)"
+  ],
+  "checks": [
+    {
+      "cmd": "python3 docs/procedures/nat-119/session_nat119.py --out artifacts/nat-120/preflight-001 --image loader-diag-xnu-sc6-md1",
+      "exit_code": 0,
+      "outcome": "ready-read-only"
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-119/session_nat119.py --out artifacts/nat-120/run-001 --image loader-diag-xnu-sc6-md1 --execute",
+      "exit_code": 0
+    },
+    {
+      "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 5 --address 50 --out artifacts/nat-120/restore-001/restore-trace",
+      "exit_code": 0
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-120/restore-001/android-check.json",
+      "exit_code": 0,
+      "outcome": "pass"
+    },
+    {
+      "cmd": "nat-013/restore_stock.py assess",
+      "exit_code": 0,
+      "outcome": "pass"
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-119/analyze120.py --kernel-text artifacts/nat-120/analysis/kernel-text.txt --pixels artifacts/nat-120/analysis/pixels.json --owner-observation ... --out artifacts/nat-120/analysis/verdict.json",
+      "exit_code": 0,
+      "verdict": "D2-refreshing"
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/nat-120/README.md",
+    "artifacts/nat-120/run-001/report.json",
+    "artifacts/nat-120/analysis/kernel-text.txt",
+    "artifacts/nat-120/analysis/pixels.json",
+    "artifacts/nat-120/analysis/panel-thumb.ppm",
+    "artifacts/nat-120/analysis/panel-thumb-ascii.txt",
+    "artifacts/nat-120/analysis/verdict.json",
+    "artifacts/nat-120/restore-001/report.json",
+    "artifacts/nat-120/restore-001/assess.json",
+    "artifacts/nat-120/restore-001/android-check.json"
+  ],
+  "artifact_hashes": {
+    "docs/procedures/nat-120/README.md": "fb628962673dbf1763cc09dd79800bf9b34525d1c202263aea75c9d2c81adaf4",
+    "artifacts/nat-120/run-001/report.json": "5970b29867488319d248b34b27f480e6f4bc92c90c31c431cfce26a630401e80",
+    "artifacts/nat-120/analysis/kernel-text.txt": "96dacba04729ee12f748ed9115f270e54e0e88f5a5c8ac659cba4fd085419c7b",
+    "artifacts/nat-120/analysis/pixels.json": "65a226b95791baaacfed982dfa15a428026088f06b020a65546a2e7325abe759",
+    "artifacts/nat-120/analysis/panel-thumb.ppm": "5ac6a658f67abed0fb6dc85282b3eb12def06a90de01e28aab5e8cab736a69cd",
+    "artifacts/nat-120/analysis/panel-thumb-ascii.txt": "5ed9d612bc8985810181461c225e90117ddaeb6c954a653a2ddd2db148123090",
+    "artifacts/nat-120/analysis/verdict.json": "fd9c0d47bde30b5ad350d8f0754a76b623bab636d9b420f1b775ff008fd2d9d2",
+    "artifacts/nat-120/restore-001/report.json": "85f9c971b1e42a0c402293794c05e71de03a09e0329ba00b05263cbee22dd084",
+    "artifacts/nat-120/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+    "artifacts/nat-120/restore-001/android-check.json": "f704e40f24a45f0d0203dd54016782fd6b16ff1bfb23691e187441395fbbcea4"
+  }
+}
