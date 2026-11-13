@@ -5,7 +5,7 @@ Date: 2026-11-13
 ## Owner authorization
 
 Decision 0044 records the owner's standing consent of 2026-11-13: "Разрешаю NAT-116 и последующие подготовленные одиночные нативные
-эксперименты без повторного согласования каждого образа, хеша или длительности". Under decisions 0019 and 0044 this record authorizes
+эксперименты без повторного согласования каждого образа, хеша или длительности". Under decision 0019 and decision 0044 this record authorizes
 **one** single-attempt RECOVERY-only run of this image; the owner was not asked again. No retry; no other partition. Boundaries of
 0002/0019/0044 stand: Android, apps, settings, accounts and user data stay intact; only RECOVERY (`/dev/block/sda18`) is written.
 
