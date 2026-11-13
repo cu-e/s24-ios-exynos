@@ -99,15 +99,18 @@ def thumbnail_ppm(rep):
 
 
 def records_of_archive(root):
-    """TEXT payloads starting with PX / PR from usb-transfers.jsonl, in transfer order (frames as the collector logged them)."""
+    """TEXT records starting with PX / PR, in device-sequence order, from the collector's reassembled per-boot frames
+    (boots/*/frames.jsonl, kind=log); raw USB transfers split records across packets and are not used."""
     texts = []
-    for line in Path(root, "usb-transfers.jsonl").read_text().splitlines():
-        r = json.loads(line)
-        if r.get("dir") != "in" or r.get("result") != "ok":
-            continue
-        data = base64.b64decode(r.get("data_b64", ""))
-        for m in re.finditer(rb"(P[XR] [\x20-\x7e]*)", data):
-            texts.append(m.group(1).decode("ascii"))
+    for frames in sorted(Path(root, "boots").glob("*/frames.jsonl")):
+        rows = []
+        for line in frames.read_text().splitlines():
+            if not line.strip():
+                continue
+            f = json.loads(line)["frame"]
+            if f.get("kind") == "log" and isinstance(f.get("text"), str) and f["text"][:3] in ("PX ", "PR "):
+                rows.append((f.get("dev_seq", 0), f["text"]))
+        texts.extend(t for _, t in sorted(rows, key=lambda r: r[0]))
     return texts
 
 

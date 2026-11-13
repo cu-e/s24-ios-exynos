@@ -1,0 +1,45 @@
+{
+  "kind": "native-device",
+  "origin": "local-device",
+  "outcome": "pass",
+  "device_inventory": "devices/local-2026-11-13-nat111.json",
+  "recorded_at": "2026-11-13T10:05:00+00:00",
+  "task": "NAT-113",
+  "owner": "claude-opus-nat113-run-20261113",
+  "decision": "docs/decisions/0043-nat113-loader-diag-xnu-sc3-md1-single-run-2026-11-13.md",
+  "summary": "One RECOVERY-only run of loader-diag-xnu-sc3-md1. At the kernel's return the panel memory 0xfa200000 held 27,517 non-black pixels forming the Apple logo (thumbnail); the kernel's screen recording holds 3 identical frames of backboardd's swapped surfaces whose white-pixel count scales to 27,156 on the panel. backboardd swapped 3 frames at 229.03-229.18 s; SpringBoard and backboardd alive in the last ps list; no panic. First iOS pixels in the scanned panel memory on this phone. Stock RECOVERY restored, readback matches, Android booted; assess pass.",
+  "not_established": [
+    "that the panel lit the pixels (nobody looked)",
+    "why no swap followed in the remaining ~21 s",
+    "any frame rate"
+  ],
+  "checks": [
+    {"step": "preflight", "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -B -I docs/procedures/nat-113/session_nat113.py --out artifacts/nat-113/preflight-001 --image loader-diag-xnu-sc3-md1", "exit_code": 0, "outcome": "ready-read-only"},
+    {"step": "execute", "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -B -I docs/procedures/nat-113/session_nat113.py --out artifacts/nat-113/run-001 --image loader-diag-xnu-sc3-md1 --execute", "exit_code": 0, "outcome": "native-attempt-started", "reboot_requested_at": "2026-11-13T09:48:21.485140+00:00"},
+    {"step": "restore", "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 5 --address 41 --out artifacts/nat-113/restore-001/restore-trace", "exit_code": 0, "acknowledged_bytes": 100663296, "note": "--out was first given as .../report.json and the tool created a directory there; renamed to restore-trace and report.json assembled from its trace (stages computed from the 0x65/0x66/0x67 commands)"},
+    {"step": "check_android", "cmd": "python3 docs/procedures/nat-012/check_android.py > artifacts/nat-113/restore-001/android-check.json", "exit_code": 0, "outcome": "pass", "recovery_hash_match": true},
+    {"step": "assess", "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-113/restore-001/report.json --readback artifacts/nat-113/restore-001/android-check.json", "exit_code": 0, "outcome": "pass"},
+    {"step": "close", "cmd": "python3 tools/lab.py project permit --scope native --value false --decision docs/decisions/0043-nat113-loader-diag-xnu-sc3-md1-single-run-2026-11-13.md --owner claude-opus-nat113-run-20261113", "exit_code": 0},
+    {"step": "decode113", "cmd": "python3 docs/procedures/nat-113/decode113.py artifacts/nat-113/run-001/archive --json artifacts/nat-113/analysis/pixels.json --ppm artifacts/nat-113/analysis/panel-thumb.ppm", "exit_code": 0, "verdict": "P1-panel-has-pixels", "panel_nonzero": 27517, "recording_frames": 3, "frame_nzb": 9816},
+    {"step": "analyze_nat110 stage-c", "cmd": "python3 docs/procedures/nat-110/analyze_nat110.py --mode stage-c --archive artifacts/nat-113/run-001/archive --out artifacts/nat-113/analysis/stage-c.json", "exit_code": 0, "row": "C6 fb-swaps-no-diff (4 swap lines; the analyser's fb_diff rule does not apply: fb_diff was off)"}
+  ],
+  "artifacts": [
+    "docs/procedures/nat-113/README.md",
+    "artifacts/nat-113/run-001/report.json",
+    "artifacts/nat-113/analysis/pixels.json",
+    "artifacts/nat-113/analysis/panel-thumb.ppm",
+    "artifacts/nat-113/analysis/kernel-text.txt",
+    "artifacts/nat-113/analysis/stage-c.json",
+    "artifacts/nat-113/restore-001/assess.json",
+    "artifacts/nat-113/restore-001/android-check.json"
+  ],
+  "artifact_hashes": {
+    "artifacts/nat-113/run-001/report.json": "4b75fa48a41c76bc678924591204379513ea52f17db6ac0e348daaeba88a7c6e",
+    "artifacts/nat-113/analysis/pixels.json": "0c2b7d5d51f4101f680825672ea28a92a5077b694ea20ca9378f26712c5d103c",
+    "artifacts/nat-113/analysis/panel-thumb.ppm": "cbf281846209b598786565f6ab427a76015acb9e55ea66b0105de3f48c67995e",
+    "artifacts/nat-113/analysis/kernel-text.txt": "1b87e84ffe2057793960a39df912e27f3a5b981cc873dcc4a7292131c9388f93",
+    "artifacts/nat-113/analysis/stage-c.json": "1bfa152bb0f026e19c5bdd74621f551b082e5956a12696a8501c3f67ee807738",
+    "artifacts/nat-113/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+    "artifacts/nat-113/restore-001/android-check.json": "44de3bb0fb2845691aab47763c027c726be6c8a30a93b777a946664dbc22e886"
+  }
+}
