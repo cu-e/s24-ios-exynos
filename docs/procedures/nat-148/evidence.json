@@ -1,0 +1,86 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-13T22:19:44.433064+00:00",
+ "task": "NAT-148",
+ "summary": "Cause of the NAT-146 stop reproduced with the kernel's own code on the NAT-035 model: the scE ten-CPU ADT (every /cpus node state \"running\") reaches _Assert(topology_info.boot_cpu == NULL) at machine_routines.c:1193 inside ml_parse_cpu_topology; with cpu1-cpu9 state \"waiting\" the kernel parses 10 CPUs (boot cpu 0) and runs the model chain to checkpoint 14. scF image built (payload differs from scE only in the attempt tag and nine state values), session_nat149 derived. Host-test only.",
+ "commit": "fec4fcc",
+ "device_used": false,
+ "image": {
+  "recovery_sha256": "56e9d3acfac4d0438c93c2eefb5f7da7b50ee94e4454bf613eb7c36b26386d3d",
+  "payload_sha256": "0788e7d812d604c6002e9096ef6b4f88d05a8b5da2e3e25ee7f73d92d3cb682a",
+  "payload_bytes": 26206640,
+  "loader_image_sha256": "f1bb4ba9c8fe3475574f96bde46eb308cf32aa69b84ff120d001e10cafe1cfcf",
+  "kernel_sha256": "6aa8b6eb27009e16d0e7a618c5e4becca6f36561ac5b632912bdda13078fd100",
+  "cmdline_bytes": 239
+ },
+ "checks": [
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B docs/procedures/nat-148/model_topology.py --json artifacts/nat-148/model-topology.json",
+   "exit_code": 0,
+   "result": "baseline cp12/1 cpu; running _Assert topology_info.boot_cpu == NULL (2 cpus); waiting cp12/10 cpus boot 0, then 40,41,42,43,44,13,14, master_cpu 0"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-148/build.py --out artifacts/nat-148/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-148/build-001 --out artifacts/nat-148/package-001",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-148/derive149.py --check",
+   "exit_code": 0
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B docs/procedures/nat-148/test_nat148.py",
+   "exit_code": 0,
+   "result": "9 OK (incl. 3 model tests)"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-148/test_nat148.py",
+   "exit_code": 0,
+   "result": "9 OK, 3 skipped (no capstone)"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "OK"
+  }
+ ],
+ "limits": [
+  "The model kernel is the NAT-022 payload kernel, not the NAT-143 kernel (same ml_parse_cpu_topology source)",
+  "The model does not run PSCI CPU_ON, secondary entry, GIC or scheduling"
+ ],
+ "artifacts": [
+  "docs/procedures/nat-148/README.md",
+  "docs/procedures/nat-148/task.json",
+  "docs/procedures/nat-148/make_adt148.py",
+  "docs/procedures/nat-148/build.py",
+  "docs/procedures/nat-148/model_topology.py",
+  "docs/procedures/nat-148/derive149.py",
+  "docs/procedures/nat-148/session_nat149.py",
+  "docs/procedures/nat-148/test_nat148.py",
+  "docs/procedures/nat-147/README.md",
+  "artifacts/nat-148/model-topology.json",
+  "artifacts/nat-148/build-001/build.json",
+  "artifacts/nat-148/package-001/package.json",
+  "artifacts/nat-148/package-001/loader-diag-xnu-scF-md1/recovery.img"
+ ],
+ "artifact_hashes": {
+  "docs/procedures/nat-148/README.md": "b6bbf27217c05ecacf71986a764c21da3a1513c405624858309b07d6c158b680",
+  "docs/procedures/nat-148/task.json": "fa4a327be4dbf40be0a9c1476aee582f2f5677cdea653b6eda83ea0f4ce14d98",
+  "docs/procedures/nat-148/make_adt148.py": "021a386d1e4a474c409f049edab0b1c3af0b0bd1ced5a380cffe61cc377441d4",
+  "docs/procedures/nat-148/build.py": "25315c1c0d25606aab4f290aeab143d668b7255b76ea772c74dd4b9fc123ce67",
+  "docs/procedures/nat-148/model_topology.py": "c012b457e059655559927522e1a48671ed38075b0d8cf464057525a20fdd725c",
+  "docs/procedures/nat-148/derive149.py": "c5139d49cedb671d32121af68ed8af23f5212228147ec2646b8dc76f35e2a188",
+  "docs/procedures/nat-148/session_nat149.py": "80c9791789f6c62fe14a9624eb3becd9cc6e85b761343e6d34557c7f7de434cd",
+  "docs/procedures/nat-148/test_nat148.py": "c2a5500c9cfb1f1c532d51bdeb56ac81f0a3eaa7ff6fc8de6d9648388b05a119",
+  "docs/procedures/nat-147/README.md": "db22e99f0c2e99cf342c71cf6ab0ad1fb07a97a6482a34feada52b3c957e6fa6",
+  "artifacts/nat-148/model-topology.json": "3d61d52a3808e2db19225d913a7c67ca417be4c69dc40c103f9f6aa83d510319",
+  "artifacts/nat-148/build-001/build.json": "5ec42037b3c2761f2e62d2da3de24a7a1324f2eaefadbbc2bf107e7946e4dc20",
+  "artifacts/nat-148/package-001/package.json": "4d89b252e9e40376cdedf56a14e8eaf1b7e58e56343c452b0405fe2d992c6f69",
+  "artifacts/nat-148/package-001/loader-diag-xnu-scF-md1/recovery.img": "56e9d3acfac4d0438c93c2eefb5f7da7b50ee94e4454bf613eb7c36b26386d3d"
+ }
+}

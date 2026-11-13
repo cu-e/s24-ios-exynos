@@ -1,0 +1,22 @@
+{
+ "id": "NAT-148",
+ "status": "pending",
+ "owner": null,
+ "title": "Host: scF image: scE (NAT-145) with cpu1-cpu9 state \"waiting\" so XNU's ml_parse_cpu_topology sees one boot CPU (NAT-146 stopped at the second-boot-CPU assertion); the kernel's own topology code run on the NAT-035 model with the as-built and fixed ADTs; session driver for NAT-149 (re-registration of NAT-147, which named the failed NAT-146 as a dependency and cannot be claimed)",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 99,
+ "depends_on": [
+  "NAT-145"
+ ],
+ "paths": [
+  "docs/procedures/nat-148",
+  "artifacts/nat-148"
+ ],
+ "acceptance": [
+  "Model run of the kernel's ml_parse_cpu_topology from a checkpoint-35 stop: as-built ten-CPU ADT reaches _Assert(topology_info.boot_cpu == NULL); the make_adt148 ADT reaches checkpoint 12 with num_cpus 10, boot cpu 0, and the model chain to checkpoint 14; baseline one-CPU ADT reaches 12",
+  "Build changes only cpu1-cpu9 state against scE (payload ADT states checked); same kernel, loader, root, window; cmdline within 255 bytes",
+  "Counted session derivation from session_nat146.py; tests; make check",
+  "Host evidence only; a native rerun (NAT-149) needs a new owner decision that names the SEC_UPLOAD loop risk and its button recovery"
+ ]
+}
