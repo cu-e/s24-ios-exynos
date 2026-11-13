@@ -1,0 +1,17 @@
+{
+  "id": "NAT-119",
+  "title": "Host: build loader-diag-xnu-sc6-md1 = NAT-117's image + kernel-side DECON0 HW-trigger kick from the heartbeat (boot-arg e1s_decon_hw=1, logs TRIG_CON/FRAME_COUNT) + loader stops drawing marker bands after the kernel's return, so the iOS frame stays in the scanned buffer; tests, analyser with a pre-registered rule, decision; no phone action",
+  "status": "pending",
+  "owner": null,
+  "priority": 99,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": ["NAT-118"],
+  "paths": ["docs/procedures/nat-119", "artifacts/nat-119"],
+  "acceptance": [
+    "kernel patch = NAT-115's combined patch + the kick, rebuilt with KRN-044; the kick only writes TRIG_CON and SHD_REG_UP_REQ, only when GLOBAL_CON says enabled + command mode, with the loader's proven HW-form sequence; strings in the binary",
+    "loader change: after why=2 no mk_draw into 0xfa200000 (counted patch rule), checked in the compiled code",
+    "analyser reads kick lines and frame-counter deltas; owner observation is recorded separately from the log verdict"
+  ],
+  "notes": "Owner (NAT-118): saw the iPhone bottom bar on the physical panel, not icons/background. research/notes/NAT-118-owner-panel-observation.md"
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T13:01:41+00:00",
+  "updated_at": "2026-11-13T13:35:53+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -16949,6 +16949,51 @@
       "evidence": "docs/procedures/nat-118/evidence.json",
       "evidence_sha256": "fa6449d0ac47f7e6395ad0be0d18cec2bffe8974dabbb5460c5e6880de70ef93",
       "finished_at": "2026-11-13T13:01:32+00:00"
+    },
+    {
+      "id": "NAT-119",
+      "title": "Host: build loader-diag-xnu-sc6-md1 = NAT-117's image + kernel-side DECON0 HW-trigger kick from the heartbeat (boot-arg e1s_decon_hw=1, logs TRIG_CON/FRAME_COUNT) + loader stops drawing marker bands after the kernel's return, so the iOS frame stays in the scanned buffer; tests, analyser with a pre-registered rule, decision; no phone action",
+      "status": "in_progress",
+      "owner": "claude-opus-nat116-20261113",
+      "priority": 99,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-118"
+      ],
+      "paths": [
+        "docs/procedures/nat-119",
+        "artifacts/nat-119"
+      ],
+      "acceptance": [
+        "kernel patch = NAT-115's combined patch + the kick, rebuilt with KRN-044; the kick only writes TRIG_CON and SHD_REG_UP_REQ, only when GLOBAL_CON says enabled + command mode, with the loader's proven HW-form sequence; strings in the binary",
+        "loader change: after why=2 no mk_draw into 0xfa200000 (counted patch rule), checked in the compiled code",
+        "analyser reads kick lines and frame-counter deltas; owner observation is recorded separately from the log verdict"
+      ],
+      "notes": "Owner (NAT-118): saw the iPhone bottom bar on the physical panel, not icons/background. research/notes/NAT-118-owner-panel-observation.md",
+      "started_at": "2026-11-13T13:35:53+00:00",
+      "last_heartbeat": "2026-11-13T13:35:53+00:00",
+      "updated_at": "2026-11-13T13:35:53+00:00"
+    },
+    {
+      "id": "NAT-120",
+      "title": "Native run of loader-diag-xnu-sc6-md1 (NAT-119): does the panel refresh during iOS (FRAME_COUNT advances after the kernel's HW-form kick) and does the owner see the whole iOS home screen; restore stock RECOVERY, verify Android",
+      "status": "pending",
+      "owner": null,
+      "priority": 99,
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "depends_on": [
+        "NAT-119"
+      ],
+      "paths": [
+        "docs/procedures/nat-120",
+        "artifacts/nat-120"
+      ],
+      "acceptance": [
+        "decision file committed before the run; permit opened and closed; stock RECOVERY verified, Android booted, data intact",
+        "evidence reports kick lines, frame-counter deltas and the owner's observation (or its absence) separately"
+      ]
     }
   ],
   "experiments": [
@@ -66173,6 +66218,46 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-13T13:35:37+00:00",
+      "action": "task.add:NAT-119",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-119",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T13:35:45+00:00",
+      "action": "task.add:NAT-120",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-120",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T13:35:53+00:00",
+      "action": "task.claim:NAT-119",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-119",
+          "status": "in_progress",
+          "owner": "claude-opus-nat116-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T13:35:53+00:00"
+        }
+      ]
     }
   ]
 }
