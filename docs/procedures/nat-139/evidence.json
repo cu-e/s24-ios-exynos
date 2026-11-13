@@ -1,0 +1,92 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-13T20:01:00.001228+00:00",
+ "task": "NAT-139",
+ "summary": "scB image: NAT-128 polling kernel with the USI SPI9 pad order (CLK gpp9-0, MOSI 1, MISO 2, CS 3) inferred from the pinned DT, a read-only MISO level check, msgbuf=1048576 (ufs_write=0 dropped: its single reader enables on ==1 only). Pin-level synthetic peer: NAT-139 driver reads a USI-wired peer, NAT-128 driver reads all-00 from it (phone T1 class), control passes. Host-test only; no device claim.",
+ "commit": "61e1959",
+ "device_used": false,
+ "image": {
+  "recovery_sha256": "e9aa908ea4c4edf1938e5722d296ce38fb711c6520607ba47c3713d9c6bce431",
+  "payload_sha256": "d26656ac2d0ae97fe5befdd8aa4fd2203e0a369d2a8b9307dbeb248cdf3d24a2",
+  "payload_bytes": 26199088,
+  "loader_image_sha256": "55f6d3b92d89da3ee35de0f2b99ca2581eb038b98109ae7be568bb9f025d71c1",
+  "kernel_sha256": "b5483e1de76d7c734aefa80ae27e75f0f8292c5221ddf6baa10e664f4e541617",
+  "cmdline_bytes": 246
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/krn-044/rebuild.py --out artifacts/nat-139/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-121/loader_return.patch --extra bsd/e1s_touch.o=docs/procedures/nat-139/e1s_touch_combined.patch --extra bsd/redwood_input.o=docs/procedures/nat-121/redwood_input.patch --extra bsd/e1s_acpm.o=docs/procedures/nat-123/e1s_acpm.patch --extra bsd/e1s_pmic.o=docs/procedures/nat-123/e1s_pmic.patch --expect-string \"miso cs-high\" --expect-string \"poll-only diagnostic complete\" --expect-string \"e1s-keys: disabled (e1skeys=0)\"",
+   "exit_code": 0,
+   "result": "0 undefined, 29 stubs; only e1s_touch.o differs from NAT-128 after path normalisation"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-139/build.py --out artifacts/nat-139/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-139/build-001 --out artifacts/nat-139/package-001",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-139/derive140.py --check",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-139/test_nat139.py",
+   "exit_code": 0,
+   "result": "9 OK"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-139/test_analyze140.py",
+   "exit_code": 0,
+   "result": "4 OK"
+  },
+  {
+   "cmd": "seeded wrong wirings (MISO pad 1; CLK/CS swapped) via test_nat139.run_case",
+   "exit_code": 0,
+   "result": "all-00 IDs, as expected"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "448 tests OK"
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-139/README.md",
+  "docs/procedures/nat-139/e1s_touch_combined.patch",
+  "docs/procedures/nat-139/host/peer139.c",
+  "docs/procedures/nat-139/test_nat139.py",
+  "docs/procedures/nat-139/build.py",
+  "docs/procedures/nat-139/derive140.py",
+  "docs/procedures/nat-139/session_nat140.py",
+  "docs/procedures/nat-139/analyze140.py",
+  "docs/procedures/nat-139/test_analyze140.py",
+  "artifacts/nat-139/kernel-001/rebuild.json",
+  "artifacts/nat-139/kernel-001/kernel.no-storage",
+  "artifacts/nat-139/build-001/build.json",
+  "artifacts/nat-139/package-001/package.json",
+  "artifacts/nat-139/package-001/loader-diag-xnu-scB-md1/recovery.img",
+  "artifacts/nat-139/make-check.log"
+ ],
+ "artifact_hashes": {
+  "docs/procedures/nat-139/README.md": "10e249a5da7b5102696d9c888c319c199593def2f9e4a2ba2678b2c917e1f380",
+  "docs/procedures/nat-139/e1s_touch_combined.patch": "b2a4847d1538edbc04fc063f4eae71a4bb8a556e819f3bcd3cc73aa3afe07893",
+  "docs/procedures/nat-139/host/peer139.c": "bfa3c73d6fd5f54d21d9da698f5d56ca860e7ce4bdeac462308c8e13ed234fcc",
+  "docs/procedures/nat-139/test_nat139.py": "5e37770e9cdab8c8f997144cf33c3773f64c1fdbfada291011e96dfe7ff21a59",
+  "docs/procedures/nat-139/build.py": "9e2d4e4b71cb24d579d8c1511cb1020e89f92b883738abb1d189e817b311a94a",
+  "docs/procedures/nat-139/derive140.py": "9314a02144fae5668d98ede03693f658a3e2d5be9b624d53ad7fd81d57699e8b",
+  "docs/procedures/nat-139/session_nat140.py": "e7814e16e3ab09ef532dd553e8059ee747b80425c86c6fa9bbae6e39bdb25633",
+  "docs/procedures/nat-139/analyze140.py": "81fc3a0fa807c15679f9d13601738945aa944d2b5f2ecb5bb0b26d06a44335ea",
+  "docs/procedures/nat-139/test_analyze140.py": "abf15d05ff5c6c99b9dda9323309abe354e74a3a31a02ae2f6768a315927794f",
+  "artifacts/nat-139/kernel-001/rebuild.json": "c6b46c00c8555d7f5791c6b79faef628d638d3f6d7387942164a0591166bdcad",
+  "artifacts/nat-139/kernel-001/kernel.no-storage": "b5483e1de76d7c734aefa80ae27e75f0f8292c5221ddf6baa10e664f4e541617",
+  "artifacts/nat-139/build-001/build.json": "fda49ac555268fc4fe83f0fceb3846605474551d82af2fe9e64a60bae221c2d4",
+  "artifacts/nat-139/package-001/package.json": "cd06a3ef33a616f487147b71db3351b60cf408a822e92402578532810897f107",
+  "artifacts/nat-139/package-001/loader-diag-xnu-scB-md1/recovery.img": "e9aa908ea4c4edf1938e5722d296ce38fb711c6520607ba47c3713d9c6bce431",
+  "artifacts/nat-139/make-check.log": "d57c293ef00e9a630ba6791865bfa0e331a19f09d77fb9919c02fd790302b2d9"
+ },
+ "limits": "Pin names of the USI pads are inferred from UART/I2C naming in the pinned DT; not electrical evidence."
+}
