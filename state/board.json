@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-13T12:28:56+00:00",
-  "ledger_updated_at": "2026-11-13T12:28:16+00:00",
-  "registry_sha256": "67fbc62c8744ba6d29ca70d0f83119c6072f5a4e192b1989af8c56ea5b6cad3d",
+  "generated_at": "2026-11-13T12:47:55+00:00",
+  "ledger_updated_at": "2026-11-13T12:47:53+00:00",
+  "registry_sha256": "c8d1b1fef00e4dae326f44ab7da524548a30a6256fa343f9f4e968c5ebced79f",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -66,6 +66,7 @@
       "UI-005"
     ],
     "gated": [
+      "NAT-118",
       "NAT-017",
       "NAT-072",
       "NAT-003",
@@ -190,6 +191,7 @@
       "IOS-009",
       "NAT-115",
       "NAT-116",
+      "NAT-117",
       "KRN-007",
       "KRN-011",
       "KRN-017",
@@ -5031,6 +5033,63 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-116.md"
+    },
+    {
+      "id": "NAT-117",
+      "title": "Host: build loader-diag-xnu-sc5-md1 = NAT-115's image with the real D22AP /product node added to the ADT (as the donor mkadt.py d22ap_product does; source: DeviceTree.d22ap.im4p of the local 20F66 IPSW) and wait_dump off (NAT-116: its printf with interrupts off panicked the kernel); same kernel; package, derived session driver, analyser with a pre-registered rule tested on the NAT-116 run, decision draft; no phone action",
+      "status": "done",
+      "owner": "claude-opus-nat116-20261113",
+      "priority": 99,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-116"
+      ],
+      "paths": [
+        "docs/procedures/nat-117",
+        "artifacts/nat-117"
+      ],
+      "acceptance": [
+        "the ADT is the NAT-085 ADT plus exactly one /product node whose properties equal the D22AP /product minus flagged (syscfg) properties, name and phandle, gamut sRGB (mkadt rule); a test checks this against the IPSW file and that the rest of the tree is byte-identical",
+        "the image is built by a wrapper over NAT-115's build that changes only the ADT derivation, the image name/tag and drops wait_dump=1; the kernel hash is NAT-115's; cmdline < 256 B",
+        "analyser analyze118.py classifies the NAT-116 archive as the bounding-path abort (control); tests and a mutation pass",
+        "session driver derived by counted substitutions, refuses without a decision file; decision draft names hashes, limits, stop conditions and restore"
+      ],
+      "notes": "NAT-116: SpringBoard aborts 9 times on 'Failed to load bounding path bitmap data ... BoundingPathBitmap-1125x2436-375x812-3.00x'; the image's ADT has no /product node. That the missing /product is the cause is a hypothesis.",
+      "started_at": "2026-11-13T12:41:57+00:00",
+      "last_heartbeat": "2026-11-13T12:41:57+00:00",
+      "updated_at": "2026-11-13T12:47:53+00:00",
+      "evidence": "docs/procedures/nat-117/evidence.json",
+      "evidence_sha256": "9e95081328bb139a08fa3369716dda3e00aff05f45612589199179cfbe2bd739",
+      "finished_at": "2026-11-13T12:47:53+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-117.md"
+    },
+    {
+      "id": "NAT-118",
+      "title": "Native run of loader-diag-xnu-sc5-md1 (NAT-117) under its own decision file: with the D22AP /product node in the ADT, does SpringBoard get past _UIScreenComplexBoundingPathUtilities, what aborts it next if anything, and does a frame other than the Apple logo reach the panel memory; restore stock RECOVERY, verify Android, analyse by NAT-117's rule",
+      "status": "pending",
+      "owner": null,
+      "priority": 99,
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "depends_on": [
+        "NAT-117"
+      ],
+      "paths": [
+        "docs/procedures/nat-118",
+        "artifacts/nat-118"
+      ],
+      "acceptance": [
+        "Decision file for this image committed before the run; native permit opened citing it and closed after; stock RECOVERY hash verified after, Android booted, data intact",
+        "Evidence reports the analyze118 verdict with the deciding lines; no lock-screen claim unless a recorded frame differs from the logo and the thumbnail shows it"
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-118.md"
     },
     {
       "id": "KRN-007",
@@ -18518,56 +18577,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-13T10:02:13+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-nat113-run-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-13T10:02:21+00:00",
-      "action": "task.done:NAT-113",
-      "owner": "claude-opus-nat113-run-20261113",
-      "tasks": [
-        {
-          "id": "NAT-113",
-          "status": "done",
-          "owner": "claude-opus-nat113-run-20261113",
-          "priority": 100,
-          "last_heartbeat": "2026-11-13T09:46:51+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T10:02:30+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-nat113-run-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-13T10:26:42+00:00",
-      "action": "task.claim:KRN-044",
-      "owner": "claude-opus-krn044-20261113",
-      "tasks": [
-        {
-          "id": "KRN-044",
-          "status": "in_progress",
-          "owner": "claude-opus-krn044-20261113",
-          "priority": 90,
-          "last_heartbeat": "2026-11-13T10:26:42+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-13T10:33:53+00:00",
       "action": "task.done:KRN-044",
       "owner": "claude-opus-krn044-20261113",
@@ -18779,11 +18788,65 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-13T12:41:41+00:00",
+      "action": "task.add:NAT-117",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-117",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T12:41:49+00:00",
+      "action": "task.add:NAT-118",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-118",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T12:41:57+00:00",
+      "action": "task.claim:NAT-117",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-117",
+          "status": "in_progress",
+          "owner": "claude-opus-nat116-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T12:41:57+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T12:47:53+00:00",
+      "action": "task.done:NAT-117",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-117",
+          "status": "done",
+          "owner": "claude-opus-nat116-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T12:41:57+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "7a033ae574e011e9413b45cb8c37b437359627347e77bed4b69ba6a9866684c1",
-    "BOARD.md": "cf114bf9563a3f19ec30143d693259adcd32fb49af0866c79156064a781f5090",
+    "STATUS.md": "3353a05b0e5755661fde33b05a9218b00f09db4d75816a9fcdd93e3dba20c8fa",
+    "BOARD.md": "dc92bdc78d57a9d8a9ee6cbc982c53349624334725b36380b29ec709b7d52bc9",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -18889,6 +18952,8 @@
     "planning/tasks/NAT-098.md": "a9cef23e28220d6d2c7b706dd79b26663b8f3f93e86ad0787f34a2e2a2067457",
     "planning/tasks/NAT-115.md": "3e3f62b5a31c13d9fa566bcc248a026e93b3e4fe3c6ea88df2a7e66f3dc73d62",
     "planning/tasks/NAT-116.md": "368bf6c8611fb28edfd66ea52100beac7d9b2c0ece3c867a83a903cef7267ebe",
+    "planning/tasks/NAT-117.md": "cfa8983d27b43ce60ade7b9bf7e2b21bb416884e0e521056cc11cc9a2ca059db",
+    "planning/tasks/NAT-118.md": "c39067cce9f5fa3f906fa52d505381a2c916e6094740e4a9212b026737110375",
     "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-011.md": "9b8014abd8d019af80fad695e0d0df9de9523d36a222553327384f7f00e8a901",
     "planning/tasks/KRN-017.md": "86a29485c4c3ed3a62f7ecf64f5e2bb303bb0bd7ac5fd661482bf024004f407d",

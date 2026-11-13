@@ -1,0 +1,77 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-13T13:30:00+00:00",
+  "task": "NAT-117",
+  "owner": "claude-opus-nat116-20261113",
+  "summary": "Built loader-diag-xnu-sc5-md1: NAT-115's image with the real D22AP /product node in the ADT (mkadt rule, 61 properties, subtype 2436) and wait_dump off; same kernel. RECOVERY 9696818f..., payload 81b33e6d.... Analyser analyze118 fixed and tested on NAT-116/NAT-113; session driver derived; decision 0046 written.",
+  "image": {
+    "recovery_sha256": "9696818ff9ccc3f38276a7196a8a934085da8860758e8ef25788a0bc581b0536",
+    "payload_sha256": "81b33e6de389b122e0e252d64d0cb221c3f6c5d3c4270a88472cc2cb298fd5c7",
+    "payload_bytes": 26141200
+  },
+  "not_established": [
+    "that the missing /product node causes the SpringBoard abort (tested by NAT-118)"
+  ],
+  "checks": [
+    {
+      "cmd": "python3 docs/procedures/nat-117/make_adt117.py --out artifacts/nat-117/e1s-product.adt",
+      "exit_code": 0
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-117/build.py --out artifacts/nat-117/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+      "exit_code": 0
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-044/package.py --build artifacts/nat-117/build-001 --out artifacts/nat-117/package-001",
+      "exit_code": 0
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-117/derive117.py && python3 docs/procedures/nat-117/derive117.py --check",
+      "exit_code": 0,
+      "output": "9 substitutions"
+    },
+    {
+      "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -B -I docs/procedures/nat-117/session_nat117.py --out <scratch> --image loader-diag-xnu-sc5-md1",
+      "exit_code": 2,
+      "output": "stopped: decision file missing; device_write_started=false, commands=[]"
+    },
+    {
+      "cmd": "python3 -B -I docs/procedures/nat-117/test_nat117.py",
+      "exit_code": 0,
+      "output": "15 tests OK"
+    },
+    {
+      "cmd": "python3 -B -I docs/procedures/nat-117/mutate_nat117.py",
+      "exit_code": 0,
+      "output": "{\"total\": 14, \"killed\": 14, \"survived\": []}"
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/nat-117/README.md",
+    "docs/procedures/nat-117/make_adt117.py",
+    "docs/procedures/nat-117/build.py",
+    "docs/procedures/nat-117/analyze118.py",
+    "docs/procedures/nat-117/derive117.py",
+    "docs/procedures/nat-117/session_nat117.py",
+    "docs/procedures/nat-117/test_nat117.py",
+    "docs/procedures/nat-117/mutate_nat117.py",
+    "artifacts/nat-117/build-001/build.json",
+    "artifacts/nat-117/package-001/package.json",
+    "artifacts/nat-117/e1s-product.adt"
+  ],
+  "artifact_hashes": {
+    "docs/procedures/nat-117/README.md": "1875b5dd29676ba6e5c71cda4cec9f0396fe06ab16d8fb53b922ea67f4273693",
+    "docs/procedures/nat-117/make_adt117.py": "a16fb70aef5f3977a9764f6de126dd1428252abf81b89c0737da69b3242c5d7d",
+    "docs/procedures/nat-117/build.py": "47bab0cf57bf7f7fbbe413ee3c7dcd6c7113312bc3b1bed650d6e457afc0e24a",
+    "docs/procedures/nat-117/analyze118.py": "7fac8863c0c2b98460f86b37554dd73769ae16970b30a40961a18efa00622547",
+    "docs/procedures/nat-117/derive117.py": "65e49a32c6a8d84ecc3ae820f428583156848233338cc4dd2b5db95bafdc42b3",
+    "docs/procedures/nat-117/session_nat117.py": "d4050c26ab2cbbece2855f52c47b6ec0ec5550011a7467bbf138d31d8bd1fdd4",
+    "docs/procedures/nat-117/test_nat117.py": "23e4663c4e1307e8726dc97597100c07b07b980ee55f92fb31585dc7916c8cde",
+    "docs/procedures/nat-117/mutate_nat117.py": "6fc5c3aa3d4cd6ab915c7218e079af3d1d191202428b986d4b966ca26731cd0c",
+    "artifacts/nat-117/build-001/build.json": "e605ec7b7d3f6dc22dc5d20885b7ef9b09da4beffa04b30be0b20667766a17db",
+    "artifacts/nat-117/package-001/package.json": "f6d70ff27d5fd79382b2e098ae8c55898f3151e37040b9c500b36b39d5a96ed2",
+    "artifacts/nat-117/e1s-product.adt": "44bbd1d06693d706dfede4ea1e3d85953cb7eb3151854302c2a41fcdceadf79e"
+  }
+}

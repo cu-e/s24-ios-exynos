@@ -1,0 +1,18 @@
+{
+  "id": "NAT-117",
+  "title": "Host: build loader-diag-xnu-sc5-md1 = NAT-115's image with the real D22AP /product node added to the ADT (as the donor mkadt.py d22ap_product does; source: DeviceTree.d22ap.im4p of the local 20F66 IPSW) and wait_dump off (NAT-116: its printf with interrupts off panicked the kernel); same kernel; package, derived session driver, analyser with a pre-registered rule tested on the NAT-116 run, decision draft; no phone action",
+  "status": "pending",
+  "owner": null,
+  "priority": 99,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": ["NAT-116"],
+  "paths": ["docs/procedures/nat-117", "artifacts/nat-117"],
+  "acceptance": [
+    "the ADT is the NAT-085 ADT plus exactly one /product node whose properties equal the D22AP /product minus flagged (syscfg) properties, name and phandle, gamut sRGB (mkadt rule); a test checks this against the IPSW file and that the rest of the tree is byte-identical",
+    "the image is built by a wrapper over NAT-115's build that changes only the ADT derivation, the image name/tag and drops wait_dump=1; the kernel hash is NAT-115's; cmdline < 256 B",
+    "analyser analyze118.py classifies the NAT-116 archive as the bounding-path abort (control); tests and a mutation pass",
+    "session driver derived by counted substitutions, refuses without a decision file; decision draft names hashes, limits, stop conditions and restore"
+  ],
+  "notes": "NAT-116: SpringBoard aborts 9 times on 'Failed to load bounding path bitmap data ... BoundingPathBitmap-1125x2436-375x812-3.00x'; the image's ADT has no /product node. That the missing /product is the cause is a hypothesis."
+}
