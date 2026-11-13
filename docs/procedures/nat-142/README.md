@@ -49,9 +49,35 @@ Session: `python3 -I docs/procedures/nat-141/session_nat142.py --out artifacts/n
   iOS maps them to the right on-screen point is unverified.
 - Interrupt-driven input, latency, acceleration and FPS.
 
+## After the run: owner observation and log timeline (added 2026-11-14)
+
+The owner was asked what the screen did while they touched it. Their answer: "я тыкал но мне кажется ios была без реакции, я уверен на
+процентов 70 не на 100 потому что там кадров 2 в секунду и мб ни ничего не произашло но я тыкал долго но ничего не помеялось".
+They saw no reaction, at about 70% confidence, at about 2 frames per second.
+
+A re-read of `artifacts/nat-142/analysis/kernel-text.txt` explains this without a fault in the input path. The UI accepted touches
+only in the last ~14 s of the kernel's 150 s window:
+
+| Kernel time (os_log clock ≈ kernel clock) | Event |
+| --- | --- |
+| 107.1 s | STM sense on; touch coordinates from 108.2 s |
+| 119.9 s | backboardd opens /dev/redwood-touch |
+| ~123 s | HakiOS input layer has its touch screen service; first samples dispatched |
+| 157.9 s | first window-server frame (software renderer); recording starts |
+| 158.6 s | backboardd sets `TouchDetectionMode` 0xff (no touches) |
+| 228.7 s | mode 0xfe (display off, tap to wake: the input layer turns a touch-down into a lock-button press) |
+| 238.2 s | mode 0x1 (touches reported), lock screen |
+| 242.0 s | `hakios: unlock: asked, answer 1` — the donor's automatic 10 s unlock (inject_sb.c), not a swipe; mode 0 |
+| 243.7–252.3 s | recorded frames 6–27: the home screen (the final panel thumbnail is the home screen) |
+| ~252 s | timed return (`loader_return_after=150`) |
+
+Most presses (84 of 91 by 229.7 s) came before the UI was taking touches. The 0xfe → 0x1 wake at 238 s may have been a touch, but the
+input layer does not log its wake press, so this is not established. The panel ends on the iOS home screen.
+
 ## Next
 
-1. Correlate a touch with a UI change: tap a known SpringBoard icon position and look for a frame change at that time, or have the
-   owner observe.
+1. Correlate a touch with a UI change. This needs a window in which the home screen is up for minutes, not seconds: a longer
+   `loader_return_after` with the fed watchdog, every press/release logged with its time, and the owner tapping app icons. The test
+   is a launchd `UIKitApplication:` spawn other than the automatic Spotlight one (NAT-143/144).
 2. Attach the IRQ on gpa1-2 (EINT, level-low, as Android) instead of 10 ms polling.
 3. Check orientation/scale against the panel's 1080×2340.

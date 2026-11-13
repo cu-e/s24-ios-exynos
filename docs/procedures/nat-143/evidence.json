@@ -1,0 +1,92 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-13T21:01:50.455349+00:00",
+ "task": "NAT-143",
+ "summary": "scD image: scC with loader_return_after 270 (fed watchdog), loader deadline 595, rec_secs 270 and every STM press/release logged with its kernel time, so the iOS home screen stays up ~2 min; session (watcher/collector 720 s) and analyser for a touch-caused app launch with a per-run pid-based clock check. Host-test only.",
+ "commit": "4194496",
+ "device_used": false,
+ "image": {
+  "recovery_sha256": "da5c03c2c41af74332a054062de2a7e7de3e3bc987bc93e55ea2aafd68dc1cda",
+  "payload_sha256": "55ad4eea5cf069c6fa4d826825b4259862e6e28761a621dbcc5a8ae69f39d963",
+  "payload_bytes": 26199248,
+  "loader_image_sha256": "02ede202c61547565df9fcec25ee35fa8f84004e8f89df1fa74668a0ba879354",
+  "kernel_sha256": "6aa8b6eb27009e16d0e7a618c5e4becca6f36561ac5b632912bdda13078fd100",
+  "cmdline_bytes": 246,
+  "return_after_s": 270,
+  "deadline_s": 595,
+  "rec_secs": 270
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/krn-044/rebuild.py --out artifacts/nat-143/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-121/loader_return.patch --extra bsd/e1s_touch.o=docs/procedures/nat-143/e1s_touch_combined.patch --extra bsd/redwood_input.o=docs/procedures/nat-121/redwood_input.patch --extra bsd/e1s_acpm.o=docs/procedures/nat-123/e1s_acpm.patch --extra bsd/e1s_pmic.o=docs/procedures/nat-123/e1s_pmic.patch --expect-string ... (5)",
+   "exit_code": 0,
+   "result": "0 undefined, 29 stubs; path-normalized objects equal NAT-141's except e1s_touch.o"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-143/build.py --out artifacts/nat-143/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-143/build-001 --out artifacts/nat-143/package-001",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-143/derive144.py --check",
+   "exit_code": 0
+  },
+  {
+   "cmd": "TMPDIR=<scratch> python3 -B -I docs/procedures/nat-143/test_nat143.py",
+   "exit_code": 0,
+   "result": "8 OK"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-143/test_analyze144.py",
+   "exit_code": 0,
+   "result": "7 OK"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "448 OK"
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-143/README.md",
+  "docs/procedures/nat-143/task.json",
+  "docs/procedures/nat-143/e1s_touch_combined.patch",
+  "docs/procedures/nat-143/test_nat143.py",
+  "docs/procedures/nat-143/build.py",
+  "docs/procedures/nat-143/derive144.py",
+  "docs/procedures/nat-143/session_nat144.py",
+  "docs/procedures/nat-143/analyze144.py",
+  "docs/procedures/nat-143/test_analyze144.py",
+  "artifacts/nat-143/kernel-001/rebuild.json",
+  "artifacts/nat-143/kernel-001/kernel.no-storage",
+  "artifacts/nat-143/build-001/build.json",
+  "artifacts/nat-143/package-001/package.json",
+  "artifacts/nat-143/package-001/loader-diag-xnu-scD-md1/recovery.img"
+ ],
+ "artifact_hashes": {
+  "docs/procedures/nat-143/README.md": "541c2f050a066e2ee5855ab558680248ca524ad4958381e69eec0c96c4c38b7f",
+  "docs/procedures/nat-143/task.json": "0c381300470aa121b562b46205c8dfcad520822507fbd0cb34517af36900c01b",
+  "docs/procedures/nat-143/e1s_touch_combined.patch": "cd039273cc244bc04b00c53ba461e27968041416b86f817db59205cf2cc600ff",
+  "docs/procedures/nat-143/test_nat143.py": "5ec74b285161f9d0d620a355664b3309b556b802bd3fe38effd6a9cad775b883",
+  "docs/procedures/nat-143/build.py": "437b4303ad8a5c14f74401f1efe329f0d450f39409c33bf8633af68cdb8baa3c",
+  "docs/procedures/nat-143/derive144.py": "543e9ff9cc16b10920f0060def6431224c936402ac3c02a8bf6fd1d3b0c7d5d7",
+  "docs/procedures/nat-143/session_nat144.py": "17b86433bb746a8ee61f33c0423dd77b301df5ab5961d23d342c655271f11010",
+  "docs/procedures/nat-143/analyze144.py": "b79771563e64fc5296ca6039743a7b68b9e621bb47a758ca27b1d2f2a01fee0c",
+  "docs/procedures/nat-143/test_analyze144.py": "ead208403166dfd95e2044454a3cebab5ea387c3df2e1bd5d6c458d86283b20d",
+  "artifacts/nat-143/kernel-001/rebuild.json": "b272a3e0da7f1bd4474de669f6c6ce9ecd4538709e17cde8a654f22f35344b15",
+  "artifacts/nat-143/kernel-001/kernel.no-storage": "6aa8b6eb27009e16d0e7a618c5e4becca6f36561ac5b632912bdda13078fd100",
+  "artifacts/nat-143/build-001/build.json": "ddaf6cf422b0a80f3d6508d97ad869d5491e371b5f0268dd662e49a9c85c5f36",
+  "artifacts/nat-143/package-001/package.json": "a9ab0588673d952cbab6e3f2a2f69ff4a7e8040a20c5e2a6439ffaebb500a318",
+  "artifacts/nat-143/package-001/loader-diag-xnu-scD-md1/recovery.img": "da5c03c2c41af74332a054062de2a7e7de3e3bc987bc93e55ea2aafd68dc1cda"
+ },
+ "limits": [
+  "Host evidence only: no claim that iOS acts on a touch",
+  "The nibble-order item of the task title needed no change (derived source already matches Samsung's struct)",
+  "The returned log may exceed the 8 KiB + 512 KiB dump; the oldest console lines would be lost"
+ ]
+}
