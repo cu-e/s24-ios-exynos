@@ -6,7 +6,7 @@
 
 | Field | Value |
 |---|---|
-| State / column | pending / gated |
+| State / column | pending / waiting |
 | Owner | unassigned |
 | Priority | 50 (higher first; default 50) |
 | Scope / evidence | native / native-device |
@@ -14,7 +14,7 @@
 
 ## Readiness
 
-Scope not authorized: native; Dependencies: CELL-005, AUD-002
+Dependencies: CELL-005, AUD-002
 
 ## Reserved paths
 

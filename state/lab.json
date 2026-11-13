@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T22:44:05+00:00",
+  "updated_at": "2026-11-13T23:17:34+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -8,7 +8,7 @@
       "host": true,
       "android-readonly": true,
       "android-app": true,
-      "native": false
+      "native": true
     },
     "facts": [
       {
@@ -818,6 +818,13 @@
         "decision": "docs/decisions/0060-nat149-loader-diag-xnu-scF-md1-single-run-2026-11-14.md",
         "owner": "claude-opus-usb130-20261113",
         "at": "2026-11-13T22:43:09+00:00"
+      },
+      {
+        "scope": "native",
+        "value": true,
+        "decision": "docs/decisions/0062-nat151-loader-diag-xnu-scG-md1-single-run-2026-11-14.md",
+        "owner": "claude-opus-usb130-20261113",
+        "at": "2026-11-13T23:17:34+00:00"
       }
     ]
   },
@@ -18071,8 +18078,8 @@
     },
     {
       "id": "NAT-150",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
       "title": "Host: where do the PSCI-started cores stop? Per-core early markers in the kernel's reset vector (entry, cpu-data match/no-match, before MMU on) written by PA and cleaned to PoC, read back by the boot CPU into the 'has not joined' line; fix analyze146's started rule (joins/running count); shorter start wait; do not pair the boot CPU with a core that has not joined; scG image and session for a native run",
       "scope": "host",
       "evidence_kind": "host-test",
@@ -18089,6 +18096,34 @@
         "Analyser counts joined cores from the running count and psci lines, tested on NAT-149's real text (result: 1 running, 9 not joined)",
         "Image differs from scF only in the listed objects/tokens; counted session derivation; make check",
         "Host evidence only; a native run needs its own owner decision"
+      ],
+      "started_at": "2026-11-13T22:56:10+00:00",
+      "last_heartbeat": "2026-11-13T22:56:10+00:00",
+      "updated_at": "2026-11-13T23:15:26+00:00",
+      "evidence": "docs/procedures/nat-150/evidence.json",
+      "evidence_sha256": "adcbe364c0f96a253e6a0ad69aec0aed28ca19bc663666c7e7e325db6ac85523",
+      "finished_at": "2026-11-13T23:15:26+00:00"
+    },
+    {
+      "id": "NAT-151",
+      "status": "pending",
+      "owner": null,
+      "title": "Native run of loader-diag-xnu-scG-md1 (NAT-150): where do the PSCI-started cores stop (early marks E0-E6 + AFFINITY_INFO per core), do any join (analyze150 C2/C1/C0), and the frame rate of the software display path with the home screen up in time; restore stock RECOVERY and check Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 99,
+      "depends_on": [
+        "NAT-150"
+      ],
+      "paths": [
+        "docs/procedures/nat-151",
+        "artifacts/nat-151"
+      ],
+      "acceptance": [
+        "Exactly one bounded run of the pinned scG package under decision 0062, RECOVERY write with full readback",
+        "analyze150 verdicts reported (smp, joined, early_where per core with affinity state, frame windows against NAT-144 21.72/s and 57 ms), or the loader CK records if no kernel ring arrives",
+        "Stock RECOVERY restored with full hash match; Android boot_completed and user-data directories present",
+        "Dated native evidence; frame rate is the kernel's count, not a camera measurement; the owner's account recorded as an observation"
       ]
     }
   ],
@@ -69071,6 +69106,58 @@
           "priority": 99
         }
       ]
+    },
+    {
+      "at": "2026-11-13T22:56:10+00:00",
+      "action": "task.claim:NAT-150",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-150",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T22:56:10+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T23:15:26+00:00",
+      "action": "task.done:NAT-150",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-150",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T22:56:10+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T23:17:02+00:00",
+      "action": "task.add:NAT-151",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-151",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T23:17:34+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
     }
   ]
 }
