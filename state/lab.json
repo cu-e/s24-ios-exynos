@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T17:46:25+00:00",
+  "updated_at": "2026-11-13T17:47:22+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -8,7 +8,7 @@
       "host": true,
       "android-readonly": true,
       "android-app": true,
-      "native": false
+      "native": true
     },
     "facts": [
       {
@@ -706,6 +706,13 @@
         "decision": "docs/decisions/0053-nat132-loader-diag-xnu-us1-md1-single-run-2026-11-13.md",
         "owner": "claude-opus-usb130-20261113",
         "at": "2026-11-13T17:28:53+00:00"
+      },
+      {
+        "scope": "native",
+        "value": true,
+        "decision": "docs/decisions/0054-nat135-loader-diag-xnu-pk1-md1-single-run-2026-11-13.md",
+        "owner": "claude-opus-usb130-20261113",
+        "at": "2026-11-13T17:47:12+00:00"
       }
     ]
   },
@@ -17544,6 +17551,31 @@
       "evidence": "docs/procedures/nat-134/evidence.json",
       "evidence_sha256": "f0d8593ca7d0f42a48724ab8f4c22dda82a0bedeecb3f6c4f4ee2eac74960c29",
       "finished_at": "2026-11-13T17:46:25+00:00"
+    },
+    {
+      "id": "NAT-135",
+      "status": "in_progress",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Native run of loader-diag-xnu-pk1-md1 (NAT-134): read-only SuperSpeed prerequisite probe over the HS link before delivery (U4 DWC31 revision, U5 cold PMU/USBDP/TCA/CMU state, U6 indirect, U7 PERIC2 GPIO, U11), then NAT-132's delivery as a non-disturbance check; restore stock RECOVERY and check Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 99,
+      "depends_on": [
+        "NAT-134"
+      ],
+      "paths": [
+        "docs/procedures/nat-135",
+        "artifacts/nat-135"
+      ],
+      "acceptance": [
+        "Exactly one bounded run of the pinned pk1 package under decision 0054, RECOVERY write with full readback",
+        "Every probe entry reported as value, skipped (with gate value) or the stalled index, from peek.jsonl",
+        "Stock RECOVERY restored with full hash match; Android boot_completed and user-data directories present",
+        "Dated native evidence; U4/U5/U7/U11 answered or reported as not readable at loader entry; no SS claim"
+      ],
+      "started_at": "2026-11-13T17:47:22+00:00",
+      "last_heartbeat": "2026-11-13T17:47:22+00:00",
+      "updated_at": "2026-11-13T17:47:22+00:00"
     }
   ],
   "experiments": [
@@ -67715,6 +67747,44 @@
           "owner": "claude-opus-usb130-20261113",
           "priority": 99,
           "last_heartbeat": "2026-11-13T17:43:20+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T17:47:01+00:00",
+      "action": "task.add:NAT-135",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-135",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T17:47:12+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-13T17:47:22+00:00",
+      "action": "task.claim:NAT-135",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-135",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T17:47:22+00:00"
         }
       ]
     }

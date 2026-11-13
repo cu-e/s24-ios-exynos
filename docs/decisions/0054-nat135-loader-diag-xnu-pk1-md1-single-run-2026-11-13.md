@@ -1,6 +1,6 @@
 # Decision 0054: one NAT-135 run of loader-diag-xnu-pk1-md1 (read-only SuperSpeed prerequisite probe)
 
-Date: 2026-11-13. Recorded by `claude-opus-usb130-20261113` under decisions 0019, 0044 and 0052. 0052 is the owner's standing
+Date: 2026-11-13. Recorded by `claude-opus-usb130-20261113` under decision 0019, decision 0044 and decision 0052. 0052 is the owner's standing
 permission of 2026-11-13 for prepared native USB experiments; consent is recorded there and not asked again. No PMIC/ACPM
 operation is used: the image keeps sc9's `e1spmic=0`. Nothing is written to any register by the probe.
 
