@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T17:28:53+00:00",
+  "updated_at": "2026-11-13T17:46:25+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -17487,6 +17487,63 @@
       "evidence": "docs/procedures/nat-132/evidence.json",
       "evidence_sha256": "b6ace4e9b2d332faa6784839cf0f417839cb56a4aca360cd6b864f25e6f62e1a",
       "finished_at": "2026-11-13T17:28:44+00:00"
+    },
+    {
+      "id": "NAT-133",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Android read-only SuperSpeed facts for the NAT-131 plan: U1 negotiated speed on both sides, U2 orientation sample (exynos_usbdrd_phy_port, both plug orientations if the owner flips), U3 USBDP PHY init dmesg (PMA/PCS/FW IDs), U6 USB rail states, U8 Download Mode bus/speed",
+      "scope": "android-readonly",
+      "evidence_kind": "android-userland",
+      "priority": 99,
+      "depends_on": [
+        "NAT-131"
+      ],
+      "paths": [
+        "docs/procedures/nat-133",
+        "artifacts/nat-133"
+      ],
+      "acceptance": [
+        "Each command and its exit code recorded; only reads (NAT-039 deny-list applied), no debugfs, no attribute writes",
+        "U1/U2/U3/U6 answered from captured values or recorded as not available with the reason",
+        "No device state changed; Android identity checked before and after"
+      ],
+      "started_at": "2026-11-13T17:32:04+00:00",
+      "last_heartbeat": "2026-11-13T17:32:04+00:00",
+      "updated_at": "2026-11-13T17:33:55+00:00",
+      "evidence": "docs/procedures/nat-133/evidence.json",
+      "evidence_sha256": "d0704d99f3a21d008d670cdfabf5edba381723cb07c4281e93ae1e8e0dff8827",
+      "finished_at": "2026-11-13T17:33:55+00:00"
+    },
+    {
+      "id": "NAT-134",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: read-only SuperSpeed prerequisite probe (NAT-131 section 5) as the engine's PEEK request over a fixed compiled-in table, host-ordered and gated on CMU gate values, run on the delivery connection before the first RX_BEGIN; image pk1 = us1 with only the engine changed; tests, build, package, single-run decision",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-131",
+        "NAT-132",
+        "NAT-133"
+      ],
+      "paths": [
+        "docs/procedures/nat-134",
+        "artifacts/nat-134"
+      ],
+      "acceptance": [
+        "PEEK reads only table entries (key, bound, wLength checked; no write form); NAT-076 and NAT-130 suites pass unchanged against the new engine except listed expected differences",
+        "Host probe order, gating, stop-on-first-failure and journal-before-next-request tested on the model, with seeded defects caught",
+        "pk1 built and packaged on the host from the pinned inputs; only the engine differs from us1 (build.json hashes)",
+        "Decision file for one native run with image, hashes, bounds, stop mechanism, restore and pre-registered interpretation"
+      ],
+      "started_at": "2026-11-13T17:43:20+00:00",
+      "last_heartbeat": "2026-11-13T17:43:20+00:00",
+      "updated_at": "2026-11-13T17:46:25+00:00",
+      "evidence": "docs/procedures/nat-134/evidence.json",
+      "evidence_sha256": "f0d8593ca7d0f42a48724ab8f4c22dda82a0bedeecb3f6c4f4ee2eac74960c29",
+      "finished_at": "2026-11-13T17:46:25+00:00"
     }
   ],
   "experiments": [
@@ -67578,6 +67635,88 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-13T17:31:54+00:00",
+      "action": "task.add:NAT-133",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-133",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T17:32:04+00:00",
+      "action": "task.claim:NAT-133",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-133",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T17:32:04+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T17:33:55+00:00",
+      "action": "task.done:NAT-133",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-133",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T17:32:04+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T17:43:10+00:00",
+      "action": "task.add:NAT-134",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-134",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T17:43:20+00:00",
+      "action": "task.claim:NAT-134",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-134",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T17:43:20+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T17:46:25+00:00",
+      "action": "task.done:NAT-134",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-134",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T17:43:20+00:00"
+        }
+      ]
     }
   ]
 }

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-13T17:30:25+00:00",
-  "ledger_updated_at": "2026-11-13T17:28:53+00:00",
-  "registry_sha256": "41134843adc1e6b1887300c81aba401e1d0131582c5dd9dbc6bf15ee121a9f5f",
+  "generated_at": "2026-11-13T17:46:42+00:00",
+  "ledger_updated_at": "2026-11-13T17:46:25+00:00",
+  "registry_sha256": "518935530374ddb1ad384f10c3d5fa8e98f8f4428255104cec41bc95b9be1619",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -205,6 +205,8 @@
       "NAT-126",
       "NAT-127",
       "NAT-128",
+      "NAT-133",
+      "NAT-134",
       "KRN-007",
       "KRN-011",
       "KRN-017",
@@ -5534,6 +5536,69 @@
       "reasons": [],
       "card_path": "planning/tasks/NAT-129.md",
       "report_health": "stale"
+    },
+    {
+      "id": "NAT-133",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Android read-only SuperSpeed facts for the NAT-131 plan: U1 negotiated speed on both sides, U2 orientation sample (exynos_usbdrd_phy_port, both plug orientations if the owner flips), U3 USBDP PHY init dmesg (PMA/PCS/FW IDs), U6 USB rail states, U8 Download Mode bus/speed",
+      "scope": "android-readonly",
+      "evidence_kind": "android-userland",
+      "priority": 99,
+      "depends_on": [
+        "NAT-131"
+      ],
+      "paths": [
+        "docs/procedures/nat-133",
+        "artifacts/nat-133"
+      ],
+      "acceptance": [
+        "Each command and its exit code recorded; only reads (NAT-039 deny-list applied), no debugfs, no attribute writes",
+        "U1/U2/U3/U6 answered from captured values or recorded as not available with the reason",
+        "No device state changed; Android identity checked before and after"
+      ],
+      "started_at": "2026-11-13T17:32:04+00:00",
+      "last_heartbeat": "2026-11-13T17:32:04+00:00",
+      "updated_at": "2026-11-13T17:33:55+00:00",
+      "evidence": "docs/procedures/nat-133/evidence.json",
+      "evidence_sha256": "d0704d99f3a21d008d670cdfabf5edba381723cb07c4281e93ae1e8e0dff8827",
+      "finished_at": "2026-11-13T17:33:55+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-133.md"
+    },
+    {
+      "id": "NAT-134",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: read-only SuperSpeed prerequisite probe (NAT-131 section 5) as the engine's PEEK request over a fixed compiled-in table, host-ordered and gated on CMU gate values, run on the delivery connection before the first RX_BEGIN; image pk1 = us1 with only the engine changed; tests, build, package, single-run decision",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-131",
+        "NAT-132",
+        "NAT-133"
+      ],
+      "paths": [
+        "docs/procedures/nat-134",
+        "artifacts/nat-134"
+      ],
+      "acceptance": [
+        "PEEK reads only table entries (key, bound, wLength checked; no write form); NAT-076 and NAT-130 suites pass unchanged against the new engine except listed expected differences",
+        "Host probe order, gating, stop-on-first-failure and journal-before-next-request tested on the model, with seeded defects caught",
+        "pk1 built and packaged on the host from the pinned inputs; only the engine differs from us1 (build.json hashes)",
+        "Decision file for one native run with image, hashes, bounds, stop mechanism, restore and pre-registered interpretation"
+      ],
+      "started_at": "2026-11-13T17:43:20+00:00",
+      "last_heartbeat": "2026-11-13T17:43:20+00:00",
+      "updated_at": "2026-11-13T17:46:25+00:00",
+      "evidence": "docs/procedures/nat-134/evidence.json",
+      "evidence_sha256": "f0d8593ca7d0f42a48724ab8f4c22dda82a0bedeecb3f6c4f4ee2eac74960c29",
+      "finished_at": "2026-11-13T17:46:25+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-134.md"
     },
     {
       "id": "KRN-007",
@@ -19075,93 +19140,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-13T16:09:59+00:00",
-      "action": "task.claim:NAT-128",
-      "owner": "claude-opus-nat116-20261113",
-      "tasks": [
-        {
-          "id": "NAT-128",
-          "status": "in_progress",
-          "owner": "claude-opus-nat116-20261113",
-          "priority": 99,
-          "last_heartbeat": "2026-11-13T16:09:59+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T16:12:30+00:00",
-      "action": "task.done:NAT-128",
-      "owner": "claude-opus-nat116-20261113",
-      "tasks": [
-        {
-          "id": "NAT-128",
-          "status": "done",
-          "owner": "claude-opus-nat116-20261113",
-          "priority": 99,
-          "last_heartbeat": "2026-11-13T16:09:59+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T16:15:28+00:00",
-      "action": "task.add:NAT-129",
-      "owner": "claude-opus-nat116-20261113",
-      "tasks": [
-        {
-          "id": "NAT-129",
-          "status": "pending",
-          "owner": null,
-          "priority": 99
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T16:15:37+00:00",
-      "action": "task.claim:NAT-129",
-      "owner": "claude-opus-nat116-20261113",
-      "tasks": [
-        {
-          "id": "NAT-129",
-          "status": "in_progress",
-          "owner": "claude-opus-nat116-20261113",
-          "priority": 99,
-          "last_heartbeat": "2026-11-13T16:15:37+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T16:44:03+00:00",
-      "action": "task.transfer:NAT-124",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-124",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 99,
-          "progress_note": "One run consumed decision 0050/0049. ACPM works and LDO18/LDO9 exact readbacks verified, but STM all-zero and no launchd lines/new iOS frame (0 recording frames): inconclusive, not done. Stock RECOVERY hash/Android/assess pass, permit closed. Owner did not observe screen.",
-          "next_step": "Host-only isolate step-3 IRQ scheduling and review Samsung SPI startup; no repeated sc8 or second PMIC run",
-          "last_heartbeat": "2026-11-13T16:44:03+00:00",
-          "handoff": "docs/procedures/nat-124/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T16:44:12+00:00",
-      "action": "task.transfer:NAT-129",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-129",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 99,
-          "last_heartbeat": "2026-11-13T16:44:12+00:00",
-          "handoff": "docs/procedures/nat-129/task.json"
-        }
-      ]
-    },
-    {
       "at": "2026-11-13T16:46:16+00:00",
       "action": "task.add:NAT-130",
       "owner": "claude-opus-usb130-20261113",
@@ -19345,11 +19323,93 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-13T17:31:54+00:00",
+      "action": "task.add:NAT-133",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-133",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T17:32:04+00:00",
+      "action": "task.claim:NAT-133",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-133",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T17:32:04+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T17:33:55+00:00",
+      "action": "task.done:NAT-133",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-133",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T17:32:04+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T17:43:10+00:00",
+      "action": "task.add:NAT-134",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-134",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T17:43:20+00:00",
+      "action": "task.claim:NAT-134",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-134",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T17:43:20+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T17:46:25+00:00",
+      "action": "task.done:NAT-134",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-134",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T17:43:20+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "ca67624d272476b16f941670b2aa97511373752a3df330b1e1c6d12187789644",
-    "BOARD.md": "3da981454eeb1ed5579849a2f655b6c91695b0494e3afa1680273877fed68287",
+    "STATUS.md": "4dc7a8b9635dc4670bf21383df87fae27bbb02d76481a7601873e927cec51e56",
+    "BOARD.md": "e661a6320ae1b06319219ef2f3b72d80cf4d5af47429cadb6c2bfd3983723c16",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -19470,6 +19530,8 @@
     "planning/tasks/NAT-127.md": "6e3fd563441efdf452e2e140bea8e4da1003f9c19b336ec4ca067f9687c3c780",
     "planning/tasks/NAT-128.md": "4b3c9d8d4702463fac1a9cc9f9efb0b7fac499b517035ce70a35900068847c20",
     "planning/tasks/NAT-129.md": "85f73f5d34d9f942aada92ba1dfe08594b45ecbc9ff54a5615d22d46e1ea9920",
+    "planning/tasks/NAT-133.md": "a526c5df5f5359e7bb52d606487e73ef8a2a8729b1f407fdc95e12d76c5c0553",
+    "planning/tasks/NAT-134.md": "fca181012c5401c602cbdb04cf59604c09cf076ec64bfa3ed7c31db8576c9d8e",
     "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-011.md": "9b8014abd8d019af80fad695e0d0df9de9523d36a222553327384f7f00e8a901",
     "planning/tasks/KRN-017.md": "86a29485c4c3ed3a62f7ecf64f5e2bb303bb0bd7ac5fd661482bf024004f407d",

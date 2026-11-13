@@ -1,0 +1,95 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-13T17:46:18.107269+00:00",
+  "task": "NAT-134",
+  "summary": "Engine PEEK over a fixed 64-entry read-only table (NAT-131 section 5) + host probe ordered/gated/journalled before delivery; NAT-076+NAT-130 suites 261 run, only the 8 listed expected diffs; 21+4+8 new/port tests OK; pk1 built and packaged (only engine differs from us1); session_nat135 derived; decision 0054 written",
+  "commit": "1bd5b1e89e447778fa21e31f0004039d6143baf2",
+  "checks": [
+    {
+      "cmd": "python3 -B docs/procedures/nat-134/regress134.py",
+      "exit_code": 0,
+      "result": "ran 261, failed 8, unexpected 0"
+    },
+    {
+      "cmd": "python3 -B docs/procedures/nat-134/test_nat134.py",
+      "exit_code": 0,
+      "result": "21 OK"
+    },
+    {
+      "cmd": "python3 -B docs/procedures/nat-134/test_deliver134.py",
+      "exit_code": 0,
+      "result": "4 OK"
+    },
+    {
+      "cmd": "TMPDIR=/home/egor/.cache/nat134-tmp artifacts/nat-065/venv/bin/python -B -W ignore -I docs/procedures/nat-134/port134.py",
+      "exit_code": 0,
+      "result": "8 OK"
+    },
+    {
+      "cmd": "python3 -B -I docs/procedures/nat-134/build.py --out artifacts/nat-134/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+      "exit_code": 0
+    },
+    {
+      "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-134/build-001 --out artifacts/nat-134/package-001",
+      "exit_code": 0,
+      "result": "RECOVERY 98f389890188685aca4913503be8e6e4125313016ea56ad81715d765579e8f69"
+    },
+    {
+      "cmd": "python3 -B docs/procedures/nat-134/derive135.py --check",
+      "exit_code": 0
+    },
+    {
+      "cmd": "make check",
+      "exit_code": 0,
+      "result": "448 tests OK"
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/nat-134/README.md",
+    "docs/procedures/nat-134/engine/usbmon.c",
+    "docs/procedures/nat-134/engine/usbmon.h",
+    "docs/procedures/nat-134/engine/port_aarch64.h",
+    "docs/procedures/nat-134/engine/usbmon_port.h",
+    "docs/procedures/nat-134/model/model.c",
+    "docs/procedures/nat-134/model/host_port.h",
+    "docs/procedures/nat-134/peek134.py",
+    "docs/procedures/nat-134/deliver134.py",
+    "docs/procedures/nat-134/build.py",
+    "docs/procedures/nat-134/derive135.py",
+    "docs/procedures/nat-134/session_nat135.py",
+    "docs/procedures/nat-134/regress134.py",
+    "docs/procedures/nat-134/test_nat134.py",
+    "docs/procedures/nat-134/test_deliver134.py",
+    "docs/procedures/nat-134/port134.py",
+    "artifacts/nat-134/build-001/build.json",
+    "artifacts/nat-134/package-001/package.json",
+    "artifacts/nat-134/package-001/loader-diag-xnu-pk1-md1/recovery.img",
+    "artifacts/nat-134/make-check.log",
+    "docs/decisions/0054-nat135-loader-diag-xnu-pk1-md1-single-run-2026-11-13.md"
+  ],
+  "artifact_hashes": {
+    "docs/procedures/nat-134/README.md": "3b447c6078257356203e5f82893e21725a00f30a2aa6409b63bbeb48813ac640",
+    "docs/procedures/nat-134/engine/usbmon.c": "5869fea78cbe5fd9e35d1b336d3d19fc621a780c1d88900a9226d259141b2c5b",
+    "docs/procedures/nat-134/engine/usbmon.h": "6a4246db8009bbda4893fed56f59aa15745a3ea2d5503814ceb2225fb2236570",
+    "docs/procedures/nat-134/engine/port_aarch64.h": "3a288be37935b946efb47dfe6470a8005762fe9f1b1cbbc8f16a1bef33755377",
+    "docs/procedures/nat-134/engine/usbmon_port.h": "2f51931150a9709b15cc7ad6ea66a9cc7f2bd9e78c6ff8036c9c70d9f6ea9a49",
+    "docs/procedures/nat-134/model/model.c": "be4bc1e9324ee13dd9d7eb3dc3a3055c3d58620f8d390336d601a1aa7a090c3a",
+    "docs/procedures/nat-134/model/host_port.h": "62acc34b00bd58938988bc809570103444dd18f687c3dc8c4d5ede9ea7b8e5b9",
+    "docs/procedures/nat-134/peek134.py": "61befcc0b02dd5e8f0c611222f3f7e1329d28961b2ba7a548da00449b95a6c81",
+    "docs/procedures/nat-134/deliver134.py": "212b3135d7db1ed70955375e64d78f4f188a2efa48b6501865eb68e875bc95d0",
+    "docs/procedures/nat-134/build.py": "a845eb7b949bfd68389bdbb8d4c54c16b494015dd6c68838bea3b333dd5b8112",
+    "docs/procedures/nat-134/derive135.py": "8283ac22a800dc4eec9174161133bce9291f920b429ec7b0d1ef050d2cfa3b18",
+    "docs/procedures/nat-134/session_nat135.py": "a7ed438329a23be1ae12b3ff64e7d35dc9d3167b830642d2d22060682802500a",
+    "docs/procedures/nat-134/regress134.py": "fa81f6749aa725465db3b50d66c02c5262aabbf1fae92db67d877ecad307d7a7",
+    "docs/procedures/nat-134/test_nat134.py": "c46cb60b530d4ba776380dbf2658f3b7543a42c7a48453b83946eb7016fb2946",
+    "docs/procedures/nat-134/test_deliver134.py": "ae1b86207babe49fae8a5cc415768f21cc3340e231af128314ad92faa61a7cdf",
+    "docs/procedures/nat-134/port134.py": "504f3e83ca1732eb594e2a0575ad949e4f8f7da4f84a09af56d803e9537d78de",
+    "artifacts/nat-134/build-001/build.json": "1b8d0727e3bcd7b06b7edc03494ee468b9620e05c8cb34f070963def1a746c54",
+    "artifacts/nat-134/package-001/package.json": "79141d1cb2057c8d31e3dd6b008c6ab3dd9a8aafded2596d9ecc2fc22911677e",
+    "artifacts/nat-134/package-001/loader-diag-xnu-pk1-md1/recovery.img": "98f389890188685aca4913503be8e6e4125313016ea56ad81715d765579e8f69",
+    "artifacts/nat-134/make-check.log": "ef9480e77d4ed44515cc79f2e25e3251533726297414502f9a09b1bbe6aab514",
+    "docs/decisions/0054-nat135-loader-diag-xnu-pk1-md1-single-run-2026-11-13.md": "ef87ee987f393095e5e205c5681f90c48f58ff4c76f1761812d2cde171e7eccb"
+  }
+}
