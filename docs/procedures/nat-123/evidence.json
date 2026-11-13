@@ -1,0 +1,69 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "summary": "Host-qualified sc8 diagnostic: ACPM offset and PM1 fixes, only two allowed rail values, fail-closed readback; 12 focused tests, 7 killed mutants, ARM64 audit and 448 project tests; no native run claimed.",
+  "recorded_at": "2026-11-13T15:21:03.132602+00:00",
+  "task": "NAT-123",
+  "owner": "claude-opus-nat116-20261113",
+  "commit": "8f14cc273be1b0440d54bd0636df27f5821981ff",
+  "artifacts": [
+    "docs/procedures/nat-123/README.md",
+    "docs/procedures/nat-123/build.py",
+    "docs/procedures/nat-123/e1s_acpm.patch",
+    "docs/procedures/nat-123/e1s_pmic.patch",
+    "artifacts/nat-123/kernel-003/rebuild.json",
+    "artifacts/nat-123/build-002/build.json",
+    "artifacts/nat-123/package-002/package.json",
+    "artifacts/nat-123/host-tests.log",
+    "artifacts/nat-123/mutations.json",
+    "artifacts/nat-123/binary-audit.json",
+    "artifacts/nat-123/make-check.log",
+    "artifacts/nat-123/gate-no-decision-001/report.json"
+  ],
+  "artifact_hashes": {
+    "docs/procedures/nat-123/README.md": "32142dd1974182b78fb1e77c049bfe8b1a2935cc39e1c83e32b883c475676c9a",
+    "docs/procedures/nat-123/build.py": "cafb376861c24d6f0d54de413c9a8fa423caf829272cd89b149643894e75eed0",
+    "docs/procedures/nat-123/e1s_acpm.patch": "e907c397896819033a11a9d846068ec53dfc531060552e763ef422b9b36c7cc7",
+    "docs/procedures/nat-123/e1s_pmic.patch": "52ba8db94deda259d5f387e2c634caf9eb4dcc8c919395bc69cb3d266b3bfa89",
+    "artifacts/nat-123/kernel-003/rebuild.json": "dbfa78ca09f46cdd02c412a6543bfb80f6920784506e0b2ff4b4c3d3baafe646",
+    "artifacts/nat-123/build-002/build.json": "6152f068c993e1c4afff8f5e51669f1f8b8739deff6f2fb2ca7710ab0f5c32d9",
+    "artifacts/nat-123/package-002/package.json": "6c1bfcdba56c60453843165a98d7e15da6ba7b4bdd3c411addad2c1fc32b2879",
+    "artifacts/nat-123/host-tests.log": "5628984722c95699d4d17b9de47c6e0fb66e89126a3bb8c8d5ec32c2f254a090",
+    "artifacts/nat-123/mutations.json": "60da51da15dba158813c8f860ab5f8cdb7ac8899232e247b8d3d8b7b9631225d",
+    "artifacts/nat-123/binary-audit.json": "f44644d27c001a2d0649713ac659206de3c583b1c70d76809f759afc05af498d",
+    "artifacts/nat-123/make-check.log": "f5bcd51a0200e42402580e322fbb382a5d3ba55f9e921a9a1ca5f832c248e797",
+    "artifacts/nat-123/gate-no-decision-001/report.json": "1448081094a6fa1fd8553b1208791dadd68c3496f84dfec6cf58a835fb1a4882"
+  },
+  "checks": [
+    {
+      "cmd": "python3 -B -I docs/procedures/nat-123/test_nat123.py",
+      "exit_code": 0,
+      "result": "12 tests pass"
+    },
+    {
+      "cmd": "python3 -B -I docs/procedures/nat-123/mutate_nat123.py",
+      "exit_code": 0,
+      "result": "7/7 killed"
+    },
+    {
+      "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-123/audit_binary.py",
+      "exit_code": 0
+    },
+    {
+      "cmd": "make check",
+      "exit_code": 0,
+      "result": "448 tests pass"
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-123/derive123.py --check",
+      "exit_code": 0
+    }
+  ],
+  "limitations": [
+    "Synthetic APM is not hardware evidence",
+    "No native PMIC, physical touch, acceleration or 60 FPS claim",
+    "Touch step 3 is compiled default, omitted token to fit cmdline",
+    "Native run is separate NAT-124; this host task does not consume device run authorization"
+  ]
+}

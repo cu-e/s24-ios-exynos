@@ -1,0 +1,17 @@
+{
+  "id": "NAT-123",
+  "title": "Host: touch rails image loader-diag-xnu-sc8-md1: fix the ACPM channel table decode (S5E9945 framework.h layout) and the S2MPS27 PM1 block address (0x05, Samsung s2mps27_core), enable only LDO9/LDO18 (decision 0049) with read-back, then the touch driver at step 3 (IRQ + event thread) feeding /dev/hakios-touch; host tests; decision; no phone action",
+  "status": "pending",
+  "owner": null,
+  "priority": 99,
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "depends_on": ["NAT-122"],
+  "paths": ["docs/procedures/nat-123", "artifacts/nat-123"],
+  "acceptance": [
+    "ACPM IPC decode and command format checked against Samsung acpm_ipc.c / acpm_mfd_spmi.c / framework.h (S5E9945 branch); host test with a fake SRAM laid out by the C struct",
+    "the only PMIC writes possible in the image are LDO9_CTRL (0x34) and LDO18_CTRL (0x3D) of SID 0x0D block 0x05 with value enable|DT voltage; panel rails path disabled; checked in the compiled object",
+    "image built on NAT-121's with e1spmic=2 e1stouch_steps=3; analyser and decision written"
+  ],
+  "notes": "NAT-122: STM no response; S-Boot leaves the touch rails' state unknown; ACPM probe decoded len=0 elem=0 (double base offset)."
+}

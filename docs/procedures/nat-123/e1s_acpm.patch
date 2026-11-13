@@ -1,0 +1,86 @@
+--- a/e1s_acpm.c
++++ b/e1s_acpm.c
+@@ -322,9 +322,14 @@
+ 		id = slot[0];
+ 		type = slot[9];
+ 		ch = base + 12;
+-		q_len = slot[ch + 28];
+-		elem = slot[ch + 29];
+-		ap_poll = slot[base + 44];
++		/*
++		 * NAT-123: struct ipc_channel / channel_info for S5E9945 (fw_header/framework.h, CONFIG_SOC_S5E9945 branch:
++		 * ch at +12, q_len at ch+28, q_elem_size at ch+29, ap_poll at +44) -- relative to the slot, not to SRAM (the old code
++		 * added `base` twice and read len=0 elem=0).
++		 */
++		q_len = slot[12 + 28];
++		elem = slot[12 + 29];
++		ap_poll = slot[44];
+ 		found++;
+ 
+ 		printf("e1s-acpm: ch%u id=%u type=%u len=%u elem=%u poll=%u "
+@@ -338,10 +343,24 @@
+ 		if (id != E1S_ACPM_CHANNEL_PMIC) {
+ 			continue;
+ 		}
+-		if (!e1s_acpm_range_ok(e1s_acpm_read32(ch + 24), q_len, elem) ||
++		/* Validate every pointer before any queue read or firmware command. */
++		if (type != 1 || elem != 16 || q_len < 2 ||
++		    !e1s_acpm_range_ok(e1s_acpm_read32(ch + 24), q_len, elem) ||
+ 		    !e1s_acpm_range_ok(e1s_acpm_read32(ch + 12), q_len, elem)) {
+ 			printf("e1s-acpm: channel 2 queues are outside SRAM\n");
+ 			return;
++		}
++
++		for (unsigned off = 4; off <= 20; off += 4) {
++			uint32_t ptr;
++			if (off == 12) {
++				continue;
++			}
++			ptr = e1s_acpm_read32(ch + off);
++			if ((ptr & 3) != 0 || ptr > E1S_ACPM_SRAM_SIZE - 4) {
++				printf("e1s-acpm: invalid queue pointer; no commands\n");
++				return;
++			}
+ 		}
+ 
+ 		e1s_acpm_pmic.valid = true;
+@@ -401,6 +420,13 @@
+ 	uint32_t cmd[E1S_ACPM_CMD_WORDS] = { 0, 0, 0, 0 };
+ 	int error;
+ 
++	/* Decision 0049: the transport itself rejects every other write. */
++	if (sid != 0x0d || type != 0x05 ||
++	    !((reg == 0x34 && value == 0xf0) ||
++	    (reg == 0x3d && value == 0xd8))) {
++		return EINVAL;
++	}
++
+ 	cmd[0] = ((uint32_t)type << 8) | reg;
+ 	cmd[1] = E1S_ACPM_MFD_FUNC_WRITE | ((uint32_t)value << 8) |
+ 	    ((uint32_t)sid << 24);
+@@ -421,21 +447,7 @@
+ e1s_acpm_mfd_update(uint8_t sid, uint8_t type, uint8_t reg, uint8_t value,
+     uint8_t mask)
+ {
+-	uint32_t cmd[E1S_ACPM_CMD_WORDS] = { 0, 0, 0, 0 };
+-	int error;
+-
+-	cmd[0] = ((uint32_t)type << 8) | reg;
+-	cmd[1] = E1S_ACPM_MFD_FUNC_UPDATE | ((uint32_t)value << 8) |
+-	    ((uint32_t)mask << 16) | ((uint32_t)sid << 24);
+-
+-	error = e1s_acpm_send(cmd);
+-	if (error != 0) {
+-		return error;
+-	}
+-	if (((cmd[1] >> 24) & 0xffU) != 0) {
+-		printf("e1s-acpm: update sid=%u type=0x%02x reg=0x%02x failed (%u)\n",
+-		    sid, type, reg, (cmd[1] >> 24) & 0xffU);
+-		return EIO;
+-	}
+-	return 0;
+-}
++	/* No masked updates are authorized in this experiment. */
++	(void)sid; (void)type; (void)reg; (void)value; (void)mask;
++	return EINVAL;
++}

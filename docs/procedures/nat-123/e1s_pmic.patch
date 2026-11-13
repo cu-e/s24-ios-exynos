@@ -1,0 +1,106 @@
+--- a/e1s_pmic.c
++++ b/e1s_pmic.c
+@@ -6,6 +6,11 @@
+ #include <sys/types.h>
+ #include <sys/e1s_pmic.h>
+ 
++/* NAT-123: Samsung s2mps27_core.c talks to the regulators through iodev->pm1 = PM1_ADDR 0x05 with sid MAIN_ID 0x0D
++ * (exynos_acpm_*_reg(node, MAIN_ID, i2c->addr, ...)); 0x1D is the bus node address, not a register block. */
++#undef E1S_PMIC_S2MPS27_TYPE
++#define E1S_PMIC_S2MPS27_TYPE       E1S_PMIC_S2MPS27_PM1
++
+ #define E1S_PMIC_ENABLE_DELAY_US    2000U
+ 
+ static bool e1s_pmic_up;
+@@ -55,12 +60,21 @@
+ 	if (error != 0) {
+ 		printf("e1s-pmic: %s: cannot read 0x%02x (%d)\n", name, ctrl, error);
+ 		return error;
++	}
++	if ((old & E1S_PMIC_LDO_ENABLE_MASK) == E1S_PMIC_LDO_ENABLE &&
++	    (old & E1S_PMIC_LDO_VSEL_MASK) != (sel & E1S_PMIC_LDO_VSEL_MASK)) {
++		printf("e1s-pmic: %s: already enabled at unexpected voltage; no write\n", name);
++		return EIO;
+ 	}
+ 	if ((old & E1S_PMIC_LDO_ENABLE_MASK) == E1S_PMIC_LDO_ENABLE) {
+ 		printf("e1s-pmic: %s already on (0x%02x=0x%02x)\n", name, ctrl, old);
+ 		return 0;
+ 	}
+ 
++	if ((old & E1S_PMIC_LDO_VSEL_MASK) != (sel & E1S_PMIC_LDO_VSEL_MASK)) {
++		printf("e1s-pmic: %s: voltage select 0x%02x differs from the device tree's 0x%02x; set to the device tree's\n",
++		    name, old & E1S_PMIC_LDO_VSEL_MASK, sel & E1S_PMIC_LDO_VSEL_MASK);
++	}
+ 	value = (sel & E1S_PMIC_LDO_VSEL_MASK) | E1S_PMIC_LDO_ENABLE;
+ 
+ 	error = e1s_pmic_write(sid, type, ctrl, value);
+@@ -73,7 +87,11 @@
+ 	error = e1s_pmic_read(sid, type, ctrl, &now);
+ 	if (error != 0) {
+ 		printf("e1s-pmic: %s: enabled, read-back failed (%d)\n", name, error);
+-		return 0;
++		return error;
++	}
++	if (now != value) {
++		printf("e1s-pmic: %s: read-back mismatch expected=0x%02x actual=0x%02x\n", name, value, now);
++		return EIO;
+ 	}
+ 	printf("e1s-pmic: %s enabled (0x%02x 0x%02x -> 0x%02x -> 0x%02x)\n",
+ 	    name, ctrl, old, value, now);
+@@ -311,6 +329,11 @@
+ 		e1s_pmic_up = false;
+ 		return;
+ 	}
++	if (chip27 != 0x01) {
++		printf("e1s-pmic: invalid chip ID; no writes\n");
++		e1s_pmic_up = false;
++		return;
++	}
+ 	printf("e1s-pmic: S2MPS27 chip ID 0x%02x\n", chip27);
+ 
+ 	error = e1s_pmic_read(E1S_PMIC_S2MPS28_4_SID, E1S_PMIC_S2MPS28_4_COM,
+@@ -330,15 +353,31 @@
+ 		    (status1 & E1S_PMIC_S2MPS27_STATUS1_PWRON) != 0);
+ 	}
+ 
+-	if (mode == 2 || mode == 3) {
++	{
++		uint8_t l9 = 0, l18 = 0;
++		int e9 = e1s_pmic_read(E1S_PMIC_S2MPS27_SID, E1S_PMIC_S2MPS27_TYPE, E1S_PMIC_S2MPS27_LDO9_CTRL, &l9);
++		int e18 = e1s_pmic_read(E1S_PMIC_S2MPS27_SID, E1S_PMIC_S2MPS27_TYPE, E1S_PMIC_S2MPS27_LDO18_CTRL, &l18);
++
++		printf("e1s-pmic: touch rails before: LDO9 0x34=0x%02x (%d) LDO18 0x3d=0x%02x (%d)\n", l9, e9, l18, e18);
++		if ((mode == 2) && (e9 != 0 || e18 != 0)) {
++			printf("e1s-pmic: touch rails not read; no write\n");
++			mode = 1;
++		}
++	}
++	if (mode == 2) {
++		uint32_t settle_ms = 100;
++
+ 		if (e1s_pmic_enable_touch_rails() == 0) {
+-			printf("e1s-pmic: touch rails are on\n");
++			PE_parse_boot_argn("e1spmic_settle_ms", &settle_ms, sizeof(settle_ms));
++			if (settle_ms > 1000) {
++				settle_ms = 1000;
++			}
++			delay_for_interval(settle_ms, NSEC_PER_MSEC);
++			printf("e1s-pmic: touch rails are on (settled %u ms)\n", settle_ms);
+ 		}
+ 	}
+ 	if (mode == 3) {
+-		if (e1s_pmic_enable_panel_rails() == 0) {
+-			printf("e1s-pmic: panel rails are on\n");
+-		}
++		printf("e1s-pmic: panel rails are not authorized (decision 0049); not touched\n");
+ 	}
+ 	if (mode == 4) {
+ 		(void)e1s_pmic_report_ufs_rails();
+@@ -346,5 +385,5 @@
+ 
+ 	e1s_pmic_rtc_init();
+ 	printf("e1s-pmic: ready (mode %u; writes %s)\n", mode,
+-	    (mode == 2 || mode == 3) ? "enabled" : "disabled");
+-}
++	    (mode == 2) ? "enabled" : "disabled");
++}

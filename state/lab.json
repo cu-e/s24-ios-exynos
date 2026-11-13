@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T14:37:30+00:00",
+  "updated_at": "2026-11-13T15:23:07+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -8,7 +8,7 @@
       "host": true,
       "android-readonly": true,
       "android-app": true,
-      "native": false
+      "native": true
     },
     "facts": [
       {
@@ -636,6 +636,13 @@
         "decision": "docs/decisions/0048-nat122-loader-diag-xnu-sc7-md1-single-run-2026-11-13.md",
         "owner": "claude-opus-nat116-20261113",
         "at": "2026-11-13T14:37:30+00:00"
+      },
+      {
+        "scope": "native",
+        "value": true,
+        "decision": "docs/decisions/0050-nat124-loader-diag-xnu-sc8-md1-single-run-2026-11-13.md",
+        "owner": "claude-opus-nat116-20261113",
+        "at": "2026-11-13T15:22:58+00:00"
       }
     ]
   },
@@ -17114,6 +17121,62 @@
       "evidence": "docs/procedures/nat-122/evidence.json",
       "evidence_sha256": "713240a7585c313438a60620c92335e47078cf2916a25753067d24e3deea10de",
       "finished_at": "2026-11-13T14:37:20+00:00"
+    },
+    {
+      "id": "NAT-123",
+      "title": "Host: touch rails image loader-diag-xnu-sc8-md1: fix the ACPM channel table decode (S5E9945 framework.h layout) and the S2MPS27 PM1 block address (0x05, Samsung s2mps27_core), enable only LDO9/LDO18 (decision 0049) with read-back, then the touch driver at step 3 (IRQ + event thread) feeding /dev/hakios-touch; host tests; decision; no phone action",
+      "status": "done",
+      "owner": "claude-opus-nat116-20261113",
+      "priority": 99,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-122"
+      ],
+      "paths": [
+        "docs/procedures/nat-123",
+        "artifacts/nat-123"
+      ],
+      "acceptance": [
+        "ACPM IPC decode and command format checked against Samsung acpm_ipc.c / acpm_mfd_spmi.c / framework.h (S5E9945 branch); host test with a fake SRAM laid out by the C struct",
+        "the only PMIC writes possible in the image are LDO9_CTRL (0x34) and LDO18_CTRL (0x3D) of SID 0x0D block 0x05 with value enable|DT voltage; panel rails path disabled; checked in the compiled object",
+        "image built on NAT-121's with e1spmic=2 e1stouch_steps=3; analyser and decision written"
+      ],
+      "notes": "NAT-122: STM no response; S-Boot leaves the touch rails' state unknown; ACPM probe decoded len=0 elem=0 (double base offset).",
+      "started_at": "2026-11-13T14:46:50+00:00",
+      "last_heartbeat": "2026-11-13T15:21:13+00:00",
+      "updated_at": "2026-11-13T15:21:48+00:00",
+      "progress_note": "Final kernel-003/build-002/package-002 built; PMIC 0x01 revision measured read-only in Android; fail-closed readback and transport allowlist verified by 12 host tests, 7 killed mutants and ARM64 object audit; make check 448 pass",
+      "next_step": "Complete host task; NAT-124 one run under decision 0050, restore and analyze separately",
+      "handoff": "docs/procedures/nat-123/README.md",
+      "evidence": "docs/procedures/nat-123/evidence.json",
+      "evidence_sha256": "7e690e47295bacf995700597dc11db1e053bcf008c7f191f8d1afb5ce69aa5d0",
+      "finished_at": "2026-11-13T15:21:48+00:00"
+    },
+    {
+      "id": "NAT-124",
+      "status": "in_progress",
+      "owner": "claude-opus-nat116-20261113",
+      "title": "Single native sc8 touch-rail diagnostic under decision 0050; verify LDO9/LDO18 readbacks and touch response, restore stock RECOVERY and check Android",
+      "priority": 99,
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "depends_on": [
+        "NAT-123"
+      ],
+      "paths": [
+        "docs/procedures/nat-124",
+        "artifacts/nat-124"
+      ],
+      "acceptance": [
+        "Exactly one bounded run of the pinned package-002 image, with recovery write/readback and collected archive",
+        "Pre-registered power/touch/window/display verdicts assessed without inferring physical input from a reader open",
+        "Stock RECOVERY restored and full hash matches; Android boot completed and user-data directories retained",
+        "Dated native evidence records outcome and limits; no working input, acceleration or FPS claim without measurements"
+      ],
+      "started_at": "2026-11-13T15:23:07+00:00",
+      "last_heartbeat": "2026-11-13T15:23:07+00:00",
+      "updated_at": "2026-11-13T15:23:07+00:00"
     }
   ],
   "experiments": [
@@ -66590,6 +66653,121 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-13T14:46:40+00:00",
+      "action": "task.add:NAT-123",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-123",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T14:46:50+00:00",
+      "action": "task.claim:NAT-123",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-123",
+          "status": "in_progress",
+          "owner": "claude-opus-nat116-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T14:46:50+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T15:00:23+00:00",
+      "action": "task.update:NAT-123",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-123",
+          "status": "in_progress",
+          "owner": "claude-opus-nat116-20261113",
+          "priority": 99,
+          "progress_note": "Same Hermes session resumed after model switch; retaining stable session owner. Reviewing existing uncommitted NAT-123 host work. Found readback errors incorrectly return success and no readback equality check; no new device action.",
+          "next_step": "Add adversarial PMIC transport tests, enforce fail-closed write boundary, then rebuild and qualify image",
+          "last_heartbeat": "2026-11-13T15:00:23+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T15:21:13+00:00",
+      "action": "task.update:NAT-123",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-123",
+          "status": "in_progress",
+          "owner": "claude-opus-nat116-20261113",
+          "priority": 99,
+          "progress_note": "Final kernel-003/build-002/package-002 built; PMIC 0x01 revision measured read-only in Android; fail-closed readback and transport allowlist verified by 12 host tests, 7 killed mutants and ARM64 object audit; make check 448 pass",
+          "next_step": "Complete host task; NAT-124 one run under decision 0050, restore and analyze separately",
+          "last_heartbeat": "2026-11-13T15:21:13+00:00",
+          "handoff": "docs/procedures/nat-123/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T15:21:48+00:00",
+      "action": "task.done:NAT-123",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-123",
+          "status": "done",
+          "owner": "claude-opus-nat116-20261113",
+          "priority": 99,
+          "progress_note": "Final kernel-003/build-002/package-002 built; PMIC 0x01 revision measured read-only in Android; fail-closed readback and transport allowlist verified by 12 host tests, 7 killed mutants and ARM64 object audit; make check 448 pass",
+          "next_step": "Complete host task; NAT-124 one run under decision 0050, restore and analyze separately",
+          "last_heartbeat": "2026-11-13T15:21:13+00:00",
+          "handoff": "docs/procedures/nat-123/README.md"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T15:22:49+00:00",
+      "action": "task.add:NAT-124",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-124",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T15:22:58+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-nat116-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-13T15:23:07+00:00",
+      "action": "task.claim:NAT-124",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-124",
+          "status": "in_progress",
+          "owner": "claude-opus-nat116-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T15:23:07+00:00"
+        }
+      ]
     }
   ]
 }
