@@ -1,0 +1,90 @@
+{
+  "kind": "native-device",
+  "origin": "local-device",
+  "outcome": "pass",
+  "recorded_at": "2026-11-13T17:28:07.357606+00:00",
+  "task": "NAT-132",
+  "summary": "USB 2.0 root delivery 2475720704 B in 66.578 s = 37.185 MB/s (NAT-127 16.146), every chunk verified, CACHED device sum 11.5 ms/8 MiB vs PLAIN 184.7 ms, wire 40.5 MB/s now 92% of time; userland verdict as NAT-127; stock RECOVERY and Android checks passed; permit closed. No physical-display, input, acceleration or FPS claim.",
+  "commit": "67e8f4416fdc3a463510086ff2b9183803efe535",
+  "device_inventory": "devices/local-2026-11-13-nat132.json",
+  "decision": "docs/decisions/0053-nat132-loader-diag-xnu-us1-md1-single-run-2026-11-13.md",
+  "image": {
+    "recovery_sha256": "364f26f8413cb8801f71e29d883554a021bc577df435d48e079a2865664a9cb2",
+    "root_sha256": "4377e98854753f648afde01d884bde352f316acad172eb5e46d44717954262f6"
+  },
+  "measurements": {
+    "bytes": 2475720704,
+    "seconds": 66.578,
+    "mb_per_s": 37.185,
+    "baseline_nat127_mb_per_s": 16.146,
+    "calib_ticks": {
+      "plain": 4729043,
+      "fast": 2344139,
+      "cached": 293598
+    },
+    "freq_hz": 25600000,
+    "tot_wire_s": 61.341,
+    "tot_sum_s": 3.533,
+    "tot_gap_s": 1.249,
+    "tot_arm_s": 0.405,
+    "wire_mb_s": 40.5,
+    "sum_fallbacks": 0,
+    "post_verify_ok": 4,
+    "retries": 0,
+    "loader_bus": "7 (high-speed)",
+    "delivery_end_after_reboot_s": 63.0,
+    "baseline_nat127_delivery_end_s": 149.5
+  },
+  "checks": [
+    {
+      "cmd": "python3 -I docs/procedures/nat-132/session_nat132.py --out artifacts/nat-132/run-001 --image loader-diag-xnu-us1-md1 --execute",
+      "exit_code": 0
+    },
+    {
+      "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 3 --out artifacts/nat-132/restore-001/restore-trace",
+      "exit_code": 0
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-132/restore-001/android-check.json",
+      "exit_code": 0
+    },
+    {
+      "cmd": "nat-013/restore_stock.py assess --report restore-001/report.json --readback restore-001/android-check.json",
+      "exit_code": 0,
+      "result": "pass"
+    },
+    {
+      "cmd": "nat-097/kl_reader2.py why=2 dump -> analysis/kernel-text.txt; nat-113/decode113.py archive --json analysis/pixels.json",
+      "exit_code": 0
+    },
+    {
+      "cmd": "nat-123/analyze124.py",
+      "exit_code": 0,
+      "result": "W-ok D2-refreshing F1-new-frame T1-no-response P0-no-verified-rails"
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/nat-132/README.md",
+    "artifacts/nat-132/run-001/report.json",
+    "artifacts/nat-132/run-001/delivery/delivery.json",
+    "artifacts/nat-132/run-001/usb-events.jsonl",
+    "artifacts/nat-132/analysis/kernel-text.txt",
+    "artifacts/nat-132/analysis/pixels.json",
+    "artifacts/nat-132/analysis/verdict.json",
+    "artifacts/nat-132/restore-001/report.json",
+    "artifacts/nat-132/restore-001/android-check.json",
+    "artifacts/nat-132/restore-001/assess.json"
+  ],
+  "artifact_hashes": {
+    "docs/procedures/nat-132/README.md": "dbd7618fa70c9f65fa38f2613d6e3379901a3d04186187c787230cf5b0066466",
+    "artifacts/nat-132/run-001/report.json": "d5a42725d666ac522d827ce24f990924034277a35bdc1b63b485ba1afba6632b",
+    "artifacts/nat-132/run-001/delivery/delivery.json": "851b62d1ea478e33876f988a98e3fd8a4712bdce039b29b3dca42d66d769533d",
+    "artifacts/nat-132/run-001/usb-events.jsonl": "9ff6159a88a380c5079347472e81da5fb1dc3d269a322aed42b4d1e5a4fb4f5d",
+    "artifacts/nat-132/analysis/kernel-text.txt": "04c4c29fef1e44e7e285af0064844368863da4e0dff09f7fd7627e0929c0dde4",
+    "artifacts/nat-132/analysis/pixels.json": "b26a3c36b7d44911cf0d010cb0696c279d75557667b40f1e117a550566460236",
+    "artifacts/nat-132/analysis/verdict.json": "011b8310aef084cf0690e48a24968189b1131f3298d29252478f10b9af383ff3",
+    "artifacts/nat-132/restore-001/report.json": "69e321541e3886308d7d5011f86c886f026560ed079da6a43f7801e318bbe2a5",
+    "artifacts/nat-132/restore-001/android-check.json": "9451bfa6821328e300c2d2f01138fb3cf4da0b58e64bc65f453ab862eb19c208",
+    "artifacts/nat-132/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a"
+  }
+}
