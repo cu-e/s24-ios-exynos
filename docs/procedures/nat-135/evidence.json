@@ -1,0 +1,72 @@
+{
+  "kind": "native-device",
+  "origin": "local-device",
+  "outcome": "inconclusive",
+  "recorded_at": "2026-11-13T17:59:44.818870+00:00",
+  "task": "NAT-135",
+  "summary": "pk1 probe: entries 0-34 read (DWC_usb31 1.90a; PMU +0x620=0 USBDP isolation set; CMU HSI0 gates on; NOEXTRDL 0); entry 35 USBDP RST_CTRL stalled, probe stopped per rule, no delivery; loader left via its deadline at +490.7 s into Download Mode (5000M); U7 not reached; stock RECOVERY and Android verified; permit closed",
+  "commit": "34f4e63410d43c84e9179c9fb69559e157406405",
+  "device_inventory": "devices/local-2026-11-13-nat135.json",
+  "decision": "docs/decisions/0054-nat135-loader-diag-xnu-pk1-md1-single-run-2026-11-13.md",
+  "acceptance": [
+    {
+      "criterion": 1,
+      "met": true
+    },
+    {
+      "criterion": 2,
+      "met": true,
+      "note": "35 values, entry 35 stalled, remaining not reached"
+    },
+    {
+      "criterion": 3,
+      "met": true
+    },
+    {
+      "criterion": 4,
+      "met": false,
+      "note": "U4/U5/U11 answered; USBDP not readable at loader entry; U7 not reached"
+    }
+  ],
+  "checks": [
+    {
+      "cmd": "python3 -I docs/procedures/nat-134/session_nat135.py --out artifacts/nat-135/run-001 --image loader-diag-xnu-pk1-md1 --execute",
+      "exit_code": 0
+    },
+    {
+      "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 5 --out artifacts/nat-135/restore-001/restore-trace",
+      "exit_code": 0
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-135/restore-001/android-check.json",
+      "exit_code": 0
+    },
+    {
+      "cmd": "nat-013/restore_stock.py assess --report restore-001/report.json --readback restore-001/android-check.json",
+      "exit_code": 0,
+      "result": "pass"
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/nat-135/README.md",
+    "artifacts/nat-135/run-001/report.json",
+    "artifacts/nat-135/run-001/delivery/delivery.json",
+    "artifacts/nat-135/run-001/delivery/peek.jsonl",
+    "artifacts/nat-135/run-001/usb-events.jsonl",
+    "artifacts/nat-135/restore-001/download-mode-sysfs.txt",
+    "artifacts/nat-135/restore-001/report.json",
+    "artifacts/nat-135/restore-001/android-check.json",
+    "artifacts/nat-135/restore-001/assess.json"
+  ],
+  "artifact_hashes": {
+    "docs/procedures/nat-135/README.md": "602338e239a70e8b00b9df01adba51e5ea045adcadab76c3840c73b5baf0f23c",
+    "artifacts/nat-135/run-001/report.json": "0cca38ae15221742b04fff2b9572a9e4d9bccfd6bb07379ee92c5d0bd5c6b61f",
+    "artifacts/nat-135/run-001/delivery/delivery.json": "94671b96b1a0b3887b92fdb4a6c2667d9eaf354f292a22d168df74b6defd6cf6",
+    "artifacts/nat-135/run-001/delivery/peek.jsonl": "4c2311710b7d73c578a5b98b6641c4ad824d45b1b6a1a55c53bb2088b629f1d8",
+    "artifacts/nat-135/run-001/usb-events.jsonl": "fab5c1425dbb22ad7d4e346297d210e53081f76eb8ea04131b8777623041a2d5",
+    "artifacts/nat-135/restore-001/download-mode-sysfs.txt": "203dd7a4b3ed62688bc380186000be9dd8d29974e2db47cc50b85efb8910ee72",
+    "artifacts/nat-135/restore-001/report.json": "c3ef3bc84a8db0fea52828cad7794ab7c5daa4acf4c96e6eb1620cdeb9da5fb9",
+    "artifacts/nat-135/restore-001/android-check.json": "aa3fff79d36b1320e978d60a6ad434af9143548793635475799f14957ece5fe5",
+    "artifacts/nat-135/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a"
+  }
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T17:47:22+00:00",
+  "updated_at": "2026-11-13T17:59:50+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -8,7 +8,7 @@
       "host": true,
       "android-readonly": true,
       "android-app": true,
-      "native": true
+      "native": false
     },
     "facts": [
       {
@@ -713,6 +713,13 @@
         "decision": "docs/decisions/0054-nat135-loader-diag-xnu-pk1-md1-single-run-2026-11-13.md",
         "owner": "claude-opus-usb130-20261113",
         "at": "2026-11-13T17:47:12+00:00"
+      },
+      {
+        "scope": "native",
+        "value": false,
+        "decision": "docs/decisions/0054-nat135-loader-diag-xnu-pk1-md1-single-run-2026-11-13.md",
+        "owner": "claude-opus-usb130-20261113",
+        "at": "2026-11-13T17:59:41+00:00"
       }
     ]
   },
@@ -17574,8 +17581,10 @@
         "Dated native evidence; U4/U5/U7/U11 answered or reported as not readable at loader entry; no SS claim"
       ],
       "started_at": "2026-11-13T17:47:22+00:00",
-      "last_heartbeat": "2026-11-13T17:47:22+00:00",
-      "updated_at": "2026-11-13T17:47:22+00:00"
+      "last_heartbeat": "2026-11-13T17:59:50+00:00",
+      "updated_at": "2026-11-13T17:59:50+00:00",
+      "progress_note": "Run consumed decision 0054: U4 DWC_usb31 1.90a, U5 PMU +0x620=0 (USBDP isolation set), CMU gates on, U11 NOEXTRDL=0; USBDP RST_CTRL read stalled at entry 35 -> probe stopped, no delivery; loader left at its deadline (+490.7 s) into Download Mode at 5000M; U7 not reached; inconclusive. Stock RECOVERY/Android/assess pass; permit closed. Evidence docs/procedures/nat-135/evidence.json",
+      "next_step": "U7 and post-S3 USBDP/TCA reads move to NAT-136 (host) / NAT-137 (native); NAT-135 is not repeated"
     }
   ],
   "experiments": [
@@ -67785,6 +67794,33 @@
           "owner": "claude-opus-usb130-20261113",
           "priority": 99,
           "last_heartbeat": "2026-11-13T17:47:22+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T17:59:41+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
+    },
+    {
+      "at": "2026-11-13T17:59:50+00:00",
+      "action": "task.update:NAT-135",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-135",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "progress_note": "Run consumed decision 0054: U4 DWC_usb31 1.90a, U5 PMU +0x620=0 (USBDP isolation set), CMU gates on, U11 NOEXTRDL=0; USBDP RST_CTRL read stalled at entry 35 -> probe stopped, no delivery; loader left at its deadline (+490.7 s) into Download Mode at 5000M; U7 not reached; inconclusive. Stock RECOVERY/Android/assess pass; permit closed. Evidence docs/procedures/nat-135/evidence.json",
+          "next_step": "U7 and post-S3 USBDP/TCA reads move to NAT-136 (host) / NAT-137 (native); NAT-135 is not repeated",
+          "last_heartbeat": "2026-11-13T17:59:50+00:00"
         }
       ]
     }
