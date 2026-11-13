@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-13T23:33:16+00:00",
-  "ledger_updated_at": "2026-11-13T23:32:57+00:00",
-  "registry_sha256": "5c71598165908bce881f5b10c1d1dfa87401c3642a8059d8ced1f99737ac23d1",
+  "generated_at": "2026-11-13T23:52:30+00:00",
+  "ledger_updated_at": "2026-11-13T23:52:11+00:00",
+  "registry_sha256": "7014d68f80653b1b9d34fd9ce42841a214b3758e8afc9b7342296f5c3e6e622b",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -224,6 +224,7 @@
       "NAT-145",
       "NAT-148",
       "NAT-150",
+      "NAT-152",
       "KRN-007",
       "KRN-011",
       "KRN-017",
@@ -6113,6 +6114,37 @@
       "reasons": [],
       "card_path": "planning/tasks/NAT-151.md",
       "report_health": "recent"
+    },
+    {
+      "id": "NAT-152",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scH, NAT-150's early marks of the PSCI-started cores with every kernel address the loader checks left in place (marks 4-6 out of line through same-size branches in the reset-vector page; boot-CPU slow pairing off by boot-arg small_cores=0 instead of a machine_routines change); check_loader_sites rc 0 as a build gate; model and tests re-run; session for a native run",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-150"
+      ],
+      "paths": [
+        "docs/procedures/nat-152",
+        "artifacts/nat-152"
+      ],
+      "acceptance": [
+        "check_loader_sites.py on the scH build: rc 0, and every loader constant resolves to the same symbol+offset as in the NAT-143 kernel",
+        "Unicorn model: started-core path = NAT-143's plus mark blocks and trampoline branches only; boot path unchanged in instructions executed; marks as in NAT-150",
+        "Image differs from scF only in the kernel, the attempt tag and small_cores=0; counted session derivation; make check",
+        "Host evidence only"
+      ],
+      "started_at": "2026-11-13T23:35:50+00:00",
+      "last_heartbeat": "2026-11-13T23:35:50+00:00",
+      "updated_at": "2026-11-13T23:52:11+00:00",
+      "evidence": "docs/procedures/nat-152/evidence.json",
+      "evidence_sha256": "c1af04002cfab28d4afd4af0b4da814e4a96dd2b12b946388a33c166aa484d7c",
+      "finished_at": "2026-11-13T23:52:11+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-152.md"
     },
     {
       "id": "KRN-007",
@@ -19753,47 +19785,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-13T22:09:20+00:00",
-      "action": "task.update:NAT-146",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-146",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 99,
-          "progress_note": "Run consumed under 0059: outcome FAIL. Both scE kernel boots stopped inside ml_parse_cpu_topology (last checkpoint 35); watchdog reset into SEC_UPLOAD, auto-restart looped into RECOVERY; owner forced Download Mode; stock RECOVERY restored, Android verified (docs/procedures/nat-146/evidence.json). Cause (source review): all /cpus nodes state=running -> second boot CPU assertion.",
-          "next_step": "NAT-147 host: state=waiting for cpu1-9, prove on NAT-035 model, rebuild scE; rerun needs a new decision",
-          "last_heartbeat": "2026-11-13T22:09:20+00:00",
-          "handoff": "docs/procedures/nat-146/README.md"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T22:09:29+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-13T22:13:37+00:00",
-      "action": "task.add:NAT-147",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-147",
-          "status": "pending",
-          "owner": null,
-          "priority": 99
-        }
-      ]
-    },
-    {
       "at": "2026-11-13T22:14:45+00:00",
       "action": "task.add:NAT-148",
       "owner": "claude-opus-usb130-20261113",
@@ -20018,11 +20009,52 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-13T23:35:31+00:00",
+      "action": "task.add:NAT-152",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-152",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T23:35:50+00:00",
+      "action": "task.claim:NAT-152",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-152",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T23:35:50+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T23:52:11+00:00",
+      "action": "task.done:NAT-152",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-152",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T23:35:50+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "fd640501c9b1fdcbb7882a0ca927ccbc0ea94f11158d8cd1323029e9d34c38e5",
-    "BOARD.md": "528694ae583daa002cfbbbb3abf796b24d0cda9df671f1408d7c1eb57304cc2c",
+    "STATUS.md": "e86d14c50f1db42c6a4ceb006d062bc1e3cdea6303d3c94a5b9fa2adfda49d9a",
+    "BOARD.md": "47c6c984ce7c1cb6be8a321cff0d417986abb47b896fec72d73d126a935b531c",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -20161,6 +20193,7 @@
     "planning/tasks/NAT-149.md": "bf00c7d78c4a37ee00d03c4b098500d3a646a3d9bcc7d00bab359434bb219818",
     "planning/tasks/NAT-150.md": "441aa937e0613fc514e1b8338b5f0050b3bb69631680493af689548bd4a45366",
     "planning/tasks/NAT-151.md": "be1d630aaa1687c55af69682bb8e77b4439303d9144fcf10224fe0152373e30c",
+    "planning/tasks/NAT-152.md": "dc188e9da1f3e75c70fe2828044056e36411bb4dfbe101df0ca86efddcfb2e0d",
     "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-011.md": "9b8014abd8d019af80fad695e0d0df9de9523d36a222553327384f7f00e8a901",
     "planning/tasks/KRN-017.md": "86a29485c4c3ed3a62f7ecf64f5e2bb303bb0bd7ac5fd661482bf024004f407d",

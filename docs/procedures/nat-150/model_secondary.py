@@ -34,7 +34,8 @@ from unicorn import arm64_const as A
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
-KERNELS = {'nat143': ROOT / 'artifacts/nat-143/kernel-001', 'nat150': ROOT / 'artifacts/nat-150/kernel-001'}
+KERNELS = {'nat143': ROOT / 'artifacts/nat-143/kernel-001', 'nat150': ROOT / 'artifacts/nat-150/kernel-001',
+           'nat152': ROOT / 'artifacts/nat-152/kernel-001'}
 LINK = 0xfffffff007004000
 PA_BASE = 0x880000000
 CPUDATA_PA = 0x8f0000000
@@ -203,6 +204,13 @@ def compare(old, new):
     body = ['mrs', 'ubfx', 'adrp', 'add', 'add', 'str', 'str', 'mrs', 'str', 'mov', 'movk', 'str', 'dc', 'add', 'dc', 'dsb']   # (capstone writes movz as mov)
     blocks = 0
     for blk in inserted:
+        # NAT-152's out-of-line marks: one branch around the block. Mark 4 replaces start_cpu's `b common_start` by a branch to the
+        # block, which ends with that `b common_start`; the matcher pairs the old branch with either one, so the extra one is first
+        # or last. Marks 5/6 are reached by a cbnz in place of the old one and end with a branch back (last).
+        if blk[-1:] == ['b']:
+            blk = blk[:-1]
+        elif blk[:1] == ['b']:
+            blk = blk[1:]
         # a mark block, after at most three instructions that load its two values (mrs/mov) and skip it (cbz); stage 1's two
         # loads stand alone, before the vector set-up that comes between them and its block
         if blk[-len(body):] == body:
@@ -236,6 +244,7 @@ def summary(r):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument('--out', type=Path)
+    ap.add_argument('--new', default='nat150', choices=sorted(set(KERNELS) - {'nat143'}))
     a = ap.parse_args()
     res = {}
     cases = {'match_cpu4': (0x81000400, 'start_cpu'), 'no_cpu_data_0xa00': (0x81000a00, 'start_cpu'),
@@ -243,8 +252,8 @@ def main():
     cases['boot_cpu_cold_start'] = (0x81000000, None, '__start')
     for name, (mpidr, handler, *entry) in cases.items():
         kw = dict(entry_sym=entry[0]) if entry else {}
-        old, new = run('nat143', mpidr, handler, **kw), run('nat150', mpidr, handler, **kw)
-        res[name] = dict(nat143=summary(old), nat150=summary(new), compare=compare(old, new))
+        old, new = run('nat143', mpidr, handler, **kw), run(a.new, mpidr, handler, **kw)
+        res[name] = dict(nat143=summary(old), new=summary(new), compare=compare(old, new))
     print(json.dumps(res, indent=1))
     if a.out:
         a.out.write_text(json.dumps(res, indent=1) + '\n')

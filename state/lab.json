@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T23:32:57+00:00",
+  "updated_at": "2026-11-13T23:52:11+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -18159,6 +18159,34 @@
         "SGPU init lines (order, return values if printed) or a statement that the ring no longer has them",
         "G3D power-domain state and the sgpu platform device path; what this establishes for a native power-on plan"
       ]
+    },
+    {
+      "id": "NAT-152",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scH, NAT-150's early marks of the PSCI-started cores with every kernel address the loader checks left in place (marks 4-6 out of line through same-size branches in the reset-vector page; boot-CPU slow pairing off by boot-arg small_cores=0 instead of a machine_routines change); check_loader_sites rc 0 as a build gate; model and tests re-run; session for a native run",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-150"
+      ],
+      "paths": [
+        "docs/procedures/nat-152",
+        "artifacts/nat-152"
+      ],
+      "acceptance": [
+        "check_loader_sites.py on the scH build: rc 0, and every loader constant resolves to the same symbol+offset as in the NAT-143 kernel",
+        "Unicorn model: started-core path = NAT-143's plus mark blocks and trampoline branches only; boot path unchanged in instructions executed; marks as in NAT-150",
+        "Image differs from scF only in the kernel, the attempt tag and small_cores=0; counted session derivation; make check",
+        "Host evidence only"
+      ],
+      "started_at": "2026-11-13T23:35:50+00:00",
+      "last_heartbeat": "2026-11-13T23:35:50+00:00",
+      "updated_at": "2026-11-13T23:52:11+00:00",
+      "evidence": "docs/procedures/nat-152/evidence.json",
+      "evidence_sha256": "c1af04002cfab28d4afd4af0b4da814e4a96dd2b12b946388a33c166aa484d7c",
+      "finished_at": "2026-11-13T23:52:11+00:00"
     }
   ],
   "experiments": [
@@ -69246,6 +69274,47 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-13T23:35:31+00:00",
+      "action": "task.add:NAT-152",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-152",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T23:35:50+00:00",
+      "action": "task.claim:NAT-152",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-152",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T23:35:50+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T23:52:11+00:00",
+      "action": "task.done:NAT-152",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-152",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T23:35:50+00:00"
+        }
+      ]
     }
   ]
 }

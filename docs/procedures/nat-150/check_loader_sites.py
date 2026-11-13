@@ -48,8 +48,8 @@ def constants(src):
     sites = re.search(r'\{([^}]*0xfffffff0[^}]*)\}', ck)[1]
     for i, v in enumerate(re.findall(r'0x([0-9a-f]{16})ULL', sites), 1):
         out['site%d' % i] = int(v, 16)
-    for f in ('ckpt.h', 'ckpt3.h'):
-        for name, v in re.findall(r'#define\s+(\w+_VA)\s+0x([0-9a-f]{16})ULL', (src / f).read_text()):
+    for f in sorted(src.glob('*.[ch]')):            # every *_VA define of the loader tree (ckpt.h, ckpt3.h, the log and recording ones ...)
+        for name, v in re.findall(r'#define\s+(\w+_VA)\s+0x(fffffff0[0-9a-f]{8})ULL', f.read_text()):
             out[name] = int(v, 16)
     return out
 

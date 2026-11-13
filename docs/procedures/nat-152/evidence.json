@@ -1,0 +1,82 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-13T23:52:00+00:00",
+ "task": "NAT-152",
+ "summary": "scH image: NAT-150's early marks of PSCI-started cores with every kernel address the loader checks left in place (marks 4-6 out of line in the reset-vector page, reached through same-kind branches that replace three existing ones; the branches back land where the old `1f` did, after LOADER_CHECKPOINT's own label), NAT-150's psci_smp patch unchanged (AFFINITY_INFO readback, 1 s start wait), boot-arg small_cores=0 instead of the machine_routines change. Gate: the loader's own nat036_check on the built payload rc 0 and all 13 loader constants on the same symbol+offset as in the NAT-143 kernel; scG gives rc 2 NAT031_SITE_BAD site 1 (NAT-151 reproduced). Unicorn model: started-core path = NAT-143's plus 5 mark blocks and their branches, boot path identical (0 inserted). Host-test only; no device used.",
+ "commit": "8d7ec32 (base; evidence committed with the NAT-152 files)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scH-md1",
+  "recovery_sha256": "e90fe5b00269b434b8707f565d3d4365d9ba03c72a94e9a754c86c4a16d39164",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "2a35d84282ad5570255a31c4768e84740d3bead3de1f56c5c8c3646fa70e3ca2",
+  "payload_bytes": 26206800,
+  "loader_image_sha256": "48841f6ca11f8dba715ef3db3d6370c4523e9d55cf4cce4129505413f11f08aa",
+  "kernel_sha256": "8d62baff503ddfe75ebf388fa13e9e8bf47cf46e942b54887f5c9221b44d14b4",
+  "cmdline_bytes": 253,
+  "session": "docs/procedures/nat-152/session_nat153.py",
+  "session_sha256": "f97f9d4bfd6228048a14648a5821b133362c5f882398fcb801b7218dcdce5e0a"
+ },
+ "sources": {
+  "docs/procedures/nat-152/build.py": "77fb6c8451116e711d6729329f5e936a731b2996c5abb2ea143616473ba9a9ee",
+  "docs/procedures/nat-152/start.patch": "95560d0ada4c71ca93f75fa700c442a0b17eaad72f0b4db3a452d2be851e1b76",
+  "docs/procedures/nat-152/psci_smp.patch": "317846b9b66c1c387a69a49a9bc71115c959683a4185225dc3c8893d3919f7c7",
+  "docs/procedures/nat-150/model_secondary.py": "e4cd7fbdc50f1a31c1e407c764d0edb68b1f62fa185346781b2980bc7beae754",
+  "docs/procedures/nat-150/check_loader_sites.py": "82d4ddd6fd21251d66059db6f1feaf026828a7d65fb5dee38a9ed8e7e99a0e28"
+ },
+ "shared_tool_changes": "nat-150/model_secondary.py: --new selects the kernel under test (nat150 or nat152); compare() accepts one extra `b` before or after an out-of-line mark block. nat-150/check_loader_sites.py: run()/symbolize() reused by nat-152/build.py. NAT-150's own suite still passes (15 OK under the venv).",
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/krn-044/rebuild.py --out artifacts/nat-152/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-121/loader_return.patch --extra (NAT-143's four) --extra osfmk/start.o=docs/procedures/nat-152/start.patch --extra osfmk/psci_smp.o=docs/procedures/nat-152/psci_smp.patch --expect-string ... (6)",
+   "exit_code": 0,
+   "result": "0 undefined, 29 stubs. Earlier kernel from the first start.patch draft (branches back past E1S_BOOT_MARK 4 and the SCTLR reload) was discarded after the model's replace finding"
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B docs/procedures/nat-150/model_secondary.py --new nat152 --out artifacts/nat-152/model-secondary.json",
+   "exit_code": 0,
+   "result": "5 cases ok; boot_cpu_cold_start 0 inserted instructions"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-152/build.py --out artifacts/nat-152/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "loader_sites_check rc 0 ok; 13 constants equal to the NAT-143 kernel's symbols"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-152/build-001 --out artifacts/nat-152/package-001",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-152/derive153.py --check",
+   "exit_code": 0
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B docs/procedures/nat-152/test_nat152.py",
+   "exit_code": 0,
+   "result": "18 OK"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-152/test_nat152.py",
+   "exit_code": 0,
+   "result": "18 OK, 5 skipped (no unicorn)"
+  },
+  {
+   "cmd": "artifacts/nat-065/venv/bin/python -B docs/procedures/nat-150/test_nat150.py",
+   "exit_code": 0,
+   "result": "15 OK (after the shared compare() change)"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "448 tests OK"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-152/kernel-001/rebuild.json",
+  "artifacts/nat-152/build-001/build.json",
+  "artifacts/nat-152/package-001/package.json",
+  "artifacts/nat-152/model-secondary.json"
+ ],
+ "limits": "Host evidence only. The model covers the kernel's start path with the MMU off; not the firmware, EL2, caches, real page tables or anything after the MMU switch. small_cores=0 semantics are read from redwood.patch source, not observed on the phone."
+}

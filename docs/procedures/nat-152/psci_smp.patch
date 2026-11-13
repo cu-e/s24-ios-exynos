@@ -1,0 +1,64 @@
+--- psci_smp.c.orig	2026-11-14 04:01:40.664171563 +0500
++++ psci_smp.c	2026-11-14 04:02:54.755041118 +0500
+@@ -55,7 +55,7 @@
+ #define PSCI_AFFINITY_INFO      0xC4000004u
+ #define PSCI_AFFINITY_OFF       1
+ 
+-#define PSCI_SMP_START_SECONDS  5       /* how long a started core is waited for */
++#define PSCI_SMP_START_SECONDS  1       /* how long a started core is waited for (NAT-150: was 5; a core that comes takes milliseconds) */
+ #define PSCI_SMP_STOP_SECONDS   3       /* ... and the cores that were told to stop */
+ 
+ extern void loader_return(void);
+@@ -75,6 +75,18 @@
+ } psci_smp_start_fault __attribute__((aligned(64)));
+ _Static_assert(sizeof(struct psci_smp_start_fault) == 64, "one cache line");
+ 
++/*
++ * NAT-150: how far a started core has got before it runs C code (PSCI_SMP_EARLY_MARK in start.s).
++ * 128 bytes per core, by MPIDR Affinity1: [0] 0x5EC00000 | the last stage, [1] its MPIDR, then two
++ * values per stage 1-6 (entry, cpu data found, not found, start_cpu, before MMU on, MMU on). The
++ * core writes them with its cache off; the boot processor only reads them after throwing away its
++ * own copy, and writes them only before CPU_ON.
++ */
++#define PSCI_SMP_EARLY_SLOTS    16
++#define PSCI_SMP_EARLY_MAGIC    0x5EC00000ull
++uint64_t psci_smp_early_marks[PSCI_SMP_EARLY_SLOTS][16] __attribute__((aligned(128)));
++_Static_assert(sizeof(psci_smp_early_marks[0]) == 128, "two cache lines per core");
++
+ static uint32_t psci_smp_cpu_stage[MAX_CPUS];   /* PSCI_SMP_CPU_*, by cpu number */
+ static uint32_t psci_smp_started;               /* a bit per core that CPU_ON was granted for */
+ 
+@@ -164,6 +176,13 @@
+ 	uint64_t entry = ml_static_vtop((vm_offset_t)&LowResetVectorBase);
+ 	uint64_t now, deadline;
+ 	int64_t status;
++	uint64_t *mark = psci_smp_early_marks[(phys_id >> 8) & (PSCI_SMP_EARLY_SLOTS - 1)];
++
++	/* its marks: zero, in memory, and not in this processor's cache (it writes them with its cache off) */
++	for (int i = 0; i < 16; i++) {
++		mark[i] = 0;
++	}
++	FlushPoC_DcacheRegion((vm_offset_t)mark, sizeof(psci_smp_early_marks[0]));
+ 
+ 	/*
+ 	 * What that core reads with its MMU off: the code and the page tables of start.s, and what
+@@ -203,6 +222,7 @@
+ 		}
+ 		/* memory, not this processor's copy of it */
+ 		FlushPoC_DcacheRegion((vm_offset_t)&psci_smp_start_fault, sizeof(psci_smp_start_fault));
++		FlushPoC_DcacheRegion((vm_offset_t)mark, sizeof(psci_smp_early_marks[0]));
+ 		if (psci_smp_start_fault.valid != 0) {
+ 			break;
+ 		}
+@@ -223,6 +243,11 @@
+ 		    cpu, phys_id, PSCI_SMP_START_SECONDS,
+ 		    stage >= PSCI_SMP_CPU_IN_KERNEL ? "it got as far as arm_init_cpu()" : "no sign of it since the firmware took the request");
+ 	}
++	FlushPoC_DcacheRegion((vm_offset_t)mark, sizeof(psci_smp_early_marks[0]));
++	printf("psci: cpu %d early marks: last 0x%llx mpidr 0x%llx 1:0x%llx,0x%llx 2:0x%llx,0x%llx 3:0x%llx,0x%llx "
++	    "4:0x%llx,0x%llx 5:0x%llx,0x%llx 6:0x%llx,0x%llx affinity_info %lld\n",
++	    cpu, mark[0], mark[1], mark[2], mark[3], mark[4], mark[5], mark[6], mark[7], mark[8], mark[9],
++	    mark[10], mark[11], mark[12], mark[13], psci_call(PSCI_AFFINITY_INFO, phys_id, 0, 0));
+ 	return KERN_FAILURE;
+ }
+ 
