@@ -1,0 +1,61 @@
+--- a.c
++++ b.c
+@@ -428,41 +428,20 @@
+ 	    gpio_rd(E1S_GPA1_EINT_CON), gpio_rd(E1S_GPA1_EINT_MASK),
+ 	    gpio_rd(E1S_GPA1_EINT_PEND));
+ 
+-	/* Do the transfer before formatting: C argument evaluation order is unspecified. */
+-	id_status = stm_chip_id(id);
+-	printf("e1s-touch: device id: %s (%02x %02x %02x %02x %02x)\n",
+-	    id_status, id[0], id[1], id[2], id[3], id[4]);
+-	if (strcmp(id_status, "ok") != 0) {
+-		printf("e1s-touch: controller unresponsive; IRQ and event thread not started\n");
+-		return;
+-	}
+-	if (stm_read_address(STM_READ_PANEL_INFO, info, sizeof(info)) == 0 &&
+-	    info[8] != 0 && info[9] != 0) {
+-		printf("e1s-touch: panel %u x %u channels\n", info[8], info[9]);
+-	}
+-	if (steps <= 2) {
+-		printf("e1s-touch: stopped after step 2 (e1stouch_steps=%u)\n", steps);
+-		return;
+-	}
+-
+-	if (irq_enabled) {
+-		kr = gic_v3_spi_attach(e1s_irq_spi, false, e1s_touch_irq_handler, NULL);
+-		if (kr == KERN_SUCCESS) {
+-			e1s_irq_intid = e1s_irq_spi;
+-			e1s_touch_eint_init();
+-			printf("e1s-touch: gpa1-2 on GIC SPI %u, level low\n", e1s_irq_spi);
+-		} else {
+-			printf("e1s-touch: GIC SPI %u attach failed %d, polling\n",
+-			    e1s_irq_spi, kr);
+-		}
+-	} else {
+-		printf("e1s-touch: interrupts disabled, polling every %u us\n",
+-		    e1s_poll_us);
+-	}
+-
+-	if (kernel_thread_start(e1s_touch_thread, NULL, &thread) == KERN_SUCCESS) {
+-		thread_deallocate(thread);
+-	} else {
+-		printf("e1s-touch: no thread for the touch controller\n");
+-	}
+-}
++	/* NAT-128: bounded read-only SPI diagnostics; no IRQ or event thread. */
++	(void)steps; (void)info; (void)kr; (void)thread;
++	for (unsigned attempt = 0; attempt < 3; attempt++) {
++		uint8_t tx[14] = { STM_REG_R, 0x20, 0, 0, 0 };
++		uint8_t rx[14] = { 0 };
++
++		id_status = stm_chip_id(id);
++		printf("e1s-touch: poll %u device id: %s (%02x %02x %02x %02x %02x)\n",
++		    attempt + 1, id_status, id[0], id[1], id[2], id[3], id[4]);
++		/* Samsung stm_ts_read_chip_id_hw: 5 address bytes + dummy + 8 data. */
++		e1s_spi_transfer(tx, rx, sizeof(tx));
++		printf("e1s-touch: poll %u hardware id: %02x %02x %02x %02x %02x %02x %02x %02x\n",
++		    attempt + 1, rx[6], rx[7], rx[8], rx[9], rx[10], rx[11], rx[12], rx[13]);
++		delay_for_interval(50000, NSEC_PER_USEC);
++	}
++	printf("e1s-touch: poll-only diagnostic complete; no IRQ or event thread\n");
++}
