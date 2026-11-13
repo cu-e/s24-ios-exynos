@@ -1,0 +1,82 @@
+{
+  "kind": "host-test",
+  "origin": "local-host",
+  "outcome": "pass",
+  "recorded_at": "2026-11-13T15:10:00+00:00",
+  "task": "NAT-121",
+  "owner": "claude-opus-nat116-20261113",
+  "summary": "Touch path image loader-diag-xnu-sc7-md1: e1s_touch.c GPIO through mapped bases + staged bring-up (e1stouch_steps), /dev/hakios-touch node, KRN-044 rebuild.py extended to several objects (single-object rebuild byte-identical to NAT-119's kernel at the same out path). RECOVERY f62c3c9e..., payload ec1e8c72....",
+  "not_established": [
+    "that the STM controller answers (NAT-122)",
+    "pin order and rails on hardware",
+    "touch reaching iOS"
+  ],
+  "checks": [
+    {
+      "cmd": "python3 docs/procedures/krn-044/rebuild.py --out artifacts/nat-119/kernel-chk --object osfmk/loader_return.o --patch docs/procedures/nat-119/kernel-combined.patch (regression vs kernel-001 after path normalisation)",
+      "exit_code": 0,
+      "output": "object and kernel identical"
+    },
+    {
+      "cmd": "python3 docs/procedures/krn-044/rebuild.py --out artifacts/nat-121/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-121/loader_return.patch --extra bsd/e1s_touch.o=docs/procedures/nat-121/e1s_touch.patch --extra bsd/redwood_input.o=docs/procedures/nat-121/redwood_input.patch --expect-string ...",
+      "exit_code": 0,
+      "note": "first attempt failed to compile (counter declared after use); fixed"
+    },
+    {
+      "cmd": "capstone scan of e1s_touch.o: physical constants 0x1103/0x1285 only as ml_io_map arguments",
+      "exit_code": 0
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-121/build.py --out artifacts/nat-121/build-001 ...",
+      "exit_code": 0
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-044/package.py --build artifacts/nat-121/build-001 --out artifacts/nat-121/package-001",
+      "exit_code": 0
+    },
+    {
+      "cmd": "python3 -B -I docs/procedures/nat-121/test_nat121.py",
+      "exit_code": 0,
+      "output": "12 tests OK (incl. unpatched source reaches outside the mapped pages)"
+    },
+    {
+      "cmd": "derive121.py --check; session_nat121.py without decision",
+      "exit_code": 2,
+      "output": "9 substitutions; stopped, no device access"
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/krn-044/rebuild.py",
+    "docs/procedures/nat-121/build.py",
+    "docs/procedures/nat-121/loader_return.patch",
+    "docs/procedures/nat-121/e1s_touch.patch",
+    "docs/procedures/nat-121/redwood_input.patch",
+    "docs/procedures/nat-121/host/shim.h",
+    "docs/procedures/nat-121/host/harness.c",
+    "docs/procedures/nat-121/test_nat121.py",
+    "docs/procedures/nat-121/analyze122.py",
+    "docs/procedures/nat-121/derive121.py",
+    "docs/procedures/nat-121/session_nat121.py",
+    "artifacts/nat-121/kernel-001/rebuild.json",
+    "artifacts/nat-121/build-001/build.json",
+    "artifacts/nat-121/package-001/package.json",
+    "research/notes/NAT-121-input-path-review.md"
+  ],
+  "artifact_hashes": {
+    "docs/procedures/krn-044/rebuild.py": "3ce3dcf04eca2c4ee247bd16770cb2c7d6a806c1dc1aba205196a7c7a48c0da0",
+    "docs/procedures/nat-121/build.py": "8f741d81d60af51dc86c4a148d3b00bdb6f1e63d7de6cb7260883fe7a18c705a",
+    "docs/procedures/nat-121/loader_return.patch": "c5732d303af380f2d3e2d78dee78c0429a870162c36470472483bffdb8421385",
+    "docs/procedures/nat-121/e1s_touch.patch": "cf08f41c75866699944ecc3c792de695cbdf549f6d9b6adb493718538bee58ec",
+    "docs/procedures/nat-121/redwood_input.patch": "ad07be9343992f374bcf3647806e863fcd5f99d45d75b0538f8fd644066f9ab0",
+    "docs/procedures/nat-121/host/shim.h": "b01b83f617c10b9e5a1879b7a3c68d6a7fa5abd94d8f0b5f723b0559321fef50",
+    "docs/procedures/nat-121/host/harness.c": "f18762784e9dd8539273cac515a00f813b79cc76dd1d179c81669dd8393ee6cf",
+    "docs/procedures/nat-121/test_nat121.py": "9e98c56f220344f9e1b806339fa2e9ad36269c9d1ad9304ea532b5ad500b4b5f",
+    "docs/procedures/nat-121/analyze122.py": "41b6e89436ccb17398b5ef637256ebf7375f96dd8f3673657ffc5c4cdd13d844",
+    "docs/procedures/nat-121/derive121.py": "a9eda66842547629b41c09439ff5e6a2dc4d65ccb5b30d69944e17d3bf316fae",
+    "docs/procedures/nat-121/session_nat121.py": "cd2ed56285cc8d87c93cb343ce941be51a8e5345f6fc7050e70de88cf11fc792",
+    "artifacts/nat-121/kernel-001/rebuild.json": "856e7c86cb1e4dbdfbde4c9beb110ebf9a80027cfd5a194e913c28e4741bddbd",
+    "artifacts/nat-121/build-001/build.json": "30494f87627884039bcd0207fb04b32028f66d40db99d5767d229f93a5d8f975",
+    "artifacts/nat-121/package-001/package.json": "e3d47209474bb2c830591acaf32e964a4bde4749072920185832a0169060cec5",
+    "research/notes/NAT-121-input-path-review.md": "b12d02bd4e94ca65f1bd2c2a56199f6a3d7b1fc3cba2a74adbab8490ed03fe64"
+  }
+}

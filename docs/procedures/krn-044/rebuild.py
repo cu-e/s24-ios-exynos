@@ -64,38 +64,54 @@ def run(argv, cwd, env, log):
     return r
 
 
+def compile_one(object_id, patch, out, log, flat=False):
+    """Compile `object_id` as its compile evidence did, on a patched copy of its source when `patch` is given; -> (plan, copy, src, src_sha, obj, obj_sha)."""
+    plan, copy, proc = compile_record(object_id)
+    tag = '' if flat else object_id.replace('/', '_')   # the main object keeps KRN-044's flat paths (they reach the debug strings)
+    for d in ('src', 'compile'):
+        (out/d/tag).mkdir(parents=True, exist_ok=True)
+    argv = list(proc['argv'])
+    srcs = [i for i, x in enumerate(argv) if Path(x).suffix in ('.c', '.cpp', '.s', '.S') and not x.startswith('-') and argv[i-1] not in ('-o', '-MF', '-MT', '-MQ')]
+    assert len(srcs) == 1, f'expected one source argument, found {[argv[i] for i in srcs]}'
+    si = srcs[0]; src = Path(argv[si])
+    src_sha = fsha(src)
+    if patch:
+        changed = out/'src'/tag/src.name
+        shutil.copyfile(src, changed)
+        run(['patch', '--no-backup-if-mismatch', '-s', str(changed), str(Path(patch).resolve())], out, None, log)
+        argv[si] = str(changed)
+        argv.insert(si, '-iquote' + str(src.parent))
+    obj = out/'compile'/tag/Path(argv[argv.index('-o')+1]).name
+    argv[argv.index('-o')+1] = str(obj)
+    if '-MF' in argv: argv[argv.index('-MF')+1] = str(out/'compile'/tag/(obj.stem+'.d'))
+    env = dict(proc['environment']); env.update(HOME=str(out/'home'), TMPDIR=str(out/'tmp'), TMP=str(out/'tmp'), TEMP=str(out/'tmp'))
+    run(argv, proc['cwd'], env, log)
+    return plan, copy, src, src_sha, obj, fsha(obj)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument('--out', type=Path, required=True)
     ap.add_argument('--object', default='iokit/MiniIOMobileFramebuffer.cpo')
     ap.add_argument('--patch', type=Path, help='unified diff applied to a copy of the object\'s source (patch -p0 style paths are ignored: the diff is applied to the single file)')
     ap.add_argument('--expect-string', action='append', default=[], help='byte string that must appear in the relinked kernel')
+    ap.add_argument('--extra', action='append', default=[], metavar='OBJECT=PATCH',
+                    help='(NAT-121) a further object compiled from a patched copy of its source and substituted in the same link')
     a = ap.parse_args()
     out = a.out.resolve(); out.mkdir(parents=True, exist_ok=False)
     for d in ('home', 'tmp', 'compile', 'src'): (out/d).mkdir()
     log = []
     assert fsha(STR041/'kernel/kernel.unstripped') == UNSTRIPPED_SHA, 'STR-041 image changed'
-    plan, copy, proc = compile_record(a.object)
-    argv = list(proc['argv'])
-    srcs = [i for i, x in enumerate(argv) if Path(x).suffix in ('.c', '.cpp', '.s', '.S') and not x.startswith('-') and argv[i-1] not in ('-o', '-MF', '-MT', '-MQ')]
-    assert len(srcs) == 1, f'expected one source argument, found {[argv[i] for i in srcs]}'
-    si = srcs[0]; src = Path(argv[si])
-    src_sha = fsha(src)
-
-    # 1. compile (changed copy of the source when --patch)
-    if a.patch:
-        changed = out/'src'/src.name
-        shutil.copyfile(src, changed)
-        run(['patch', '--no-backup-if-mismatch', '-s', str(changed), str(a.patch.resolve())], out, None, log)
-        argv[si] = str(changed)
-        # quoted includes resolve relative to the source's directory first: keep the original directory searchable
-        argv.insert(si, '-iquote' + str(src.parent))
-    obj = out/'compile'/Path(argv[argv.index('-o')+1]).name
-    argv[argv.index('-o')+1] = str(obj)
-    if '-MF' in argv: argv[argv.index('-MF')+1] = str(out/'compile'/(obj.stem+'.d'))
-    env = dict(proc['environment']); env.update(HOME=str(out/'home'), TMPDIR=str(out/'tmp'), TMP=str(out/'tmp'), TEMP=str(out/'tmp'))
-    run(argv, proc['cwd'], env, log)
-    obj_sha = fsha(obj)
+    plan, copy, src, src_sha, obj, obj_sha = compile_one(a.object, a.patch, out, log, flat=True)
+    subst = {a.object: obj}
+    extras = []
+    for e in a.extra:
+        oid, _, pth = e.partition('=')
+        assert oid and pth and oid not in subst, e
+        _, ecopy, esrc, esha, eobj, eobj_sha = compile_one(oid, pth, out, log)
+        subst[oid] = eobj
+        extras.append(dict(object=oid, source=str(esrc), source_sha256=esha, patch=pth, patch_sha256=fsha(pth),
+                           compiled_object_sha256=eobj_sha, linked_object_sha256=ecopy['source']['sha256']))
 
     # 2. relink in a private copy. The linker stores each object's absolute path in the debug map (N_OSO
     # stabs), so only a directory whose path has the same length as STR-041's can reproduce its bytes.
@@ -111,10 +127,11 @@ def main():
         rel = line[len(old_objects)+1:]
         dst = link/'objects'/rel; dst.parent.mkdir(parents=True, exist_ok=True)
         # N_OSO stabs also record each object's mtime: keep STR-041's mtimes (the substituted object gets the original's)
-        if rel == a.object: shutil.copyfile(obj, dst); shutil.copystat(line, dst)
+        if rel in subst: shutil.copyfile(subst[rel], dst); shutil.copystat(line, dst)
         else: shutil.copy2(line, dst)
         filelist.append(str(dst))
-    assert a.object in [l[len(new_objects)+1:] for l in filelist], 'object not in the link'
+    linked = [l[len(new_objects)+1:] for l in filelist]
+    assert all(o in linked for o in subst), 'object not in the link'
     (link/'kernel/link.filelist').write_text(''.join(f+'\n' for f in filelist))
     for name in ('all-alias.exp', 'all-kpi.exp', 'symbolsets.plist', 'symbolsets.xml.plist', 'version.o', 'lastkerneldataconst.o',
                  'lastkernelconstructor.o', 'nonlto.o', 'config'):
@@ -171,7 +188,7 @@ def main():
                entry=hex(view['entry']), undefined_symbols=0, uuid=uuids[0].split()[-1], expect_strings=found,
                no_storage=str(out/'kernel.no-storage'), no_storage_sha256=sha(stubbed), stub_patches=len(stub_report['patches']),
                stub_changed_bytes=stub_report['changed_bytes'],
-               no_storage_identical_to_nat020=sha(stubbed) == NOSTORAGE_SHA, commands=log)
+               no_storage_identical_to_nat020=sha(stubbed) == NOSTORAGE_SHA, extra_objects=extras, commands=log)
     (out/'rebuild.json').write_text(json.dumps(rec, indent=1)+'\n')
     print(json.dumps({k: rec[k] for k in ('object_identical', 'kernel_unstripped_sha256', 'identical_to_reference', 'differing_bytes',
                                           'identical_after_path_normalization', 'differing_bytes_after_path_normalization', 'no_storage_of_normalized_identical_to_nat020',

@@ -1,0 +1,38 @@
+--- r_a.c	2026-11-13 19:18:22.174916495 +0500
++++ r_b.c	2026-11-13 19:19:56.926861751 +0500
+@@ -134,15 +134,23 @@
+ 	wakeup(&touch_queue);
+ }
+ 
++static uint32_t nat121_opens, nat121_posts;
++
+ void
+ redwood_touch_post(uint32_t type, uint32_t finger, uint32_t x, uint32_t y)
+ {
++	if (nat121_posts++ < 24) {
++		printf("redwood-touch: sample %u type %u finger %u at %u %u\n", nat121_posts, type, finger, x, y);
++	}
+ 	touch_post(type, finger, x, y, true);
+ }
+ 
+ static int
+-touch_open(__unused dev_t dev, __unused int flags, __unused int devtype, __unused struct proc *p)
++touch_open(__unused dev_t dev, __unused int flags, __unused int devtype, struct proc *p)
+ {
++	if (nat121_opens++ < 8) {
++		printf("redwood-touch: opened by pid %d (minor %d)\n", p != NULL ? proc_pid(p) : -1, minor(dev));
++	}
+ 	return 0;
+ }
+ 
+@@ -213,6 +221,10 @@
+ 	if (major < 0 || devfs_make_node(makedev(major, 0), DEVFS_CHAR, UID_ROOT, GID_WHEEL, 0666, "redwood-touch") == NULL) {
+ 		printf("redwood-touch: cannot create the device\n");
+ 	}
++	/* NAT-121: the prebuilt libhakios.dylib in backboardd opens /dev/hakios-touch (same record): the same queue under that name */
++	if (major >= 0 && devfs_make_node(makedev(major, 0), DEVFS_CHAR, UID_ROOT, GID_WHEEL, 0666, "hakios-touch") == NULL) {
++		printf("redwood-touch: cannot create /dev/hakios-touch\n");
++	}
+ 	exit_call = thread_call_allocate(exit_hold_elapsed, NULL);
+ #if defined(E1S)
+ 	/*
