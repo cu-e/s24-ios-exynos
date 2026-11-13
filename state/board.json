@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-13T20:17:10+00:00",
-  "ledger_updated_at": "2026-11-13T20:16:47+00:00",
-  "registry_sha256": "b61a929d61b0eb48278badfea777783df9fc72c218af40769554ecf4bfd6e6ba",
+  "generated_at": "2026-11-13T20:26:47+00:00",
+  "ledger_updated_at": "2026-11-13T20:26:44+00:00",
+  "registry_sha256": "d13e538198418cd5a19faa9d0648dc16a961a07c72de19581a5392940ffa20ad",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -70,6 +70,7 @@
       "UI-005"
     ],
     "gated": [
+      "NAT-142",
       "NAT-017",
       "NAT-072",
       "NAT-003",
@@ -212,6 +213,7 @@
       "NAT-134",
       "NAT-139",
       "NAT-140",
+      "NAT-141",
       "KRN-007",
       "KRN-011",
       "KRN-017",
@@ -5759,6 +5761,64 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-140.md"
+    },
+    {
+      "id": "NAT-141",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scC touch image: on the NAT-140-verified pins, Samsung's screen-on start sequence (system reset FA 20 00 00 24 81 + READY wait, CLEAR_ALL_EVENT, scan mode A0 00 01 with echo, SENSE_ON) and a polled 0x87 event thread posting coordinates to /dev/hakios-touch; no IRQ, no calibration, no flash write; package, session driver, analyser, decision",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-139"
+      ],
+      "paths": [
+        "docs/procedures/nat-141",
+        "artifacts/nat-141"
+      ],
+      "acceptance": [
+        "Start sequence and event framing cited to the pinned Samsung stm_spi source and host-executed against a pin-level synthetic STM peer that answers READY, echo and coordinate events",
+        "Kernel rebuilt by KRN-044 with only e1s_touch.o changed; cmdline within 255 bytes",
+        "Counted session derivation, analyser with tests, make check",
+        "Host evidence only"
+      ],
+      "started_at": "2026-11-13T20:20:51+00:00",
+      "last_heartbeat": "2026-11-13T20:20:51+00:00",
+      "updated_at": "2026-11-13T20:26:05+00:00",
+      "evidence": "docs/procedures/nat-141/evidence.json",
+      "evidence_sha256": "e6495962cf6fda57d7c278b379f6dc5a84658adb7026cab6a81c1548da54c830",
+      "finished_at": "2026-11-13T20:26:05+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-141.md"
+    },
+    {
+      "id": "NAT-142",
+      "status": "pending",
+      "owner": null,
+      "title": "Native run of loader-diag-xnu-scC-md1 (NAT-141): Samsung STM screen-on start sequence and polled touch events posted to /dev/hakios-touch, with the owner touching the screen; restore stock RECOVERY and check Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 99,
+      "depends_on": [
+        "NAT-141"
+      ],
+      "paths": [
+        "docs/procedures/nat-142",
+        "artifacts/nat-142"
+      ],
+      "acceptance": [
+        "Exactly one bounded run of the pinned scC package under decision 0057, RECOVERY write with full readback",
+        "analyze142 verdicts reported: start S0-S3, events E0/E1 with counts and coordinates, reader, power, window/display",
+        "Stock RECOVERY restored with full hash match; Android boot_completed and user-data directories present",
+        "Dated native evidence; no claim that iOS acted on input without a UI change"
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-142.md"
     },
     {
       "id": "KRN-007",
@@ -19341,59 +19401,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-13T19:31:18+00:00",
-      "action": "task.done:NAT-129",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-129",
-          "status": "done",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 99,
-          "last_heartbeat": "2026-11-13T16:44:12+00:00",
-          "handoff": "docs/procedures/nat-129/task.json"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T19:31:28+00:00",
-      "action": "task.add:NAT-137",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-137",
-          "status": "pending",
-          "owner": null,
-          "priority": 99
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T19:31:54+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-13T19:32:04+00:00",
-      "action": "task.claim:NAT-137",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-137",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 99,
-          "last_heartbeat": "2026-11-13T19:32:04+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-13T19:50:36+00:00",
       "action": "task.update:NAT-137",
       "owner": "claude-opus-usb130-20261113",
@@ -19612,11 +19619,65 @@
           "last_heartbeat": "2026-11-13T20:16:03+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-13T20:20:42+00:00",
+      "action": "task.add:NAT-141",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-141",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T20:20:51+00:00",
+      "action": "task.claim:NAT-141",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-141",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T20:20:51+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T20:26:05+00:00",
+      "action": "task.done:NAT-141",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-141",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T20:20:51+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T20:26:44+00:00",
+      "action": "task.add:NAT-142",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-142",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "573d8eab5a3ddd25e8cd62935ccaa210edb88f6495b49532f1440baead5b6790",
-    "BOARD.md": "2ea7e385c364f33ee7579fb5e8fecd9a945a2bae8a15d3794dd03aa76f34832b",
+    "STATUS.md": "2406c3c711901eed5e18e46c09e0233b625c1c7c1bfa4be679f374843bc30858",
+    "BOARD.md": "f535c505247e9eef228ca623b9bffb91f6e0949fe782bf8ea1408302b8ad2d4e",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -19744,6 +19805,8 @@
     "planning/tasks/NAT-138.md": "0ba9abe5702bd16f5faa1786dd7bf60c324f086e62f564a867a3bcd787a80108",
     "planning/tasks/NAT-139.md": "a02d43942a235781f22e112fc62faae6cea51573000b48208d91e8bdc50b1530",
     "planning/tasks/NAT-140.md": "182d9a97c7ab11a84156dda276670d16ae5b6553fe4c118c4750fa3733016dc9",
+    "planning/tasks/NAT-141.md": "63b698ab674d9d2b3a7643370acdfd31315bf49c21117ad4c912faa800725da9",
+    "planning/tasks/NAT-142.md": "2b95c3cba1e2f30f67a5ae0e7ad09d244ee6f2f86891d18fdf5ef8eb2f98c332",
     "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-011.md": "9b8014abd8d019af80fad695e0d0df9de9523d36a222553327384f7f00e8a901",
     "planning/tasks/KRN-017.md": "86a29485c4c3ed3a62f7ecf64f5e2bb303bb0bd7ac5fd661482bf024004f407d",

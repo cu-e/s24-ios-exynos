@@ -1,0 +1,87 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-13T20:25:58.297028+00:00",
+ "task": "NAT-141",
+ "summary": "scC image: Samsung screen-on STM start (FA 20 00 00 24 81 + READY, C0 62, A0 00 01 + echo, C0 10) and a polled 0x87 event thread posting to /dev/hakios-touch, admitted only after an answered ID; host-executed with real bit-banged SPI against a synthetic event peer. Host-test only.",
+ "commit": "a30cb02",
+ "device_used": false,
+ "image": {
+  "recovery_sha256": "15b2d177cc0b3f061eec1a0064e3d1569a43b296ac2c8ca4a4ea4824da70b617",
+  "payload_sha256": "416826b3221355df31cc6daecb6ac82470e1011df8f33a56c76b149ad0348263",
+  "payload_bytes": 26199088,
+  "loader_image_sha256": "1dd223ef88494ff0947c80ef0f627f5bb027d0099e1582f1bd9ec779106690e8",
+  "kernel_sha256": "9213cff4b675bb22d08aa7ef696ec82d8e0bf61c6206cfd6da0c537d4ae85914",
+  "cmdline_bytes": 246
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/krn-044/rebuild.py --out artifacts/nat-141/kernel-001 ... --extra bsd/e1s_touch.o=docs/procedures/nat-141/e1s_touch_combined.patch (other extras as NAT-139)",
+   "exit_code": 0,
+   "result": "0 undefined, 29 stubs, only e1s_touch.o differs from NAT-139"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-141/build.py --out artifacts/nat-141/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-141/build-001 --out artifacts/nat-141/package-001",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-141/derive142.py --check",
+   "exit_code": 0
+  },
+  {
+   "cmd": "TMPDIR=<scratch> python3 -B -I docs/procedures/nat-141/test_nat141.py",
+   "exit_code": 0,
+   "result": "5 OK"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-141/test_analyze142.py",
+   "exit_code": 0,
+   "result": "4 OK"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "448 OK"
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-141/README.md",
+  "docs/procedures/nat-141/e1s_touch_combined.patch",
+  "docs/procedures/nat-141/host/peer141.c",
+  "docs/procedures/nat-141/test_nat141.py",
+  "docs/procedures/nat-141/build.py",
+  "docs/procedures/nat-141/derive142.py",
+  "docs/procedures/nat-141/session_nat142.py",
+  "docs/procedures/nat-141/analyze142.py",
+  "docs/procedures/nat-141/test_analyze142.py",
+  "artifacts/nat-141/kernel-001/rebuild.json",
+  "artifacts/nat-141/kernel-001/kernel.no-storage",
+  "artifacts/nat-141/build-001/build.json",
+  "artifacts/nat-141/package-001/package.json",
+  "artifacts/nat-141/package-001/loader-diag-xnu-scC-md1/recovery.img",
+  "artifacts/nat-141/make-check.log"
+ ],
+ "artifact_hashes": {
+  "docs/procedures/nat-141/README.md": "b3f64844f5a78fb918bbc5bffff7bede950da2b0013afb6dbf24f846924d898b",
+  "docs/procedures/nat-141/e1s_touch_combined.patch": "10156055c9c696a3021e9858dd7575ac6542a943a3996d52c1f800a5648baa74",
+  "docs/procedures/nat-141/host/peer141.c": "75e4fb91ef2572ed14f06957d7b0624d9e9e7abdf3351c9e1ff0e4f1ed22da30",
+  "docs/procedures/nat-141/test_nat141.py": "4a3de265f2908e6756a71fb84628171ca955f0774b7d862ad05e3e32ae261ae1",
+  "docs/procedures/nat-141/build.py": "4e6337712c363326c63e32af11e4f3c115642d31b1982b0c61caf69018982e1f",
+  "docs/procedures/nat-141/derive142.py": "31af2de40b9ae5c45ae6b04fe64d209fd4742d24f63565fb2322492edf915827",
+  "docs/procedures/nat-141/session_nat142.py": "ced8653c205fc7cfefe742d09cd252ccce059808cdd1d9fb5293ad604c9ac84c",
+  "docs/procedures/nat-141/analyze142.py": "81989352f9e27c2df77b14b6e53dfd92e94a76b4ee584d64d0d873e6e8f774bd",
+  "docs/procedures/nat-141/test_analyze142.py": "610726da5dd0bacef6d770cd79d21da27cb654d010eb2bbf312134a1b9518865",
+  "artifacts/nat-141/kernel-001/rebuild.json": "9736d663c179e056a3031f0cf1af07a642d30b52db6f1fa99cf96ffb43ef78c6",
+  "artifacts/nat-141/kernel-001/kernel.no-storage": "9213cff4b675bb22d08aa7ef696ec82d8e0bf61c6206cfd6da0c537d4ae85914",
+  "artifacts/nat-141/build-001/build.json": "fe542bd9e95c23570ad01b835581b4d0259cbb98dad53cd6949c67f1e61448a2",
+  "artifacts/nat-141/package-001/package.json": "9fd16629e4c9dd0a1798642558a1153e0c5f40aa4bbdb93479d15f57e9a01f98",
+  "artifacts/nat-141/package-001/loader-diag-xnu-scC-md1/recovery.img": "15b2d177cc0b3f061eec1a0064e3d1569a43b296ac2c8ca4a4ea4824da70b617",
+  "artifacts/nat-141/make-check.log": "32ce5690a8b00a9426af957b14cd4938acbaf8ebb9337b7ccaa2ebdff378c0ec"
+ },
+ "limits": "Synthetic peer; not electrical evidence."
+}

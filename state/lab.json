@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T20:16:47+00:00",
+  "updated_at": "2026-11-13T20:26:44+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -17749,6 +17749,56 @@
       "evidence": "docs/procedures/gpu-017/evidence.json",
       "evidence_sha256": "30cff1655cbd2065410e018e2bcce2f8ab0dea78956840b761b3145d29b4def4",
       "finished_at": "2026-11-13T20:16:47+00:00"
+    },
+    {
+      "id": "NAT-141",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scC touch image: on the NAT-140-verified pins, Samsung's screen-on start sequence (system reset FA 20 00 00 24 81 + READY wait, CLEAR_ALL_EVENT, scan mode A0 00 01 with echo, SENSE_ON) and a polled 0x87 event thread posting coordinates to /dev/hakios-touch; no IRQ, no calibration, no flash write; package, session driver, analyser, decision",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-139"
+      ],
+      "paths": [
+        "docs/procedures/nat-141",
+        "artifacts/nat-141"
+      ],
+      "acceptance": [
+        "Start sequence and event framing cited to the pinned Samsung stm_spi source and host-executed against a pin-level synthetic STM peer that answers READY, echo and coordinate events",
+        "Kernel rebuilt by KRN-044 with only e1s_touch.o changed; cmdline within 255 bytes",
+        "Counted session derivation, analyser with tests, make check",
+        "Host evidence only"
+      ],
+      "started_at": "2026-11-13T20:20:51+00:00",
+      "last_heartbeat": "2026-11-13T20:20:51+00:00",
+      "updated_at": "2026-11-13T20:26:05+00:00",
+      "evidence": "docs/procedures/nat-141/evidence.json",
+      "evidence_sha256": "e6495962cf6fda57d7c278b379f6dc5a84658adb7026cab6a81c1548da54c830",
+      "finished_at": "2026-11-13T20:26:05+00:00"
+    },
+    {
+      "id": "NAT-142",
+      "status": "pending",
+      "owner": null,
+      "title": "Native run of loader-diag-xnu-scC-md1 (NAT-141): Samsung STM screen-on start sequence and polled touch events posted to /dev/hakios-touch, with the owner touching the screen; restore stock RECOVERY and check Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 99,
+      "depends_on": [
+        "NAT-141"
+      ],
+      "paths": [
+        "docs/procedures/nat-142",
+        "artifacts/nat-142"
+      ],
+      "acceptance": [
+        "Exactly one bounded run of the pinned scC package under decision 0057, RECOVERY write with full readback",
+        "analyze142 verdicts reported: start S0-S3, events E0/E1 with counts and coordinates, reader, power, window/display",
+        "Stock RECOVERY restored with full hash match; Android boot_completed and user-data directories present",
+        "Dated native evidence; no claim that iOS acted on input without a UI change"
+      ]
     }
   ],
   "experiments": [
@@ -68258,6 +68308,60 @@
           "owner": "claude-opus-usb130-20261113",
           "priority": 90,
           "last_heartbeat": "2026-11-13T20:16:03+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T20:20:42+00:00",
+      "action": "task.add:NAT-141",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-141",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T20:20:51+00:00",
+      "action": "task.claim:NAT-141",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-141",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T20:20:51+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T20:26:05+00:00",
+      "action": "task.done:NAT-141",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-141",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-13T20:20:51+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T20:26:44+00:00",
+      "action": "task.add:NAT-142",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-142",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
         }
       ]
     }
