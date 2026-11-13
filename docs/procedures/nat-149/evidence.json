@@ -1,0 +1,91 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "fail",
+ "recorded_at": "2026-11-13T22:42:21.712344+00:00",
+ "task": "NAT-149",
+ "summary": "scF ran once under decision 0060 and ended through its own stop path (timed return, log dump why=2 517830 B, deadline, Download Mode by itself). The NAT-148 fix works on the phone: ten CPUs registered (phys 0x0-0x900). The retail firmware accepted PSCI CPU_ON (status 0) for all nine secondaries, but none joined: each \"has not joined: no sign of it since the firmware took the request\" (no arm_init_cpu stage, no entry fault); 1 of 10 processors running. The 9 x 5 s start waits delayed the home screen to ~354 s, so no frame-rate window. analyze146 printed C1-some, but its started count is the boot CPU's cpu_start lines; in substance no secondary ran. Stock RECOVERY restored, Android verified.",
+ "commit": "611cf24",
+ "device_used": true,
+ "decision": "docs/decisions/0060-nat149-loader-diag-xnu-scF-md1-single-run-2026-11-14.md",
+ "device_inventory": "devices/local-2026-11-14-nat149.json",
+ "image": {
+  "recovery_sha256": "56e9d3acfac4d0438c93c2eefb5f7da7b50ee94e4454bf613eb7c36b26386d3d",
+  "kernel_sha256": "6aa8b6eb27009e16d0e7a618c5e4becca6f36561ac5b632912bdda13078fd100"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-148/session_nat149.py --out artifacts/nat-149/preflight-002 --image loader-diag-xnu-scF-md1",
+   "exit_code": 0,
+   "result": "ready-read-only (preflight-001 stopped: decision text lacked \"decision 0019\", fixed in 611cf24)"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/nat-148/session_nat149.py --out artifacts/nat-149/run-001 --image loader-diag-xnu-scF-md1 --execute",
+   "exit_code": 0,
+   "result": "native-attempt-started; delivered 2475720704 B at 36.17 MB/s"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 21 --out artifacts/nat-149/restore-001/restore-trace",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-149/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-149/restore-001/report.json --readback artifacts/nat-149/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "kl_reader2 why=2 dump -> analysis/kernel-text.txt; python3 -B -I docs/procedures/nat-113/decode113.py artifacts/nat-149/run-001/archive --json ... --ppm ...",
+   "exit_code": 0,
+   "result": "P1-panel-has-pixels"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-145/analyze146.py --kernel-text artifacts/nat-149/analysis/kernel-text.txt --pixels artifacts/nat-149/analysis/pixels.json --out artifacts/nat-149/analysis/verdict.json",
+   "exit_code": 0,
+   "result": "smp C1-some (rule flaw, see README), running 1, 9 not joined, fps none"
+  }
+ ],
+ "limits": [
+  "No marker before arm_init_cpu: where the cores stop is unknown",
+  "No frame rate measured",
+  "Owner observation not recorded"
+ ],
+ "artifacts": [
+  "docs/procedures/nat-149/README.md",
+  "docs/procedures/nat-149/task.json",
+  "docs/decisions/0060-nat149-loader-diag-xnu-scF-md1-single-run-2026-11-14.md",
+  "artifacts/nat-149/run-001/report.json",
+  "artifacts/nat-149/run-001/usb-events.jsonl",
+  "artifacts/nat-149/run-001/delivery/delivery.json",
+  "artifacts/nat-149/run-001/archive/collector-summary.json",
+  "artifacts/nat-149/analysis/kernel-text.txt",
+  "artifacts/nat-149/analysis/pixels.json",
+  "artifacts/nat-149/analysis/verdict.json",
+  "artifacts/nat-149/restore-001/report.json",
+  "artifacts/nat-149/restore-001/android-check.json",
+  "artifacts/nat-149/restore-001/assess.json",
+  "artifacts/nat-149/native-attempt-loader-diag-xnu-scF-md1-used.json",
+  "devices/local-2026-11-14-nat149.json"
+ ],
+ "artifact_hashes": {
+  "docs/procedures/nat-149/README.md": "cb2f3a994ecb4a745d0ee8ec0b958e40ff0217bbf819acb0d7a663f6ddf8cc29",
+  "docs/procedures/nat-149/task.json": "6c80e76fa6e0cddcdd1c49c2c685290062a35abaf683a1b72179776ae2573692",
+  "docs/decisions/0060-nat149-loader-diag-xnu-scF-md1-single-run-2026-11-14.md": "e5a5d173e4b03bb1f6a4fca62172be24004a0834b0994f4291744d51402601eb",
+  "artifacts/nat-149/run-001/report.json": "81636e086090d517a6c3648ccaf0954d95a68398604cdbca9e2e4fb98df92103",
+  "artifacts/nat-149/run-001/usb-events.jsonl": "71ee63974c1430d3ddf7e51e66e72da570dc617da25343baaabfdd7707d62ce9",
+  "artifacts/nat-149/run-001/delivery/delivery.json": "ca10fc13ebda9673666ef656457ac5e385035e8bca1875c8f337b4d957e958fa",
+  "artifacts/nat-149/run-001/archive/collector-summary.json": "003bec899d4d7e102fd944e9d75c7cdaa0de128a6fbf9ccf139c537af4cbbc67",
+  "artifacts/nat-149/analysis/kernel-text.txt": "fd0b1d8a35192ce6b4c97eba6368977336554a2789bd3871e0da74c2fed0e9c1",
+  "artifacts/nat-149/analysis/pixels.json": "0cf461acb63ab485cb2e07e27f5ab181fa83fcbf0694d1d97c38ef52eb7926a4",
+  "artifacts/nat-149/analysis/verdict.json": "215f13403dca9be3361b738abe9c40a63eb5d72dc913633e40175ce219d9aa79",
+  "artifacts/nat-149/restore-001/report.json": "237523660fc71847006a2930d801949cb2425ad50d901e1d2fe635b5b033d33a",
+  "artifacts/nat-149/restore-001/android-check.json": "486b6d9e010abe68f46c938f686fbfa05a8855428c88d0ee6bdf346714ed569c",
+  "artifacts/nat-149/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "artifacts/nat-149/native-attempt-loader-diag-xnu-scF-md1-used.json": "400e3c3b6589b6ea9d2a89233ecc24e89045c9d5e0d7cfc6d8dd8168727d0be5",
+  "devices/local-2026-11-14-nat149.json": "1e3405fa248d7472a3b43ee6e6dbf804447982d5481245e2e583d272d5d2d343"
+ }
+}
