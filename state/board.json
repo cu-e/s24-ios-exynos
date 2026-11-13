@@ -1,11 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-13T14:10:52+00:00",
-  "ledger_updated_at": "2026-11-13T14:10:43+00:00",
-  "registry_sha256": "1b90d15d3d7d17f78ff5ac3be9a0df626b0b0599369c6d48023a773ec0fac4a5",
+  "generated_at": "2026-11-13T14:15:46+00:00",
+  "ledger_updated_at": "2026-11-13T14:15:11+00:00",
+  "registry_sha256": "75dbbe3ed25c668cc60a820c631130dd821024a240989ca584d22c9e4acaa84a",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
+      "NAT-121",
       "NAT-082",
       "NAT-054",
       "NAT-055"
@@ -5156,6 +5157,32 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-120.md"
+    },
+    {
+      "id": "NAT-121",
+      "title": "Host: touch input path for the next image: fix e1s_touch.c physical-address GPIO access (NAT-066 abort), add staged bring-up (e1stouch_steps), add a /dev/hakios-touch devfs node for the prebuilt libhakios reader, extend KRN-044 rebuild.py to several objects; host tests on a fake register file; image build, analyser and decision; no phone action",
+      "status": "pending",
+      "owner": null,
+      "priority": 99,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-120"
+      ],
+      "paths": [
+        "docs/procedures/nat-121",
+        "artifacts/nat-121"
+      ],
+      "acceptance": [
+        "every GPIO access in e1s_touch.c uses the ml_io_map'ed base; a fake-register host test of the extracted functions shows only offsets inside the mapped pages",
+        "staged boot-arg: step 1 writes nothing; step 2 changes only gpp9[0..3] function/pull and reads the STM device id; step 3 starts the event loop",
+        "kernel exposes /dev/hakios-touch with the same record layout; libhakios open path confirmed from its strings",
+        "image built on NAT-119's, decision draft with risks (pin direction change on the touch SPI bus, rails unknown)"
+      ],
+      "notes": "research/notes/NAT-121-input-path-review.md",
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-121.md"
     },
     {
       "id": "KRN-007",
@@ -18643,19 +18670,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-13T12:41:41+00:00",
-      "action": "task.add:NAT-117",
-      "owner": "claude-opus-nat116-20261113",
-      "tasks": [
-        {
-          "id": "NAT-117",
-          "status": "pending",
-          "owner": null,
-          "priority": 99
-        }
-      ]
-    },
-    {
       "at": "2026-11-13T12:41:49+00:00",
       "action": "task.add:NAT-118",
       "owner": "claude-opus-nat116-20261113",
@@ -18893,11 +18907,24 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-13T14:15:11+00:00",
+      "action": "task.add:NAT-121",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-121",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "c6eed3bb3f1ffbdd7b482603cb650f7f05b55a2ff8af81d3b0cb019bb2f08a13",
-    "BOARD.md": "564cdc6f152e1526851f9d4dc5cbab20dbbfb161e340c260a73c734ca882584e",
+    "STATUS.md": "f146a979f58ca84aa75a3642c7165b3fd71cfa62fdb22f40356c632bcd7203ce",
+    "BOARD.md": "c4f616692258f89c73df1234d9becdbddbee1f474af6167c0337c96222c74c3b",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -19007,6 +19034,7 @@
     "planning/tasks/NAT-118.md": "8f3ad36d91368bd637ae874e5b9d59b46b0f40981edb2510efeacccdf2253123",
     "planning/tasks/NAT-119.md": "e7a1591cbbfcd0c092737e113cb30b7914c23f0f882c2bd7d0b83fd6bb7d2959",
     "planning/tasks/NAT-120.md": "7c08188385b6c654dfec800f20fa25e4a857b5bc73df420e38af4fadbf7cfb68",
+    "planning/tasks/NAT-121.md": "ef91612ee90a36eb3da60258cb32e4125b307626fbdd6ce04271aa1b5a633a90",
     "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-011.md": "9b8014abd8d019af80fad695e0d0df9de9523d36a222553327384f7f00e8a901",
     "planning/tasks/KRN-017.md": "86a29485c4c3ed3a62f7ecf64f5e2bb303bb0bd7ac5fd661482bf024004f407d",

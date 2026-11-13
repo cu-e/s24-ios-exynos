@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T14:10:43+00:00",
+  "updated_at": "2026-11-13T14:15:11+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -17031,6 +17031,29 @@
       "evidence": "docs/procedures/nat-120/evidence.json",
       "evidence_sha256": "a49002cb262daf487caad96339491aeb59440a7fe7617a990f6db6b87f392464",
       "finished_at": "2026-11-13T14:10:35+00:00"
+    },
+    {
+      "id": "NAT-121",
+      "title": "Host: touch input path for the next image: fix e1s_touch.c physical-address GPIO access (NAT-066 abort), add staged bring-up (e1stouch_steps), add a /dev/hakios-touch devfs node for the prebuilt libhakios reader, extend KRN-044 rebuild.py to several objects; host tests on a fake register file; image build, analyser and decision; no phone action",
+      "status": "pending",
+      "owner": null,
+      "priority": 99,
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "depends_on": [
+        "NAT-120"
+      ],
+      "paths": [
+        "docs/procedures/nat-121",
+        "artifacts/nat-121"
+      ],
+      "acceptance": [
+        "every GPIO access in e1s_touch.c uses the ml_io_map'ed base; a fake-register host test of the extracted functions shows only offsets inside the mapped pages",
+        "staged boot-arg: step 1 writes nothing; step 2 changes only gpp9[0..3] function/pull and reads the STM device id; step 3 starts the event loop",
+        "kernel exposes /dev/hakios-touch with the same record layout; libhakios open path confirmed from its strings",
+        "image built on NAT-119's, decision draft with risks (pin direction change on the touch SPI bus, rails unknown)"
+      ],
+      "notes": "research/notes/NAT-121-input-path-review.md"
     }
   ],
   "experiments": [
@@ -66381,6 +66404,19 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-13T14:15:11+00:00",
+      "action": "task.add:NAT-121",
+      "owner": "claude-opus-nat116-20261113",
+      "tasks": [
+        {
+          "id": "NAT-121",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
     }
   ]
 }
