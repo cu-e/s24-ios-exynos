@@ -1,0 +1,17 @@
+{
+  "id": "NAT-125",
+  "status": "pending",
+  "owner": null,
+  "title": "Host: isolate NAT-124 no-userland regression; prevent IRQ/event-thread startup after an unresponsive STM and document pinned Samsung SPI startup",
+  "scope": "host",
+  "evidence_kind": "host-test",
+  "priority": 99,
+  "depends_on": ["NAT-123"],
+  "paths": ["docs/procedures/nat-125", "artifacts/nat-125"],
+  "acceptance": [
+    "Host regression demonstrates that the existing driver attaches a level-low IRQ despite all-zero STM response, and corrected driver does not attach IRQ or start event thread",
+    "Responsive STM still reaches stage 3 in the host harness; unresponsive input never creates an IRQ/rearm loop",
+    "Samsung SPI startup/read framing reviewed at full pinned SHA with exact source anchors and unknowns; no speculative hardware success",
+    "Actual ARM64 compile/link and project checks pass; evidence and handoff saved; no phone action or new PMIC run"
+  ]
+}

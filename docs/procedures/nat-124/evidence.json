@@ -1,0 +1,66 @@
+{
+  "kind": "native-device",
+  "origin": "local-device",
+  "outcome": "inconclusive",
+  "task": "NAT-124",
+  "owner": "claude-opus-nat116-20261113",
+  "recorded_at": "2026-11-13T15:41:34.564544+00:00",
+  "commit": "a95edf634cbd911dee9e5ccce5c2cecaecb7d09f",
+  "summary": "ACPM and both touch LDO readbacks confirmed on S24; STM still no response, no launchd lines or recorded iOS frame. Stock RECOVERY restored and Android checked pass. Not task done.",
+  "device_inventory": "devices/local-2026-11-13-nat124.json",
+  "owner_observation": "\u041d\u0435 \u043d\u0430\u0431\u043b\u044e\u0434\u0430\u043b \u044d\u043a\u0440\u0430\u043d",
+  "decision": "docs/decisions/0050-nat124-loader-diag-xnu-sc8-md1-single-run-2026-11-13.md",
+  "checks": [
+    {
+      "cmd": "python3 docs/procedures/nat-123/session_nat123.py --out artifacts/nat-124/run-001 --image loader-diag-xnu-sc8-md1 --execute",
+      "exit_code": 0
+    },
+    {
+      "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 5 --address 56 --out artifacts/nat-124/restore-001/restore-trace",
+      "exit_code": 0
+    },
+    {
+      "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-124/restore-001/android-check.json",
+      "exit_code": 0
+    },
+    {
+      "cmd": "nat-013/restore_stock.py assess --report restore-001/report.json --readback restore-001/android-check.json",
+      "exit_code": 0
+    },
+    {
+      "cmd": "nat-123/analyze124.py",
+      "exit_code": 0,
+      "result": "W-ok / D2-refreshing / T1-no-response / P2-both-rails-verified; physical input not established"
+    }
+  ],
+  "artifacts": [
+    "docs/procedures/nat-124/README.md",
+    "artifacts/nat-124/run-001/report.json",
+    "artifacts/nat-124/run-001/delivery/delivery.json",
+    "artifacts/nat-124/analysis/kernel-text.txt",
+    "artifacts/nat-124/analysis/pixels.json",
+    "artifacts/nat-124/analysis/verdict.json",
+    "artifacts/nat-124/restore-001/report.json",
+    "artifacts/nat-124/restore-001/android-check.json",
+    "artifacts/nat-124/restore-001/assess.json"
+  ],
+  "artifact_hashes": {
+    "docs/procedures/nat-124/README.md": "015d5223444b16dbd9902af40d12ed68b56912ae4321a6910e6cb3e019e1efde",
+    "artifacts/nat-124/run-001/report.json": "8984008c82fa53ceef96c1368222f121bce8bdfab19bda91606002bd75eefb56",
+    "artifacts/nat-124/run-001/delivery/delivery.json": "f3913cc0252d7fe952c9e34440d8e3448428a0df6d551628a2fedb20188e08c8",
+    "artifacts/nat-124/analysis/kernel-text.txt": "91e6496191151686af774828e9c215e3f66fde3ddef9c6c0de22e929b2010e0f",
+    "artifacts/nat-124/analysis/pixels.json": "ee7e42ab211a994edae5603b281840e8b438c4907d7ad50e90a57c38bbce15e6",
+    "artifacts/nat-124/analysis/verdict.json": "ddf16deba52651b0a55e2586b4fd4515029d5f535881af3850f96e56d2bdc234",
+    "artifacts/nat-124/restore-001/report.json": "20d801c162ddca3f747492f0d956008d01464e70b0e5d925c2bcf81b8dc2ea6d",
+    "artifacts/nat-124/restore-001/android-check.json": "335f5b2a6cb5b95eb74d192bee31b3e364172fa1b1ae98ab0d51d9b35d82232d",
+    "artifacts/nat-124/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a"
+  },
+  "not_established": [
+    "iOS frame in this run",
+    "physical input",
+    "cause of missing launchd/PID1 activity",
+    "electrically measured rail voltage",
+    "GPU acceleration",
+    "60 FPS"
+  ]
+}
