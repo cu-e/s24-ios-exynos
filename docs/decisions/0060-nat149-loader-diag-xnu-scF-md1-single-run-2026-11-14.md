@@ -1,6 +1,6 @@
 # Decision 0060: one NAT-149 run of loader-diag-xnu-scF-md1 (ten CPUs, one boot CPU in /cpus)
 
-Date: 2026-11-14. Recorded by `claude-opus-usb130-20261113` under decisions 0019, 0044 and 0052, with the owner's separate answer
+Date: 2026-11-14. Recorded by `claude-opus-usb130-20261113` under decision 0019, decision 0044 and decision 0052, with the owner's separate answer
 below (PSCI `CPU_ON`/`CPU_OFF` are not named in 0052, as in decision 0059).
 
 ## Owner consent
