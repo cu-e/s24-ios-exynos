@@ -1,0 +1,68 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "outcome": "fail",
+ "recorded_at": "2026-11-13T23:32:26.249772+00:00",
+ "task": "NAT-151",
+ "summary": "scG RECOVERY written with readback; the loader ran to PREPARING XNU HANDOFF and then took a data abort (ESR 0x96000010, ELR 0x800b36d4, FAR 0x1f935) before the kernel: the loader's compile-time kernel addresses (5 start.s checkpoint sites, loader_jump, _set_mmu_ttb) no longer match the NAT-150 kernel, whose start.patch moved that code. Reproduced on the host with the loader's own nat036_check: scG rc 2 NAT031_SITE_BAD site 1, scF rc 0. No delivery (never-ready); the 595 s deadline brought Download Mode by itself; stock RECOVERY restored, Android verified. Nothing about the secondary cores was measured.",
+ "decision": "docs/decisions/0062-nat151-loader-diag-xnu-scG-md1-single-run-2026-11-14.md",
+ "device_used": true,
+ "image": {
+  "name": "loader-diag-xnu-scG-md1",
+  "recovery_sha256": "a9f0eed0175fc9f4aea26dd67a50b6f2ca5b62494cf70414250f3700d8dd6de0",
+  "payload_sha256": "a68fd474af6775d5c66c525edf66b0baf006ff9e169795f0c67bf1e70cd2c213"
+ },
+ "timeline": {
+  "recovery_written_readback_equal": "2026-11-13T23:19:04Z",
+  "loader_up": "23:19:40Z",
+  "exception": "23:19:45Z",
+  "delivery_never_ready": "23:24:08Z",
+  "download_mode": "23:29:32Z",
+  "restore_rc0": "23:30:26Z",
+  "android_check_pass": "23:31:04Z"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-150/session_nat151.py --out artifacts/nat-151/preflight-001 --image loader-diag-xnu-scG-md1",
+   "exit_code": 0,
+   "result": "ready-read-only"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/nat-150/session_nat151.py --out artifacts/nat-151/run-001 --image loader-diag-xnu-scG-md1 --execute",
+   "exit_code": 0,
+   "result": "native-attempt-started; delivery never-ready"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 23 --out artifacts/nat-151/restore-001/restore-trace",
+   "exit_code": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-151/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-151/restore-001/report.json --readback artifacts/nat-151/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-150/check_loader_sites.py --build artifacts/nat-150/build-001 --image loader-diag-xnu-scG-md1 --kernel-dir artifacts/nat-150/kernel-001",
+   "exit_code": 1,
+   "result": "rc 2 NAT031_SITE_BAD site 1"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-150/check_loader_sites.py --build artifacts/nat-148/build-001 --image loader-diag-xnu-scF-md1",
+   "exit_code": 0,
+   "result": "rc 0"
+  }
+ ],
+ "artifacts": {
+  "artifacts/nat-151/run-001/report.json": "d130c7b02c3488b97e25962557fcfae3c817ea5596bd67af823bc4af2bf81192",
+  "artifacts/nat-151/restore-001/android-check.json": "1b7abee4be8c6d9e46d75e9e3fde51a45b486843fff557b566478bd687119286",
+  "artifacts/nat-151/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "artifacts/nat-151/run-001/delivery/delivery.jsonl": "bf6a04a72d535e0c83cc21aa0d328f95d2294464fc62fd3a4a9b7fbcac4687ae"
+ },
+ "local_device_record": "devices/local-2026-11-14-nat151.json",
+ "not_established": "Why the loader faults in its failure path instead of printing the site check message; anything about PSCI-started cores."
+}

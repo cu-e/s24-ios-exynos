@@ -1,17 +1,15 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-13T23:18:33+00:00",
-  "ledger_updated_at": "2026-11-13T23:18:14+00:00",
-  "registry_sha256": "c669674c12625c9d51d90bc05aaab705e3be54a9cd98dd792beaf90c68497a15",
+  "generated_at": "2026-11-13T23:33:16+00:00",
+  "ledger_updated_at": "2026-11-13T23:32:57+00:00",
+  "registry_sha256": "5c71598165908bce881f5b10c1d1dfa87401c3642a8059d8ced1f99737ac23d1",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
-      "NAT-017",
       "NAT-082",
+      "GPU-018",
       "NAT-054",
-      "NAT-055",
-      "NAT-072",
-      "NAT-004"
+      "NAT-055"
     ],
     "in_progress": [
       "NAT-103",
@@ -74,9 +72,14 @@
       "BT-004",
       "UI-003",
       "UI-004",
-      "UI-005",
+      "UI-005"
+    ],
+    "gated": [
+      "NAT-017",
+      "NAT-072",
       "NAT-003",
       "DRV-003",
+      "NAT-004",
       "UI-002",
       "USB-002",
       "GPU-008",
@@ -96,7 +99,6 @@
       "QUAL-001",
       "BT-005"
     ],
-    "gated": [],
     "done": [
       "KRN-009",
       "KRN-025",
@@ -6103,8 +6105,10 @@
         "Dated native evidence; frame rate is the kernel's count, not a camera measurement; the owner's account recorded as an observation"
       ],
       "started_at": "2026-11-13T23:18:14+00:00",
-      "last_heartbeat": "2026-11-13T23:18:14+00:00",
-      "updated_at": "2026-11-13T23:18:14+00:00",
+      "last_heartbeat": "2026-11-13T23:32:38+00:00",
+      "updated_at": "2026-11-13T23:32:38+00:00",
+      "progress_note": "FAIL (native-device): loader stopped before the kernel; its compile-time kernel addresses (5 start.s checkpoint sites, loader_jump, _set_mmu_ttb) were moved by NAT-150's start.patch; reproduced on host (check_loader_sites: scG rc 2 site 1, scF rc 0); deadline -> Download Mode by itself; stock RECOVERY restored, Android verified (evidence docs/procedures/nat-151/evidence.json)",
+      "next_step": "NAT-152 host: scH with the loader's view intact (check_loader_sites rc 0 as build gate)",
       "column": "in_progress",
       "reasons": [],
       "card_path": "planning/tasks/NAT-151.md",
@@ -7803,8 +7807,10 @@
         "Prepare image hash, bounded run, independent return and stock restore plan for review",
         "Only after explicit authorization execute the log canary and assess retention"
       ],
-      "column": "ready",
-      "reasons": [],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
       "card_path": "planning/tasks/NAT-017.md"
     },
     {
@@ -11676,6 +11682,31 @@
       "card_path": "planning/tasks/NAT-084.md"
     },
     {
+      "id": "GPU-018",
+      "status": "pending",
+      "owner": null,
+      "title": "Android read-only: Xclipse 940 inventory for a first native GPU step: /vendor/firmware/sgpu file names, sizes and SHA-256 (never the blob), SGPU/G3D lines still in the kernel ring, the G3D power-domain runtime state and the sgpu device's sysfs identity; no debugfs clk_summary, no writes",
+      "scope": "android-readonly",
+      "evidence_kind": "android-userland",
+      "priority": 95,
+      "depends_on": [
+        "GPU-017"
+      ],
+      "paths": [
+        "docs/procedures/gpu-018",
+        "artifacts/gpu-018"
+      ],
+      "acceptance": [
+        "Commands and exit codes recorded; nothing written on the phone; debugfs clk_summary not read",
+        "Firmware names, sizes and hashes listed (no blob committed or copied outside artifacts/)",
+        "SGPU init lines (order, return values if printed) or a statement that the ring no longer has them",
+        "G3D power-domain state and the sgpu platform device path; what this establishes for a native power-on plan"
+      ],
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/GPU-018.md"
+    },
+    {
       "id": "DRV-001",
       "title": "Prepare an STM SPI touch driver and host adapter",
       "status": "done",
@@ -12302,8 +12333,10 @@
       ],
       "status": "pending",
       "owner": null,
-      "column": "ready",
-      "reasons": [],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
       "card_path": "planning/tasks/NAT-072.md"
     },
     {
@@ -18450,8 +18483,9 @@
         "Record fail/inconclusive if XNU execution is not established."
       ],
       "next_step": "Wait for exact recovery prerequisites and concrete native authorization",
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
         "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-005, IOS-007, NAT-078, NAT-081, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103, NAT-124, NAT-135, NAT-137, NAT-146, NAT-149, NAT-151"
       ],
@@ -18488,8 +18522,9 @@
         "Do not combine touch, UFS and GPU in the first experiment.",
         "Promote only verified results into status."
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: NAT-003",
         "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-007, NAT-078, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103, NAT-124, NAT-135, NAT-137, NAT-146, NAT-149, NAT-151"
       ],
@@ -18685,8 +18720,10 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "ready",
-      "reasons": [],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
       "card_path": "planning/tasks/NAT-004.md"
     },
     {
@@ -18722,8 +18759,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: DRV-003, UI-003, UI-004, UI-005"
       ],
       "card_path": "planning/tasks/UI-002.md"
@@ -18754,8 +18792,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: DRV-003"
       ],
       "card_path": "planning/tasks/USB-002.md"
@@ -18786,8 +18825,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: GPU-007, DRV-003"
       ],
       "card_path": "planning/tasks/GPU-008.md"
@@ -18819,8 +18859,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: GPU-008, GPU-009, UI-002"
       ],
       "card_path": "planning/tasks/GPU-010.md"
@@ -18852,8 +18893,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: DRV-003, NET-004"
       ],
       "card_path": "planning/tasks/NET-002.md"
@@ -18885,8 +18927,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: NET-002, UI-002, NET-005"
       ],
       "card_path": "planning/tasks/NET-003.md"
@@ -18920,8 +18963,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: DRV-003, BT-003, BT-004"
       ],
       "card_path": "planning/tasks/BT-002.md"
@@ -18952,8 +18996,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: AUD-001, DRV-003"
       ],
       "card_path": "planning/tasks/AUD-002.md"
@@ -18984,8 +19029,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: CAM-001, DRV-003"
       ],
       "card_path": "planning/tasks/CAM-002.md"
@@ -19016,8 +19062,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: PWR-001, DRV-003"
       ],
       "card_path": "planning/tasks/PWR-002.md"
@@ -19048,8 +19095,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: DRV-003"
       ],
       "card_path": "planning/tasks/SEN-002.md"
@@ -19080,8 +19128,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: CELL-002, DRV-003"
       ],
       "card_path": "planning/tasks/CELL-003.md"
@@ -19112,8 +19161,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: CELL-003, CELL-004"
       ],
       "card_path": "planning/tasks/CELL-005.md"
@@ -19144,8 +19194,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: CELL-005, AUD-002"
       ],
       "card_path": "planning/tasks/CELL-006.md"
@@ -19176,8 +19227,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: CELL-003"
       ],
       "card_path": "planning/tasks/ESIM-002.md"
@@ -19209,8 +19261,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: ESIM-002, CELL-005, ESIM-004"
       ],
       "card_path": "planning/tasks/ESIM-003.md"
@@ -19249,8 +19302,9 @@
         "Implement or measure only this task boundary",
         "Record real results, failure modes and next-step handoff"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: GPU-010, NET-003, BT-002, AUD-002, CAM-002, PWR-002, SEN-002, CELL-006, ESIM-003, BT-005"
       ],
       "card_path": "planning/tasks/QUAL-001.md"
@@ -19289,8 +19343,9 @@
         "Run actual audio/control/lifecycle and coexistence checks",
         "Publish sanitized evidence and unresolved limitations"
       ],
-      "column": "waiting",
+      "column": "gated",
       "reasons": [
+        "Scope not authorized: native",
         "Dependencies: BT-002, AUD-002, NET-002, UI-002"
       ],
       "card_path": "planning/tasks/BT-005.md"
@@ -19595,10 +19650,10 @@
       {
         "id": "NAT-151",
         "status": "in_progress",
-        "last_heartbeat": "2026-11-13T23:18:14+00:00",
+        "last_heartbeat": "2026-11-13T23:32:38+00:00",
         "report_health": "recent",
-        "progress_note": null,
-        "next_step": null,
+        "progress_note": "FAIL (native-device): loader stopped before the kernel; its compile-time kernel addresses (5 start.s checkpoint sites, loader_jump, _set_mmu_ttb) were moved by NAT-150's start.patch; reproduced on host (check_loader_sites: scG rc 2 site 1, scF rc 0); deadline -> Download Mode by itself; stock RECOVERY restored, Android verified (evidence docs/procedures/nat-151/evidence.json)",
+        "next_step": "NAT-152 host: scH with the loader's view intact (check_loader_sites rc 0 as build gate)",
         "handoff": null,
         "branch": null,
         "worktree": null
@@ -19697,44 +19752,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-13T21:41:42+00:00",
-      "action": "task.add:NAT-146",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-146",
-          "status": "pending",
-          "owner": null,
-          "priority": 99
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T21:41:53+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-13T21:42:04+00:00",
-      "action": "task.claim:NAT-146",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-146",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 99,
-          "last_heartbeat": "2026-11-13T21:42:04+00:00"
-        }
-      ]
-    },
     {
       "at": "2026-11-13T22:09:20+00:00",
       "action": "task.update:NAT-146",
@@ -19961,11 +19978,51 @@
           "last_heartbeat": "2026-11-13T23:18:14+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-13T23:20:42+00:00",
+      "action": "task.add:GPU-018",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "GPU-018",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T23:32:38+00:00",
+      "action": "task.update:NAT-151",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-151",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "progress_note": "FAIL (native-device): loader stopped before the kernel; its compile-time kernel addresses (5 start.s checkpoint sites, loader_jump, _set_mmu_ttb) were moved by NAT-150's start.patch; reproduced on host (check_loader_sites: scG rc 2 site 1, scF rc 0); deadline -> Download Mode by itself; stock RECOVERY restored, Android verified (evidence docs/procedures/nat-151/evidence.json)",
+          "next_step": "NAT-152 host: scH with the loader's view intact (check_loader_sites rc 0 as build gate)",
+          "last_heartbeat": "2026-11-13T23:32:38+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T23:32:57+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
     }
   ],
   "view_sha256": {
-    "STATUS.md": "76e813c0bba86c848994e510a4019dbbd5c52ba09a5ad2a8d4bb5f57af1c2e38",
-    "BOARD.md": "a407c05c549d11fa45f7709223fce66e2b88a13c26e12f7529b022860f392cd5",
+    "STATUS.md": "fd640501c9b1fdcbb7882a0ca927ccbc0ea94f11158d8cd1323029e9d34c38e5",
+    "BOARD.md": "528694ae583daa002cfbbbb3abf796b24d0cda9df671f1408d7c1eb57304cc2c",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -20103,7 +20160,7 @@
     "planning/tasks/NAT-148.md": "ecf4349736a4c6b36e5a455d138a86e1ab07bf9c2df9abf6bf13c873900ff846",
     "planning/tasks/NAT-149.md": "bf00c7d78c4a37ee00d03c4b098500d3a646a3d9bcc7d00bab359434bb219818",
     "planning/tasks/NAT-150.md": "441aa937e0613fc514e1b8338b5f0050b3bb69631680493af689548bd4a45366",
-    "planning/tasks/NAT-151.md": "140791c1b8e9658c64b8aedc8458a9cda6dcd697f47739bdab1dd305e61d671c",
+    "planning/tasks/NAT-151.md": "be1d630aaa1687c55af69682bb8e77b4439303d9144fcf10224fe0152373e30c",
     "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-011.md": "9b8014abd8d019af80fad695e0d0df9de9523d36a222553327384f7f00e8a901",
     "planning/tasks/KRN-017.md": "86a29485c4c3ed3a62f7ecf64f5e2bb303bb0bd7ac5fd661482bf024004f407d",
@@ -20144,7 +20201,7 @@
     "planning/tasks/REV-009.md": "88b28ac896c5615f69c1ffb4715e88285d7a3b59bc3fdf967d4674cca5835f6e",
     "planning/tasks/REV-015.md": "84076ee6c39ee7f9f07a3039a2f9035a9bb7ed6993a9449c4e948c879c37fb6e",
     "planning/tasks/VM-007.md": "cc3b0371dde27da4854d9f1f989289328970ae84f3c9c4429fda2bcdd403761f",
-    "planning/tasks/NAT-017.md": "c929486901375793e0bcf465cf3ce5fbee6b8405f75475d2430bdb7ab788345f",
+    "planning/tasks/NAT-017.md": "44ba4989437a4baf7399488bbf4f0dbf893079dfcc00500dfa86a2f0686be690",
     "planning/tasks/NAT-022.md": "92b1dcb59f1830629d3d1e59defeec92fe3e49eb2df1eff97d0c8d6e35eadeb9",
     "planning/tasks/NAT-023.md": "1018e390c7aa0cdda8fd59e72ec44b2a5cd0131199bb7f13a769fc9825e73bae",
     "planning/tasks/NAT-024.md": "10bde102216adebc51d1565be90df70cb2b646c764ea667e6a0472b93d210e22",
@@ -20235,6 +20292,7 @@
     "planning/tasks/NAT-068.md": "63ac39bfc290b650ecdf1d5e546a4dd64bd59e618178a376f2a1d88d8b37349a",
     "planning/tasks/NAT-069.md": "dc88da36b861f2658df9ea2d1587a3aff3467385871912fa3645c77a2c535a41",
     "planning/tasks/NAT-084.md": "4e7fb47074b9fe0026583bfb6e34dcc047cf284cf6568ce3785e9bb9ec787e85",
+    "planning/tasks/GPU-018.md": "e1269f32bef8ac0e2a0bb5a9f2eaaa2de938177dd4b367cbd33ed94c9cf106cf",
     "planning/tasks/DRV-001.md": "eaac786b5ca6d0640d7a9bea43bf42424662189e0f9f44baaa6b6ad049f10f17",
     "planning/tasks/KRN-023.md": "a95e56ff9ef7bfa3ff55cf11a48d0bba892cc95ab504b367bc3e9d4490ecdd51",
     "planning/tasks/REV-012.md": "99bf82028acd252050bbe595c74c47d22013dfccb4d261b32b98825471ce86ea",
@@ -20250,7 +20308,7 @@
     "planning/tasks/ESIM-001.md": "4ff5511bf1b91ec562d46b9fa0fdbc4dc3ffd12af187060e75777f8fcde71bb6",
     "planning/tasks/VM-004.md": "e60d0c34c4cbc0e4c68b4a74b97657a569fe4a12f25e16efc01dcaa45ccc2b15",
     "planning/tasks/NAT-057.md": "5a5cfb72e8e8b6bf01995892e27a8f23c02e6de2f5ea24330a780c8dc156837a",
-    "planning/tasks/NAT-072.md": "f6d36ed525f1156bd2618317aa6c37c0df126844e073c174e07af3c1f258dec4",
+    "planning/tasks/NAT-072.md": "f2b429f3d571a48c51951a7a0eaec6e38d9cd7c2d34a2e06890c71fb0d4c4bc9",
     "planning/tasks/NAT-081.md": "f71adff8df091fe52cea08c846dc3c1b530fadc4829b34ff83ae6edc7c827b04",
     "planning/tasks/SEN-001.md": "3c54f6f748160ba9c5b4c4f27f41576ddb90a5c2f73f0243805e189091695d2d",
     "planning/tasks/ODIN-001.md": "ac0ee966c510177f407059b9a1c47e89df084a5b1c873bb7eea122547f1d4f0a",
@@ -20390,30 +20448,30 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "c41cd5c4ca10c75fe7413712b6a6395397d54ade859214b75bc55d02f4446a47",
-    "planning/tasks/DRV-003.md": "58ddec915bf370ec9d186f954469ca58df649aac15186e2ec009f73a96d9348d",
+    "planning/tasks/NAT-003.md": "6580de3e953eb365b3d328bf5a3c8bd5be04e8a0e91926ceda5b79be3a980374",
+    "planning/tasks/DRV-003.md": "fbb2c81166877f918555e8dbc90eaa7951cf60b7be292ed391824f369e0c9c64",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",
     "planning/tasks/VM-003.md": "760c0b8003a2319cfa01e6f4656713cabbe40f2ebe39564f9e8333cb20fc7cda",
-    "planning/tasks/NAT-004.md": "5804c2be34d15a8e539fc4f288689d7acfd5e3424c99129689aaf9b875d2ad75",
-    "planning/tasks/UI-002.md": "984f7ef7959a4eccf7332591a5ac93e2ac4a1c8d05fd326faae9d8c22ade78c6",
-    "planning/tasks/USB-002.md": "23567fd2cd2e6752af618d961d6ba3061fdc9ab561b4494324ae94cf91e9d56a",
-    "planning/tasks/GPU-008.md": "26c4f4fe4a7c68d7d7175633056f415ae0d549b5bca19666e3657f1d3e212376",
-    "planning/tasks/GPU-010.md": "f9bff8d93aa4450f956eb4000597fec205dbc3fca41e51bb81fac78760e2f4c9",
-    "planning/tasks/NET-002.md": "3e8fedc1c73c2279574a6f7634f952950a3ae7843be6207a191654ff05259a5d",
-    "planning/tasks/NET-003.md": "2124a4511523d5313460f928c85ad24b3ac2ddf86cdbdb6c3400ed0327c961a4",
-    "planning/tasks/BT-002.md": "d66c41d11670ca682ab33e7eced14d7e283489c3a7d92e2d2d66f13375333187",
-    "planning/tasks/AUD-002.md": "6cec3fe3144d09783e8fb8ed8adf6f33b7e003525610dd7d18b30e7fe716099e",
-    "planning/tasks/CAM-002.md": "85480f672fcd0409c494ed435540eebd6d033a8b844297b9611cc668753b189c",
-    "planning/tasks/PWR-002.md": "4cca1d61964aad7a2cc7b962c5a2675e3a553b475846ecf74ed23114d659d157",
-    "planning/tasks/SEN-002.md": "5796f05f5f589888b13bf0eb46dabb93515acefa734542b0c52a21eb5945528a",
-    "planning/tasks/CELL-003.md": "5492b64ee5e28407471bc50a49a5925283c957a1f342d574fb7c2d2e90aa315b",
-    "planning/tasks/CELL-005.md": "53022f7e7616ca24e7bee539eaa1aa28399cf628d8367736759fedc3dec38ed5",
-    "planning/tasks/CELL-006.md": "1ac0d7ce95f9aec6d6c78fe1dc9409caed431b6a8516e9b67a2f057da47abb81",
-    "planning/tasks/ESIM-002.md": "09c304a263dec7407a752746e418148e0da89fb93019f23decdd00fd5f918b12",
-    "planning/tasks/ESIM-003.md": "727ce25540c9b48be086c5964842835ce4f8ac692e26e5a65b63fb1652fdddd4",
-    "planning/tasks/QUAL-001.md": "8ea0fc73f3e48e0046e81e8ee469af2934a6366ec933d04f5b155660bb044f38",
-    "planning/tasks/BT-005.md": "89c0c7ef91079fc4b3a318ea8893c05e67ea4bc93998f3754f8c4a5290ec6c56"
+    "planning/tasks/NAT-004.md": "01ae4f311eaea418d2faa9f0a9622c0548cc4035cefc0ae47039e8acfe3d383a",
+    "planning/tasks/UI-002.md": "5669ba2f32f4ec7d2645872861f8386ed6c8c5de8e89b251743f940b593caac4",
+    "planning/tasks/USB-002.md": "7f7a1becaf541ada578adc6a25c0ea651489f967d5ff844f0be8b3568e303462",
+    "planning/tasks/GPU-008.md": "8b10873253b9ad1f4cab2298e05f5359e7b9917aa4c7525bf7fb954ad06b74fb",
+    "planning/tasks/GPU-010.md": "4749d305f26f3c16f7a9e7180a76696bbccdbe43ad5c29c46229e1bf68b27d8c",
+    "planning/tasks/NET-002.md": "d29066526b3034e404542cde26c8b2f5feff13eaf064ce1d81a92e1551351a46",
+    "planning/tasks/NET-003.md": "3b578a7d362fc72029c832b43094480b56d5685402b8d311e58b27cc2e574ee0",
+    "planning/tasks/BT-002.md": "9a522a17b371e76892c564fd4f82d198b3ee526c3209b7f9b1e0e2b032ffc739",
+    "planning/tasks/AUD-002.md": "eb5952fd0ebc9f3b02765eff1ca88a7598d9396be68c8678a08e0ed67fe1cead",
+    "planning/tasks/CAM-002.md": "c103b76f2d577d2fbf0281ff75fb44a227eed2225665ea79158333b0566e6551",
+    "planning/tasks/PWR-002.md": "f80a6af04cbe0ff88f07c6af1a1a04f89693584003fea461c05ed3d5119129c3",
+    "planning/tasks/SEN-002.md": "d5fb456503ff7cdef26c03b846c8da969efa1299efda131c78435ff5f4efba43",
+    "planning/tasks/CELL-003.md": "21beaf041f7a0f24cdaead83b121ce0c18937e7e684a3d3e952f7ce212663e19",
+    "planning/tasks/CELL-005.md": "f4d56657b1532f99561638e25a1b544d1f344725befb8d77c61ef05514d87c79",
+    "planning/tasks/CELL-006.md": "6b306fabb59cc3ccd33b0263d2024ad0e0c0c69dfb961c8970f21ee47880f367",
+    "planning/tasks/ESIM-002.md": "6c399676159f65f4b4bb57a7753974158e33bb9786602f3568fc0158110547d7",
+    "planning/tasks/ESIM-003.md": "f8771c136a5fa36d900bdca732abec23c437850a53a146c61c8cb5437553f8e7",
+    "planning/tasks/QUAL-001.md": "7bf40b2c3c32e8161f29dc9134f7fc30271e33315a9d2c8877dc04cccc0bd8fe",
+    "planning/tasks/BT-005.md": "35bc4d704b20131d6176800ff9f9822b0f78173243d37fa576d6a53d48986576"
   }
 }

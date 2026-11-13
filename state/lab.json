@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-13T23:18:14+00:00",
+  "updated_at": "2026-11-13T23:32:57+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -8,7 +8,7 @@
       "host": true,
       "android-readonly": true,
       "android-app": true,
-      "native": true
+      "native": false
     },
     "facts": [
       {
@@ -825,6 +825,13 @@
         "decision": "docs/decisions/0062-nat151-loader-diag-xnu-scG-md1-single-run-2026-11-14.md",
         "owner": "claude-opus-usb130-20261113",
         "at": "2026-11-13T23:17:34+00:00"
+      },
+      {
+        "scope": "native",
+        "value": false,
+        "decision": "docs/decisions/0062-nat151-loader-diag-xnu-scG-md1-single-run-2026-11-14.md",
+        "owner": "claude-opus-usb130-20261113",
+        "at": "2026-11-13T23:32:57+00:00"
       }
     ]
   },
@@ -18126,8 +18133,32 @@
         "Dated native evidence; frame rate is the kernel's count, not a camera measurement; the owner's account recorded as an observation"
       ],
       "started_at": "2026-11-13T23:18:14+00:00",
-      "last_heartbeat": "2026-11-13T23:18:14+00:00",
-      "updated_at": "2026-11-13T23:18:14+00:00"
+      "last_heartbeat": "2026-11-13T23:32:38+00:00",
+      "updated_at": "2026-11-13T23:32:38+00:00",
+      "progress_note": "FAIL (native-device): loader stopped before the kernel; its compile-time kernel addresses (5 start.s checkpoint sites, loader_jump, _set_mmu_ttb) were moved by NAT-150's start.patch; reproduced on host (check_loader_sites: scG rc 2 site 1, scF rc 0); deadline -> Download Mode by itself; stock RECOVERY restored, Android verified (evidence docs/procedures/nat-151/evidence.json)",
+      "next_step": "NAT-152 host: scH with the loader's view intact (check_loader_sites rc 0 as build gate)"
+    },
+    {
+      "id": "GPU-018",
+      "status": "pending",
+      "owner": null,
+      "title": "Android read-only: Xclipse 940 inventory for a first native GPU step: /vendor/firmware/sgpu file names, sizes and SHA-256 (never the blob), SGPU/G3D lines still in the kernel ring, the G3D power-domain runtime state and the sgpu device's sysfs identity; no debugfs clk_summary, no writes",
+      "scope": "android-readonly",
+      "evidence_kind": "android-userland",
+      "priority": 95,
+      "depends_on": [
+        "GPU-017"
+      ],
+      "paths": [
+        "docs/procedures/gpu-018",
+        "artifacts/gpu-018"
+      ],
+      "acceptance": [
+        "Commands and exit codes recorded; nothing written on the phone; debugfs clk_summary not read",
+        "Firmware names, sizes and hashes listed (no blob committed or copied outside artifacts/)",
+        "SGPU init lines (order, return values if printed) or a statement that the ring no longer has them",
+        "G3D power-domain state and the sgpu platform device path; what this establishes for a native power-on plan"
+      ]
     }
   ],
   "experiments": [
@@ -69175,6 +69206,46 @@
           "last_heartbeat": "2026-11-13T23:18:14+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-13T23:20:42+00:00",
+      "action": "task.add:GPU-018",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "GPU-018",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T23:32:38+00:00",
+      "action": "task.update:NAT-151",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-151",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "progress_note": "FAIL (native-device): loader stopped before the kernel; its compile-time kernel addresses (5 start.s checkpoint sites, loader_jump, _set_mmu_ttb) were moved by NAT-150's start.patch; reproduced on host (check_loader_sites: scG rc 2 site 1, scF rc 0); deadline -> Download Mode by itself; stock RECOVERY restored, Android verified (evidence docs/procedures/nat-151/evidence.json)",
+          "next_step": "NAT-152 host: scH with the loader's view intact (check_loader_sites rc 0 as build gate)",
+          "last_heartbeat": "2026-11-13T23:32:38+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-13T23:32:57+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
     }
   ]
 }
