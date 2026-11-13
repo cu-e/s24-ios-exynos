@@ -1,11 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-13T22:43:31+00:00",
-  "ledger_updated_at": "2026-11-13T22:43:09+00:00",
-  "registry_sha256": "7b3c056a9d9500ccb12691bdd85b456bfc50c2f5e4efd9b9c11f6c2ad191f6be",
+  "generated_at": "2026-11-13T22:44:27+00:00",
+  "ledger_updated_at": "2026-11-13T22:44:05+00:00",
+  "registry_sha256": "97be8e667dcd39fb75290ab98e6699342d8089ab718ed71a54d1635f5ca0d11b",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
+      "NAT-150",
       "NAT-082",
       "NAT-054",
       "NAT-055"
@@ -6048,6 +6049,31 @@
       "reasons": [],
       "card_path": "planning/tasks/NAT-149.md",
       "report_health": "recent"
+    },
+    {
+      "id": "NAT-150",
+      "status": "pending",
+      "owner": null,
+      "title": "Host: where do the PSCI-started cores stop? Per-core early markers in the kernel's reset vector (entry, cpu-data match/no-match, before MMU on) written by PA and cleaned to PoC, read back by the boot CPU into the 'has not joined' line; fix analyze146's started rule (joins/running count); shorter start wait; do not pair the boot CPU with a core that has not joined; scG image and session for a native run",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-148"
+      ],
+      "paths": [
+        "docs/procedures/nat-150",
+        "artifacts/nat-150"
+      ],
+      "acceptance": [
+        "start.o rebuilt by KRN-044 with only the marker change; marker writes and the boot CPU readback host-checked (model or disassembly) without changing the path of a core that matches",
+        "Analyser counts joined cores from the running count and psci lines, tested on NAT-149's real text (result: 1 running, 9 not joined)",
+        "Image differs from scF only in the listed objects/tokens; counted session derivation; make check",
+        "Host evidence only; a native run needs its own owner decision"
+      ],
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-150.md"
     },
     {
       "id": "KRN-007",
@@ -19652,17 +19678,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-13T21:19:26+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
       "at": "2026-11-13T21:19:37+00:00",
       "action": "task.done:NAT-144",
       "owner": "claude-opus-usb130-20261113",
@@ -19913,11 +19928,24 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-13T22:44:05+00:00",
+      "action": "task.add:NAT-150",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-150",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "2513321c01b8ef71fdf42a10cd6a13cded48c393d72e76c2191137fc73728b67",
-    "BOARD.md": "8a17476c3cb6b08777c1ca41bc241680c97f30c08cc202c58d56fb337e424a6a",
+    "STATUS.md": "a3d206d46edcfd87d63550d31fbb358729e2f0110c9d0c782822226c1fb79605",
+    "BOARD.md": "44552e83c9364a046e9328b800237d791e1a464bb8c7e15635f028217f3f353a",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -20054,6 +20082,7 @@
     "planning/tasks/NAT-147.md": "8bbdf1f990d2a22fb2f42984d367c7b3064304011f4dd5b9aa6592c340cb3612",
     "planning/tasks/NAT-148.md": "ecf4349736a4c6b36e5a455d138a86e1ab07bf9c2df9abf6bf13c873900ff846",
     "planning/tasks/NAT-149.md": "df29debb9134a891a4b2a85a5acd4aa31515a9b1cd84370d679dd0cffbc6107f",
+    "planning/tasks/NAT-150.md": "ec5ce80b8035b6012a1108c99f531048305e1047c0638c046ed6d775c9baefe9",
     "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-011.md": "9b8014abd8d019af80fad695e0d0df9de9523d36a222553327384f7f00e8a901",
     "planning/tasks/KRN-017.md": "86a29485c4c3ed3a62f7ecf64f5e2bb303bb0bd7ac5fd661482bf024004f407d",
