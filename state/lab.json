@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T06:08:04+00:00",
+  "updated_at": "2026-11-14T06:14:08+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -19244,6 +19244,54 @@
       "evidence": "docs/procedures/nat-184/evidence.json",
       "evidence_sha256": "2834b3dd2b8eba73966053adc3ddecb648ff636be72ee32588921bc736da1fe7",
       "finished_at": "2026-11-14T06:07:45+00:00"
+    },
+    {
+      "id": "NAT-185",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scV = scU (NAT-183) with a read-only per-process CPU-time sampler in bsd/e1s_display.o (recount_task_times over proc_iterate every 5 s, 200-380 s: span, busy sum, kernel, cpu0 idle counter, top 6) to find what bounds the swipe frame rate now that the driver takes 2.16 ms (NAT-184)",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 93,
+      "depends_on": [
+        "NAT-184"
+      ],
+      "paths": [
+        "docs/procedures/nat-185",
+        "artifacts/nat-185"
+      ],
+      "acceptance": [
+        "Kernel = NAT-183's with only bsd/e1s_display.o rebuilt from a patch = NAT-176's plus the sampler (no register access added)",
+        "Host harness with a simulated process table: spans, deltas, new/exited processes, overflow count, top ordering and the e1stop=0 switch checked; mutants caught",
+        "Loader sites rc 0; relocscan clean; cmdline = scU's with the tag; package, counted session, analyser with registered verdicts, make check"
+      ],
+      "started_at": "2026-11-14T06:10:10+00:00",
+      "last_heartbeat": "2026-11-14T06:10:10+00:00",
+      "updated_at": "2026-11-14T06:14:08+00:00",
+      "evidence": "docs/procedures/nat-185/evidence.json",
+      "evidence_sha256": "11bf61332c96199a3b1fbb776d2ab4781f707719fd311becf4eb65359c621cc2",
+      "finished_at": "2026-11-14T06:14:08+00:00"
+    },
+    {
+      "id": "NAT-186",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: run scV (NAT-185 process-time sampler on scU) once under decision 0061; per-process CPU share of cpu0 during the synthetic swipes, busy share, and the frame verdicts",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 93,
+      "depends_on": [
+        "NAT-185"
+      ],
+      "paths": [
+        "docs/procedures/nat-186",
+        "artifacts/nat-186"
+      ],
+      "acceptance": [
+        "Per-image decision before the run",
+        "Registered CPU-share verdict and the K/swipe verdicts",
+        "Stock RECOVERY restored with full hash and Android verified"
+      ]
     }
   ],
   "experiments": [
@@ -71961,6 +72009,60 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T06:09:32+00:00",
+      "action": "task.add:NAT-185",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-185",
+          "status": "pending",
+          "owner": null,
+          "priority": 93
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T06:09:51+00:00",
+      "action": "task.add:NAT-186",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-186",
+          "status": "pending",
+          "owner": null,
+          "priority": 93
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T06:10:10+00:00",
+      "action": "task.claim:NAT-185",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-185",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 93,
+          "last_heartbeat": "2026-11-14T06:10:10+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T06:14:08+00:00",
+      "action": "task.done:NAT-185",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-185",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 93,
+          "last_heartbeat": "2026-11-14T06:10:10+00:00"
+        }
+      ]
     }
   ]
 }

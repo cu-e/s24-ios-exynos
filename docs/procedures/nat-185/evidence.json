@@ -1,0 +1,80 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T06:45:00+00:00",
+ "task": "NAT-185",
+ "summary": "scV = scU (NAT-183) + bsd/e1s_display.o rebuilt from NAT-176's snapshot plus a read-only per-process CPU-time sampler (proc_iterate + recount_task_times every 5 s, 200-380 s; span, busy, kernel, cpu0 idle counter, top 6; e1stop=0 off; no register access added). Host harness with a simulated process table: 8 OK, 4 mutants caught. Kernel d7e7fee1, loader sites rc 0, 254 B, package 57ab3944, counted session ef8ee127, analyser top186 (U-none/U-sat/U-mid/U-free). Host-test only.",
+ "commit": "a244502d (base)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scV-md1",
+  "recovery_sha256": "57ab39447993b83b48e4afef2674ec0ead000de87f609729c9c9f01be907b27e",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "117aafcc15c8e78e1c04707c1921a962bd680678cd3b3090ed0a8803943c7a88",
+  "payload_bytes": 26208032,
+  "loader_image_sha256": "d38398ebb0bece791e441bfec28026a17eea4a421e1e3a5a592e575e90f1d704",
+  "kernel_dir": "artifacts/nat-185/kernel-001",
+  "kernel_sha256": "d7e7fee154104aaf9c59a4d2145c3901763259296ebd85cb373c388a4667c8b3",
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT185-scV debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 touch_lat=1 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "cmdline_bytes": 254,
+  "session": "docs/procedures/nat-185/session_nat186.py",
+  "session_sha256": "ef8ee127ca0ed506efd9938bfe47378b81a3a25488743fdcaf5827eec1919823"
+ },
+ "sources": {
+  "docs/procedures/nat-185/build.py": "f53bd5037f68660efb59e273bf23304cd1716c0c139c6d894b1a1e4debe3f83c",
+  "docs/procedures/nat-185/e1s_display.patch": "ed9846b76a7caa5fc8b1567b36c00f816d868e39b59dec409ff0b7f573624899",
+  "docs/procedures/nat-185/rebuild-args.json": "b221a161a92f12fd9900e0d193ba4e78fd7a1cf998130b3d06db298c2e62f397",
+  "docs/procedures/nat-185/host/shim185.h": "13bfee0302fe3ea9c5d083f88b4664f04489b03b51199f0e6be679e78eca9db1",
+  "docs/procedures/nat-185/host/fake185.c": "9c6fc307cab30014ed010ee44c4bbcb14e5962148749d57d6c5aa3dbf88b4de8",
+  "docs/procedures/nat-185/test_nat185.py": "cf989c1c001ee1d9c3cc225d7c42293d5fe8e0a5f385ab1bc43e28d3f6e4c799",
+  "docs/procedures/nat-185/top186.py": "a7d6b7d9ce8cc95b89b09a252505a451dab689f443da3f9cfb2f77085df2044c",
+  "docs/procedures/nat-185/derive186.py": "db4e0dd17d4f865ad582bcc2e626c6c05dd313dbb58e52753048a3ca954dc598",
+  "docs/procedures/nat-185/session_nat186.py": "ef8ee127ca0ed506efd9938bfe47378b81a3a25488743fdcaf5827eec1919823",
+  "docs/procedures/nat-185/README.md": "3b85327ff51d5ab2bb8ba87b1870d39b0950b4bbc0f58d6aefc6144488c23f00",
+  "docs/procedures/nat-185/task.json": "8b1344e988dbf6cb43df49e5af8932859db012e6676ddb2a193ab09bb961d4ad"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/krn-044/rebuild.py --out artifacts/nat-185/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-121/loader_return.patch --extra bsd/e1s_touch.o=docs/procedures/nat-174/e1s_touch_combined.patch --extra bsd/redwood_input.o=docs/procedures/nat-165/redwood_input.patch --extra bsd/e1s_acpm.o=docs/procedures/nat-172/e1s_acpm.patch --extra bsd/e1s_pmic.o=docs/procedures/nat-123/e1s_pmic.patch --extra osfmk/start.o=docs/procedures/nat-152/start.patch --extra osfmk/psci_smp.o=docs/procedures/nat-152/psci_smp.patch --extra bsd/e1s_display.o=docs/procedures/nat-185/e1s_display.patch --extra iokit/MiniIOMobileFramebuffer.cpo=docs/procedures/nat-183/MiniIOMobileFramebuffer.patch --expect-string start: sense on (ready %s --expect-string miso cs-high --expect-string e1s-keys: disabled (e1skeys=0) --expect-string event thread started --expect-string e1s-touch: %s %u: finger %u x %u y %u --expect-string psci: cpu %d early marks: last 0x%llx --expect-string tl: u at %llu --expect-string e1s-dpp: %s pmu dpub %#x dpuf0 %#x dpuf1 %#x --expect-string e1s-top: %u s span %llu us busy %llu us kernel %llu us idle0 %llu us procs %u lost %u",
+   "exit_code": 0,
+   "result": "no_storage d7e7fee1, 0 undefined"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-185/build.py --out artifacts/nat-185/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "254 B; loader sites rc 0 ok bad 0; relocscan passed"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-185/build-001 --out artifacts/nat-185/package-001",
+   "exit_code": 0,
+   "result": "57ab39447993b83b48e4afef2674ec0ead000de87f609729c9c9f01be907b27e"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-185/derive186.py --check",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-185/test_nat185.py",
+   "exit_code": 0,
+   "result": "8 OK"
+  }
+ ],
+ "not_established": [
+  "the real process mix on the phone (NAT-186)",
+  "whether recount/idle counters behave on this port"
+ ],
+ "artifacts": [
+  "artifacts/nat-185/kernel-001/rebuild.json",
+  "artifacts/nat-185/build-001/build.json",
+  "artifacts/nat-185/package-001/package.json",
+  "artifacts/nat-185/package-001/loader-diag-xnu-scV-md1/recovery.img"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-185/kernel-001/rebuild.json": "04b8c371862ed76d737405e6a354d2f4a7fafd6f0bee5e71796833de78ecaa83",
+  "artifacts/nat-185/build-001/build.json": "6a4cc0277e2ed00cd9c537cc597907f1fb419d550ec0e4ad75581c14d6d1db9f",
+  "artifacts/nat-185/package-001/package.json": "c3da77f63b717078cb5f79723f54b6f969785d79f3ea8cbd2257d27bdfc7b2af",
+  "artifacts/nat-185/package-001/loader-diag-xnu-scV-md1/recovery.img": "57ab39447993b83b48e4afef2674ec0ead000de87f609729c9c9f01be907b27e"
+ }
+}

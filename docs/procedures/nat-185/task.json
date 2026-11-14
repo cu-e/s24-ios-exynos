@@ -1,0 +1,16 @@
+{
+ "id": "NAT-185",
+ "status": "pending",
+ "owner": null,
+ "title": "Host: scV = scU (NAT-183) with a read-only per-process CPU-time sampler in bsd/e1s_display.o (recount_task_times over proc_iterate every 5 s, 200-380 s: span, busy sum, kernel, cpu0 idle counter, top 6) to find what bounds the swipe frame rate now that the driver takes 2.16 ms (NAT-184)",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 93,
+ "depends_on": ["NAT-184"],
+ "paths": ["docs/procedures/nat-185", "artifacts/nat-185"],
+ "acceptance": [
+  "Kernel = NAT-183's with only bsd/e1s_display.o rebuilt from a patch = NAT-176's plus the sampler (no register access added)",
+  "Host harness with a simulated process table: spans, deltas, new/exited processes, overflow count, top ordering and the e1stop=0 switch checked; mutants caught",
+  "Loader sites rc 0; relocscan clean; cmdline = scU's with the tag; package, counted session, analyser with registered verdicts, make check"
+ ]
+}

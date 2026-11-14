@@ -1,0 +1,308 @@
+--- a/e1s_display.c
++++ b/e1s_display.c
+@@ -1,12 +1,17 @@
+ #if defined(ARM64_BOARD_CONFIG_E1S)
+ 
+ #include <console/video_console.h>
++#include <kern/clock.h>
++#include <kern/recount.h>
++#include <kern/thread.h>
+ #include <libkern/libkern.h>
+ #include <pexpert/pexpert.h>
++#include <sys/proc_internal.h>
+ #include <sys/systm.h>
+ #include <sys/types.h>
+ 
+ extern struct vc_info vinfo;
++extern bool ml_cpu_idle_time(int cpu_id, uint64_t *idle);
+ extern vm_offset_t ml_io_map(vm_offset_t phys_addr, vm_size_t size);
+ 
+ #define E1S_DECON0_MAIN_PA      0x19100000UL
+@@ -220,10 +225,266 @@
+ 	    e1s_display_read(ss, 0x08U));
+ }
+ 
++/*
++ * NAT-176: a read-only snapshot of the display layers S-Boot left running, for display-hardware scaling of the iOS surface
++ * (NAT-162 table; Samsung e1s kernel 417484173abc). Loads only. The PMU status bit 0 of DPUB, DPUF0 and DPUF1 (stock pmucal
++ * "DPUB_STATUS" 0x12861D44, "DPUF0_STATUS" 0x12861D84, "DPUF1_STATUS" 0x128626C4) must all be set, or nothing else is read.
++ * Taken at probe and again at E1S_DPP_LATE_S seconds of uptime (iOS drawing, swipes running). boot-arg e1sdpp=0 turns it off.
++ */
++#define E1S_PMU_PA              0x12860000UL
++#define E1S_PMU_SIZE            0x3000U
++#define E1S_PMU_DPUB_STATUS     0x1d44U
++#define E1S_PMU_DPUF0_STATUS    0x1d84U
++#define E1S_PMU_DPUF1_STATUS    0x26c4U
++#define E1S_DPP_LATE_S          300U
++#define E1S_DPP_MAX_OFFS        20U
++
++struct e1s_dpp_group {
++	const char      *name;
++	uint64_t        pa;
++	uint32_t        size;
++	uint32_t        n;
++	uint16_t        off[E1S_DPP_MAX_OFFS];
++};
++
++#define E1S_WIN_OFFS    16, { 0x0, 0x4, 0x8, 0xc, 0x10, 0x14, 0x18, 0x1c, 0x800, 0x804, 0x808, 0x80c, 0x810, 0x814, 0x818, 0x81c }
++#define E1S_DMA_OFFS    19, { 0x8, 0xc, 0x10, 0x14, 0x18, 0x1c, 0x40, 0x50, 0x200, 0x338, 0x740, 0x408, 0x40c, 0x410, 0x414, \
++	                      0x418, 0x41c, 0x440, 0x450 }
++#define E1S_DPP_OFFS    13, { 0x0, 0x1c, 0x30, 0x34, 0x38, 0x3c, 0x80, 0x84, 0x88, 0x8c, 0x90, 0x94, 0x98 }
++
++static const struct e1s_dpp_group e1s_dpp_groups[] = {
++	{ "decon", 0x19100000UL, 0x1000U, 7, { 0x4, 0x30, 0x50, 0x60, 0x200, 0x204, 0x4 } },
++	{ "win2", 0x19112000UL, 0x1000U, E1S_WIN_OFFS },
++	{ "win3", 0x19113000UL, 0x1000U, E1S_WIN_OFFS },
++	{ "wincon2", 0x19132000UL, 0x1000U, 1, { 0x0 } },
++	{ "wincon3", 0x19133000UL, 0x1000U, 1, { 0x0 } },
++	{ "dma0", 0x19900000UL, 0x1000U, E1S_DMA_OFFS },
++	{ "dma1", 0x19901000UL, 0x1000U, E1S_DMA_OFFS },
++	{ "dpp0", 0x19930000UL, 0x1000U, E1S_DPP_OFFS },
++	{ "dpp1", 0x19931000UL, 0x1000U, E1S_DPP_OFFS },
++	{ "sramc0", 0x19950000UL, 0x1000U, 2, { 0x10, 0x14 } },
++	{ "sramc1", 0x19951000UL, 0x1000U, 2, { 0x10, 0x14 } },
++	{ "sysmmu", 0x19840000UL, 0x9000U, 5, { 0x0, 0x8, 0x34, 0x8000, 0x8404 } },
++};
++#define E1S_DPP_GROUPS  (sizeof(e1s_dpp_groups) / sizeof(e1s_dpp_groups[0]))
++
++static volatile uint32_t *e1s_dpp_pmu;
++static volatile uint32_t *e1s_dpp_map[E1S_DPP_GROUPS];
++
++static void
++e1s_dpp_snapshot(const char *when)
++{
++	uint32_t dpub, dpuf0, dpuf1;
++	unsigned g, i;
++
++	if (e1s_dpp_pmu == NULL) {
++		e1s_dpp_pmu = (volatile uint32_t *)ml_io_map(E1S_PMU_PA, E1S_PMU_SIZE);
++	}
++	if (e1s_dpp_pmu == NULL) {
++		printf("e1s-dpp: %s cannot map the PMU\n", when);
++		return;
++	}
++	dpub = e1s_display_read(e1s_dpp_pmu, E1S_PMU_DPUB_STATUS);
++	dpuf0 = e1s_display_read(e1s_dpp_pmu, E1S_PMU_DPUF0_STATUS);
++	dpuf1 = e1s_display_read(e1s_dpp_pmu, E1S_PMU_DPUF1_STATUS);
++	printf("e1s-dpp: %s pmu dpub %#x dpuf0 %#x dpuf1 %#x\n", when, dpub, dpuf0, dpuf1);
++	if ((dpub & dpuf0 & dpuf1 & 1U) == 0) {
++		printf("e1s-dpp: %s skipped: a display power domain is off\n", when);
++		return;
++	}
++	for (g = 0; g < E1S_DPP_GROUPS; g++) {
++		const struct e1s_dpp_group *grp = &e1s_dpp_groups[g];
++		char line[320];
++		int len;
++
++		if (e1s_dpp_map[g] == NULL) {
++			e1s_dpp_map[g] = (volatile uint32_t *)ml_io_map((vm_offset_t)grp->pa, grp->size);
++		}
++		if (e1s_dpp_map[g] == NULL) {
++			printf("e1s-dpp: %s %s cannot map %#llx\n", when, grp->name, (unsigned long long)grp->pa);
++			continue;
++		}
++		len = snprintf(line, sizeof(line), "e1s-dpp: %s %s %#llx", when, grp->name, (unsigned long long)grp->pa);
++		for (i = 0; i < grp->n && len > 0 && (size_t)len < sizeof(line); i++) {
++			len += snprintf(line + len, sizeof(line) - (size_t)len, " %x=%x", grp->off[i],
++			    e1s_display_read(e1s_dpp_map[g], grp->off[i]));
++		}
++		printf("%s\n", line);
++	}
++}
++
++static void
++e1s_dpp_late_thread(void *arg __unused, wait_result_t result __unused)
++{
++	uint64_t ns;
++
++	for (;;) {
++		absolutetime_to_nanoseconds(mach_absolute_time(), &ns);
++		if (ns >= (uint64_t)E1S_DPP_LATE_S * NSEC_PER_SEC) {
++			break;
++		}
++		delay_for_interval(1000, NSEC_PER_USEC * 1000);
++	}
++	e1s_dpp_snapshot("late");
++	for (;;) {
++		delay_for_interval(3600, NSEC_PER_SEC);
++	}
++}
++
++/*
++ * NAT-185: where the only running core's time goes while the swipes run. Every E1S_TOP_EVERY_S from E1S_TOP_FROM_S to
++ * E1S_TOP_UNTIL_S of uptime, each process's user + system time (recount_task_times(), the counters task_info reads, no lock) is
++ * set against the last sample; the span, the sum, the kernel's share (pid 0), cpu0's idle counter (ml_cpu_idle_time, as boot-arg
++ * cpuload reads it) and the E1S_TOP_SHOW busiest are printed. Only reads; a process that exited inside a span is missing from it,
++ * one born inside it counts with its whole life. Boot-arg e1stop=0 turns it off.
++ */
++#define E1S_TOP_FROM_S          200U
++#define E1S_TOP_UNTIL_S         380U
++#define E1S_TOP_EVERY_S         5U
++#define E1S_TOP_PROCS           160U
++#define E1S_TOP_SHOW            6U
++
++struct e1s_top {
++	int             pid;
++	uint64_t        total;                  /* user + system, mach time */
++	uint64_t        delta;
++	char            name[20];
++};
++static struct e1s_top e1s_top_old[E1S_TOP_PROCS], e1s_top_new[E1S_TOP_PROCS];
++static unsigned int e1s_top_nold, e1s_top_nnew, e1s_top_lost;
++
++static int
++e1s_top_one(proc_t p, void *arg __unused)
++{
++	struct e1s_top *e;
++	task_t task;
++
++	if (e1s_top_nnew >= E1S_TOP_PROCS) {
++		e1s_top_lost++;
++		return PROC_RETURNED;
++	}
++	e = &e1s_top_new[e1s_top_nnew++];
++	e->pid = proc_pid(p);
++	e->total = 0;
++	e->delta = 0;
++	task = proc_task(p);
++	if (task != TASK_NULL) {
++		struct recount_times_mach t = recount_task_times(task);
++
++		e->total = t.rtm_user + t.rtm_system;
++	}
++	strlcpy(e->name, proc_best_name(p), sizeof(e->name));
++	return PROC_RETURNED;
++}
++
++static uint64_t
++e1s_top_us(uint64_t mach)
++{
++	uint64_t ns;
++
++	absolutetime_to_nanoseconds(mach, &ns);
++	return ns / 1000;
++}
++
++/* one sample; with report, the span since the last one is printed */
++static void
++e1s_top_sample(bool report, unsigned int at_s, uint64_t span_us, uint64_t idle_us)
++{
++	uint64_t sum = 0, kernel = 0;
++	unsigned int i, j, k, shown[E1S_TOP_SHOW], nshown = 0;
++	char line[200];
++	int len;
++
++	e1s_top_nnew = 0;
++	e1s_top_lost = 0;
++	proc_iterate(PROC_ALLPROCLIST, e1s_top_one, NULL, NULL, NULL);
++	for (i = 0; i < e1s_top_nnew; i++) {
++		struct e1s_top *e = &e1s_top_new[i];
++
++		e->delta = e->total;
++		for (j = 0; j < e1s_top_nold; j++) {
++			if (e1s_top_old[j].pid == e->pid) {
++				e->delta = e->total >= e1s_top_old[j].total ? e->total - e1s_top_old[j].total : 0;
++				break;
++			}
++		}
++		e->delta = e1s_top_us(e->delta);
++		sum += e->delta;
++		if (e->pid == 0) {
++			kernel = e->delta;
++		}
++	}
++	if (report) {
++		printf("e1s-top: %u s span %llu us busy %llu us kernel %llu us idle0 %llu us procs %u lost %u\n", at_s,
++		    (unsigned long long)span_us, (unsigned long long)sum, (unsigned long long)kernel, (unsigned long long)idle_us,
++		    e1s_top_nnew, e1s_top_lost);
++		for (k = 0; k < E1S_TOP_SHOW; k++) {
++			unsigned int best = E1S_TOP_PROCS;
++
++			for (i = 0; i < e1s_top_nnew; i++) {
++				bool taken = false;
++
++				for (j = 0; j < nshown; j++) {
++					taken = taken || shown[j] == i;
++				}
++				if (!taken && e1s_top_new[i].delta != 0 && (best == E1S_TOP_PROCS || e1s_top_new[i].delta > e1s_top_new[best].delta)) {
++					best = i;
++				}
++			}
++			if (best == E1S_TOP_PROCS) {
++				break;
++			}
++			shown[nshown++] = best;
++		}
++		len = snprintf(line, sizeof(line), "e1s-top: %u s top", at_s);
++		for (k = 0; k < nshown && len > 0 && (size_t)len < sizeof(line); k++) {
++			len += snprintf(line + len, sizeof(line) - (size_t)len, " %s[%d] %llu", e1s_top_new[shown[k]].name,
++			    e1s_top_new[shown[k]].pid, (unsigned long long)e1s_top_new[shown[k]].delta);
++		}
++		printf("%s\n", line);
++	}
++	memcpy(e1s_top_old, e1s_top_new, sizeof(e1s_top_new[0]) * e1s_top_nnew);
++	e1s_top_nold = e1s_top_nnew;
++}
++
++static void
++e1s_top_thread(void *arg __unused, wait_result_t result __unused)
++{
++	uint64_t ns, then = 0, idle = 0, idle_then = 0;
++	unsigned int next = E1S_TOP_FROM_S;
++	bool first = true;
++
++	for (;;) {
++		absolutetime_to_nanoseconds(mach_absolute_time(), &ns);
++		if (ns >= (uint64_t)E1S_TOP_UNTIL_S * NSEC_PER_SEC) {
++			break;
++		}
++		if (ns >= (uint64_t)next * NSEC_PER_SEC) {
++			if (!ml_cpu_idle_time(0, &idle)) {
++				idle = 0;
++			}
++			idle = e1s_top_us(idle);
++			e1s_top_sample(!first, (unsigned int)(ns / NSEC_PER_SEC), (ns - then) / 1000, idle >= idle_then ? idle - idle_then : 0);
++			first = false;
++			then = ns;
++			idle_then = idle;
++			next += E1S_TOP_EVERY_S;
++		}
++		delay_for_interval(100, NSEC_PER_USEC * 1000);
++	}
++	printf("e1s-top: done\n");
++	for (;;) {
++		delay_for_interval(3600, NSEC_PER_SEC);
++	}
++}
++
+ void
+ e1s_display_probe(void)
+ {
+ 	uint32_t mode = 1;
++	uint32_t dpp = 1;
++	uint32_t top = 1;
++	thread_t thread;
+ 
+ 	(void)PE_parse_boot_argn("e1sdisp", &mode, sizeof(mode));
+ 	if (mode == 0) {
+@@ -233,6 +494,20 @@
+ 	if (mode >= 2) {
+ 		e1s_display_pipeline();
+ 	}
++	(void)PE_parse_boot_argn("e1stop", &top, sizeof(top));
++	if (top != 0 && kernel_thread_start(e1s_top_thread, NULL, &thread) == KERN_SUCCESS) {
++		thread_deallocate(thread);
++		printf("e1s-top: process time thread started (%u-%u s every %u s)\n", E1S_TOP_FROM_S, E1S_TOP_UNTIL_S, E1S_TOP_EVERY_S);
++	}
++	(void)PE_parse_boot_argn("e1sdpp", &dpp, sizeof(dpp));
++	if (dpp == 0) {
++		return;
++	}
++	e1s_dpp_snapshot("probe");
++	if (kernel_thread_start(e1s_dpp_late_thread, NULL, &thread) == KERN_SUCCESS) {
++		thread_deallocate(thread);
++		printf("e1s-dpp: late snapshot thread started (at %u s)\n", E1S_DPP_LATE_S);
++	}
+ }
+ 
+ #endif /* ARM64_BOARD_CONFIG_E1S */
