@@ -1,0 +1,177 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "origin_detail": "SM-S921B e1s, one run of loader-diag-xnu-e2r-md1 delivered into RAM via RECOVERY, decision 0082",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T10:30:00+00:00",
+ "task": "NAT-200",
+ "summary": "reason200 R-reason: SpringBoard's SMP-only abort is NSInternalInconsistencyException 'Invalid parameter not satisfying: routingContextUID', thrown from MediaControls -> MediaPlayer on a libdispatch workqueue thread (3 aborts: 241.9 s without touch, 316.5 s, later). Ten CPUs again (S2-all, no panic, stop path ok). mediaserverd crash-loops (SIGSEGV) in every run; the missing route context is the likely link (not established). Stock RECOVERY restored, Android verified.",
+ "decision": "docs/decisions/0082-nat200-loader-diag-xnu-e2r-md1-single-run-2026-11-14.md",
+ "commit": "670967fb (NAT-199)",
+ "device_used": true,
+ "image": {
+  "name": "loader-diag-xnu-e2r-md1",
+  "recovery_sha256": "747f74e7a612f9502a3c248b154cbe302579d992b68b50a26a0d9e7f57c805de",
+  "payload_sha256": "bfc2914b00ce27cca966fa01fcc5a575c7d483a126da5c7de6cee11c0c3331e6",
+  "session": "docs/procedures/nat-199/session_nat200.py",
+  "session_sha256": "eccf26acda1e7a885d713d5309009021817cc1ef7e464fe2f6ce1470dedd306b"
+ },
+ "measurements": {
+  "reason200": "R-reason",
+  "reasons": [
+   {
+    "text": "Terminating app due to uncaught exception 'NSInternalInconsistencyException', reason: 'Invalid parameter not satisfying: routingContextUID'",
+    "exception": "NSInternalInconsistencyException",
+    "reason": "Invalid parameter not satisfying: routingContextUID",
+    "throw_stack": [
+     "0x1aae7548c",
+     "0x1a415d050",
+     "0x1a5663900",
+     "0x1ba14bfcc",
+     "0x1cbc37b0c",
+     "0x1b1c167a8",
+     "0x1b1c17780",
+     "0x1b1bfbd88",
+     "0x1b1bfc430",
+     "0x1f4d63b94",
+     "0x1f4d63720"
+    ],
+    "throw_stack_symbols": [
+     "0x186de548c CoreFoundation <redacted>+0xa0",
+     "0x1800cd050 libobjc.A.dylib _objc_exception_throw+0x38",
+     "0x1815d3900 Foundation <redacted>+0x0",
+     "0x1960bbfcc MediaPlayer <redacted>+0x1c8",
+     "0x1a7ba7b0c MediaControls <redacted>+0x98",
+     "0x18db867a8 libdispatch.dylib <redacted>+0x18",
+     "0x18db87780 libdispatch.dylib <redacted>+0x10",
+     "0x18db6bd88 libdispatch.dylib <redacted>+0x268",
+     "0x18db6c430 libdispatch.dylib <redacted>+0xa0",
+     "0x1d0cd3b94 libsystem_pthread.dylib __pthread_wqthread+0xe0",
+     "0x1d0cd3720 libsystem_pthread.dylib _start_wqthread+0x8"
+    ]
+   }
+  ],
+  "aborts": [
+   {
+    "name": "SpringBoard",
+    "pid": 13,
+    "slide": "0x24090000",
+    "frames": [
+     "0x1b1cd84b8",
+     "0x1f4ca8f54",
+     "0x1f4c99a4c",
+     "0x1a4162014",
+     "0x1f4ca8424",
+     "0x1f4ca83d4",
+     "0x1b1c17794",
+     "0x1b1bfbd88",
+     "0x1b1bfc430",
+     "0x1f4d63b94",
+     "0x1f4d63720"
+    ]
+   },
+   {
+    "name": "SpringBoard",
+    "pid": 122,
+    "slide": "0x24090000",
+    "frames": [
+     "0x1b1cd84b8",
+     "0x1f4ca8f54",
+     "0x1f4c99a4c",
+     "0x1a4162014",
+     "0x1f4ca8424",
+     "0x1f4ca83d4"
+    ]
+   },
+   {
+    "name": "SpringBoard",
+    "pid": 122,
+    "slide": "0x24090000",
+    "frames": [
+     "0x1b1c17794",
+     "0x1b1bfbd88",
+     "0x1b1bfc430",
+     "0x1f4d63b94",
+     "0x1b1cd84b8",
+     "0x1f4d63720"
+    ]
+   }
+  ],
+  "scans": [
+   {
+    "lines": 1,
+    "bytes": 1076766,
+    "distinct": 1
+   },
+   {
+    "lines": 3,
+    "bytes": 1310719,
+    "distinct": 1
+   }
+  ],
+  "smp198": "S2-all running 10",
+  "top186": "U-free 0.108",
+  "fbcopy181": "K-none",
+  "bbd188": "B2 4.12 ms/frame"
+ },
+ "commands": [
+  {
+   "cmd": "python3 docs/procedures/nat-199/session_nat200.py --out artifacts/nat-200/preflight-001 --image loader-diag-xnu-e2r-md1",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-199/session_nat200.py --out artifacts/nat-200/run-001 --image loader-diag-xnu-e2r-md1 --execute",
+   "exit": 0
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 61 --out artifacts/nat-200/restore-001/restore-trace",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-200/restore-001/android-check.json",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess ...",
+   "exit": 0
+  },
+  {
+   "cmd": "sh artifacts/nat-200/analyse.sh",
+   "exit": 0
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-200/analysis/reason200.json",
+  "artifacts/nat-200/analysis/smp198.json",
+  "artifacts/nat-200/analysis/verdict.json",
+  "artifacts/nat-200/analysis/kernel-text.txt",
+  "artifacts/nat-200/analysis/fbcopy181.json",
+  "artifacts/nat-200/analysis/bbd188.json",
+  "artifacts/nat-200/analysis/top186.json",
+  "artifacts/nat-200/restore-001/report.json",
+  "artifacts/nat-200/restore-001/android-check.json",
+  "artifacts/nat-200/run-001.log"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-200/analysis/reason200.json": "6c211dfa33d57f61440ce7100da91983ce1522a05b3434223e0aa2459e1c830c",
+  "artifacts/nat-200/analysis/smp198.json": "334705969bd22b86636ee3b4912f20c3cfdfcc4c83b3f94e8e46ecf896d74bfb",
+  "artifacts/nat-200/analysis/verdict.json": "987cd746e51bd6f2f689a62cdbcdc5d7e538887703ea6265916058ac400261a3",
+  "artifacts/nat-200/analysis/kernel-text.txt": "3a95cd53f845fd7489acba7f9cd32a05d4863fc6c39924173fd8f1617fb46f1b",
+  "artifacts/nat-200/analysis/fbcopy181.json": "4696908b1ed0f2d2b5dfdcfd915c250796417eb2e7b4306d18fe5b111453e954",
+  "artifacts/nat-200/analysis/bbd188.json": "7e79f9f5037dc669b42c1e6df8a15e84574013aa40ea5daba69150696e7d9ada",
+  "artifacts/nat-200/analysis/top186.json": "e4877f39d09d2e0ad16f322c6902d7964fc041ecef4e6ba92ff5dff7d1f8e257",
+  "artifacts/nat-200/restore-001/report.json": "3aca4789241343dc092c1bba0166663019f92f09453d33627438e2f8f826408c",
+  "artifacts/nat-200/restore-001/android-check.json": "2ecef336aed9933a05ed086a44d70abcd48aff710f27f705209518ad37f1cfc9",
+  "artifacts/nat-200/run-001.log": "a0f54977b7f15fbde5cbf91e430a176016aec1e68cc2f9a2c6e76aa36ea68739"
+ },
+ "restore": {
+  "stock_recovery_sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+  "assess": "pass",
+  "android_check": "pass"
+ },
+ "device_inventory": "devices/local-2026-11-14-nat200.json",
+ "limitations": [
+  "link from mediaserverd's crash loop to the empty route context is an interpretation",
+  "no frame claim: SpringBoard restarted in the swipe window"
+ ]
+}

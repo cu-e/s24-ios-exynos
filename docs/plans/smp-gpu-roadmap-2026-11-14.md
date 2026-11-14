@@ -31,7 +31,7 @@ Legend:
 | S11 | Clocks of the other clusters through ACPM (stock FREQ_REQ per domain, as NAT-173 did for cpu0) | after S9 | stock parameters only |
 | S12 | Measure: backboardd and the driver on different cores, frames per 5 s against the reference | after S10 | reference scV |
 
-**Current blocker on the SMP line:** none that is external. S7–S9 are done: ten CPUs run XNU (NAT-198). Next: the reason for SpringBoard's SMP-only exception, then S10–S12. S6 stays stopped.
+**Current blocker on the SMP line:** none that is external. S7–S9 are done: ten CPUs run XNU (NAT-198). NAT-200 found the reason for SpringBoard's SMP-only exception: `routingContextUID` empty in MediaControls → MediaPlayer, beside the mediaserverd SIGSEGV loop. Next: mediaserverd's fault (systrace) and the S11 cluster clocks, then S10 and S12. S6 stays stopped.
 
 ## Xclipse 940 GPU
 
