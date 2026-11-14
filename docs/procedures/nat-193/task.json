@@ -1,0 +1,21 @@
+{
+ "id": "NAT-193",
+ "status": "pending",
+ "owner": null,
+ "title": "Host: scZ = scV (NAT-185 kernel, ran in NAT-186/188) with fbscale=2 in place of touch_lat=1 (iOS renders 750x1624 instead of 1125x2436: 2.25x fewer pixels for backboardd's software composition, NAT-192); same kernel and root; bbd188 verdict registered against NAT-186's 67.95 ms per frame",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 95,
+ "depends_on": [
+  "NAT-192"
+ ],
+ "paths": [
+  "docs/procedures/nat-193",
+  "artifacts/nat-193"
+ ],
+ "acceptance": [
+  "Command line equals scV's with ' touch_lat=1 ' replaced by ' fbscale=2 ' and the tag changed (test); kernel and md0 root identical to scV's; loader sites rc 0",
+  "Driver source review: fbscale=2 gives a 750x1624 surface and the NAT-183 run table handles the 750->1080 upscale; bbd188 still reads its inputs without touch_lat",
+  "Package, counted session, registered verdicts for NAT-194"
+ ]
+}

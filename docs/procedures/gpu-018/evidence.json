@@ -1,0 +1,94 @@
+{
+ "kind": "android-userland",
+ "origin": "local-device",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T08:34:03+00:00",
+ "task": "GPU-018",
+ "summary": "Read-only Xclipse 940 inventory: firmware vangogh_lite_unified_evt0/1.bin (901120 B each) is in vendor_boot ramdisk lib/firmware/sgpu, not /vendor/firmware; sgpu is a vendor_boot module; stock binaries confirm SMC 0x82000520 (gfx_v10_0_fw_init), SMC 0x82000410 (pd tz save/restore), HVC 0xC6000108/110/111 (exynos-s2mpu); Android runs pKVM (kvm-arm.mode=protected, exynos-hypervisor protected module), so S2MPU HVCs are served by Linux EL2; GPU runtime-suspended when idle, 14 OPPs 252-1095 MHz; init lines no longer in ring.",
+ "device_used": true,
+ "writes_on_device": false,
+ "debugfs_read": false,
+ "device_inventory": "devices/local-2026-11-14-gpu018.json",
+ "commands": [
+  {
+   "cmd": "adb shell \"su -c 'ls -l /vendor/firmware/ | grep -i -e sgpu -e vangogh -e gpu; ls -lR /vendor/firmware/sgpu'\"",
+   "exit_code": 0,
+   "result": "no GPU firmware; /vendor/firmware/sgpu absent"
+  },
+  {
+   "cmd": "adb shell \"su -c 'find /vendor /vendor_dlkm /odm /system/vendor -iname *vangogh* -o -iname *sgpu*'\"",
+   "exit_code": 0,
+   "result": "only libSGPUOpenCL.so, libdrm_sgpu.so"
+  },
+  {
+   "cmd": "adb shell \"su -c 'ls /vendor/firmware/'\"",
+   "exit_code": 0,
+   "result": "110 entries, none GPU"
+  },
+  {
+   "cmd": "adb shell \"su -c dmesg\"",
+   "exit_code": 0,
+   "result": "1424 lines from 1672 s; only sgpu DVFS lines; kept local, not committed"
+  },
+  {
+   "cmd": "adb shell \"su -c 'cat /proc/modules ...; cat /sys/module/firmware_class/parameters/path; ls /sys/bus/platform/devices'\"",
+   "exit_code": 0,
+   "result": "sgpu module 1306624 B; 22200000.sgpu, 12861e40.pd_g3dcore"
+  },
+  {
+   "cmd": "adb shell \"su -c 'cat /proc/device-tree/psci/{compatible,method} ...; cat /proc/cmdline'\"",
+   "exit_code": 0,
+   "result": "psci-1.0 smc; kvm-arm.mode=protected; protected_modules=exynos-hypervisor"
+  },
+  {
+   "cmd": "adb shell \"su -c 'cat .../power/runtime_status; devfreq; /sys/kernel/gpu/gpu_model'\"",
+   "exit_code": 0,
+   "result": "sgpu suspended; 14 OPPs; Samsung Xclipse 940"
+  },
+  {
+   "cmd": "host: vendor_boot v4 ramdisk split, legacy-LZ4 decode (scratch lz4legacy.py), cpio -idm",
+   "exit_code": 0,
+   "result": "ramdisk1 firmware, ramdisk2 294 modules"
+  },
+  {
+   "cmd": "llvm-objdump -dr --no-show-raw-insn <module>.ko + movk/mov/call trace",
+   "exit_code": 0,
+   "result": "call IDs as README table"
+  }
+ ],
+ "stock_images": {
+  "devices/recovery/backups/2026-11-10/boot.img": "a05a3c3b1085ecf9dc7522079a28d196732e0fd6384068aa6f964b71c29a86ab",
+  "devices/recovery/backups/2026-11-10/vendor_boot.img": "7d028e3398a1f3fdf1bd3bb5b990af1b8cfb078930f6e8aec53d289717739129"
+ },
+ "firmware": {
+  "vangogh_lite_unified_evt0.bin": {
+   "bytes": 901120,
+   "sha256": "b91d564835a3decf88ece824c73eeabc494026962a8982d71742ff1cb5f2ad2a"
+  },
+  "vangogh_lite_unified_evt1.bin": {
+   "bytes": 901120,
+   "sha256": "c361847b65fe8f4b58ed4f10bcc573de40fd2cda37472161392aec844d8357ce"
+  }
+ },
+ "modules": {
+  "sgpu.ko": "d2f234ab615a2c0b102f1992f88d54377d5edcae293cb355b213e286060ad41a",
+  "exynos-pd.ko": "4f47cab6b3603da2d016081e4c72e7b8f27e2b37c855998f54f237412c24e56c",
+  "exynos-pd_el3.ko": "31d3bcf02cba900f0e426eb3e381dab7e4b1eb329d462b87c62146a5c2c41faf",
+  "exynos-s2mpu.ko": "2dc1e61d76a3854336a996ee68244de9bb4c1cbd6f9f1f76bb387c5185665bb5",
+  "exynos-hypervisor.ko": "2bde7f6f06ee669faef9cbc8b595875a48845dafba9e706055a1d4888b3c4825",
+  "imgloader.ko": "ff7a59a3d6a424771de8e2842eb530b0e49b1ccd7e021e63de3150346aa66578"
+ },
+ "artifacts": [
+  "artifacts/gpu-018/run-001/fw-names.txt",
+  "artifacts/gpu-018/run-001/modules.txt",
+  "artifacts/gpu-018/run-001/el-facts.txt",
+  "artifacts/gpu-018/run-001/power-state.txt",
+  "artifacts/gpu-018/run-001/sysfs-1.txt"
+ ],
+ "limits": [
+  "EVT revision not established",
+  "init order/return values not in ring",
+  "S2MPU reset state unknown",
+  "EL3 acceptance of the SMCs from NS-EL1 without EL2 unknown"
+ ]
+}

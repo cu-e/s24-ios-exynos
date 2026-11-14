@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T08:06:41+00:00",
+  "updated_at": "2026-11-14T08:38:32+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -18406,8 +18406,8 @@
     },
     {
       "id": "GPU-018",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
       "title": "Android read-only: Xclipse 940 inventory for a first native GPU step: /vendor/firmware/sgpu file names, sizes and SHA-256 (never the blob), SGPU/G3D lines still in the kernel ring, the G3D power-domain runtime state and the sgpu device's sysfs identity; no debugfs clk_summary, no writes",
       "scope": "android-readonly",
       "evidence_kind": "android-userland",
@@ -18424,7 +18424,13 @@
         "Firmware names, sizes and hashes listed (no blob committed or copied outside artifacts/)",
         "SGPU init lines (order, return values if printed) or a statement that the ring no longer has them",
         "G3D power-domain state and the sgpu platform device path; what this establishes for a native power-on plan"
-      ]
+      ],
+      "started_at": "2026-11-14T08:28:47+00:00",
+      "last_heartbeat": "2026-11-14T08:28:47+00:00",
+      "updated_at": "2026-11-14T08:37:53+00:00",
+      "evidence": "docs/procedures/gpu-018/evidence.json",
+      "evidence_sha256": "0ecc263238882c6b131cb05b766d9da752bd961bc460654563f6805593448cc5",
+      "finished_at": "2026-11-14T08:37:53+00:00"
     },
     {
       "id": "NAT-152",
@@ -19517,6 +19523,99 @@
       "evidence": "docs/procedures/nat-192/evidence.json",
       "evidence_sha256": "16f25d8792fc821e8fb62a0f44ead8c3246b75c434199e25badc6a69eee1c095",
       "finished_at": "2026-11-14T08:06:22+00:00"
+    },
+    {
+      "id": "NAT-193",
+      "status": "blocked",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scZ = scV (NAT-185 kernel, ran in NAT-186/188) with fbscale=2 in place of touch_lat=1 (iOS renders 750x1624 instead of 1125x2436: 2.25x fewer pixels for backboardd's software composition, NAT-192); same kernel and root; bbd188 verdict registered against NAT-186's 67.95 ms per frame",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "depends_on": [
+        "NAT-192"
+      ],
+      "paths": [
+        "docs/procedures/nat-193",
+        "artifacts/nat-193"
+      ],
+      "acceptance": [
+        "Command line equals scV's with ' touch_lat=1 ' replaced by ' fbscale=2 ' and the tag changed (test); kernel and md0 root identical to scV's; loader sites rc 0",
+        "Driver source review: fbscale=2 gives a 750x1624 surface and the NAT-183 run table handles the 750->1080 upscale; bbd188 still reads its inputs without touch_lat",
+        "Package, counted session, registered verdicts for NAT-194"
+      ],
+      "started_at": "2026-11-14T08:19:05+00:00",
+      "last_heartbeat": "2026-11-14T08:27:41+00:00",
+      "updated_at": "2026-11-14T08:27:41+00:00",
+      "progress_note": "2026-11-14: withdrawn by the owner (no quality-for-FPS compromises such as fbscale=2). Host build/package/tests exist under artifacts/nat-193 and docs/procedures/nat-193 as a record only; decision 0079 deleted before any run; nothing ran on the phone",
+      "next_step": "None unless the owner reopens the reduced-resolution line",
+      "blocked_reason": "Owner instruction 2026-11-14: reduced UI resolution (fbscale=2) is a quality compromise and is not to be pursued; needs an explicit owner reversal"
+    },
+    {
+      "id": "NAT-194",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: one run of scZ (NAT-193, fbscale=2) under the synthetic swipes: backboardd CPU per frame (bbd188) and frames per 5 s against NAT-186 at scale 3; restore stock RECOVERY and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 1,
+      "depends_on": [
+        "NAT-193"
+      ],
+      "paths": [
+        "docs/procedures/nat-194",
+        "artifacts/nat-194",
+        "docs/decisions/0079-nat194-loader-diag-xnu-scZ-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "One run under its own decision file; bbd188 verdict B-none/B0/B1/B2 against 67.95 ms; frames per 5 s and K verdict reported beside it",
+        "Panel thumbnail and driver display line confirm the 750x1624 surface",
+        "Stock RECOVERY restored with full hash check, Android verified, permit closed after done"
+      ],
+      "priority_reason": "Withdrawn by the owner 2026-11-14 (fbscale=2 quality compromise); no decision file exists, so the session gate cannot run it; depends on blocked NAT-193",
+      "updated_at": "2026-11-14T08:28:06+00:00"
+    },
+    {
+      "id": "GPU-019",
+      "status": "pending",
+      "owner": null,
+      "title": "Host review of the stock BYH3 binaries for the first GPU step (roadmap G3+G6): g3dcore_on register writes/waits in cmupmucal.ko, DTZPC SMC 0x82000410 arguments in exynos-pd_el3.ko, the first ID/status registers sgpu.ko reads after power-on, and what exynos-hypervisor.ko's EL2 code does for HVC 0xC6000108/110/111 (forward to EL3 or not)",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 98,
+      "depends_on": [
+        "GPU-018"
+      ],
+      "paths": [
+        "docs/procedures/gpu-019",
+        "artifacts/gpu-019"
+      ],
+      "acceptance": [
+        "Every value for power on / DTZPC restore / ID read / DTZPC save / power off traced to a stock binary offset and cross-checked with the pinned source",
+        "The S2MPU HVC handling at EL2 described from the stock exynos-hypervisor.ko, or stated as not determinable",
+        "No Apple or vendor binary committed; only offsets, values and hashes"
+      ]
+    },
+    {
+      "id": "NAT-195",
+      "status": "pending",
+      "owner": null,
+      "title": "Host: read-only secondary EL2 probe (roadmap S7): a PSCI-started core that finds CurrentEL == 2 records HCR_EL2, SCTLR_EL2, CNTHCTL_EL2, CNTVOFF_EL2, CPTR_EL2, MDCR_EL2, ICC_SRE_EL2, VBAR_EL2 and MPIDR_EL1 into its mark slot and parks in wfe; no EL2 register is written; reference scV otherwise",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "NAT-153"
+      ],
+      "paths": [
+        "docs/procedures/nat-195",
+        "artifacts/nat-195"
+      ],
+      "acceptance": [
+        "Only mrs reads at EL2 plus the existing mark store and a wfe park; no msr to any EL2 register (test on the patch and the object)",
+        "Loader sites rc 0 and __TEXT_EXEC page count unchanged against scV",
+        "Package, counted session, registered criteria for the native run"
+      ]
     }
   ],
   "experiments": [
@@ -72652,6 +72751,147 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T08:18:27+00:00",
+      "action": "task.add:NAT-193",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-193",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:18:46+00:00",
+      "action": "task.add:NAT-194",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-194",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:19:05+00:00",
+      "action": "task.claim:NAT-193",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-193",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 95,
+          "last_heartbeat": "2026-11-14T08:19:05+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:27:22+00:00",
+      "action": "task.update:NAT-193",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-193",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 95,
+          "progress_note": "2026-11-14: withdrawn by the owner (no quality-for-FPS compromises such as fbscale=2). Host build/package/tests exist under artifacts/nat-193 and docs/procedures/nat-193 as a record only; decision 0079 deleted before any run; nothing ran on the phone",
+          "next_step": "None unless the owner reopens the reduced-resolution line",
+          "last_heartbeat": "2026-11-14T08:27:22+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:27:41+00:00",
+      "action": "task.block:NAT-193",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-193",
+          "status": "blocked",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 95,
+          "progress_note": "2026-11-14: withdrawn by the owner (no quality-for-FPS compromises such as fbscale=2). Host build/package/tests exist under artifacts/nat-193 and docs/procedures/nat-193 as a record only; decision 0079 deleted before any run; nothing ran on the phone",
+          "next_step": "None unless the owner reopens the reduced-resolution line",
+          "blocked_reason": "Owner instruction 2026-11-14: reduced UI resolution (fbscale=2) is a quality compromise and is not to be pursued; needs an explicit owner reversal",
+          "last_heartbeat": "2026-11-14T08:27:41+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:28:06+00:00",
+      "action": "task.prioritize:NAT-194",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-194",
+          "status": "pending",
+          "owner": null,
+          "priority": 1,
+          "priority_reason": "Withdrawn by the owner 2026-11-14 (fbscale=2 quality compromise); no decision file exists, so the session gate cannot run it; depends on blocked NAT-193"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:28:47+00:00",
+      "action": "task.claim:GPU-018",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "GPU-018",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 95,
+          "last_heartbeat": "2026-11-14T08:28:47+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:37:53+00:00",
+      "action": "task.done:GPU-018",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "GPU-018",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 95,
+          "last_heartbeat": "2026-11-14T08:28:47+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:38:12+00:00",
+      "action": "task.add:GPU-019",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "GPU-019",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:38:32+00:00",
+      "action": "task.add:NAT-195",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-195",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
     }
   ]
 }

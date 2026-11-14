@@ -1,0 +1,78 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T08:23:44+00:00",
+ "task": "NAT-193",
+ "summary": "scZ = scV (NAT-185 kernel d7e7fee1, NAT-110 md0) with fbscale=2 in place of touch_lat=1 (252 B): iOS draws 750x1624 (375x812 pt at 2x) instead of 1125x2436, 2.25x fewer pixels for backboardd software composition (NAT-192). Payload equals scV from the cmdline on; loader sites rc 0; driver source review of fbscale and the run table; bbd188 unaffected by removing tl: lines (67.95 on NAT-186). Cache review: QuartzCore takes canvas from IOMobileFramebufferGetCanvasSizes (CA_CANVAS_* env overrides), scale from the device tree. RECOVERY ae2199c2, payload 6719580f, session 4e57ff10. Host-test only.",
+ "commit": "39159e41 (base)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scZ-md1",
+  "recovery_sha256": "ae2199c2c660f02b12eb7bfe202dc8bd124ef121a8e74a81ee9851ac3af3b4c3",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "6719580fb01a2de16261a82c5daf97411b7da71ee2cef26c15bf11f180cb629f",
+  "payload_bytes": 26208032,
+  "loader_image_sha256": "67455140f07fc6470e9d41e7facc16780fc21679070f825e6803ad612b4d8873",
+  "kernel_dir": "artifacts/nat-185/kernel-001",
+  "kernel_sha256": "d7e7fee154104aaf9c59a4d2145c3901763259296ebd85cb373c388a4667c8b3",
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT193-scZ debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 fbscale=2 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "cmdline_bytes": 252,
+  "session": "docs/procedures/nat-193/session_nat194.py",
+  "session_sha256": "4e57ff10127f031331ef988e7eb33e8cee29beffe7f5849c44e824987e5b2ed3"
+ },
+ "sources": {
+  "docs/procedures/nat-193/build.py": "56ae960544f98cf82ae3d07ed087aaa3f6e2da13deb269ba4c4b3750d8e84d66",
+  "docs/procedures/nat-193/test_nat193.py": "a9b2d8f6a5909d0fe2c61896c641b6bc51402696040d50144879fb9170a500bc",
+  "docs/procedures/nat-193/derive194.py": "70e604cf61f9796af2d16a142b560a802fa80b38a71df7d4f326b6de90a7377b",
+  "docs/procedures/nat-193/session_nat194.py": "4e57ff10127f031331ef988e7eb33e8cee29beffe7f5849c44e824987e5b2ed3",
+  "docs/procedures/nat-193/README.md": "01b8a163da0aa48d3b174aaf8d4f44e67cba0c08cd99ddd739f74aa81aab4e58",
+  "docs/procedures/nat-193/task.json": "fb05d7695ff01d778f700ab666189ab22b7c2bf298bbf30680c86775d27c4fb5",
+  "docs/procedures/nat-193/task194.json": "b4daaae149ec61fc403c3819c659b2c82ee4243af6fc83344410a2980a2165be"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/nat-193/build.py --out artifacts/nat-193/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "252 B, loader sites rc 0, kernel = scV"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-193/build-001 --out artifacts/nat-193/package-001",
+   "exit_code": 0,
+   "result": "RECOVERY ae2199c2c660f02b12eb7bfe202dc8bd124ef121a8e74a81ee9851ac3af3b4c3"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-193/derive194.py",
+   "exit_code": 0,
+   "result": "4e57ff10127f031331ef988e7eb33e8cee29beffe7f5849c44e824987e5b2ed3"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-193/test_nat193.py",
+   "exit_code": 0,
+   "result": "Ran 6 tests OK"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-183/test_nat183.py",
+   "exit_code": 0,
+   "result": "Ran 3 tests OK (run table incl. 750->1080)"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-189/dscdis.py --cache ... --table artifacts/nat-189/dsc-table.pickle 0x18852b3dc",
+   "exit_code": 0,
+   "result": "QuartzCore display setup: GetDisplaySize, GetCanvasSizes (last entry), CA_LCD_*/CA_CANVAS_* getenv overrides, GetDotPitch, GetDisplayArea"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-193/build-001/build.json",
+  "artifacts/nat-193/package-001/package.json",
+  "artifacts/nat-193/build-001.log",
+  "artifacts/nat-193/package-001.log"
+ ],
+ "limits": [
+  "driver upscale cost on the phone unknown (331 runs per row vs 45)",
+  "2x artwork availability in the 3x donor root unknown",
+  "swipe175 has no input without touch_lat=1",
+  "withdrawn: no native run will be made from this image"
+ ],
+ "withdrawn": "2026-11-14 by the owner before any run (no reduced-resolution compromise); decision 0079 deleted unused; NAT-193 blocked, NAT-194 deprioritised"
+}

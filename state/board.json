@@ -1,13 +1,14 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-14T08:07:00+00:00",
-  "ledger_updated_at": "2026-11-14T08:06:41+00:00",
-  "registry_sha256": "7c196cf70abb171e8341e7850fdb4f716e3afcf06379fb70808028d1d6d8fc98",
+  "generated_at": "2026-11-14T08:38:51+00:00",
+  "ledger_updated_at": "2026-11-14T08:38:32+00:00",
+  "registry_sha256": "709cc06321c2fc687b3ea69ebb49b7277709983b63b9995da585031ff66a8e0e",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
+      "GPU-019",
       "NAT-082",
-      "GPU-018",
+      "NAT-195",
       "NAT-054",
       "NAT-055"
     ],
@@ -39,6 +40,7 @@
       "IOS-005",
       "KRN-003",
       "KRN-004",
+      "NAT-193",
       "ODIN-001",
       "KRN-034",
       "NAT-009",
@@ -100,7 +102,8 @@
       "ESIM-002",
       "ESIM-003",
       "QUAL-001",
-      "BT-005"
+      "BT-005",
+      "NAT-194"
     ],
     "done": [
       "KRN-009",
@@ -346,6 +349,7 @@
       "NAT-068",
       "NAT-069",
       "NAT-084",
+      "GPU-018",
       "DRV-001",
       "KRN-023",
       "REV-012",
@@ -7565,6 +7569,30 @@
       "card_path": "planning/tasks/NAT-131.md"
     },
     {
+      "id": "GPU-019",
+      "status": "pending",
+      "owner": null,
+      "title": "Host review of the stock BYH3 binaries for the first GPU step (roadmap G3+G6): g3dcore_on register writes/waits in cmupmucal.ko, DTZPC SMC 0x82000410 arguments in exynos-pd_el3.ko, the first ID/status registers sgpu.ko reads after power-on, and what exynos-hypervisor.ko's EL2 code does for HVC 0xC6000108/110/111 (forward to EL3 or not)",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 98,
+      "depends_on": [
+        "GPU-018"
+      ],
+      "paths": [
+        "docs/procedures/gpu-019",
+        "artifacts/gpu-019"
+      ],
+      "acceptance": [
+        "Every value for power on / DTZPC restore / ID read / DTZPC save / power off traced to a stock binary offset and cross-checked with the pinned source",
+        "The S2MPU HVC handling at EL2 described from the stock exynos-hypervisor.ko, or stated as not determinable",
+        "No Apple or vendor binary committed; only offsets, values and hashes"
+      ],
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/GPU-019.md"
+    },
+    {
       "id": "KRN-006",
       "title": "Harden experimental XNU compiler AST and whole-kernel expression coverage",
       "priority": 97,
@@ -8773,6 +8801,30 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-099.md"
+    },
+    {
+      "id": "NAT-195",
+      "status": "pending",
+      "owner": null,
+      "title": "Host: read-only secondary EL2 probe (roadmap S7): a PSCI-started core that finds CurrentEL == 2 records HCR_EL2, SCTLR_EL2, CNTHCTL_EL2, CNTVOFF_EL2, CPTR_EL2, MDCR_EL2, ICC_SRE_EL2, VBAR_EL2 and MPIDR_EL1 into its mark slot and parks in wfe; no EL2 register is written; reference scV otherwise",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 97,
+      "depends_on": [
+        "NAT-153"
+      ],
+      "paths": [
+        "docs/procedures/nat-195",
+        "artifacts/nat-195"
+      ],
+      "acceptance": [
+        "Only mrs reads at EL2 plus the existing mark store and a wfe park; no msr to any EL2 register (test on the patch and the object)",
+        "Loader sites rc 0 and __TEXT_EXEC page count unchanged against scV",
+        "Package, counted session, registered criteria for the native run"
+      ],
+      "column": "ready",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-195.md"
     },
     {
       "id": "KRN-005",
@@ -11816,8 +11868,8 @@
     },
     {
       "id": "GPU-018",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
       "title": "Android read-only: Xclipse 940 inventory for a first native GPU step: /vendor/firmware/sgpu file names, sizes and SHA-256 (never the blob), SGPU/G3D lines still in the kernel ring, the G3D power-domain runtime state and the sgpu device's sysfs identity; no debugfs clk_summary, no writes",
       "scope": "android-readonly",
       "evidence_kind": "android-userland",
@@ -11835,9 +11887,48 @@
         "SGPU init lines (order, return values if printed) or a statement that the ring no longer has them",
         "G3D power-domain state and the sgpu platform device path; what this establishes for a native power-on plan"
       ],
-      "column": "ready",
+      "started_at": "2026-11-14T08:28:47+00:00",
+      "last_heartbeat": "2026-11-14T08:28:47+00:00",
+      "updated_at": "2026-11-14T08:37:53+00:00",
+      "evidence": "docs/procedures/gpu-018/evidence.json",
+      "evidence_sha256": "0ecc263238882c6b131cb05b766d9da752bd961bc460654563f6805593448cc5",
+      "finished_at": "2026-11-14T08:37:53+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/GPU-018.md"
+    },
+    {
+      "id": "NAT-193",
+      "status": "blocked",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scZ = scV (NAT-185 kernel, ran in NAT-186/188) with fbscale=2 in place of touch_lat=1 (iOS renders 750x1624 instead of 1125x2436: 2.25x fewer pixels for backboardd's software composition, NAT-192); same kernel and root; bbd188 verdict registered against NAT-186's 67.95 ms per frame",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 95,
+      "depends_on": [
+        "NAT-192"
+      ],
+      "paths": [
+        "docs/procedures/nat-193",
+        "artifacts/nat-193"
+      ],
+      "acceptance": [
+        "Command line equals scV's with ' touch_lat=1 ' replaced by ' fbscale=2 ' and the tag changed (test); kernel and md0 root identical to scV's; loader sites rc 0",
+        "Driver source review: fbscale=2 gives a 750x1624 surface and the NAT-183 run table handles the 750->1080 upscale; bbd188 still reads its inputs without touch_lat",
+        "Package, counted session, registered verdicts for NAT-194"
+      ],
+      "started_at": "2026-11-14T08:19:05+00:00",
+      "last_heartbeat": "2026-11-14T08:27:41+00:00",
+      "updated_at": "2026-11-14T08:27:41+00:00",
+      "progress_note": "2026-11-14: withdrawn by the owner (no quality-for-FPS compromises such as fbscale=2). Host build/package/tests exist under artifacts/nat-193 and docs/procedures/nat-193 as a record only; decision 0079 deleted before any run; nothing ran on the phone",
+      "next_step": "None unless the owner reopens the reduced-resolution line",
+      "blocked_reason": "Owner instruction 2026-11-14: reduced UI resolution (fbscale=2) is a quality compromise and is not to be pursued; needs an explicit owner reversal",
+      "column": "blocked",
+      "reasons": [
+        "Owner instruction 2026-11-14: reduced UI resolution (fbscale=2) is a quality compromise and is not to be pursued; needs an explicit owner reversal"
+      ],
+      "card_path": "planning/tasks/NAT-193.md",
+      "report_health": "recent"
     },
     {
       "id": "DRV-001",
@@ -12430,7 +12521,7 @@
       "column": "in_progress",
       "reasons": [],
       "card_path": "planning/tasks/NAT-190.md",
-      "report_health": "recent"
+      "report_health": "stale"
     },
     {
       "id": "NAT-191",
@@ -19715,7 +19806,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-005, IOS-007, NAT-078, NAT-081, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103, NAT-124, NAT-135, NAT-137, NAT-146, NAT-149, NAT-151, NAT-154, NAT-190"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-005, IOS-007, NAT-078, NAT-081, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103, NAT-124, NAT-135, NAT-137, NAT-146, NAT-149, NAT-151, NAT-154, NAT-190, NAT-193"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -19754,7 +19845,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-007, NAT-078, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103, NAT-124, NAT-135, NAT-137, NAT-146, NAT-149, NAT-151, NAT-154, NAT-190"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-007, NAT-078, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103, NAT-124, NAT-135, NAT-137, NAT-146, NAT-149, NAT-151, NAT-154, NAT-190, NAT-193"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -20605,6 +20696,36 @@
         "Dependencies: NAT-151"
       ],
       "card_path": "planning/tasks/NAT-155.md"
+    },
+    {
+      "id": "NAT-194",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: one run of scZ (NAT-193, fbscale=2) under the synthetic swipes: backboardd CPU per frame (bbd188) and frames per 5 s against NAT-186 at scale 3; restore stock RECOVERY and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 1,
+      "depends_on": [
+        "NAT-193"
+      ],
+      "paths": [
+        "docs/procedures/nat-194",
+        "artifacts/nat-194",
+        "docs/decisions/0079-nat194-loader-diag-xnu-scZ-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "One run under its own decision file; bbd188 verdict B-none/B0/B1/B2 against 67.95 ms; frames per 5 s and K verdict reported beside it",
+        "Panel thumbnail and driver display line confirm the 750x1624 surface",
+        "Stock RECOVERY restored with full hash check, Android verified, permit closed after done"
+      ],
+      "priority_reason": "Withdrawn by the owner 2026-11-14 (fbscale=2 quality compromise); no decision file exists, so the session gate cannot run it; depends on blocked NAT-193",
+      "updated_at": "2026-11-14T08:28:06+00:00",
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native",
+        "Dependencies: NAT-193"
+      ],
+      "card_path": "planning/tasks/NAT-194.md"
     }
   ],
   "agents": {
@@ -20926,10 +21047,21 @@
         "worktree": null
       },
       {
+        "id": "NAT-193",
+        "status": "blocked",
+        "last_heartbeat": "2026-11-14T08:27:41+00:00",
+        "report_health": "recent",
+        "progress_note": "2026-11-14: withdrawn by the owner (no quality-for-FPS compromises such as fbscale=2). Host build/package/tests exist under artifacts/nat-193 and docs/procedures/nat-193 as a record only; decision 0079 deleted before any run; nothing ran on the phone",
+        "next_step": "None unless the owner reopens the reduced-resolution line",
+        "handoff": null,
+        "branch": null,
+        "worktree": null
+      },
+      {
         "id": "NAT-190",
         "status": "in_progress",
         "last_heartbeat": "2026-11-14T07:39:49+00:00",
-        "report_health": "recent",
+        "report_health": "stale",
         "progress_note": "FAIL (native-device, decision 0077): scX panicked at 200.07 s on the e1s-pc sampler's first tick: recount.c:567 assert ml_get_interrupts_enabled()==FALSE via _e1s_pc_thread+0xac -> recount_current_thread_times (self-time read); pc190 P-none; until 200 s as scV (K2 2.26 ms, C2, P1). Loader deadline -> Download Mode by itself; stock RECOVERY restored, full hash, Android verified, assess pass. Evidence docs/procedures/nat-190/evidence.json",
         "next_step": "NAT-191 host: self time via recount_thread_time_mach(current_thread()), harness aborts on recount_current_*, audit asserts of every called KPI; NAT-192 native rerun under a new decision",
         "handoff": null,
@@ -21030,135 +21162,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-14T06:39:25+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-14T06:39:44+00:00",
-      "action": "task.claim:NAT-188",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-188",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 94,
-          "last_heartbeat": "2026-11-14T06:39:44+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T06:54:05+00:00",
-      "action": "task.done:NAT-188",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-188",
-          "status": "done",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 94,
-          "last_heartbeat": "2026-11-14T06:39:44+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T06:54:24+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-14T07:19:01+00:00",
-      "action": "task.add:NAT-189",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-189",
-          "status": "pending",
-          "owner": null,
-          "priority": 94
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T07:19:20+00:00",
-      "action": "task.add:NAT-190",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-190",
-          "status": "pending",
-          "owner": null,
-          "priority": 94
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T07:19:39+00:00",
-      "action": "task.claim:NAT-189",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-189",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 94,
-          "last_heartbeat": "2026-11-14T07:19:39+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T07:21:09+00:00",
-      "action": "task.done:NAT-189",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-189",
-          "status": "done",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 94,
-          "last_heartbeat": "2026-11-14T07:19:39+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T07:23:31+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-14T07:23:51+00:00",
-      "action": "task.claim:NAT-190",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-190",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 94,
-          "last_heartbeat": "2026-11-14T07:23:51+00:00"
-        }
-      ]
-    },
     {
       "at": "2026-11-14T07:39:49+00:00",
       "action": "task.update:NAT-190",
@@ -21289,11 +21292,152 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T08:18:27+00:00",
+      "action": "task.add:NAT-193",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-193",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:18:46+00:00",
+      "action": "task.add:NAT-194",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-194",
+          "status": "pending",
+          "owner": null,
+          "priority": 95
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:19:05+00:00",
+      "action": "task.claim:NAT-193",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-193",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 95,
+          "last_heartbeat": "2026-11-14T08:19:05+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:27:22+00:00",
+      "action": "task.update:NAT-193",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-193",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 95,
+          "progress_note": "2026-11-14: withdrawn by the owner (no quality-for-FPS compromises such as fbscale=2). Host build/package/tests exist under artifacts/nat-193 and docs/procedures/nat-193 as a record only; decision 0079 deleted before any run; nothing ran on the phone",
+          "next_step": "None unless the owner reopens the reduced-resolution line",
+          "last_heartbeat": "2026-11-14T08:27:22+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:27:41+00:00",
+      "action": "task.block:NAT-193",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-193",
+          "status": "blocked",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 95,
+          "progress_note": "2026-11-14: withdrawn by the owner (no quality-for-FPS compromises such as fbscale=2). Host build/package/tests exist under artifacts/nat-193 and docs/procedures/nat-193 as a record only; decision 0079 deleted before any run; nothing ran on the phone",
+          "next_step": "None unless the owner reopens the reduced-resolution line",
+          "blocked_reason": "Owner instruction 2026-11-14: reduced UI resolution (fbscale=2) is a quality compromise and is not to be pursued; needs an explicit owner reversal",
+          "last_heartbeat": "2026-11-14T08:27:41+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:28:06+00:00",
+      "action": "task.prioritize:NAT-194",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-194",
+          "status": "pending",
+          "owner": null,
+          "priority": 1,
+          "priority_reason": "Withdrawn by the owner 2026-11-14 (fbscale=2 quality compromise); no decision file exists, so the session gate cannot run it; depends on blocked NAT-193"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:28:47+00:00",
+      "action": "task.claim:GPU-018",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "GPU-018",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 95,
+          "last_heartbeat": "2026-11-14T08:28:47+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:37:53+00:00",
+      "action": "task.done:GPU-018",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "GPU-018",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 95,
+          "last_heartbeat": "2026-11-14T08:28:47+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:38:12+00:00",
+      "action": "task.add:GPU-019",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "GPU-019",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:38:32+00:00",
+      "action": "task.add:NAT-195",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-195",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "92cb9803380f479f97132551cd9d68911f141217f9d9bfe3b1fce3d3f7ff5fe3",
-    "BOARD.md": "cf46ae63b2f416ebeece99dbb011e92a492a9ce336cdc90df3d9dfe339742bff",
+    "STATUS.md": "7cdf00fe3d5f144610ac8b5f6901d7012dc3d30000e1fadd2688f6f14dcb2626",
+    "BOARD.md": "15760a27c21e0094b812fd7871cc5c8afcbb8093e1ec2c76e83274a3b1e30b8b",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -21467,6 +21611,7 @@
     "planning/tasks/NAT-101.md": "5b2fc1e43a6119d7afad7ef7b7f44b54c398daff6fe524b4e93ef7423c915125",
     "planning/tasks/NAT-102.md": "553dfd41551a8608467aeaaa8fd34ee6a57d35e9e367996e57dc3b76d669d58c",
     "planning/tasks/NAT-131.md": "fa94c8930019f77944a6c193b0a9040b5dc9f91becb6d059f4b6e317a9905df7",
+    "planning/tasks/GPU-019.md": "5f708c21db934a3a9d3334792172a17cf0676944bdba3b07b8582a357bc4c1f0",
     "planning/tasks/KRN-006.md": "17787b37e62d7cb230c248532450af8108a583aca6b6e955cee29637f8e981a1",
     "planning/tasks/KRN-014.md": "373bcf06587ce0b77bbacdfa023baa6c9b888953717dafa33267ff49a60ea753",
     "planning/tasks/KRN-015.md": "28783b6b5313987331209c84d30f10ddeab6ee7f41bf6bf1d963790545460926",
@@ -21497,6 +21642,7 @@
     "planning/tasks/NAT-091.md": "f0eb2889d031c3892425552569ac05048168149e42d8ae98660573a371535a9b",
     "planning/tasks/IOS-014.md": "342ef37955617b7d80899f8aa96d3cddf06a165a708bf65a8c66215f265c546d",
     "planning/tasks/NAT-099.md": "e4eae2b2b21bf8ee0de5420cdea30d01fe3d9ec36ac291a5c5d4a600ea868c41",
+    "planning/tasks/NAT-195.md": "bcba9927cbd4ecb2fd28ca104a4545910877be306089b9f911a530c2dc0471ea",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/REV-004.md": "8c7b273845208b121b2d6d1f05038b627689d3f97b766a765a91cdf23082bdb1",
     "planning/tasks/REV-011.md": "5ea2857fe5caca100edd1f7f53667f0b2a27de4b576000ecd14e2a55f1e7d51b",
@@ -21566,7 +21712,8 @@
     "planning/tasks/NAT-068.md": "63ac39bfc290b650ecdf1d5e546a4dd64bd59e618178a376f2a1d88d8b37349a",
     "planning/tasks/NAT-069.md": "dc88da36b861f2658df9ea2d1587a3aff3467385871912fa3645c77a2c535a41",
     "planning/tasks/NAT-084.md": "4e7fb47074b9fe0026583bfb6e34dcc047cf284cf6568ce3785e9bb9ec787e85",
-    "planning/tasks/GPU-018.md": "e1269f32bef8ac0e2a0bb5a9f2eaaa2de938177dd4b367cbd33ed94c9cf106cf",
+    "planning/tasks/GPU-018.md": "ea00bc3c5ee247aac48532583c411c98c1f52ace01d9b082a7db310e75abd344",
+    "planning/tasks/NAT-193.md": "86359e53cccb192f987f71a23d0818ee7ab2c4ba41863eb3e1fc25f7613b0e56",
     "planning/tasks/DRV-001.md": "eaac786b5ca6d0640d7a9bea43bf42424662189e0f9f44baaa6b6ad049f10f17",
     "planning/tasks/KRN-023.md": "a95e56ff9ef7bfa3ff55cf11a48d0bba892cc95ab504b367bc3e9d4490ecdd51",
     "planning/tasks/REV-012.md": "99bf82028acd252050bbe595c74c47d22013dfccb4d261b32b98825471ce86ea",
@@ -21582,7 +21729,7 @@
     "planning/tasks/NAT-187.md": "54d00486528795cd5141488abc4e14f88741203ee68d01c5773c52a573242152",
     "planning/tasks/NAT-188.md": "3c7631470d84a1bbb078564876021e12599502f4296eca425be7b57e25b8b25c",
     "planning/tasks/NAT-189.md": "6994eca7bbb95f2f65b272fdc35abadf94a6edba5f5eef3884904e9febc404ba",
-    "planning/tasks/NAT-190.md": "7b31c953f95fdc98bd382586d56d9b7b7774066ed1edb3e7dbdeea9ed326e176",
+    "planning/tasks/NAT-190.md": "4bd6d3359b982c05845b9dba56cf84c9cdb25c7cc646b78b42b1571669480391",
     "planning/tasks/NAT-191.md": "ed0418491afe5c53785c1cd61f17e9bc11dc1811c76d966bff6c0286ef92573d",
     "planning/tasks/NAT-192.md": "21e769387559409817dcccf32ff8544d8e2f8140b4eb9b82f1cd4390d08a31b4",
     "planning/tasks/ESIM-001.md": "4ff5511bf1b91ec562d46b9fa0fdbc4dc3ffd12af187060e75777f8fcde71bb6",
@@ -21758,8 +21905,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "3e32b9e9350d4dcb4597026ab8169e681b7415779bb30b8acea3f65f622a6cbf",
-    "planning/tasks/DRV-003.md": "7afbe974fb7795ae650194eca8535c73a4ead07aee6a90991c1ee5e4ebb6e8d4",
+    "planning/tasks/NAT-003.md": "451bd3d4722889c73ebb1dd10fb0e200f3773431d0ce70fe9bd0abe457a8d7bf",
+    "planning/tasks/DRV-003.md": "8605a9069247f1db2e0b16e7ca7eb4082401e3714093ecb423e0439e124f1778",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",
@@ -21783,6 +21930,7 @@
     "planning/tasks/ESIM-003.md": "f8771c136a5fa36d900bdca732abec23c437850a53a146c61c8cb5437553f8e7",
     "planning/tasks/QUAL-001.md": "7bf40b2c3c32e8161f29dc9134f7fc30271e33315a9d2c8877dc04cccc0bd8fe",
     "planning/tasks/BT-005.md": "35bc4d704b20131d6176800ff9f9822b0f78173243d37fa576d6a53d48986576",
-    "planning/tasks/NAT-155.md": "bacd5c5b0b92185191e885d83698f16b6cfe399c7448de026d244c037b7866fa"
+    "planning/tasks/NAT-155.md": "bacd5c5b0b92185191e885d83698f16b6cfe399c7448de026d244c037b7866fa",
+    "planning/tasks/NAT-194.md": "2d5d179931504b860b2bfe619e93d9202bc78232e010ebdffa8c242329283dfd"
   }
 }
