@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T02:56:52+00:00",
+  "updated_at": "2026-11-14T03:11:59+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -8,7 +8,7 @@
       "host": true,
       "android-readonly": true,
       "android-app": true,
-      "native": true
+      "native": false
     },
     "facts": [
       {
@@ -965,6 +965,13 @@
         "decision": "docs/decisions/0069-nat170-loader-diag-xnu-scO-md1-single-run-2026-11-14.md",
         "owner": "claude-opus-usb130-20261113",
         "at": "2026-11-14T02:56:32+00:00"
+      },
+      {
+        "scope": "native",
+        "value": false,
+        "decision": "docs/decisions/0069-nat170-loader-diag-xnu-scO-md1-single-run-2026-11-14.md",
+        "owner": "claude-opus-usb130-20261113",
+        "at": "2026-11-14T03:11:59+00:00"
       }
     ]
   },
@@ -18790,7 +18797,7 @@
     },
     {
       "id": "NAT-170",
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude-opus-usb130-20261113",
       "title": "Native: run scO (NAT-169: shadowed GPP9 DAT, IRQ-gated touch poll) once under decision 0061; touch ID reads and timing (read/write split of the GPIO access cost), poll period, skipped polls and high-line events, cpu0 busy share and frames against NAT-168; restore stock RECOVERY with full hash and verify Android",
       "scope": "native",
@@ -18812,7 +18819,31 @@
       ],
       "started_at": "2026-11-14T02:56:52+00:00",
       "last_heartbeat": "2026-11-14T02:56:52+00:00",
-      "updated_at": "2026-11-14T02:56:52+00:00"
+      "updated_at": "2026-11-14T03:11:40+00:00",
+      "evidence": "docs/procedures/nat-170/evidence.json",
+      "evidence_sha256": "44c0c54cdccfdacf57d32f9e3c0727dba869d1f266eae480f3ac26b9c553f676",
+      "finished_at": "2026-11-14T03:11:40+00:00"
+    },
+    {
+      "id": "NAT-171",
+      "status": "in_progress",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Source review: how stock Android sets the CPU cluster frequency on s5e9945 (cluster of cpu0, DVFS domain, ACPM IPC vs CMU writes, ECT tables, voltages), and the minimal stock-parameter steps a non-Linux kernel would need to raise cpu0's clock; redwood_cpufreq's cpufreq=1 path is Qualcomm EPSS and must never run on E1S",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 80,
+      "depends_on": [],
+      "paths": [
+        "docs/procedures/nat-171"
+      ],
+      "acceptance": [
+        "Findings with file:line citations into references/s24-linux 417484173abc, S/I marked",
+        "Call path and parameters (domain IDs, ACPM commands or CMU registers) or the specific missing fact",
+        "Risks and the read-only native step that would come first"
+      ],
+      "started_at": "2026-11-14T02:59:38+00:00",
+      "last_heartbeat": "2026-11-14T02:59:38+00:00",
+      "updated_at": "2026-11-14T02:59:38+00:00"
     }
   ],
   "experiments": [
@@ -70862,6 +70893,58 @@
           "last_heartbeat": "2026-11-14T02:56:52+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-14T02:59:18+00:00",
+      "action": "task.add:NAT-171",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-171",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T02:59:38+00:00",
+      "action": "task.claim:NAT-171",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-171",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 80,
+          "last_heartbeat": "2026-11-14T02:59:38+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T03:11:40+00:00",
+      "action": "task.done:NAT-170",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-170",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 86,
+          "last_heartbeat": "2026-11-14T02:56:52+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T03:11:59+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
     }
   ]
 }
