@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T01:52:27+00:00",
+  "updated_at": "2026-11-14T01:56:44+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -18612,6 +18612,54 @@
       "evidence": "docs/procedures/nat-164/evidence.json",
       "evidence_sha256": "c49eba659b6f373b44e170ee7c6c9e50d620be5f76a458998ddcfb4443ab5649",
       "finished_at": "2026-11-14T01:52:08+00:00"
+    },
+    {
+      "id": "NAT-165",
+      "status": "in_progress",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scM = scJ with a kernel whose E1S redwood_input_init() also calls redwood_cpufreq_init() (with no cpufreq/ddr boot-arg it only starts the cpuload thread) and boot-arg cpuload=1000: per-core busy share every second with kernel timestamps (tl: u), the measurement NAT-161's withdrawn ps split could not give; kernel rebuild, loader-sites gate, build, package, counted session",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 80,
+      "depends_on": [
+        "NAT-164"
+      ],
+      "paths": [
+        "docs/procedures/nat-165",
+        "artifacts/nat-165"
+      ],
+      "acceptance": [
+        "Kernel = NAT-152's seven objects with the same patches except redwood_input (NAT-121's patch plus the one call); tl: u format present",
+        "Source review: redwood_cpufreq_init() with no cpufreq/ddr boot-arg does nothing but load_start()",
+        "check_loader_sites rc 0 with NAT-143 symbols; relocscan 0 not allowed; cmdline <= 255",
+        "Decoder for tl: u tested; package, counted session, make check"
+      ],
+      "started_at": "2026-11-14T01:56:44+00:00",
+      "last_heartbeat": "2026-11-14T01:56:44+00:00",
+      "updated_at": "2026-11-14T01:56:44+00:00"
+    },
+    {
+      "id": "NAT-166",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: run scM (NAT-165: scJ + cpuload=1000 kernel hook) once under decision 0061; per-core busy share of cpu0 on the idle home screen with kernel timestamps alongside the framebuffer windows; restore stock RECOVERY with full hash and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 80,
+      "depends_on": [
+        "NAT-165"
+      ],
+      "paths": [
+        "docs/procedures/nat-166",
+        "artifacts/nat-166",
+        "docs/decisions/0067-nat166-loader-diag-xnu-scM-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "Per-image decision before the run",
+        "tl: u busy share of cpu0 over the steady windows: saturated (>= 90%) or not",
+        "Stock RECOVERY restored with full hash and Android verified",
+        "Evidence with provenance"
+      ]
     }
   ],
   "experiments": [
@@ -70374,6 +70422,46 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T01:56:06+00:00",
+      "action": "task.add:NAT-165",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-165",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T01:56:25+00:00",
+      "action": "task.add:NAT-166",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-166",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T01:56:44+00:00",
+      "action": "task.claim:NAT-165",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-165",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 80,
+          "last_heartbeat": "2026-11-14T01:56:44+00:00"
+        }
+      ]
     }
   ]
 }

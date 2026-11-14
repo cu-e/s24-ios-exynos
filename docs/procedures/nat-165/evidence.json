@@ -1,0 +1,78 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T08:20:00+00:00",
+ "task": "NAT-165",
+ "summary": "scM = scJ + cpuload=1000 with a kernel whose E1S redwood_input_init() also calls redwood_cpufreq_init() (NAT-152 kernel, only redwood_input.o patch changed: NAT-121 + one call); with no cpufreq/ddr boot-arg it only starts the load thread (source equals pinned upstream). Loader check rc 0 on NAT-143 symbols, relocscan 0 not allowed, cmdline 255 B; load166 decoder; package f0e1cfd9; counted session for NAT-166. Host-test only.",
+ "commit": "e093772 (base)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scM-md1",
+  "recovery_sha256": "f0e1cfd923c89e8f202427f6815b7adfc1adc94bdd66dc9022a61dd9c6049257",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "1450397b04b9a433f1c17b00dac7ee4687bf388f87304aa7ab1ebedbb6b7f8aa",
+  "payload_bytes": 26206800,
+  "loader_image_sha256": "37508d4acb7aed29b120fa9e9f49dace242e3b6999d960feefd25f82309dd88c",
+  "kernel_dir": "artifacts/nat-165/kernel-001",
+  "kernel_sha256": "f13b7c346cbb0c74f8485787f1b1076fc734f44e1c9e8df17d72041b4245d92f",
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT165-scM debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 cpuload=1000 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "cmdline_bytes": 255,
+  "session": "docs/procedures/nat-165/session_nat166.py",
+  "session_sha256": "7e2300ed263a1507f4ab0d2ea2c17296e8d1abf6e58e0fc58bc86a6f10c28e1c"
+ },
+ "sources": {
+  "docs/procedures/nat-165/build.py": "f463b1e5f9627e306656406210e44a75e716c130ca674f90eb7a9527940c51d8",
+  "docs/procedures/nat-165/redwood_input.patch": "1d0cf240fb8cc138714bc22bf3fae038b67c8a4115034bfe1497cf35ac3159de",
+  "docs/procedures/nat-165/load166.py": "370c4b743b85507891bc2b60cd25793a6feb9a6452e99918874d0e37c0cc77a0",
+  "docs/procedures/nat-165/derive166.py": "db6e031bb8ef73e1c5823eb322d8b4b108710d6c3fe425d55b1666d51240420b",
+  "docs/procedures/nat-165/test_nat165.py": "7ef57b7ec7771da7f04ffb2fa8afbba7a5796cdd5c268a7a11c5b67760a0fc4a"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/krn-044/rebuild.py --out artifacts/nat-165/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-121/loader_return.patch --extra bsd/e1s_touch.o=docs/procedures/nat-143/e1s_touch_combined.patch --extra bsd/redwood_input.o=docs/procedures/nat-165/redwood_input.patch --extra bsd/e1s_acpm.o=docs/procedures/nat-123/e1s_acpm.patch --extra bsd/e1s_pmic.o=docs/procedures/nat-123/e1s_pmic.patch --extra osfmk/start.o=docs/procedures/nat-152/start.patch --extra osfmk/psci_smp.o=docs/procedures/nat-152/psci_smp.patch --expect-string start: sense on (ready %s --expect-string miso cs-high --expect-string e1s-keys: disabled (e1skeys=0) --expect-string event thread started --expect-string e1s-touch: %s %u: finger %u x %u y %u --expect-string psci: cpu %d early marks: last 0x%llx --expect-string tl: u at %llu",
+   "exit_code": 0,
+   "result": "no_storage f13b7c346cbb0c74f8485787f1b1076fc734f44e1c9e8df17d72041b4245d92f, 0 undefined, tl: u present"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-165/build.py --out artifacts/nat-165/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "255 B; NAT-152 gate (loader check rc 0, constants on NAT-143 symbols) and relocscan passed"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-165/build-001 --out artifacts/nat-165/package-001",
+   "exit_code": 0,
+   "result": "f0e1cfd923c89e8f202427f6815b7adfc1adc94bdd66dc9022a61dd9c6049257"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-165/derive166.py --check",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-165/test_nat165.py",
+   "exit_code": 0,
+   "result": "6 OK"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "OK"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-165/kernel-001/rebuild.json",
+  "artifacts/nat-165/kernel-001.log",
+  "artifacts/nat-165/build-001/build.json",
+  "artifacts/nat-165/build-001.log",
+  "artifacts/nat-165/package-001/package.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-165/kernel-001/rebuild.json": "6a148d02b806bdfedd955eaedeedeee4e4ea9e0ec310b474b26f17edde175144",
+  "artifacts/nat-165/kernel-001.log": "abe4e8ad3a8cb80928e51debe7d259fcabf36170a9871a7a9f98e9ec969f19be",
+  "artifacts/nat-165/build-001/build.json": "41a5398749ba57afdeabd23e7d7e3e545564a8828e48d5b36e807c9185b56a1f",
+  "artifacts/nat-165/build-001.log": "f1b0255f8fbf780d521b4ad2355a102326aba810dc18b3a4b18270efffd11f76",
+  "artifacts/nat-165/package-001/package.json": "e8f9a4ac391fdd54df84cccb6789fb4bd3e6d606b9cdddbf102a03ca26064a73"
+ },
+ "limits": "Host only; whether ml_cpu_idle_time reports cpu0 idle correctly on E1S is for NAT-166."
+}

@@ -1,0 +1,17 @@
+{
+ "id": "NAT-165",
+ "status": "pending",
+ "owner": null,
+ "title": "Host: scM = scJ with a kernel whose E1S redwood_input_init() also calls redwood_cpufreq_init() (with no cpufreq/ddr boot-arg it only starts the cpuload thread) and boot-arg cpuload=1000: per-core busy share every second with kernel timestamps (tl: u), the measurement NAT-161's withdrawn ps split could not give; kernel rebuild, loader-sites gate, build, package, counted session",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 80,
+ "depends_on": ["NAT-164"],
+ "paths": ["docs/procedures/nat-165", "artifacts/nat-165"],
+ "acceptance": [
+  "Kernel = NAT-152's seven objects with the same patches except redwood_input (NAT-121's patch plus the one call); tl: u format present",
+  "Source review: redwood_cpufreq_init() with no cpufreq/ddr boot-arg does nothing but load_start()",
+  "check_loader_sites rc 0 with NAT-143 symbols; relocscan 0 not allowed; cmdline <= 255",
+  "Decoder for tl: u tested; package, counted session, make check"
+ ]
+}
