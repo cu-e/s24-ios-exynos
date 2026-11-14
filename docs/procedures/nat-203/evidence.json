@@ -1,0 +1,77 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T10:57:41+00:00",
+ "task": "NAT-203",
+ "summary": "e2m = e2s (NAT-201 kernel, trace on) with md0 pid1-sc2-hbm: NAT-110's tree + the donor's pinned libhakios.media.dylib (hakios 87bf485, blob 93a6028b, sha d8680034) and one inject.conf line inserting it into mediaserverd; the library empties +[BWCoreImageFilterRenderer prewarmPortraitFilterVersion:semanticStyleFilters:] at 0x1a2115c0c, which in the 20F66 cache tail-calls the function of NAT-202's fault frame. 11 tests OK, 3 media204 mutants killed; RECOVERY 6d27f0de, session 64d4afef. No device access.",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-e2m-md1",
+  "recovery_sha256": "6d27f0de85bcba195c7b6546315b0cbe4f5f3b9577020666cb694c20c6894c96",
+  "payload_sha256": "1f71263d976311e204e034d43b49fbc17acea5f889290e23923ae49b026d92d3",
+  "kernel_sha256": "dd5cbc7d9c6e58935b6bd1f3e0ad96632ad43bd174040c14d1c6b09e9861c07f",
+  "md0_sha256": "9a1eaab6f0a3fa278dc99ff6656a38658de8b212391eecf8dca5ba7d41c4d43d",
+  "session": "docs/procedures/nat-203/session_nat204.py",
+  "session_sha256": "64d4afefc6183899feb4b569b28671f674931b0dc2c94459565c31b215178f73"
+ },
+ "donor": {
+  "repo": "references/hakios",
+  "commit": "87bf4851bcc9cbb24fd79997820aa3661abe4ea5",
+  "path": "prebuilt/userland/libhakios.media.dylib",
+  "sha256": "d8680034e5f0cdecd396cd7488e9d0f30037223ebc57f5309f99a6cd45a4ad26",
+  "license": "MIT",
+  "source": "userland/src/inject_media.c"
+ },
+ "sources": {
+  "build_hbm_root.py": "38d92dc1fa31bb449bb2087322c4d43447533dcde6d72894d59e8fb21c57b099",
+  "build.py": "06570ed92cea265e0f4f66e1de3529e9649f0eca7a273285068187813fbd595a",
+  "media204.py": "88135f9a428107521afd9aea8434648a3151787ec525a46bc441e6192607b1e3",
+  "derive204.py": "718a85e38d70b30274f7a753835fcb8db64174c8e0ef06cf8a9c26bd7a52877a",
+  "test_nat203.py": "a23a848ac3f6a5271bc18069f7445374c2763f4a3bcc2412fe6ae4d149101261"
+ },
+ "commands": [
+  {
+   "cmd": "python3 -B docs/procedures/nat-203/build_hbm_root.py",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-203/build.py --out artifacts/nat-203/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-203/pid1-sc2-hbm/root.apfs",
+   "exit": 0,
+   "note": "first attempt stopped on the chain md0 pin; the pin swap (as NAT-187) added"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-203/build-001 --out artifacts/nat-203/package-001",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-203/derive204.py --check",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-203/test_nat203.py",
+   "exit": 0,
+   "tests": 11
+  },
+  {
+   "cmd": "3 mutants of media204.py (signal exits, slide, pc-0 condition) with test_nat203.py Verdicts; unmutated control copy OK",
+   "exit": "each killed"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-203/pid1-sc2-hbm/build.json",
+  "artifacts/nat-203/pid1-sc2-hbm/root.apfs",
+  "artifacts/nat-203/build-001/build.json",
+  "artifacts/nat-203/package-001/package.json",
+  "artifacts/nat-203/package-001/loader-diag-xnu-e2m-md1/recovery.img",
+  "artifacts/nat-204/analyse.sh"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-203/pid1-sc2-hbm/build.json": "e95eb43651082daded34199a3a8459b31b775456d77091052b7b8639875fe247",
+  "artifacts/nat-203/pid1-sc2-hbm/root.apfs": "9a1eaab6f0a3fa278dc99ff6656a38658de8b212391eecf8dca5ba7d41c4d43d",
+  "artifacts/nat-203/build-001/build.json": "f19fc25bad3a213a21520ff58bea27bc896f5f37a4f45f24076f2d916cbabe67",
+  "artifacts/nat-203/package-001/package.json": "44d96c22aa37345f00b0dd39021ba5d6d039c49802bc13d9d2ab1000b1d2de8b",
+  "artifacts/nat-203/package-001/loader-diag-xnu-e2m-md1/recovery.img": "6d27f0de85bcba195c7b6546315b0cbe4f5f3b9577020666cb694c20c6894c96",
+  "artifacts/nat-204/analyse.sh": "c7b0aae39b0ee14f297db96d8e7639f0f28a739c3b76dc129390dc5a09d5ebc4"
+ }
+}

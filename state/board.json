@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-14T10:54:58+00:00",
-  "ledger_updated_at": "2026-11-14T10:54:49+00:00",
-  "registry_sha256": "a9515b8e45807546da0da4ab8dc9fed65ce26328b270c0ba299e6675c7824326",
+  "generated_at": "2026-11-14T10:58:45+00:00",
+  "ledger_updated_at": "2026-11-14T10:58:36+00:00",
+  "registry_sha256": "67ff6506f5de733a5b8740959a7ad0d6b83dc6c41a73f0aa6b20b94d834d84e4",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -78,6 +78,7 @@
       "NAT-155"
     ],
     "gated": [
+      "NAT-204",
       "NAT-017",
       "NAT-072",
       "NAT-003",
@@ -234,6 +235,7 @@
       "NAT-200",
       "NAT-201",
       "NAT-202",
+      "NAT-203",
       "KRN-007",
       "KRN-011",
       "KRN-017",
@@ -6379,6 +6381,63 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-202.md"
+    },
+    {
+      "id": "NAT-203",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: e2m = e2s with the md0 root pid1-sc2-hbm: the donor's pinned libhakios.media.dylib inserted into mediaserverd (inject.conf line), which empties CMCapture's portrait-filter prewarm, the CoreImage GL call through address 0 that NAT-202 recorded 46 times",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-202"
+      ],
+      "paths": [
+        "docs/procedures/nat-203",
+        "artifacts/nat-203"
+      ],
+      "acceptance": [
+        "md0 = NAT-110's tree + the pinned donor library + one inject.conf line, nothing else; APFS readback",
+        "The prewarm address the library checks is the function whose tail call reaches NAT-202's fault frame in the 20F66 cache",
+        "Image = e2s with the new md0 and tag; package, counted session, media204 verdicts tested on NAT-202's text and synthetic text"
+      ],
+      "started_at": "2026-11-14T10:57:18+00:00",
+      "last_heartbeat": "2026-11-14T10:57:18+00:00",
+      "updated_at": "2026-11-14T10:58:36+00:00",
+      "evidence": "docs/procedures/nat-203/evidence.json",
+      "evidence_sha256": "83dddb6f0813dc12809fff96fcad072de2d26ba329a487155b202b4e1602ab98",
+      "finished_at": "2026-11-14T10:58:36+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-203.md"
+    },
+    {
+      "id": "NAT-204",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: one run of e2m (NAT-203): does mediaserverd stay up (media204), and with it does SpringBoard's SMP-only routingContextUID abort go away (reason200)? smp198 and the scV measures beside it; restore stock RECOVERY and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 99,
+      "depends_on": [
+        "NAT-203"
+      ],
+      "paths": [
+        "docs/procedures/nat-204",
+        "artifacts/nat-204",
+        "docs/decisions/0084-nat204-loader-diag-xnu-e2m-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "One run under its own decision file; verdict M-fixed / M-other / M-same / M-none, and A-gone / A-same / A-other",
+        "smp198 and the boot CPU measures reported beside it",
+        "Stock RECOVERY restored with full hash check, Android verified, permit closed after done"
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-204.md"
     },
     {
       "id": "KRN-007",
@@ -21398,56 +21457,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-14T09:27:46+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-14T09:28:05+00:00",
-      "action": "task.claim:NAT-198",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-198",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 98,
-          "last_heartbeat": "2026-11-14T09:28:05+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T09:44:45+00:00",
-      "action": "task.done:NAT-198",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-198",
-          "status": "done",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 98,
-          "last_heartbeat": "2026-11-14T09:28:05+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T09:45:05+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
       "at": "2026-11-14T09:55:33+00:00",
       "action": "task.add:NAT-199",
       "owner": "claude-opus-usb130-20261113",
@@ -21654,11 +21663,65 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T10:57:00+00:00",
+      "action": "task.add:NAT-203",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-203",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T10:57:09+00:00",
+      "action": "task.add:NAT-204",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-204",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T10:57:18+00:00",
+      "action": "task.claim:NAT-203",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-203",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-14T10:57:18+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T10:58:36+00:00",
+      "action": "task.done:NAT-203",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-203",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-14T10:57:18+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "18d9cc365904a5db20dd8d58414f1f015a25dd7ef2c5f10bc7c590a612dec708",
-    "BOARD.md": "9538796f3dec04e15ded90853fa7c8d84a9d9a1891f9a8239e4ff404cb9396b7",
+    "STATUS.md": "ecc712efed279556455e17ee0b0ef0d77cf7f6ff221d30a40577f9c7cdb253c6",
+    "BOARD.md": "1816c20f20e9e320f81aea76f3c77f457748c532e5e1f0ab6b2de516e6750be3",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -21804,6 +21867,8 @@
     "planning/tasks/NAT-200.md": "ecc4fff4d0b49c8ecf24f8e415912a65f056d48598a3d91083648bfd403d7ecd",
     "planning/tasks/NAT-201.md": "8052820271c06f82c16cf46964d5c81b4c4511f7e99aaca83bebaeaf2c739de8",
     "planning/tasks/NAT-202.md": "b0846f1561a4a36217bab57508ffae5bc1b95c5d20393d63c50d06d3e7caa7e0",
+    "planning/tasks/NAT-203.md": "69b43f3e865fc7755d17f4a4e4bbaffd58fb3fce0b3fca33598e983174cf5ada",
+    "planning/tasks/NAT-204.md": "e944cd9372e6edbf15282ea470874123b9d29ccb7ff8c4be25fb686e631fece4",
     "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-011.md": "9b8014abd8d019af80fad695e0d0df9de9523d36a222553327384f7f00e8a901",
     "planning/tasks/KRN-017.md": "86a29485c4c3ed3a62f7ecf64f5e2bb303bb0bd7ac5fd661482bf024004f407d",

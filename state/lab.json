@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T10:54:49+00:00",
+  "updated_at": "2026-11-14T10:58:36+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -19879,6 +19879,55 @@
       "evidence": "docs/procedures/nat-202/evidence.json",
       "evidence_sha256": "a2188baf9061ab5e56fc6c9cd26413adf84bd74dc32f0453e5b76e125bc599c7",
       "finished_at": "2026-11-14T10:54:40+00:00"
+    },
+    {
+      "id": "NAT-203",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: e2m = e2s with the md0 root pid1-sc2-hbm: the donor's pinned libhakios.media.dylib inserted into mediaserverd (inject.conf line), which empties CMCapture's portrait-filter prewarm, the CoreImage GL call through address 0 that NAT-202 recorded 46 times",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-202"
+      ],
+      "paths": [
+        "docs/procedures/nat-203",
+        "artifacts/nat-203"
+      ],
+      "acceptance": [
+        "md0 = NAT-110's tree + the pinned donor library + one inject.conf line, nothing else; APFS readback",
+        "The prewarm address the library checks is the function whose tail call reaches NAT-202's fault frame in the 20F66 cache",
+        "Image = e2s with the new md0 and tag; package, counted session, media204 verdicts tested on NAT-202's text and synthetic text"
+      ],
+      "started_at": "2026-11-14T10:57:18+00:00",
+      "last_heartbeat": "2026-11-14T10:57:18+00:00",
+      "updated_at": "2026-11-14T10:58:36+00:00",
+      "evidence": "docs/procedures/nat-203/evidence.json",
+      "evidence_sha256": "83dddb6f0813dc12809fff96fcad072de2d26ba329a487155b202b4e1602ab98",
+      "finished_at": "2026-11-14T10:58:36+00:00"
+    },
+    {
+      "id": "NAT-204",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: one run of e2m (NAT-203): does mediaserverd stay up (media204), and with it does SpringBoard's SMP-only routingContextUID abort go away (reason200)? smp198 and the scV measures beside it; restore stock RECOVERY and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 99,
+      "depends_on": [
+        "NAT-203"
+      ],
+      "paths": [
+        "docs/procedures/nat-204",
+        "artifacts/nat-204",
+        "docs/decisions/0084-nat204-loader-diag-xnu-e2m-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "One run under its own decision file; verdict M-fixed / M-other / M-same / M-none, and A-gone / A-same / A-other",
+        "smp198 and the boot CPU measures reported beside it",
+        "Stock RECOVERY restored with full hash check, Android verified, permit closed after done"
+      ]
     }
   ],
   "experiments": [
@@ -73604,6 +73653,60 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T10:57:00+00:00",
+      "action": "task.add:NAT-203",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-203",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T10:57:09+00:00",
+      "action": "task.add:NAT-204",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-204",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T10:57:18+00:00",
+      "action": "task.claim:NAT-203",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-203",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-14T10:57:18+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T10:58:36+00:00",
+      "action": "task.done:NAT-203",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-203",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-14T10:57:18+00:00"
+        }
+      ]
     }
   ]
 }
