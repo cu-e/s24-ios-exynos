@@ -1,0 +1,87 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T04:05:00+00:00",
+ "task": "NAT-172",
+ "summary": "scQ = scO + e1s_acpm.o with a channel-parameterised transport, channel-0 (DVFS) validation, and e1s_cpuclk_raise(): PLL_CPUCL0 CON3 and dependent-add rate before/after one stock FREQ_REQ {2, 1959000, 0, 0} on APM channel 0, sent only for a stock level, a valid polled channel, a decoded PLL below target. Fake APM: one command of the stock layout, all no-request cases, NAT-123 PMIC cases unchanged (17 OK). Kernel = NAT-169 record with only e1s_acpm.o changed; loader sites rc 0; 255 B; package d7312135; counted session; cpuclk173 analyser. Host-test only.",
+ "commit": "5035192 (base)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scQ-md1",
+  "recovery_sha256": "d73121352e1c538f013e8a3d09533c93aeeb304bde0186d1b6f6137179a01622",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "c60622b9d5600c2dc5e9d22f33ba97250c45a9a74faf64b4a924dd755f8f73c2",
+  "payload_bytes": 26206448,
+  "loader_image_sha256": "42a001f50b8d47512a2012daac9a455d92f1a5cabba7f69aa93174db4362565c",
+  "kernel_dir": "artifacts/nat-172/kernel-001",
+  "kernel_sha256": "5891f6aad205b453fffad7d32b5aeece715145d10dc5321e63910a1ef2fef352",
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT172-scQ debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 cpuload=1000 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "cmdline_bytes": 255,
+  "session": "docs/procedures/nat-172/session_nat173.py",
+  "session_sha256": "09154b464c567e0963a75eaee52cc59bcb1daa960d49cec94c4f900bd217861c"
+ },
+ "sources": {
+  "docs/procedures/nat-172/build.py": "1c8c6e9c881e6077c65dd83bdda127b11b90356f2d6f8975ec3f1e7765625318",
+  "docs/procedures/nat-172/e1s_acpm.patch": "03c92bdcc0759d002b3a36e9c919bdc3e0ceae90151b8c44f3e85c6416717bf5",
+  "docs/procedures/nat-172/rebuild-args.json": "b207f2ddcf6213b291a6715a0c0572e2bbfccf88bd7336bbb8c3dbe3c9dc3c9b",
+  "docs/procedures/nat-172/host/fakeapm.c": "b790b3b205e965b85bf553435bd87cd983b669b37803ff1fa83b401d4700b140",
+  "docs/procedures/nat-172/host/shim.h": "1c0e2abb0b3b2d7ccde0209c8dc8d864e14b825abfaa6c69f2e12745b1fa4d79",
+  "docs/procedures/nat-172/host/main.c": "622a2ba0c5b26b9b7e51a59a2d1164519017c4694ecc7c2b6cc06da4c0f6a3e5",
+  "docs/procedures/nat-172/test_nat172.py": "8c92f695573b6672f678ba550775b2b38b1d761f0e5e5abe3b160e99a7ecdd9c",
+  "docs/procedures/nat-172/cpuclk173.py": "dc4c09e36ac1f25d2912d69c1330fc29007262a0aa449550d65c07698452080f",
+  "docs/procedures/nat-172/derive173.py": "cdd477942038fefdafd65acc7f7001174babd3bdb63efb913abde73329052dd9",
+  "docs/procedures/nat-172/session_nat173.py": "09154b464c567e0963a75eaee52cc59bcb1daa960d49cec94c4f900bd217861c",
+  "docs/procedures/nat-172/README.md": "1f2586b72f59a70940c6b29c6e2bffa7ffdeff44add8138c90f614f991bfaa0d",
+  "docs/procedures/nat-172/task.json": "aa4e18923c198964bbedb5f5f01fed7ddf16a040cea780a4130d9cc3a2ac4b36"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/krn-044/rebuild.py --out artifacts/nat-172/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-121/loader_return.patch --extra bsd/e1s_touch.o=docs/procedures/nat-169/e1s_touch_combined.patch --extra bsd/redwood_input.o=docs/procedures/nat-165/redwood_input.patch --extra bsd/e1s_acpm.o=docs/procedures/nat-172/e1s_acpm.patch --extra bsd/e1s_pmic.o=docs/procedures/nat-123/e1s_pmic.patch --extra osfmk/start.o=docs/procedures/nat-152/start.patch --extra osfmk/psci_smp.o=docs/procedures/nat-152/psci_smp.patch --expect-string start: sense on (ready %s --expect-string miso cs-high --expect-string e1s-keys: disabled (e1skeys=0) --expect-string event thread started --expect-string e1s-touch: %s %u: finger %u x %u y %u --expect-string psci: cpu %d early marks: last 0x%llx --expect-string tl: u at %llu",
+   "exit_code": 0,
+   "result": "no_storage 5891f6aa..., 0 undefined; llvm-objdump: 3 x 32 dependent add x8,x8,#1 in e1s_cpuclk_raise"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-172/build.py --out artifacts/nat-172/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "255 B; loader sites rc 0 ok; relocscan passed"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-172/build-001 --out artifacts/nat-172/package-001",
+   "exit_code": 0,
+   "result": "d73121352e1c538f013e8a3d09533c93aeeb304bde0186d1b6f6137179a01622"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-172/derive173.py --check",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 -B -W ignore docs/procedures/nat-172/test_nat172.py",
+   "exit_code": 0,
+   "result": "17 OK"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "OK"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-172/kernel-001/rebuild.json",
+  "artifacts/nat-172/kernel-001.log",
+  "artifacts/nat-172/build-001/build.json",
+  "artifacts/nat-172/build-001.log",
+  "artifacts/nat-172/package-001/package.json",
+  "artifacts/nat-172/e1s_acpm.c"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-172/kernel-001/rebuild.json": "67dc5eb1fc7a3876dfaeb537330a983d758a581ac59510fdf62a4f496afaffad",
+  "artifacts/nat-172/kernel-001.log": "684c6dc4ea7729c9275af1b8105437e12698195ab13294a6f41e6b1737a6eaa9",
+  "artifacts/nat-172/build-001/build.json": "4f7901165e5938e8fccba58fa97ed134f1edf660129ffe9433904a9c86554411",
+  "artifacts/nat-172/build-001.log": "f467c991062bdae4da0aed868ff583984aa39f38b4f30b157b7fa5854d465b74",
+  "artifacts/nat-172/package-001/package.json": "d5947c6d822267b6bb3e3ad576c7e04dd30160afdce5fe50d3a0ddb3f7aef478",
+  "artifacts/nat-172/e1s_acpm.c": "f20e1ab76413d3bf6ecbf8bc7d3e28bbe2af11956633c2a4e93bf675fba66a78"
+ },
+ "limits": "Host only, synthetic firmware; whether the APM firmware accepts the request without the ESCA DM init, and the reply semantics, are for NAT-173."
+}

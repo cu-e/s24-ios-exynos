@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-14T03:16:17+00:00",
-  "ledger_updated_at": "2026-11-14T03:15:58+00:00",
-  "registry_sha256": "ba356992876057be449b5172140e732f8ae6307245c80cd2c658361d59b51528",
+  "generated_at": "2026-11-14T03:23:39+00:00",
+  "ledger_updated_at": "2026-11-14T03:23:20+00:00",
+  "registry_sha256": "700c7bf36bd7e0b1ca3482281b70b3780a3c84158be451991cca16dc66baad29",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -79,6 +79,7 @@
     "gated": [
       "NAT-017",
       "NAT-072",
+      "NAT-173",
       "NAT-003",
       "DRV-003",
       "NAT-004",
@@ -397,6 +398,7 @@
       "GPU-017",
       "KRN-033",
       "NAT-014",
+      "NAT-172",
       "KRN-035",
       "KRN-036",
       "NAT-169",
@@ -14532,6 +14534,65 @@
       "report_health": "stale"
     },
     {
+      "id": "NAT-172",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scQ = scO (NAT-169) with a cpu0 clock probe and one stock DVFS request: e1s_acpm.o logs PLL_CPUCL0 CON3 (0x1DC4010C) and a timed dependent-add rate, then (only if the PLL decode is valid and below the target) sends FREQ_REQ {2, 1959000 kHz, 0, 0} on APM channel 0 through the proven polled transport and logs the reply and both readbacks again; target limited to this phone's 17 stock cluster-0 levels (NAT-171)",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 88,
+      "depends_on": [
+        "NAT-170",
+        "NAT-171"
+      ],
+      "paths": [
+        "docs/procedures/nat-172",
+        "artifacts/nat-172"
+      ],
+      "acceptance": [
+        "Kernel = NAT-169's with only e1s_acpm.o's patch changed; the PMIC path unchanged on the NAT-123 host harness",
+        "Fake APM: exactly one channel-0 command with the stock layout; no command when the decode is invalid, already at target, the channel is invalid, or the boot-arg value is not a stock level",
+        "Loader sites rc 0; relocscan clean; cmdline = scO's with the tag changed; package, counted session, analyser with registered verdicts, tests, make check"
+      ],
+      "started_at": "2026-11-14T03:17:54+00:00",
+      "last_heartbeat": "2026-11-14T03:17:54+00:00",
+      "updated_at": "2026-11-14T03:23:20+00:00",
+      "evidence": "docs/procedures/nat-172/evidence.json",
+      "evidence_sha256": "a6484c59a2aa756fbb66075b7cdfb6efd5ac7c5373be6067bd2562fe2dd0e2e0",
+      "finished_at": "2026-11-14T03:23:20+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-172.md"
+    },
+    {
+      "id": "NAT-173",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: run scQ (NAT-172: cpu0 clock probe + one stock FREQ_REQ 1959000 kHz on APM channel 0) once under decision 0061; PLL and add-rate before/after, firmware reply, cpu0 load, frames and touch poll against NAT-170; restore stock RECOVERY with full hash and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 88,
+      "depends_on": [
+        "NAT-172"
+      ],
+      "paths": [
+        "docs/procedures/nat-173",
+        "artifacts/nat-173",
+        "docs/decisions/0070-nat173-loader-diag-xnu-scQ-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "Per-image decision before the run",
+        "Before/after PLL decode and add rate, the reply words, and a registered verdict",
+        "frames159, load166 and touch170 against NAT-170",
+        "Stock RECOVERY restored with full hash and Android verified"
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-173.md"
+    },
+    {
       "id": "KRN-035",
       "title": "Implement bounded source-qualified RSA public-key construction and signature verification",
       "priority": 87,
@@ -20395,57 +20456,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-14T02:16:43+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-14T02:17:55+00:00",
-      "action": "task.add:NAT-167",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-167",
-          "status": "pending",
-          "owner": null,
-          "priority": 85
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T02:18:14+00:00",
-      "action": "task.add:NAT-168",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-168",
-          "status": "pending",
-          "owner": null,
-          "priority": 85
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T02:18:33+00:00",
-      "action": "task.claim:NAT-167",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-167",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 85,
-          "last_heartbeat": "2026-11-14T02:18:33+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-14T02:23:32+00:00",
       "action": "task.done:NAT-167",
       "owner": "claude-opus-usb130-20261113",
@@ -20653,11 +20663,65 @@
           "last_heartbeat": "2026-11-14T02:59:38+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-14T03:17:16+00:00",
+      "action": "task.add:NAT-172",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-172",
+          "status": "pending",
+          "owner": null,
+          "priority": 88
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T03:17:35+00:00",
+      "action": "task.add:NAT-173",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-173",
+          "status": "pending",
+          "owner": null,
+          "priority": 88
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T03:17:54+00:00",
+      "action": "task.claim:NAT-172",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-172",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 88,
+          "last_heartbeat": "2026-11-14T03:17:54+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T03:23:20+00:00",
+      "action": "task.done:NAT-172",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-172",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 88,
+          "last_heartbeat": "2026-11-14T03:17:54+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "8f3a47b89760927cbe5f12845623b96bb87cc0e58362bb9c9b6260d140c169d6",
-    "BOARD.md": "a8066d3fa693b8a0f5a6a4b6c861058a01f0b4225e355f70ba4278b3a913e2a9",
+    "STATUS.md": "85ab0633a04915268cb3c65901464973a44c6fdcc596cfa2d9871ff54552c2e1",
+    "BOARD.md": "f9f4b329008cc637a271e01d4c3c87283312a4fa1e776a05ee3ae8b36eb8dbf6",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -20996,6 +21060,8 @@
     "planning/tasks/KRN-034.md": "216955769016c966a7b2ed1191501a2967d901d5371a7e1ec31f2230896ac5cc",
     "planning/tasks/NAT-009.md": "7fcd0c6655888c3515a10871a2f5a8f5c0455ef3e61c149f65b42f7ebd9d5f3b",
     "planning/tasks/IOS-007.md": "c116ef8935d17ff7707c9cafacabad81273be3bcdeccaf872b742860b4aed9a5",
+    "planning/tasks/NAT-172.md": "5f26b359941233b459d65925f5ff640706b185ff29e0bff3caeae7539d94f84a",
+    "planning/tasks/NAT-173.md": "1836185009193214b214e42fc1452ba4ca66e3e0a7aaceebba839a61e5ff570f",
     "planning/tasks/KRN-035.md": "73d3fdfa9f6c3f1f76fe0f244208e46b40bf7343bf78e2f78223ea9c1c7a98a7",
     "planning/tasks/KRN-036.md": "43b1fb9c66ca2aa223235ea38bf2e400888380c3822a4aca35e67b96cd532020",
     "planning/tasks/NAT-169.md": "e5835067681bceab4994da3d9d65fd99e9988a3850a7cc1e0a18ec49393e84e2",

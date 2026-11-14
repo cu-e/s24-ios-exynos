@@ -1,0 +1,391 @@
+--- a/e1s_acpm.c
++++ b/e1s_acpm.c
+@@ -16,6 +16,18 @@
+ #define E1S_ACPM_INITDATA_OFF   0x9D00U
+ #define E1S_ACPM_CHANNEL_STRIDE 48U
+ #define E1S_ACPM_CHANNEL_PMIC   2U
++/*
++ * NAT-172: the stock CPU DVFS request (references/s24-linux 417484173abc, docs/procedures/nat-171): cal_dfs_set_rate ->
++ * exynos_acpm_set_rate sends { index | seq << 16, kHz, FREQ_REQ = 0, timer } on APM channel 0 (cal_if acpm-ipc-channel = <0>)
++ * with a response; ACPM_DVFS_CPUCL0 = 0x0B040002, index 2. The firmware does the PLL and the voltage. PLL_CPUCL0 PLL_CON3 is
++ * CMU_CPUCL0 + 0x10c: MDIV 25:16, PDIV 13:8, SDIV 2:0, OSCCLK 76.8 MHz (cmucal-sfr.c:3166, 18363-18366; cmucal-node.c:6516).
++ */
++#define E1S_ACPM_CHANNEL_DVFS   0U
++#define E1S_DVFS_CPUCL0         2U
++#define E1S_DVFS_FREQ_REQ       0U
++#define E1S_CMU_CPUCL0_PA       0x1DC40000UL
++#define E1S_PLL_CPUCL0_CON3     0x10cU
++#define E1S_OSCCLK_KHZ          76800U
+ 
+ #define E1S_ACPM_INTGR0         0x08U
+ #define E1S_ACPM_INTCR0         0x0CU
+@@ -59,6 +71,7 @@
+ static lck_grp_t         *e1s_acpm_lock_group;
+ static lck_mtx_t         *e1s_acpm_lock;
+ static struct e1s_acpm_channel e1s_acpm_pmic;
++static struct e1s_acpm_channel e1s_acpm_dvfs;
+ static bool               e1s_acpm_up;
+ static uint32_t           e1s_acpm_seq;
+ 
+@@ -106,18 +119,18 @@
+ }
+ 
+ static void
+-e1s_acpm_clear_irq(void)
++e1s_acpm_clear_irq(const struct e1s_acpm_channel *ch)
+ {
+-	uint32_t bit = 1U << e1s_acpm_pmic.id;
++	uint32_t bit = 1U << ch->id;
+ 
+ 	e1s_acpm_mbox_write(E1S_ACPM_INTCR1, bit);
+ 	e1s_acpm_sync();
+ }
+ 
+ static int
+-e1s_acpm_wait_irq(uint32_t seq)
++e1s_acpm_wait_irq(const struct e1s_acpm_channel *ch, uint32_t seq)
+ {
+-	uint32_t bit = 1U << e1s_acpm_pmic.id;
++	uint32_t bit = 1U << ch->id;
+ 	uint32_t spin;
+ 
+ 	for (spin = 0; spin < E1S_ACPM_POLL_LIMIT; spin++) {
+@@ -132,9 +145,8 @@
+ }
+ 
+ static int
+-e1s_acpm_take_response(uint32_t seq, uint32_t *cmd)
++e1s_acpm_take_response(const struct e1s_acpm_channel *ch, uint32_t seq, uint32_t *cmd)
+ {
+-	struct e1s_acpm_channel *ch = &e1s_acpm_pmic;
+ 	uint32_t front, rear, i;
+ 	uint8_t *slot;
+ 	unsigned word;
+@@ -169,7 +181,7 @@
+ 		e1s_acpm_sync();
+ 		e1s_acpm_write32(ch->rx_rear, (rear + 1) % ch->q_len);
+ 		e1s_acpm_sync();
+-		e1s_acpm_clear_irq();
++		e1s_acpm_clear_irq(ch);
+ 		return 0;
+ 	}
+ 
+@@ -177,14 +189,13 @@
+ }
+ 
+ static int
+-e1s_acpm_send_locked(uint32_t *cmd)
++e1s_acpm_send_locked(const struct e1s_acpm_channel *ch, uint32_t *cmd)
+ {
+-	struct e1s_acpm_channel *ch = &e1s_acpm_pmic;
+ 	uint32_t front, rear, next, seq, spin, word;
+ 	uint8_t *slot;
+ 	int error;
+ 
+-	if (!e1s_acpm_up) {
++	if (!e1s_acpm_up || !ch->valid) {
+ 		return ENXIO;
+ 	}
+ 
+@@ -230,17 +241,17 @@
+ 	e1s_acpm_write32(ch->tx_front, next);
+ 	e1s_acpm_sync();
+ 
+-	e1s_acpm_clear_irq();
++	e1s_acpm_clear_irq(ch);
+ 	e1s_acpm_mbox_write(E1S_ACPM_INTGR0, (1U << ch->id) << 16);
+ 	e1s_acpm_sync();
+ 
+-	error = e1s_acpm_wait_irq(seq);
++	error = e1s_acpm_wait_irq(ch, seq);
+ 	if (error != 0) {
+ 		return error;
+ 	}
+ 
+ 	for (spin = 0; spin < E1S_ACPM_POLL_LIMIT; spin++) {
+-		error = e1s_acpm_take_response(seq, cmd);
++		error = e1s_acpm_take_response(ch, seq, cmd);
+ 		if (error == 0) {
+ 			return 0;
+ 		}
+@@ -255,16 +266,125 @@
+ }
+ 
+ static int
++e1s_acpm_send_ch(const struct e1s_acpm_channel *ch, uint32_t *cmd)
++{
++	int error;
++
++	lck_mtx_lock(e1s_acpm_lock);
++	error = e1s_acpm_send_locked(ch, cmd);
++	lck_mtx_unlock(e1s_acpm_lock);
++	return error;
++}
++
++static int
+ e1s_acpm_send(uint32_t *cmd)
+ {
+ 	int error;
+ 
+ 	lck_mtx_lock(e1s_acpm_lock);
+-	error = e1s_acpm_send_locked(cmd);
++	error = e1s_acpm_send_locked(&e1s_acpm_pmic, cmd);
+ 	lck_mtx_unlock(e1s_acpm_lock);
+ 	return error;
+ }
+ 
++/* NAT-172: this phone's cluster-0 levels (Android policy0 scaling_available_frequencies, docs/procedures/nat-171). */
++static const uint32_t e1s_cl0_khz[] = {
++	400000, 576000, 672000, 768000, 864000, 960000, 1056000, 1152000, 1248000, 1344000, 1440000, 1536000, 1632000, 1728000,
++	1824000, 1920000, 1959000,
++};
++
++/* Dependent adds per microsecond, best of three runs of 8 Mi adds: about the core clock in MHz on an in-order core. */
++static uint32_t
++e1s_add_rate(void)
++{
++	uint32_t best = 0;
++
++	for (int run = 0; run < 3; run++) {
++		uint64_t x = 0, began = mach_absolute_time(), ns;
++		uint32_t rate;
++
++		for (uint32_t i = 0; i < 262144U; i++) {
++#if defined(__arm64__) || defined(__aarch64__)
++			__asm__ volatile (".rept 32\n\tadd %0, %0, #1\n\t.endr" : "+r" (x));
++#else
++			__asm__ volatile ("" : "+r" (x));
++			x += 32;
++#endif
++		}
++		absolutetime_to_nanoseconds(mach_absolute_time() - began, &ns);
++		rate = ns != 0 ? (uint32_t)(262144ULL * 32U * 1000U / ns) : 0;
++		if (rate > best) {
++			best = rate;
++		}
++	}
++	return best;
++}
++
++/* PLL_CPUCL0 output in kHz from PLL_CON3 (integer part only), or 0 if the fields cannot be a running PLL. */
++static uint32_t
++e1s_pll_khz(volatile uint32_t *cmu, uint32_t *raw)
++{
++	uint32_t v = cmu[E1S_PLL_CPUCL0_CON3 / 4], m = (v >> 16) & 0x3ffU, p = (v >> 8) & 0x3fU, s = v & 7U;
++
++	*raw = v;
++	if (!(v & (1U << 31)) || m == 0 || p == 0) {
++		return 0;
++	}
++	return (uint32_t)((uint64_t)E1S_OSCCLK_KHZ * m / ((uint64_t)p << s));
++}
++
++static void
++e1s_cpuclk_raise(void)
++{
++	uint32_t target = 1959000, raw, before, after, rate;
++	uint32_t cmd[E1S_ACPM_CMD_WORDS];
++	volatile uint32_t *cmu;
++	bool stock = false;
++	int error;
++
++	PE_parse_boot_argn("e1scpuclk", &target, sizeof(target));
++	if (target == 0) {
++		printf("e1s-cpuclk: off (e1scpuclk=0)\n");
++		return;
++	}
++	for (unsigned i = 0; i < sizeof(e1s_cl0_khz) / sizeof(e1s_cl0_khz[0]); i++) {
++		stock |= e1s_cl0_khz[i] == target;
++	}
++	cmu = (volatile uint32_t *)ml_io_map(E1S_CMU_CPUCL0_PA, 0x1000);
++	if (cmu == NULL) {
++		printf("e1s-cpuclk: cannot map CMU_CPUCL0\n");
++		return;
++	}
++	before = e1s_pll_khz(cmu, &raw);
++	rate = e1s_add_rate();
++	printf("e1s-cpuclk: before: pll con3 0x%08x = %u kHz; %u adds/us; mbox INTMR1 0x%08x\n", raw, before, rate,
++	    e1s_acpm_mbox_read(E1S_ACPM_INTMR1));
++	if (!stock) {
++		printf("e1s-cpuclk: %u kHz is not a stock cluster-0 level; no request\n", target);
++		return;
++	}
++	if (!e1s_acpm_dvfs.valid) {
++		printf("e1s-cpuclk: no DVFS channel; no request\n");
++		return;
++	}
++	/* CON3 gives the integer part only (1959000 decodes as 1958400 with M 102 P 1 S 2), so within 1% counts as there. */
++	if (before == 0 || before >= target - target / 100) {
++		printf("e1s-cpuclk: PLL %s; no request\n", before == 0 ? "not decoded" : "already at the target");
++		return;
++	}
++	cmd[0] = E1S_DVFS_CPUCL0;
++	cmd[1] = target;
++	cmd[2] = E1S_DVFS_FREQ_REQ;
++	cmd[3] = 0;
++	error = e1s_acpm_send_ch(&e1s_acpm_dvfs, cmd);
++	printf("e1s-cpuclk: FREQ_REQ cluster 0 %u kHz on channel 0: error %d, reply %08x %08x %08x %08x\n", target, error,
++	    cmd[0], cmd[1], cmd[2], cmd[3]);
++	delay(50000);
++	after = e1s_pll_khz(cmu, &raw);
++	rate = e1s_add_rate();
++	printf("e1s-cpuclk: after: pll con3 0x%08x = %u kHz; %u adds/us\n", raw, after, rate);
++}
++
+ bool
+ e1s_acpm_ready(void)
+ {
+@@ -312,6 +432,8 @@
+ 		uint8_t *slot;
+ 		uint8_t id, type, q_len, elem, ap_poll;
+ 		uint32_t ch;
++		struct e1s_acpm_channel *dst;
++		bool ptr_ok = false;
+ 
+ 		base = channels + i * E1S_ACPM_CHANNEL_STRIDE;
+ 		if (base + E1S_ACPM_CHANNEL_STRIDE > E1S_ACPM_SRAM_SIZE) {
+@@ -322,9 +444,14 @@
+ 		id = slot[0];
+ 		type = slot[9];
+ 		ch = base + 12;
+-		q_len = slot[ch + 28];
+-		elem = slot[ch + 29];
+-		ap_poll = slot[base + 44];
++		/*
++		 * NAT-123: struct ipc_channel / channel_info for S5E9945 (fw_header/framework.h, CONFIG_SOC_S5E9945 branch:
++		 * ch at +12, q_len at ch+28, q_elem_size at ch+29, ap_poll at +44) -- relative to the slot, not to SRAM (the old code
++		 * added `base` twice and read len=0 elem=0).
++		 */
++		q_len = slot[12 + 28];
++		elem = slot[12 + 29];
++		ap_poll = slot[44];
+ 		found++;
+ 
+ 		printf("e1s-acpm: ch%u id=%u type=%u len=%u elem=%u poll=%u "
+@@ -335,29 +462,61 @@
+ 		    e1s_acpm_read32(ch + 12), e1s_acpm_read32(ch + 4),
+ 		    e1s_acpm_read32(ch + 8));
+ 
+-		if (id != E1S_ACPM_CHANNEL_PMIC) {
++		if (id != E1S_ACPM_CHANNEL_PMIC && id != E1S_ACPM_CHANNEL_DVFS) {
+ 			continue;
+ 		}
+-		if (!e1s_acpm_range_ok(e1s_acpm_read32(ch + 24), q_len, elem) ||
+-		    !e1s_acpm_range_ok(e1s_acpm_read32(ch + 12), q_len, elem)) {
++		dst = id == E1S_ACPM_CHANNEL_PMIC ? &e1s_acpm_pmic : &e1s_acpm_dvfs;
++		/* Validate every pointer before any queue read or firmware command. NAT-172: the DVFS channel must also be AP-polled; a
++		 * bad DVFS channel is only skipped, the PMIC path is unchanged. */
++		if (type != 1 || elem != 16 || q_len < 2 ||
++		    !e1s_acpm_range_ok(e1s_acpm_read32(ch + 24), q_len, elem) ||
++		    !e1s_acpm_range_ok(e1s_acpm_read32(ch + 12), q_len, elem) ||
++		    (dst == &e1s_acpm_dvfs && ap_poll != 1)) {
++			if (dst == &e1s_acpm_dvfs) {
++				printf("e1s-acpm: DVFS channel 0 not usable; no DVFS request\n");
++				continue;
++			}
+ 			printf("e1s-acpm: channel 2 queues are outside SRAM\n");
+ 			return;
+ 		}
+ 
+-		e1s_acpm_pmic.valid = true;
+-		e1s_acpm_pmic.id = id;
+-		e1s_acpm_pmic.type = type;
+-		e1s_acpm_pmic.q_len = q_len;
+-		e1s_acpm_pmic.elem_size = elem;
+-		e1s_acpm_pmic.ap_poll = ap_poll;
++		for (unsigned off = 4; off <= 20; off += 4) {
++			uint32_t ptr;
++			if (off == 12) {
++				continue;
++			}
++			ptr = e1s_acpm_read32(ch + off);
++			if ((ptr & 3) != 0 || ptr > E1S_ACPM_SRAM_SIZE - 4) {
++				break;
++			}
++			if (off == 20) {
++				ptr_ok = true;
++			}
++		}
++		if (!ptr_ok) {
++			if (dst == &e1s_acpm_dvfs) {
++				printf("e1s-acpm: DVFS channel 0 has an invalid queue pointer; no DVFS request\n");
++				continue;
++			}
++			printf("e1s-acpm: invalid queue pointer; no commands\n");
++			return;
++		}
++		ptr_ok = false;
++
++		dst->valid = true;
++		dst->id = id;
++		dst->type = type;
++		dst->q_len = q_len;
++		dst->elem_size = elem;
++		dst->ap_poll = ap_poll;
+ 		/* AP RX: the APM's tx_* fields. */
+-		e1s_acpm_pmic.rx_rear = e1s_acpm_read32(ch + 16);
+-		e1s_acpm_pmic.rx_front = e1s_acpm_read32(ch + 20);
+-		e1s_acpm_pmic.rx_base = e1s_acpm_read32(ch + 24);
++		dst->rx_rear = e1s_acpm_read32(ch + 16);
++		dst->rx_front = e1s_acpm_read32(ch + 20);
++		dst->rx_base = e1s_acpm_read32(ch + 24);
+ 		/* AP TX: the APM's rx_* fields. */
+-		e1s_acpm_pmic.tx_rear = e1s_acpm_read32(ch + 4);
+-		e1s_acpm_pmic.tx_front = e1s_acpm_read32(ch + 8);
+-		e1s_acpm_pmic.tx_base = e1s_acpm_read32(ch + 12);
++		dst->tx_rear = e1s_acpm_read32(ch + 4);
++		dst->tx_front = e1s_acpm_read32(ch + 8);
++		dst->tx_base = e1s_acpm_read32(ch + 12);
+ 	}
+ 
+ 	if (!e1s_acpm_pmic.valid) {
+@@ -366,8 +525,9 @@
+ 	}
+ 
+ 	e1s_acpm_up = true;
+-	e1s_acpm_clear_irq();
++	e1s_acpm_clear_irq(&e1s_acpm_pmic);
+ 	printf("e1s-acpm: PMIC channel ready (%u channels scanned)\n", found);
++	e1s_cpuclk_raise();
+ }
+ 
+ int
+@@ -401,6 +561,13 @@
+ 	uint32_t cmd[E1S_ACPM_CMD_WORDS] = { 0, 0, 0, 0 };
+ 	int error;
+ 
++	/* Decision 0049: the transport itself rejects every other write. */
++	if (sid != 0x0d || type != 0x05 ||
++	    !((reg == 0x34 && value == 0xf0) ||
++	    (reg == 0x3d && value == 0xd8))) {
++		return EINVAL;
++	}
++
+ 	cmd[0] = ((uint32_t)type << 8) | reg;
+ 	cmd[1] = E1S_ACPM_MFD_FUNC_WRITE | ((uint32_t)value << 8) |
+ 	    ((uint32_t)sid << 24);
+@@ -421,21 +588,7 @@
+ e1s_acpm_mfd_update(uint8_t sid, uint8_t type, uint8_t reg, uint8_t value,
+     uint8_t mask)
+ {
+-	uint32_t cmd[E1S_ACPM_CMD_WORDS] = { 0, 0, 0, 0 };
+-	int error;
+-
+-	cmd[0] = ((uint32_t)type << 8) | reg;
+-	cmd[1] = E1S_ACPM_MFD_FUNC_UPDATE | ((uint32_t)value << 8) |
+-	    ((uint32_t)mask << 16) | ((uint32_t)sid << 24);
+-
+-	error = e1s_acpm_send(cmd);
+-	if (error != 0) {
+-		return error;
+-	}
+-	if (((cmd[1] >> 24) & 0xffU) != 0) {
+-		printf("e1s-acpm: update sid=%u type=0x%02x reg=0x%02x failed (%u)\n",
+-		    sid, type, reg, (cmd[1] >> 24) & 0xffU);
+-		return EIO;
+-	}
+-	return 0;
++	/* No masked updates are authorized in this experiment. */
++	(void)sid; (void)type; (void)reg; (void)value; (void)mask;
++	return EINVAL;
+ }

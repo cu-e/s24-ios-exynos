@@ -1,0 +1,16 @@
+{
+ "id": "NAT-172",
+ "status": "pending",
+ "owner": null,
+ "title": "Host: scQ = scO (NAT-169) with a cpu0 clock probe and one stock DVFS request: e1s_acpm.o logs PLL_CPUCL0 CON3 (0x1DC4010C) and a timed dependent-add rate, then (only if the PLL decode is valid and below the target) sends FREQ_REQ {2, 1959000 kHz, 0, 0} on APM channel 0 through the proven polled transport and logs the reply and both readbacks again; target limited to this phone's 17 stock cluster-0 levels (NAT-171)",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 88,
+ "depends_on": ["NAT-170", "NAT-171"],
+ "paths": ["docs/procedures/nat-172", "artifacts/nat-172"],
+ "acceptance": [
+  "Kernel = NAT-169's with only e1s_acpm.o's patch changed; the PMIC path unchanged on the NAT-123 host harness",
+  "Fake APM: exactly one channel-0 command with the stock layout; no command when the decode is invalid, already at target, the channel is invalid, or the boot-arg value is not a stock level",
+  "Loader sites rc 0; relocscan clean; cmdline = scO's with the tag changed; package, counted session, analyser with registered verdicts, tests, make check"
+ ]
+}
