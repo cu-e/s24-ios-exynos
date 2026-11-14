@@ -1,0 +1,49 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T05:45:00+00:00",
+ "task": "NAT-178",
+ "summary": "Stock s5e9945 cal_rt sequence for one scaled linear RGB layer on DMA1/DPP1 (references/s24-linux 417484173abc): ordered write list with addresses/values/citations (DECON begin/flush, SRAMC1, DPP1 scaler and sizes, DMA1 sizes/base/format, HDR_COMM1 bypass), ratios 0x10AAAA/0x10A80A, coefficient table 1 (108 words at 0x19940000..0x199401AC), BASEADDR 32-bit without high register, CFG_ERR/IRQ/CONFIG_ERR status bits, pre-write save list and write-back to NAT-177 values, 10 open questions with checks. Owner re-check of coefficient selection/macros/rows, TRIG/SHD bits, BASEADDR; XRGB8888 chosen (IDMA 4, per-frame alpha, SRAMC 0x1000, DPP IO_CON 0x100).",
+ "commit": "44b02524 (base)",
+ "device_used": false,
+ "source": {
+  "repo": "references/s24-linux",
+  "sha": "417484173abc2c4fa93e738ea82ad9f2e84911b1"
+ },
+ "prepared_by": "research subagent; re-checked by claude-opus-usb130-20261113",
+ "checks": [
+  {
+   "cmd": "git -C references/s24-linux show HEAD:drivers/gpu/drm/samsung/dpu/cal_rt/dpp_reg.c | sed -n 30,40p;826,905p",
+   "exit_code": 0,
+   "result": "table selection and loops as documented"
+  },
+  {
+   "cmd": "git -C references/s24-linux show HEAD:drivers/gpu/drm/samsung/dpu/cal_common/exynos_dpp_coef.h | sed -n 34,37p;164,167p",
+   "exit_code": 0,
+   "result": "table 1 rows match"
+  },
+  {
+   "cmd": "git -C references/s24-linux show HEAD:drivers/gpu/drm/samsung/dpu/cal_rt/regs-decon.h | sed -n 146,167p;204,214p",
+   "exit_code": 0,
+   "result": "TRIG_CON/SHD bits match"
+  },
+  {
+   "cmd": "git -C references/s24-linux show HEAD:drivers/gpu/drm/samsung/dpu/cal_rt/regs-dpp.h | grep IDMA_IMG_FORMAT/DPP_ALPHA",
+   "exit_code": 0,
+   "result": "XRGB8888=4, ALPHA_SEL bit 7"
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-178/README.md"
+ ],
+ "artifact_sha256": {
+  "docs/procedures/nat-178/README.md": "208943510c33f11977ff5dedcb29eb4fd57c93c1c70e8b7a8d973c3207e20741"
+ },
+ "not_established": [
+  "no write executed on the phone",
+  "SHD bit that latches DPUF shadows",
+  "BASEADDR alignment rule",
+  "stride units if rows are padded"
+ ]
+}
