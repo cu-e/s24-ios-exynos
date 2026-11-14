@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T04:30:10+00:00",
+  "updated_at": "2026-11-14T04:47:22+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -1000,6 +1000,20 @@
         "decision": "docs/decisions/0071-nat175-loader-diag-xnu-scR-md1-single-run-2026-11-14.md",
         "owner": "claude-opus-usb130-20261113",
         "at": "2026-11-14T04:17:16+00:00"
+      },
+      {
+        "scope": "native",
+        "value": true,
+        "decision": "docs/decisions/0072-nat177-loader-diag-xnu-scS-md1-single-run-2026-11-14.md",
+        "owner": "claude-opus-usb130-20261113",
+        "at": "2026-11-14T04:31:13+00:00"
+      },
+      {
+        "scope": "native",
+        "value": false,
+        "decision": "docs/decisions/0072-nat177-loader-diag-xnu-scS-md1-single-run-2026-11-14.md",
+        "owner": "claude-opus-usb130-20261113",
+        "at": "2026-11-14T04:47:03+00:00"
       }
     ]
   },
@@ -19017,8 +19031,8 @@
     },
     {
       "id": "NAT-177",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
       "title": "Native: run scS (NAT-176: read-only DPP/DMA/SRAMC/SysMMU snapshot gated on PMU power status) once under decision 0061; registers decoded against NAT-162 (which DPP feeds the visible window, scaler state, SysMMU bypass), swipe capacity reproduced",
       "scope": "native",
       "evidence_kind": "native-device",
@@ -19034,7 +19048,36 @@
         "Per-image decision before the run",
         "Snapshot lines present at probe and at 300 s, or the gate's reason for skipping; dpp177 verdict",
         "Stock RECOVERY restored with full hash and Android verified"
-      ]
+      ],
+      "started_at": "2026-11-14T04:31:32+00:00",
+      "last_heartbeat": "2026-11-14T04:31:32+00:00",
+      "updated_at": "2026-11-14T04:46:44+00:00",
+      "evidence": "docs/procedures/nat-177/evidence.json",
+      "evidence_sha256": "3235d83df7f95156894a4b88c7bf4bd4d77a16678f6de19cecbfb27a0fd2ce48",
+      "finished_at": "2026-11-14T04:46:44+00:00"
+    },
+    {
+      "id": "NAT-178",
+      "status": "in_progress",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Source review: exact stock s5e9945 cal_rt register sequence to switch DECON0 win3/DMA1/DPP1 (state read in NAT-177: ARGB8888 1080x2340 at 0xfa200000, scaler off, SysMMU not translating, panel 120 Hz command mode) to a physically contiguous 1125x2436 ARGB buffer scaled to 1080x2340 by DPP1: every register offset, field and value (DMA, DPP, SRAMC, scaler coefficients table, DECON shadow update/trigger in command mode), BASEADDR width/alignment, CFG_ERR meaning, and an exact write-back to the NAT-177 values",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 93,
+      "depends_on": [
+        "NAT-177"
+      ],
+      "paths": [
+        "docs/procedures/nat-178"
+      ],
+      "acceptance": [
+        "Every register write needed listed with offset, value and a file:line citation in references/s24-linux 417484173abc",
+        "Coefficient values for the 1125->1080 / 2436->2340 ratio quoted or located exactly",
+        "Open questions named with the check that would resolve each"
+      ],
+      "started_at": "2026-11-14T04:47:22+00:00",
+      "last_heartbeat": "2026-11-14T04:47:22+00:00",
+      "updated_at": "2026-11-14T04:47:22+00:00"
     }
   ],
   "experiments": [
@@ -71410,6 +71453,83 @@
           "owner": "claude-opus-usb130-20261113",
           "priority": 92,
           "last_heartbeat": "2026-11-14T04:21:17+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T04:31:13+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-14T04:31:32+00:00",
+      "action": "task.claim:NAT-177",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-177",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 92,
+          "last_heartbeat": "2026-11-14T04:31:32+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T04:45:12+00:00",
+      "action": "task.add:NAT-178",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-178",
+          "status": "pending",
+          "owner": null,
+          "priority": 93
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T04:46:44+00:00",
+      "action": "task.done:NAT-177",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-177",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 92,
+          "last_heartbeat": "2026-11-14T04:31:32+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T04:47:03+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
+    },
+    {
+      "at": "2026-11-14T04:47:22+00:00",
+      "action": "task.claim:NAT-178",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-178",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 93,
+          "last_heartbeat": "2026-11-14T04:47:22+00:00"
         }
       ]
     }
