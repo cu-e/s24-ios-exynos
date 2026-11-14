@@ -2,9 +2,9 @@
 
 > Generated from state/lab.json. Use the CLI; do not edit this board or its task cards.
 
-Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-14T00:20:15+00:00.
+Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-14T00:26:42+00:00.
 
-Registry SHA256: `085159a39bab58fc0833d4ca75004cc58128e8156c2455a5f2b859d7875086fa`. Run `python3 tools/lab.py board --check` to detect stale files.
+Registry SHA256: `b108c54f225a9e55935e2b788b233c124a3f91ed606ef86771b9938909a61b35`. Run `python3 tools/lab.py board --check` to detect stale files.
 
 [Workflow](docs/planning.md) · [All task details](planning/README.md) · [Machine view](state/board.json) · [Status](STATUS.md)
 
@@ -403,7 +403,7 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 | claude-opus-usb130-20261113 | NAT-146 | in_progress | 2026-11-13T22:09:20+00:00 | stale | Run consumed under 0059: outcome FAIL. Both scE kernel boots stopped inside ml_parse_cpu_topology (last checkpoint 35); watchdog reset into SEC_UPLOAD, auto-restart looped into RECOVERY; owner forced Download Mode; stock RECOVERY restored, Android verified (docs/procedures/nat-146/evidence.json). Cause (source review): all /cpus nodes state=running -&gt; second boot CPU assertion. / NAT-147 host: state=waiting for cpu1-9, prove on NAT-035 model, rebuild scE; rerun needs a new decision | handoff: docs/procedures/nat-146/README.md |
 | claude-opus-usb130-20261113 | NAT-149 | in_progress | 2026-11-13T22:42:40+00:00 | stale | Run consumed under 0060: outcome FAIL for SMP. Topology fix confirmed (10 cpus registered); PSCI CPU_ON accepted (status 0) for cores 1-9 but none reached arm_init_cpu, no entry fault; 1 of 10 running; home screen ~354 s so no fps window. Stock RECOVERY restored, Android verified (docs/procedures/nat-149/evidence.json). / Host: early per-core markers in start.s (entry, cpu-data match, pre-MMU) read back by the boot CPU; analyser rule fix; shorter start wait; new decision for a native run | handoff: docs/procedures/nat-149/README.md |
 | claude-opus-usb130-20261113 | NAT-151 | in_progress | 2026-11-13T23:32:38+00:00 | stale | FAIL (native-device): loader stopped before the kernel; its compile-time kernel addresses (5 start.s checkpoint sites, loader_jump, _set_mmu_ttb) were moved by NAT-150&#x27;s start.patch; reproduced on host (check_loader_sites: scG rc 2 site 1, scF rc 0); deadline -&gt; Download Mode by itself; stock RECOVERY restored, Android verified (evidence docs/procedures/nat-151/evidence.json) / NAT-152 host: scH with the loader&#x27;s view intact (check_loader_sites rc 0 as build gate) | — |
-| claude-opus-usb130-20261113 | NAT-154 | in_progress | 2026-11-14T00:19:56+00:00 | recent | No progress note / Next step not reported | — |
+| claude-opus-usb130-20261113 | NAT-154 | in_progress | 2026-11-14T00:26:23+00:00 | recent | 2026-11-14: work on the EL2-to-EL1 start-up change was stopped by a safety classifier while reading Linux EL2 set-up constants; no NAT-154 code, patch or image was written; nothing ran on the phone (Android up, native permit closed) / Owner decision needed on whether and how to continue NAT-154; not resumed by the agent | — |
 | claude-takeover-20261110-6c8f | INT-002 | blocked | 2026-11-10T08:46:05+00:00 | stale | ROOT126 provider+036commonPASS MAIN5e1f;024126 is only remaining actualbody/root125running, no provisionalcredit. Runtime002PASS recordonceCLI0 capsule36e1/Misc0fa78;3programcurrentruntime c5bc exactld10+ROOT91clang5/setseg2, frozen4a8e/no loaderreplay. Immutable916index5e23/126ABSENT,035overrides explicit. Runtime001preparationFAIL retained; future3runtimecommits combinewithfinal024only. / Await ROOT125 terminal and ownerfinal024packet for independentactual126/join1042; then fresh minimalcandidate with exactruntimeb6d4/e663/4a8e source/evidence, rootgrantpub/common only. STR037consumer runtimec5bc/index916 delivered; no source/helper/flags changes/no target/common replay or foreignclosures. | branch: team/int-e1s-profile-20261106; worktree: worktrees/int-e1s-profile-20261106; handoff: worktrees/int-history-iokit-20261106/artifacts/integration-gate/handoff.md |
 | claude-takeover-20261110-6c8f | INT-003 | blocked | 2026-11-10T08:46:46+00:00 | stale | Independent native actual reviews frozen: wave88 osfmk-a26/160 and osfmk-b159/159; root93 libkern77/77; root98 provider315 filtered headers plus32 exact native signatures,315 full26-flag invocations,four export-MIG copies and Firehose14be accepted in6c61b4a. Root98 actual31 resource/cleanup records and665 input hashes matched. Original failed attempts preserved; provider4TUs/2archives and link/privateABI/runtime/hardware remain pending. / CM/root may integrate exact STR018 eight-commit header producer chain through29c11a69 plus independent header review after serialized grant; original SR18 separately prepares four native provider TUs and two archives. No target regeneration, common, publication or namespace mutation authorized by this review. | branch: team/int-platform-20261106; worktree: worktrees/int-platform-20261106; handoff: worktrees/int-platform-20261106/docs/integration/platform/native-provider-headers98-review/handoff.md |
 | claude-takeover-20261110-6c8f | KRN-008 | blocked | 2026-11-10T08:45:24+00:00 | stale | Checkpoint:679/978 actual component objects emit ARM64;925 real compile attempts,246 failures and53 missing generated sources. Four top-level direct objects/archives/link metadata are additional requirements. Independent audit verifies16383 code definitions,2598 dependency files and10674 artifact digests across15 capsules.132 repository tests pass; original10889 compiler sources/198 build inputs/5111 kernel sources and other owners/scopes unchanged. Task remains in_progress. / KRN-009 atomic metadata and KRN-010 coherent MIG generation are ready; preserve compile-session2 and recorded dependency graph, then resolve all remaining component/top-level/generated/link prerequisites. No native capability is qualified. | branch: main; handoff: docs/procedures/xnu-kernel-objects.md |
@@ -423,8 +423,6 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
 
 ## Recent activity
 
-- 2026-11-13T23:32:38+00:00 · claude-opus-usb130-20261113 · task.update:NAT-151
-  - NAT-151: FAIL (native-device): loader stopped before the kernel; its compile-time kernel addresses (5 start.s checkpoint sites, loader_jump, _set_mmu_ttb) were moved by NAT-150&#x27;s start.patch; reproduced on host (check_loader_sites: scG rc 2 site 1, scF rc 0); deadline -&gt; Download Mode by itself; stock RECOVERY restored, Android verified (evidence docs/procedures/nat-151/evidence.json)
 - 2026-11-13T23:32:57+00:00 · claude-opus-usb130-20261113 · project.permit:native
 - 2026-11-13T23:35:31+00:00 · claude-opus-usb130-20261113 · task.add:NAT-152
   - NAT-152: pending
@@ -454,6 +452,8 @@ Owner names identify cooperating agents, not authenticated processes. A recent r
   - NAT-156: pending
 - 2026-11-14T00:19:56+00:00 · claude-opus-usb130-20261113 · task.claim:NAT-154
   - NAT-154: in_progress
+- 2026-11-14T00:26:23+00:00 · claude-opus-usb130-20261113 · task.update:NAT-154
+  - NAT-154: 2026-11-14: work on the EL2-to-EL1 start-up change was stopped by a safety classifier while reading Linux EL2 set-up constants; no NAT-154 code, patch or image was written; nothing ran on the phone (Android up, native permit closed)
 
 Use a unique owner per agent session. Atomically take ready work:
 
