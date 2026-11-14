@@ -1,12 +1,11 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-14T08:38:51+00:00",
-  "ledger_updated_at": "2026-11-14T08:38:32+00:00",
-  "registry_sha256": "709cc06321c2fc687b3ea69ebb49b7277709983b63b9995da585031ff66a8e0e",
+  "generated_at": "2026-11-14T08:44:21+00:00",
+  "ledger_updated_at": "2026-11-14T08:44:02+00:00",
+  "registry_sha256": "147a1611fad89ac290bfa2089c8cdde33d81a42aecd09fe606d588d8a93bc5ce",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
-      "GPU-019",
       "NAT-082",
       "NAT-195",
       "NAT-054",
@@ -259,6 +258,7 @@
       "NAT-101",
       "NAT-102",
       "NAT-131",
+      "GPU-019",
       "KRN-006",
       "KRN-014",
       "KRN-015",
@@ -7570,8 +7570,8 @@
     },
     {
       "id": "GPU-019",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
       "title": "Host review of the stock BYH3 binaries for the first GPU step (roadmap G3+G6): g3dcore_on register writes/waits in cmupmucal.ko, DTZPC SMC 0x82000410 arguments in exynos-pd_el3.ko, the first ID/status registers sgpu.ko reads after power-on, and what exynos-hypervisor.ko's EL2 code does for HVC 0xC6000108/110/111 (forward to EL3 or not)",
       "scope": "host",
       "evidence_kind": "source-review",
@@ -7588,7 +7588,15 @@
         "The S2MPU HVC handling at EL2 described from the stock exynos-hypervisor.ko, or stated as not determinable",
         "No Apple or vendor binary committed; only offsets, values and hashes"
       ],
-      "column": "ready",
+      "started_at": "2026-11-14T08:39:53+00:00",
+      "last_heartbeat": "2026-11-14T08:42:38+00:00",
+      "updated_at": "2026-11-14T08:44:02+00:00",
+      "progress_note": "PMUCAL tables, DTZPC args, SMC/HVC routing and uH plugin established from stock binaries (README, evidence draft)",
+      "next_step": "Trace the first GPU ID/status register offsets sgpu.ko reads after power-on (amdgpu early init / sgpu probe), then complete",
+      "evidence": "docs/procedures/gpu-019/evidence.json",
+      "evidence_sha256": "01ce5e287413d2160eae12caae3ee85fe95b6af80deaef6b1dcfe6707af90bf5",
+      "finished_at": "2026-11-14T08:44:02+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/GPU-019.md"
     },
@@ -21163,46 +21171,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-14T07:39:49+00:00",
-      "action": "task.update:NAT-190",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-190",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 94,
-          "progress_note": "FAIL (native-device, decision 0077): scX panicked at 200.07 s on the e1s-pc sampler's first tick: recount.c:567 assert ml_get_interrupts_enabled()==FALSE via _e1s_pc_thread+0xac -> recount_current_thread_times (self-time read); pc190 P-none; until 200 s as scV (K2 2.26 ms, C2, P1). Loader deadline -> Download Mode by itself; stock RECOVERY restored, full hash, Android verified, assess pass. Evidence docs/procedures/nat-190/evidence.json",
-          "next_step": "NAT-191 host: self time via recount_thread_time_mach(current_thread()), harness aborts on recount_current_*, audit asserts of every called KPI; NAT-192 native rerun under a new decision",
-          "last_heartbeat": "2026-11-14T07:39:49+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T07:40:08+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-14T07:43:29+00:00",
-      "action": "task.add:NAT-191",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-191",
-          "status": "pending",
-          "owner": null,
-          "priority": 94
-        }
-      ]
-    },
-    {
       "at": "2026-11-14T07:43:48+00:00",
       "action": "task.add:NAT-192",
       "owner": "claude-opus-usb130-20261113",
@@ -21433,11 +21401,57 @@
           "priority": 97
         }
       ]
+    },
+    {
+      "at": "2026-11-14T08:39:53+00:00",
+      "action": "task.claim:GPU-019",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "GPU-019",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 98,
+          "last_heartbeat": "2026-11-14T08:39:53+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:42:38+00:00",
+      "action": "task.update:GPU-019",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "GPU-019",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 98,
+          "progress_note": "PMUCAL tables, DTZPC args, SMC/HVC routing and uH plugin established from stock binaries (README, evidence draft)",
+          "next_step": "Trace the first GPU ID/status register offsets sgpu.ko reads after power-on (amdgpu early init / sgpu probe), then complete",
+          "last_heartbeat": "2026-11-14T08:42:38+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:44:02+00:00",
+      "action": "task.done:GPU-019",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "GPU-019",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 98,
+          "progress_note": "PMUCAL tables, DTZPC args, SMC/HVC routing and uH plugin established from stock binaries (README, evidence draft)",
+          "next_step": "Trace the first GPU ID/status register offsets sgpu.ko reads after power-on (amdgpu early init / sgpu probe), then complete",
+          "last_heartbeat": "2026-11-14T08:42:38+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "7cdf00fe3d5f144610ac8b5f6901d7012dc3d30000e1fadd2688f6f14dcb2626",
-    "BOARD.md": "15760a27c21e0094b812fd7871cc5c8afcbb8093e1ec2c76e83274a3b1e30b8b",
+    "STATUS.md": "54bef10675d0c83be398731dbe4cca106f9b6ca2069b8f6000169012a7d831e1",
+    "BOARD.md": "d898a826bc7cbb4048e810f19694a9cac186ce57aa7f9f700fb8b93e0c48caa1",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -21611,7 +21625,7 @@
     "planning/tasks/NAT-101.md": "5b2fc1e43a6119d7afad7ef7b7f44b54c398daff6fe524b4e93ef7423c915125",
     "planning/tasks/NAT-102.md": "553dfd41551a8608467aeaaa8fd34ee6a57d35e9e367996e57dc3b76d669d58c",
     "planning/tasks/NAT-131.md": "fa94c8930019f77944a6c193b0a9040b5dc9f91becb6d059f4b6e317a9905df7",
-    "planning/tasks/GPU-019.md": "5f708c21db934a3a9d3334792172a17cf0676944bdba3b07b8582a357bc4c1f0",
+    "planning/tasks/GPU-019.md": "b56cbd7d9ef273231296b6fa58e20de4c8c900e9975e9cc188e9f86b99c63e6e",
     "planning/tasks/KRN-006.md": "17787b37e62d7cb230c248532450af8108a583aca6b6e955cee29637f8e981a1",
     "planning/tasks/KRN-014.md": "373bcf06587ce0b77bbacdfa023baa6c9b888953717dafa33267ff49a60ea753",
     "planning/tasks/KRN-015.md": "28783b6b5313987331209c84d30f10ddeab6ee7f41bf6bf1d963790545460926",

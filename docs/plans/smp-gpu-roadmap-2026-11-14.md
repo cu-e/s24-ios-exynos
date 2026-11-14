@@ -39,10 +39,10 @@ Legend:
 |---|---|---|---|
 | G1 | Bring-up sequence from the pinned Samsung source | done | GPU-017: PMUCAL `g3dcore_on`, SMC 0x82000410, HVC 0xC6000108/110/111, SMC 0x82000520, gfxhub, rings |
 | G2 | Inventory from Android and the stock BYH3 binaries | done | GPU-018: firmware in the vendor_boot ramdisk (`vangogh_lite_unified_evt0/1.bin`, 901120 B); call IDs confirmed in `sgpu.ko`, `exynos-pd_el3.ko`, `exynos-s2mpu.ko`; S2MPU HVCs served by pKVM + `exynos-hypervisor` |
-| G3 | Stock-binary review of the power-on values | allowed now (host) | `g3dcore_on` register writes and waits in the stock `cmupmucal.ko`; the DTZPC SMC arguments in `exynos-pd_el3.ko`; the ID/status register offsets the stock `sgpu.ko` reads first |
+| G3 | Stock-binary review of the power-on values | done (GPU-019) | `g3dcore_on` register writes and waits in the stock `cmupmucal.ko`; the DTZPC SMC arguments in `exynos-pd_el3.ko`; the ID/status register offsets the stock `sgpu.ko` reads first |
 | G4 | Kernel object `e1s_gpu`: power domain on → DTZPC restore → read GPU ID/status → DTZPC save → power off, with readbacks and 200 ms timeouts | allowed now (host, harness) | values from G3 only; no DMA, no firmware, no HVC |
 | G5 | Native run of G4 | allowed under 0061 (stock values, reversible by `g3dcore_off` and reset) | per-image decision lists every register, value and call ID |
-| G6 | What the S2MPU HVCs do at EL2 (`exynos-hypervisor.ko` hyp code; do they forward to EL3?) | allowed now (host review of stock binaries) | decides between EL2 code of our own and a direct path |
+| G6 | What the S2MPU HVCs do at EL2 | done (GPU-019): served by Samsung uH (el2_code 0xC1400000) inside pKVM; other SMCs go to EL3 unchanged | decides between EL2 code of our own and a direct path |
 | G7 | EL2 service for 0xC6000108/110/111 under XNU | owner (design first) | it would be new EL2-resident code; the plan goes to the owner, and a classifier stop on it ends that piece |
 | G8 | Firmware verify and RLC self-load (HVC 0xC6000110/111, SMC 0x82000520) | after G6/G7 | firmware read from the phone's own vendor_boot at run time, never committed |
 | G9 | gfxhub VM, IH ring, one GFX queue, WRITE_DATA 0xDEADBEEF polled by the CPU | after G8 | MMIO inside the GPU block |

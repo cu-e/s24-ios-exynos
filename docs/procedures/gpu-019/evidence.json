@@ -1,0 +1,40 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T08:42:25+00:00",
+ "task": "GPU-019",
+ "summary": "Stock BYH3 cmupmucal.ko g3dcore_on/off/status/cmu_init tables decoded and equal to the pinned source; exynos-pd_el3 DTZPC SMC 0x82000410 args (1|0, id, 2), restore then HVC 0xC6000108 via exynos_pd_restore_s2mpu; exynos-hypervisor.ko hyp HVC handler is a plugin pointer, SMC trap only 0x82002910/11 (others to EL3); plugin is Samsung uH (el2_code 0xC1400000 2 MiB, compatible el2,uh; s2mpu_table 0xC5000000). First GPU step values are stock-traceable; S2MPU HVCs need uH under pKVM (owner piece G7). GPU ID register offsets still open. First read after power-on: GRBM_CHIP_REVISION at PA 0x22208084 (reg_offset GC seg0 0x1260 + 0xdc1, stock nbio_v2_3_get_chip_revision), expected 0x02600200 from stock DT chip_revision (EVT1 -> evt1 firmware).",
+ "artifacts": [
+  "artifacts/gpu-018/run-001/vendor_boot/exynos-pd_el3.dis.local",
+  "artifacts/gpu-018/run-001/vendor_boot/exynos-hypervisor.dis.local",
+  "artifacts/gpu-018/run-001/hyp-dt.txt",
+  "artifacts/gpu-018/run-001/hyp-resmem.txt",
+  "artifacts/gpu-018/run-001/sgpu-dt.txt"
+ ],
+ "sources": {
+  "cmupmucal.ko": "stock vendor_boot ramdisk 2",
+  "references/s24-linux": "417484173abc2c4fa93e738ea82ad9f2e84911b1"
+ },
+ "commands": [
+  {
+   "cmd": "llvm-readelf -s/-S cmupmucal.ko + struct pmucal_seq decode (80 B)",
+   "exit_code": 0,
+   "result": "as README table"
+  },
+  {
+   "cmd": "llvm-objdump -dr exynos-pd_el3.ko / exynos-hypervisor.ko",
+   "exit_code": 0,
+   "result": "SMC/HVC args and handlers"
+  },
+  {
+   "cmd": "adb shell \"su -c 'od /proc/device-tree/exynos-hypervisor/* and reserved-memory/{el2_code,el2_earlymem,s2mpu_table}'\"",
+   "exit_code": 0,
+   "result": "uH at 0xC1400000"
+  }
+ ],
+ "limits": [
+  "S2MPU reset state unknown",
+  "whether EL3 answers these SMCs from XNU is unmeasured"
+ ]
+}
