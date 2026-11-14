@@ -1,0 +1,96 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T05:10:00+00:00",
+ "task": "NAT-174",
+ "summary": "scR = scQ (NAT-172) with bsd/e1s_touch.o = NAT-169 patch + e1s_swipe_thread (finger 9 home-screen page swipes, 215-375 s uptime, every 3 s, DOWN + 12 MOVE x 16 ms + UP, alternating, through redwood_touch_post; e1stouch_swipe=0 off) and touch_lat=1 in place of cpuload=1000. Kernel = NAT-172 record with only e1s_touch.o changed (fc5c773e, 0 undefined); loader sites rc 0; 254 B; package dcf3eab8; counted session; swipe175 analyser with registered verdicts S-none/S-same/F60/F30/F-low. 6 tests OK. Host-test only: does not show that SpringBoard pages on the synthetic events.",
+ "commit": "5083988a (base)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scR-md1",
+  "recovery_sha256": "dcf3eab8059b884215c9992607a29b9c5ccf5e566d623c627e1189cd5b2e84a9",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "436fa4ad6dd45b7c9712cae28035a0223fbe523b34cbe55c1c6c039ff48d1308",
+  "payload_bytes": 26206624,
+  "loader_image_sha256": "1b19da20634b789ba1983d792605f04d8b8998bbc735ff3d282af38665fc10d0",
+  "kernel_dir": "artifacts/nat-174/kernel-001",
+  "kernel_sha256": "fc5c773e0ae7ba87e132eb2cd54a4f4e536065e1684dfc99f798764d635bcfca",
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT174-scR debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 touch_lat=1 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "cmdline_bytes": 254,
+  "session": "docs/procedures/nat-174/session_nat175.py",
+  "session_sha256": "6724e2603db8cce54e4b78329d68daa7aa799729c38e7e81fc96cb782df25a61"
+ },
+ "sources": {
+  "docs/procedures/nat-174/build.py": "afaa2bc575e9c748bb491b106d4fe5c823051625772aa54496011be35d4bfa64",
+  "docs/procedures/nat-174/e1s_touch_combined.patch": "6f4a00378c72a312bcb3bc6ae4968709221f917c117c151f3d8756fe812080d6",
+  "docs/procedures/nat-174/rebuild-args.json": "d43ac55642b9d0f2abce6f45255c4e5dd54a9c230c1209993c03a22823aee6d9",
+  "docs/procedures/nat-174/host/clock174.c": "1cedcbf42499b454286b6a8d177d3fc157e06648fa3238a47ca2c3fbccd2bef4",
+  "docs/procedures/nat-174/test_nat174.py": "a0ce1a214f73176aa4d5b8eb9b2e73c13b75ac761b17652b4426398be2607d5d",
+  "docs/procedures/nat-174/swipe175.py": "c2f4145fbc90a5b7631bb1e746e5077956e8fe3110fe13abb4a1106b8e1db4fd",
+  "docs/procedures/nat-174/derive175.py": "0e58cdc082f81e288f4f1208cc3bb91637b6b5f764f85f869042790c69651b19",
+  "docs/procedures/nat-174/session_nat175.py": "6724e2603db8cce54e4b78329d68daa7aa799729c38e7e81fc96cb782df25a61",
+  "docs/procedures/nat-174/README.md": "87fcd3e3efbeb548ca2b0bbf268032e2753a65a59ac2216c662317eec596cd70",
+  "docs/procedures/nat-174/task.json": "f3392a80b30c15c5b166d20a88e0b0256fb218a9625157bd3997589299f68cc9"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/krn-044/rebuild.py --out artifacts/nat-174/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-121/loader_return.patch --extra bsd/e1s_touch.o=docs/procedures/nat-174/e1s_touch_combined.patch --extra bsd/redwood_input.o=docs/procedures/nat-165/redwood_input.patch --extra bsd/e1s_acpm.o=docs/procedures/nat-172/e1s_acpm.patch --extra bsd/e1s_pmic.o=docs/procedures/nat-123/e1s_pmic.patch --extra osfmk/start.o=docs/procedures/nat-152/start.patch --extra osfmk/psci_smp.o=docs/procedures/nat-152/psci_smp.patch --expect-string start: sense on (ready %s --expect-string miso cs-high --expect-string e1s-keys: disabled (e1skeys=0) --expect-string event thread started --expect-string e1s-touch: %s %u: finger %u x %u y %u --expect-string psci: cpu %d early marks: last 0x%llx --expect-string tl: u at %llu",
+   "exit_code": 0,
+   "result": "no_storage fc5c773e, 0 undefined"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-174/build.py --out artifacts/nat-174/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "254 B; loader sites rc 0 ok bad 0; relocscan passed; patch delta by function checked"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-174/build-001 --out artifacts/nat-174/package-001",
+   "exit_code": 0,
+   "result": "dcf3eab8059b884215c9992607a29b9c5ccf5e566d623c627e1189cd5b2e84a9"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-174/derive175.py --check",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-174/test_nat174.py",
+   "exit_code": 0,
+   "result": "6 OK"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-174/swipe175.py artifacts/nat-164/analysis/kernel-text.txt",
+   "exit_code": 0,
+   "result": "S-none on a run without swipes; idle swap interval median 105.83 ms (matches tl164)"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "OK"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-174/kernel-001/rebuild.json",
+  "artifacts/nat-174/kernel-001.log",
+  "artifacts/nat-174/build-001/build.json",
+  "artifacts/nat-174/build-001.log",
+  "artifacts/nat-174/package-001/package.json",
+  "artifacts/nat-174/e1s_touch.c",
+  "artifacts/nat-174/make-check.log"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-174/kernel-001/rebuild.json": "7f4a60edc865ecbc56d56e2ddee6e9422b7f01893b3da6e2c52798a3a1eec531",
+  "artifacts/nat-174/kernel-001.log": "db81726cb51b1ead686bf81d1d5c839f35e32c6f103f73f5cc1d01858671e004",
+  "artifacts/nat-174/build-001/build.json": "f5521cd5cb53bb66f42f69f9d3c480cc8a6cb1a727c163bf3df988730eb09313",
+  "artifacts/nat-174/build-001.log": "68c0dd1085a4d9eaacb3cfe0638960612d456bd20e8d8650bf4bc467363add71",
+  "artifacts/nat-174/package-001/package.json": "82777870349af4536141a72d9b6c671b540f2d95063e850a57194f326b1e9ea5",
+  "artifacts/nat-174/e1s_touch.c": "f626e5e4b5afda399d30e96b942cfab4536e7990153885f4855fac1e0460fe49",
+  "artifacts/nat-174/make-check.log": "ea9828224c2115cc71ac3ef6b3e56a289cfd6cf098d48099d7888e78d84c3dbf"
+ },
+ "limits": [
+  "Host simulation of timing only; the phone is the test of whether SpringBoard animates on finger-9 events.",
+  "Delivered log tail is ~532 KB: early swipes may be outside it; S-none covers that case.",
+  "Window end changed 360 -> 375 s after the task was written (README explains)."
+ ]
+}

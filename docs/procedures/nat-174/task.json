@@ -1,0 +1,16 @@
+{
+ "id": "NAT-174",
+ "status": "pending",
+ "owner": null,
+ "title": "Host: scR = scQ (NAT-172, cpu0 at 1958 MHz) with a synthetic swipe thread in e1s_touch.o (one finger, horizontal home-screen page swipes posted through redwood_touch_post from 215 s to 360 s uptime, every 3 s, alternating direction) and touch_lat=1 in place of cpuload=1000, so swap intervals during animation measure frame capacity (NAT-173: idle home screen ~9.6 fps is content cadence)",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 90,
+ "depends_on": ["NAT-173"],
+ "paths": ["docs/procedures/nat-174", "artifacts/nat-174"],
+ "acceptance": [
+  "Kernel = NAT-172's with only e1s_touch.o's patch changed (NAT-169's + the swipe thread)",
+  "Host peer: the swipe thread posts DOWN, MOVEs, UP for finger 9 with the planned coordinates and timing; e1stouch_swipe=0 posts nothing; real-touch handling unchanged",
+  "Loader sites rc 0; relocscan clean; cmdline = scQ's with cpuload=1000 -> touch_lat=1 and the tag; package, counted session, analyser with registered verdicts, tests, make check"
+ ]
+}

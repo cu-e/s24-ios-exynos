@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-14T03:40:32+00:00",
-  "ledger_updated_at": "2026-11-14T03:40:13+00:00",
-  "registry_sha256": "dd3282563499efa5c6cfbf79d2a7422246c4479b11ad1e7c6e99ac09402f0f31",
+  "generated_at": "2026-11-14T03:54:35+00:00",
+  "ledger_updated_at": "2026-11-14T03:54:16+00:00",
+  "registry_sha256": "f6f63eabcf40f81246f3eccc254e0dafd903d4c358cd7417f22eb61558d78b3d",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -79,6 +79,7 @@
     "gated": [
       "NAT-017",
       "NAT-072",
+      "NAT-175",
       "NAT-003",
       "DRV-003",
       "NAT-004",
@@ -395,6 +396,7 @@
       "NAT-077",
       "KRN-044",
       "GPU-017",
+      "NAT-174",
       "KRN-033",
       "NAT-014",
       "NAT-172",
@@ -14224,6 +14226,64 @@
       "card_path": "planning/tasks/GPU-017.md"
     },
     {
+      "id": "NAT-174",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scR = scQ (NAT-172, cpu0 at 1958 MHz) with a synthetic swipe thread in e1s_touch.o (one finger, horizontal home-screen page swipes posted through redwood_touch_post from 215 s to 360 s uptime, every 3 s, alternating direction) and touch_lat=1 in place of cpuload=1000, so swap intervals during animation measure frame capacity (NAT-173: idle home screen ~9.6 fps is content cadence)",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 90,
+      "depends_on": [
+        "NAT-173"
+      ],
+      "paths": [
+        "docs/procedures/nat-174",
+        "artifacts/nat-174"
+      ],
+      "acceptance": [
+        "Kernel = NAT-172's with only e1s_touch.o's patch changed (NAT-169's + the swipe thread)",
+        "Host peer: the swipe thread posts DOWN, MOVEs, UP for finger 9 with the planned coordinates and timing; e1stouch_swipe=0 posts nothing; real-touch handling unchanged",
+        "Loader sites rc 0; relocscan clean; cmdline = scQ's with cpuload=1000 -> touch_lat=1 and the tag; package, counted session, analyser with registered verdicts, tests, make check"
+      ],
+      "started_at": "2026-11-14T03:42:58+00:00",
+      "last_heartbeat": "2026-11-14T03:42:58+00:00",
+      "updated_at": "2026-11-14T03:54:16+00:00",
+      "evidence": "docs/procedures/nat-174/evidence.json",
+      "evidence_sha256": "287023f390db487055173d18ee991d6ee2214261d4c9201497ec9f519a819cf4",
+      "finished_at": "2026-11-14T03:54:16+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-174.md"
+    },
+    {
+      "id": "NAT-175",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: run scR (NAT-174: synthetic home-screen swipes, touch_lat=1, cpu0 1958 MHz) once under decision 0061; swap intervals and frames per second during swipe animations vs idle, driver time, swipe-to-panel latency; restore stock RECOVERY with full hash and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 90,
+      "depends_on": [
+        "NAT-174"
+      ],
+      "paths": [
+        "docs/procedures/nat-175",
+        "artifacts/nat-175",
+        "docs/decisions/0071-nat175-loader-diag-xnu-scR-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "Per-image decision before the run",
+        "Registered capacity verdict from swap intervals under swipe",
+        "Clock C2 reproduced (cpuclk173) and touch health",
+        "Stock RECOVERY restored with full hash and Android verified"
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-175.md"
+    },
+    {
       "id": "KRN-033",
       "title": "Implement source-qualified AES-GCM streaming modes and managed nonce helpers",
       "priority": 89,
@@ -20460,57 +20520,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-14T02:44:30+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-14T02:48:16+00:00",
-      "action": "task.add:NAT-169",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-169",
-          "status": "pending",
-          "owner": null,
-          "priority": 86
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T02:48:35+00:00",
-      "action": "task.add:NAT-170",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-170",
-          "status": "pending",
-          "owner": null,
-          "priority": 86
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T02:48:54+00:00",
-      "action": "task.claim:NAT-169",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-169",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 86,
-          "last_heartbeat": "2026-11-14T02:48:54+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-14T02:55:39+00:00",
       "action": "task.done:NAT-169",
       "owner": "claude-opus-usb130-20261113",
@@ -20718,11 +20727,65 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T03:42:20+00:00",
+      "action": "task.add:NAT-174",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-174",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T03:42:39+00:00",
+      "action": "task.add:NAT-175",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-175",
+          "status": "pending",
+          "owner": null,
+          "priority": 90
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T03:42:58+00:00",
+      "action": "task.claim:NAT-174",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-174",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 90,
+          "last_heartbeat": "2026-11-14T03:42:58+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T03:54:16+00:00",
+      "action": "task.done:NAT-174",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-174",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 90,
+          "last_heartbeat": "2026-11-14T03:42:58+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "8da52c215cd6d6d71e89fdeda4895393d85b1325ba8a96f4daaf986d93e72dfc",
-    "BOARD.md": "4801f11a738b0b6a43df83b7d4fdbf11fb198e43914e435812ec29e7be685ed8",
+    "STATUS.md": "9fdb7b59ea7cfde182be563c0b74422d0b10e9e0ec32e72b7eb2a9b7d98fb09c",
+    "BOARD.md": "c7ebf39aaa55bb1ee316f106b91715b4cf3011ef149f7f40c03536277d073de2",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -21054,6 +21117,8 @@
     "planning/tasks/NAT-078.md": "b8b6baee63a5fe316e0f0250b619b8ab72acc2911962b8058276b181f5aea8af",
     "planning/tasks/KRN-044.md": "15de648189423b2e5cb87ee6749d5d254a0c52ae687446eab5f5237174c97766",
     "planning/tasks/GPU-017.md": "7942f9df05bcf0cca19c0e1673424a46033bff9813735b7872a200b20da4bf86",
+    "planning/tasks/NAT-174.md": "bca24c5f2cee97a31a4f26118b59c8623919dad3a0118994e1c2c13683dfd1c1",
+    "planning/tasks/NAT-175.md": "774594a9b7636656bb20371131e269d2555633c7f51789daed6b30b24a3f0a7f",
     "planning/tasks/KRN-033.md": "65895b5673cb8432d904647391ec6378b6eafcac42e79bfd6cef92a0dcc4b83f",
     "planning/tasks/NAT-011.md": "13d5b59a05e410c27749dd20732dbe9312dda69ca349e32845cd4b144be9aaa3",
     "planning/tasks/NAT-014.md": "8ab44f96da942083ed04d834447e25cd58e8ddda08c83b2f1ca4e44327720c71",
