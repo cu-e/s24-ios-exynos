@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T02:44:30+00:00",
+  "updated_at": "2026-11-14T02:55:39+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -18753,6 +18753,56 @@
       "evidence": "docs/procedures/nat-168/evidence.json",
       "evidence_sha256": "524e5583a28cb951d7b1466dae622f73fb3fec35cb9e26fbe617f63f6a640c84",
       "finished_at": "2026-11-14T02:44:11+00:00"
+    },
+    {
+      "id": "NAT-169",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scO = scN (NAT-167) with fewer touch GPIO accesses: GPP9 DAT shadowed per transfer (3 stores + 1 load per bit instead of 4 loads + 3 stores, same waveform) and the 10 ms poll gated on the gpa1-2 IRQ level (stock IRQF_TRIGGER_LOW) with a full read every 25th poll and a counter of events found on a high line; NAT-168 measured ~8.5 us per GPIO access, ~9.5 ms per poll",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 86,
+      "depends_on": [
+        "NAT-168"
+      ],
+      "paths": [
+        "docs/procedures/nat-169",
+        "artifacts/nat-169"
+      ],
+      "acceptance": [
+        "Kernel = NAT-167's with only e1s_touch.o's patch changed",
+        "Pin-level host peer: identical frame sequence and DAT write sequence to NAT-167's driver; fewer GPP9 reads; with a level-low IRQ model no event is lost and idle polls skip the SPI read",
+        "Loader check rc 0 on NAT-143 symbols; relocscan 0 not allowed; cmdline = scN's with the tag changed; package, counted session, tests, make check"
+      ],
+      "started_at": "2026-11-14T02:48:54+00:00",
+      "last_heartbeat": "2026-11-14T02:48:54+00:00",
+      "updated_at": "2026-11-14T02:55:39+00:00",
+      "evidence": "docs/procedures/nat-169/evidence.json",
+      "evidence_sha256": "ee87948474f41dfcfc02e8976e113628ac63582fd11222ce963f40946971eb20",
+      "finished_at": "2026-11-14T02:55:39+00:00"
+    },
+    {
+      "id": "NAT-170",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: run scO (NAT-169: shadowed GPP9 DAT, IRQ-gated touch poll) once under decision 0061; touch ID reads and timing (read/write split of the GPIO access cost), poll period, skipped polls and high-line events, cpu0 busy share and frames against NAT-168; restore stock RECOVERY with full hash and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 86,
+      "depends_on": [
+        "NAT-169"
+      ],
+      "paths": [
+        "docs/procedures/nat-170",
+        "artifacts/nat-170",
+        "docs/decisions/0069-nat170-loader-diag-xnu-scO-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "Per-image decision before the run",
+        "Touch ID reads ok and event thread started; ID read time against NAT-168; poll period per 1000 polls",
+        "cpu0 busy share and frames159 against NAT-168",
+        "Stock RECOVERY restored with full hash and Android verified"
+      ]
     }
   ],
   "experiments": [
@@ -70723,6 +70773,60 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T02:48:16+00:00",
+      "action": "task.add:NAT-169",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-169",
+          "status": "pending",
+          "owner": null,
+          "priority": 86
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T02:48:35+00:00",
+      "action": "task.add:NAT-170",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-170",
+          "status": "pending",
+          "owner": null,
+          "priority": 86
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T02:48:54+00:00",
+      "action": "task.claim:NAT-169",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-169",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 86,
+          "last_heartbeat": "2026-11-14T02:48:54+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T02:55:39+00:00",
+      "action": "task.done:NAT-169",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-169",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 86,
+          "last_heartbeat": "2026-11-14T02:48:54+00:00"
+        }
+      ]
     }
   ]
 }

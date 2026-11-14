@@ -1,0 +1,16 @@
+{
+ "id": "NAT-169",
+ "status": "pending",
+ "owner": null,
+ "title": "Host: scO = scN (NAT-167) with fewer touch GPIO accesses: GPP9 DAT shadowed per transfer (3 stores + 1 load per bit instead of 4 loads + 3 stores, same waveform) and the 10 ms poll gated on the gpa1-2 IRQ level (stock IRQF_TRIGGER_LOW) with a full read every 25th poll and a counter of events found on a high line; NAT-168 measured ~8.5 us per GPIO access, ~9.5 ms per poll",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 86,
+ "depends_on": ["NAT-168"],
+ "paths": ["docs/procedures/nat-169", "artifacts/nat-169"],
+ "acceptance": [
+  "Kernel = NAT-167's with only e1s_touch.o's patch changed",
+  "Pin-level host peer: identical frame sequence and DAT write sequence to NAT-167's driver; fewer GPP9 reads; with a level-low IRQ model no event is lost and idle polls skip the SPI read",
+  "Loader check rc 0 on NAT-143 symbols; relocscan 0 not allowed; cmdline = scN's with the tag changed; package, counted session, tests, make check"
+ ]
+}

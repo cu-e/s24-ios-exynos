@@ -1,0 +1,103 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T03:30:00+00:00",
+ "task": "NAT-169",
+ "summary": "scO = scN with GPP9 DAT shadowed per transfer (same frames and DAT write sequence on the pin-level peer, reads 1216651 -> 305226) and the touch poll gated on gpa1-2 (stock IRQF_TRIGGER_LOW) with a full read every 25th poll (IRQ model: same 6 posts, 0x87 reads 2103 -> 93, 0 high-line events). Kernel = NAT-167 record with only e1s_touch.o changed; loader sites rc 0; 255 B; package 8f67d7df; counted session; touch170 analyser with registered verdicts. Host-test only.",
+ "commit": "9c8e76a (base)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scO-md1",
+  "recovery_sha256": "8f67d7df1c9ed616add76f9fb873b76e3e78d972d92d6acbb25e99d916a28b4e",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "70119f7502f05774e11b18f739a301828e1d9eac2a0131a16b295670527312f0",
+  "payload_bytes": 26206864,
+  "loader_image_sha256": "662f78b74676edc3c56c2558c40ae7504faf789e181dcb52570b2c8374252a01",
+  "kernel_dir": "artifacts/nat-169/kernel-001",
+  "kernel_sha256": "e32e36c1ad958c28e26ce58ad979fe408bafe1035d94987ce183ee79dce39ba0",
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT169-scO debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 cpuload=1000 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "cmdline_bytes": 255,
+  "session": "docs/procedures/nat-169/session_nat170.py",
+  "session_sha256": "0aaa35e44bbbefb180e2ce313d145858322935610606394be94a6aa8ada367e1"
+ },
+ "host_peer": {
+  "old": {
+   "dat_reads": 1216651,
+   "dat_writes": 913543,
+   "wave": "4a8d713d"
+  },
+  "new": {
+   "dat_reads": 305226,
+   "dat_writes": 913543,
+   "wave": "4a8d713d"
+  },
+  "irq_model": {
+   "old_reads_0x87": 2103,
+   "new_reads_0x87": 93,
+   "posts": 6,
+   "summary_2000": "low 2, skipped 1918, high-line reads 80 with 0 events"
+  }
+ },
+ "sources": {
+  "docs/procedures/nat-169/build.py": "5d976239ea25291da981073d679f0d11dda25df79029dee33e827b4dabe97f4a",
+  "docs/procedures/nat-169/e1s_touch_combined.patch": "30bb913e3bf6870aa171dafa2a91839a616d1d6c295b716b536c66d1bbbb4fd9",
+  "docs/procedures/nat-169/rebuild-args.json": "32b6e0eb9986ace78f551faa080754df97d61d1ff56db03c5947d9210573e024",
+  "docs/procedures/nat-169/host/peer169.c": "f65240664c5cbbb31674606fa1ecbed99b0e309c44386371f00083d5f4e0c422",
+  "docs/procedures/nat-169/test_nat169.py": "f11ec92f780d22bbf4777df4999441807919b378f4d35e0e03ad9f15fb6aeb1a",
+  "docs/procedures/nat-169/touch170.py": "c1bc16ea92c3c83c0d2dad530ec33182cac6d27a8d3a733d81328623b35812e4",
+  "docs/procedures/nat-169/derive170.py": "c5ae84a463d78dc41724f5ed93cb3dcbbb1d01aa227dc85cad9ddffb8ebae00e",
+  "docs/procedures/nat-169/session_nat170.py": "0aaa35e44bbbefb180e2ce313d145858322935610606394be94a6aa8ada367e1",
+  "docs/procedures/nat-169/README.md": "43dc9e22ab2a4129b6cf233caa91c0a8ba5cff154cdef845d6ef277a641fbae7",
+  "docs/procedures/nat-169/task.json": "1433abee2d5634018eb07caeff0ef6f3c2b49598ee7a480f1da1a05694eaf04f"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/krn-044/rebuild.py --out artifacts/nat-169/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-121/loader_return.patch --extra bsd/e1s_touch.o=docs/procedures/nat-169/e1s_touch_combined.patch --extra bsd/redwood_input.o=docs/procedures/nat-165/redwood_input.patch --extra bsd/e1s_acpm.o=docs/procedures/nat-123/e1s_acpm.patch --extra bsd/e1s_pmic.o=docs/procedures/nat-123/e1s_pmic.patch --extra osfmk/start.o=docs/procedures/nat-152/start.patch --extra osfmk/psci_smp.o=docs/procedures/nat-152/psci_smp.patch --expect-string start: sense on (ready %s --expect-string miso cs-high --expect-string e1s-keys: disabled (e1skeys=0) --expect-string event thread started --expect-string e1s-touch: %s %u: finger %u x %u y %u --expect-string psci: cpu %d early marks: last 0x%llx --expect-string tl: u at %llu",
+   "exit_code": 0,
+   "result": "no_storage e32e36c1..., 0 undefined"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-169/build.py --out artifacts/nat-169/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "255 B; loader sites rc 0 ok; relocscan passed"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-169/build-001 --out artifacts/nat-169/package-001",
+   "exit_code": 0,
+   "result": "8f67d7df1c9ed616add76f9fb873b76e3e78d972d92d6acbb25e99d916a28b4e"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-169/derive170.py --check",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-169/test_nat169.py",
+   "exit_code": 0,
+   "result": "9 OK"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "OK"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-169/kernel-001/rebuild.json",
+  "artifacts/nat-169/kernel-001.log",
+  "artifacts/nat-169/build-001/build.json",
+  "artifacts/nat-169/build-001.log",
+  "artifacts/nat-169/package-001/package.json",
+  "artifacts/nat-169/e1s_touch.c"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-169/kernel-001/rebuild.json": "adc077ef425d13a2babd17d75559aadab8d29e451864038ae8337d3408be63c0",
+  "artifacts/nat-169/kernel-001.log": "cdc59d208bafd744f10e9be0d8cbe11a8c1f2ff95c07d487b3125d9ff545400e",
+  "artifacts/nat-169/build-001/build.json": "4ef18e033876c85ee97a80ba2d8abf3243192374cd9eedc4e027b0a82ab65b7e",
+  "artifacts/nat-169/build-001.log": "32d8160365ae9c4fb0f42249e15c4db0ed0f5d6460b4af8f075670b23c5d0127",
+  "artifacts/nat-169/package-001/package.json": "caf7a58f952c8981fbfc5813c681e220c7415a385714ce7ae022017e1b693fbf",
+  "artifacts/nat-169/e1s_touch.c": "52d65ee18987299506a6adef6800119f241397c2c635fd674ee1714c47e0e2ff"
+ },
+ "limits": "Host only, synthetic peer; the real IRQ behaviour of the STM and the effect on cpu0 and frames are for NAT-170."
+}

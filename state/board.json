@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-14T02:44:49+00:00",
-  "ledger_updated_at": "2026-11-14T02:44:30+00:00",
-  "registry_sha256": "921bae9e9dc80c33623968f6e42d431211cf3684205b8aac3a1267516aa65c45",
+  "generated_at": "2026-11-14T02:55:58+00:00",
+  "ledger_updated_at": "2026-11-14T02:55:39+00:00",
+  "registry_sha256": "2c15fc84f7c0637c84546ae35d91b2c09c91915e03c8e1b7cc62180f525d429f",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -79,6 +79,7 @@
     "gated": [
       "NAT-017",
       "NAT-072",
+      "NAT-170",
       "NAT-003",
       "DRV-003",
       "NAT-004",
@@ -399,6 +400,7 @@
       "NAT-014",
       "KRN-035",
       "KRN-036",
+      "NAT-169",
       "KRN-028",
       "VM-006",
       "VM-023",
@@ -14613,6 +14615,64 @@
       "card_path": "planning/tasks/KRN-036.md"
     },
     {
+      "id": "NAT-169",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scO = scN (NAT-167) with fewer touch GPIO accesses: GPP9 DAT shadowed per transfer (3 stores + 1 load per bit instead of 4 loads + 3 stores, same waveform) and the 10 ms poll gated on the gpa1-2 IRQ level (stock IRQF_TRIGGER_LOW) with a full read every 25th poll and a counter of events found on a high line; NAT-168 measured ~8.5 us per GPIO access, ~9.5 ms per poll",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 86,
+      "depends_on": [
+        "NAT-168"
+      ],
+      "paths": [
+        "docs/procedures/nat-169",
+        "artifacts/nat-169"
+      ],
+      "acceptance": [
+        "Kernel = NAT-167's with only e1s_touch.o's patch changed",
+        "Pin-level host peer: identical frame sequence and DAT write sequence to NAT-167's driver; fewer GPP9 reads; with a level-low IRQ model no event is lost and idle polls skip the SPI read",
+        "Loader check rc 0 on NAT-143 symbols; relocscan 0 not allowed; cmdline = scN's with the tag changed; package, counted session, tests, make check"
+      ],
+      "started_at": "2026-11-14T02:48:54+00:00",
+      "last_heartbeat": "2026-11-14T02:48:54+00:00",
+      "updated_at": "2026-11-14T02:55:39+00:00",
+      "evidence": "docs/procedures/nat-169/evidence.json",
+      "evidence_sha256": "ee87948474f41dfcfc02e8976e113628ac63582fd11222ce963f40946971eb20",
+      "finished_at": "2026-11-14T02:55:39+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-169.md"
+    },
+    {
+      "id": "NAT-170",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: run scO (NAT-169: shadowed GPP9 DAT, IRQ-gated touch poll) once under decision 0061; touch ID reads and timing (read/write split of the GPIO access cost), poll period, skipped polls and high-line events, cpu0 busy share and frames against NAT-168; restore stock RECOVERY with full hash and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 86,
+      "depends_on": [
+        "NAT-169"
+      ],
+      "paths": [
+        "docs/procedures/nat-170",
+        "artifacts/nat-170",
+        "docs/decisions/0069-nat170-loader-diag-xnu-scO-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "Per-image decision before the run",
+        "Touch ID reads ok and event thread started; ID read time against NAT-168; poll period per 1000 polls",
+        "cpu0 busy share and frames159 against NAT-168",
+        "Stock RECOVERY restored with full hash and Android verified"
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-170.md"
+    },
+    {
       "id": "KRN-001",
       "title": "Build the full E1S XNU kernel with supplied SDK and pinned dependencies",
       "status": "blocked",
@@ -20303,56 +20363,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-14T01:38:24+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-14T01:38:43+00:00",
-      "action": "task.claim:NAT-164",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-164",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 80,
-          "last_heartbeat": "2026-11-14T01:38:43+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T01:52:08+00:00",
-      "action": "task.done:NAT-164",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-164",
-          "status": "done",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 80,
-          "last_heartbeat": "2026-11-14T01:38:43+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T01:52:27+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
       "at": "2026-11-14T01:56:06+00:00",
       "action": "task.add:NAT-165",
       "owner": "claude-opus-usb130-20261113",
@@ -20559,11 +20569,65 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T02:48:16+00:00",
+      "action": "task.add:NAT-169",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-169",
+          "status": "pending",
+          "owner": null,
+          "priority": 86
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T02:48:35+00:00",
+      "action": "task.add:NAT-170",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-170",
+          "status": "pending",
+          "owner": null,
+          "priority": 86
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T02:48:54+00:00",
+      "action": "task.claim:NAT-169",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-169",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 86,
+          "last_heartbeat": "2026-11-14T02:48:54+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T02:55:39+00:00",
+      "action": "task.done:NAT-169",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-169",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 86,
+          "last_heartbeat": "2026-11-14T02:48:54+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "97c1ccb90af6f7b6b1bb16cd4604a4aa9b3e65d2ebb22939a58ff5b47b2b6f3d",
-    "BOARD.md": "ce3105e1fb6bf6121ccf7dfeeda1eed16366f0cd26e0acecf2ba61a498c93653",
+    "STATUS.md": "4333121ba444a02eb5aee484917ba39385f926d62ed07f9e0f1fa53f2e000ae3",
+    "BOARD.md": "60791f71f05721957e04d7545e6e0117bfc134271f0186888be1a0aade5a8f4c",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -20904,6 +20968,8 @@
     "planning/tasks/IOS-007.md": "c116ef8935d17ff7707c9cafacabad81273be3bcdeccaf872b742860b4aed9a5",
     "planning/tasks/KRN-035.md": "73d3fdfa9f6c3f1f76fe0f244208e46b40bf7343bf78e2f78223ea9c1c7a98a7",
     "planning/tasks/KRN-036.md": "43b1fb9c66ca2aa223235ea38bf2e400888380c3822a4aca35e67b96cd532020",
+    "planning/tasks/NAT-169.md": "e5835067681bceab4994da3d9d65fd99e9988a3850a7cc1e0a18ec49393e84e2",
+    "planning/tasks/NAT-170.md": "a30015c5e03cbb11b21b16638a169c9fe51bf223553f9cf386677f03ff3cc7b9",
     "planning/tasks/KRN-001.md": "28664fd57224bd0984d344179b7fd6c06ef8600fcd30b551b43d5c2be054e3b8",
     "planning/tasks/CELL-010.md": "b568b98c1ed5527ec0e2688452b4d1ec8b1193af6118ddccf7789cf30c19baeb",
     "planning/tasks/KRN-028.md": "e3a53637d27e69f4b0fe97812206275d0813012ff2cdf563ffa3c215c05830e5",

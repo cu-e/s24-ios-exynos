@@ -1,0 +1,377 @@
+--- e1s_touch.c
++++ e1s_touch.c
+@@ -14,22 +14,26 @@
+ extern void gic_v3_spi_unmask(uint32_t intid);
+ 
+ #define E1S_ALIVE_GPIO          0x12850000UL
+-#define E1S_GPA1_CON            (E1S_ALIVE_GPIO + 0x20)
+-#define E1S_GPA1_DAT            (E1S_ALIVE_GPIO + 0x24)
+-#define E1S_GPA1_PUD            (E1S_ALIVE_GPIO + 0x28)
+-#define E1S_GPA1_EINT_CON       (E1S_ALIVE_GPIO + 0x704)
+-#define E1S_GPA1_EINT_MASK      (E1S_ALIVE_GPIO + 0x904)
+-#define E1S_GPA1_EINT_PEND      (E1S_ALIVE_GPIO + 0xa04)
++#define E1S_GPA1_CON            (gpa1 + 0x20)
++#define E1S_GPA1_DAT            (gpa1 + 0x24)
++#define E1S_GPA1_PUD            (gpa1 + 0x28)
++#define E1S_GPA1_EINT_CON       (gpa1 + 0x704)
++#define E1S_GPA1_EINT_MASK      (gpa1 + 0x904)
++#define E1S_GPA1_EINT_PEND      (gpa1 + 0xa04)
+ 
+ #define E1S_PERIC1_GPIO         0x11030000UL
+-#define E1S_GPP9_CON            (E1S_PERIC1_GPIO + 0xe0)
+-#define E1S_GPP9_DAT            (E1S_PERIC1_GPIO + 0xe4)
+-#define E1S_GPP9_PUD            (E1S_PERIC1_GPIO + 0xe8)
+-#define E1S_GPP9_DRV            (E1S_PERIC1_GPIO + 0xec)
+-
+-#define E1S_SPI_CLK_PIN         2
++#define E1S_GPP9_CON            (gpp9 + 0xe0)
++#define E1S_GPP9_DAT            (gpp9 + 0xe4)
++#define E1S_GPP9_PUD            (gpp9 + 0xe8)
++#define E1S_GPP9_DRV            (gpp9 + 0xec)
++
++/*
++ * NAT-138: USI pad order (pinned s5e9945 DT: pad 0 carries uart RXD / hsi2c SCL, pad 1 TXD / SDA, pad 2 RTS, pad 3 the SPI CS of
++ * the e1s touch node), so SPI9 is CLK gpp9-0, MOSI gpp9-1, MISO gpp9-2, CS gpp9-3. NAT-122/124/137 used CLK 2 / MISO 0.
++ */
++#define E1S_SPI_CLK_PIN         0
+ #define E1S_SPI_MOSI_PIN        1
+-#define E1S_SPI_MISO_PIN        0
++#define E1S_SPI_MISO_PIN        2
+ #define E1S_SPI_CS_PIN          3
+ #define E1S_TOUCH_IRQ_PIN       2
+ #define E1S_TOUCH_GIC_SPI       42U
+@@ -68,7 +72,14 @@
+ static vm_offset_t gpp9;
+ static vm_offset_t gpa1;
+ static uint32_t e1s_poll_us = 4000;
+-static uint32_t e1s_halfbit = 400;
++/* NAT-167: 8 loops per half bit instead of 400. At 400 a 0x87 event read took ~9.3 ms of busy CPU per poll (NAT-166: 19.3 s per
++ * 1000 polls with a 10 ms sleep), about half of the single running core, for an SPI clock near 4 kHz; the stock DTS allows this
++ * chip 10 MHz (tsp_stm_spi spi-max-frequency). boot-arg e1stouch_delay still overrides it. */
++static uint32_t e1s_halfbit = 8;
++/* NAT-169: the event thread reads the STM only when gpa1-2 is low (stock stm_core.c requests IRQF_TRIGGER_LOW | IRQF_ONESHOT: the
++ * line stays low while events are pending), plus an unconditional read every e1s_full_every-th poll as a check (0 = every poll, the
++ * NAT-141..168 behaviour). NAT-168: each GPIO access costs ~8.5 us here and an event read ~1008 of them. boot-arg e1stouch_full. */
++static uint32_t e1s_full_every = 25;
+ static uint32_t e1s_flip;
+ static uint32_t e1s_irq_spi = E1S_TOUCH_GIC_SPI;
+ static uint32_t e1s_irq_intid;
+@@ -172,25 +183,33 @@
+ static void
+ e1s_spi_transfer(const uint8_t *tx, uint8_t *rx, uint32_t length)
+ {
+-	pin_set(E1S_GPP9_DAT, E1S_SPI_CS_PIN, false);
++	/* NAT-169: DAT is read once per transfer and then written from this copy, instead of a read-modify-write per pin change. The
++	 * written values and their order are those of pin_set(); only GPP9 pins 0-3 are driven, and no other driver touches GPP9. */
++	const uint32_t clk = 1U << E1S_SPI_CLK_PIN, mosi = 1U << E1S_SPI_MOSI_PIN, cs = 1U << E1S_SPI_CS_PIN;
++	uint32_t v = gpio_rd(E1S_GPP9_DAT) & ~cs;
++
++	gpio_wr(E1S_GPP9_DAT, v);
+ 	for (uint32_t i = 0; i < length; i++) {
+ 		uint8_t out = tx != NULL ? tx[i] : 0;
+ 		uint8_t in = 0;
+ 
+ 		for (int bit = 7; bit >= 0; bit--) {
+-			pin_set(E1S_GPP9_DAT, E1S_SPI_MOSI_PIN, (out >> bit) & 1U);
++			v = ((out >> bit) & 1U) ? (v | mosi) : (v & ~mosi);
++			gpio_wr(E1S_GPP9_DAT, v);
+ 			spi_delay();
+-			pin_set(E1S_GPP9_DAT, E1S_SPI_CLK_PIN, true);
++			v |= clk;
++			gpio_wr(E1S_GPP9_DAT, v);
+ 			spi_delay();
+-			in = (uint8_t)((in << 1) | (pin_get(E1S_GPP9_DAT, E1S_SPI_MISO_PIN) ? 1U : 0U));
+-			pin_set(E1S_GPP9_DAT, E1S_SPI_CLK_PIN, false);
++			in = (uint8_t)((in << 1) | ((gpio_rd(E1S_GPP9_DAT) >> E1S_SPI_MISO_PIN) & 1U));
++			v &= ~clk;
++			gpio_wr(E1S_GPP9_DAT, v);
+ 			spi_delay();
+ 		}
+ 		if (rx != NULL) {
+ 			rx[i] = in;
+ 		}
+ 	}
+-	pin_set(E1S_GPP9_DAT, E1S_SPI_CS_PIN, true);
++	gpio_wr(E1S_GPP9_DAT, v | cs);
+ }
+ 
+ static void
+@@ -356,12 +375,172 @@
+ 	}
+ }
+ 
++/*
++ * NAT-141: Samsung's screen-on start of the STM (pinned stm_core.c stm_ts_start_device -> stm_ts_reinit, stm_fn.c 308-640):
++ * system reset (FA 20 00 00 24 81, 10 ms, wait for the READY status event), CLEAR_ALL_EVENT (C0 62), scan mode A0 00 01 with
++ * its echo event, SENSE_ON (C0 10). No force calibration, no panel calibration, no firmware update, nothing written to flash.
++ * Then a polled event thread: 0x87 reads every e1s_poll_us, coordinate events posted to /dev/hakios-touch. No IRQ is attached.
++ */
++#define STM_STATUS_REPORT       0x43
++#define STM_ERROR_REPORT        0xF3
++#define STM_WAIT_TRIES          150     /* stm_fn.c: STM_TS_RETRY_COUNT * 15, 20 ms apart */
++#define E1S_EV_LOG_COORD        64
++#define E1S_EV_LOG_OTHER        16
++#define E1S_EV_LOG_TOUCH        512     /* NAT-143: every press and release, with the kernel time, for the UI correlation */
++
++static void
++ev_print(const char *what, const uint8_t *ev)
++{
++	printf("e1s-touch: %s %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n", what,
++	    ev[0], ev[1], ev[2], ev[3], ev[4], ev[5], ev[6], ev[7], ev[8], ev[9], ev[10], ev[11], ev[12], ev[13], ev[14], ev[15]);
++}
++
++static int
++stm_wait_ready(void)
++{
++	for (unsigned i = 0; i < STM_WAIT_TRIES; i++) {
++		uint8_t ev[STM_EVENT_SIZE] = { 0 };
++
++		stm_read_command(STM_READ_ONE_EVENT, ev, sizeof(ev));
++		if (((ev[0] >> 2) & 0xf) == 2 && ev[1] == 0x00) {
++			printf("e1s-touch: start: ready after %u read(s)\n", i + 1);
++			ev_print("start: ready event", ev);
++			return 0;
++		}
++		if (ev[0] == 0xff && ev[1] == 0xff && ev[2] == 0xff) {
++			printf("e1s-touch: start: ready wait read ff ff ff (broken firmware per stm_fn.c)\n");
++			return -1;
++		}
++		if (ev[0] == STM_ERROR_REPORT) {
++			ev_print("start: error event", ev);
++		}
++		delay_for_interval(20000, NSEC_PER_USEC);
++	}
++	printf("e1s-touch: start: no ready event in %u reads\n", STM_WAIT_TRIES);
++	return -1;
++}
++
++static int
++stm_echo(const uint8_t *cmd, uint32_t n)
++{
++	uint32_t cmp = n > 4 ? 4 : n;
++
++	stm_write(cmd, n, NULL, 0);
++	delay_for_interval(20000, NSEC_PER_USEC);
++	for (unsigned i = 0; i < STM_WAIT_TRIES; i++) {
++		uint8_t ev[STM_EVENT_SIZE] = { 0 };
++		bool matched = true;
++
++		stm_read_command(STM_READ_ONE_EVENT, ev, sizeof(ev));
++		if (ev[0] == STM_STATUS_REPORT && ev[1] == 0x01) {
++			for (uint32_t k = 0; k < cmp; k++) {
++				if (ev[k + 2] != cmd[k]) {
++					matched = false;
++				}
++			}
++			if (matched) {
++				printf("e1s-touch: start: echo of %02x after %u read(s)\n", cmd[0], i + 1);
++				return 0;
++			}
++		}
++		if (ev[0] == STM_ERROR_REPORT) {
++			ev_print("start: error event", ev);
++		}
++		delay_for_interval(20000, NSEC_PER_USEC);
++	}
++	printf("e1s-touch: start: no echo of %02x in %u reads\n", cmd[0], STM_WAIT_TRIES);
++	return -1;
++}
++
++static void
++e1s_touch_ev_thread(void *arg __unused, wait_result_t result __unused)
++{
++	static const uint8_t reset_reg = 0xFA;
++	static const uint8_t reset_data[5] = { 0x20, 0x00, 0x00, 0x24, 0x81 };
++	static const uint8_t clear_all = 0x62;
++	static const uint8_t scan_on[3] = { 0xA0, 0x00, 0x01 };
++	static const uint8_t sense_on = 0x10;
++	uint32_t polls = 0, irq_low = 0, coords = 0, n_press = 0, n_release = 0, other = 0, logged_c = 0, logged_o = 0, logged_t = 0, reports = 0;
++	uint32_t skipped = 0, high_reads = 0, high_events = 0;
++	uint32_t report_every = e1s_poll_us < 10000000U ? 10000000U / e1s_poll_us : 1U;
++	int ready, echo;
++
++	printf("e1s-touch: start: system reset\n");
++	stm_write(&reset_reg, 1, reset_data, sizeof(reset_data));
++	delay_for_interval(10000, NSEC_PER_USEC);
++	ready = stm_wait_ready();
++	stm_write(&clear_all, 1, NULL, 0);
++	echo = stm_echo(scan_on, sizeof(scan_on));
++	stm_write(&sense_on, 1, NULL, 0);
++	printf("e1s-touch: start: sense on (ready %s, scan echo %s); polling events every %u us, no IRQ, read on a low gpa1-2 or every %u polls\n",
++	    ready == 0 ? "yes" : "no", echo == 0 ? "yes" : "no", e1s_poll_us, e1s_full_every);
++
++	for (;;) {
++		bool low;
++
++		polls++;
++		low = !pin_get(E1S_GPA1_DAT, E1S_TOUCH_IRQ_PIN);
++		if (low) {
++			irq_low++;
++		} else if (e1s_full_every != 0 && polls % e1s_full_every != 0) {
++			skipped++;
++			goto next_poll;
++		} else {
++			high_reads++;
++		}
++		for (uint32_t i = 0; i < STM_MAX_EVENTS; i++) {
++			uint8_t ev[STM_EVENT_SIZE] = { 0 };
++
++			stm_read_command(STM_READ_ONE_EVENT, ev, sizeof(ev));
++			if (ev[0] == 0) {
++				break;
++			}
++			high_events += !low;
++			if ((ev[0] & 0x3) == STM_EVENT_COORD) {
++				uint32_t action = ev[0] >> 6;
++
++				coords++;
++				n_press += action == STM_COORD_PRESS;
++				n_release += action == STM_COORD_RELEASE;
++				if (logged_c < E1S_EV_LOG_COORD) {
++					logged_c++;
++					printf("e1s-touch: coord %u: finger %u action %u x %u y %u\n", coords, (ev[0] >> 2) & 0xf, action,
++					    ((uint32_t)ev[1] << 4) | (ev[3] >> 4), ((uint32_t)ev[2] << 4) | (ev[3] & 0x0f));
++				}
++				if ((action == STM_COORD_PRESS || action == STM_COORD_RELEASE) && logged_t < E1S_EV_LOG_TOUCH) {
++					logged_t++;
++					printf("e1s-touch: %s %u: finger %u x %u y %u\n", action == STM_COORD_PRESS ? "press" : "release",
++					    action == STM_COORD_PRESS ? n_press : n_release, (ev[0] >> 2) & 0xf,
++					    ((uint32_t)ev[1] << 4) | (ev[3] >> 4), ((uint32_t)ev[2] << 4) | (ev[3] & 0x0f));
++				}
++				post_event(ev);
++			} else {
++				other++;
++				if (logged_o < E1S_EV_LOG_OTHER) {
++					logged_o++;
++					ev_print("event", ev);
++				}
++			}
++		}
++next_poll:
++		if (polls % report_every == 0 && reports < 30) {
++			reports++;
++			printf("e1s-touch: events after %u polls: coord %u (press %u release %u) other %u; irq line low in %u polls; "
++			    "skipped %u, high-line reads %u with %u events\n",
++			    polls, coords, n_press, n_release, other, irq_low, skipped, high_reads, high_events);
++		}
++		delay_for_interval(e1s_poll_us, NSEC_PER_USEC);
++	}
++}
++
+ void
+ e1s_touch_init(void)
+ {
+ 	uint32_t enabled = 1;
+ 	uint32_t irq_enabled = 1;
++	uint32_t steps = 3;
+ 	uint8_t id[5] = { 0 };
++	const char *id_status;
+ 	uint8_t info[11] = { 0 };
+ 	kern_return_t kr;
+ 	thread_t thread;
+@@ -372,6 +551,7 @@
+ 	}
+ 	PE_parse_boot_argn("e1stouch_poll_us", &e1s_poll_us, sizeof(e1s_poll_us));
+ 	PE_parse_boot_argn("e1stouch_delay", &e1s_halfbit, sizeof(e1s_halfbit));
++	PE_parse_boot_argn("e1stouch_full", &e1s_full_every, sizeof(e1s_full_every));
+ 	PE_parse_boot_argn("e1stouch_flip", &e1s_flip, sizeof(e1s_flip));
+ 	PE_parse_boot_argn("e1stouch_irq", &irq_enabled, sizeof(irq_enabled));
+ 	PE_parse_boot_argn("e1stouch_irq_spi", &e1s_irq_spi, sizeof(e1s_irq_spi));
+@@ -392,6 +572,19 @@
+ 		printf("e1s-touch: cannot map the PERIC1/ALIVE GPIO blocks\n");
+ 		return;
+ 	}
++	/*
++	 * NAT-121: boot-arg e1stouch_steps=N stops after step N. 1: read what S-Boot left (nothing written). 2: + the four gpp9 pins
++	 * to GPIO and one device-id transfer. 3 (default): + interrupt and the event thread.
++	 */
++	PE_parse_boot_argn("e1stouch_steps", &steps, sizeof(steps));
++	printf("e1s-touch: step 1: gpp9 con=%#x dat=%#x pud=%#x drv=%#x; gpa1 con=%#x dat=%#x pud=%#x eint con=%#x mask=%#x pend=%#x\n",
++	    gpio_rd(E1S_GPP9_CON), gpio_rd(E1S_GPP9_DAT), gpio_rd(E1S_GPP9_PUD), gpio_rd(E1S_GPP9_DRV),
++	    gpio_rd(E1S_GPA1_CON), gpio_rd(E1S_GPA1_DAT), gpio_rd(E1S_GPA1_PUD),
++	    gpio_rd(E1S_GPA1_EINT_CON), gpio_rd(E1S_GPA1_EINT_MASK), gpio_rd(E1S_GPA1_EINT_PEND));
++	if (steps <= 1) {
++		printf("e1s-touch: stopped after step 1 (e1stouch_steps=%u)\n", steps);
++		return;
++	}
+ 
+ 	/* CS high before it becomes an output, so the chip is not selected. */
+ 	pin_set(E1S_GPP9_DAT, E1S_SPI_CS_PIN, true);
+@@ -413,31 +606,55 @@
+ 	    gpio_rd(E1S_GPA1_EINT_CON), gpio_rd(E1S_GPA1_EINT_MASK),
+ 	    gpio_rd(E1S_GPA1_EINT_PEND));
+ 
+-	printf("e1s-touch: device id: %s (%02x %02x %02x %02x %02x)\n",
+-	    stm_chip_id(id), id[0], id[1], id[2], id[3], id[4]);
+-	if (stm_read_address(STM_READ_PANEL_INFO, info, sizeof(info)) == 0 &&
+-	    info[8] != 0 && info[9] != 0) {
+-		printf("e1s-touch: panel %u x %u channels\n", info[8], info[9]);
++	/* NAT-138: MISO level with the chip deselected, then selected without a clock edge (inputs only, nothing is sent). */
++	{
++		bool idle = pin_get(E1S_GPP9_DAT, E1S_SPI_MISO_PIN);
++		bool selected;
++
++		pin_set(E1S_GPP9_DAT, E1S_SPI_CS_PIN, false);
++		spi_delay();
++		spi_delay();
++		selected = pin_get(E1S_GPP9_DAT, E1S_SPI_MISO_PIN);
++		pin_set(E1S_GPP9_DAT, E1S_SPI_CS_PIN, true);
++		printf("e1s-touch: spi9 map clk=gpp9-%u mosi=gpp9-%u miso=gpp9-%u cs=gpp9-%u; miso cs-high=%u cs-low=%u\n",
++		    E1S_SPI_CLK_PIN, E1S_SPI_MOSI_PIN, E1S_SPI_MISO_PIN, E1S_SPI_CS_PIN, idle ? 1U : 0U, selected ? 1U : 0U);
++	}
++
++	/* NAT-128: bounded read-only SPI diagnostics; no IRQ or event thread. */
++	(void)steps; (void)info; (void)kr; (void)thread;
++	for (unsigned attempt = 0; attempt < 3; attempt++) {
++		uint8_t tx[14] = { STM_REG_R, 0x20, 0, 0, 0 };
++		uint8_t rx[14] = { 0 };
++
++		id_status = stm_chip_id(id);
++		printf("e1s-touch: poll %u device id: %s (%02x %02x %02x %02x %02x)\n",
++		    attempt + 1, id_status, id[0], id[1], id[2], id[3], id[4]);
++		/* Samsung stm_ts_read_chip_id_hw: 5 address bytes + dummy + 8 data. */
++		e1s_spi_transfer(tx, rx, sizeof(tx));
++		printf("e1s-touch: poll %u hardware id: %02x %02x %02x %02x %02x %02x %02x %02x\n",
++		    attempt + 1, rx[6], rx[7], rx[8], rx[9], rx[10], rx[11], rx[12], rx[13]);
++		delay_for_interval(50000, NSEC_PER_USEC);
++	}
++	printf("e1s-touch: ID polls complete\n");
++
++	/* NAT-141: only a controller that answered its ID gets the start sequence and the event thread (NAT-125's admission rule) */
++	if (strcmp(id_status, "ok") != 0) {
++		printf("e1s-touch: no event thread: the last ID poll was \"%s\"\n", id_status);
++		return;
+ 	}
+-
+-	if (irq_enabled) {
+-		kr = gic_v3_spi_attach(e1s_irq_spi, false, e1s_touch_irq_handler, NULL);
+-		if (kr == KERN_SUCCESS) {
+-			e1s_irq_intid = e1s_irq_spi;
+-			e1s_touch_eint_init();
+-			printf("e1s-touch: gpa1-2 on GIC SPI %u, level low\n", e1s_irq_spi);
+-		} else {
+-			printf("e1s-touch: GIC SPI %u attach failed %d, polling\n",
+-			    e1s_irq_spi, kr);
+-		}
+-	} else {
+-		printf("e1s-touch: interrupts disabled, polling every %u us\n",
+-		    e1s_poll_us);
++	if (PE_parse_boot_argn("e1stouch_ev", &enabled, sizeof(enabled)) && enabled == 0) {
++		printf("e1s-touch: no event thread (e1stouch_ev=0)\n");
++		return;
+ 	}
+-
+-	if (kernel_thread_start(e1s_touch_thread, NULL, &thread) == KERN_SUCCESS) {
++	if (e1s_poll_us < 10000) {
++		e1s_poll_us = 10000;
++	}
++	/* Android's tsp_int_active: gpa1-2 input with PULL_NONE (e1s dts); only the pull is changed, and only so its level means something */
++	pin_pull(E1S_GPA1_PUD, E1S_TOUCH_IRQ_PIN, E1S_PUD_NONE);
++	if (kernel_thread_start(e1s_touch_ev_thread, NULL, &thread) == KERN_SUCCESS) {
+ 		thread_deallocate(thread);
++		printf("e1s-touch: event thread started (gpa1 pud=%#x)\n", gpio_rd(E1S_GPA1_PUD));
+ 	} else {
+-		printf("e1s-touch: no thread for the touch controller\n");
++		printf("e1s-touch: no thread for the event poll\n");
+ 	}
+ }
