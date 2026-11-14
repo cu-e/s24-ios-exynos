@@ -1,0 +1,77 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T06:30:00+00:00",
+ "task": "NAT-183",
+ "summary": "scU = scS (NAT-176) + iokit/MiniIOMobileFramebuffer.cpo with a per-layer run table (struct ColumnRun, built in drawLayer() after fColumn, nearest only) and drawRows() copying 45 memcpy per row; per-pixel loop kept as fallback; patch adds lines only. Same pixels as the per-pixel loop (verbatim pieces in a host harness, real/upscale/crop/2000 random maps; 5 mutants caught; NAT-182 measured 2.32 vs 7.44 ms on the A520). Kernel 564946fb, loader sites rc 0, 254 B, package bd274be1, counted session ec619f9a. Host-test only.",
+ "commit": "30a87f3e (base)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scU-md1",
+  "recovery_sha256": "bd274be10ff2b3dba21cecc62880d237a2aebdf3f35910bfc0016b6db4cb95a0",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "329967960461b08699f7ce453c31ec8ec5ffdc4fa58809bb74a19d33fa1b0b7a",
+  "payload_bytes": 26207520,
+  "loader_image_sha256": "fe453212767c7d695940f56a14bf41f58a33b7788c0506f97e27a4a1b1ce141f",
+  "kernel_dir": "artifacts/nat-183/kernel-001",
+  "kernel_sha256": "564946fbb7b9e27a99978e6b77c4c5eb29658162bc9fd2e2a9eb019993f2bb4a",
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT183-scU debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 touch_lat=1 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "cmdline_bytes": 254,
+  "session": "docs/procedures/nat-183/session_nat184.py",
+  "session_sha256": "ec619f9ab9c053d03a2c3b6bae68c6004dcf612425b81c9d2372c84386053b67"
+ },
+ "sources": {
+  "docs/procedures/nat-183/build.py": "b6baff73c2e84d138dd3e7bbf5018220fc84bf5018c2f138730d1863bf4b0ebc",
+  "docs/procedures/nat-183/MiniIOMobileFramebuffer.patch": "a8b6f274eb1cd91ca8833446641e7d8c8dc99af9e7116a333524ca03140a3b46",
+  "docs/procedures/nat-183/rebuild-args.json": "674cb957f6317c06a66e4f8bc186d62e53a046e2f533e3f03ded88391c9f2bc2",
+  "docs/procedures/nat-183/test_nat183.py": "b7a3afc31a84e5e7c2210df3da7373176f4c93d221628fa4192ccaaf150fe9b6",
+  "docs/procedures/nat-183/derive184.py": "83be1fbdd89d95875596a970173ba8d2112e696cc948e41986aad89680818f4c",
+  "docs/procedures/nat-183/session_nat184.py": "ec619f9ab9c053d03a2c3b6bae68c6004dcf612425b81c9d2372c84386053b67",
+  "docs/procedures/nat-183/README.md": "d4ce529de9c97c03d3bb620f1e540467704c68ca2d48fdaf8e164f17112e4b1e",
+  "docs/procedures/nat-183/task.json": "a6571f34a4d2423b6cbbd192711301742b0a3c767190ec2f4107f3c9527053c3"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/krn-044/rebuild.py --out artifacts/nat-183/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-121/loader_return.patch --extra bsd/e1s_touch.o=docs/procedures/nat-174/e1s_touch_combined.patch --extra bsd/redwood_input.o=docs/procedures/nat-165/redwood_input.patch --extra bsd/e1s_acpm.o=docs/procedures/nat-172/e1s_acpm.patch --extra bsd/e1s_pmic.o=docs/procedures/nat-123/e1s_pmic.patch --extra osfmk/start.o=docs/procedures/nat-152/start.patch --extra osfmk/psci_smp.o=docs/procedures/nat-152/psci_smp.patch --extra bsd/e1s_display.o=docs/procedures/nat-176/e1s_display.patch --extra iokit/MiniIOMobileFramebuffer.cpo=docs/procedures/nat-183/MiniIOMobileFramebuffer.patch --expect-string start: sense on (ready %s --expect-string miso cs-high --expect-string e1s-keys: disabled (e1skeys=0) --expect-string event thread started --expect-string e1s-touch: %s %u: finger %u x %u y %u --expect-string psci: cpu %d early marks: last 0x%llx --expect-string tl: u at %llu --expect-string e1s-dpp: %s pmu dpub %#x dpuf0 %#x dpuf1 %#x",
+   "exit_code": 0,
+   "result": "no_storage 564946fb, 0 undefined"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-183/build.py --out artifacts/nat-183/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "254 B; loader sites rc 0 ok bad 0; relocscan passed"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-183/build-001 --out artifacts/nat-183/package-001",
+   "exit_code": 0,
+   "result": "bd274be10ff2b3dba21cecc62880d237a2aebdf3f35910bfc0016b6db4cb95a0"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-183/derive184.py --check",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-183/test_nat183.py",
+   "exit_code": 0,
+   "result": "3 OK (equivalence, 5 mutants caught, additions only)"
+  }
+ ],
+ "not_established": [
+  "native driver time (NAT-184)",
+  "frame-rate effect"
+ ],
+ "artifacts": [
+  "artifacts/nat-183/kernel-001/rebuild.json",
+  "artifacts/nat-183/build-001/build.json",
+  "artifacts/nat-183/package-001/package.json",
+  "artifacts/nat-183/package-001/loader-diag-xnu-scU-md1/recovery.img"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-183/kernel-001/rebuild.json": "adc7ec9616064a6fa78216c48b537ea6e403d8f0ffb4f753b3ff6b39032c9fec",
+  "artifacts/nat-183/build-001/build.json": "8bc705d3eb39b88401e18507c4588837061aefa274865d9746776dd363336b15",
+  "artifacts/nat-183/package-001/package.json": "68b97fbaf7698fc0f9da3ac1e656ba9b584ee93b044ed11c829c880dc5bbba99",
+  "artifacts/nat-183/package-001/loader-diag-xnu-scU-md1/recovery.img": "bd274be10ff2b3dba21cecc62880d237a2aebdf3f35910bfc0016b6db4cb95a0"
+ }
+}

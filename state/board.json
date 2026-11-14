@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-14T05:37:52+00:00",
-  "ledger_updated_at": "2026-11-14T05:37:32+00:00",
-  "registry_sha256": "c81aa34fb3bbd238cf67a99ac33f1584b47f5b48a594b85356b624f47a43f34a",
+  "generated_at": "2026-11-14T05:48:31+00:00",
+  "ledger_updated_at": "2026-11-14T05:48:12+00:00",
+  "registry_sha256": "2df9b2a9f9a7d5fe21f7f2c81732ad86c8e2efda397ce9a2ca4204abd7b88e06",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -79,6 +79,7 @@
     "gated": [
       "NAT-017",
       "NAT-072",
+      "NAT-184",
       "NAT-003",
       "DRV-003",
       "NAT-004",
@@ -364,6 +365,8 @@
       "NAT-075",
       "NAT-176",
       "NAT-177",
+      "NAT-182",
+      "NAT-183",
       "NAT-013",
       "NAT-073",
       "NAT-079",
@@ -12788,6 +12791,92 @@
       "card_path": "planning/tasks/NAT-177.md"
     },
     {
+      "id": "NAT-182",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Android-userland: copy-bandwidth reference on the A520 cpu0 for the framebuffer scaling (NAT-181: 8.74 ms/frame, scales with core clock, not with instruction count): cached source 1125x2436 -> write-combined (dma_heap system-uncached) and cached 1080x2340 destinations, per-pixel and run copies, read-only and write-only streams, pinned to cpu0 at a recorded clock",
+      "scope": "android-app",
+      "evidence_kind": "android-userland",
+      "priority": 92,
+      "depends_on": [
+        "NAT-181"
+      ],
+      "paths": [
+        "docs/procedures/nat-182",
+        "artifacts/nat-182"
+      ],
+      "acceptance": [
+        "Own static test binary run by adb shell in /data/local/tmp, pinned to cpu0 (CPU part 0xd80), removed afterwards; no setting changed",
+        "Medians and minima for: per-pixel nearest and run copies into WC and cached destinations, WC write-only, cached read-only, cached copy; cpu0 scaling_cur_freq recorded",
+        "Conclusion which stream bounds the 8.74 ms copy and what a cached destination plus cache clean would cost"
+      ],
+      "started_at": "2026-11-14T05:40:31+00:00",
+      "last_heartbeat": "2026-11-14T05:40:31+00:00",
+      "updated_at": "2026-11-14T05:43:16+00:00",
+      "evidence": "docs/procedures/nat-182/evidence.json",
+      "evidence_sha256": "b04ccc57a325fc5abad80a66d07e158aabd74396261a3ae6ed84fd77bc758db8",
+      "finished_at": "2026-11-14T05:43:16+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-182.md"
+    },
+    {
+      "id": "NAT-183",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scU = scS (NAT-176) with the framebuffer driver's nearest-neighbour scaling copying a run table of consecutive picture columns built once per layer in drawLayer() (NAT-182: 2.32 ms vs 7.44 per frame on the A520 at 1959 MHz); per-pixel loop kept as fallback; pixel output identical; software only",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 92,
+      "depends_on": [
+        "NAT-182"
+      ],
+      "paths": [
+        "docs/procedures/nat-183",
+        "artifacts/nat-183"
+      ],
+      "acceptance": [
+        "Kernel = NAT-176's with only iokit/MiniIOMobileFramebuffer.cpo added, from a patch that only adds lines",
+        "Host test: the run table and row copies cut from the patched source equal the per-pixel loop for real, upscale, crop and random maps; filter and missing-table cases produce no table; mutants caught",
+        "Loader sites rc 0; relocscan clean; cmdline = scS's with the tag; package, counted session, registered verdicts, make check"
+      ],
+      "started_at": "2026-11-14T05:46:27+00:00",
+      "last_heartbeat": "2026-11-14T05:46:27+00:00",
+      "updated_at": "2026-11-14T05:48:12+00:00",
+      "evidence": "docs/procedures/nat-183/evidence.json",
+      "evidence_sha256": "326564532b20b47ac10404e6e947747d91286b13ab29c54488ccae9ebd10f057",
+      "finished_at": "2026-11-14T05:48:12+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-183.md"
+    },
+    {
+      "id": "NAT-184",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: run scU (NAT-183: per-layer run table in the nearest-neighbour scaling) once under decision 0061; framebuffer driver time per frame (K verdict, NAT-181 8.74 ms) and swipe frame intervals",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 92,
+      "depends_on": [
+        "NAT-183"
+      ],
+      "paths": [
+        "docs/procedures/nat-184",
+        "artifacts/nat-184"
+      ],
+      "acceptance": [
+        "Per-image decision before the run",
+        "Registered driver-time verdict and swipe verdict",
+        "Stock RECOVERY restored with full hash and Android verified"
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-184.md"
+    },
+    {
       "id": "NAT-013",
       "title": "Harden stock restore tooling against ended-session resume and premature success reporting",
       "scope": "host",
@@ -20677,96 +20766,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-14T04:17:16+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-14T04:20:39+00:00",
-      "action": "task.add:NAT-176",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-176",
-          "status": "pending",
-          "owner": null,
-          "priority": 92
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T04:20:58+00:00",
-      "action": "task.add:NAT-177",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-177",
-          "status": "pending",
-          "owner": null,
-          "priority": 92
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T04:21:17+00:00",
-      "action": "task.claim:NAT-176",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-176",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 92,
-          "last_heartbeat": "2026-11-14T04:21:17+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T04:30:10+00:00",
-      "action": "task.done:NAT-176",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-176",
-          "status": "done",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 92,
-          "last_heartbeat": "2026-11-14T04:21:17+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T04:31:13+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-14T04:31:32+00:00",
-      "action": "task.claim:NAT-177",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-177",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 92,
-          "last_heartbeat": "2026-11-14T04:31:32+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-14T04:45:12+00:00",
       "action": "task.add:NAT-178",
       "owner": "claude-opus-usb130-20261113",
@@ -20935,11 +20934,106 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T05:40:11+00:00",
+      "action": "task.add:NAT-182",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-182",
+          "status": "pending",
+          "owner": null,
+          "priority": 92
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T05:40:31+00:00",
+      "action": "task.claim:NAT-182",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-182",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 92,
+          "last_heartbeat": "2026-11-14T05:40:31+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T05:43:16+00:00",
+      "action": "task.done:NAT-182",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-182",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 92,
+          "last_heartbeat": "2026-11-14T05:40:31+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T05:45:49+00:00",
+      "action": "task.add:NAT-183",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-183",
+          "status": "pending",
+          "owner": null,
+          "priority": 92
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T05:46:08+00:00",
+      "action": "task.add:NAT-184",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-184",
+          "status": "pending",
+          "owner": null,
+          "priority": 92
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T05:46:27+00:00",
+      "action": "task.claim:NAT-183",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-183",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 92,
+          "last_heartbeat": "2026-11-14T05:46:27+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T05:48:12+00:00",
+      "action": "task.done:NAT-183",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-183",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 92,
+          "last_heartbeat": "2026-11-14T05:46:27+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "0b970f7c5213ae65160412d202e6c9e36892315f6046e73a22a17ab463f04d42",
-    "BOARD.md": "937b1cb9aa3f65383f99673b5797425d971c158e033e16d0a6815345600d5a8c",
+    "STATUS.md": "349e550ccb7302263937acf1bc518946ecdff28feae1930e3886b78fbd4af79a",
+    "BOARD.md": "bbc76d884dc490528216e33abfd6805b3fbc39b9055c821d8e6bfdeb639a4e43",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -21238,6 +21332,9 @@
     "planning/tasks/NAT-075.md": "766e3d950376593154a5fb5f2ef1d816f2e103a18fbf2fbbc4b475c50e224556",
     "planning/tasks/NAT-176.md": "2ef9bfb4d2b1a93780e84464cd45713b69d649729975343ed1feaf9cd2eb5ff7",
     "planning/tasks/NAT-177.md": "bfdf5f5f3d403f3a577b2da72b9f3fbffb915dd19af4359f5d52a45ada4c717e",
+    "planning/tasks/NAT-182.md": "fe66188911a9080bdd052aa889385bfb2bb5a873029be981bc94dd7cca5c2d5e",
+    "planning/tasks/NAT-183.md": "2e7c184f9f92d1bf5916907c731b49ea6aeebe6ceb69ced3539a5ce06d693e04",
+    "planning/tasks/NAT-184.md": "2ca3d3b178d8f66c079c9d1a6a4d3cf77ce66700618af3f92924bf142758d00d",
     "planning/tasks/NAT-013.md": "b211a32160f7a1711f4cdfb1218280216622baf34bd7fdfcfdf7b259ce4b12a9",
     "planning/tasks/NAT-073.md": "b516be95aa111fc8a8f7696cce5f92a9df91eb180eb86e714722afac04033dca",
     "planning/tasks/NAT-079.md": "f563e759cc5d623ede832bc0f41ab8f5fa3d9f8595c58572a7be0fc38a58b5a0",

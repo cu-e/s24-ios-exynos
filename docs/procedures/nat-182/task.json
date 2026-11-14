@@ -1,0 +1,16 @@
+{
+ "id": "NAT-182",
+ "status": "pending",
+ "owner": null,
+ "title": "Android-userland: copy-bandwidth reference on the A520 cpu0 for the framebuffer scaling (NAT-181: 8.74 ms/frame, scales with core clock, not with instruction count): cached source 1125x2436 -> write-combined (dma_heap system-uncached) and cached 1080x2340 destinations, per-pixel and run copies, read-only and write-only streams, pinned to cpu0 at a recorded clock",
+ "scope": "android-app",
+ "evidence_kind": "android-userland",
+ "priority": 92,
+ "depends_on": ["NAT-181"],
+ "paths": ["docs/procedures/nat-182", "artifacts/nat-182"],
+ "acceptance": [
+  "Own static test binary run by adb shell in /data/local/tmp, pinned to cpu0 (CPU part 0xd80), removed afterwards; no setting changed",
+  "Medians and minima for: per-pixel nearest and run copies into WC and cached destinations, WC write-only, cached read-only, cached copy; cpu0 scaling_cur_freq recorded",
+  "Conclusion which stream bounds the 8.74 ms copy and what a cached destination plus cache clean would cost"
+ ]
+}

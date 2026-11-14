@@ -1,0 +1,16 @@
+{
+ "id": "NAT-183",
+ "status": "pending",
+ "owner": null,
+ "title": "Host: scU = scS (NAT-176) with the framebuffer driver's nearest-neighbour scaling copying a run table of consecutive picture columns built once per layer in drawLayer() (NAT-182: 2.32 ms vs 7.44 per frame on the A520 at 1959 MHz); per-pixel loop kept as fallback; pixel output identical; software only",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 92,
+ "depends_on": ["NAT-182"],
+ "paths": ["docs/procedures/nat-183", "artifacts/nat-183"],
+ "acceptance": [
+  "Kernel = NAT-176's with only iokit/MiniIOMobileFramebuffer.cpo added, from a patch that only adds lines",
+  "Host test: the run table and row copies cut from the patched source equal the per-pixel loop for real, upscale, crop and random maps; filter and missing-table cases produce no table; mutants caught",
+  "Loader sites rc 0; relocscan clean; cmdline = scS's with the tag; package, counted session, registered verdicts, make check"
+ ]
+}

@@ -1,0 +1,78 @@
+--- a/MiniIOMobileFramebuffer.cpp
++++ b/MiniIOMobileFramebuffer.cpp
+@@ -223,6 +223,10 @@
+ /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+ 
+ struct RowJob;
++/* NAT-183: a stretch of a panel row whose picture columns follow each other: count pixels at panel column to from picture column from */
++struct ColumnRun {
++	uint32_t        to, from, count;
++};
+ 
+ class IOMobileFramebuffer : public IOService
+ {
+@@ -287,6 +291,7 @@
+ 	/* the screen recording, if one was asked for */
+ 	uint32_t *      fColumn;                /* drawLayer(): source column for every panel column */
+ 	uint16_t *      fColumnWeight;          /* ... with fb_filter: how much of the column after it, of 256 */
++	struct ColumnRun * fColumnRun;          /* ... without it: fColumn as runs, worked out with it (NAT-183) */
+ 	uint32_t *      fBlendRow;              /* ... and a row of the picture blended from two (fBlendRowSize pixels) */
+ 	uint32_t        fBlendRowSize;
+ 	uint8_t *       fRecBase;
+@@ -444,6 +449,7 @@
+ 	}
+ 	fColumn = IONewZero(uint32_t, fPanelWidth);
+ 	fColumnWeight = IONewZero(uint16_t, fPanelWidth);
++	fColumnRun = IONewZero(struct ColumnRun, fPanelWidth);
+ 	fDiff = gDiff != 0;
+ 	fDiffLeft = fDiffTop = ~0u;
+ 	IOLog("MiniIOMobileFramebuffer: display %ux%u on a panel of %ux%u (%u bytes per row)\n", fWidth, fHeight,
+@@ -597,6 +603,8 @@
+ 	uint32_t        stride;
+ 	int32_t         sx, sy, sw, sh, px0, py0, px1, py1, cx0, cx1;
+ 	bool            filter, unscaled;
++	const struct ColumnRun * runs;          /* (nearest, when there is room for them: fColumn as runs) */
++	uint32_t        runCount;
+ };
+ 
+ void
+@@ -668,6 +676,10 @@
+ 
+ 				out[i] = w == 0 || a == from[c + 1] ? a : blend(a, from[c + 1], w);
+ 			}
++		} else if (job->runs != NULL) {
++			for (uint32_t r = 0; r < job->runCount; r++) {
++				memcpy(to + job->runs[r].to, from + job->runs[r].from, (size_t) job->runs[r].count * sizeof(uint32_t));
++			}
+ 		} else {
+ 			for (int32_t x = cx0; x < cx1; x++) {
+ 				to[x] = from[fColumn[x]];
+@@ -786,6 +798,28 @@
+ 			fColumn[x] = (uint32_t) (sx + (int64_t) (x - px0) * sw / (px1 - px0));
+ 		}
+ 	}
++	/*
++	 * NAT-183: ... and, for nearest, as runs of picture columns that follow each other (1125 on 1080: 45 a row), so that a row is
++	 * 45 copies and not 1080 loads, stores and a look at fColumn each (on the A520 7.4 ms a frame against 2.3, NAT-182).
++	 */
++	job.runs = NULL;
++	job.runCount = 0;
++	if (!filter && fColumnRun != NULL) {
++		uint32_t n = 0;
++
++		for (int32_t x = cx0; x < cx1; x++) {
++			if (n != 0 && fColumn[x] == fColumn[x - 1] + 1) {
++				fColumnRun[n - 1].count++;
++			} else {
++				fColumnRun[n].to = (uint32_t) x;
++				fColumnRun[n].from = fColumn[x];
++				fColumnRun[n].count = 1;
++				n++;
++			}
++		}
++		job.runs = fColumnRun;
++		job.runCount = n;
++	}
+ 	job.pixels = s->pixels();
+ 	job.stride = s->info.bytesPerRow;
+ 	job.sx = sx;

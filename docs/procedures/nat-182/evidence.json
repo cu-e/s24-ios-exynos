@@ -1,0 +1,154 @@
+{
+ "kind": "android-userland",
+ "origin": "local-device",
+ "origin_detail": "SM-S921B e1s Android, adb shell user, own static binary pinned to cpu0 (0xd80), removed afterwards",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T06:05:00+00:00",
+ "task": "NAT-182",
+ "summary": "Framebuffer scaling on cpu0 (A520 @1959 MHz): per-pixel nearest 7.44 ms, NAT-180 run copy 7.83 ms (no gain, as NAT-181), runs precomputed once -> 45 memcpy per row 2.32 ms (3.2x, same pixels); straight 10 MB memcpy to WC 1.30 ms; WC = cached for writes. The copy is code-bound, not bandwidth-bound: next NAT-183 run table in the driver.",
+ "commit": "30a87f3e (base)",
+ "device_used": true,
+ "measurements": {
+  "pixel_wc": {
+   "median_ms": 7.436,
+   "min_ms": 7.288,
+   "khz": [
+    1959000,
+    1959000
+   ]
+  },
+  "runs_wc": {
+   "median_ms": 7.83,
+   "min_ms": 7.769,
+   "khz": [
+    1959000,
+    1959000
+   ]
+  },
+  "pixel_cached": {
+   "median_ms": 7.377,
+   "min_ms": 7.29,
+   "khz": [
+    1959000,
+    1959000
+   ]
+  },
+  "runs_cached": {
+   "median_ms": 7.867,
+   "min_ms": 7.849,
+   "khz": [
+    1959000,
+    1959000
+   ]
+  },
+  "runs_cached_clean": {
+   "median_ms": 8.41,
+   "min_ms": 8.38,
+   "khz": [
+    1959000,
+    1959000
+   ]
+  },
+  "table_wc": {
+   "median_ms": 2.318,
+   "min_ms": 2.188,
+   "khz": [
+    1959000,
+    1959000
+   ]
+  },
+  "table_cached": {
+   "median_ms": 2.321,
+   "min_ms": 2.204,
+   "khz": [
+    1959000,
+    1959000
+   ]
+  },
+  "memset_wc": {
+   "median_ms": 0.421,
+   "min_ms": 0.412,
+   "khz": [
+    1959000,
+    1959000
+   ]
+  },
+  "memset_cached": {
+   "median_ms": 0.411,
+   "min_ms": 0.407,
+   "khz": [
+    1959000,
+    1959000
+   ]
+  },
+  "read_src": {
+   "median_ms": 1.081,
+   "min_ms": 1.078,
+   "khz": [
+    1959000,
+    1959000
+   ]
+  },
+  "read_wc_lines": {
+   "median_ms": 8.256,
+   "min_ms": 8.204,
+   "khz": [
+    1959000,
+    1959000
+   ]
+  },
+  "memcpy_cached": {
+   "median_ms": 1.329,
+   "min_ms": 1.295,
+   "khz": [
+    1959000,
+    1959000
+   ]
+  },
+  "memcpy_wc": {
+   "median_ms": 1.297,
+   "min_ms": 1.275,
+   "khz": [
+    1959000,
+    1959000
+   ]
+  }
+ },
+ "checks": [
+  {
+   "cmd": "aarch64-linux-android34-clang -O2 -static -Wall -Werror -o artifacts/nat-182/copybench docs/procedures/nat-182/copybench.c",
+   "exit_code": 0,
+   "result": "db0d9be9dd1181d1e32ef9ab29f1615174d98b985eadea177a9c4f480f77f826"
+  },
+  {
+   "cmd": "adb push artifacts/nat-182/copybench /data/local/tmp/nat182-copybench; adb shell '/data/local/tmp/nat182-copybench 0 15'",
+   "exit_code": 0,
+   "result": "first build rc=3 (bionic aligned_alloc size rule, nothing measured); v1 run-cpu0.txt; v2 run-cpu0-v2.txt with table variant; both checks same"
+  },
+  {
+   "cmd": "adb shell 'rm /data/local/tmp/nat182-copybench'",
+   "exit_code": 0,
+   "result": "removed"
+  }
+ ],
+ "sources": {
+  "docs/procedures/nat-182/copybench.c": "c4bbb723af3cf2801e8aaa3bf62a3cad984036db877bb0a5f26b9d491bd97469",
+  "docs/procedures/nat-182/README.md": "05d89f98621eda0eda5676d41407a4fa903e305df485f3e6dfb4c843ae114ab7",
+  "docs/procedures/nat-182/task.json": "1b16b30d6f76802e2a6cdb4028575c8fc0b1d4f6cd8e93bbfbbbfdabf1187a92"
+ },
+ "not_established": [
+  "native time with XNU memcpy (NAT-184)",
+  "frame-rate effect"
+ ],
+ "artifacts": [
+  "artifacts/nat-182/copybench",
+  "artifacts/nat-182/run-cpu0.txt",
+  "artifacts/nat-182/run-cpu0-v2.txt"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-182/copybench": "db0d9be9dd1181d1e32ef9ab29f1615174d98b985eadea177a9c4f480f77f826",
+  "artifacts/nat-182/run-cpu0.txt": "b5cb2cb513e2eeef34cc83ed6c07e791880278b53e8fe00e9fe214db5216a207",
+  "artifacts/nat-182/run-cpu0-v2.txt": "c297683af39db656f6cefba076a9252b894d678b2f784094403c21f89bf6ce7e"
+ },
+ "device_inventory": "devices/local-2026-11-14-nat182.json"
+}
