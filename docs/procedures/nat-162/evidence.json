@@ -1,0 +1,24 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T06:45:00+00:00",
+ "task": "NAT-162",
+ "summary": "Display-hardware scaling plan from references/s24-linux 417484173abc: s5e9945 uses cal_rt; odd DPPs (L1 = DPP1, which S-Boot win3 already uses per NAT-070 CHMAP) scale (1/4..8x); stock register sequence for IDMA/DPP/SRAMC/SCL coefficients and DECON command-mode shadow commit; ratios 0x10AAAA/0x10A80A within limits; DPU behind sysmmu_dpuf_s0, S-Boot uses physical 0xfa200000 (bypass inferred) so a contiguous 10.96 MB surface would be needed; NAT-070 offset misreadings corrected; read-only snapshot list. Prepared by a research subagent; key citations re-checked in-session.",
+ "commit": "see git log",
+ "device_used": false,
+ "sources": {
+  "references/s24-linux": "417484173abc2c4fa93e738ea82ad9f2e84911b1"
+ },
+ "checks": [
+  {
+   "cmd": "git -C references/s24-linux show HEAD:drivers/gpu/drm/samsung/dpu/Makefile (lines 7-8); HEAD:arch/arm64/configs/e1s_defconfig (6638-6639); HEAD:arch/arm64/boot/dts/exynos/s5e9945-drm-dpu.dtsi (105-122); HEAD:drivers/gpu/drm/samsung/dpu/exynos_drm_dpp.c (344-348, 580-594); HEAD:drivers/gpu/drm/samsung/dpu/cal_rt/regs-decon.h (TRIG_CON 148, SHD_REG_UP_REQ 206, DECON_INT_EN 215)",
+   "exit_code": 0,
+   "result": "re-check matches the report"
+  }
+ ],
+ "artifacts": [
+  "docs/procedures/nat-162/README.md"
+ ],
+ "limits": "Source review only; no register read on the phone; power-domain state of DPUF blocks unknown; win2 vs win3 visibility unknown."
+}
