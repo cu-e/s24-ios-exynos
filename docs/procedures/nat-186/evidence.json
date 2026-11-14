@@ -1,0 +1,696 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "origin_detail": "SM-S921B e1s, one run of loader-diag-xnu-scV-md1 delivered into RAM via RECOVERY, decision 0075",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T06:40:00+00:00",
+ "task": "NAT-186",
+ "summary": "U-sat: during the swipes cpu0 is 99.6% busy and backboardd (CoreAnimation render server) takes 76% (SpringBoard 7.7%, kernel 3.9%). backboardd CPU per frame: 13-20 ms idle, ~30 ms during home-page swipes, ~190 ms in the Today view the alternating swipes drift into (last frame shows it) - this is the earlier \"SpringBoard stops answering\". K2 2.16 ms; swipes F60 by rule (median 16.66 ms) but per-swipe 3-87 fps. Rendering is CPU-bound on one A520: next levers are less render work (Reduce Transparency/Motion), SMP (owner) or GPU (owner). Stock RECOVERY restored (full hash), Android verified.",
+ "decision": "docs/decisions/0075-nat186-loader-diag-xnu-scV-md1-single-run-2026-11-14.md",
+ "commit": "be94554a (image built at)",
+ "device_used": true,
+ "image": {
+  "name": "loader-diag-xnu-scV-md1",
+  "recovery_sha256": "57ab39447993b83b48e4afef2674ec0ead000de87f609729c9c9f01be907b27e",
+  "payload_sha256": "117aafcc15c8e78e1c04707c1921a962bd680678cd3b3090ed0a8803943c7a88",
+  "kernel_sha256": "d7e7fee154104aaf9c59a4d2145c3901763259296ebd85cb373c388a4667c8b3",
+  "session": "docs/procedures/nat-185/session_nat186.py",
+  "session_sha256": "ef8ee127ca0ed506efd9938bfe47378b81a3a25488743fdcaf5827eec1919823"
+ },
+ "measurements": {
+  "top186": {
+   "verdict": "U-sat",
+   "windows": 35,
+   "swipe_windows": 32,
+   "busy_share_median": 0.996,
+   "busy_share_min": 0.717,
+   "busy_share_max": 1.289,
+   "kernel_share_median": 0.042,
+   "idle0_share_median": 0.0,
+   "idle_counter_agrees": true,
+   "lost_max": 0,
+   "top_over_swipes": [
+    {
+     "name": "backboardd",
+     "pid": 16,
+     "us": 121555884,
+     "share": 0.76
+    },
+    {
+     "name": "SpringBoard",
+     "pid": 12,
+     "us": 12295772,
+     "share": 0.077
+    },
+    {
+     "name": "kernel_task",
+     "pid": 0,
+     "us": 6254015,
+     "share": 0.039
+    },
+    {
+     "name": "remindd",
+     "pid": 130,
+     "us": 1416412,
+     "share": 0.009
+    },
+    {
+     "name": "mediaserverd",
+     "pid": 135,
+     "us": 1101650,
+     "share": 0.007
+    },
+    {
+     "name": "launchd.darwin",
+     "pid": 1,
+     "us": 705256,
+     "share": 0.004
+    },
+    {
+     "name": "mediaserverd",
+     "pid": 123,
+     "us": 598507,
+     "share": 0.004
+    },
+    {
+     "name": "mediaserverd",
+     "pid": 105,
+     "us": 553427,
+     "share": 0.003
+    },
+    {
+     "name": "mediaserverd",
+     "pid": 113,
+     "us": 546043,
+     "share": 0.003
+    },
+    {
+     "name": "mediaserverd",
+     "pid": 125,
+     "us": 484631,
+     "share": 0.003
+    }
+   ]
+  },
+  "fbcopy181": {
+   "verdict": "K2",
+   "driver_ms_median": 2.162,
+   "driver_ms_min": 2.153,
+   "driver_ms_max": 2.41,
+   "steady_windows": 31,
+   "fps_median": 10.32,
+   "swipe_verdict": "F60",
+   "swipe_copy_ms_median": 2.15,
+   "swipe_swap_interval_ms_median": 16.66,
+   "swipe_fps_median": 22.48,
+   "swipe_fps_max": 87.35,
+   "driver_gain_ms": 6.752,
+   "copy_gain_ms": 6.62,
+   "baseline": {
+    "driver_ms_median": 8.914,
+    "swipe_copy_ms_median": 8.77,
+    "swipe_swap_interval_ms_median": 21.0,
+    "source": "NAT-177"
+   }
+  },
+  "frames159": {
+   "windows": 38,
+   "recorded": false,
+   "recording_end_s": null,
+   "steady_windows": 31,
+   "first_steady_s": 194.0,
+   "last_steady_s": 377.0,
+   "driver_ms_median": 2.162,
+   "driver_ms_min": 2.153,
+   "driver_ms_max": 2.41,
+   "fps_median": 10.32,
+   "fps_min": 1.8,
+   "fps_max": 21.31,
+   "frame_interval_ms_median": 96.9,
+   "gpu_wait_us_max": 0,
+   "late_swaps": 448,
+   "other_ms_median": 94.7
+  },
+  "cpuclk173": {
+   "before": {
+    "con3": "0xa0190200",
+    "fields": {
+     "enable": true,
+     "m": 25,
+     "p": 2,
+     "s": 0
+    },
+    "khz": 960000,
+    "adds_per_us": 959,
+    "intmr1": "0x00000000"
+   },
+   "request": {
+    "target_khz": 1959000,
+    "error": 0,
+    "reply": [
+     "00010000",
+     "001de458",
+     "00000000",
+     "00000000"
+    ]
+   },
+   "after": {
+    "con3": "0xa0660400",
+    "fields": {
+     "enable": true,
+     "m": 102,
+     "p": 4,
+     "s": 0
+    },
+    "khz": 1958400,
+    "adds_per_us": 1958
+   },
+   "verdict": "C2",
+   "rate_ratio": 2.042
+  },
+  "touch170": {
+   "id_reads": 3,
+   "id_ok": 3,
+   "id_lines": [
+    "ok (53 54 40 36 03)",
+    "ok (53 54 40 36 03)",
+    "ok (53 54 40 36 03)"
+   ],
+   "event_thread_started": true,
+   "marks": 23,
+   "seconds_per_1000": 11.15,
+   "first_mark_s": 136,
+   "last_mark_s": 381,
+   "intervals_s": [
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    12,
+    11,
+    11,
+    11,
+    11,
+    11,
+    12,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    12,
+    11,
+    11
+   ],
+   "coord_events": 0,
+   "busy_ms_per_poll_est": 1.15,
+   "verdict": "P1",
+   "gate": {
+    "polls": 23000,
+    "irq_low": 3,
+    "skipped": 22077,
+    "high_reads": 920,
+    "high_events": 0
+   },
+   "device_id_read_ms": 2.487,
+   "gpio_cost_estimate_us": {
+    "load": 10.43,
+    "store": 5.94,
+    "ref_id_ms": 5.241
+   }
+  },
+  "dpp177": {
+   "pmu": {
+    "probe": {
+     "dpub": 1,
+     "dpuf0": 1,
+     "dpuf1": 1
+    },
+    "late": {
+     "dpub": 1,
+     "dpuf0": 1,
+     "dpuf1": 1
+    }
+   },
+   "skipped": [],
+   "groups": {
+    "probe": [
+     "decon",
+     "dma0",
+     "dma1",
+     "dpp0",
+     "dpp1",
+     "sramc0",
+     "sramc1",
+     "sysmmu",
+     "win2",
+     "win3",
+     "wincon2",
+     "wincon3"
+    ],
+    "late": [
+     "decon",
+     "dma0",
+     "dma1",
+     "dpp0",
+     "dpp1",
+     "sramc0",
+     "sramc1",
+     "sysmmu",
+     "win2",
+     "win3",
+     "wincon2",
+     "wincon3"
+    ]
+   },
+   "verdict": "R-ok",
+   "probe": {
+    "decon": {
+     "frame_count": [
+      11294,
+      11294
+     ],
+     "trig_con": "0x3063",
+     "shd_reg_up_req": "0x0",
+     "int_en": "0x303011",
+     "data_path": [
+      "0xb1",
+      "0x0"
+     ]
+    },
+    "win2": {
+     "raw": "0x1",
+     "enabled": true,
+     "chmap": 0,
+     "start": [
+      0,
+      0
+     ],
+     "end": [
+      1079,
+      2339
+     ]
+    },
+    "win3": {
+     "raw": "0x11",
+     "enabled": true,
+     "chmap": 1,
+     "start": [
+      0,
+      0
+     ],
+     "end": [
+      1079,
+      2339
+     ]
+    },
+    "dma0": {
+     "format": 0,
+     "src": [
+      1080,
+      2340
+     ],
+     "img": [
+      1080,
+      2340
+     ],
+     "base": "0xfa200000",
+     "shadow_base": "0xfa200000"
+    },
+    "dpp0": {
+     "id": "0x7030000",
+     "cfg_err": "0x0",
+     "src": [
+      1080,
+      2340
+     ],
+     "scaler_on": false,
+     "scaled": [
+      0,
+      0
+     ],
+     "ratio": [
+      "0x100000",
+      "0x100000"
+     ]
+    },
+    "sramc0": {
+     "mode": "0x0",
+     "scl_en": false,
+     "dst": "0x0"
+    },
+    "dma1": {
+     "format": 0,
+     "src": [
+      1080,
+      2340
+     ],
+     "img": [
+      1080,
+      2340
+     ],
+     "base": "0xfa200000",
+     "shadow_base": "0xfa200000"
+    },
+    "dpp1": {
+     "id": "0x7030000",
+     "cfg_err": "0x0",
+     "src": [
+      1080,
+      2340
+     ],
+     "scaler_on": false,
+     "scaled": [
+      0,
+      0
+     ],
+     "ratio": [
+      "0x100000",
+      "0x100000"
+     ]
+    },
+    "sramc1": {
+     "mode": "0x0",
+     "scl_en": false,
+     "dst": "0x0"
+    },
+    "sysmmu": {
+     "ctrl": "0x0",
+     "status": "0x0",
+     "version": "0x90010000",
+     "ctrl_vm": "0x24",
+     "flpt_vm": "0x0",
+     "translating": false
+    },
+    "visible": [
+     {
+      "window": "win2",
+      "dpp": 0,
+      "has_scaler": false
+     },
+     {
+      "window": "win3",
+      "dpp": 1,
+      "has_scaler": true
+     }
+    ]
+   },
+   "late": {
+    "decon": {
+     "frame_count": [
+      32441,
+      32441
+     ],
+     "trig_con": "0x3063",
+     "shd_reg_up_req": "0x0",
+     "int_en": "0x303011",
+     "data_path": [
+      "0xb1",
+      "0x0"
+     ]
+    },
+    "win2": {
+     "raw": "0x1",
+     "enabled": true,
+     "chmap": 0,
+     "start": [
+      0,
+      0
+     ],
+     "end": [
+      1079,
+      2339
+     ]
+    },
+    "win3": {
+     "raw": "0x11",
+     "enabled": true,
+     "chmap": 1,
+     "start": [
+      0,
+      0
+     ],
+     "end": [
+      1079,
+      2339
+     ]
+    },
+    "dma0": {
+     "format": 0,
+     "src": [
+      1080,
+      2340
+     ],
+     "img": [
+      1080,
+      2340
+     ],
+     "base": "0xfa200000",
+     "shadow_base": "0xfa200000"
+    },
+    "dpp0": {
+     "id": "0x7030000",
+     "cfg_err": "0x0",
+     "src": [
+      1080,
+      2340
+     ],
+     "scaler_on": false,
+     "scaled": [
+      0,
+      0
+     ],
+     "ratio": [
+      "0x100000",
+      "0x100000"
+     ]
+    },
+    "sramc0": {
+     "mode": "0x0",
+     "scl_en": false,
+     "dst": "0x0"
+    },
+    "dma1": {
+     "format": 0,
+     "src": [
+      1080,
+      2340
+     ],
+     "img": [
+      1080,
+      2340
+     ],
+     "base": "0xfa200000",
+     "shadow_base": "0xfa200000"
+    },
+    "dpp1": {
+     "id": "0x7030000",
+     "cfg_err": "0x0",
+     "src": [
+      1080,
+      2340
+     ],
+     "scaler_on": false,
+     "scaled": [
+      0,
+      0
+     ],
+     "ratio": [
+      "0x100000",
+      "0x100000"
+     ]
+    },
+    "sramc1": {
+     "mode": "0x0",
+     "scl_en": false,
+     "dst": "0x0"
+    },
+    "sysmmu": {
+     "ctrl": "0x0",
+     "status": "0x0",
+     "version": "0x90010000",
+     "ctrl_vm": "0x24",
+     "flpt_vm": "0x0",
+     "translating": false
+    },
+    "visible": [
+     {
+      "window": "win2",
+      "dpp": 0,
+      "has_scaler": false
+     },
+     {
+      "window": "win3",
+      "dpp": 1,
+      "has_scaler": true
+     }
+    ]
+   },
+   "changed_probe_to_late": {}
+  },
+  "swipe175": {
+   "cover_s": [
+    305.834,
+    385.235
+   ],
+   "swaps": 312,
+   "frames": 312,
+   "downs": 23,
+   "finger9_samples": 322,
+   "real_finger_samples": 0,
+   "swipe_swap_interval": {
+    "n": 117,
+    "median": 16.66,
+    "p10": 6.25,
+    "p90": 85.39,
+    "min": 2.6,
+    "max": 166.79
+   },
+   "idle_swap_interval": {
+    "n": 55,
+    "median": 57.19,
+    "p10": 7.09,
+    "p90": 669.01,
+    "min": 3.59,
+    "max": 1107.2
+   },
+   "swipe_share_60hz": 0.632,
+   "swipe_fps_median": 22.48,
+   "swipe_fps_max": 87.35,
+   "swaps_per_swipe_median": 3,
+   "down_to_first_swap": {
+    "n": 23,
+    "median": 178.5,
+    "p10": 27.19,
+    "p90": 528.93,
+    "min": 9.6,
+    "max": 650.36
+   },
+   "swipe_copy": {
+    "n": 156,
+    "median": 2.15,
+    "p10": 2.14,
+    "p90": 2.18,
+    "min": 2.13,
+    "max": 6.16
+   },
+   "swipe_beat_wait": {
+    "n": 156,
+    "median": 6.31,
+    "p10": 0.0,
+    "p90": 13.61,
+    "min": 0.0,
+    "max": 15.33
+   },
+   "thread_lines": [
+    "e1s-swipe: start: finger 9, 12 moves of 16000 us, every 3000 ms until 375 s",
+    "e1s-swipe: done after 54 swipes"
+   ],
+   "verdict": "F60"
+  },
+  "display": {
+   "window": "W-ok",
+   "display": "D2-refreshing",
+   "ios": "S1-alive-no-frame",
+   "power": "P2-both-rails-verified"
+  },
+  "backboardd_ms_per_frame": {
+   "pre_swipe_205_215": "13-20",
+   "home_pages_300": 30,
+   "today_view_315_375": 190
+  }
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-185/session_nat186.py --out artifacts/nat-186/preflight-001 --image loader-diag-xnu-scV-md1",
+   "exit_code": 0,
+   "result": "ready-read-only"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/nat-185/session_nat186.py --out artifacts/nat-186/run-001 --image loader-diag-xnu-scV-md1 --execute",
+   "exit_code": 0,
+   "result": "native-attempt-started"
+  },
+  {
+   "cmd": "lsusb -d 04e8:685d (wait)",
+   "exit_code": 0,
+   "result": "Download Mode (bus 8 device 49) by 06:27:50Z"
+  },
+  {
+   "cmd": "nat-097/kl_reader2.py read_archive2(artifacts/nat-186/run-001/archive) why=2 -> artifacts/nat-186/analysis/kernel-text.txt",
+   "exit_code": 0,
+   "result": "532529 B, 0 unreadable, 72 e1s-top lines"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-185/top186.py artifacts/nat-186/analysis/kernel-text.txt --json artifacts/nat-186/analysis/top186.json",
+   "exit_code": 0,
+   "result": "U-sat 0.996, backboardd 0.76"
+  },
+  {
+   "cmd": "fbcopy181 / swipe175 / frames159 / dpp177 / cpuclk173 / load166 / touch170 / decode113 / analyze150 (NAT-184 commands with nat-186 paths)",
+   "exit_code": 0,
+   "result": "K2, F60, R-ok, C2, P1, W-ok D2"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 49 --out artifacts/nat-186/restore-001/restore-trace",
+   "exit_code": 0,
+   "result": "100663296/100663296 acknowledged, reboot confirmed"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-186/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass, recovery_hash_match true"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-186/restore-001/report.json --readback artifacts/nat-186/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "android_booted true, recovery_readback_matches true"
+  }
+ ],
+ "not_established": [
+  "which effects make backboardd frames expensive",
+  "whether cpu0 idle counter works when the core is not saturated"
+ ],
+ "device_inventory": "devices/local-2026-11-14-nat186.json",
+ "artifacts": [
+  "artifacts/nat-186/run-001.log",
+  "artifacts/nat-186/analysis/kernel-text.txt",
+  "artifacts/nat-186/analysis/top186.json",
+  "artifacts/nat-186/analysis/fbcopy181.json",
+  "artifacts/nat-186/analysis/swipe175.json",
+  "artifacts/nat-186/analysis/frames159.json",
+  "artifacts/nat-186/analysis/dpp177.json",
+  "artifacts/nat-186/analysis/cpuclk173.json",
+  "artifacts/nat-186/analysis/touch170.json",
+  "artifacts/nat-186/analysis/load166.json",
+  "artifacts/nat-186/analysis/pixels.json",
+  "artifacts/nat-186/analysis/panel-thumb.ppm",
+  "artifacts/nat-186/analysis/verdict.json",
+  "artifacts/nat-186/restore-001/report.json",
+  "artifacts/nat-186/restore-001/android-check.json",
+  "artifacts/nat-186/restore-001/assess.json",
+  "artifacts/nat-186/restore-001/restore-trace/trace.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-186/run-001.log": "a0273de008db9f5237ef54ea7f7bcdaf3d23271b483d810f55c6a23c7bcda9f6",
+  "artifacts/nat-186/analysis/kernel-text.txt": "c19dc8e13c8fbd70976b13a6ba8ca3f35a520376fd1b32ea0ddabf32e32c577a",
+  "artifacts/nat-186/analysis/top186.json": "219b445a099d2d34aa1491ace1786a417c089c4e2d89e6b241b47068d307c86c",
+  "artifacts/nat-186/analysis/fbcopy181.json": "b2ff6cc75922ac051eecb4cdc1843fd2611faed74b86a7226269f7368981a3af",
+  "artifacts/nat-186/analysis/swipe175.json": "3d103b6f5533901a2511998d2285b094537606fbb851becc39e614ab351f998f",
+  "artifacts/nat-186/analysis/frames159.json": "9af53529fb164dc698778b985b2707d089bafc4e798356dd356fe3053c03ebf2",
+  "artifacts/nat-186/analysis/dpp177.json": "101e64fb8b5891398ca6217fbab5b6e0ace9a15f230ae383074c00d58b33e4e2",
+  "artifacts/nat-186/analysis/cpuclk173.json": "133269c0152b8f4d9e0650db8fd96c3a6a9ea494ca900d59e3e142684b3c813d",
+  "artifacts/nat-186/analysis/touch170.json": "f4508653f865966b7ed127e3bf74cfba4bd47dfe0628dd2e47a4e89a493cf3e7",
+  "artifacts/nat-186/analysis/load166.json": "3ad65a9c4a7d22d6a905c8f2825ff8bbf39f6b7d27ca24bd04133c259b20f20a",
+  "artifacts/nat-186/analysis/pixels.json": "0a00706b5c96ab690ae0402937024ba343b308e51f83bfdf7aaf914829e69774",
+  "artifacts/nat-186/analysis/panel-thumb.ppm": "f100590265772dba9afe0c3c982007dac254d9e877cc27e2a69be11e5ffc2e9b",
+  "artifacts/nat-186/analysis/verdict.json": "1b34baac34f69907968e305971e0bfdba3a7d4a1fe052ea518acf1f31d0ffcb2",
+  "artifacts/nat-186/restore-001/report.json": "cc18c78f36c946992491e8d6c9d7f10dbea116d36d7e481b0564a5be5d7fb37c",
+  "artifacts/nat-186/restore-001/android-check.json": "8c7a43458a2e533918a0f17778a63488e009c76f656d9ed4d3af09360fc15183",
+  "artifacts/nat-186/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "artifacts/nat-186/restore-001/restore-trace/trace.json": "89034d5ee59173971884f0d67f54a953694b9e7fe2ee40b41e01a7ba353fe041"
+ }
+}
