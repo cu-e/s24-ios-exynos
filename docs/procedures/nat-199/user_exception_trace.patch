@@ -1,0 +1,141 @@
+--- a/user_exception_trace.c
++++ b/user_exception_trace.c
+@@ -16,6 +16,9 @@
+ #include <kern/startup.h>
+ #include <kern/task.h>
+ #include <kern/thread.h>
++#include <kern/thread_call.h>
++#include <kern/clock.h>
++#include <machine/atomic.h>
+ #include <mach/exception_types.h>
+ #include <mach/machine/thread_status.h>
+ #include <string.h>
+@@ -109,6 +112,120 @@
+  */
+ void user_abort_trace(void);
+ 
++/*
++ * NAT-199: the reason, too. The text of an uncaught exception ("*** Terminating app due to uncaught exception 'N', reason: '...'"
++ * and the "First throw call stack" line after it) reaches the console, and so the loader log's 1 MB ring, but on the way out only
++ * the last 512 KB of the loader log reach the host (NAT-198: the SpringBoard aborts at 216 s and 301 s were in the part that
++ * was lost). The kernel message buffer arrives whole. So, 2 s after an abort (the program's standard error comes through a pipe
++ * and may be later than the abort itself), the loader log is searched for that text and each line found is printed once into the
++ * message buffer. Read-only: the log is only read, without its lock (a line written at that very moment may come out mixed).
++ */
++#define UAR_NEEDLE      "Terminating app due to uncaught exception"
++#define UAR_FIRST_THROW "First throw call stack"
++#define UAR_LINE        600
++#define UAR_SEEN        16
++
++extern char     loader_log[];
++extern uint32_t loader_log_len;
++
++static thread_call_t uar_call;
++static uint32_t      uar_seen[UAR_SEEN];
++static unsigned      uar_seen_count;
++
++static uint32_t
++uar_hash(const char *s, size_t n)
++{
++	uint32_t h = 2166136261u;
++
++	for (size_t i = 0; i < n; i++) {
++		h = (h ^ (uint8_t)s[i]) * 16777619u;
++	}
++	return h;
++}
++
++/* Print the log line from position `at` (bounded), with anything unprintable as '.'. */
++static void
++uar_say(const char *what, uint32_t at, uint32_t len)
++{
++	char line[UAR_LINE + 1];
++	uint32_t n = 0;
++
++	for (uint32_t i = at; i < len && n < UAR_LINE && loader_log[i] != '\n'; i++) {
++		char c = loader_log[i];
++		line[n++] = (c >= 0x20 && c < 0x7f) ? c : '.';
++	}
++	line[n] = 0;
++	printf("userabort: %s: %s\n", what, line);
++}
++
++static bool
++uar_match(uint32_t i, uint32_t len, const char *needle, size_t n)
++{
++	return i + n <= len && loader_log[i] == needle[0] && memcmp(loader_log + i, needle, n) == 0;
++}
++
++static void
++uar_scan(thread_call_param_t p0 __unused, thread_call_param_t p1 __unused)
++{
++	uint32_t len = os_atomic_load(&loader_log_len, relaxed);
++	const size_t n = sizeof(UAR_NEEDLE) - 1, m = sizeof(UAR_FIRST_THROW) - 1;
++	unsigned found = 0;
++
++	for (uint32_t i = 0; i + n <= len; i++) {
++		uint32_t h, end = i;
++		bool seen = false;
++
++		if (!uar_match(i, len, UAR_NEEDLE, n)) {
++			continue;
++		}
++		/* the same text from the needle on (this function's own lines included) is said once */
++		while (end < len && end - i < 160 && loader_log[end] != '\n') {
++			end++;
++		}
++		h = uar_hash(loader_log + i, end - i);
++		for (unsigned k = 0; k < uar_seen_count; k++) {
++			seen = seen || uar_seen[k] == h;
++		}
++		found++;
++		if (seen || uar_seen_count == UAR_SEEN) {
++			continue;
++		}
++		uar_seen[uar_seen_count++] = h;
++		uar_say("reason", i, len);
++		/* the throw stack follows within the next few lines */
++		for (uint32_t j = end, lines = 0; j < len && lines < 4; j++) {
++			if (loader_log[j] == '\n') {
++				lines++;
++			} else if (uar_match(j, len, UAR_FIRST_THROW, m)) {
++				/* "*** First throw call stack:", then the addresses on the next line */
++				while (j < len && loader_log[j] != '\n') {
++					j++;
++				}
++				if (j + 1 < len) {
++					uar_say("throw stack", j + 1, len);
++				}
++				break;
++			}
++		}
++	}
++	printf("userabort: reason scan: %u line(s) in %u bytes of the loader log, %u distinct said\n", found, len, uar_seen_count);
++}
++
++static void
++user_abort_reason_later(void)
++{
++	uint64_t deadline;
++
++	/* (two first aborts at the same moment on two processors would allocate two calls: one is then simply not used) */
++	if (uar_call == NULL) {
++		uar_call = thread_call_allocate(uar_scan, NULL);
++	}
++	if (uar_call != NULL) {
++		clock_interval_to_deadline(2, NSEC_PER_SEC, &deadline);
++		thread_call_enter_delayed(uar_call, deadline);
++	}
++}
++
+ void
+ user_abort_trace(void)
+ {
+@@ -142,6 +259,7 @@
+ 		fp = frame[0];
+ 	}
+ 	printf("\n");
++	user_abort_reason_later();
+ }
+ 
+ /*

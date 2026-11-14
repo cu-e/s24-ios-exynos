@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T09:45:05+00:00",
+  "updated_at": "2026-11-14T09:57:31+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -19741,6 +19741,55 @@
       "evidence": "docs/procedures/nat-198/evidence.json",
       "evidence_sha256": "ffee4d933b8cf88644d55159db53431f8ddcbe39d97e52f95e4db0845fa9cc27",
       "finished_at": "2026-11-14T09:44:45+00:00"
+    },
+    {
+      "id": "NAT-199",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: e2r = e21 (ten CPUs) + the uncaught-exception reason after a user abort: 2 s later a thread call searches the loader log (read-only) for 'Terminating app due to uncaught exception' and prints each distinct line and its first-throw stack into the kernel message buffer (NAT-198 lost SpringBoard's SMP abort reason in the untransmitted part of the log)",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-198"
+      ],
+      "paths": [
+        "docs/procedures/nat-199",
+        "artifacts/nat-199"
+      ],
+      "acceptance": [
+        "The scan only reads the loader log; host harness on the patch's own functions with NAT-116-format text: reason and stack said once, own lines not repeated",
+        "Segments and loader-checked symbols equal e21; loader sites rc 0",
+        "Package, counted session, registered criteria for the native run"
+      ],
+      "started_at": "2026-11-14T09:55:54+00:00",
+      "last_heartbeat": "2026-11-14T09:55:54+00:00",
+      "updated_at": "2026-11-14T09:57:31+00:00",
+      "evidence": "docs/procedures/nat-199/evidence.json",
+      "evidence_sha256": "1476d4052e42ecf951417295c2d17b3423b843d6e8354f09e79f70b2747e1d8d",
+      "finished_at": "2026-11-14T09:57:31+00:00"
+    },
+    {
+      "id": "NAT-200",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: one run of e2r (NAT-199): ten CPUs as NAT-198, and the reason of SpringBoard's SMP-only abort from the kernel message buffer; smp198 and the scV measures beside it; restore stock RECOVERY and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 99,
+      "depends_on": [
+        "NAT-199"
+      ],
+      "paths": [
+        "docs/procedures/nat-200",
+        "artifacts/nat-200",
+        "docs/decisions/0082-nat200-loader-diag-xnu-e2r-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "One run under its own decision file; verdict R-reason / R-abort-no-text / R-no-abort / R-none with the exception text and throw stack",
+        "smp198 verdict and the boot CPU measures reported beside it",
+        "Stock RECOVERY restored with full hash check, Android verified, permit closed after done"
+      ]
     }
   ],
   "experiments": [
@@ -73258,6 +73307,60 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T09:55:33+00:00",
+      "action": "task.add:NAT-199",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-199",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T09:55:54+00:00",
+      "action": "task.claim:NAT-199",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-199",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-14T09:55:54+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T09:56:14+00:00",
+      "action": "task.add:NAT-200",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-200",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T09:57:31+00:00",
+      "action": "task.done:NAT-199",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-199",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-14T09:55:54+00:00"
+        }
+      ]
     }
   ]
 }

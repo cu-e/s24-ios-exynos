@@ -1,0 +1,69 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T10:40:00+00:00",
+ "task": "NAT-199",
+ "summary": "e2r = e21 + osfmk/user_exception_trace.o: 2 s after a user abort a thread call reads the loader log (read-only) for 'Terminating app due to uncaught exception' and prints each distinct line plus its first-throw stack into the kernel message buffer (NAT-198 lost SpringBoard's SMP abort text in the untransmitted 994 KB). Fits the __TEXT_EXEC slack (segments = e21), loader sites rc 0, 7 tests OK (host harness of the patch's own scan functions on NAT-116-format text), 3 mutants killed. RECOVERY 747f74e7..., session eccf26ac.... No device access.",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-e2r-md1",
+  "recovery_sha256": "747f74e7a612f9502a3c248b154cbe302579d992b68b50a26a0d9e7f57c805de",
+  "payload_sha256": "bfc2914b00ce27cca966fa01fcc5a575c7d483a126da5c7de6cee11c0c3331e6",
+  "kernel_sha256": "320420f4e08ee2204f449f62c6a8585177f8caf8ce59d383915b741cfb78c6a3",
+  "session": "docs/procedures/nat-199/session_nat200.py",
+  "session_sha256": "eccf26acda1e7a885d713d5309009021817cc1ef7e464fe2f6ce1470dedd306b"
+ },
+ "sources": {
+  "user_exception_trace.patch": "601ed717d0eed26c350efc2ba5db903ef0e1400c427a0282e146da7b6904231d",
+  "build.py": "4b31d1f3396e422c6841ee63d9b0473c945eebdf4f5c3e7e36d4cbbab8d27cb5",
+  "rebuild-args.json": "d93825549b4374f23808d6635ba1c967d6a8ca499f1b2caeff2ed48fdda2ca4f",
+  "reason200.py": "d50c56d781fe91828e7950aae9258b5a1fb599daa5ca88bc458d200f943ac918",
+  "derive200.py": "3905c28af1f0a0f8d1f3c01291e00f319ff9c4a3818430f3eb2f58e7e23a5d2f",
+  "test_nat199.py": "3db64ec30baf6d3f863d05eeda64c7d5e392ab76ec1379e1de425d540c51ca07"
+ },
+ "commands": [
+  {
+   "cmd": "krn-044/rebuild.py with docs/procedures/nat-199/rebuild-args.json",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-199/build.py --out artifacts/nat-199/build-001 ...",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-199/build-001 --out artifacts/nat-199/package-001",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-199/test_nat199.py",
+   "exit": 0,
+   "tests": 7
+  },
+  {
+   "cmd": "3 mutants of the scan (dedup, stack offset, look-ahead) with test_nat199.py Harness",
+   "exit": "each killed"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-199/kernel-001/rebuild.json",
+  "artifacts/nat-199/build-001/build.json",
+  "artifacts/nat-199/package-001/package.json",
+  "artifacts/nat-199/package-001/loader-diag-xnu-e2r-md1/recovery.img",
+  "artifacts/nat-199/kernel-001.log",
+  "artifacts/nat-199/build-001.log",
+  "artifacts/nat-199/package-001.log"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-199/kernel-001/rebuild.json": "988c72db35cb8e61ebbde63a3526cd93996dd4a18c28478f3c06f9a262153f63",
+  "artifacts/nat-199/build-001/build.json": "ee647eb6ffa57100b32c010e391025b938d9067e986233788fd941924971d218",
+  "artifacts/nat-199/package-001/package.json": "940e35e9d557cb0105d376297f5435a97f0b91d18736f02f148eb9fbbddd46b4",
+  "artifacts/nat-199/package-001/loader-diag-xnu-e2r-md1/recovery.img": "747f74e7a612f9502a3c248b154cbe302579d992b68b50a26a0d9e7f57c805de",
+  "artifacts/nat-199/kernel-001.log": "4dea87a82eceb04d80b0aa29677b762d3eab55eeffea77de99af542038aa6481",
+  "artifacts/nat-199/build-001.log": "4dc8c9a0e31b4a43cbd2fbe6fb488b2f190e455d213fd4a18a28c2adf93aef10",
+  "artifacts/nat-199/package-001.log": "cb60d79ad7e4f398e45c8b27d5b3483dc748a59791375f7d0310803beffcee00"
+ },
+ "limitations": [
+  "host-test only; whether the text reaches the console before the scan (2 s) is NAT-200's question"
+ ]
+}

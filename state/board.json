@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-14T09:45:25+00:00",
-  "ledger_updated_at": "2026-11-14T09:45:05+00:00",
-  "registry_sha256": "6feabdf475ffa1511b68423d7d6272a2f029706520a7f98aa2a06adbf860e2ac",
+  "generated_at": "2026-11-14T09:58:14+00:00",
+  "ledger_updated_at": "2026-11-14T09:57:31+00:00",
+  "registry_sha256": "63a031c6bb142fd39cb61992403f46f95498e7e2dccc064ec297781f7d292b9f",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -78,6 +78,7 @@
       "NAT-155"
     ],
     "gated": [
+      "NAT-200",
       "NAT-017",
       "NAT-072",
       "NAT-003",
@@ -230,6 +231,7 @@
       "NAT-150",
       "NAT-152",
       "NAT-153",
+      "NAT-199",
       "KRN-007",
       "KRN-011",
       "KRN-017",
@@ -6253,6 +6255,63 @@
       "reasons": [],
       "card_path": "planning/tasks/NAT-154.md",
       "report_health": "stale"
+    },
+    {
+      "id": "NAT-199",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: e2r = e21 (ten CPUs) + the uncaught-exception reason after a user abort: 2 s later a thread call searches the loader log (read-only) for 'Terminating app due to uncaught exception' and prints each distinct line and its first-throw stack into the kernel message buffer (NAT-198 lost SpringBoard's SMP abort reason in the untransmitted part of the log)",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-198"
+      ],
+      "paths": [
+        "docs/procedures/nat-199",
+        "artifacts/nat-199"
+      ],
+      "acceptance": [
+        "The scan only reads the loader log; host harness on the patch's own functions with NAT-116-format text: reason and stack said once, own lines not repeated",
+        "Segments and loader-checked symbols equal e21; loader sites rc 0",
+        "Package, counted session, registered criteria for the native run"
+      ],
+      "started_at": "2026-11-14T09:55:54+00:00",
+      "last_heartbeat": "2026-11-14T09:55:54+00:00",
+      "updated_at": "2026-11-14T09:57:31+00:00",
+      "evidence": "docs/procedures/nat-199/evidence.json",
+      "evidence_sha256": "1476d4052e42ecf951417295c2d17b3423b843d6e8354f09e79f70b2747e1d8d",
+      "finished_at": "2026-11-14T09:57:31+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-199.md"
+    },
+    {
+      "id": "NAT-200",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: one run of e2r (NAT-199): ten CPUs as NAT-198, and the reason of SpringBoard's SMP-only abort from the kernel message buffer; smp198 and the scV measures beside it; restore stock RECOVERY and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 99,
+      "depends_on": [
+        "NAT-199"
+      ],
+      "paths": [
+        "docs/procedures/nat-200",
+        "artifacts/nat-200",
+        "docs/decisions/0082-nat200-loader-diag-xnu-e2r-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "One run under its own decision file; verdict R-reason / R-abort-no-text / R-no-abort / R-none with the exception text and throw stack",
+        "smp198 verdict and the boot CPU measures reported beside it",
+        "Stock RECOVERY restored with full hash check, Android verified, permit closed after done"
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-200.md"
     },
     {
       "id": "KRN-007",
@@ -21272,62 +21331,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-14T08:38:12+00:00",
-      "action": "task.add:GPU-019",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "GPU-019",
-          "status": "pending",
-          "owner": null,
-          "priority": 98
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T08:38:32+00:00",
-      "action": "task.add:NAT-195",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-195",
-          "status": "pending",
-          "owner": null,
-          "priority": 97
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T08:39:53+00:00",
-      "action": "task.claim:GPU-019",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "GPU-019",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 98,
-          "last_heartbeat": "2026-11-14T08:39:53+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T08:42:38+00:00",
-      "action": "task.update:GPU-019",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "GPU-019",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 98,
-          "progress_note": "PMUCAL tables, DTZPC args, SMC/HVC routing and uH plugin established from stock binaries (README, evidence draft)",
-          "next_step": "Trace the first GPU ID/status register offsets sgpu.ko reads after power-on (amdgpu early init / sgpu probe), then complete",
-          "last_heartbeat": "2026-11-14T08:42:38+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-14T08:44:02+00:00",
       "action": "task.done:GPU-019",
       "owner": "claude-opus-usb130-20261113",
@@ -21537,11 +21540,65 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T09:55:33+00:00",
+      "action": "task.add:NAT-199",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-199",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T09:55:54+00:00",
+      "action": "task.claim:NAT-199",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-199",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-14T09:55:54+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T09:56:14+00:00",
+      "action": "task.add:NAT-200",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-200",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T09:57:31+00:00",
+      "action": "task.done:NAT-199",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-199",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-14T09:55:54+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "5118dee66b9a8f96b345cd43039c86b22d3e21dce0179df51e57f353a71584ab",
-    "BOARD.md": "a51f4413190c07f9fc4add8f8a397062bfcae60c08b91ea47531552ede8e92ce",
+    "STATUS.md": "3de672521ccc40ada3914a1c1b08c4bd8abd828adabf04014083025b0240e8cb",
+    "BOARD.md": "d99bca2b3c2dea39483c79cae21df674b91ef226680258261978d974fa65dee5",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -21683,6 +21740,8 @@
     "planning/tasks/NAT-152.md": "dc188e9da1f3e75c70fe2828044056e36411bb4dfbe101df0ca86efddcfb2e0d",
     "planning/tasks/NAT-153.md": "fe0edb7be1cb1704be78201bda2ac443315742c521d544b9b7789bc84184df99",
     "planning/tasks/NAT-154.md": "bdc8d2f12d1cf6859a609d7a643cc25002792ef647dceb89508be30950c24c74",
+    "planning/tasks/NAT-199.md": "dc71961212ce7aec818ff39d489c93b7b2a69c85144fd1193ef68978fede3109",
+    "planning/tasks/NAT-200.md": "a26b61be0779cdb226e4a7e61480a6d0e36d29ca42e6165274a151d2902fafe5",
     "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-011.md": "9b8014abd8d019af80fad695e0d0df9de9523d36a222553327384f7f00e8a901",
     "planning/tasks/KRN-017.md": "86a29485c4c3ed3a62f7ecf64f5e2bb303bb0bd7ac5fd661482bf024004f407d",
