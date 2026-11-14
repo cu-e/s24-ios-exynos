@@ -24,14 +24,14 @@ Legend:
 | S4 | Why EL2 | done | S-Boot enters our loader at EL2 (NAT-022 ENTRY `0x8900`, two boots). Android boots at EL2 and becomes pKVM (`kvm-arm.mode=protected`, GPU-018). PSCI starts a core at the highest non-secure EL |
 | S5 | The project's own EL2→EL1 sequence | done (exists, runs every boot) | the loader's `start.S` `from_el2`: HCR_EL2.RW, CNTHCTL_EL2 = 3, ICC_SRE_EL2 (SRE/Enable), CPTR_EL2 = 0, ELR/SPSR_EL2, `eret`; used on the boot CPU in every native run |
 | S6 | Reading Linux's EL2 set-up constants (`init_el2`) | **STOPPED** (2026-11-14 ~00:2xZ, NAT-154) | not resumed and not needed: S5 is the project's own source |
-| S7 | Read-only probe: on a secondary at EL2, record HCR_EL2, SCTLR_EL2, CNTHCTL_EL2, CNTVOFF_EL2, CPTR_EL2, MDCR_EL2, ICC_SRE_EL2, VBAR_EL2, MPIDR, then park in `wfe` | allowed now (host, then native under 0061) | system-register reads only; answers whether the firmware leaves EL2 state that the drop must handle |
+| S7 | Read-only probe: on a secondary at EL2, record HCR_EL2, SCTLR_EL2, CNTHCTL_EL2, CNTVOFF_EL2, CPTR_EL2, MDCR_EL2, ICC_SRE_EL2, VBAR_EL2, MPIDR, then CPU_OFF | **done** (NAT-195 host, NAT-196 native E-ok, 2026-11-14) | all 9 cores at EL2: HCR RW/API/APK/ATA, EL2 MMU off, VBAR_EL2 0, CNTHCTL 3, CNTVOFF 0, CPTR 0x32ff, ICC_SRE 9. The S5 sequence reproduces the boot CPU state; no new value is needed (docs/procedures/nat-196/README.md) |
 | S8 | Secondary reset path: when CurrentEL == 2, run the S5 sequence and `eret` to the EL1 entry | allowed now as a narrow host task; **if the classifier stops it, it stays stopped** | same goal as NAT-154. It uses only the loader's own phone-proven code, never the S6 source. Gates: `check_loader_sites.py` rc 0 and `__TEXT_EXEC` page slack (1232 B left in scV, NAT-189) |
 | S9 | Native run: cores at `arm_init_cpu`, `cpu_start`, the idle loop | allowed now (0061: CPU_ON runs need only the per-image decision) | criteria: running count > 1, no panic, timed return |
 | S10 | XNU SMP function: IPIs (GIC SGIs), per-CPU timers, cluster topology (A520 / A720 / X4), `small_cores` policy | after S9 | host work plus native runs |
 | S11 | Clocks of the other clusters through ACPM (stock FREQ_REQ per domain, as NAT-173 did for cpu0) | after S9 | stock parameters only |
 | S12 | Measure: backboardd and the driver on different cores, frames per 5 s against the reference | after S10 | reference scV |
 
-**Current blocker on the SMP line:** none that is external. S7 and S8 are the next pieces. S6 stays stopped.
+**Current blocker on the SMP line:** none that is external. S7 is done; S8 is the next piece. S6 stays stopped.
 
 ## Xclipse 940 GPU
 
