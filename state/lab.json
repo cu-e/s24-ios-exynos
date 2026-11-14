@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T04:17:16+00:00",
+  "updated_at": "2026-11-14T04:30:10+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -18988,6 +18988,53 @@
       "evidence": "docs/procedures/nat-175/evidence.json",
       "evidence_sha256": "3a527a396e34800b44e4565767356fac20acf1d7460cef175ae218944a205bc4",
       "finished_at": "2026-11-14T04:16:57+00:00"
+    },
+    {
+      "id": "NAT-176",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scS = scR (NAT-174) with a read-only display-layer snapshot in e1s_display.o: PMU DPUB/DPUF0/DPUF1 status (0x12861D44/1D84/26C4 bit 0, stock pmucal) gates reads of DECON TRIG/SHD/DATA_PATH, windows 2/3 (+shadow), DMA L0/L1 (+shadow), DPP L0/L1, SRAMC L0/L1 and SysMMU 0x19840000 (NAT-162 table), at probe and again at 300 s uptime; no register writes. Prerequisite for DPP1 hardware scaling of the 1125x2436 surface (NAT-175: CPU scaling costs 8.77 ms of every frame)",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 92,
+      "depends_on": [
+        "NAT-175"
+      ],
+      "paths": [
+        "docs/procedures/nat-176",
+        "artifacts/nat-176"
+      ],
+      "acceptance": [
+        "Kernel = NAT-174's with only bsd/e1s_display.o added/changed; the patch contains no register store (host check over the patched source and a fake-MMIO host run that records every access: loads only, gated on the three PMU status bits, every address in the NAT-162 table)",
+        "Loader sites rc 0; relocscan clean; cmdline unchanged except the tag (254 B); package, counted session, analyser dpp177.py with registered verdicts, tests, make check"
+      ],
+      "started_at": "2026-11-14T04:21:17+00:00",
+      "last_heartbeat": "2026-11-14T04:21:17+00:00",
+      "updated_at": "2026-11-14T04:30:10+00:00",
+      "evidence": "docs/procedures/nat-176/evidence.json",
+      "evidence_sha256": "bfa597a3da54efc23fce2eaa0c58c9441d7cfb44368241759c498048ab2fac7a",
+      "finished_at": "2026-11-14T04:30:10+00:00"
+    },
+    {
+      "id": "NAT-177",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: run scS (NAT-176: read-only DPP/DMA/SRAMC/SysMMU snapshot gated on PMU power status) once under decision 0061; registers decoded against NAT-162 (which DPP feeds the visible window, scaler state, SysMMU bypass), swipe capacity reproduced",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 92,
+      "depends_on": [
+        "NAT-176"
+      ],
+      "paths": [
+        "docs/procedures/nat-177",
+        "artifacts/nat-177"
+      ],
+      "acceptance": [
+        "Per-image decision before the run",
+        "Snapshot lines present at probe and at 300 s, or the gate's reason for skipping; dpp177 verdict",
+        "Stock RECOVERY restored with full hash and Android verified"
+      ]
     }
   ],
   "experiments": [
@@ -71311,6 +71358,60 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T04:20:39+00:00",
+      "action": "task.add:NAT-176",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-176",
+          "status": "pending",
+          "owner": null,
+          "priority": 92
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T04:20:58+00:00",
+      "action": "task.add:NAT-177",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-177",
+          "status": "pending",
+          "owner": null,
+          "priority": 92
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T04:21:17+00:00",
+      "action": "task.claim:NAT-176",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-176",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 92,
+          "last_heartbeat": "2026-11-14T04:21:17+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T04:30:10+00:00",
+      "action": "task.done:NAT-176",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-176",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 92,
+          "last_heartbeat": "2026-11-14T04:21:17+00:00"
+        }
+      ]
     }
   ]
 }

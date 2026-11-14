@@ -1,0 +1,101 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T05:20:00+00:00",
+ "task": "NAT-176",
+ "summary": "scS = scR (NAT-174) + bsd/e1s_display.o with a read-only display-layer snapshot: stock PMU DPUB/DPUF0/DPUF1 status bit 0 (0x12861D44/1D84/26C4) gates loads of NAT-162's table (DECON, win2/3 + shadow, WINCON CHMAP, DMA/DPP/SRAMC L0/L1, SysMMU v9 CTRL/STATUS/VERSION/CTRL_VM/FLPT) at probe and at 300 s; no stores (static check + read-only fake MMIO; 2 mutants caught). Kernel d84b4ce0 (NAT-174 + one object), loader sites rc 0, 254 B, package 002f5653, counted session 93ed6dad, analyser dpp177 (R-none/R-gated/R-partial/R-ok). 7 tests OK. Host-test only.",
+ "commit": "94c5d964 (base)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scS-md1",
+  "recovery_sha256": "002f5653014155df0f19226ae5d2d7cdf696c70ea5fae7b1d968745321b6fdbd",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "61dcbd3e463bc458238ec3bf62a0e43add3695d061a3c05d3824ac2924524e97",
+  "payload_bytes": 26207232,
+  "loader_image_sha256": "9a6f79399f89649fd6568fe917929f3df086c832d945dd72244bf2ee0a9af697",
+  "kernel_dir": "artifacts/nat-176/kernel-001",
+  "kernel_sha256": "d84b4ce0e6aed7d730dff9a2afbea49baf84d2eadfbb669e12e230be86966a58",
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT176-scS debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 touch_lat=1 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "cmdline_bytes": 254,
+  "session": "docs/procedures/nat-176/session_nat177.py",
+  "session_sha256": "93ed6dad53946973d850cc52ccfb2761d2b560285b5d760d195371ba230e96bb"
+ },
+ "sources": {
+  "docs/procedures/nat-176/build.py": "8bcedd85fdd72e7bf2260dda7a6ca56fd0ba1b80010c46b42a77c355d927dcb8",
+  "docs/procedures/nat-176/e1s_display.patch": "dbe48284c9c17940521619769967c7042878a2e0a762d5eae7db4b51e08fdbad",
+  "docs/procedures/nat-176/rebuild-args.json": "a216681794839ef9f241537c805daa58f577c06abce3db34ad0cba1f3ec912ed",
+  "docs/procedures/nat-176/host/fakemmio176.c": "9754a54b38939a85114e4f40aaec475d80f1458ff71f85817e52fe6a6c588d9f",
+  "docs/procedures/nat-176/host/shim176.h": "ed7a09a756543f139b176c443432db8dc37e1e1f9ed84c7a9c27b7a68129df17",
+  "docs/procedures/nat-176/test_nat176.py": "5d2b083731e44d92496b91ad2a53085123329aa0ed109426e9236d6a847a5f8f",
+  "docs/procedures/nat-176/dpp177.py": "72d8f985f8acd504bbe3e0847c6d3f7f7796c519b9f94a2ee9d441a4e50d2195",
+  "docs/procedures/nat-176/derive177.py": "dbe56757f1e8a12b910201690c95897ebef59fa41ceb5bf4b76fb52f635d7a3a",
+  "docs/procedures/nat-176/session_nat177.py": "93ed6dad53946973d850cc52ccfb2761d2b560285b5d760d195371ba230e96bb",
+  "docs/procedures/nat-176/README.md": "cf92506118436dca11a055da7d66838bacb9650aa50f2b0d92412d8d65706828",
+  "docs/procedures/nat-176/task.json": "a9b57927ff5f2de38edd3480c4d7f35a0284016203ebeda7f8f0daa810dc4824"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/krn-044/rebuild.py --out artifacts/nat-176/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-121/loader_return.patch --extra bsd/e1s_touch.o=docs/procedures/nat-174/e1s_touch_combined.patch --extra bsd/redwood_input.o=docs/procedures/nat-165/redwood_input.patch --extra bsd/e1s_acpm.o=docs/procedures/nat-172/e1s_acpm.patch --extra bsd/e1s_pmic.o=docs/procedures/nat-123/e1s_pmic.patch --extra osfmk/start.o=docs/procedures/nat-152/start.patch --extra osfmk/psci_smp.o=docs/procedures/nat-152/psci_smp.patch --extra bsd/e1s_display.o=docs/procedures/nat-176/e1s_display.patch --expect-string start: sense on (ready %s --expect-string miso cs-high --expect-string e1s-keys: disabled (e1skeys=0) --expect-string event thread started --expect-string e1s-touch: %s %u: finger %u x %u y %u --expect-string psci: cpu %d early marks: last 0x%llx --expect-string tl: u at %llu --expect-string e1s-dpp: %s pmu dpub %#x dpuf0 %#x dpuf1 %#x",
+   "exit_code": 0,
+   "result": "no_storage d84b4ce0, 0 undefined"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-176/build.py --out artifacts/nat-176/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "254 B; loader sites rc 0 ok bad 0; relocscan passed"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-176/build-001 --out artifacts/nat-176/package-001",
+   "exit_code": 0,
+   "result": "002f5653014155df0f19226ae5d2d7cdf696c70ea5fae7b1d968745321b6fdbd"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-176/derive177.py --check",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-176/test_nat176.py",
+   "exit_code": 0,
+   "result": "7 OK"
+  },
+  {
+   "cmd": "mutants: gate (dpub & 1U) / inserted e1s_dpp_pmu[0] = 0 store, run against test_nat176",
+   "exit_code": 0,
+   "result": "1 and 3 failures: caught"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-176/dpp177.py artifacts/nat-175/analysis/kernel-text.txt",
+   "exit_code": 0,
+   "result": "R-none on a run without the snapshot"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "OK"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-176/kernel-001/rebuild.json",
+  "artifacts/nat-176/kernel-001.log",
+  "artifacts/nat-176/build-001/build.json",
+  "artifacts/nat-176/build-001.log",
+  "artifacts/nat-176/package-001/package.json",
+  "artifacts/nat-176/e1s_display.c",
+  "artifacts/nat-176/make-check.log"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-176/kernel-001/rebuild.json": "b7a478733b70487705c5753333cc7d2f41fb9d45c2629f58a10e4582721d48e6",
+  "artifacts/nat-176/kernel-001.log": "c0d8b0ab0e166b5cfd956e77073cf901e68bd5305be1e8d4a18086cb1fd7d521",
+  "artifacts/nat-176/build-001/build.json": "92c44b5aad09fbaa7dbcffefd725da4db04c11e760f31be6c603b742661f658a",
+  "artifacts/nat-176/build-001.log": "103f9d657a8fb2d317f10471bd6b8463ddf940deaa97760eecbf8677778da9c5",
+  "artifacts/nat-176/package-001/package.json": "467f16157279240d449b2942fbd5dabac88490dff4e1962b908c5260f828d9de",
+  "artifacts/nat-176/e1s_display.c": "0544c95e2c634f76b3f8dbf6d5657421c9c56be55b9d261fc02ac915c0068396",
+  "artifacts/nat-176/make-check.log": "c2815411359609d86043cdcd5ea350571e1f0d2af0cf982fe3dc5c61adb91c92"
+ },
+ "limits": [
+  "Host simulation: what the phone registers hold is the NAT-177 question.",
+  "A load from an unclocked block could still fault despite the PMU gate; bounded by the timed return and watchdog."
+ ]
+}
