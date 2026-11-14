@@ -1,0 +1,152 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "origin_detail": "SM-S921B e1s, loader-diag-xnu-scJ-md1 booted from RECOVERY, iOS userland from RAM",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T01:08:33+00:00",
+ "task": "NAT-159",
+ "summary": "scJ (scH + fb_filter=0, recording tokens dropped) ran once. Steady 5 s windows (frames159.py rule, same as for NAT-153, 7 windows 353-383 s, no touch): MiniIOMobileFramebuffer driver time 26.00 ms per frame median (25.99-26.18) against NAT-153 70.68 ms: F2 (-63%). Frames/s median 9.26 (7.16-10.35) against 6.99; frame interval 108.0 ms, of which 82.0 ms is outside the driver (NAT-153: 72.4). GPU wait 0; late swaps 21 over 7 windows. Display D2-refreshing, P1 panel has pixels. SMP unchanged (C0-one, cpu1-9 E6). Stock RECOVERY restored, full hash match, Android verified.",
+ "decision": "docs/decisions/0064-nat159-loader-diag-xnu-scJ-md1-single-run-2026-11-14.md",
+ "commit": "see git log (decision 0064 commit precedes the run)",
+ "device_used": true,
+ "image": {
+  "name": "loader-diag-xnu-scJ-md1",
+  "recovery_sha256": "778300380b4ccd975d34e1cee89aca428db68db88d9e48232376399367a7003a",
+  "payload_sha256": "cd9823e1ce5a4b4d38d7e6d63fc9e0fe2142bfded8bd1710b782664336089ce5",
+  "kernel_sha256": "8d62baff503ddfe75ebf388fa13e9e8bf47cf46e942b54887f5c9221b44d14b4",
+  "session": "docs/procedures/nat-158/session_nat159.py",
+  "session_sha256": "0fa7d22ef5d97f66dd08ad8fa85baf7d781c312179b1bd70c64bacb4188de2ae"
+ },
+ "measurements": {
+  "frames": {
+   "windows": 12,
+   "recorded": false,
+   "recording_end_s": null,
+   "steady_windows": 7,
+   "first_steady_s": 353.0,
+   "last_steady_s": 383.0,
+   "driver_ms_median": 26.001,
+   "driver_ms_min": 25.994,
+   "driver_ms_max": 26.18,
+   "fps_median": 9.26,
+   "fps_min": 7.16,
+   "fps_max": 10.35,
+   "frame_interval_ms_median": 108.0,
+   "gpu_wait_us_max": 0,
+   "late_swaps": 21,
+   "other_ms_median": 82.0
+  },
+  "baseline_nat153": {
+   "windows": 13,
+   "recorded": true,
+   "recording_end_s": 345.0,
+   "steady_windows": 8,
+   "first_steady_s": 346.0,
+   "last_steady_s": 382.0,
+   "driver_ms_median": 70.681,
+   "driver_ms_min": 70.658,
+   "driver_ms_max": 74.25,
+   "fps_median": 6.99,
+   "fps_min": 6.76,
+   "fps_max": 7.3,
+   "frame_interval_ms_median": 143.1,
+   "gpu_wait_us_max": 0,
+   "late_swaps": 4,
+   "other_ms_median": 72.4
+  },
+  "grade": "F2",
+  "touch_events": 0,
+  "display": "D2-refreshing",
+  "pixels": "P1-panel-has-pixels, 1136377 non-zero",
+  "smp": "C0-one, cpu1-9 E6-mmu-on as in NAT-153",
+  "delivery_mb_s": 35.511
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-158/session_nat159.py --out artifacts/nat-159/preflight-001 --image loader-diag-xnu-scJ-md1",
+   "exit_code": 0,
+   "result": "ready-read-only"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/nat-158/session_nat159.py --out artifacts/nat-159/run-001 --image loader-diag-xnu-scJ-md1 --execute",
+   "exit_code": 0,
+   "result": "native-attempt-started; delivery delivered 35.511 MB/s"
+  },
+  {
+   "cmd": "nat-097/kl_reader2.py read_archive2(artifacts/nat-159/run-001/archive) why=2 text -> artifacts/nat-159/analysis/kernel-text.txt",
+   "exit_code": 0,
+   "result": "2 boots, 0 drops, 0 unreadable, why=2 532529 chars, 0 hole bytes"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-159/frames159.py artifacts/nat-159/analysis/kernel-text.txt --json artifacts/nat-159/analysis/frames159.json",
+   "exit_code": 0,
+   "result": "7 steady windows, driver 26.001 ms median, 9.26/s median"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-159/frames159.py artifacts/nat-153/analysis/kernel-text.txt --json artifacts/nat-153/analysis/frames159.json",
+   "exit_code": 0,
+   "result": "baseline: 8 steady windows, 70.681 ms, 6.99/s"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-113/decode113.py artifacts/nat-159/run-001/archive --json artifacts/nat-159/analysis/pixels.json --ppm artifacts/nat-159/analysis/panel-thumb.ppm",
+   "exit_code": 0,
+   "result": "P1-panel-has-pixels"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-150/analyze150.py --kernel-text artifacts/nat-159/analysis/kernel-text.txt --pixels artifacts/nat-159/analysis/pixels.json --out artifacts/nat-159/analysis/verdict.json",
+   "exit_code": 0
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 27 --out artifacts/nat-159/restore-001/restore-trace",
+   "exit_code": 0,
+   "result": "100663296/100663296 acknowledged, session end and reboot confirmed"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-159/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass, recovery_hash_match true"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-159/restore-001/report.json --readback artifacts/nat-159/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass (report.json derived from restore-trace/trace.json, same command sequence as NAT-153)"
+  }
+ ],
+ "not_established": [
+  "panel refresh rate and scan-out timing (kernel counts only, no camera)",
+  "input latency (no touch in this run)",
+  "why time outside the driver rose 72.4 -> 82.0 ms per frame (content differs between runs; frames159 cannot split rendering from other work)",
+  "frame rate with more than one core (SMP line paused, NAT-154)"
+ ],
+ "device_inventory": "devices/local-2026-11-14-nat159.json",
+ "artifacts": [
+  "artifacts/nat-159/run-001/report.json",
+  "artifacts/nat-159/run-001.stdout",
+  "artifacts/nat-159/preflight-001/report.json",
+  "artifacts/nat-159/analysis/kernel-text.txt",
+  "artifacts/nat-159/analysis/frames159.json",
+  "artifacts/nat-159/analysis/pixels.json",
+  "artifacts/nat-159/analysis/verdict.json",
+  "artifacts/nat-153/analysis/frames159.json",
+  "artifacts/nat-159/restore-001/report.json",
+  "artifacts/nat-159/restore-001/android-check.json",
+  "artifacts/nat-159/restore-001/assess.json",
+  "artifacts/nat-159/restore-001/restore-trace/trace.json",
+  "artifacts/nat-159/native-attempt-loader-diag-xnu-scJ-md1-used.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-159/run-001/report.json": "a4e5a5fa1ce880a9d73b2b572c91027db693c2ef966750b66d448af117dddcc2",
+  "artifacts/nat-159/run-001.stdout": "5450e81c9f1edc7152dfb80bd7d733bb98fb935a76a2642758124470f851ef41",
+  "artifacts/nat-159/preflight-001/report.json": "ac185ffd72cc254b141805b9cf1990817075b7325c17a1e26315d455b6caf023",
+  "artifacts/nat-159/analysis/kernel-text.txt": "948f43061506e7a35b4312ed0250eca2f69be9801f24311614e8fa7ca11250b2",
+  "artifacts/nat-159/analysis/frames159.json": "ede048ae0fe40d272e8315633969091ea02a7645f6cba5ed651bc0fb46738ad0",
+  "artifacts/nat-159/analysis/pixels.json": "c57007817ba138508b09bc739685026926b6aef5ee2845b39f52b86606abaf68",
+  "artifacts/nat-159/analysis/verdict.json": "0168dce23cd85cc3f9addaf4650dd5e27a1380f4c3e16ff79b9bad8681cb003b",
+  "artifacts/nat-153/analysis/frames159.json": "c1dc1c5147f5a3b2e3ea5a72e39cc9da105b6b691f1958440ed5b30e017a741f",
+  "artifacts/nat-159/restore-001/report.json": "f8edf7cd90b5244df783500c3e6bf8d23eae7da2e7c16b681c9e7596e3377fc9",
+  "artifacts/nat-159/restore-001/android-check.json": "93954bb0ed25f5cbdaf4bff0e440666783b1d9ca80f2737eda1b8a4c5c30495d",
+  "artifacts/nat-159/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "artifacts/nat-159/restore-001/restore-trace/trace.json": "45b7bc8d9b290e17d9c3efbdfe6429734b592dfc8f5571ff5f3427b351c600e0",
+  "artifacts/nat-159/native-attempt-loader-diag-xnu-scJ-md1-used.json": "651c161899c9e03b48ae08193a2eda75d505c53bf1228f2c4cdf9883daa1f0c6"
+ }
+}
