@@ -1,0 +1,285 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "origin_detail": "SM-S921B e1s, loader-diag-xnu-scL-md1 booted from RECOVERY, iOS userland from RAM",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T01:51:56+00:00",
+ "task": "NAT-164",
+ "summary": "scL (scJ + touch_lat=1) ran once; 363 tl swap/frame lines, no touch. Verdict T-cadence: CoreAnimation hands over a swap every 105.8 ms (median; p10 91.7, p90 112.4) and the driver puts each in panel memory 26.06 ms after SwapEnd (beat wait 0, no queueing): the ~10 frames/s on the idle home screen is the rate at which userland produces frames, not the driver or the CPU (single core ~50% busy, NAT-161). frames159: 9.77/s, driver 26.02 ms (instrumentation cost nil vs NAT-159). The panel shows the home screen with widgets and the live Clock icon (likely animated content; not established). Stock RECOVERY restored, full hash, Android verified.",
+ "decision": "docs/decisions/0066-nat164-loader-diag-xnu-scL-md1-single-run-2026-11-14.md",
+ "commit": "see git log",
+ "device_used": true,
+ "image": {
+  "name": "loader-diag-xnu-scL-md1",
+  "recovery_sha256": "6ab4112f6f9102443b4b7b472562e30aa37f27b17dbd953cdfead7cf50d67f5a",
+  "payload_sha256": "93a2989acf6ea87dd4055bf63065da5e05b1bf95020d317b50da4c393f57e00b",
+  "kernel_sha256": "8d62baff503ddfe75ebf388fa13e9e8bf47cf46e942b54887f5c9221b44d14b4",
+  "session": "docs/procedures/nat-163/session_nat164.py",
+  "session_sha256": "da0fd4f2661bc2098e456b08d92eeb17fef6a8d78249e574a062951ae614d8a8"
+ },
+ "measurements": {
+  "verdict": "T-cadence",
+  "tl": {
+   "swaps": 363,
+   "frames": 363,
+   "touch_samples": 0,
+   "load_lines": 0,
+   "idle": {
+    "swaps": 363,
+    "swap_interval": {
+     "n": 359,
+     "median": 105.83,
+     "p10": 91.7,
+     "p90": 112.4,
+     "min": 34.96,
+     "max": 1898.27
+    },
+    "beat_wait": {
+     "n": 363,
+     "median": 0.0,
+     "p10": 0.0,
+     "p90": 0.0,
+     "min": 0.0,
+     "max": 0.0
+    },
+    "copy": {
+     "n": 363,
+     "median": 26.0,
+     "p10": 25.92,
+     "p90": 26.13,
+     "min": 25.77,
+     "max": 34.1
+    },
+    "swap_to_done": {
+     "n": 363,
+     "median": 26.06,
+     "p10": 25.97,
+     "p90": 26.18,
+     "min": 25.9,
+     "max": 48.23
+    },
+    "share_60hz": 0.0
+   },
+   "touch": {
+    "swaps": 0,
+    "swap_interval": null,
+    "beat_wait": null,
+    "copy": null,
+    "swap_to_done": null,
+    "share_60hz": null
+   },
+   "touch_to_panel": null
+  },
+  "frames": {
+   "windows": 13,
+   "recorded": false,
+   "recording_end_s": null,
+   "steady_windows": 7,
+   "first_steady_s": 346.0,
+   "last_steady_s": 384.0,
+   "driver_ms_median": 26.018,
+   "driver_ms_min": 25.987,
+   "driver_ms_max": 26.179,
+   "fps_median": 9.77,
+   "fps_min": 4.67,
+   "fps_max": 10.15,
+   "frame_interval_ms_median": 102.4,
+   "gpu_wait_us_max": 0,
+   "late_swaps": 17,
+   "other_ms_median": 76.4,
+   "steady": [
+    {
+     "t": 346.0,
+     "frames": 50,
+     "ms": 5042,
+     "driver_us": 26179,
+     "gpu_us": 0,
+     "refresh_waits": 0,
+     "refresh_us": 0,
+     "late": 1
+    },
+    {
+     "t": 358.0,
+     "frames": 51,
+     "ms": 5032,
+     "driver_us": 26022,
+     "gpu_us": 0,
+     "refresh_waits": 0,
+     "refresh_us": 0,
+     "late": 2
+    },
+    {
+     "t": 363.0,
+     "frames": 51,
+     "ms": 5025,
+     "driver_us": 26026,
+     "gpu_us": 0,
+     "refresh_waits": 0,
+     "refresh_us": 0,
+     "late": 2
+    },
+    {
+     "t": 368.0,
+     "frames": 42,
+     "ms": 5027,
+     "driver_us": 26009,
+     "gpu_us": 0,
+     "refresh_waits": 0,
+     "refresh_us": 0,
+     "late": 5
+    },
+    {
+     "t": 374.0,
+     "frames": 26,
+     "ms": 5562,
+     "driver_us": 26008,
+     "gpu_us": 0,
+     "refresh_waits": 0,
+     "refresh_us": 0,
+     "late": 3
+    },
+    {
+     "t": 379.0,
+     "frames": 49,
+     "ms": 5017,
+     "driver_us": 25987,
+     "gpu_us": 0,
+     "refresh_waits": 0,
+     "refresh_us": 0,
+     "late": 3
+    },
+    {
+     "t": 384.0,
+     "frames": 36,
+     "ms": 5019,
+     "driver_us": 26018,
+     "gpu_us": 0,
+     "refresh_waits": 0,
+     "refresh_us": 0,
+     "late": 1
+    }
+   ]
+  },
+  "cpu_split": {
+   "snapshots": 2,
+   "span_s": 37.22,
+   "from_s": 333.06,
+   "to_s": 370.28,
+   "processes_cpu_s": 31.77,
+   "driver_cpu_s": 6.3,
+   "busy_share": 1.023,
+   "top": [
+    {
+     "cpu_s": 21.94,
+     "proc": "13 /System/Library/CoreServices/SpringBoard.app/SpringBoa"
+    },
+    {
+     "cpu_s": 7.18,
+     "proc": "1 /sbin/launchd.darwin"
+    },
+    {
+     "cpu_s": 1.59,
+     "proc": "12 /usr/libexec/runningboardd"
+    },
+    {
+     "cpu_s": 1.05,
+     "proc": "11 /usr/libexec/UserEventAgent (System)"
+    },
+    {
+     "cpu_s": 0.01,
+     "proc": "8 /redwood/bin/hb"
+    }
+   ],
+   "note": "single running core; time-stamp bases (launchd wall clock vs kernel seconds) assumed equal: both start near boot"
+  },
+  "touch_events": 0,
+  "pixels": "P1-panel-has-pixels, 1136377 non-zero"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-163/session_nat164.py --out artifacts/nat-164/preflight-001 --image loader-diag-xnu-scL-md1",
+   "exit_code": 0,
+   "result": "ready-read-only"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/nat-163/session_nat164.py --out artifacts/nat-164/run-001 --image loader-diag-xnu-scL-md1 --execute",
+   "exit_code": 0,
+   "result": "native-attempt-started; delivered 35.672 MB/s; Download Mode at 01:49:42 UTC (loader deadline)"
+  },
+  {
+   "cmd": "nat-097/kl_reader2.py read_archive2(artifacts/nat-164/run-001/archive) why=2 -> artifacts/nat-164/analysis/kernel-text.txt",
+   "exit_code": 0,
+   "result": "2 boots, 0 drops, 0 unreadable, 0 hole bytes"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-163/tl164.py artifacts/nat-164/analysis/kernel-text.txt --json artifacts/nat-164/analysis/tl164.json",
+   "exit_code": 0,
+   "result": "363 swaps, interval 105.83 ms, swap_to_done 26.06 ms"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-159/frames159.py artifacts/nat-164/analysis/kernel-text.txt --json artifacts/nat-164/analysis/frames159.json",
+   "exit_code": 0,
+   "result": "9.77/s, 26.02 ms"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-113/decode113.py artifacts/nat-164/run-001/archive --json artifacts/nat-164/analysis/pixels.json --ppm artifacts/nat-164/analysis/panel-thumb.ppm",
+   "exit_code": 0,
+   "result": "P1-panel-has-pixels"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 31 --out artifacts/nat-164/restore-001/restore-trace",
+   "exit_code": 0,
+   "result": "100663296/100663296 acknowledged, session end and reboot confirmed"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-164/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass, recovery_hash_match true"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-164/restore-001/report.json --readback artifacts/nat-164/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  }
+ ],
+ "not_established": [
+  "which content redraws the idle home screen every ~106 ms (the Clock icon is a candidate)",
+  "frame rate under continuous interaction (capacity) and touch-to-panel latency: no touch in this run",
+  "panel refresh and scan-out"
+ ],
+ "device_inventory": "devices/local-2026-11-14-nat164.json",
+ "artifacts": [
+  "artifacts/nat-164/run-001/report.json",
+  "artifacts/nat-164/run-001.stdout",
+  "artifacts/nat-164/preflight-001/report.json",
+  "artifacts/nat-164/analysis/kernel-text.txt",
+  "artifacts/nat-164/analysis/tl164.json",
+  "artifacts/nat-164/analysis/frames159.json",
+  "artifacts/nat-164/analysis/cpu161.json",
+  "artifacts/nat-164/analysis/pixels.json",
+  "artifacts/nat-164/analysis/verdict.json",
+  "artifacts/nat-164/analysis/panel-thumb-x3.png",
+  "artifacts/nat-164/restore-001/report.json",
+  "artifacts/nat-164/restore-001/android-check.json",
+  "artifacts/nat-164/restore-001/assess.json",
+  "artifacts/nat-164/restore-001/restore-trace/trace.json",
+  "artifacts/nat-164/native-attempt-loader-diag-xnu-scL-md1-used.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-164/run-001/report.json": "b1431fcc3ed470e9e86b999164af48130bcbea13ca79dbeedde675507422ffe3",
+  "artifacts/nat-164/run-001.stdout": "3d191a53cb2a9b7c54287d3d571ac3caeca281a30d63fc2a3bf6c4a1130572ef",
+  "artifacts/nat-164/preflight-001/report.json": "e60fee346a3a31bc8c4752ff2c739dabdde75ec85c8b3700c326eb53c4f9d61a",
+  "artifacts/nat-164/analysis/kernel-text.txt": "760ce34d86731cf80bbdf451c5cfd124f1be8db4448b86a4420a9d6d8d07f961",
+  "artifacts/nat-164/analysis/tl164.json": "fbcd16548bba86af75dd920f7beb0538614eceea85ef545c0fa206b06659e5ee",
+  "artifacts/nat-164/analysis/frames159.json": "55f80f2e587c293970181696c544bdbc50152a293798833a2f545fbfc7e188d7",
+  "artifacts/nat-164/analysis/cpu161.json": "3e2de013ccced4ffd0108362f59ecf3c1d0c37239d9706faa9117ee4bddaf614",
+  "artifacts/nat-164/analysis/pixels.json": "6dc81ab7c6c2c0e20584ccb782e98582ee29ad7c77ebc87598c53c9c1eb60018",
+  "artifacts/nat-164/analysis/verdict.json": "9e1f9d29830d47daabe048feae9bea368b1eb06cc59341486ac0c50540eb332f",
+  "artifacts/nat-164/analysis/panel-thumb-x3.png": "f21c70ac81c77c4ee58e7d01edf0b0e5d1b20178ab11b2f33a4ba8c7743aec28",
+  "artifacts/nat-164/restore-001/report.json": "74dd620f0da4c680ef1a3fbea93cb0c3406187d6ab6c637cad5b99d0e32558eb",
+  "artifacts/nat-164/restore-001/android-check.json": "7364bde5dc688d10a698ad0f4ffa8d8b64aa06877a8834e488fc5df196d7374b",
+  "artifacts/nat-164/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "artifacts/nat-164/restore-001/restore-trace/trace.json": "ad7d3dd5facdf9bc5761e97de874196e4186084646056002571089051abdedb3",
+  "artifacts/nat-164/native-attempt-loader-diag-xnu-scL-md1-used.json": "17705a6538d6ee3e0ac19c829e8cbc1438177a79f4cd824e127bc9629677c580"
+ }
+}
