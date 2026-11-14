@@ -1,0 +1,197 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "origin_detail": "SM-S921B e1s, loader-diag-xnu-scK-md1 booted from RECOVERY, iOS userland from RAM",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T01:32:02+00:00",
+ "task": "NAT-161",
+ "summary": "scK (scJ + fbscale=2) ran once: iOS came up at 750x1624 (swap lines), SpringBoard stayed up. Steady windows (frames159, 10 windows 319-382 s, no touch): 9.65 frames/s median vs NAT-159 9.26 (+4%): G0; driver 25.75 ms (25.73-25.95) vs 26.00; outside the driver 77.9 ms vs 82.0. CPU split between two ps snapshots 328-363 s (cpu161.py): processes 10.68 s (SpringBoard 5.65, backboardd 2.27) + driver 6.78 s over 34.9 s = 50% busy on the single core: the idle home screen frame rate is not CPU-bound; rendering 2.25x fewer pixels barely changes it. Display D2, P1. Stock RECOVERY restored, full hash, Android verified.",
+ "decision": "docs/decisions/0065-nat161-loader-diag-xnu-scK-md1-single-run-2026-11-14.md",
+ "commit": "see git log",
+ "device_used": true,
+ "image": {
+  "name": "loader-diag-xnu-scK-md1",
+  "recovery_sha256": "3fb15e16cb9ef20ca94c35c68abf66bbc52ca09c828f60d46b26b63c8cfdea5d",
+  "payload_sha256": "1073e982038250e9d2daa24650dd80f641f51162d0f7511a8fbac4f291c0b98c",
+  "kernel_sha256": "8d62baff503ddfe75ebf388fa13e9e8bf47cf46e942b54887f5c9221b44d14b4",
+  "session": "docs/procedures/nat-160/session_nat161.py",
+  "session_sha256": "c0f8797f9a00be745089616c26f257b45515bf21d16c46ac709e414de84b2dc9"
+ },
+ "measurements": {
+  "frames": {
+   "windows": 14,
+   "recorded": false,
+   "recording_end_s": null,
+   "steady_windows": 10,
+   "first_steady_s": 319.0,
+   "last_steady_s": 382.0,
+   "driver_ms_median": 25.7475,
+   "driver_ms_min": 25.728,
+   "driver_ms_max": 25.946,
+   "fps_median": 9.65,
+   "fps_min": 3.57,
+   "fps_max": 10.15,
+   "frame_interval_ms_median": 103.6,
+   "gpu_wait_us_max": 0,
+   "late_swaps": 20,
+   "other_ms_median": 77.9
+  },
+  "baseline_nat159": {
+   "windows": 12,
+   "recorded": false,
+   "recording_end_s": null,
+   "steady_windows": 7,
+   "first_steady_s": 353.0,
+   "last_steady_s": 383.0,
+   "driver_ms_median": 26.001,
+   "driver_ms_min": 25.994,
+   "driver_ms_max": 26.18,
+   "fps_median": 9.26,
+   "fps_min": 7.16,
+   "fps_max": 10.35,
+   "frame_interval_ms_median": 108.0,
+   "gpu_wait_us_max": 0,
+   "late_swaps": 21,
+   "other_ms_median": 82.0
+  },
+  "grade": "G0",
+  "cpu_split": {
+   "snapshots": 2,
+   "span_s": 34.94,
+   "from_s": 327.91,
+   "to_s": 362.86,
+   "processes_cpu_s": 10.68,
+   "driver_cpu_s": 6.78,
+   "busy_share": 0.5,
+   "top": [
+    {
+     "cpu_s": 5.65,
+     "proc": "13 /System/Library/CoreServices/SpringBoard.app/SpringBoa"
+    },
+    {
+     "cpu_s": 2.27,
+     "proc": "16 /usr/libexec/backboardd"
+    },
+    {
+     "cpu_s": 0.77,
+     "proc": "12 /usr/libexec/runningboardd"
+    },
+    {
+     "cpu_s": 0.74,
+     "proc": "1 /sbin/launchd.darwin"
+    },
+    {
+     "cpu_s": 0.38,
+     "proc": "24 /usr/sbin/cfprefsd daemon"
+    },
+    {
+     "cpu_s": 0.31,
+     "proc": "23 /usr/libexec/logd_helper"
+    },
+    {
+     "cpu_s": 0.19,
+     "proc": "21 /usr/libexec/logd"
+    },
+    {
+     "cpu_s": 0.18,
+     "proc": "11 /usr/libexec/UserEventAgent (System)"
+    }
+   ],
+   "note": "single running core; time-stamp bases (launchd wall clock vs kernel seconds) assumed equal: both start near boot"
+  },
+  "surface": "750x1624 BGRA",
+  "touch_events": 0,
+  "display": "D2-refreshing",
+  "pixels": "P1-panel-has-pixels, 1263415 non-zero",
+  "delivery_mb_s": 35.733,
+  "userland_exits": "mediaserverd SIGSEGV x4 (also in NAT-159), datamigrator exit(0)"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-160/session_nat161.py --out artifacts/nat-161/preflight-001 --image loader-diag-xnu-scK-md1",
+   "exit_code": 0,
+   "result": "ready-read-only"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/nat-160/session_nat161.py --out artifacts/nat-161/run-001 --image loader-diag-xnu-scK-md1 --execute",
+   "exit_code": 0,
+   "result": "native-attempt-started; delivered 35.733 MB/s"
+  },
+  {
+   "cmd": "nat-097/kl_reader2.py read_archive2(artifacts/nat-161/run-001/archive) why=2 -> artifacts/nat-161/analysis/kernel-text.txt",
+   "exit_code": 0,
+   "result": "2 boots, 0 drops, 0 unreadable, 0 hole bytes"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-159/frames159.py artifacts/nat-161/analysis/kernel-text.txt --json artifacts/nat-161/analysis/frames159.json",
+   "exit_code": 0,
+   "result": "10 steady windows, 9.65/s, 25.75 ms"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-161/cpu161.py artifacts/nat-161/analysis/kernel-text.txt --json artifacts/nat-161/analysis/cpu161.json",
+   "exit_code": 0,
+   "result": "busy share 0.50 over 34.94 s"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-113/decode113.py artifacts/nat-161/run-001/archive --json artifacts/nat-161/analysis/pixels.json --ppm artifacts/nat-161/analysis/panel-thumb.ppm",
+   "exit_code": 0,
+   "result": "P1-panel-has-pixels"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-150/analyze150.py --kernel-text artifacts/nat-161/analysis/kernel-text.txt --pixels artifacts/nat-161/analysis/pixels.json --out artifacts/nat-161/analysis/verdict.json",
+   "exit_code": 0
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 29 --out artifacts/nat-161/restore-001/restore-trace",
+   "exit_code": 0,
+   "result": "100663296/100663296 acknowledged, session end and reboot confirmed"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-161/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass, recovery_hash_match true"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-161/restore-001/report.json --readback artifacts/nat-161/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass (report.json derived from trace.json, same command sequence as NAT-159)"
+  }
+ ],
+ "not_established": [
+  "what paces CoreAnimation on the idle home screen (content rate vs its own clock vs swap waits): needs per-swap timing (touch_lat=1) or a continuous-animation workload",
+  "capacity frame rate under interaction at scale 2 (no touch)",
+  "panel refresh, scan-out and input latency",
+  "the launchd wall clock and the kernel clock are assumed to share a base for the CPU span"
+ ],
+ "device_inventory": "devices/local-2026-11-14-nat161.json",
+ "artifacts": [
+  "artifacts/nat-161/run-001/report.json",
+  "artifacts/nat-161/run-001.stdout",
+  "artifacts/nat-161/preflight-001/report.json",
+  "artifacts/nat-161/analysis/kernel-text.txt",
+  "artifacts/nat-161/analysis/frames159.json",
+  "artifacts/nat-161/analysis/cpu161.json",
+  "artifacts/nat-161/analysis/pixels.json",
+  "artifacts/nat-161/analysis/verdict.json",
+  "artifacts/nat-161/restore-001/report.json",
+  "artifacts/nat-161/restore-001/android-check.json",
+  "artifacts/nat-161/restore-001/assess.json",
+  "artifacts/nat-161/restore-001/restore-trace/trace.json",
+  "artifacts/nat-161/native-attempt-loader-diag-xnu-scK-md1-used.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-161/run-001/report.json": "cfae74710dd1f31faeae97a5934382ceda19b1ecda2c57a66cc4949ca5ee9666",
+  "artifacts/nat-161/run-001.stdout": "3d702f0edd9321b190ebca5d1f1e4212e059e65e9b44fea64e8362b9f43b4a90",
+  "artifacts/nat-161/preflight-001/report.json": "6ae95f4e62fd4b04119b64d8bad10fd958ee207ea0e58eac19f5ae8693f72257",
+  "artifacts/nat-161/analysis/kernel-text.txt": "8f89be5ad5a7142ba1792cdbcba1965ae37ed528adb1fadeb7c008b11822a6cb",
+  "artifacts/nat-161/analysis/frames159.json": "b282537fa5083d4d2c7c930c91c78e6f6252cda21433b09fb465093287866218",
+  "artifacts/nat-161/analysis/cpu161.json": "22145df258d64a2d6d85ce43d00d30effb36c9266e1c2f4e29a024d6c41267d7",
+  "artifacts/nat-161/analysis/pixels.json": "6b517db423d398cf15e20d57bb0d53344e1a05e299ead74d30ca97b51280290a",
+  "artifacts/nat-161/analysis/verdict.json": "4ac742ed182de5f9b586f190404099fced64738bcd3c4c437a44f26ff4f7e02e",
+  "artifacts/nat-161/restore-001/report.json": "959e36160c7256dfdbe69858df628a5d7899bacde023a06fe7cc669b70b07cfc",
+  "artifacts/nat-161/restore-001/android-check.json": "870ebb17d9a108dd7685d514018f4ac482caa2d50faca8b8a3dc31139faf2bba",
+  "artifacts/nat-161/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "artifacts/nat-161/restore-001/restore-trace/trace.json": "e5987a2dd8c8562152da7e3bdea0094b7f58ed06ffbea44329a00d0ebde16b59",
+  "artifacts/nat-161/native-attempt-loader-diag-xnu-scK-md1-used.json": "ec098386327887c80db5219b0b2b03e79bd27b34e390e2d5e0be5e1117571d74"
+ }
+}
