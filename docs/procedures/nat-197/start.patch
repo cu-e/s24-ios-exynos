@@ -1,0 +1,215 @@
+--- start.s.orig
++++ start.s
+@@ -88,6 +88,36 @@
+ #endif /* defined(KERNEL_INTEGRITY_KTRR) */
+ .endmacro
+ 
++#if defined(GENERIC_PSCI_SMP)
++#define NAT195_EL2_PROBE 1						// NAT-195: read-only EL2 probe (see Lpsci_smp_mark4); NAT-197: kept as the fallback, a core still at EL2 there was not dropped
++/*
++ * NAT-150/152: how far a core that PSCI CPU_ON started has got, for the boot processor to read
++ * (psci_smp_start_cpu()). Each core has 128 bytes of psci_smp_early_marks (psci_smp.c), found
++ * by its MPIDR Affinity1: [0] 0x5EC00000 | the last stage reached, [8] its MPIDR,
++ * [16 * stage] and [16 * stage + 8] the two registers given. Addressed as the core runs: by
++ * physical address with the MMU off (the store goes to memory), through the V=P mapping just
++ * after it is on; then cleaned to the point of coherency. Uses x9 and x10 only; flags unchanged.
++ */
++.macro PSCI_SMP_EARLY_MARK stage, ra, rb
++	mrs		x9, MPIDR_EL1
++	ubfx	x9, x9, #8, #4
++	adrp	x10, EXT(psci_smp_early_marks)@page
++	add		x10, x10, EXT(psci_smp_early_marks)@pageoff
++	add		x10, x10, x9, lsl #7
++	str		\ra, [x10, #(16 * \stage)]
++	str		\rb, [x10, #(16 * \stage + 8)]
++	mrs		x9, MPIDR_EL1
++	str		x9, [x10, #8]
++	movz	x9, #\stage
++	movk	x9, #0x5EC0, lsl #16
++	str		x9, [x10]
++	dc		cvac, x10
++	add		x10, x10, #64
++	dc		cvac, x10
++	dsb		sy
++.endm
++#endif /* defined(GENERIC_PSCI_SMP) */
++
+ /*
+  * Checks the reset handler for global and CPU-specific reset-assist functions,
+  * then jumps to the reset handler with boot args and cpu data. This is copied
+@@ -134,11 +164,15 @@
+ 	 * processor's early ones, which hand the exception to the boot loader:
+ 	 * that is not for this core to do.
+ 	 */
++	mrs		x11, CurrentEL						// (NAT-150: as the core came in)
++	b		Lnat197_drop						// (NAT-197: in place of mrs x12, SCTLR_EL1; at EL2 to EL1, then back)
++Lnat197_back:
+ 	msr		DAIFSet, #(DAIFSC_ALL)				// Disable all interrupts
+ 	adrp	x0, EXT(LowSecondaryExceptionVectorBase)@page
+ 	add		x0, x0, EXT(LowSecondaryExceptionVectorBase)@pageoff
+ 	msr		VBAR_EL1, x0
+ 	isb
++	PSCI_SMP_EARLY_MARK 1, x11, x12				// stage 1: at the entry
+ 	// The MMU and the caches are off, says PSCI; of the rest of SCTLR it
+ 	// says nothing. Only the bits that must be set, until common_start.
+ 	MOV64	x0, 0x30D00800
+@@ -201,6 +235,9 @@
+ 	cmp		x0, x2
+ 	bne		Lskip_cpu_reset_handler
+ 1:
++#if defined(GENERIC_PSCI_SMP)
++	PSCI_SMP_EARLY_MARK 2, x21, x0				// stage 2: its cpu data and a valid handler found
++#endif
+ 
+ #if HAS_BP_RET
+ 	bl		EXT(set_bp_ret)
+@@ -217,6 +254,9 @@
+ 
+ 	blr		x0
+ Lskip_cpu_reset_handler:
++#if defined(GENERIC_PSCI_SMP)
++	PSCI_SMP_EARLY_MARK 3, x0, x3				// stage 3: no cpu data, or no valid handler (it hangs here)
++#endif
+ 	b		.									// Hang if the handler is NULL or returns
+ 
+ 	.align 3
+@@ -246,6 +286,100 @@
+ LEXT(_start)
+ 	b	EXT(start_first_cpu)
+ 
++#if defined(GENERIC_PSCI_SMP)
++/*
++ * NAT-152: marks 4-6 of a started core, out of line. Each is reached through a branch that takes
++ * the place of one that was there (same size), so that no instruction after this page moves: the
++ * boot loader checks start.s's checkpoint sites, loader_jump and _set_mmu_ttb at fixed addresses
++ * (NAT-151). Only a started core (x21 != 0) comes here.
++ */
++Lpsci_smp_mark4:
++	PSCI_SMP_EARLY_MARK 4, lr, x23				// stage 4: start_cpu, stacks set
++#if defined(NAT195_EL2_PROBE)
++	/*
++	 * NAT-195: a started core that is at EL2 (NAT-153) records the EL2 state the firmware left and
++	 * parks. Reads only: no EL2 register is written. Slots 3-6 of its marks are reused (stage 3 is
++	 * the hang path and stages 5-6 are never reached by a parked core); the last stage word is
++	 * 0x5EC000E2; then PSCI CPU_OFF, with a wfe park if it returns. A core at EL1 goes on as before.
++	 */
++	mrs		x9, CurrentEL
++	cmp		x9, #0x8
++	b.ne	common_start
++	mrs		x11, HCR_EL2
++	mrs		x12, SCTLR_EL2
++	PSCI_SMP_EARLY_MARK 3, x11, x12				// 3: HCR_EL2, SCTLR_EL2
++	mrs		x11, MDCR_EL2
++	mrs		x12, VBAR_EL2
++	PSCI_SMP_EARLY_MARK 4, x11, x12				// 4: MDCR_EL2, VBAR_EL2
++	mrs		x11, CNTHCTL_EL2
++	mrs		x12, CNTVOFF_EL2
++	PSCI_SMP_EARLY_MARK 5, x11, x12				// 5: CNTHCTL_EL2, CNTVOFF_EL2
++	mrs		x11, CPTR_EL2
++	mrs		x12, ICC_SRE_EL2
++	PSCI_SMP_EARLY_MARK 6, x11, x12				// 6: CPTR_EL2, ICC_SRE_EL2
++	mrs		x9, MPIDR_EL1
++	ubfx	x9, x9, #8, #4
++	adrp	x10, EXT(psci_smp_early_marks)@page
++	add		x10, x10, EXT(psci_smp_early_marks)@pageoff
++	add		x10, x10, x9, lsl #7
++	movz	x9, #0xE2
++	movk	x9, #0x5EC0, lsl #16
++	str		x9, [x10]
++	dc		cvac, x10
++	dsb		sy
++	movz	w0, #0x0002							// PSCI CPU_OFF (0x84000002, as psci_smp.c uses): back to the firmware, off,
++	movk	w0, #0x8400, lsl #16				// as the NAT-153 cores ended (AFFINITY_INFO 1)
++	smc		#0
++Lnat195_park:										// only if CPU_OFF returns
++
++	wfe
++	b		Lnat195_park
++#endif /* defined(NAT195_EL2_PROBE) */
++	b		common_start
++Lpsci_smp_mark5:
++	mrs		x11, TTBR1_EL1
++	mrs		x12, TCR_EL1
++	PSCI_SMP_EARLY_MARK 5, x11, x12				// stage 5: just before its MMU is on
++	b		Lpsci_smp_mark5_back
++Lpsci_smp_mark6:
++	mrs		x11, SCTLR_EL1
++	mov		x12, sp
++	PSCI_SMP_EARLY_MARK 6, x11, x12				// stage 6: its MMU on (V=P)
++	b		Lpsci_smp_mark6_back
++/*
++ * NAT-197: a core that PSCI CPU_ON started at EL2 (NAT-153, NAT-196) goes down to EL1, where the rest
++ * of start.s and the kernel run, as the boot processor does. The values are the boot loader's own
++ * (shim/e1s-xnu/start.S, from_el2), which every native run has used on the boot processor: HCR_EL2 RW
++ * only, the EL1 timer and counter open, the GIC system registers allowed at EL1, nothing trapped by
++ * CPTR_EL2, then eret to EL1h with DAIF masked. NAT-196 measured what the firmware leaves (CNTHCTL 3,
++ * ICC_SRE 9, CNTVOFF 0, CPTR 0x32ff, HCR RW|API|APK|ATA): only HCR_EL2 and CPTR_EL2 change. A core
++ * that is at EL1 already only comes back. Uses x9 and x10; x11 keeps the entry CurrentEL in bits 3:2
++ * and gets the CurrentEL after this in bits 11:10 (0x408: came at EL2, now EL1), for stage 1's mark.
++ */
++Lnat197_drop:
++	cmp		x11, #0x8
++	b.ne	Lnat197_el1
++	mov		x9, #(1 << 31)						// HCR_EL2.RW
++	msr		HCR_EL2, x9
++	mov		x9, #3								// CNTHCTL_EL2.EL1PCTEN|EL1PCEN
++	msr		CNTHCTL_EL2, x9
++	mrs		x9, ICC_SRE_EL2
++	mov		x10, #9								// SRE | Enable: ICC_*_EL1 allowed
++	orr		x9, x9, x10
++	msr		ICC_SRE_EL2, x9
++	msr		CPTR_EL2, xzr
++	adr		x9, Lnat197_el1
++	msr		ELR_EL2, x9
++	mov		x9, #0x3c5							// EL1h, DAIF masked
++	msr		SPSR_EL2, x9
++	eret
++Lnat197_el1:
++	mrs		x9, CurrentEL
++	orr		x11, x11, x9, lsl #8
++	mrs		x12, SCTLR_EL1						// (the instruction the branch took the place of)
++	b		Lnat197_back
++#endif /* defined(GENERIC_PSCI_SMP) */
++
+ 
+ /*
+  * Provides an early-boot exception vector so that the processor will spin
+@@ -504,7 +638,11 @@
+ 	add		lr, lr, x22
+ 	sub		lr, lr, x23
+ 
++#if defined(GENERIC_PSCI_SMP)
++	b		Lpsci_smp_mark4						// (NAT-152: then common_start)
++#else
+ 	b		common_start
++#endif
+ 
+ /*
+  * create_l1_table_entry
+@@ -957,16 +1095,26 @@
+ 	PAC_INIT_KEY_STATE tmp=x0, tmp2=x1
+ #endif /* HAS_APPLE_PAC */
+ 
++#if defined(GENERIC_PSCI_SMP)
++	cbnz	x21, Lpsci_smp_mark5				// boot CPU cold start only (NAT-152: a started core marks, then comes back)
++#else
+ 	cbnz	x21, 1f								// boot CPU cold start only
++#endif
+ 	LOADER_CHECKPOINT 4
++Lpsci_smp_mark5_back:							// (where the original `1f` lands: the macro's own last label)
+ 	E1S_BOOT_MARK 4
+ 1:
+ 	// Enable caches, MMU, ROP and JOP
+ 	MOV64   x0, SCTLR_EL1_DEFAULT
+ 	MSR_SCTLR_EL1_X0
+ 	isb		sy
++#if defined(GENERIC_PSCI_SMP)
++	cbnz	x21, Lpsci_smp_mark6				// (NAT-152: a started core marks, then comes back)
++#else
+ 	cbnz	x21, 1f
++#endif
+ 	LOADER_CHECKPOINT 5
++Lpsci_smp_mark6_back:							// (where the original `1f` lands: the macro's own last label)
+ 	MOV64   x0, SCTLR_EL1_DEFAULT				// restore what the checkpoint clobbered
+ 1:
+ 

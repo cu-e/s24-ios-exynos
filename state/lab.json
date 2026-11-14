@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T09:14:36+00:00",
+  "updated_at": "2026-11-14T09:26:31+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -19672,6 +19672,55 @@
       "evidence": "docs/procedures/nat-196/evidence.json",
       "evidence_sha256": "52b5cb075408648891fbc942682799902feb2edecbd111d5f5e30ce83e432522",
       "finished_at": "2026-11-14T09:14:17+00:00"
+    },
+    {
+      "id": "NAT-197",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: secondary EL2->EL1 drop (roadmap S8): a PSCI-started core that enters at EL2 runs the boot loader's own phone-proven from_el2 sequence (HCR_EL2=RW, CNTHCTL_EL2=3, ICC_SRE_EL2|=9, CPTR_EL2=0, ELR/SPSR EL1h, eret) out of line at reset_vector, then continues XNU's EL1 path; NAT-195 probe kept as the fallback; reference scV otherwise",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 98,
+      "depends_on": [
+        "NAT-196"
+      ],
+      "paths": [
+        "docs/procedures/nat-197",
+        "artifacts/nat-197"
+      ],
+      "acceptance": [
+        "The only EL2 writes are the loader's from_el2 values (test against shim/e1s-xnu/start.S on the patch and on the linked kernel)",
+        "No instruction outside the reset-vector page moves: segments and nm equal scV; loader sites rc 0",
+        "Package, counted session, analyser with registered verdicts for the native run (running count, per-core stage, faults, panic)"
+      ],
+      "started_at": "2026-11-14T09:20:10+00:00",
+      "last_heartbeat": "2026-11-14T09:20:10+00:00",
+      "updated_at": "2026-11-14T09:25:58+00:00",
+      "evidence": "docs/procedures/nat-197/evidence.json",
+      "evidence_sha256": "1b56c4dc56e5cfac90aeea630f0a6126004fd7ea5af1d16fe92825edf1e7b484",
+      "finished_at": "2026-11-14T09:25:58+00:00"
+    },
+    {
+      "id": "NAT-198",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: one run of e21 (NAT-197): PSCI-started cores drop EL2->EL1 with the loader's own from_el2 values and continue XNU's start path; smp198 verdict (running count, per-core stage, EL after drop, faults, panic); boot CPU measures as scV; restore stock RECOVERY and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 98,
+      "depends_on": [
+        "NAT-197"
+      ],
+      "paths": [
+        "docs/procedures/nat-198",
+        "artifacts/nat-198",
+        "docs/decisions/0081-nat198-loader-diag-xnu-e21-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "One run under its own decision file; smp198 verdict S-none/S-panic/S2-all/S1-some/S0-none with per-core state",
+        "Boot CPU measures (display, fbcopy181, bbd188, top186, cpuclk173, touch170) and the stop path reported beside it",
+        "Stock RECOVERY restored with full hash check, Android verified, permit closed after done"
+      ]
     }
   ],
   "experiments": [
@@ -73085,6 +73134,60 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T09:19:51+00:00",
+      "action": "task.add:NAT-197",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-197",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T09:20:10+00:00",
+      "action": "task.claim:NAT-197",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-197",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 98,
+          "last_heartbeat": "2026-11-14T09:20:10+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T09:25:58+00:00",
+      "action": "task.done:NAT-197",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-197",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 98,
+          "last_heartbeat": "2026-11-14T09:20:10+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T09:26:31+00:00",
+      "action": "task.add:NAT-198",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-198",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
     }
   ]
 }

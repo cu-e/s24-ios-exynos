@@ -1,0 +1,16 @@
+{
+ "id": "NAT-197",
+ "status": "pending",
+ "owner": null,
+ "title": "Host: secondary EL2->EL1 drop (roadmap S8): a PSCI-started core that enters at EL2 runs the boot loader's own phone-proven from_el2 sequence (HCR_EL2=RW, CNTHCTL_EL2=3, ICC_SRE_EL2|=9, CPTR_EL2=0, ELR/SPSR EL1h, eret) out of line at reset_vector, then continues XNU's EL1 path; NAT-195 probe kept as the fallback; reference scV otherwise",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 98,
+ "depends_on": ["NAT-196"],
+ "paths": ["docs/procedures/nat-197", "artifacts/nat-197"],
+ "acceptance": [
+  "The only EL2 writes are the loader's from_el2 values (test against shim/e1s-xnu/start.S on the patch and on the linked kernel)",
+  "No instruction outside the reset-vector page moves: segments and nm equal scV; loader sites rc 0",
+  "Package, counted session, analyser with registered verdicts for the native run (running count, per-core stage, faults, panic)"
+ ]
+}

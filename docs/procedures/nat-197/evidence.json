@@ -1,0 +1,74 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T09:50:00+00:00",
+ "task": "NAT-197",
+ "summary": "Secondary EL2->EL1 drop: reset_vector+4 branches (same size) to an out-of-line block in the reset-vector page that runs the boot loader's from_el2 sequence instruction for instruction (HCR_EL2=RW, CNTHCTL_EL2=3, ICC_SRE_EL2|=9, CPTR_EL2=0, ELR/SPSR EL1h DAIF masked, eret) and comes back to reset_vector+8; NAT-195 probe kept as fallback. Kernel segments and nm equal scV, loader sites rc 0, 9 tests OK, 4 patch mutants killed. Image loader-diag-xnu-e21-md1 RECOVERY 52a8b24d..., session_nat198.py derived. No device access.",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-e21-md1",
+  "recovery_sha256": "52a8b24da5124c55b5813bcfc1869b28ff0826c4c5cfa9c78b5595c9a549e110",
+  "payload_sha256": "b579d77ffda311e326f747d5a315d2d4652a0222ceb957e0dbdeccec2f325b50",
+  "kernel_sha256": "0da06b549569d442f36f2431d27014f14d783a1099e4f545b12453ed10d9b8d3",
+  "session": "docs/procedures/nat-197/session_nat198.py",
+  "session_sha256": "9b88664e0b1234342950577391145cf0bc3b3e60bc6ef48aa749536019d143e0"
+ },
+ "sources": {
+  "start.patch": "e975e8e95f0595e44a6af29199b0a1d5714c46414134e92fc400ddd51299fe6a",
+  "build.py": "4e7e85d2f463062537a07ccac55362170f0ec98c3a96f5ce321eaa4af1e321a5",
+  "rebuild-args.json": "3688ce9872322b557f07e835a82239745c82fa09de8982bcf8e210da1b5dc7a3",
+  "smp198.py": "96d521469c49ca915cba287a5cbe9eb9db2cad5471b000dafa1a3b483f428727",
+  "derive198.py": "3473be74d5a08a413ca8895d12406548e40713bbff780a6161205cedc6f8ae94",
+  "test_nat197.py": "4d7247e5a3b90f5e210937d3c7d6bd2cee39b5e239bdd6dd577cc7d5f3608767"
+ },
+ "commands": [
+  {
+   "cmd": "python3 -c ... krn-044/rebuild.py (docs/procedures/nat-197/rebuild-args.json)",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-197/build.py --out artifacts/nat-197/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-197/build-001 --out artifacts/nat-197/package-001",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-197/derive198.py --check",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-197/test_nat197.py",
+   "exit": 0,
+   "tests": 9
+  },
+  {
+   "cmd": "patch mutants (SPSR, CNTHCTL, CPTR, HCR source reg) with test_nat197.py Patch",
+   "exit": "each killed"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-197/kernel-001/rebuild.json",
+  "artifacts/nat-197/build-001/build.json",
+  "artifacts/nat-197/package-001/package.json",
+  "artifacts/nat-197/package-001/loader-diag-xnu-e21-md1/recovery.img",
+  "artifacts/nat-197/kernel-001.log",
+  "artifacts/nat-197/build-001.log",
+  "artifacts/nat-197/package-001.log"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-197/kernel-001/rebuild.json": "f73e5a4c9f9bb83109bc011d3ee606b6de672c440125faff2e0647dfbe870388",
+  "artifacts/nat-197/build-001/build.json": "ddfb117d6aebdd677581010a9c60950f235f3e93bb8088ad39d65a9a0a1a9a65",
+  "artifacts/nat-197/package-001/package.json": "3c29ed84794771ff11bdb28a19c9fc49ce633bc9e3128dd5546b4f2f609607bb",
+  "artifacts/nat-197/package-001/loader-diag-xnu-e21-md1/recovery.img": "52a8b24da5124c55b5813bcfc1869b28ff0826c4c5cfa9c78b5595c9a549e110",
+  "artifacts/nat-197/kernel-001.log": "5126ecad7444203854a31c2c6549d613726a0cdf45e713b05e3f45b294e27eec",
+  "artifacts/nat-197/build-001.log": "d76e166264aa96e3e35bafcb8edd4994beb9ae034dfaac9a0103a1f4ee85129f",
+  "artifacts/nat-197/package-001.log": "249e9cd015c32d2b6c410812943ac41111b6165aa42956c83f6800f15da9e349"
+ },
+ "limitations": [
+  "host-test only: whether the cores join XNU is NAT-198's question",
+  "the boot CPU's CNTVOFF_EL2 is not known (the secondaries' is 0)"
+ ]
+}

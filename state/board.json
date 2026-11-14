@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-14T09:14:55+00:00",
-  "ledger_updated_at": "2026-11-14T09:14:36+00:00",
-  "registry_sha256": "59313fa39c8f9569a8a33550b85d6e786fad030c579825b0380e420a2ff4f5bb",
+  "generated_at": "2026-11-14T09:27:24+00:00",
+  "ledger_updated_at": "2026-11-14T09:26:31+00:00",
+  "registry_sha256": "cac61a1263b1b2022babf703ebfea2e74e90ba30940dd67a2f8f0e97071223a7",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -78,6 +78,7 @@
       "NAT-155"
     ],
     "gated": [
+      "NAT-198",
       "NAT-017",
       "NAT-072",
       "NAT-003",
@@ -258,6 +259,7 @@
       "NAT-102",
       "NAT-131",
       "GPU-019",
+      "NAT-197",
       "KRN-006",
       "KRN-014",
       "KRN-015",
@@ -7600,6 +7602,63 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/GPU-019.md"
+    },
+    {
+      "id": "NAT-197",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: secondary EL2->EL1 drop (roadmap S8): a PSCI-started core that enters at EL2 runs the boot loader's own phone-proven from_el2 sequence (HCR_EL2=RW, CNTHCTL_EL2=3, ICC_SRE_EL2|=9, CPTR_EL2=0, ELR/SPSR EL1h, eret) out of line at reset_vector, then continues XNU's EL1 path; NAT-195 probe kept as the fallback; reference scV otherwise",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 98,
+      "depends_on": [
+        "NAT-196"
+      ],
+      "paths": [
+        "docs/procedures/nat-197",
+        "artifacts/nat-197"
+      ],
+      "acceptance": [
+        "The only EL2 writes are the loader's from_el2 values (test against shim/e1s-xnu/start.S on the patch and on the linked kernel)",
+        "No instruction outside the reset-vector page moves: segments and nm equal scV; loader sites rc 0",
+        "Package, counted session, analyser with registered verdicts for the native run (running count, per-core stage, faults, panic)"
+      ],
+      "started_at": "2026-11-14T09:20:10+00:00",
+      "last_heartbeat": "2026-11-14T09:20:10+00:00",
+      "updated_at": "2026-11-14T09:25:58+00:00",
+      "evidence": "docs/procedures/nat-197/evidence.json",
+      "evidence_sha256": "1b56c4dc56e5cfac90aeea630f0a6126004fd7ea5af1d16fe92825edf1e7b484",
+      "finished_at": "2026-11-14T09:25:58+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-197.md"
+    },
+    {
+      "id": "NAT-198",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: one run of e21 (NAT-197): PSCI-started cores drop EL2->EL1 with the loader's own from_el2 values and continue XNU's start path; smp198 verdict (running count, per-core stage, EL after drop, faults, panic); boot CPU measures as scV; restore stock RECOVERY and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 98,
+      "depends_on": [
+        "NAT-197"
+      ],
+      "paths": [
+        "docs/procedures/nat-198",
+        "artifacts/nat-198",
+        "docs/decisions/0081-nat198-loader-diag-xnu-e21-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "One run under its own decision file; smp198 verdict S-none/S-panic/S2-all/S1-some/S0-none with per-core state",
+        "Boot CPU measures (display, fbcopy181, bbd188, top186, cpuclk173, touch170) and the stop path reported beside it",
+        "Stock RECOVERY restored with full hash check, Android verified, permit closed after done"
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-198.md"
     },
     {
       "id": "KRN-006",
@@ -21209,62 +21268,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-14T08:18:27+00:00",
-      "action": "task.add:NAT-193",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-193",
-          "status": "pending",
-          "owner": null,
-          "priority": 95
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T08:18:46+00:00",
-      "action": "task.add:NAT-194",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-194",
-          "status": "pending",
-          "owner": null,
-          "priority": 95
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T08:19:05+00:00",
-      "action": "task.claim:NAT-193",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-193",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 95,
-          "last_heartbeat": "2026-11-14T08:19:05+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T08:27:22+00:00",
-      "action": "task.update:NAT-193",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-193",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 95,
-          "progress_note": "2026-11-14: withdrawn by the owner (no quality-for-FPS compromises such as fbscale=2). Host build/package/tests exist under artifacts/nat-193 and docs/procedures/nat-193 as a record only; decision 0079 deleted before any run; nothing ran on the phone",
-          "next_step": "None unless the owner reopens the reduced-resolution line",
-          "last_heartbeat": "2026-11-14T08:27:22+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-14T08:27:41+00:00",
       "action": "task.block:NAT-193",
       "owner": "claude-opus-usb130-20261113",
@@ -21485,11 +21488,65 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T09:19:51+00:00",
+      "action": "task.add:NAT-197",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-197",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T09:20:10+00:00",
+      "action": "task.claim:NAT-197",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-197",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 98,
+          "last_heartbeat": "2026-11-14T09:20:10+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T09:25:58+00:00",
+      "action": "task.done:NAT-197",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-197",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 98,
+          "last_heartbeat": "2026-11-14T09:20:10+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T09:26:31+00:00",
+      "action": "task.add:NAT-198",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-198",
+          "status": "pending",
+          "owner": null,
+          "priority": 98
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "5bf9b39ef41bda7e344720e20a6a54ba1e5ec1fc9a237bf953629e3c5a8ab6b7",
-    "BOARD.md": "d82ff0ae57891e515a4e62a962f5d15b3a8e0e875cffd25ad13abf409b51bf18",
+    "STATUS.md": "fb2755b5902d6b701bbe24f17cd30afeaea5c1e2a66b2616c39e879d2989fadb",
+    "BOARD.md": "0cc8f7716d532e192367cb5e27d094a9329180f1cb543c2a8bffa9bdcb482de9",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -21664,6 +21721,8 @@
     "planning/tasks/NAT-102.md": "553dfd41551a8608467aeaaa8fd34ee6a57d35e9e367996e57dc3b76d669d58c",
     "planning/tasks/NAT-131.md": "fa94c8930019f77944a6c193b0a9040b5dc9f91becb6d059f4b6e317a9905df7",
     "planning/tasks/GPU-019.md": "b56cbd7d9ef273231296b6fa58e20de4c8c900e9975e9cc188e9f86b99c63e6e",
+    "planning/tasks/NAT-197.md": "a1835a31de9cd908dbb6be770de7a09664f04dcbdcef76bacfe0af30ed4851ef",
+    "planning/tasks/NAT-198.md": "d5eb5e82bd7a4cff62522b439416208dc095b4c28eecde0e655d35bb5c7e55bb",
     "planning/tasks/KRN-006.md": "17787b37e62d7cb230c248532450af8108a583aca6b6e955cee29637f8e981a1",
     "planning/tasks/KRN-014.md": "373bcf06587ce0b77bbacdfa023baa6c9b888953717dafa33267ff49a60ea753",
     "planning/tasks/KRN-015.md": "28783b6b5313987331209c84d30f10ddeab6ee7f41bf6bf1d963790545460926",
