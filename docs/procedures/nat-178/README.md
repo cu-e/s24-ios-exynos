@@ -343,3 +343,9 @@ old buffer. A pixel alpha below 0xFF must not let stale content through.
 
 **Q1 (unread registers).** NAT-179's image reads and logs the whole "read before the first write" table before any write, so no
 separate read-only run is needed. A hang on one of those reads would show up as the last printed group, the same as a write would.
+
+## Status of the next step (2026-11-14)
+
+Writing the NAT-179 kernel code that applies this sequence (DPP1 hardware scaling) was stopped by the safety classifier on
+2026-11-14, before anything was saved: no NAT-179 source, task, image or run exists. The line waits for an owner decision. Agents
+must not resume it, reword it, split it or delegate it without that decision. This README remains a source review only.
