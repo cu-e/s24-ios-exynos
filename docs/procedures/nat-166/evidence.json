@@ -1,0 +1,312 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "origin_detail": "SM-S921B e1s, loader-diag-xnu-scM-md1 booted from RECOVERY, iOS userland from RAM",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T02:15:54+00:00",
+ "task": "NAT-166",
+ "summary": "scM (scJ + cpuload=1000, kernel calling redwood_cpufreq_init on E1S) ran once: 201 tl: u lines from 183 s to 384 s, cpu0 100% busy in every 1 s sample (verdict L2-saturated); cpu1-9 also read 100 (never run: no idle accounting, not graded). Idle accounting (recount_processor_idle/run, source) only accrues when cpu0 enters processor_idle, so cpu0 never went idle for a whole second. frames159: 9.61/s, 26.00 ms driver (load thread cost nil). Separate finding from the same log: the e1s touch event thread takes [19.38, 19.34, 19.3] s per 1000 polls with a 10 ms sleep, i.e. ~9.4 ms of busy SPI bit-banging (e1s_halfbit 400 volatile loops x3 per bit) per poll: up to about half of cpu0. Stock RECOVERY restored, full hash, Android verified.",
+ "decision": "docs/decisions/0067-nat166-loader-diag-xnu-scM-md1-single-run-2026-11-14.md",
+ "commit": "see git log",
+ "device_used": true,
+ "image": {
+  "name": "loader-diag-xnu-scM-md1",
+  "recovery_sha256": "f0e1cfd923c89e8f202427f6815b7adfc1adc94bdd66dc9022a61dd9c6049257",
+  "payload_sha256": "1450397b04b9a433f1c17b00dac7ee4687bf388f87304aa7ab1ebedbb6b7f8aa",
+  "kernel_sha256": "f13b7c346cbb0c74f8485787f1b1076fc734f44e1c9e8df17d72041b4245d92f",
+  "session": "docs/procedures/nat-165/session_nat166.py",
+  "session_sha256": "7e2300ed263a1507f4ab0d2ea2c17296e8d1abf6e58e0fc58bc86a6f10c28e1c"
+ },
+ "measurements": {
+  "verdict": "L2-saturated",
+  "load": {
+   "load_lines": 201,
+   "frames": {
+    "windows": 13,
+    "recorded": false,
+    "recording_end_s": null,
+    "steady_windows": 8,
+    "first_steady_s": 325.0,
+    "last_steady_s": 378.0,
+    "driver_ms_median": 25.999,
+    "driver_ms_min": 25.973,
+    "driver_ms_max": 26.012,
+    "fps_median": 9.61,
+    "fps_min": 5.72,
+    "fps_max": 10.15,
+    "frame_interval_ms_median": 104.1,
+    "gpu_wait_us_max": 0,
+    "late_swaps": 17,
+    "other_ms_median": 78.1
+   },
+   "cores": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "span_s": [
+    183.1,
+    383.7
+   ],
+   "steady_span_s": [
+    319.9,
+    379.0
+   ],
+   "steady_samples": 59,
+   "steady_busy": {
+    "0": {
+     "median": 100,
+     "min": 100,
+     "max": 100
+    },
+    "1": {
+     "median": 100,
+     "min": 100,
+     "max": 100
+    },
+    "2": {
+     "median": 100,
+     "min": 100,
+     "max": 100
+    },
+    "3": {
+     "median": 100,
+     "min": 100,
+     "max": 100
+    },
+    "4": {
+     "median": 100,
+     "min": 100,
+     "max": 100
+    },
+    "5": {
+     "median": 100,
+     "min": 100,
+     "max": 100
+    },
+    "6": {
+     "median": 100,
+     "min": 100,
+     "max": 100
+    },
+    "7": {
+     "median": 100,
+     "min": 100,
+     "max": 100
+    },
+    "8": {
+     "median": 100,
+     "min": 100,
+     "max": 100
+    },
+    "9": {
+     "median": 100,
+     "min": 100,
+     "max": 100
+    }
+   },
+   "verdict": "L2-saturated",
+   "graded_core": 0
+  },
+  "frames": {
+   "windows": 13,
+   "recorded": false,
+   "recording_end_s": null,
+   "steady_windows": 8,
+   "first_steady_s": 325.0,
+   "last_steady_s": 378.0,
+   "driver_ms_median": 25.999,
+   "driver_ms_min": 25.973,
+   "driver_ms_max": 26.012,
+   "fps_median": 9.61,
+   "fps_min": 5.72,
+   "fps_max": 10.15,
+   "frame_interval_ms_median": 104.1,
+   "gpu_wait_us_max": 0,
+   "late_swaps": 17,
+   "other_ms_median": 78.1,
+   "steady": [
+    {
+     "t": 325.0,
+     "frames": 29,
+     "ms": 5067,
+     "driver_us": 25973,
+     "gpu_us": 0,
+     "refresh_waits": 0,
+     "refresh_us": 0,
+     "late": 3
+    },
+    {
+     "t": 347.0,
+     "frames": 48,
+     "ms": 5071,
+     "driver_us": 26012,
+     "gpu_us": 0,
+     "refresh_waits": 0,
+     "refresh_us": 0,
+     "late": 2
+    },
+    {
+     "t": 352.0,
+     "frames": 50,
+     "ms": 5026,
+     "driver_us": 25995,
+     "gpu_us": 0,
+     "refresh_waits": 0,
+     "refresh_us": 0,
+     "late": 2
+    },
+    {
+     "t": 357.0,
+     "frames": 49,
+     "ms": 5019,
+     "driver_us": 25997,
+     "gpu_us": 0,
+     "refresh_waits": 0,
+     "refresh_us": 0,
+     "late": 0
+    },
+    {
+     "t": 362.0,
+     "frames": 51,
+     "ms": 5026,
+     "driver_us": 26001,
+     "gpu_us": 0,
+     "refresh_waits": 0,
+     "refresh_us": 0,
+     "late": 4
+    },
+    {
+     "t": 367.0,
+     "frames": 49,
+     "ms": 5026,
+     "driver_us": 26010,
+     "gpu_us": 0,
+     "refresh_waits": 0,
+     "refresh_us": 0,
+     "late": 1
+    },
+    {
+     "t": 372.0,
+     "frames": 44,
+     "ms": 5117,
+     "driver_us": 25987,
+     "gpu_us": 0,
+     "refresh_waits": 0,
+     "refresh_us": 0,
+     "late": 4
+    },
+    {
+     "t": 378.0,
+     "frames": 33,
+     "ms": 5065,
+     "driver_us": 26008,
+     "gpu_us": 0,
+     "refresh_waits": 0,
+     "refresh_us": 0,
+     "late": 1
+    }
+   ]
+  },
+  "touch_poll_seconds_per_1000": [
+   19.38,
+   19.34,
+   19.3,
+   19.32,
+   19.43,
+   19.41,
+   19.37,
+   19.33,
+   18.51,
+   20.61,
+   21.38,
+   21.75
+  ],
+  "touch_events": 0
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-165/session_nat166.py --out artifacts/nat-166/preflight-001 --image loader-diag-xnu-scM-md1",
+   "exit_code": 0,
+   "result": "ready-read-only"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/nat-165/session_nat166.py --out artifacts/nat-166/run-001 --image loader-diag-xnu-scM-md1 --execute",
+   "exit_code": 0,
+   "result": "native-attempt-started; Download Mode at the deadline (02:12:40 UTC)"
+  },
+  {
+   "cmd": "nat-097/kl_reader2.py read_archive2(artifacts/nat-166/run-001/archive) why=2 -> artifacts/nat-166/analysis/kernel-text.txt",
+   "exit_code": 0,
+   "result": "2 boots, 0 drops, 0 unreadable, 0 hole bytes"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-165/load166.py artifacts/nat-166/analysis/kernel-text.txt --json artifacts/nat-166/analysis/load166.json",
+   "exit_code": 0,
+   "result": "201 lines; cpu0 median 100 (min 100) over 59 steady samples: L2-saturated"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-159/frames159.py artifacts/nat-166/analysis/kernel-text.txt --json artifacts/nat-166/analysis/frames159.json",
+   "exit_code": 0,
+   "result": "9.61/s, 26.00 ms"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 33 --out artifacts/nat-166/restore-001/restore-trace",
+   "exit_code": 0,
+   "result": "100663296/100663296 acknowledged"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-166/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass, recovery_hash_match true"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-166/restore-001/report.json --readback artifacts/nat-166/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  }
+ ],
+ "not_established": [
+  "which threads take cpu0 (no per-thread profile); the touch poll share is an estimate from its period",
+  "that the idle counter would read below 100 on an idle cpu0 here (no idle phase was sampled; first sample at 183 s)",
+  "capacity frame rate under interaction"
+ ],
+ "device_inventory": "devices/local-2026-11-14-nat166.json",
+ "artifacts": [
+  "artifacts/nat-166/run-001/report.json",
+  "artifacts/nat-166/run-001.stdout",
+  "artifacts/nat-166/preflight-001/report.json",
+  "artifacts/nat-166/analysis/kernel-text.txt",
+  "artifacts/nat-166/analysis/load166.json",
+  "artifacts/nat-166/analysis/frames159.json",
+  "artifacts/nat-166/analysis/pixels.json",
+  "artifacts/nat-166/analysis/verdict.json",
+  "artifacts/nat-166/restore-001/report.json",
+  "artifacts/nat-166/restore-001/android-check.json",
+  "artifacts/nat-166/restore-001/assess.json",
+  "artifacts/nat-166/restore-001/restore-trace/trace.json",
+  "artifacts/nat-166/native-attempt-loader-diag-xnu-scM-md1-used.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-166/run-001/report.json": "b69325a4ce02271062ef59e412435690c1e4a302805640cf49e8f352c4bcb073",
+  "artifacts/nat-166/run-001.stdout": "f2f77acafced53e75807171ca03ef0671c39bfdd02bf6b374dee03f6b7bfa260",
+  "artifacts/nat-166/preflight-001/report.json": "ea20df1c393ec65dd30b9b88cf2e1d662382fe6dd49840d986b679b18559f061",
+  "artifacts/nat-166/analysis/kernel-text.txt": "806ddd5fe59c16a63a2edeee677dab1f83be2f08b009c1110ffebd3fad386976",
+  "artifacts/nat-166/analysis/load166.json": "345e62c912f5893e6c7616619c0bbfaef340076d5beda21b5faf93deec8fa28e",
+  "artifacts/nat-166/analysis/frames159.json": "87949d05f9526815a9454321f65691916cfad9ad08adc420d2c5b35659ecad59",
+  "artifacts/nat-166/analysis/pixels.json": "b1c7b1396fad039d9677c5e740f979453167fde5023ea0b6cc4927ced6e24dee",
+  "artifacts/nat-166/analysis/verdict.json": "931c52dd4cd2a581653e630c64950af63c2db2bd6228772adf2bf44cc73ce641",
+  "artifacts/nat-166/restore-001/report.json": "7f87ced99f06e72a8acedf13d7316f95a951e5ddba81346a4e7bdd9a48f16ee0",
+  "artifacts/nat-166/restore-001/android-check.json": "883ccd61c908815f4130fabc858acc14a579fe8851a4f16d2e133a2017380de8",
+  "artifacts/nat-166/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "artifacts/nat-166/restore-001/restore-trace/trace.json": "a540b481989d1924d2e15e3feeb3b94bca2fe2078a6444ce4c3d0efe37aebfff",
+  "artifacts/nat-166/native-attempt-loader-diag-xnu-scM-md1-used.json": "51077531518b1646c3df1a3f1c908a1a7c5885c9a8d5cccf0915be95762aa62f"
+ }
+}
