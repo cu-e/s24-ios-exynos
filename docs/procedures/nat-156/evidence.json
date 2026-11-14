@@ -1,0 +1,33 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T00:45:00+00:00",
+ "task": "NAT-156",
+ "summary": "MiniIOMobileFramebuffer's per-frame cost on the single running core (NAT-153: 70.7 ms, one 1125x2436 BGRA layer to the 1080x2340 panel, rec_secs on, fb_filter/threads/scale defaults): bilinear scaling of 2.53 M panel pixels in drawRows plus record(); panel mapped write-combining (VM_WIMG_WCOMB = 6 in the scH kernel's initialize_screen), surfaces cacheable, so memory type is not the cause. Host-only timing of the unchanged loops: bilinear 4.3/7.9/16.2 ms (flat/UI-like/noise), nearest 1.4-1.5 ms, memcpy 0.4 ms. Ranked levers: display-hardware scaling (removes the copy), SMP, fb_filter=0, fbscale=2, fb_threads=1, rec_secs=0, GPU rendering. Next: native run of scH + fb_filter=0 only.",
+ "commit": "3af13e8 (base; evidence committed with the NAT-156 files)",
+ "device_used": false,
+ "sources": {
+  "references/s24-port (c8860decc62c6d6180e609036d027a2997972420) xnu/hackios/files/iokit/Kernel/MiniIOMobileFramebuffer.cpp": "pinned upstream",
+  "docs/procedures/nat-156/bench_scale.c": "7cf0d346ee87cdcea05fa127a709e61e73f949b5d63f6fbf03f4bfde02635802"
+ },
+ "checks": [
+  {
+   "cmd": "cc -O2 -Wall -o artifacts/nat-156/bench docs/procedures/nat-156/bench_scale.c && artifacts/nat-156/bench {flat,ui,noise}",
+   "exit_code": 0,
+   "result": "see artifacts/nat-156/bench-host.txt (host only)"
+  },
+  {
+   "cmd": "capstone disassembly of _initialize_screen in artifacts/nat-152/kernel-001 kernel.unstripped: mov w2, #6 before bl _ml_io_map_unmappable",
+   "exit_code": 0,
+   "result": "panel mapping VM_WIMG_WCOMB"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-156/bench-host.txt"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-156/bench-host.txt": "39deb08b42946b9e4e4b69a2c3442afe057fbcdeba9bb391b33cc0bf6fb74660"
+ },
+ "limits": "Host timings rank the paths; they are not phone measurements. The ~70 ms render share is inferred from 141 ms per frame minus the driver time, not measured. The synthetic UI-like input is not a captured frame (the run's recording was not transferred)."
+}
