@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T00:26:23+00:00",
+  "updated_at": "2026-11-14T00:35:58+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -18306,7 +18306,7 @@
       "title": "Host: loader nat036_msg() returns its slot/site messages from a table of absolute link-time pointers (six R_AARCH64_ABS64 in ckpt3.c.o .rela.rodata); the position-independent loader faults in fail() reading them (NAT-151: FAR 0x1f935). Return them PC-relatively, and a build check that the loader objects carry no ABS64 relocation except the Image header's size",
       "scope": "host",
       "evidence_kind": "host-test",
-      "priority": 70,
+      "priority": 1,
       "depends_on": [
         "NAT-151"
       ],
@@ -18318,7 +18318,9 @@
         "Relocation scan of every loader object: only start.S's header quad remains",
         "nat036_msg returns the same strings for every rc/bad (host test against the old table)",
         "The fix applies to future loader builds without changing a pinned image retroactively; make check"
-      ]
+      ],
+      "priority_reason": "superseded by NAT-157 (same work; NAT-155 depends on the open NAT-151 fail record)",
+      "updated_at": "2026-11-14T00:29:09+00:00"
     },
     {
       "id": "NAT-156",
@@ -18339,6 +18341,31 @@
         "Host timing of the same inner loops is labelled host-only, not a phone measurement",
         "A ranked list of levers with what each needs (boot-arg only, kernel change, SMP, DPP hardware scaling)"
       ]
+    },
+    {
+      "id": "NAT-157",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Supersedes NAT-155 (its dependency on the open NAT-151 fail record cannot be met). Host: loader nat036_msg() returns its slot/site messages from a table of absolute link-time pointers (six R_AARCH64_ABS64 in ckpt3.c.o .rela.rodata); the position-independent loader faults in fail() reading them (NAT-151: FAR 0x1f935). Return them PC-relatively, and a build check that the loader objects carry no ABS64 relocation except the Image header's size",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 70,
+      "depends_on": [],
+      "paths": [
+        "docs/procedures/nat-157",
+        "artifacts/nat-157"
+      ],
+      "acceptance": [
+        "Relocation scan of every loader object: only start.S's header quad remains",
+        "nat036_msg returns the same strings for every rc/bad (host test against the old table)",
+        "The fix applies to future loader builds without changing a pinned image retroactively; make check"
+      ],
+      "started_at": "2026-11-14T00:28:43+00:00",
+      "last_heartbeat": "2026-11-14T00:28:43+00:00",
+      "updated_at": "2026-11-14T00:35:58+00:00",
+      "evidence": "docs/procedures/nat-157/evidence.json",
+      "evidence_sha256": "a1d7f1b359e3a2aadc33d78dd72a556e933f81eb00ccc8fd7d48990eb8d7174e",
+      "finished_at": "2026-11-14T00:35:58+00:00"
     }
   ],
   "experiments": [
@@ -69663,6 +69690,61 @@
           "progress_note": "2026-11-14: work on the EL2-to-EL1 start-up change was stopped by a safety classifier while reading Linux EL2 set-up constants; no NAT-154 code, patch or image was written; nothing ran on the phone (Android up, native permit closed)",
           "next_step": "Owner decision needed on whether and how to continue NAT-154; not resumed by the agent",
           "last_heartbeat": "2026-11-14T00:26:23+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T00:28:24+00:00",
+      "action": "task.add:NAT-157",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-157",
+          "status": "pending",
+          "owner": null,
+          "priority": 70
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T00:28:43+00:00",
+      "action": "task.claim:NAT-157",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-157",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 70,
+          "last_heartbeat": "2026-11-14T00:28:43+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T00:29:09+00:00",
+      "action": "task.prioritize:NAT-155",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-155",
+          "status": "pending",
+          "owner": null,
+          "priority": 1,
+          "priority_reason": "superseded by NAT-157 (same work; NAT-155 depends on the open NAT-151 fail record)"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T00:35:58+00:00",
+      "action": "task.done:NAT-157",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-157",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 70,
+          "last_heartbeat": "2026-11-14T00:28:43+00:00"
         }
       ]
     }

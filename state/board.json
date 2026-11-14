@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-14T00:26:42+00:00",
-  "ledger_updated_at": "2026-11-14T00:26:23+00:00",
-  "registry_sha256": "b108c54f225a9e55935e2b788b233c124a3f91ed606ef86771b9938909a61b35",
+  "generated_at": "2026-11-14T00:36:17+00:00",
+  "ledger_updated_at": "2026-11-14T00:35:58+00:00",
+  "registry_sha256": "3d826d0342be8d00a9b7e1574662304f8162cbfa1aba28631946b979a6ca5686",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -448,6 +448,7 @@
       "MISC-001",
       "GPU-015",
       "LAB-004",
+      "NAT-157",
       "DRV-005",
       "DRV-006",
       "KRN-040",
@@ -17622,30 +17623,32 @@
       "card_path": "planning/tasks/LAB-004.md"
     },
     {
-      "id": "NAT-155",
-      "status": "pending",
-      "owner": null,
-      "title": "Host: loader nat036_msg() returns its slot/site messages from a table of absolute link-time pointers (six R_AARCH64_ABS64 in ckpt3.c.o .rela.rodata); the position-independent loader faults in fail() reading them (NAT-151: FAR 0x1f935). Return them PC-relatively, and a build check that the loader objects carry no ABS64 relocation except the Image header's size",
+      "id": "NAT-157",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Supersedes NAT-155 (its dependency on the open NAT-151 fail record cannot be met). Host: loader nat036_msg() returns its slot/site messages from a table of absolute link-time pointers (six R_AARCH64_ABS64 in ckpt3.c.o .rela.rodata); the position-independent loader faults in fail() reading them (NAT-151: FAR 0x1f935). Return them PC-relatively, and a build check that the loader objects carry no ABS64 relocation except the Image header's size",
       "scope": "host",
       "evidence_kind": "host-test",
       "priority": 70,
-      "depends_on": [
-        "NAT-151"
-      ],
+      "depends_on": [],
       "paths": [
-        "docs/procedures/nat-155",
-        "artifacts/nat-155"
+        "docs/procedures/nat-157",
+        "artifacts/nat-157"
       ],
       "acceptance": [
         "Relocation scan of every loader object: only start.S's header quad remains",
         "nat036_msg returns the same strings for every rc/bad (host test against the old table)",
         "The fix applies to future loader builds without changing a pinned image retroactively; make check"
       ],
-      "column": "waiting",
-      "reasons": [
-        "Dependencies: NAT-151"
-      ],
-      "card_path": "planning/tasks/NAT-155.md"
+      "started_at": "2026-11-14T00:28:43+00:00",
+      "last_heartbeat": "2026-11-14T00:28:43+00:00",
+      "updated_at": "2026-11-14T00:35:58+00:00",
+      "evidence": "docs/procedures/nat-157/evidence.json",
+      "evidence_sha256": "a1d7f1b359e3a2aadc33d78dd72a556e933f81eb00ccc8fd7d48990eb8d7174e",
+      "finished_at": "2026-11-14T00:35:58+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-157.md"
     },
     {
       "id": "DRV-005",
@@ -19496,6 +19499,34 @@
         "Dependencies: BT-002, AUD-002, NET-002, UI-002"
       ],
       "card_path": "planning/tasks/BT-005.md"
+    },
+    {
+      "id": "NAT-155",
+      "status": "pending",
+      "owner": null,
+      "title": "Host: loader nat036_msg() returns its slot/site messages from a table of absolute link-time pointers (six R_AARCH64_ABS64 in ckpt3.c.o .rela.rodata); the position-independent loader faults in fail() reading them (NAT-151: FAR 0x1f935). Return them PC-relatively, and a build check that the loader objects carry no ABS64 relocation except the Image header's size",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 1,
+      "depends_on": [
+        "NAT-151"
+      ],
+      "paths": [
+        "docs/procedures/nat-155",
+        "artifacts/nat-155"
+      ],
+      "acceptance": [
+        "Relocation scan of every loader object: only start.S's header quad remains",
+        "nat036_msg returns the same strings for every rc/bad (host test against the old table)",
+        "The fix applies to future loader builds without changing a pinned image retroactively; make check"
+      ],
+      "priority_reason": "superseded by NAT-157 (same work; NAT-155 depends on the open NAT-151 fail record)",
+      "updated_at": "2026-11-14T00:29:09+00:00",
+      "column": "waiting",
+      "reasons": [
+        "Dependencies: NAT-151"
+      ],
+      "card_path": "planning/tasks/NAT-155.md"
     }
   ],
   "agents": {
@@ -19911,58 +19942,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-13T23:32:57+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
-      "at": "2026-11-13T23:35:31+00:00",
-      "action": "task.add:NAT-152",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-152",
-          "status": "pending",
-          "owner": null,
-          "priority": 99
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T23:35:50+00:00",
-      "action": "task.claim:NAT-152",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-152",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 99,
-          "last_heartbeat": "2026-11-13T23:35:50+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-13T23:52:11+00:00",
-      "action": "task.done:NAT-152",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-152",
-          "status": "done",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 99,
-          "last_heartbeat": "2026-11-13T23:35:50+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-13T23:54:26+00:00",
       "action": "task.add:NAT-153",
       "owner": "claude-opus-usb130-20261113",
@@ -20159,11 +20138,66 @@
           "last_heartbeat": "2026-11-14T00:26:23+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-14T00:28:24+00:00",
+      "action": "task.add:NAT-157",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-157",
+          "status": "pending",
+          "owner": null,
+          "priority": 70
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T00:28:43+00:00",
+      "action": "task.claim:NAT-157",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-157",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 70,
+          "last_heartbeat": "2026-11-14T00:28:43+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T00:29:09+00:00",
+      "action": "task.prioritize:NAT-155",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-155",
+          "status": "pending",
+          "owner": null,
+          "priority": 1,
+          "priority_reason": "superseded by NAT-157 (same work; NAT-155 depends on the open NAT-151 fail record)"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T00:35:58+00:00",
+      "action": "task.done:NAT-157",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-157",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 70,
+          "last_heartbeat": "2026-11-14T00:28:43+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "14f573a8acb4974e54d9b2cf5007c5895118a75c2e034154f2c456183da7d3f0",
-    "BOARD.md": "8a6b57741df9bde6f22d06129d69075ecaa035377e79db0298132a52702cb6ca",
+    "STATUS.md": "83dba931410355a1912d99bcdc69c921ab98ea181ce53ce8acb585a4f46ff200",
+    "BOARD.md": "c56abc42cbfdd659a50657a4e64785543b9bd27cfdcae057785f82b289c5f60f",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -20572,7 +20606,7 @@
     "planning/tasks/GPU-012.md": "8e8e2dd9fcf479839ade84fe5963f1bb025e06e266e09cdc4849e6ad994c7ecd",
     "planning/tasks/GPU-015.md": "44a7ded4ecbedd0b5dd5956bb3c75a94e34fd501716c4bec49b175c275600981",
     "planning/tasks/LAB-004.md": "a64aa0527bd07f6d7f9fda70647b73c21c349f718875e0bebbca9ee4675c6be7",
-    "planning/tasks/NAT-155.md": "f38b908ba85a379259e38b306fe74fcb66f364ee2506ff259b6ae1f109ee3e46",
+    "planning/tasks/NAT-157.md": "2e03156de6ec94f149ea2fb9adc0dc53bd0199da01b2a1b17af17234a9fa7d30",
     "planning/tasks/DRV-005.md": "bb7026aa010b4fd9e6a664391f1f0866a789f7365e7bebb826ed15b7cbb53d8f",
     "planning/tasks/DRV-006.md": "6116f263042ff30dc687f5826b75a7c0da5afbba5326065e01ce245a027e68ba",
     "planning/tasks/KRN-040.md": "3078f05d1553121a53783a5f8e7d073b93d9c2917afb3e2ef72f381a782e9d70",
@@ -20618,6 +20652,7 @@
     "planning/tasks/ESIM-002.md": "6c399676159f65f4b4bb57a7753974158e33bb9786602f3568fc0158110547d7",
     "planning/tasks/ESIM-003.md": "f8771c136a5fa36d900bdca732abec23c437850a53a146c61c8cb5437553f8e7",
     "planning/tasks/QUAL-001.md": "7bf40b2c3c32e8161f29dc9134f7fc30271e33315a9d2c8877dc04cccc0bd8fe",
-    "planning/tasks/BT-005.md": "35bc4d704b20131d6176800ff9f9822b0f78173243d37fa576d6a53d48986576"
+    "planning/tasks/BT-005.md": "35bc4d704b20131d6176800ff9f9822b0f78173243d37fa576d6a53d48986576",
+    "planning/tasks/NAT-155.md": "bacd5c5b0b92185191e885d83698f16b6cfe399c7448de026d244c037b7866fa"
   }
 }

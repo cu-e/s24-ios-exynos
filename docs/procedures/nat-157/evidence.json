@@ -1,0 +1,47 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T00:55:00+00:00",
+ "task": "NAT-157",
+ "summary": "Loader nat036_msg() returned slot/site messages from a table of six absolute link-time pointers (R_AARCH64_ABS64), which the position-independent, unrelocated loader dereferenced at their link-time values (NAT-151's fault, FAR 0x1f935). fix_msg.py changes only the table's type to a 6x40 character array (a switch of literals was not enough: LLVM rebuilt a pointer table, 5 ABS64), applied by wrap_cc() to each image's own ckpt3.c just before compilation; relocscan.py gates on any ABS relocation except the Image header size. Old and new return identical strings for 140 inputs; loader-flag compile 6 -> 0 absolute relocations; a full scH build with the hook has only the header relocation, passes NAT-152's loader-site gate, and changes only 10-ckpt3.c.o (payload.adt8.bin identical). Host-test only.",
+ "commit": "bc0ed1f (base; evidence committed with the NAT-157 files)",
+ "device_used": false,
+ "sources": {
+  "docs/procedures/nat-157/fix_msg.py": "5fc0096ce422c4c85a64f51904c6935093ac06b67944d898a78ea609c8834566",
+  "docs/procedures/nat-157/relocscan.py": "5105eac2be15402a1e91c4b8bb22240fd81d8232b451b9b8332b98e9809b18c7",
+  "docs/procedures/nat-157/build_demo.py": "c1c35202ee47a7674b94ec438ddf357196d8448e0e6d3454c88023c0f94cc6fb",
+  "docs/procedures/nat-157/test_nat157.py": "a734cc7765d154c39a7c957ec1e09c083b3e303dde63566f3126983df9898cf8"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/nat-157/relocscan.py artifacts/nat-152/build-001/loader-diag-xnu-scH-md1",
+   "exit_code": 1,
+   "result": "7 absolute relocations, 6 not allowed (10-ckpt3.c.o .rela.rodata)"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-157/test_nat157.py",
+   "exit_code": 0,
+   "result": "5 OK; first draft (switch of literals) failed the 0-relocation test with 5 left, replaced by the character array"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-157/build_demo.py --out artifacts/nat-157/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "relocations 1, bad 0; NAT-152 gate loader_sites_check rc 0; a first attempt patched an unused nat-052 module instance (hook not effective, rc 1) and was fixed by chain_modules()"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "448 tests OK"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-157/build-001/nat157.json",
+  "artifacts/nat-157/build-001/build.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-157/build-001/nat157.json": "8e1e29b2117d65891c42c66a3a57afe355a1662194ad60efd4bce43e50ee74f3",
+  "artifacts/nat-157/build-001/build.json": "87aaa61aebe02112deba40f1c47ab1acedc8de8036edcbfb67e780d018e1d362"
+ },
+ "limits": "Host evidence only. The fixed message path has not run on the phone; it only matters when a loader check fails."
+}

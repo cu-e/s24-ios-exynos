@@ -1,0 +1,19 @@
+{
+ "id": "NAT-157",
+ "status": "pending",
+ "owner": null,
+ "title": "Supersedes NAT-155 (its dependency on the open NAT-151 fail record cannot be met). Host: loader nat036_msg() returns its slot/site messages from a table of absolute link-time pointers (six R_AARCH64_ABS64 in ckpt3.c.o .rela.rodata); the position-independent loader faults in fail() reading them (NAT-151: FAR 0x1f935). Return them PC-relatively, and a build check that the loader objects carry no ABS64 relocation except the Image header's size",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 70,
+ "depends_on": [],
+ "paths": [
+  "docs/procedures/nat-157",
+  "artifacts/nat-157"
+ ],
+ "acceptance": [
+  "Relocation scan of every loader object: only start.S's header quad remains",
+  "nat036_msg returns the same strings for every rc/bad (host test against the old table)",
+  "The fix applies to future loader builds without changing a pinned image retroactively; make check"
+ ]
+}
