@@ -1,0 +1,67 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T06:30:00+00:00",
+ "task": "NAT-160",
+ "summary": "scK = scJ (ran in NAT-159) with boot-arg fbscale=2 after fb_filter=0 (iOS renders 750x1624, 2.25x fewer pixels). Payload byte-identical to scJ after the cmdline field; loader objects differ only in 08-markerlib52.c.o (image name); loader checkpoint check rc 0 with NAT-143 symbols; relocscan 0 not allowed; cmdline 252 B; package and counted session for NAT-161. Host-test only.",
+ "commit": "c3a3486 (base; evidence committed with the NAT-160 files)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scK-md1",
+  "recovery_sha256": "3fb15e16cb9ef20ca94c35c68abf66bbc52ca09c828f60d46b26b63c8cfdea5d",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "1073e982038250e9d2daa24650dd80f641f51162d0f7511a8fbac4f291c0b98c",
+  "payload_bytes": 26206800,
+  "loader_image_sha256": "8b61dc7157876205ce2423d6f8fe07bb8b53affa7952ffccd1723ad6c13730e3",
+  "kernel_dir": "artifacts/nat-152/kernel-001",
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT160-scK debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 fbscale=2 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "cmdline_bytes": 252,
+  "session": "docs/procedures/nat-160/session_nat161.py",
+  "session_sha256": "c0f8797f9a00be745089616c26f257b45515bf21d16c46ac709e414de84b2dc9"
+ },
+ "sources": {
+  "docs/procedures/nat-160/build.py": "451c21801d4e881ff377afe281e85a7a1d850d8141dfdfaa4eaa922934277757",
+  "docs/procedures/nat-160/derive161.py": "a8fcf9e949761915482f1d6187c3d5ac34b612014ab7238f987a265e46c4884a",
+  "docs/procedures/nat-160/test_nat160.py": "34e8b467f954c8dbacf290770c846770cdb0821ba7617a06ce8beb6ad00e6c57",
+  "docs/procedures/nat-158/build.py": "6a4d6b4c191dd3fd0937a3c890d5bd85f5e3a9d80219e21fd4b5249a1c85cf81"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/nat-160/build.py --out artifacts/nat-160/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "cmdline 252 B; relocations 1 allowed; NAT-152 gate passed"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-160/build-001 --out artifacts/nat-160/package-001",
+   "exit_code": 0,
+   "result": "3fb15e16cb9ef20ca94c35c68abf66bbc52ca09c828f60d46b26b63c8cfdea5d"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-160/derive161.py --check",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-160/test_nat160.py",
+   "exit_code": 0,
+   "result": "6 OK"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "448 tests OK"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-160/build-001/build.json",
+  "artifacts/nat-160/build-001.log",
+  "artifacts/nat-160/package-001/package.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-160/build-001/build.json": "00cc6f6551b512be554a949f5619d624105cdc6f3b32d7604a13460888e8fad6",
+  "artifacts/nat-160/build-001.log": "6c9d14b3511c4d8dcb0bcbbfbce3f613d252eab52869af333f6b1cc3769f822b",
+  "artifacts/nat-160/package-001/package.json": "bb4ecbf7735f8b23a26964e8d57db9c21524d767d3a8dcec148520f9f884ad72"
+ },
+ "limits": "Host only; whether SpringBoard runs at scale 2 and the rendering saving are for NAT-161."
+}
