@@ -1,0 +1,43 @@
+--- a/MiniIOMobileFramebuffer.cpp
++++ b/MiniIOMobileFramebuffer.cpp
+@@ -599,6 +599,29 @@
+ 	bool            filter, unscaled;
+ };
+ 
++/*
++ * NAT-180: the nearest-neighbour columns of a row as runs. Next to each other on the panel, fColumn mostly rises by one (the iPhone's
++ * 1125 columns on 1080 leave out one in 25), so a row is a few dozen stretches of consecutive picture pixels, and each is copied with
++ * one memcpy instead of a load and a store per pixel. Where a column repeats or jumps (any other scale) a run simply ends there; the
++ * result is the same pixels as the loop it replaces (docs/procedures/nat-180/test_nat180.py).
++ */
++static inline void
++copyColumnRuns(uint32_t * to, const uint32_t * from, const uint32_t * column, int32_t x0, int32_t x1)
++{
++	int32_t x = x0;
++
++	while (x < x1) {
++		int32_t start = x;
++		uint32_t first = column[x];
++
++		while (x + 1 < x1 && column[x + 1] == column[x] + 1) {
++			x++;
++		}
++		x++;
++		memcpy(to + start, from + first, (size_t) (x - start) * sizeof(uint32_t));
++	}
++}
++
+ void
+ IOMobileFramebuffer::drawRows(const RowJob * job, int32_t y0, int32_t y1, uint32_t * blendRow)
+ {
+@@ -669,9 +692,7 @@
+ 				out[i] = w == 0 || a == from[c + 1] ? a : blend(a, from[c + 1], w);
+ 			}
+ 		} else {
+-			for (int32_t x = cx0; x < cx1; x++) {
+-				to[x] = from[fColumn[x]];
+-			}
++			copyColumnRuns(to, from, fColumn, cx0, cx1);
+ 		}
+ 	}
+ }
