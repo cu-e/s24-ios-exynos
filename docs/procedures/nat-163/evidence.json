@@ -1,0 +1,67 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T07:30:00+00:00",
+ "task": "NAT-163",
+ "summary": "scL = scJ + touch_lat=1 (tl: s / tl: v / tl: p timing lines into the loader console log). Payload identical to scJ after the cmdline field, only the image name differs in the loader, loader check rc 0 on NAT-143 symbols, relocscan 0 not allowed, cmdline 254 B; tl164.py decoder tested on synthetic lines in the driver formats; package and counted session for NAT-164. Host-test only.",
+ "commit": "31fda1f (base)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scL-md1",
+  "recovery_sha256": "6ab4112f6f9102443b4b7b472562e30aa37f27b17dbd953cdfead7cf50d67f5a",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "93a2989acf6ea87dd4055bf63065da5e05b1bf95020d317b50da4c393f57e00b",
+  "payload_bytes": 26206800,
+  "loader_image_sha256": "5ba8dc29312976e53ca10273708ed917a1e25590f46b89fac4dacdd5d5e14984",
+  "kernel_dir": "artifacts/nat-152/kernel-001",
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT163-scL debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 touch_lat=1 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "cmdline_bytes": 254,
+  "session": "docs/procedures/nat-163/session_nat164.py",
+  "session_sha256": "da0fd4f2661bc2098e456b08d92eeb17fef6a8d78249e574a062951ae614d8a8"
+ },
+ "sources": {
+  "docs/procedures/nat-163/build.py": "5264d5b8a92d45ab70c3231f258cac2dcbe565caa27776452e5f86f7454e17ba",
+  "docs/procedures/nat-163/derive164.py": "7388dfcbe0ebc90f4d28fb1bdf46340f70b6de1b6278ac17e4ff88770ad4fd71",
+  "docs/procedures/nat-163/tl164.py": "44967bfb4bbd2f90d6be7989e8e643016e0ee1317c4f692ade4cc147f8efafec",
+  "docs/procedures/nat-163/test_nat163.py": "0ca4e29a6c8c61692b54aca9d75b7588bd2a5bcb039db8735396c7bb0b3e947c"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/nat-163/build.py --out artifacts/nat-163/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "254 B, relocations 1 allowed, NAT-152 gate passed"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-163/build-001 --out artifacts/nat-163/package-001",
+   "exit_code": 0,
+   "result": "6ab4112f6f9102443b4b7b472562e30aa37f27b17dbd953cdfead7cf50d67f5a"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-163/derive164.py --check",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-163/test_nat163.py",
+   "exit_code": 0,
+   "result": "7 OK"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "OK"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-163/build-001/build.json",
+  "artifacts/nat-163/build-001.log",
+  "artifacts/nat-163/package-001/package.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-163/build-001/build.json": "fb73c7ceb4453e16c30e5e51f408f5d749f7730c0e1faf8e26d1a4bc895684b9",
+  "artifacts/nat-163/build-001.log": "ea174cebcc7003adc5a62347fc10183343ea1b545685b0e0e1acbae4510f1696",
+  "artifacts/nat-163/package-001/package.json": "0120af5487307bfe6bd47b927b0aff82e67c2074b545ece7afc3f69eec68f47c"
+ },
+ "limits": "Host only; the lines are decoded only from synthetic input until NAT-164."
+}
