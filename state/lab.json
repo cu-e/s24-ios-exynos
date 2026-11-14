@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T07:40:08+00:00",
+  "updated_at": "2026-11-14T07:44:59+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -19448,6 +19448,55 @@
       "updated_at": "2026-11-14T07:39:49+00:00",
       "progress_note": "FAIL (native-device, decision 0077): scX panicked at 200.07 s on the e1s-pc sampler's first tick: recount.c:567 assert ml_get_interrupts_enabled()==FALSE via _e1s_pc_thread+0xac -> recount_current_thread_times (self-time read); pc190 P-none; until 200 s as scV (K2 2.26 ms, C2, P1). Loader deadline -> Download Mode by itself; stock RECOVERY restored, full hash, Android verified, assess pass. Evidence docs/procedures/nat-190/evidence.json",
       "next_step": "NAT-191 host: self time via recount_thread_time_mach(current_thread()), harness aborts on recount_current_*, audit asserts of every called KPI; NAT-192 native rerun under a new decision"
+    },
+    {
+      "id": "NAT-191",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scY = scX (NAT-189) with the e1s-pc sampler's self time read by recount_thread_time_mach(current_thread()) instead of recount_current_thread_time_mach(), whose interrupts-off assertion panicked NAT-190 at the first tick; harness enforces the precondition; audit of every KPI the sampler calls",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 94,
+      "depends_on": [
+        "NAT-189"
+      ],
+      "paths": [
+        "docs/procedures/nat-191",
+        "artifacts/nat-191"
+      ],
+      "acceptance": [
+        "Only the three self-time calls change against NAT-189 (test); harness aborts on recount_current_*; NAT-189 patch reproduces the NAT-190 panic in the harness",
+        "Object references no recount_current_*; kernel 0 undefined; segments unchanged; loader sites rc 0; package; counted session",
+        "Every undefined symbol of the object reviewed for interrupt/preemption assertions"
+      ],
+      "started_at": "2026-11-14T07:44:07+00:00",
+      "last_heartbeat": "2026-11-14T07:44:07+00:00",
+      "updated_at": "2026-11-14T07:44:59+00:00",
+      "evidence": "docs/procedures/nat-191/evidence.json",
+      "evidence_sha256": "7f3e26eb3fb852e7a3c57cab9ea8b3dca3ac7d8ef178218593dbab35b7d43e02",
+      "finished_at": "2026-11-14T07:44:59+00:00"
+    },
+    {
+      "id": "NAT-192",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: one run of scY (NAT-191) to profile backboardd user pc during the swipes (rerun of NAT-190 after its identified assertion panic); restore stock RECOVERY and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 94,
+      "depends_on": [
+        "NAT-191"
+      ],
+      "paths": [
+        "docs/procedures/nat-192",
+        "artifacts/nat-192",
+        "docs/decisions/0078-nat192-loader-diag-xnu-scY-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "One run under its own decision file; pc190 verdict P-none/P-thin/P-ok with groups and top functions over the swipe windows and the last window",
+        "Sampler self cost and e1s-top backboardd share/per-frame CPU vs NAT-186",
+        "Stock RECOVERY restored with full hash check, Android verified, permit closed after done"
+      ]
     }
   ],
   "experiments": [
@@ -72479,6 +72528,60 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T07:43:29+00:00",
+      "action": "task.add:NAT-191",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-191",
+          "status": "pending",
+          "owner": null,
+          "priority": 94
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T07:43:48+00:00",
+      "action": "task.add:NAT-192",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-192",
+          "status": "pending",
+          "owner": null,
+          "priority": 94
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T07:44:07+00:00",
+      "action": "task.claim:NAT-191",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-191",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 94,
+          "last_heartbeat": "2026-11-14T07:44:07+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T07:44:59+00:00",
+      "action": "task.done:NAT-191",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-191",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 94,
+          "last_heartbeat": "2026-11-14T07:44:07+00:00"
+        }
+      ]
     }
   ]
 }

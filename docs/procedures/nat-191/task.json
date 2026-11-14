@@ -1,0 +1,21 @@
+{
+ "id": "NAT-191",
+ "status": "pending",
+ "owner": null,
+ "title": "Host: scY = scX (NAT-189) with the e1s-pc sampler's self time read by recount_thread_time_mach(current_thread()) instead of recount_current_thread_time_mach(), whose interrupts-off assertion panicked NAT-190 at the first tick; harness enforces the precondition; audit of every KPI the sampler calls",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 94,
+ "depends_on": [
+  "NAT-189"
+ ],
+ "paths": [
+  "docs/procedures/nat-191",
+  "artifacts/nat-191"
+ ],
+ "acceptance": [
+  "Only the three self-time calls change against NAT-189 (test); harness aborts on recount_current_*; NAT-189 patch reproduces the NAT-190 panic in the harness",
+  "Object references no recount_current_*; kernel 0 undefined; segments unchanged; loader sites rc 0; package; counted session",
+  "Every undefined symbol of the object reviewed for interrupt/preemption assertions"
+ ]
+}

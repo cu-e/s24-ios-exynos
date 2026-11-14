@@ -1,0 +1,82 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T07:44:47+00:00",
+ "task": "NAT-191",
+ "summary": "scY = scX (NAT-189) with the e1s-pc self time read by recount_thread_time_mach(current_thread()) instead of recount_current_thread_time_mach() (interrupts-off assert, the NAT-190 panic). Harness enforces the precondition (abort); NAT-189's patch reproduces the panic there; only the 3 self-time lines change; 13 OK, 7 mutants killed. Object nm -u has no recount_current_*; every undefined symbol reviewed in XNU 8796 source. Kernel dd2b9f3f (0 undefined), segments as scV, loader sites rc 0, 254 B, RECOVERY cafc0d33, payload 89fcb733, session d1bda36a. Host-test only.",
+ "commit": "a23e78a0 (base)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scY-md1",
+  "recovery_sha256": "cafc0d3329ffb90f66d77f580cffb6cf3ba279d270b96ed7361a707902b47885",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "89fcb733648766320269b55eeab475f7976e9405a7e68ad88e07a53af11cf1c3",
+  "payload_bytes": 26208816,
+  "loader_image_sha256": "928a93cabaec2dc1dafc20e32f77647022a45031736b2191c6c48ce2998df0ea",
+  "kernel_dir": "artifacts/nat-191/kernel-001",
+  "kernel_sha256": "dd2b9f3ffdd97263653664c8b4e13dbcf7587657adad6bf5333304f061c16886",
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT191-scY debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 touch_lat=1 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "cmdline_bytes": 254,
+  "session": "docs/procedures/nat-191/session_nat192.py",
+  "session_sha256": "d1bda36aa98c63862278f341c5f16d68992d3ccf0f6fe4603c349b0918f594cd"
+ },
+ "sources": {
+  "docs/procedures/nat-191/build.py": "41398352b6619e55088f7aede5eea9009230c88508b6ef4b5dbfc4ffc2002be4",
+  "docs/procedures/nat-191/e1s_display.patch": "a1674ed0bfe86a3fce1ae9a243e4955a57cd1397ad45ea4516df818901073f7d",
+  "docs/procedures/nat-191/rebuild-args.json": "9338fc5a8ff561924c2db7fd2ba69922cc3b8896bdf7114c978bb1adfd84ff27",
+  "docs/procedures/nat-191/host/shim191.h": "40fa5ce083dc4591d7f48ff96aac8e8b81ffed9d036edfd8809788f4bf63b2ab",
+  "docs/procedures/nat-191/host/fake191.c": "d3425c5844955dfada35b6353786491b74c670bfcbc72d01ad50278011b68e0c",
+  "docs/procedures/nat-191/test_nat191.py": "97baf9ec8f8eb9d0aab342b92759491e5cfb592de19ab7a04d4d43a8e1238ba9",
+  "docs/procedures/nat-191/derive192.py": "4e05d0abca5963ed819d22d3822e277f1a46f90206564d95eedebb4411f090b3",
+  "docs/procedures/nat-191/session_nat192.py": "d1bda36aa98c63862278f341c5f16d68992d3ccf0f6fe4603c349b0918f594cd",
+  "docs/procedures/nat-191/README.md": "9ea85c28c79f8839c63dfc072081a355c6534e2df9342ac6e4d2ec117b0642ae",
+  "docs/procedures/nat-191/task.json": "29c3a8e423f825de73b360bbfe0c33a80481f68dd801824a0b68767c7095c249",
+  "docs/procedures/nat-191/task192.json": "ae4be39374978e8d9a0938f52c56a404b067e99f58d9d2f1bfa4f8261924b0ea"
+ },
+ "checks": [
+  {
+   "cmd": "TMPDIR=artifacts/nat-189/harness python3 -B docs/procedures/nat-191/test_nat191.py",
+   "exit_code": 0,
+   "result": "Ran 13 tests OK"
+  },
+  {
+   "cmd": "python3 -c <json args> docs/procedures/krn-044/rebuild.py @docs/procedures/nat-191/rebuild-args.json",
+   "exit_code": 0,
+   "result": "undefined_symbols 0, no_storage dd2b9f3ffdd97263653664c8b4e13dbcf7587657adad6bf5333304f061c16886"
+  },
+  {
+   "cmd": "aarch64-apple-darwin-nm -u artifacts/nat-191/kernel-001/compile/bsd_e1s_display.o/e1s_display.o",
+   "exit_code": 0,
+   "result": "no recount_current_* (NAT-189 object had _recount_current_thread_time_mach)"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-191/build.py --out artifacts/nat-191/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "loader sites rc 0, 254 B"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-191/build-001 --out artifacts/nat-191/package-001",
+   "exit_code": 0,
+   "result": "RECOVERY cafc0d3329ffb90f66d77f580cffb6cf3ba279d270b96ed7361a707902b47885"
+  },
+  {
+   "cmd": "aarch64-apple-darwin-size -m <kernel.unstripped>",
+   "exit_code": 0,
+   "result": "__TEXT 1671168 __DATA_CONST 950272 __TEXT_EXEC 8749056 __DATA 5505024 __BOOTDATA 311296 (= scV)"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-191/derive192.py --check",
+   "exit_code": 0,
+   "result": "pass"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-191/kernel-001/rebuild.json",
+  "artifacts/nat-191/build-001/build.json",
+  "artifacts/nat-191/package-001/package.json"
+ ],
+ "limits": [
+  "host-test only; the run is NAT-192"
+ ]
+}
