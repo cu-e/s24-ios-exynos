@@ -1,0 +1,173 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "origin_detail": "SM-S921B e1s, one run of loader-diag-xnu-scY-md1 delivered into RAM via RECOVERY, decision 0078",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T08:06:10+00:00",
+ "task": "NAT-192",
+ "summary": "pc190 P-ok: 4 windows, 137,586 samples (69,526 over 220-310 s), coarse coverage 0.996, sampler self 0.6 %, no panic. Fine-table images: QuartzCore 0.59-0.63, libsystem_m (powf/atan2f) 0.13-0.16, vImage premultiplied blend 0.06-0.07, kernel traps 0.04-0.09, memmove 0.01. Code read from the cache: ~35 % bilinear image-sampling span loops (sub_1884471ec/188447348/188448380, caller sub_18843fe04), ~15 % continuous-corner superellipse masks (sub_1884454c8: 12 powf per 4 pixels), ~13-17 % a per-pixel atan2f span (sub_18844755c), ~7 % vImage blend, copies < 1 %. Registered group line corrected post hoc: pc190's coarse buckets are attributed by bucket start (names libsystem_pthread/RegulatoryDomain for libsystem_m/QuartzCore). bbd188 B0 213.5 ms/frame vs 67.95 (frames fell at the sampler start; observer effect or UI state unresolved). K2 2.17 ms, C2, P1, W-ok/D2, U-sat, backboardd 0.834. Stock RECOVERY restored, Android verified.",
+ "decision": "docs/decisions/0078-nat192-loader-diag-xnu-scY-md1-single-run-2026-11-14.md",
+ "commit": "c40b097f (NAT-191)",
+ "device_used": true,
+ "image": {
+  "name": "loader-diag-xnu-scY-md1",
+  "recovery_sha256": "cafc0d3329ffb90f66d77f580cffb6cf3ba279d270b96ed7361a707902b47885",
+  "kernel_sha256": "dd2b9f3ffdd97263653664c8b4e13dbcf7587657adad6bf5333304f061c16886",
+  "session": "docs/procedures/nat-191/session_nat192.py",
+  "session_sha256": "d1bda36aa98c63862278f341c5f16d68992d3ccf0f6fe4603c349b0918f594cd"
+ },
+ "measurements": {
+  "pc190_verdict": "P-ok",
+  "swipe_samples": 69526,
+  "coarse_coverage": 0.9962,
+  "sampler_self_share": 0.006,
+  "windows": {
+   "220": {
+    "ticks": 17063,
+    "samples": 11326
+   },
+   "265": {
+    "ticks": 37924,
+    "samples": 30242
+   },
+   "310": {
+    "ticks": 39105,
+    "samples": 39284
+   },
+   "375": {
+    "ticks": 56274,
+    "samples": 56734
+   }
+  },
+  "fine_images": {
+   "220": {
+    "QuartzCore": 0.59,
+    "libsystem_m": 0.151,
+    "libsystem_kernel": 0.092,
+    "vImage": 0.072,
+    "libsystem_platform": 0.011
+   },
+   "265": {
+    "QuartzCore": 0.625,
+    "libsystem_m": 0.143,
+    "libsystem_kernel": 0.072,
+    "vImage": 0.062,
+    "libsystem_platform": 0.01
+   },
+   "310": {
+    "QuartzCore": 0.625,
+    "libsystem_m": 0.128,
+    "vImage": 0.068,
+    "libsystem_kernel": 0.035,
+    "libsystem_platform": 0.007
+   },
+   "375": {
+    "QuartzCore": 0.596,
+    "libsystem_m": 0.16,
+    "vImage": 0.065,
+    "libsystem_kernel": 0.043,
+    "libsystem_platform": 0.008
+   }
+  },
+  "top_functions_265_310": {
+   "QuartzCore:sub_1884471ec bilinear span": 0.206,
+   "_powf": 0.107,
+   "QuartzCore:sub_188447348 bilinear clamp": 0.104,
+   "QuartzCore:sub_18844755c atan2f span": 0.097,
+   "vImage:sub_18c091430": 0.068,
+   "QuartzCore:sub_188448380 bilinear opaque": 0.041
+  },
+  "bbd188": {
+   "verdict": "B0",
+   "ms_per_frame_median": 213.54,
+   "backboardd_share_median": 0.901
+  },
+  "fbcopy181": "K2 2.172 ms",
+  "cpuclk173": "C2",
+  "touch170": "P1",
+  "top186": "U-sat",
+  "backboardd_share": 0.834
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-191/session_nat192.py --out artifacts/nat-192/preflight-001 --image loader-diag-xnu-scY-md1",
+   "exit_code": 0,
+   "result": "ready-read-only"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/nat-191/session_nat192.py --out artifacts/nat-192/run-001 --image loader-diag-xnu-scY-md1 --execute",
+   "exit_code": 0,
+   "result": "native-attempt-started (reboot 07:47:53Z)"
+  },
+  {
+   "cmd": "lsusb -d 04e8:685d (after watcher 3213355 / collector 3213358 exit)",
+   "exit_code": 0,
+   "result": "Download Mode bus 8 device 55"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 55 --out artifacts/nat-192/restore-001/restore-trace",
+   "exit_code": 0,
+   "result": "100663296/100663296, reboot confirmed"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-192/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass, recovery_hash_match true"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-192/restore-001/report.json --readback artifacts/nat-192/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "sh artifacts/nat-192/analyse.sh",
+   "exit_code": 0,
+   "result": "pc190 P-ok, top186 U-sat, bbd188 B0, fbcopy181 K2"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-189/dscdis.py --cache ... --extra artifacts/nat-189/dsc-symbols --table artifacts/nat-189/dsc-table.pickle 0x18843fe04 0x1884454c8 0x18844755c 0x18c091430 0x188441c74 (+0x1884471ec 0x188448380)",
+   "exit_code": 0,
+   "result": "artifacts/nat-192/dis1.txt"
+  }
+ ],
+ "not_established": [
+  "observer effect of the 1-ms sampler on frame rate (run the same image with e1spc=0)",
+  "CA operation names behind redacted functions",
+  "why 200-220 s was busier than NAT-186"
+ ],
+ "device_inventory": "devices/local-2026-11-14-nat192.json",
+ "artifacts": [
+  "artifacts/nat-192/run-001.log",
+  "artifacts/nat-192/analysis/kernel-text.txt",
+  "artifacts/nat-192/analysis/pc190.json",
+  "artifacts/nat-192/analysis/top186.json",
+  "artifacts/nat-192/analysis/bbd188.json",
+  "artifacts/nat-192/analysis/fbcopy181.json",
+  "artifacts/nat-192/analysis/frames159.json",
+  "artifacts/nat-192/analysis/cpuclk173.json",
+  "artifacts/nat-192/analysis/touch170.json",
+  "artifacts/nat-192/analysis/verdict.json",
+  "artifacts/nat-192/analysis/panel-thumb.ppm",
+  "artifacts/nat-192/dis1.txt",
+  "artifacts/nat-192/restore-001/report.json",
+  "artifacts/nat-192/restore-001/android-check.json",
+  "artifacts/nat-192/restore-001/assess.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-192/run-001.log": "1800abf879e52abbd81f217c253043b6f5ae8fd0c51c3c47a354d1ca8f3829bf",
+  "artifacts/nat-192/analysis/kernel-text.txt": "bea80026c8e31f7a8392177f153ea04128fd095f5c5e768c7743ef60874f2065",
+  "artifacts/nat-192/analysis/pc190.json": "8d9ae68ef3fb700ea1eb0ea4c0cad44ded85b2d19f9ce00d74d3101b640d104e",
+  "artifacts/nat-192/analysis/top186.json": "8958ee628b3ec06751e7f311107584551031eab9feb95f73865d6a6dd7cc7770",
+  "artifacts/nat-192/analysis/bbd188.json": "074036fc425549a2450afcfd3e703f6abfc45504c2513c0b5ea25660858dcc7c",
+  "artifacts/nat-192/analysis/fbcopy181.json": "b37b8fa811477ca1de6961e48a939e94fe8d716db90b7f3c12746c233abd7f5c",
+  "artifacts/nat-192/analysis/frames159.json": "90b5bfd7f5c25e49e23e7c652cda611e0ec85591a3eecb2e75f189e5dace658b",
+  "artifacts/nat-192/analysis/cpuclk173.json": "133269c0152b8f4d9e0650db8fd96c3a6a9ea494ca900d59e3e142684b3c813d",
+  "artifacts/nat-192/analysis/touch170.json": "07aaa7b167a47e334de309fc41296552870b16ec19c94abea7b6444cd7b8f293",
+  "artifacts/nat-192/analysis/verdict.json": "e694326b460cf16999bc453c196c462772cbe544267fd814330d44ea455aaed3",
+  "artifacts/nat-192/analysis/panel-thumb.ppm": "de360c30a62a321b6ad141a4c3e65a3c24583765c4a6e03b5e740f61e8a68b5c",
+  "artifacts/nat-192/dis1.txt": "1c32fb6aeb3a2c5d05563db3e541141c83fd786a5df3ff93adae918d5d4c59fc",
+  "artifacts/nat-192/restore-001/report.json": "7377d031500769e095aa32c009d84effa2295415c78d102152526499f722b8fe",
+  "artifacts/nat-192/restore-001/android-check.json": "00a7139cbab2405fb3acd729afcd5c1d122535f1d40f4d19d32cb05345a0a4c0",
+  "artifacts/nat-192/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a"
+ }
+}
