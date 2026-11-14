@@ -4,6 +4,12 @@
 timed by the launchd log lines just before each snapshot, plus the framebuffer driver's time over the same span from frames159.
 Kernel/userland counts, not a profiler: ps TIME includes each process's kernel time; the driver's presenter is a kernel thread.
 
+ERRATUM (2026-11-14, after NAT-164): the snapshot times are NOT reliable. The console part of the dump has no kernel timestamps; the
+launchd line before a snapshot can be far older than it, and the heartbeat's own `ps` takes 4-27 s to run on the phone
+("SWEET hb: n=N ps pid=P status=0 ms=M"), so per-process TIME is sampled somewhere inside that window. busy_share is therefore
+reported only when every ps in the pair ran in under 1 s; otherwise it is null with the reason. The per-process deltas stay as
+relative indications only.
+
   python3 -B docs/procedures/nat-161/cpu161.py KERNEL_TEXT [--json OUT]
 """
 import importlib.util
@@ -45,6 +51,7 @@ def analyse(text):
     if len(s) < 2 or s[0]['t'] is None or s[1]['t'] is None:
         return dict(snapshots=len(s), verdict='no-span')
     a, b = s[0], s[1]
+    ps_ms = [int(m.group(1)) for m in re.finditer(r'SWEET hb: n=\d+ ps pid=\d+ status=\d+ ms=(\d+)', text)]
     span = b['t'] - a['t']
     delta = sorted(((round(v - a['procs'].get(k, 0.0), 2), k) for k, v in b['procs'].items()), reverse=True)
     procs = sum(d for d, _ in delta)
@@ -57,7 +64,11 @@ def analyse(text):
         drv += part * w['frames'] * w['driver_us'] / 1e6
     return dict(snapshots=len(s), span_s=round(span, 2), from_s=round(a['t'], 2), to_s=round(b['t'], 2),
                 processes_cpu_s=round(procs, 2), driver_cpu_s=round(drv, 2),
-                busy_share=round((procs + drv) / span, 3), top=[dict(cpu_s=d, proc=k) for d, k in delta[:8]],
+                ps_run_ms=ps_ms[:2],
+                busy_share=round((procs + drv) / span, 3) if ps_ms[:2] and max(ps_ms[:2]) < 1000 else None,
+                busy_share_unreliable_reason=None if ps_ms[:2] and max(ps_ms[:2]) < 1000 else
+                'snapshot times unknown to within the ps run time (%s ms) and the launchd-line offset' % ps_ms[:2],
+                raw_share_not_a_measurement=round((procs + drv) / span, 3), top=[dict(cpu_s=d, proc=k) for d, k in delta[:8]],
                 note='single running core; time-stamp bases (launchd wall clock vs kernel seconds) assumed equal: both start near boot')
 
 

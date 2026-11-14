@@ -20,7 +20,9 @@
 - SpringBoard stayed up. The only exits are mediaserverd crashing on SIGSEGV, as in NAT-159.
 - Rendering 2.25 times fewer pixels changed the frame rate by 4%.
 
-## Why: the single core is half idle (`cpu161.py`)
+## CPU split (`cpu161.py`): WITHDRAWN, see `ERRATUM-2026-11-14.md`
+
+The figures below were the first reading. They are not a measurement: the snapshot times are unknown to within 5–27 s.
 
 Between the two `ps` snapshots the heartbeat prints (328–363 s, 34.9 s), CPU time was:
 
@@ -30,7 +32,7 @@ Between the two `ps` snapshots the heartbeat prints (328–363 s, 34.9 s), CPU t
 | Framebuffer driver | 6.78 s, from its 5 s windows weighted by overlap |
 | **Total** | **50% of the span** |
 
-The idle home screen's frame rate is not CPU-bound. In NAT-153/159 the first two snapshots fall during boot, so they cannot be
+~~The idle home screen's frame rate is not CPU-bound.~~ (withdrawn) In NAT-153/159 the first two snapshots fall during boot, so they cannot be
 compared. The driver source says CoreAnimation "does not go by the refresh notifications of this driver … but by a clock of its own".
 The ~10/s cap seen in every run (at most 51–52 frames per 5 s) is therefore most likely the rate at which the home screen's content
 changes, or CoreAnimation's own pacing. It is not the hardware's capacity.
