@@ -71,18 +71,26 @@ def analyse(text):
 
 
 def lookup(addrs, table):
+    # NAT-202 fix (after the run, symbolisation only): an address below the slide (pc 0, a call through NULL) is not looked up
+    bad = {a for a in addrs if a.startswith('0x-') or int(a, 16) < 0x100000000}
+    good = [a for a in addrs if a not in bad]
+    res = {a: '%s not a shared cache address' % a for a in bad}
+    if not good:
+        return {a: res[a] for a in addrs}
+    addrs_in = addrs
+    addrs = good
     out = subprocess.run([sys.executable, '-B', str(HERE.parent / 'nat-189/dscsym.py'), '--table', table, 'lookup', *addrs],
                          capture_output=True, text=True, check=True).stdout.splitlines()
-    res = {}
     for a, l in zip(addrs, out):
         res[a] = l if ' None None' not in l else '%s not in the shared cache (page offset 0x%x)' % (a, int(a, 16) & 0x3fff)
-    return res
+    return {a: res[a] for a in addrs_in}
 
 
 def symbolise(r, table):
     for t in r['first_mediaserverd'] + r['other_first']:
         slide = int(t['slide'], 16)
-        addrs = ['0x%x' % (int(a, 16) - slide) for a in [t['pc'], t['lr'], *t['frames']]]
+        addrs = [('0x%x' % (int(a, 16) - slide)) if int(a, 16) >= slide else ('0x-%x' % (slide - int(a, 16)) if int(a, 16) else '0x0')
+                 for a in [t['pc'], t['lr'], *t['frames']]]
         t['symbols'] = list(lookup(addrs, table).values())
     for s in r['mediaserverd_sites']:
         sym = lookup([s['pc_unslid'], s['lr_unslid']], table)
