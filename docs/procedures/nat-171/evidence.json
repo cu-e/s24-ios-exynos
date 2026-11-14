@@ -1,0 +1,38 @@
+{
+ "kind": "source-review",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T03:35:00+00:00",
+ "task": "NAT-171",
+ "summary": "Stock CPU DVFS on s5e9945: cpu0 is in cluster0 (cpu0-3, Cortex-A520), cal-id ACPM_DVFS_CPUCL0 0x0B040002 -> firmware index 2; the kernel never writes CMU/PLL or CPU voltage: exynos_cpufreq_target -> cal_dfs_set_rate -> exynos_acpm_set_rate sends {2|seq<<16, kHz, FREQ_REQ=0, timer} on APM mailbox 0x12B90000 channel 0 with a response. Android readback on this phone: policy0 400000..1959000 kHz (17 levels), idle 672000. Our ACPM scan: channel 0 type 1 len 8 elem 16 poll 1 (same as the proven PMIC channel 2). Prepared by a research subagent, re-checked in part.",
+ "commit": "2017f2d (base)",
+ "device_used": true,
+ "device_use": "Android userland read of /sys/devices/system/cpu/cpufreq/policy0 only (no root write, no debugfs)",
+ "sources": {
+  "docs/procedures/nat-171/README.md": "dd37bf398fb2d9680f6a0705ab3221cf3794ffcfcd57bbff517222902569af8f",
+  "docs/procedures/nat-171/task.json": "cb0a71f5b4ec19dc02b9d12387772ad8b48f07b2d60ed69da537b8ab75357896"
+ },
+ "reference": {
+  "repo": "references/s24-linux",
+  "sha": "417484173abc2c4fa93e738ea82ad9f2e84911b1"
+ },
+ "checks": [
+  {
+   "cmd": "adb shell 'cat /sys/devices/system/cpu/cpufreq/policy0/{cpuinfo_max_freq,cpuinfo_min_freq,scaling_cur_freq,scaling_governor,scaling_available_frequencies,related_cpus}'",
+   "exit_code": 0,
+   "result": "1959000/400000/672000/energy_aware/17 levels/0-3"
+  },
+  {
+   "cmd": "grep e1s-acpm artifacts/nat-170/analysis/kernel-text.txt",
+   "exit_code": 0,
+   "result": "ch0 id=0 type=1 len=8 elem=16 poll=1; ch11 type=1 len=14 poll=0"
+  }
+ ],
+ "not_established": [
+  "whether the firmware honours FREQ_REQ without DM_DATA_INIT/DM_POLICY_UPDATE",
+  "the reply word semantics",
+  "the clock S-Boot leaves cluster 0 at"
+ ],
+ "artifacts": [],
+ "artifact_sha256": {}
+}

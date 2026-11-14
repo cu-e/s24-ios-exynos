@@ -2,7 +2,7 @@
 
 > Generated from state/lab.json. Use the CLI; do not edit this board or its task cards.
 
-Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-14T03:12:18+00:00.
+Phase: **device baseline captured; Android-preserving research**. Snapshot: 2026-11-14T03:15:35+00:00.
 
 Registry SHA256: `6461d9a87c456302b46ef8a888fe51dc0717b48f01249be74f5488016e12b495`. Run `python3 tools/lab.py board --check` to detect stale files.
 
