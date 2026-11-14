@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T00:46:31+00:00",
+  "updated_at": "2026-11-14T00:53:26+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -8,7 +8,7 @@
       "host": true,
       "android-readonly": true,
       "android-app": true,
-      "native": false
+      "native": true
     },
     "facts": [
       {
@@ -888,6 +888,13 @@
         "decision": "docs/decisions/0063-nat153-loader-diag-xnu-scH-md1-single-run-2026-11-14.md",
         "owner": "claude-opus-usb130-20261113",
         "at": "2026-11-14T00:16:56+00:00"
+      },
+      {
+        "scope": "native",
+        "value": true,
+        "decision": "docs/decisions/0064-nat159-loader-diag-xnu-scJ-md1-single-run-2026-11-14.md",
+        "owner": "claude-opus-usb130-20261113",
+        "at": "2026-11-14T00:53:07+00:00"
       }
     ]
   },
@@ -18375,7 +18382,7 @@
     },
     {
       "id": "NAT-158",
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude-opus-usb130-20261113",
       "title": "Host: scJ = scH (NAT-152, ran in NAT-153) with boot-arg fb_filter=0 (nearest-neighbour scaling, NAT-156 lever 3) in place of the recording tokens rec_secs=270 rec_mb=64 (the 255-byte line has no room for both; NAT-153's recording ended at 345 s, before the 70.7 ms windows it is compared with); NAT-157 loader message fix built in with its relocation gate; loader-sites gate; package and counted session for a native run",
       "scope": "host",
@@ -18397,12 +18404,15 @@
       ],
       "started_at": "2026-11-14T00:46:31+00:00",
       "last_heartbeat": "2026-11-14T00:46:31+00:00",
-      "updated_at": "2026-11-14T00:46:31+00:00"
+      "updated_at": "2026-11-14T00:51:15+00:00",
+      "evidence": "docs/procedures/nat-158/evidence.json",
+      "evidence_sha256": "63f261ffc447d4b18fdfb555d7305cef903305ded0024bba07769ae6ea177b6d",
+      "finished_at": "2026-11-14T00:51:15+00:00"
     },
     {
       "id": "NAT-159",
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "claude-opus-usb130-20261113",
       "title": "Native: run scJ (NAT-158: scH + fb_filter=0) once under decision 0061 with its own per-image decision; measure MiniIOMobileFramebuffer per-frame driver time and frames per 5 s against NAT-153 (70.7 ms, 6-7/s, single core, after the recording ended); restore stock RECOVERY with full hash check and verify Android",
       "scope": "native",
       "evidence_kind": "native-device",
@@ -18420,7 +18430,10 @@
         "Driver ms per frame and frames per 5 s windows from the kernel log, compared with NAT-153's steady windows",
         "Stock RECOVERY restored with full hash and Android verified",
         "Evidence with provenance; fail/inconclusive recorded but do not complete"
-      ]
+      ],
+      "started_at": "2026-11-14T00:53:26+00:00",
+      "last_heartbeat": "2026-11-14T00:53:26+00:00",
+      "updated_at": "2026-11-14T00:53:26+00:00"
     }
   ],
   "experiments": [
@@ -69868,6 +69881,45 @@
           "owner": "claude-opus-usb130-20261113",
           "priority": 80,
           "last_heartbeat": "2026-11-14T00:46:31+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T00:51:15+00:00",
+      "action": "task.done:NAT-158",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-158",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 80,
+          "last_heartbeat": "2026-11-14T00:46:31+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T00:53:07+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-14T00:53:26+00:00",
+      "action": "task.claim:NAT-159",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-159",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 80,
+          "last_heartbeat": "2026-11-14T00:53:26+00:00"
         }
       ]
     }
