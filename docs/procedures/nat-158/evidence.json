@@ -1,0 +1,67 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T05:52:00+00:00",
+ "task": "NAT-158",
+ "summary": "scJ = scH (NAT-152 build-001, ran in NAT-153) with boot-arg fb_filter=0 (nearest-neighbour scaling) in place of rec_secs=270 rec_mb=64 (255-byte limit; NAT-153's recording ended at 345 s, before the 70.7 ms windows) and NAT-157's loader message fix. Kernel/ramdisk/ADT byte-identical after the cmdline field; loader objects differ in 10-ckpt3.c.o (fix) and 08-markerlib52.c.o (image name); loader checkpoint check rc 0 with NAT-143 symbols; relocscan 1 allowed, 0 not allowed; package and counted session derivation for NAT-159. Host-test only; no device used.",
+ "commit": "8f46c84 (base; evidence committed with the NAT-158 files)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scJ-md1",
+  "recovery_sha256": "778300380b4ccd975d34e1cee89aca428db68db88d9e48232376399367a7003a",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "cd9823e1ce5a4b4d38d7e6d63fc9e0fe2142bfded8bd1710b782664336089ce5",
+  "payload_bytes": 26206800,
+  "loader_image_sha256": "7217ef2c2f5b2d2a0209054cc8643e44f91440c02d9ea7153b04a3cc6e917238",
+  "kernel_dir": "artifacts/nat-152/kernel-001",
+  "cmdline_bytes": 242,
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT158-scJ debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "session": "docs/procedures/nat-158/session_nat159.py",
+  "session_sha256": "0fa7d22ef5d97f66dd08ad8fa85baf7d781c312179b1bd70c64bacb4188de2ae"
+ },
+ "sources": {
+  "docs/procedures/nat-158/build.py": "6a4d6b4c191dd3fd0937a3c890d5bd85f5e3a9d80219e21fd4b5249a1c85cf81",
+  "docs/procedures/nat-158/derive159.py": "c5328a2669860668fcef595faf6834da1f9d721e850b9e9feccc6ae38e21a957",
+  "docs/procedures/nat-158/test_nat158.py": "a75e12ee1a10198f72b9cebd9f5e34c0ce3218ba86d242ebd17b4cba39737f39",
+  "docs/procedures/nat-157/fix_msg.py": "5fc0096ce422c4c85a64f51904c6935093ac06b67944d898a78ea609c8834566",
+  "docs/procedures/nat-157/relocscan.py": "5105eac2be15402a1e91c4b8bb22240fd81d8232b451b9b8332b98e9809b18c7"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/nat-158/build.py --out artifacts/nat-158/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "cmdline 242 B; relocations 1 (allowed); differing objects 08-markerlib52.c.o, 10-ckpt3.c.o; NAT-152 gate (loader check rc 0, constants on NAT-143 symbols) passed inside the build"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-158/build-001 --out artifacts/nat-158/package-001",
+   "exit_code": 0,
+   "result": "778300380b4ccd975d34e1cee89aca428db68db88d9e48232376399367a7003a"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-158/derive159.py --check",
+   "exit_code": 0,
+   "result": "pass: counted session derivation"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-158/test_nat158.py",
+   "exit_code": 0,
+   "result": "7 OK"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "448 tests OK"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-158/build-001/build.json",
+  "artifacts/nat-158/build-001.log",
+  "artifacts/nat-158/package-001/package.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-158/build-001/build.json": "f859ad5249ca79893aaf704b16d927df80f6335eb4db422dbc43d5a5ff619d4f",
+  "artifacts/nat-158/package-001/package.json": "29cc80ac18a8f2562957ea0b61706da512d73e1487b5d0d168e1539420d399e3"
+ },
+ "limits": "Host only: no frame time is predicted from it; NAT-159 measures on the phone. The screen recording is not in this image."
+}
