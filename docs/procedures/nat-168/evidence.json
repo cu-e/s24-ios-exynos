@@ -1,0 +1,204 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "origin_detail": "SM-S921B e1s S921BXXS9BYH3 over USB; image from RECOVERY, root delivered to RAM",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T02:50:00+00:00",
+ "task": "NAT-168",
+ "summary": "scN (NAT-167: touch SPI half-bit default 8 instead of 400) ran once. Touch works at 8 (3/3 device id ok, event thread started) but the registered verdict is P0: 19.47 s per 1000 polls (NAT-166 19.58 by the same tool); the ID read takes 5.24 ms for 88 bits in both runs. The delay loop is not the poll cost: the linked kernel holds 8 (nm/Mach-O read), the loop is present (llvm-objdump), so 400 loops cost only tens of us per transfer; the cost is the GPIO MMIO itself, 4 reads + 3 writes of GPP9 DAT per bit, ~8.5 us per access (inference: 616 accesses in 5.24 ms). cpu0 still L2 (100% in all 37 steady samples), frames159 9.55/s, driver 25.94 ms, display W-ok/D2/S1/P2 as NAT-166. Stock RECOVERY restored with full hash, Android verified.",
+ "decision": "docs/decisions/0068-nat168-loader-diag-xnu-scN-md1-single-run-2026-11-14.md",
+ "commit": "94085d2 (decision), image from 61f88fe",
+ "device_used": true,
+ "image": {
+  "name": "loader-diag-xnu-scN-md1",
+  "recovery_sha256": "408e8ff3d6202ae2df9e5bde3dc6a2a06ce94f5ac9d0ed89c3acd83e3c203b6b",
+  "payload_sha256": "a36f0405ab89eb66122e8ebf3162d9604da1d368578d64c6c1eac787ee03a56c",
+  "kernel_sha256": "eb0f0a1ee4ed7e1c101a64015c90f08498ba39d223f649f35b57f4375f778144",
+  "kernel_uuid": "BABA6672-6DA0-39EE-963D-0031430AD600",
+  "session_sha256": "8dfb76a449abea74ab01f1c152d6b6c23565681e01f138056bd482a0f6083231"
+ },
+ "measurements": {
+  "touch168": {
+   "id_reads": 3,
+   "id_ok": 3,
+   "id_lines": [
+    "ok (53 54 40 36 03)",
+    "ok (53 54 40 36 03)",
+    "ok (53 54 40 36 03)"
+   ],
+   "event_thread_started": true,
+   "marks": 13,
+   "seconds_per_1000": 19.47,
+   "first_mark_s": 142,
+   "last_mark_s": 378,
+   "intervals_s": [
+    20,
+    19,
+    19,
+    19,
+    20,
+    19,
+    19,
+    20,
+    19,
+    19,
+    21,
+    22
+   ],
+   "coord_events": 0,
+   "busy_ms_per_poll_est": 9.47,
+   "verdict": "P0"
+  },
+  "load166_verdict": "L2-saturated",
+  "load166_steady_samples": 37,
+  "cpu0_steady": {
+   "median": 100,
+   "min": 100,
+   "max": 100
+  },
+  "frames159": {
+   "windows": 11,
+   "recorded": false,
+   "recording_end_s": null,
+   "steady_windows": 7,
+   "first_steady_s": 348.0,
+   "last_steady_s": 379.0,
+   "driver_ms_median": 25.943,
+   "driver_ms_min": 25.934,
+   "driver_ms_max": 25.956,
+   "fps_median": 9.55,
+   "fps_min": 6.96,
+   "fps_max": 10.28,
+   "frame_interval_ms_median": 104.7,
+   "gpu_wait_us_max": 0,
+   "late_swaps": 13,
+   "other_ms_median": 78.8
+  },
+  "display": {
+   "window": "W-ok",
+   "display": "D2-refreshing",
+   "ios": "S1-alive-no-frame",
+   "power": "P2-both-rails-verified"
+  },
+  "id_read_timing_ms": {
+   "nat166": {
+    "device_id": 5.246,
+    "hardware_id": 6.608,
+    "poll_to_poll": 57.5
+   },
+   "nat168": {
+    "device_id": 5.241,
+    "hardware_id": 6.554,
+    "poll_to_poll": 57.5
+   },
+   "note": "kernel stamps print microseconds unpadded (fraction may exceed 999999); gaps measured between consecutive log lines, which include the printf of the previous line"
+  },
+  "linked_kernel_e1s_halfbit": {
+   "address": "0xfffffff007af9524",
+   "value": 8
+  },
+  "transfer_code": "llvm-objdump of e1s_spi_transfer (NAT-165 object): per bit 4 loads + 3 stores of GPP9 DAT (read-modify-write per pin change plus the MISO read) and 3 volatile stack loops bounded by e1s_halfbit"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-167/session_nat168.py --out artifacts/nat-168/preflight-001 --image loader-diag-xnu-scN-md1",
+   "exit_code": 0,
+   "result": "ready-read-only"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/nat-167/session_nat168.py --out artifacts/nat-168/run-001 --image loader-diag-xnu-scN-md1 --execute",
+   "exit_code": 0,
+   "result": "native-attempt-started, readback 408e8ff3"
+  },
+  {
+   "cmd": "lsusb -d 04e8:685d (wait)",
+   "exit_code": 0,
+   "result": "Download Mode at 02:37:17Z, 10 min 22 s after the reboot request (loader deadline)"
+  },
+  {
+   "cmd": "nat-097/kl_reader2.py read_archive2(artifacts/nat-168/run-001/archive) why=2 -> artifacts/nat-168/analysis/kernel-text.txt",
+   "exit_code": 0,
+   "result": "2 dumps, why=2 text 532529 B"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-168/touch168.py artifacts/nat-168/analysis/kernel-text.txt --json artifacts/nat-168/analysis/touch168.json",
+   "exit_code": 0,
+   "result": "P0 19.47 s/1000"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-165/load166.py artifacts/nat-168/analysis/kernel-text.txt --json artifacts/nat-168/analysis/load166.json",
+   "exit_code": 0,
+   "result": "L2-saturated"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-159/frames159.py artifacts/nat-168/analysis/kernel-text.txt --json artifacts/nat-168/analysis/frames159.json",
+   "exit_code": 0,
+   "result": "9.55/s, 25.94 ms"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-113/decode113.py artifacts/nat-168/run-001/archive --json artifacts/nat-168/analysis/pixels.json --ppm artifacts/nat-168/analysis/panel-thumb.ppm",
+   "exit_code": 0,
+   "result": "ok"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-150/analyze150.py --kernel-text artifacts/nat-168/analysis/kernel-text.txt --pixels artifacts/nat-168/analysis/pixels.json --out artifacts/nat-168/analysis/verdict.json",
+   "exit_code": 0,
+   "result": "W-ok D2-refreshing S1-alive-no-frame P2-both-rails-verified"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 35 --out artifacts/nat-168/restore-001/restore-trace",
+   "exit_code": 0,
+   "result": "100663296/100663296 acknowledged, reboot confirmed"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-168/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass, recovery_hash_match true"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-168/restore-001/report.json --readback artifacts/nat-168/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  }
+ ],
+ "not_established": [
+  "the split of the ~8.5 us per GPIO access between reads and writes, and why it is so slow (bus clock or interconnect state of PERIC1 under this loader is not measured)",
+  "whether the STM chip keeps its IRQ line low for as long as events are pending (stock level-low semantics; needed before gating the poll on the line)",
+  "the per-thread split of cpu0"
+ ],
+ "device_inventory": "devices/local-2026-11-14-nat168.json",
+ "artifacts": [
+  "artifacts/nat-168/run-001.stdout",
+  "artifacts/nat-168/run-001/report.json",
+  "artifacts/nat-168/run-001/archive/manifest.json",
+  "artifacts/nat-168/analysis/kernel-text.txt",
+  "artifacts/nat-168/analysis/touch168.json",
+  "artifacts/nat-168/analysis/load166.json",
+  "artifacts/nat-168/analysis/frames159.json",
+  "artifacts/nat-168/analysis/pixels.json",
+  "artifacts/nat-168/analysis/verdict.json",
+  "artifacts/nat-168/analysis/panel-thumb.ppm",
+  "artifacts/nat-168/restore-001/restore.stdout",
+  "artifacts/nat-168/restore-001/restore-trace/trace.json",
+  "artifacts/nat-168/restore-001/report.json",
+  "artifacts/nat-168/restore-001/android-check.json",
+  "artifacts/nat-168/restore-001/assess.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-168/run-001.stdout": "0973ca4965ae8de597a0c2693e79560c6867f4cb3005ec3353a09fe7fad1fb1b",
+  "artifacts/nat-168/run-001/report.json": "5f52ccea758a54c194718a03fbffcc8bb90d4899d751e21d167bd28846491cb4",
+  "artifacts/nat-168/run-001/archive/manifest.json": "af0e12a230d989dc31b2626b807914077ddc44700328808ab02d7e7fbb57c2c9",
+  "artifacts/nat-168/analysis/kernel-text.txt": "4c55c7d5b85eac4b497ca74140ecf95ac9a957a3cc6142e208e1e00023acf20d",
+  "artifacts/nat-168/analysis/touch168.json": "2912dc8276fc08839f328949621be5cc6f7ef3b07ddec9ea7f3a89aa3fb6d4c7",
+  "artifacts/nat-168/analysis/load166.json": "7fe40d93b802da54e59fbc47bac308d8a3a5b7b03e91ae6a0f34cd9f256a2035",
+  "artifacts/nat-168/analysis/frames159.json": "70b6c695d18cf590cd52ecc8c77b4e4090bf5f466872145073b7c9ee4e453a63",
+  "artifacts/nat-168/analysis/pixels.json": "907b4ef227b1d04ba82bd3b0cd5abe8e6612fdc11ed4090637cd0a4c019b6306",
+  "artifacts/nat-168/analysis/verdict.json": "1eff40725bd5accfb1db3a49ae0609dd9814e2bd5e3e9acdaffc88e999202dda",
+  "artifacts/nat-168/analysis/panel-thumb.ppm": "120f3954f6c23cec77bb1c6a91fa2c32202e5a864790154a132d308730f1550d",
+  "artifacts/nat-168/restore-001/restore.stdout": "643da9871ed489f32b10bf3af527379cde5ed66bc280f24223dd59339bed3a9c",
+  "artifacts/nat-168/restore-001/restore-trace/trace.json": "939ea510fd7ef21b896b3d6547a23473b357f53a72258298f2cffc66129a1ce1",
+  "artifacts/nat-168/restore-001/report.json": "a5a7c915f2f23db71157f86b0c11c11f62b4f7a06596d43c9c9abd2f7e531b73",
+  "artifacts/nat-168/restore-001/android-check.json": "1ec7e47e875a24089596d9585f689018d8925f5d28506f54ff1ddae22c14923b",
+  "artifacts/nat-168/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a"
+ }
+}
