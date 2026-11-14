@@ -1,0 +1,83 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T07:05:00+00:00",
+ "task": "NAT-187",
+ "summary": "scW = scV (NAT-185 kernel, unchanged) with the md0 root = NAT-110 + /var/mobile/Library/Preferences/com.apple.Accessibility.plist (EnhancedBackgroundContrastEnabled=Reduce Transparency, ReduceMotionEnabled=Reduce Motion; keys/domain in the donor libAccessibility) and its var.skel line; mkapfs 4 MiB, verify content and kernel apfs_lib readback 397/397. Image built with the small-root pin replaced by the verified hash; loader sites rc 0, 254 B, package fb65027c, counted session 88e8b06d, analyser bbd188 (B2/B1/B0 vs NAT-186 baseline 67.95 ms backboardd CPU per frame). 4 tests OK. Host-test only.",
+ "commit": "3f0eb7b9 (base)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scW-md1",
+  "recovery_sha256": "fb65027cd6ddb7813b971d1918964027a5aa2c5a79fef4282859a83bad4f060c",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "f41eb9f2274a28862103d4eb586f0fc52c4bf38c1743c8356a54500c402102ca",
+  "payload_bytes": 26208032,
+  "loader_image_sha256": "6669af39d1956f0041ef8a42954c2e9395dcc3c03806902ac5d7100c8d343658",
+  "kernel_sha256": "d7e7fee154104aaf9c59a4d2145c3901763259296ebd85cb373c388a4667c8b3",
+  "md0_sha256": "3f91915709307fe2826ecbb1dee86c01b875e91ea060796c645051ee8a32cd49",
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT187-scW debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 touch_lat=1 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "cmdline_bytes": 254,
+  "session": "docs/procedures/nat-187/session_nat188.py",
+  "session_sha256": "88e8b06d8fa999ce0ce5f67f1ef2dab3ae764ebca4e50f771dcedeeb94daadef"
+ },
+ "sources": {
+  "docs/procedures/nat-187/build_ax_root.py": "2da83d6c0bdb2a44f6d914a7f2295896f29f2a59e6db2c752abb8bb9cac8e700",
+  "docs/procedures/nat-187/build.py": "435a95ad3f9525ba1e7a013f7c6febe45ff5e590039f4f834c172b1729048511",
+  "docs/procedures/nat-187/bbd188.py": "d74d30c5c342b615bdef7a375748a3257dcf252f05e7c900b6ff62fa12ea41d2",
+  "docs/procedures/nat-187/test_nat187.py": "f0009d8ee4815af4c4b1de3568911ce745954d9051fa456fb976697a08a0a629",
+  "docs/procedures/nat-187/derive188.py": "3f8653ac87a8079d16aabe4c825fd2b8d3078c97e6d96ac764ae72b7893f978b",
+  "docs/procedures/nat-187/session_nat188.py": "88e8b06d8fa999ce0ce5f67f1ef2dab3ae764ebca4e50f771dcedeeb94daadef",
+  "docs/procedures/nat-187/README.md": "3c313c14a4b8f2aaf1a6221332fc764b562abaefdd945396fe064247c09a0330",
+  "docs/procedures/nat-187/task.json": "6b3de6931b4b6134939f1a89e3815696306eaa436987974cac78d836dc5bf9d2"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/nat-187/build_ax_root.py",
+   "exit_code": 0,
+   "result": "root.apfs 3f919157, 397 files, readback ok"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-187/build.py --out artifacts/nat-187/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-187/pid1-sc2-hb-ax/root.apfs",
+   "exit_code": 0,
+   "result": "254 B; loader sites rc 0 ok bad 0; relocscan passed"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-187/build-001 --out artifacts/nat-187/package-001",
+   "exit_code": 0,
+   "result": "fb65027cd6ddb7813b971d1918964027a5aa2c5a79fef4282859a83bad4f060c"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-187/derive188.py --check",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-187/test_nat187.py",
+   "exit_code": 0,
+   "result": "4 OK"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-187/bbd188.py artifacts/nat-186/analysis/kernel-text.txt",
+   "exit_code": 0,
+   "result": "baseline 67.95 ms/frame, share 0.768, 60-Hz share 0.594"
+  }
+ ],
+ "not_established": [
+  "whether backboardd reads the preference from that file at start (NAT-188)"
+ ],
+ "artifacts": [
+  "artifacts/nat-187/pid1-sc2-hb-ax/build.json",
+  "artifacts/nat-187/pid1-sc2-hb-ax/root.apfs",
+  "artifacts/nat-187/build-001/build.json",
+  "artifacts/nat-187/package-001/package.json",
+  "artifacts/nat-187/package-001/loader-diag-xnu-scW-md1/recovery.img"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-187/pid1-sc2-hb-ax/build.json": "290be5c85d07e60680438117e518f1bc059c3fb2242b6fd6cd69d9808a63dad8",
+  "artifacts/nat-187/pid1-sc2-hb-ax/root.apfs": "3f91915709307fe2826ecbb1dee86c01b875e91ea060796c645051ee8a32cd49",
+  "artifacts/nat-187/build-001/build.json": "5245652769155908fba9e4278f2fb72082a06767f904b51267b0bdd6a7a858e0",
+  "artifacts/nat-187/package-001/package.json": "66601ccb3878c73471f11dcf5ac09012cbefe2388244521fee408c74bd51f226",
+  "artifacts/nat-187/package-001/loader-diag-xnu-scW-md1/recovery.img": "fb65027cd6ddb7813b971d1918964027a5aa2c5a79fef4282859a83bad4f060c"
+ }
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T06:30:26+00:00",
+  "updated_at": "2026-11-14T06:38:31+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -19312,6 +19312,54 @@
       "evidence": "docs/procedures/nat-186/evidence.json",
       "evidence_sha256": "76537f0a345e8243797a13e94799c0d44cbb00b06399311d210b506a576bbd6c",
       "finished_at": "2026-11-14T06:30:07+00:00"
+    },
+    {
+      "id": "NAT-187",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scW = scV (NAT-185) with the md0 root carrying /var/mobile/Library/Preferences/com.apple.Accessibility.plist (EnhancedBackgroundContrastEnabled = Reduce Transparency, ReduceMotionEnabled = Reduce Motion; keys from the donor libAccessibility) so backboardd stops rendering blur materials in software (NAT-186: backboardd 76% of cpu0, ~30 ms/frame on home swipes, ~190 ms in the Today view)",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 94,
+      "depends_on": [
+        "NAT-186"
+      ],
+      "paths": [
+        "docs/procedures/nat-187",
+        "artifacts/nat-187"
+      ],
+      "acceptance": [
+        "Root = NAT-110's tree plus exactly one preference plist (0644, 501:501) and one etc/var.skel f-line; mkapfs 4 MiB, verify.py content and kernel apfs_lib readback with no mismatch",
+        "Keys and domain shown in the donor dyld shared cache; plist decodes to exactly the two booleans",
+        "Image = scV's kernel and command line (tag changed) with the new ramdisk; loader sites rc 0; package, counted session, registered verdicts (backboardd ms per frame and share, K, swipes), make check"
+      ],
+      "started_at": "2026-11-14T06:34:09+00:00",
+      "last_heartbeat": "2026-11-14T06:34:09+00:00",
+      "updated_at": "2026-11-14T06:38:31+00:00",
+      "evidence": "docs/procedures/nat-187/evidence.json",
+      "evidence_sha256": "d7079cb4abe541a7e302197dfa1ac9cb8d34efed522cb5fa3de55eb1ca7508d8",
+      "finished_at": "2026-11-14T06:38:31+00:00"
+    },
+    {
+      "id": "NAT-188",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: run scW (NAT-187 Reduce Transparency + Reduce Motion in the delivered root) once under decision 0061; backboardd CPU per frame and share, swipe frame intervals, last frame",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 94,
+      "depends_on": [
+        "NAT-187"
+      ],
+      "paths": [
+        "docs/procedures/nat-188",
+        "artifacts/nat-188"
+      ],
+      "acceptance": [
+        "Per-image decision before the run",
+        "Registered backboardd and swipe verdicts",
+        "Stock RECOVERY restored with full hash and Android verified"
+      ]
     }
   ],
   "experiments": [
@@ -72133,6 +72181,60 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T06:33:30+00:00",
+      "action": "task.add:NAT-187",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-187",
+          "status": "pending",
+          "owner": null,
+          "priority": 94
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T06:33:49+00:00",
+      "action": "task.add:NAT-188",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-188",
+          "status": "pending",
+          "owner": null,
+          "priority": 94
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T06:34:09+00:00",
+      "action": "task.claim:NAT-187",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-187",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 94,
+          "last_heartbeat": "2026-11-14T06:34:09+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T06:38:31+00:00",
+      "action": "task.done:NAT-187",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-187",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 94,
+          "last_heartbeat": "2026-11-14T06:34:09+00:00"
+        }
+      ]
     }
   ]
 }
