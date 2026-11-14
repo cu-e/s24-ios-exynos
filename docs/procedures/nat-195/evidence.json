@@ -1,0 +1,76 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T08:53:39+00:00",
+ "task": "NAT-195",
+ "summary": "e2p = scV with start.o from NAT-152 patch + a read-only EL2 probe in the out-of-line mark-4 block: a started core at EL2 reads HCR/SCTLR/MDCR/VBAR/CNTHCTL/CNTVOFF/CPTR/ICC_SRE _EL2 into mark slots 3-6, stage 0x5EC000E2, PSCI CPU_OFF, wfe fallback; no msr (test + mutant). Kernel ac557550 0 undefined, segments and nm equal scV, loader sites rc 0, 254 B, RECOVERY ef99af4d, payload b736cb08, session 3655d168; analyser e2p196 E-noprobe on NAT-153. Corrects NAT-153: S-Boot enters the loader at EL2 (NAT-022 canary); the loader drops itself.",
+ "commit": "bd0667d6 (base)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-e2p-md1",
+  "recovery_sha256": "ef99af4dabd107a96361b08a6efd6e1933b99ceeddd16899052d921b20e7366d",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "b736cb088ac99b571ea21bee7608b9b239bc44fa8c8dfbdbe90474249ba9d8d1",
+  "payload_bytes": 26208032,
+  "loader_image_sha256": "94712a03ff2990898fb71ddc3a39d9225d3a9f4d25f6793c16b3bfd3beb92a90",
+  "kernel_dir": "artifacts/nat-195/kernel-001",
+  "kernel_sha256": "ac5575501d10446ba41c62b1c97dac34613fe62d5490796d46df60db62fdd14b",
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT195-e2p debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 touch_lat=1 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "session": "docs/procedures/nat-195/session_nat196.py",
+  "session_sha256": "3655d16814dd10e398e6f12f18041207b5a25607825478c161208ddcda556fce"
+ },
+ "sources": {
+  "docs/procedures/nat-195/build.py": "cfdfb02665bee443b5cb7236c06e96e2941fab9c1ed931c1dcf34880392237a0",
+  "docs/procedures/nat-195/start.patch": "207d98a4e94647e08d26ba2bcb213cd81fadef7fe840b4056284da466225946b",
+  "docs/procedures/nat-195/rebuild-args.json": "b206fda0b5379423e80eda73c06eb4d4ce08daf2b505cdd295204902d5fc0cb9",
+  "docs/procedures/nat-195/e2p196.py": "b70b41ab571fda39da3cac3606ec7f990343aaef5e800a1c80ccf5d13510ee50",
+  "docs/procedures/nat-195/test_nat195.py": "16d69ae887d0e28fd5d8fd6e218af6d41d544b5e33f463ad59968f5a60f43839",
+  "docs/procedures/nat-195/derive196.py": "2a1bc6ea7c64d295541e8c61cbecf7f479ce44cb5fb5a8059f1d797b9be922a0",
+  "docs/procedures/nat-195/session_nat196.py": "3655d16814dd10e398e6f12f18041207b5a25607825478c161208ddcda556fce",
+  "docs/procedures/nat-195/README.md": "94bf2405ce8ef457540ecea7db7d6037c969568464ed2f2585fb21f02d32c99c",
+  "docs/procedures/nat-195/task.json": "d0a1925ef29a45e35e1c21c9ef164d3fce7f4fbc1ad60069c7604acd946c3c5a",
+  "docs/procedures/nat-195/task196.json": "06b97e774b90a9b9070cb24498197e228c2ab0941c9a94b8193bd09f473461e1"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -c <json args> docs/procedures/krn-044/rebuild.py @docs/procedures/nat-195/rebuild-args.json",
+   "exit_code": 0,
+   "result": "0 undefined, no-storage ac5575501d10446ba41c62b1c97dac34613fe62d5490796d46df60db62fdd14b"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-195/build.py --out artifacts/nat-195/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "loader sites rc 0, 254 B"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-195/build-001 --out artifacts/nat-195/package-001",
+   "exit_code": 0,
+   "result": "RECOVERY ef99af4dabd107a96361b08a6efd6e1933b99ceeddd16899052d921b20e7366d"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-195/derive196.py --check",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-195/test_nat195.py",
+   "exit_code": 0,
+   "result": "Ran 6 tests OK"
+  },
+  {
+   "cmd": "mutant: + msr HCR_EL2, x11 in start.patch -> Patch test",
+   "exit_code": 1,
+   "result": "killed"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-195/kernel-001/rebuild.json",
+  "artifacts/nat-195/build-001/build.json",
+  "artifacts/nat-195/package-001/package.json"
+ ],
+ "limits": [
+  "host-test only; the run is NAT-196 (decision 0080)",
+  "CPU_OFF from EL2 not yet observed on the phone"
+ ]
+}

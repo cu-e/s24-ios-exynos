@@ -1,13 +1,12 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-14T08:44:21+00:00",
-  "ledger_updated_at": "2026-11-14T08:44:02+00:00",
-  "registry_sha256": "147a1611fad89ac290bfa2089c8cdde33d81a42aecd09fe606d588d8a93bc5ce",
+  "generated_at": "2026-11-14T08:54:30+00:00",
+  "ledger_updated_at": "2026-11-14T08:54:11+00:00",
+  "registry_sha256": "11af0e73f49891520df09225496b4137e08d33a735d4643e4ea643b0d5d15606",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
       "NAT-082",
-      "NAT-195",
       "NAT-054",
       "NAT-055"
     ],
@@ -80,6 +79,7 @@
     ],
     "gated": [
       "NAT-017",
+      "NAT-196",
       "NAT-072",
       "NAT-003",
       "DRV-003",
@@ -284,6 +284,7 @@
       "NAT-090",
       "IOS-014",
       "NAT-099",
+      "NAT-195",
       "KRN-005",
       "REV-004",
       "REV-011",
@@ -8812,8 +8813,8 @@
     },
     {
       "id": "NAT-195",
-      "status": "pending",
-      "owner": null,
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
       "title": "Host: read-only secondary EL2 probe (roadmap S7): a PSCI-started core that finds CurrentEL == 2 records HCR_EL2, SCTLR_EL2, CNTHCTL_EL2, CNTVOFF_EL2, CPTR_EL2, MDCR_EL2, ICC_SRE_EL2, VBAR_EL2 and MPIDR_EL1 into its mark slot and parks in wfe; no EL2 register is written; reference scV otherwise",
       "scope": "host",
       "evidence_kind": "host-test",
@@ -8830,9 +8831,42 @@
         "Loader sites rc 0 and __TEXT_EXEC page count unchanged against scV",
         "Package, counted session, registered criteria for the native run"
       ],
-      "column": "ready",
+      "started_at": "2026-11-14T08:46:00+00:00",
+      "last_heartbeat": "2026-11-14T08:46:00+00:00",
+      "updated_at": "2026-11-14T08:53:52+00:00",
+      "evidence": "docs/procedures/nat-195/evidence.json",
+      "evidence_sha256": "0cf9faa7ba70453eed56472dbf81691b5df93cff4fd4f729d4f1e3892252856f",
+      "finished_at": "2026-11-14T08:53:52+00:00",
+      "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-195.md"
+    },
+    {
+      "id": "NAT-196",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: one run of e2p (NAT-195): read-only EL2 register probe on the PSCI-started cores (record, CPU_OFF); e2p196 verdict and decoded EL2 state; boot CPU as scV; restore stock RECOVERY and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 97,
+      "depends_on": [
+        "NAT-195"
+      ],
+      "paths": [
+        "docs/procedures/nat-196",
+        "artifacts/nat-196",
+        "docs/decisions/0080-nat196-loader-diag-xnu-e2p-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "One run under its own decision file; e2p196 verdict E-none/E-noprobe/E-partial/E-ok with decoded EL2 registers per core",
+        "Boot CPU path as scV (home screen, timed return) reported beside it",
+        "Stock RECOVERY restored with full hash check, Android verified, permit closed after done"
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-196.md"
     },
     {
       "id": "KRN-005",
@@ -21171,47 +21205,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-14T07:43:48+00:00",
-      "action": "task.add:NAT-192",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-192",
-          "status": "pending",
-          "owner": null,
-          "priority": 94
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T07:44:07+00:00",
-      "action": "task.claim:NAT-191",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-191",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 94,
-          "last_heartbeat": "2026-11-14T07:44:07+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T07:44:59+00:00",
-      "action": "task.done:NAT-191",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-191",
-          "status": "done",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 94,
-          "last_heartbeat": "2026-11-14T07:44:07+00:00"
-        }
-      ]
-    },
-    {
       "at": "2026-11-14T07:46:57+00:00",
       "action": "project.permit:native",
       "owner": "claude-opus-usb130-20261113",
@@ -21447,11 +21440,52 @@
           "last_heartbeat": "2026-11-14T08:42:38+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-14T08:46:00+00:00",
+      "action": "task.claim:NAT-195",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-195",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 97,
+          "last_heartbeat": "2026-11-14T08:46:00+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:53:52+00:00",
+      "action": "task.done:NAT-195",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-195",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 97,
+          "last_heartbeat": "2026-11-14T08:46:00+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T08:54:11+00:00",
+      "action": "task.add:NAT-196",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-196",
+          "status": "pending",
+          "owner": null,
+          "priority": 97
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "54bef10675d0c83be398731dbe4cca106f9b6ca2069b8f6000169012a7d831e1",
-    "BOARD.md": "d898a826bc7cbb4048e810f19694a9cac186ce57aa7f9f700fb8b93e0c48caa1",
+    "STATUS.md": "516a4b5d85ffbc446f9c530e835f0cf5c6bbf1cfab67814019354b6e1352929f",
+    "BOARD.md": "a3aae0cfe6ab5e743531833d02bdd024b87869e6892a39182cd4f5dba017d4bd",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -21656,7 +21690,8 @@
     "planning/tasks/NAT-091.md": "f0eb2889d031c3892425552569ac05048168149e42d8ae98660573a371535a9b",
     "planning/tasks/IOS-014.md": "342ef37955617b7d80899f8aa96d3cddf06a165a708bf65a8c66215f265c546d",
     "planning/tasks/NAT-099.md": "e4eae2b2b21bf8ee0de5420cdea30d01fe3d9ec36ac291a5c5d4a600ea868c41",
-    "planning/tasks/NAT-195.md": "bcba9927cbd4ecb2fd28ca104a4545910877be306089b9f911a530c2dc0471ea",
+    "planning/tasks/NAT-195.md": "7362d74d991389aa9de4f6e5b0a806d8fa49c65e64b53fd7f4a989ce5168f03c",
+    "planning/tasks/NAT-196.md": "3ad0e4910e419ad1a886624845fd3622d0124d81e875b2d34ea6f9d28e16fd41",
     "planning/tasks/KRN-005.md": "9dc245a9222bf8ecee5f5d7c61eb8dcbcb77c9d0301e91d7ce79aaaa8bdaf7fb",
     "planning/tasks/REV-004.md": "8c7b273845208b121b2d6d1f05038b627689d3f97b766a765a91cdf23082bdb1",
     "planning/tasks/REV-011.md": "5ea2857fe5caca100edd1f7f53667f0b2a27de4b576000ecd14e2a55f1e7d51b",
