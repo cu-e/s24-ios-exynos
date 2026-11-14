@@ -1,0 +1,80 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T09:40:00+00:00",
+ "task": "NAT-167",
+ "summary": "scN = scM (NAT-165) with the touch driver SPI half-bit default 400 -> 8 loops: kernel = NAT-165 record with only bsd/e1s_touch.o changed (NAT-143 patch + the default line; otool -d: _e1s_halfbit 0x190 -> 0x8); cmdline = scM with tag changed, 255 B; loader check rc 0, relocscan 0 not allowed; package 408e8ff3; counted session for NAT-168. Host-test only.",
+ "commit": "7bb1430 (base)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scN-md1",
+  "recovery_sha256": "408e8ff3d6202ae2df9e5bde3dc6a2a06ce94f5ac9d0ed89c3acd83e3c203b6b",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "a36f0405ab89eb66122e8ebf3162d9604da1d368578d64c6c1eac787ee03a56c",
+  "payload_bytes": 26206800,
+  "loader_image_sha256": "da620fd8144491866ff0811639ba3465ac301391ed542ffa774144a2a57854c0",
+  "kernel_dir": "artifacts/nat-167/kernel-001",
+  "kernel_sha256": "eb0f0a1ee4ed7e1c101a64015c90f08498ba39d223f649f35b57f4375f778144",
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT167-scN debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 cpuload=1000 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "cmdline_bytes": 255,
+  "session": "docs/procedures/nat-167/session_nat168.py",
+  "session_sha256": "8dfb76a449abea74ab01f1c152d6b6c23565681e01f138056bd482a0f6083231"
+ },
+ "sources": {
+  "docs/procedures/nat-167/build.py": "3780a8096a0fab34a53399d03d08d004ece7845c9222982d571963f37037577b",
+  "docs/procedures/nat-167/e1s_touch_combined.patch": "0a520fcb96684e58eda98044416e6217873a67b966031aede4c3155c8aa66591",
+  "docs/procedures/nat-167/rebuild-args.json": "0e73f00289cd0a108f491950ad12274aa3cdb212c18a7ef07730959d00a4b20e",
+  "docs/procedures/nat-167/derive168.py": "c6f5ba8958db13ccea92067b0c64aea6b24cb3b6396968d77648784ee29b66c1",
+  "docs/procedures/nat-167/session_nat168.py": "8dfb76a449abea74ab01f1c152d6b6c23565681e01f138056bd482a0f6083231",
+  "docs/procedures/nat-167/test_nat167.py": "7c9ffc0dd50f455873c794f9f0baeed15344bf6474d91ecbd29c359f16c4297d",
+  "docs/procedures/nat-167/README.md": "e83410d9502625c7dd7000af8ba94962e2c78a6badfe5827eebd69cd960efdcf"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -B docs/procedures/krn-044/rebuild.py --out artifacts/nat-167/kernel-001 --object osfmk/loader_return.o --patch docs/procedures/nat-121/loader_return.patch --extra bsd/e1s_touch.o=docs/procedures/nat-167/e1s_touch_combined.patch --extra bsd/redwood_input.o=docs/procedures/nat-165/redwood_input.patch --extra bsd/e1s_acpm.o=docs/procedures/nat-123/e1s_acpm.patch --extra bsd/e1s_pmic.o=docs/procedures/nat-123/e1s_pmic.patch --extra osfmk/start.o=docs/procedures/nat-152/start.patch --extra osfmk/psci_smp.o=docs/procedures/nat-152/psci_smp.patch --expect-string start: sense on (ready %s --expect-string miso cs-high --expect-string e1s-keys: disabled (e1skeys=0) --expect-string event thread started --expect-string e1s-touch: %s %u: finger %u x %u y %u --expect-string psci: cpu %d early marks: last 0x%llx --expect-string tl: u at %llu",
+   "exit_code": 0,
+   "result": "no_storage eb0f0a1e..., 0 undefined"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-167/build.py --out artifacts/nat-167/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "255 B; NAT-152 gate (loader check rc 0) and relocscan passed"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-167/build-001 --out artifacts/nat-167/package-001",
+   "exit_code": 0,
+   "result": "408e8ff3d6202ae2df9e5bde3dc6a2a06ce94f5ac9d0ed89c3acd83e3c203b6b"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-167/derive168.py --check",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-167/test_nat167.py",
+   "exit_code": 0,
+   "result": "5 OK (includes nm/otool value check 400 vs 8)"
+  },
+  {
+   "cmd": "make check",
+   "exit_code": 0,
+   "result": "OK"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-167/kernel-001/rebuild.json",
+  "artifacts/nat-167/kernel-001.log",
+  "artifacts/nat-167/build-001/build.json",
+  "artifacts/nat-167/build-001.log",
+  "artifacts/nat-167/package-001/package.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-167/kernel-001/rebuild.json": "113fd613150a2d74b0dd344170e6631d91d808222223bc52877151042df73171",
+  "artifacts/nat-167/kernel-001.log": "3c294058ff9e0f500af849c31a9bd94d1c2bdd7cf16cacea6f3d3f5a3e9721d2",
+  "artifacts/nat-167/build-001/build.json": "8881b3a04e8aec6bd0a06cb195ed482b87dda51e8f91fe864048ec74326ed5e9",
+  "artifacts/nat-167/build-001.log": "4c8ff149725e936898ed3c349bceec68b115969abcbd24fdd4c537682dc1bda6",
+  "artifacts/nat-167/package-001/package.json": "8a641f6a4c8bc7177411859e108feb81576f66068c241e38ec6e3daa74a5276b"
+ },
+ "limits": "Host only; whether the STM touch chip reads correctly with 8-loop half bits, and the effect on cpu0 and frames, is for NAT-168."
+}

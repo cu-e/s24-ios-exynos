@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-14T02:17:02+00:00",
-  "ledger_updated_at": "2026-11-14T02:16:43+00:00",
-  "registry_sha256": "2606c3bc8b95f6ce7151ca2668a3dc880d187bc8f715b3fb44d1b27d045ef4eb",
+  "generated_at": "2026-11-14T02:23:51+00:00",
+  "ledger_updated_at": "2026-11-14T02:23:32+00:00",
+  "registry_sha256": "1d6e94aeed25504dd7931efb6dd3b635fa3f5142b7d64e5963f97b152d87ff8e",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -79,6 +79,7 @@
     "gated": [
       "NAT-017",
       "NAT-072",
+      "NAT-168",
       "NAT-003",
       "DRV-003",
       "NAT-004",
@@ -416,6 +417,7 @@
       "VM-051",
       "VM-052",
       "NAT-010",
+      "NAT-167",
       "AUD-003",
       "CAM-003",
       "PWR-003",
@@ -15488,6 +15490,64 @@
       "card_path": "planning/tasks/NAT-010.md"
     },
     {
+      "id": "NAT-167",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scN = scM (NAT-165) with the touch driver's SPI half-bit default 400 -> 8 loops (NAT-166: the 10 ms touch poll spent ~9.3 ms of busy bit-banging per poll, about half of cpu0; stock DTS allows this chip 10 MHz); kernel rebuild (e1s_touch.o and NAT-165's redwood_input.o changed), loader gate, build, package, counted session",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 85,
+      "depends_on": [
+        "NAT-166"
+      ],
+      "paths": [
+        "docs/procedures/nat-167",
+        "artifacts/nat-167"
+      ],
+      "acceptance": [
+        "Kernel = NAT-165's with only e1s_touch.o's patch changed, and that patch = NAT-143's plus the default half-bit line",
+        "Loader check rc 0 on NAT-143 symbols; relocscan 0 not allowed; cmdline = scM's with the tag changed",
+        "Package, counted session, tests, make check"
+      ],
+      "started_at": "2026-11-14T02:18:33+00:00",
+      "last_heartbeat": "2026-11-14T02:18:33+00:00",
+      "updated_at": "2026-11-14T02:23:32+00:00",
+      "evidence": "docs/procedures/nat-167/evidence.json",
+      "evidence_sha256": "ab9c8bb563f88c07eae6f69d672e28274403d7391b52f579362635045dd660db",
+      "finished_at": "2026-11-14T02:23:32+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-167.md"
+    },
+    {
+      "id": "NAT-168",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: run scN (NAT-167: touch SPI half-bit 8) once under decision 0061; touch ID reads still correct, poll period, cpu0 busy share (cpuload) and frames against NAT-166; restore stock RECOVERY with full hash and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 85,
+      "depends_on": [
+        "NAT-167"
+      ],
+      "paths": [
+        "docs/procedures/nat-168",
+        "artifacts/nat-168",
+        "docs/decisions/0068-nat168-loader-diag-xnu-scN-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "Per-image decision before the run",
+        "Touch device/hardware ID reads as in NAT-166 and the event thread started; poll period per 1000 polls",
+        "cpu0 busy share and frames159 against NAT-166",
+        "Stock RECOVERY restored with full hash and Android verified"
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-168.md"
+    },
+    {
       "id": "AUD-003",
       "title": "Prepare source-qualified ABOX PCM host input and ownership boundaries",
       "status": "done",
@@ -20239,59 +20299,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-14T01:19:28+00:00",
-      "action": "task.claim:NAT-162",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-162",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 75,
-          "last_heartbeat": "2026-11-14T01:19:28+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T01:20:31+00:00",
-      "action": "task.done:NAT-162",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-162",
-          "status": "done",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 75,
-          "last_heartbeat": "2026-11-14T01:19:28+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T01:32:15+00:00",
-      "action": "task.done:NAT-161",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-161",
-          "status": "done",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 80,
-          "last_heartbeat": "2026-11-14T01:15:53+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T01:32:34+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
       "at": "2026-11-14T01:33:57+00:00",
       "action": "task.add:NAT-163",
       "owner": "claude-opus-usb130-20261113",
@@ -20498,11 +20505,65 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T02:17:55+00:00",
+      "action": "task.add:NAT-167",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-167",
+          "status": "pending",
+          "owner": null,
+          "priority": 85
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T02:18:14+00:00",
+      "action": "task.add:NAT-168",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-168",
+          "status": "pending",
+          "owner": null,
+          "priority": 85
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T02:18:33+00:00",
+      "action": "task.claim:NAT-167",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-167",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 85,
+          "last_heartbeat": "2026-11-14T02:18:33+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T02:23:32+00:00",
+      "action": "task.done:NAT-167",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-167",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 85,
+          "last_heartbeat": "2026-11-14T02:18:33+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "bbe02ff02a6795dfde59f5e80d8018b8308ed60bd552aff5c7c5d48dcc7aea59",
-    "BOARD.md": "797d6e53afb48943d1f30896e494fe4636f9641fee642589eafd032e33fefb5c",
+    "STATUS.md": "eaff1445a54f62527335bc1c95d733b782762aa0a5bfd0faa41518d4518fa10f",
+    "BOARD.md": "afa7b3e7a553cda2fc59d0a21c764ec4a8a62cb18e21eb5027629db259c82726",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -20862,6 +20923,8 @@
     "planning/tasks/VM-051.md": "1ce8573da42e1bcb24002aeeed55c3528872f07d707eb704107300beb9a593aa",
     "planning/tasks/VM-052.md": "714929529fd9e53981d1c60eb169badc37ebb01db2918f6861a49eaa913f2977",
     "planning/tasks/NAT-010.md": "3bc6791cfc0fb922c998d1167d3b73eb0fe529cba7cbb0c47a521b1067afca0e",
+    "planning/tasks/NAT-167.md": "7a41429859ff5e4b5a69256bf641cf4311149a284f0e5d658e55a3e099ea51cc",
+    "planning/tasks/NAT-168.md": "da397dcbebdd5fe56d24dc6845b21baa3b1cb7453500ecd2277ddceaea0bd31f",
     "planning/tasks/AUD-003.md": "4c4e08b858298722a856838980fc435c46852158939305ce38c0a1bc36168942",
     "planning/tasks/CAM-003.md": "0011d7fd53571c5e673da8221ec031aee28c8e10835c86c34411c7c435a02086",
     "planning/tasks/PWR-003.md": "da473ec179dfaab627860f7399d8f29a8514a1123d5a13536f27e9198af03b42",

@@ -1,0 +1,16 @@
+{
+ "id": "NAT-167",
+ "status": "pending",
+ "owner": null,
+ "title": "Host: scN = scM (NAT-165) with the touch driver's SPI half-bit default 400 -> 8 loops (NAT-166: the 10 ms touch poll spent ~9.3 ms of busy bit-banging per poll, about half of cpu0; stock DTS allows this chip 10 MHz); kernel rebuild (e1s_touch.o and NAT-165's redwood_input.o changed), loader gate, build, package, counted session",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 85,
+ "depends_on": ["NAT-166"],
+ "paths": ["docs/procedures/nat-167", "artifacts/nat-167"],
+ "acceptance": [
+  "Kernel = NAT-165's with only e1s_touch.o's patch changed, and that patch = NAT-143's plus the default half-bit line",
+  "Loader check rc 0 on NAT-143 symbols; relocscan 0 not allowed; cmdline = scM's with the tag changed",
+  "Package, counted session, tests, make check"
+ ]
+}
