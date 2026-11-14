@@ -25,13 +25,13 @@ Legend:
 | S5 | The project's own EL2→EL1 sequence | done (exists, runs every boot) | the loader's `start.S` `from_el2`: HCR_EL2.RW, CNTHCTL_EL2 = 3, ICC_SRE_EL2 (SRE/Enable), CPTR_EL2 = 0, ELR/SPSR_EL2, `eret`; used on the boot CPU in every native run |
 | S6 | Reading Linux's EL2 set-up constants (`init_el2`) | **STOPPED** (2026-11-14 ~00:2xZ, NAT-154) | not resumed and not needed: S5 is the project's own source |
 | S7 | Read-only probe: on a secondary at EL2, record HCR_EL2, SCTLR_EL2, CNTHCTL_EL2, CNTVOFF_EL2, CPTR_EL2, MDCR_EL2, ICC_SRE_EL2, VBAR_EL2, MPIDR, then CPU_OFF | **done** (NAT-195 host, NAT-196 native E-ok, 2026-11-14) | all 9 cores at EL2: HCR RW/API/APK/ATA, EL2 MMU off, VBAR_EL2 0, CNTHCTL 3, CNTVOFF 0, CPTR 0x32ff, ICC_SRE 9. The S5 sequence reproduces the boot CPU state; no new value is needed (docs/procedures/nat-196/README.md) |
-| S8 | Secondary reset path: when CurrentEL == 2, run the S5 sequence and `eret` to the EL1 entry | allowed now as a narrow host task; **if the classifier stops it, it stays stopped** | same goal as NAT-154. It uses only the loader's own phone-proven code, never the S6 source. Gates: `check_loader_sites.py` rc 0 and `__TEXT_EXEC` page slack (1232 B left in scV, NAT-189) |
-| S9 | Native run: cores at `arm_init_cpu`, `cpu_start`, the idle loop | allowed now (0061: CPU_ON runs need only the per-image decision) | criteria: running count > 1, no panic, timed return |
+| S8 | Secondary reset path: when CurrentEL == 2, run the S5 sequence and `eret` to the EL1 entry | **done** (NAT-197 host-test, 044513a4) | out of line at reset_vector+4, layout = scV, loader sites rc 0; the loader sequence instruction for instruction |
+| S9 | Native run: cores at `arm_init_cpu`, `cpu_start`, the idle loop | **done** (NAT-198 native, S2-all, 2026-11-14) | 10 of 10 processors running, no fault or panic, stop path works; parallel work measured. Open: SpringBoard aborts under SMP (uncaught ObjC exception on a libdispatch thread), flat topology, secondary clocks unset |
 | S10 | XNU SMP function: IPIs (GIC SGIs), per-CPU timers, cluster topology (A520 / A720 / X4), `small_cores` policy | after S9 | host work plus native runs |
 | S11 | Clocks of the other clusters through ACPM (stock FREQ_REQ per domain, as NAT-173 did for cpu0) | after S9 | stock parameters only |
 | S12 | Measure: backboardd and the driver on different cores, frames per 5 s against the reference | after S10 | reference scV |
 
-**Current blocker on the SMP line:** none that is external. S7 is done; S8 is the next piece. S6 stays stopped.
+**Current blocker on the SMP line:** none that is external. S7–S9 are done: ten CPUs run XNU (NAT-198). Next: the reason for SpringBoard's SMP-only exception, then S10–S12. S6 stays stopped.
 
 ## Xclipse 940 GPU
 
@@ -40,8 +40,8 @@ Legend:
 | G1 | Bring-up sequence from the pinned Samsung source | done | GPU-017: PMUCAL `g3dcore_on`, SMC 0x82000410, HVC 0xC6000108/110/111, SMC 0x82000520, gfxhub, rings |
 | G2 | Inventory from Android and the stock BYH3 binaries | done | GPU-018: firmware in the vendor_boot ramdisk (`vangogh_lite_unified_evt0/1.bin`, 901120 B); call IDs confirmed in `sgpu.ko`, `exynos-pd_el3.ko`, `exynos-s2mpu.ko`; S2MPU HVCs served by pKVM + `exynos-hypervisor` |
 | G3 | Stock-binary review of the power-on values | done (GPU-019) | `g3dcore_on` register writes and waits in the stock `cmupmucal.ko`; the DTZPC SMC arguments in `exynos-pd_el3.ko`; the ID/status register offsets the stock `sgpu.ko` reads first |
-| G4 | Kernel object `e1s_gpu`: power domain on → DTZPC restore → read GPU ID/status → DTZPC save → power off, with readbacks and 200 ms timeouts | allowed now (host, harness) | values from G3 only; no DMA, no firmware, no HVC |
-| G5 | Native run of G4 | allowed under 0061 (stock values, reversible by `g3dcore_off` and reset) | per-image decision lists every register, value and call ID |
+| G4 | Kernel object `e1s_gpu`: power domain on → DTZPC restore → read GPU ID/status → DTZPC save → power off | **STOPPED** (2026-11-14 ~09:5xZ, by the classifier while the host harness for it was being written) | not resumed or reworded. Left uncommitted and untouched: `docs/procedures/gpu-020/` (patch, build.py, rebuild args) and `artifacts/gpu-020/` (host kernel and image build). No task, no decision, nothing ran on the phone; owner |
+| G5 | Native run of G4 | follows G4, so stopped with it; was allowed under 0061 (stock values, reversible by `g3dcore_off` and reset) | per-image decision lists every register, value and call ID |
 | G6 | What the S2MPU HVCs do at EL2 | done (GPU-019): served by Samsung uH (el2_code 0xC1400000) inside pKVM; other SMCs go to EL3 unchanged | decides between EL2 code of our own and a direct path |
 | G7 | EL2 service for 0xC6000108/110/111 under XNU | owner (design first) | it would be new EL2-resident code; the plan goes to the owner, and a classifier stop on it ends that piece |
 | G8 | Firmware verify and RLC self-load (HVC 0xC6000110/111, SMC 0x82000520) | after G6/G7 | firmware read from the phone's own vendor_boot at run time, never committed |

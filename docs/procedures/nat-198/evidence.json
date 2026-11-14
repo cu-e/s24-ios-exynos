@@ -1,0 +1,127 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "origin_detail": "SM-S921B e1s, one run of loader-diag-xnu-e21-md1 delivered into RAM via RECOVERY, decision 0081",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T10:05:00+00:00",
+ "task": "NAT-198",
+ "summary": "smp198 S2-all / analyze150 C2-all-ten: with the EL2->EL1 drop all ten cores run in XNU (GenericARMPE 10 of 10 at 107.19 s), no failure, no fault, no panic; stop path at the timed return worked (cpu5 began it, boot CPU completed, Download Mode). Parallel work shown by e1s-top 5.22 s busy in a 4.95 s span; busy share 0.154 (U-free) vs 0.993 single-CPU. Open: SpringBoard aborts twice (uncaught ObjC exception on a libdispatch workqueue thread, 216.4 s and 301.6 s) so frame measures are not comparable with scV; flat topology (all cluster 0); secondary clocks unset. Stock RECOVERY restored, Android verified.",
+ "decision": "docs/decisions/0081-nat198-loader-diag-xnu-e21-md1-single-run-2026-11-14.md",
+ "commit": "044513a4 (NAT-197)",
+ "device_used": true,
+ "image": {
+  "name": "loader-diag-xnu-e21-md1",
+  "recovery_sha256": "52a8b24da5124c55b5813bcfc1869b28ff0826c4c5cfa9c78b5595c9a549e110",
+  "payload_sha256": "b579d77ffda311e326f747d5a315d2d4652a0222ceb957e0dbdeccec2f325b50",
+  "kernel_sha256": "0da06b549569d442f36f2431d27014f14d783a1099e4f545b12453ed10d9b8d3",
+  "session": "docs/procedures/nat-197/session_nat198.py",
+  "session_sha256": "9b88664e0b1234342950577391145cf0bc3b3e60bc6ef48aa749536019d143e0"
+ },
+ "measurements": {
+  "smp198": "S2-all",
+  "running": 10,
+  "joined": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9
+  ],
+  "panics": 0,
+  "stop_notes": [
+   {
+    "cpu": 5,
+    "what": "ends the system"
+   }
+  ],
+  "parallel_evidence": "e1s-top 250 s: span 4950640 us, busy 5217356 us",
+  "top186": "U-free busy_share_median 0.154",
+  "springboard_aborts": [
+   {
+    "pid": 13,
+    "t": 216.418
+   },
+   {
+    "pid": 115,
+    "t": 301.641
+   }
+  ],
+  "abort_stack": "abort <- libc++abi <- libobjc <- std::terminate <- libdispatch <- _pthread_wqthread",
+  "fbcopy181": "K2 driver 0.862 ms, steady windows 4, swipe fps median 20.44 max 60.34",
+  "bbd188": "B1 46.32 ms/frame (7 spans)",
+  "cpuclk173": "C2",
+  "display": "W-ok D2",
+  "topology": "all cores cluster_id 0 type 0"
+ },
+ "commands": [
+  {
+   "cmd": "python3 docs/procedures/nat-197/session_nat198.py --out artifacts/nat-198/preflight-001 --image loader-diag-xnu-e21-md1",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-197/session_nat198.py --out artifacts/nat-198/run-001 --image loader-diag-xnu-e21-md1 --execute",
+   "exit": 0
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 59 --out artifacts/nat-198/restore-001/restore-trace",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-198/restore-001/android-check.json",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-198/restore-001/report.json --readback artifacts/nat-198/restore-001/android-check.json",
+   "exit": 0
+  },
+  {
+   "cmd": "sh artifacts/nat-198/analyse.sh",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-189/dscsym.py --table artifacts/nat-189/dsc-table.pickle lookup <11 unslid abort-stack addresses>",
+   "exit": 0
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-198/analysis/smp198.json",
+  "artifacts/nat-198/analysis/verdict.json",
+  "artifacts/nat-198/analysis/kernel-text.txt",
+  "artifacts/nat-198/analysis/fbcopy181.json",
+  "artifacts/nat-198/analysis/bbd188.json",
+  "artifacts/nat-198/analysis/top186.json",
+  "artifacts/nat-198/analysis/cpuclk173.json",
+  "artifacts/nat-198/analysis/touch170.json",
+  "artifacts/nat-198/restore-001/report.json",
+  "artifacts/nat-198/restore-001/android-check.json",
+  "artifacts/nat-198/run-001.log"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-198/analysis/smp198.json": "8f6320fc20bf46d09cbdcb0681109fb2689a8c396eb9188243fde21ba01d757b",
+  "artifacts/nat-198/analysis/verdict.json": "dd586d1dc8b01e83601f98df9e6ce1931c43781e5c0bf5ce7e49ae00ba282f7a",
+  "artifacts/nat-198/analysis/kernel-text.txt": "8e012e4cfdba861fd12fd428931986ebd37749dca956ea67b3265f49795b4da4",
+  "artifacts/nat-198/analysis/fbcopy181.json": "a7d688c0de094c2d39d369d3d43184375d8ab7d70c49f07f6fa5184d581cfe18",
+  "artifacts/nat-198/analysis/bbd188.json": "7597eab1b22325136ed31dac129abd33b8f4db52f1d3ff993be9f78a51563805",
+  "artifacts/nat-198/analysis/top186.json": "f13bd19839a1de1ea5c830762ffff12c8d3fa1da4646eadf0bccffdbae0b242b",
+  "artifacts/nat-198/analysis/cpuclk173.json": "133269c0152b8f4d9e0650db8fd96c3a6a9ea494ca900d59e3e142684b3c813d",
+  "artifacts/nat-198/analysis/touch170.json": "5eb7d799ed15ed2b97602c8564874adf039f06d14555d440019c13afa5328cad",
+  "artifacts/nat-198/restore-001/report.json": "83f1bf3228adf5663be3412357487ce856f9d2f7fd0f588befa9635779172c73",
+  "artifacts/nat-198/restore-001/android-check.json": "1b6fa75ab6b4b89b076208edc433a3580162c2da1476a719c1fa1cad7a953123",
+  "artifacts/nat-198/run-001.log": "6d5d57e661721a21e8dc33faf822ef603168ce7b32104fdd07d8fcfd289519eb"
+ },
+ "restore": {
+  "stock_recovery_sha256": "96620b8bbb6ed871690069d646f5b91039be86811f26371728209b29d3babf67",
+  "assess": "pass",
+  "android_check": "pass"
+ },
+ "device_inventory": "devices/local-2026-11-14-nat198.json",
+ "limitations": [
+  "SpringBoard's exception reason is not in the kernel log",
+  "no frame-rate claim: SpringBoard restarted twice in the swipe window",
+  "scV analysers are not per-CPU"
+ ]
+}
