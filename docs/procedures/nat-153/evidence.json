@@ -1,0 +1,125 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "origin_detail": "SM-S921B e1s, loader-diag-xnu-scH-md1 booted from RECOVERY, iOS userland from RAM",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T00:15:00+00:00",
+ "task": "NAT-153",
+ "summary": "One bounded run of scH (decision 0063 under 0061). The loader passed its checkpoint checks and jumped to the kernel (NAT-151's scG did not); md1 2475720704 B at 36.19 MB/s; kernel ring why=2 690654 B, no holes. analyze150: smp C0-one, joined none, early_where E6-mmu-on for all cpu 1-9, AFFINITY_INFO 1 (off). Stage-1 mark CurrentEL = 0x8: the PSCI-started cores enter at EL2 while the boot CPU and XNU run at EL1; XNU's start path programs only EL1 translation, so the first kernel-VA access after mark 6 cannot work at EL2. Software display path: 6-7 frames/s steady from 341 s, 70.7 ms per frame inside MiniIOMobileFramebuffer (0 us GPU/refresh wait); no touch input (owner did not interact). Loader deadline brought Download Mode at 595 s; stock RECOVERY restored with full hash match, Android verified.",
+ "decision": "docs/decisions/0063-nat153-loader-diag-xnu-scH-md1-single-run-2026-11-14.md",
+ "commit": "0ed97eb (decision, task, claim); evidence committed with the NAT-153 record",
+ "device_used": true,
+ "image": {
+  "name": "loader-diag-xnu-scH-md1",
+  "recovery_sha256": "e90fe5b00269b434b8707f565d3d4365d9ba03c72a94e9a754c86c4a16d39164",
+  "payload_sha256": "2a35d84282ad5570255a31c4768e84740d3bead3de1f56c5c8c3646fa70e3ca2",
+  "kernel_sha256": "8d62baff503ddfe75ebf388fa13e9e8bf47cf46e942b54887f5c9221b44d14b4",
+  "session": "docs/procedures/nat-152/session_nat153.py",
+  "session_sha256": "f97f9d4bfd6228048a14648a5821b133362c5f882398fcb801b7218dcdce5e0a"
+ },
+ "timeline_local": {
+  "reboot_requested": "04:56:10",
+  "loader_usb_up": "04:56:37",
+  "delivered": "04:57:56",
+  "loader_left_usb": "05:06:29",
+  "download_mode": "05:06:33",
+  "watcher_end": "05:08:07",
+  "android_verified": "05:08:59"
+ },
+ "measurements": {
+  "smp": "C0-one",
+  "running": 1,
+  "ncpu": 10,
+  "early_where": {
+   "E6-mmu-on": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ]
+  },
+  "affinity_info": "1 (off) for cpu 1-9, read 1 s after CPU_ON",
+  "stage1_current_el": "0x8 (EL2) for cpu 1-9",
+  "stage1_sctlr_el1": {
+   "cpu1-3": "0x30d8099a",
+   "cpu4-9": "0x30d5099a"
+  },
+  "stage4": "lr 0xfffffff007431ee0 (arm_init_cpu), x23 0x8fe400000",
+  "stage5": "TTBR1 0x996a89000, TCR 0x22a51a251a",
+  "stage6": "SCTLR_EL1 0x3454599d, sp 0xfffffff91b9a4000 (cpu 1)",
+  "framebuffer_steady": "34-37 frames per 5 s window from 341 s (6-7/s), 70.7 ms per frame in the driver, longest interval 79 ms",
+  "analyze150_fps_steady_windows": 0,
+  "display": "D2-refreshing",
+  "pixels": "P1-panel-has-pixels, 1149635 non-zero"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-152/session_nat153.py --out artifacts/nat-153/preflight-001 --image loader-diag-xnu-scH-md1",
+   "exit_code": 0,
+   "result": "ready-read-only"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/nat-152/session_nat153.py --out artifacts/nat-153/run-001 --image loader-diag-xnu-scH-md1 --execute",
+   "exit_code": 0,
+   "result": "native-attempt-started; delivery delivered 36.191 MB/s"
+  },
+  {
+   "cmd": "nat-097/kl_reader2.py read_archive2(artifacts/nat-153/run-001/archive) why=2 dump -> artifacts/nat-153/analysis/kernel-text.txt",
+   "exit_code": 0,
+   "result": "2 boots, 0 drops, 0 unreadable, why=2 690654 B, 0 hole bytes"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-113/decode113.py artifacts/nat-153/run-001/archive --json artifacts/nat-153/analysis/pixels.json --ppm artifacts/nat-153/analysis/panel-thumb.ppm",
+   "exit_code": 0,
+   "result": "P1-panel-has-pixels"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-150/analyze150.py --kernel-text artifacts/nat-153/analysis/kernel-text.txt --pixels artifacts/nat-153/analysis/pixels.json --out artifacts/nat-153/analysis/verdict.json",
+   "exit_code": 0
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 25 --out artifacts/nat-153/restore-001/restore-trace",
+   "exit_code": 0,
+   "result": "100663296/100663296 acknowledged, session end and reboot confirmed"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-153/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass, recovery_hash_match true"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-153/restore-001/report.json --readback artifacts/nat-153/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass (report.json derived from restore-trace/trace.json, same command sequence as NAT-151's)"
+  }
+ ],
+ "not_established": [
+  "which instruction after mark 6 faults and what the EL2 exception does (the core is off afterwards)",
+  "the EL2 register state the firmware leaves on a started core (HCR_EL2, CNTHCTL_EL2, CNTVOFF_EL2, ICC_SRE_EL2, CPTR_EL2)",
+  "frame rate under touch input (no owner interaction in this run)"
+ ],
+ "device_inventory": "devices/local-2026-11-14-nat153.json",
+ "artifacts": [
+  "artifacts/nat-153/analysis/kernel-text.txt",
+  "artifacts/nat-153/analysis/pixels.json",
+  "artifacts/nat-153/analysis/verdict.json",
+  "artifacts/nat-153/restore-001/android-check.json",
+  "artifacts/nat-153/restore-001/assess.json",
+  "artifacts/nat-153/restore-001/report.json",
+  "artifacts/nat-153/run-001/report.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-153/analysis/kernel-text.txt": "2eeb149a04946a22684ac35bfab22fc569687d23d145200a0eae42e99c637c01",
+  "artifacts/nat-153/analysis/pixels.json": "9723c7c4233baf8ede8858a9c3c54c2de1830a0e4e3e401e8da1d3ad99a31c76",
+  "artifacts/nat-153/analysis/verdict.json": "e291a256db151ca8da2bfe01d76067bc4c8d984e4875b85650cf98a2931b2f38",
+  "artifacts/nat-153/run-001/report.json": "70fe633a8826e088df5b271fa4349ec8f5f18bcaaeb572b663c367175f2cb685",
+  "artifacts/nat-153/restore-001/android-check.json": "324ccb972ffada1aa7ef50467db1bde5966791849caf649a89bbba0bb316a707",
+  "artifacts/nat-153/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a",
+  "artifacts/nat-153/restore-001/report.json": "2fdb610374bd707e4fab9d09316aed699ffcc2874c0e6b3eaed228b8d900094d"
+ }
+}

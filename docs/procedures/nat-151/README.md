@@ -49,6 +49,22 @@ failure path faults after a failed check. That is a separate loader defect, not 
 NAT-150's host model checked only the kernel's own start path. It did not check the loader's view of the kernel, so it could not see
 this. The gap was in my check, not in the phone.
 
+### Why the failure path faulted (found 2026-11-14 on the host, during NAT-153)
+
+The loader is position-independent: it is linked at 0 (`loader.ld`) and has no runtime relocation. `nat036_msg()`
+(`docs/procedures/nat-036/src/ckpt3.c:220`, in every loader since NAT-036) returns the slot/site messages from a `static const char
+*const site[]` table. That table holds absolute link-time addresses: six `R_AARCH64_ABS64` relocations in `10-ckpt3.c.o`'s
+`.rela.rodata`. They are the only absolute pointers in the loader apart from the Image header's size field in `start.S`.
+- The scG loader Image holds the word 0x1f935 at offset 0x20548. 0x1f935 is the link-time address of "XNU checkpoint site 1 check
+  failed".
+- With the base S-Boot used this time, 0x800b0000, ELR 0x800b36d4 is offset 0x36d4: `ldrb w20, [x19]` in `fail()`, which reads the
+  message. Of all 64 KiB-aligned bases up to ELR, 0x800b0000 is the only one that puts a load or store at ELR.
+- So `fail()` dereferenced physical 0x1f935 and took the data abort (ESR 0x96000010, FAR 0x1f935). The check had already found the
+  failure; printing it was what faulted.
+
+The `switch` cases return string literals PC-relatively and are not affected. The fix is to return the site messages from the
+`switch` too. It is a separate host task because it changes the loader Image hash that later builds pin.
+
 ## What this establishes
 
 - Any change that moves code in start.s, or in the objects that contain `loader_jump` / `_set_mmu_ttb`, breaks the loader's checkpoint
