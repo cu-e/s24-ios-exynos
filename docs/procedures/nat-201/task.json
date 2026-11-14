@@ -1,0 +1,16 @@
+{
+ "id": "NAT-201",
+ "status": "pending",
+ "owner": null,
+ "title": "Host: e2s = e2r (NAT-199) with the user-exception trace on by default (user_exception_trace_enabled 0 -> 1, boot-arg systrace not set, so the system-call and exec traces stay off): every user EXC_BAD_ACCESS/BAD_INSTRUCTION/ARITHMETIC/BREAKPOINT prints pc/lr/sp/slide, register texts and frames before delivery, for mediaserverd's SIGSEGV loop, the candidate source of SpringBoard's missing routingContextUID (NAT-200)",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 99,
+ "depends_on": ["NAT-200"],
+ "paths": ["docs/procedures/nat-201", "artifacts/nat-201"],
+ "acceptance": [
+  "The patch is NAT-199's plus the one default line; the kernel differs from NAT-199's only in UUID, same-length build paths and that byte; symbols and segments in place; loader sites rc 0",
+  "Command line = e2r's with the tag changed and no systrace token",
+  "trap202 analyser tested on lines built from the source's own printf formats; package, counted session, registered criteria for the native run"
+ ]
+}

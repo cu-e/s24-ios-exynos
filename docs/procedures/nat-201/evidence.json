@@ -1,0 +1,76 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T15:55:00+00:00",
+ "task": "NAT-201",
+ "summary": "e2s = e2r (NAT-199) with user_exception_trace_enabled defaulting to 1 (boot-arg systrace not set: it would also turn on the failed-system-call and exec traces, and systrace_name= does not fit the 256-byte BOOT_LINE_LENGTH). Every user EXC_BAD_ACCESS/BAD_INSTRUCTION/ARITHMETIC/BREAKPOINT then prints pc/lr/sp/slide, register texts and frames before delivery, for mediaserverd's SIGSEGV loop. Kernel differs from NAT-199's only in UUID, same-length build paths and that byte; symbols/segments equal, loader sites rc 0; command line = e2r's with the tag changed; 8 tests OK, 3 analyser mutants killed. RECOVERY 9e21d2cb..., session 4e565de9.... No device access.",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-e2s-md1",
+  "recovery_sha256": "9e21d2cb7a0b66f0c2ae151d70c431c21cdf6a9b233cc0b8b5d020332b0c1e17",
+  "payload_sha256": "3bf77cfecf5f6e60e96e9a341ba607bb9a397c0ddf212070a5b1af9a7d3812d8",
+  "kernel_sha256": "dd5cbc7d9c6e58935b6bd1f3e0ad96632ad43bd174040c14d1c6b09e9861c07f",
+  "session": "docs/procedures/nat-201/session_nat202.py",
+  "session_sha256": "4e565de9256aba8bd51e9b2a543f3e2b40d2f2b97ee2fd8a12a18686aa8e673b"
+ },
+ "sources": {
+  "user_exception_trace.patch": "ba88d7f8e104cfe9b320bc9ee0769c84c6d907ed8610660139de67d40a320412",
+  "build.py": "47ce40da67dbb2ffdbc18ebb941e764f2a97459384739b4871069ac8ac9ddc9e",
+  "rebuild-args.json": "5eb3376a8e68c524e58651aae4a7a705c4a210f56009880b1464ce758841d817",
+  "trap202.py": "d4fe2c9ce4c75ecdb7fa760d5859ffd496c2c00d626c67d5c1131a9566c9d71a",
+  "derive202.py": "8df8e4d8c140de6e424d45baa84bdf9e306bc7ab26470527184b74ecdb462bd4",
+  "test_nat201.py": "1cdebfe22829ff92d33a44e9f9d80df385f778cb6a006c01282b21f472b0e11b"
+ },
+ "commands": [
+  {
+   "cmd": "krn-044/rebuild.py with docs/procedures/nat-201/rebuild-args.json",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-201/build.py --out artifacts/nat-201/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-201/build-001 --out artifacts/nat-201/package-001",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-201/derive202.py --check",
+   "exit": 0
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-201/test_nat201.py",
+   "exit": 0,
+   "tests": 8
+  },
+  {
+   "cmd": "3 mutants of trap202.py (stray-line guard, mediaserverd filter, slide) with test_nat201.py Analyse",
+   "exit": "each killed"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-201/trap202.py artifacts/nat-200/analysis/kernel-text.txt (trace off there)",
+   "exit": 0,
+   "verdict": "T-none"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-201/kernel-001/rebuild.json",
+  "artifacts/nat-201/build-001/build.json",
+  "artifacts/nat-201/package-001/package.json",
+  "artifacts/nat-201/package-001/loader-diag-xnu-e2s-md1/recovery.img",
+  "artifacts/nat-201/kernel-001/kernel.no-storage",
+  "artifacts/nat-202/analyse.sh"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-201/kernel-001/rebuild.json": "52f5fa94bddbe190d622e0585324848c514e0b5fdfff408c816f8089ebbb18bb",
+  "artifacts/nat-201/build-001/build.json": "6d3e23035ab299e7971c067ff37344b4a99fa1bfbde0d7e61ba9e59a9b6c081a",
+  "artifacts/nat-201/package-001/package.json": "1518cc18ca8791cf58d153f9cd51f212de4e54e309fa810fc86de51dc0c69b09",
+  "artifacts/nat-201/package-001/loader-diag-xnu-e2s-md1/recovery.img": "9e21d2cb7a0b66f0c2ae151d70c431c21cdf6a9b233cc0b8b5d020332b0c1e17",
+  "artifacts/nat-201/kernel-001/kernel.no-storage": "dd5cbc7d9c6e58935b6bd1f3e0ad96632ad43bd174040c14d1c6b09e9861c07f",
+  "artifacts/nat-202/analyse.sh": "79dee2d2673c4c17bbe458d6e8238ab06a0a219ee857fa6e0ba1ef8b394d8c3f"
+ },
+ "notes": [
+  "An earlier attempt in this task swapped touch_lat=1 for boot-arg systrace=1 (built, not packaged for use); it was discarded on reading systemcalls.c and kern_exec.c, which read the same boot-arg."
+ ]
+}

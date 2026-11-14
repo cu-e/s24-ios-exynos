@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-14T10:14:30+00:00",
-  "ledger_updated_at": "2026-11-14T10:14:09+00:00",
-  "registry_sha256": "5f77e8a8e6618a379ecd3bbdc672a6417e80053a1284b12466ad8f17871e78e6",
+  "generated_at": "2026-11-14T10:29:39+00:00",
+  "ledger_updated_at": "2026-11-14T10:29:31+00:00",
+  "registry_sha256": "cdd88247612f724da2a5c9364905481e048df90bc75931bee8fd9a065e8ade9b",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -78,6 +78,7 @@
       "NAT-155"
     ],
     "gated": [
+      "NAT-202",
       "NAT-017",
       "NAT-072",
       "NAT-003",
@@ -232,6 +233,7 @@
       "NAT-153",
       "NAT-199",
       "NAT-200",
+      "NAT-201",
       "KRN-007",
       "KRN-011",
       "KRN-017",
@@ -6316,6 +6318,63 @@
       "column": "done",
       "reasons": [],
       "card_path": "planning/tasks/NAT-200.md"
+    },
+    {
+      "id": "NAT-201",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: e2s = e2r (NAT-199) with the user-exception trace on by default (user_exception_trace_enabled 0 -> 1, boot-arg systrace not set, so the system-call and exec traces stay off): every user EXC_BAD_ACCESS/BAD_INSTRUCTION/ARITHMETIC/BREAKPOINT prints pc/lr/sp/slide, register texts and frames before delivery, for mediaserverd's SIGSEGV loop, the candidate source of SpringBoard's missing routingContextUID (NAT-200)",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-200"
+      ],
+      "paths": [
+        "docs/procedures/nat-201",
+        "artifacts/nat-201"
+      ],
+      "acceptance": [
+        "The patch is NAT-199's plus the one default line; the kernel differs from NAT-199's only in UUID, same-length build paths and that byte; symbols and segments in place; loader sites rc 0",
+        "Command line = e2r's with the tag changed and no systrace token",
+        "trap202 analyser tested on lines built from the source's own printf formats; package, counted session, registered criteria for the native run"
+      ],
+      "started_at": "2026-11-14T10:28:02+00:00",
+      "last_heartbeat": "2026-11-14T10:28:02+00:00",
+      "updated_at": "2026-11-14T10:29:31+00:00",
+      "evidence": "docs/procedures/nat-201/evidence.json",
+      "evidence_sha256": "4bf58cd60454637a24d998f60f5283998857e7b183abe05ca4d1d3864eccdcda",
+      "finished_at": "2026-11-14T10:29:31+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-201.md"
+    },
+    {
+      "id": "NAT-202",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: one run of e2s (NAT-201): ten CPUs as NAT-200, and mediaserverd's fault (exception, codes, pc/lr, register texts, frames) from the kernel message buffer; reason200, smp198 and the scV measures beside it; restore stock RECOVERY and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 99,
+      "depends_on": [
+        "NAT-201"
+      ],
+      "paths": [
+        "docs/procedures/nat-202",
+        "artifacts/nat-202",
+        "docs/decisions/0083-nat202-loader-diag-xnu-e2s-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "One run under its own decision file; verdict T-media / T-other / T-none with the fault sites symbolised",
+        "reason200, smp198 and the boot CPU measures reported beside it",
+        "Stock RECOVERY restored with full hash check, Android verified, permit closed after done"
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-202.md"
     },
     {
       "id": "KRN-007",
@@ -21335,56 +21394,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-14T08:55:56+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-14T08:56:16+00:00",
-      "action": "task.claim:NAT-196",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-196",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 97,
-          "last_heartbeat": "2026-11-14T08:56:16+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T09:14:17+00:00",
-      "action": "task.done:NAT-196",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-196",
-          "status": "done",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 97,
-          "last_heartbeat": "2026-11-14T08:56:16+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T09:14:36+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
       "at": "2026-11-14T09:19:51+00:00",
       "action": "task.add:NAT-197",
       "owner": "claude-opus-usb130-20261113",
@@ -21591,11 +21600,65 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T10:27:45+00:00",
+      "action": "task.add:NAT-201",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-201",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T10:27:54+00:00",
+      "action": "task.add:NAT-202",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-202",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T10:28:02+00:00",
+      "action": "task.claim:NAT-201",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-201",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-14T10:28:02+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T10:29:31+00:00",
+      "action": "task.done:NAT-201",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-201",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-14T10:28:02+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "cf6355cd0c3108205150e8f329345e878e07674e43f2c9650cead3fbceb112d9",
-    "BOARD.md": "7ab423360394f375bde71e2079fe1ce96f3e24059a4103b6f627c411974abfc7",
+    "STATUS.md": "aaa10c0f9a109160be4698508fa23fdb6fbc76245b7956366550a35519173835",
+    "BOARD.md": "76c4d0af5bbf1429047781c2281a2945844385a396ecfc5c0451cdd834fe466a",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -21739,6 +21802,8 @@
     "planning/tasks/NAT-154.md": "bdc8d2f12d1cf6859a609d7a643cc25002792ef647dceb89508be30950c24c74",
     "planning/tasks/NAT-199.md": "dc71961212ce7aec818ff39d489c93b7b2a69c85144fd1193ef68978fede3109",
     "planning/tasks/NAT-200.md": "ecc4fff4d0b49c8ecf24f8e415912a65f056d48598a3d91083648bfd403d7ecd",
+    "planning/tasks/NAT-201.md": "8052820271c06f82c16cf46964d5c81b4c4511f7e99aaca83bebaeaf2c739de8",
+    "planning/tasks/NAT-202.md": "ed159613f644c6dd88dcf64f6f41ec59cb1d7a38fc105efd06563aca7e511b93",
     "planning/tasks/KRN-007.md": "3fd0eb6b069842c499c6328b1b9274889fdd36a2549fe1f805d8610453c6359d",
     "planning/tasks/KRN-011.md": "9b8014abd8d019af80fad695e0d0df9de9523d36a222553327384f7f00e8a901",
     "planning/tasks/KRN-017.md": "86a29485c4c3ed3a62f7ecf64f5e2bb303bb0bd7ac5fd661482bf024004f407d",

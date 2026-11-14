@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T10:14:09+00:00",
+  "updated_at": "2026-11-14T10:29:31+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -19810,6 +19810,55 @@
       "evidence": "docs/procedures/nat-200/evidence.json",
       "evidence_sha256": "5ba38449a671e5df2aabd061630d1d46d192af1d200c4586e53d9f5dbc523914",
       "finished_at": "2026-11-14T10:13:49+00:00"
+    },
+    {
+      "id": "NAT-201",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: e2s = e2r (NAT-199) with the user-exception trace on by default (user_exception_trace_enabled 0 -> 1, boot-arg systrace not set, so the system-call and exec traces stay off): every user EXC_BAD_ACCESS/BAD_INSTRUCTION/ARITHMETIC/BREAKPOINT prints pc/lr/sp/slide, register texts and frames before delivery, for mediaserverd's SIGSEGV loop, the candidate source of SpringBoard's missing routingContextUID (NAT-200)",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-200"
+      ],
+      "paths": [
+        "docs/procedures/nat-201",
+        "artifacts/nat-201"
+      ],
+      "acceptance": [
+        "The patch is NAT-199's plus the one default line; the kernel differs from NAT-199's only in UUID, same-length build paths and that byte; symbols and segments in place; loader sites rc 0",
+        "Command line = e2r's with the tag changed and no systrace token",
+        "trap202 analyser tested on lines built from the source's own printf formats; package, counted session, registered criteria for the native run"
+      ],
+      "started_at": "2026-11-14T10:28:02+00:00",
+      "last_heartbeat": "2026-11-14T10:28:02+00:00",
+      "updated_at": "2026-11-14T10:29:31+00:00",
+      "evidence": "docs/procedures/nat-201/evidence.json",
+      "evidence_sha256": "4bf58cd60454637a24d998f60f5283998857e7b183abe05ca4d1d3864eccdcda",
+      "finished_at": "2026-11-14T10:29:31+00:00"
+    },
+    {
+      "id": "NAT-202",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: one run of e2s (NAT-201): ten CPUs as NAT-200, and mediaserverd's fault (exception, codes, pc/lr, register texts, frames) from the kernel message buffer; reason200, smp198 and the scV measures beside it; restore stock RECOVERY and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 99,
+      "depends_on": [
+        "NAT-201"
+      ],
+      "paths": [
+        "docs/procedures/nat-202",
+        "artifacts/nat-202",
+        "docs/decisions/0083-nat202-loader-diag-xnu-e2s-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "One run under its own decision file; verdict T-media / T-other / T-none with the fault sites symbolised",
+        "reason200, smp198 and the boot CPU measures reported beside it",
+        "Stock RECOVERY restored with full hash check, Android verified, permit closed after done"
+      ]
     }
   ],
   "experiments": [
@@ -73431,6 +73480,60 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T10:27:45+00:00",
+      "action": "task.add:NAT-201",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-201",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T10:27:54+00:00",
+      "action": "task.add:NAT-202",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-202",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T10:28:02+00:00",
+      "action": "task.claim:NAT-201",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-201",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-14T10:28:02+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T10:29:31+00:00",
+      "action": "task.done:NAT-201",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-201",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-14T10:28:02+00:00"
+        }
+      ]
     }
   ]
 }
