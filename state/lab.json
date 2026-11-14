@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T01:56:44+00:00",
+  "updated_at": "2026-11-14T02:01:32+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -8,7 +8,7 @@
       "host": true,
       "android-readonly": true,
       "android-app": true,
-      "native": false
+      "native": true
     },
     "facts": [
       {
@@ -930,6 +930,13 @@
         "decision": "docs/decisions/0066-nat164-loader-diag-xnu-scL-md1-single-run-2026-11-14.md",
         "owner": "claude-opus-usb130-20261113",
         "at": "2026-11-14T01:52:27+00:00"
+      },
+      {
+        "scope": "native",
+        "value": true,
+        "decision": "docs/decisions/0067-nat166-loader-diag-xnu-scM-md1-single-run-2026-11-14.md",
+        "owner": "claude-opus-usb130-20261113",
+        "at": "2026-11-14T02:01:13+00:00"
       }
     ]
   },
@@ -18615,7 +18622,7 @@
     },
     {
       "id": "NAT-165",
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude-opus-usb130-20261113",
       "title": "Host: scM = scJ with a kernel whose E1S redwood_input_init() also calls redwood_cpufreq_init() (with no cpufreq/ddr boot-arg it only starts the cpuload thread) and boot-arg cpuload=1000: per-core busy share every second with kernel timestamps (tl: u), the measurement NAT-161's withdrawn ps split could not give; kernel rebuild, loader-sites gate, build, package, counted session",
       "scope": "host",
@@ -18636,12 +18643,15 @@
       ],
       "started_at": "2026-11-14T01:56:44+00:00",
       "last_heartbeat": "2026-11-14T01:56:44+00:00",
-      "updated_at": "2026-11-14T01:56:44+00:00"
+      "updated_at": "2026-11-14T02:00:32+00:00",
+      "evidence": "docs/procedures/nat-165/evidence.json",
+      "evidence_sha256": "de970ed87dcefb3487e5fbc23a271da332bc72ffc9d759f1532303de5eafa6b7",
+      "finished_at": "2026-11-14T02:00:32+00:00"
     },
     {
       "id": "NAT-166",
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "claude-opus-usb130-20261113",
       "title": "Native: run scM (NAT-165: scJ + cpuload=1000 kernel hook) once under decision 0061; per-core busy share of cpu0 on the idle home screen with kernel timestamps alongside the framebuffer windows; restore stock RECOVERY with full hash and verify Android",
       "scope": "native",
       "evidence_kind": "native-device",
@@ -18659,7 +18669,10 @@
         "tl: u busy share of cpu0 over the steady windows: saturated (>= 90%) or not",
         "Stock RECOVERY restored with full hash and Android verified",
         "Evidence with provenance"
-      ]
+      ],
+      "started_at": "2026-11-14T02:01:32+00:00",
+      "last_heartbeat": "2026-11-14T02:01:32+00:00",
+      "updated_at": "2026-11-14T02:01:32+00:00"
     }
   ],
   "experiments": [
@@ -70460,6 +70473,45 @@
           "owner": "claude-opus-usb130-20261113",
           "priority": 80,
           "last_heartbeat": "2026-11-14T01:56:44+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T02:00:32+00:00",
+      "action": "task.done:NAT-165",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-165",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 80,
+          "last_heartbeat": "2026-11-14T01:56:44+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T02:01:13+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-14T02:01:32+00:00",
+      "action": "task.claim:NAT-166",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-166",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 80,
+          "last_heartbeat": "2026-11-14T02:01:32+00:00"
         }
       ]
     }
