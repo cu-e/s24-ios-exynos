@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T00:16:56+00:00",
+  "updated_at": "2026-11-14T00:19:56+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -18271,6 +18271,72 @@
       "evidence": "docs/procedures/nat-153/evidence.json",
       "evidence_sha256": "3fc986e084d277af74d203add3fd2b80f1479cbd55c3e4df49722c359ba8bf08",
       "finished_at": "2026-11-14T00:16:37+00:00"
+    },
+    {
+      "id": "NAT-154",
+      "status": "in_progress",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scI, PSCI-started cores that enter at EL2 (NAT-153: CurrentEL 0x8 on cpu 1-9) record the EL2 state the firmware left (HCR/SCTLR/CNTHCTL/CNTVOFF/CPTR/MDCR/ICC_SRE/VBAR_EL2) and drop to EL1 by eret with EL2 set up for an EL1 kernel (RW, no stage 2, no traps, EL1 timer and GIC system-register access, VPIDR/VMPIDR, CNTVOFF equal to the boot CPU's), all inside the reset-vector page; boot CPU timer offset recorded; loader-sites gate, model of both entries, session for a native run",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 99,
+      "depends_on": [
+        "NAT-153"
+      ],
+      "paths": [
+        "docs/procedures/nat-154",
+        "artifacts/nat-154"
+      ],
+      "acceptance": [
+        "check_loader_sites.py on the built payload rc 0 and every loader constant on the same symbol+offset as in the NAT-143 kernel",
+        "EL2 set-up values each justified from the Arm architecture reference or Linux init_el2 (pinned source), and nothing written at EL2 that NAT-153 did not show is reachable (CurrentEL test first)",
+        "Model: EL1 entry path identical to scH's; EL2 entry reaches the eret with the registers set as documented; boot path unchanged",
+        "Image differs from scH only in start.o (and psci_smp.o if the mark layout grows) and the tag; counted session derivation; make check; host evidence only"
+      ],
+      "started_at": "2026-11-14T00:19:56+00:00",
+      "last_heartbeat": "2026-11-14T00:19:56+00:00",
+      "updated_at": "2026-11-14T00:19:56+00:00"
+    },
+    {
+      "id": "NAT-155",
+      "status": "pending",
+      "owner": null,
+      "title": "Host: loader nat036_msg() returns its slot/site messages from a table of absolute link-time pointers (six R_AARCH64_ABS64 in ckpt3.c.o .rela.rodata); the position-independent loader faults in fail() reading them (NAT-151: FAR 0x1f935). Return them PC-relatively, and a build check that the loader objects carry no ABS64 relocation except the Image header's size",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 70,
+      "depends_on": [
+        "NAT-151"
+      ],
+      "paths": [
+        "docs/procedures/nat-155",
+        "artifacts/nat-155"
+      ],
+      "acceptance": [
+        "Relocation scan of every loader object: only start.S's header quad remains",
+        "nat036_msg returns the same strings for every rc/bad (host test against the old table)",
+        "The fix applies to future loader builds without changing a pinned image retroactively; make check"
+      ]
+    },
+    {
+      "id": "NAT-156",
+      "status": "pending",
+      "owner": null,
+      "title": "Host source review: where the 70.7 ms per frame of MiniIOMobileFramebuffer goes on one core (NAT-153: 1125x2436 surface scaled bilinearly onto the 1080x2340 panel), what fb_filter=0, fbscale=2 and fb_threads change in work per frame, and a measured host estimate of each; plan for the next native frame-rate measurement",
+      "scope": "host",
+      "evidence_kind": "source-review",
+      "priority": 80,
+      "depends_on": [
+        "NAT-153"
+      ],
+      "paths": [
+        "docs/procedures/nat-156"
+      ],
+      "acceptance": [
+        "Per-frame work of each path from the pinned driver source (pixels read and written, arithmetic per pixel)",
+        "Host timing of the same inner loops is labelled host-only, not a phone measurement",
+        "A ranked list of levers with what each needs (boot-arg only, kernel change, SMP, DPP hardware scaling)"
+      ]
     }
   ],
   "experiments": [
@@ -69528,6 +69594,59 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T00:18:59+00:00",
+      "action": "task.add:NAT-154",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-154",
+          "status": "pending",
+          "owner": null,
+          "priority": 99
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T00:19:18+00:00",
+      "action": "task.add:NAT-155",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-155",
+          "status": "pending",
+          "owner": null,
+          "priority": 70
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T00:19:37+00:00",
+      "action": "task.add:NAT-156",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-156",
+          "status": "pending",
+          "owner": null,
+          "priority": 80
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T00:19:56+00:00",
+      "action": "task.claim:NAT-154",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-154",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 99,
+          "last_heartbeat": "2026-11-14T00:19:56+00:00"
+        }
+      ]
     }
   ]
 }
