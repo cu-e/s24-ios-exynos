@@ -1,0 +1,105 @@
+{
+ "kind": "native-device",
+ "origin": "local-device",
+ "origin_detail": "SM-S921B e1s, one run of loader-diag-xnu-scX-md1 delivered into RAM via RECOVERY, decision 0077",
+ "outcome": "fail",
+ "recorded_at": "2026-11-14T07:39:20+00:00",
+ "task": "NAT-190",
+ "summary": "scX booted to the iOS home screen as before (K2 driver 2.26 ms, cpuclk C2, touch P1, panel has pixels, 8.7 fps idle), then panicked at 200.07 s, the first tick of the new e1s-pc sampler: 'recount.c:567 Assertion failed: ml_get_interrupts_enabled() == FALSE', backtrace _e1s_pc_thread+0xac -> _recount_current_thread_times (the window self-time read). recount_current_thread_time_mach() may only be called with interrupts off; the DEVELOPMENT kernel checks it. pc190 P-none (no window line), top186 U-none (the e1s-top first span is at 205 s). The loader reached Download Mode by itself; stock RECOVERY restored with full hash check, Android verified (assess pass). The host harness did not model the assertion.",
+ "decision": "docs/decisions/0077-nat190-loader-diag-xnu-scX-md1-single-run-2026-11-14.md",
+ "commit": "7bde3ba4 (NAT-189)",
+ "device_used": true,
+ "image": {
+  "name": "loader-diag-xnu-scX-md1",
+  "recovery_sha256": "170f8c9374d50198bc656769b0d27066cd34e6e1e75240c2e6c7c059fab5dda5",
+  "payload_sha256": "03e586cca696f1c65740b003e22a843b8add841eee175957c832b591b5a78540",
+  "kernel_sha256": "dc827310b3f4e2766b0ad2bcd25e43bda52f0b4bfe287fa968eccce787f9a0b9",
+  "session": "docs/procedures/nat-189/session_nat190.py",
+  "session_sha256": "be64e14886fb35b37f5a955247c4cfa1b565010ac732bd8c57ea581f41a012db"
+ },
+ "measurements": {
+  "panic_at_s": 200.07,
+  "panic": "recount.c:567 Assertion failed: ml_get_interrupts_enabled() == FALSE",
+  "panic_caller": "_e1s_pc_thread+0xac -> _recount_current_thread_times",
+  "pc190": "P-none",
+  "top186": "U-none",
+  "frames159": {
+   "driver_ms_median": 2.259,
+   "fps_median": 8.68,
+   "steady_windows": 2
+  },
+  "fbcopy181": "K2",
+  "cpuclk173": "C2",
+  "touch170": "P1",
+  "decode113": "P1-panel-has-pixels",
+  "sampler_started_at_s": 122.77,
+  "last_frame_line_s": 199.51
+ },
+ "checks": [
+  {
+   "cmd": "python3 -I docs/procedures/nat-189/session_nat190.py --out artifacts/nat-190/preflight-001 --image loader-diag-xnu-scX-md1",
+   "exit_code": 0,
+   "result": "ready-read-only"
+  },
+  {
+   "cmd": "python3 -I docs/procedures/nat-189/session_nat190.py --out artifacts/nat-190/run-001 --image loader-diag-xnu-scX-md1 --execute",
+   "exit_code": 0,
+   "result": "native-attempt-started (reboot 2026-11-14T07:24:23Z)"
+  },
+  {
+   "cmd": "lsusb -d 04e8:685d (wait for watcher + collector exit)",
+   "exit_code": 0,
+   "result": "Download Mode, bus 8 device 53"
+  },
+  {
+   "cmd": "artifacts/recovery-rescue-20261110-01/venv/bin/python -I docs/procedures/nat-012/restore_stock.py --bus 8 --address 53 --out artifacts/nat-190/restore-001/restore-trace",
+   "exit_code": 0,
+   "result": "100663296/100663296 acknowledged, reboot confirmed"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-012/check_android.py artifacts/nat-190/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass, recovery_hash_match true"
+  },
+  {
+   "cmd": "python3 docs/procedures/nat-013/restore_stock.py assess --report artifacts/nat-190/restore-001/report.json --readback artifacts/nat-190/restore-001/android-check.json",
+   "exit_code": 0,
+   "result": "pass"
+  },
+  {
+   "cmd": "sh artifacts/nat-190/analyse.sh (kl_reader2 why=2 dump -> kernel-text.txt; pc190, top186, bbd188, fbcopy181, swipe175, frames159, cpuclk173, load166, touch170, decode113, analyze150)",
+   "exit_code": 0,
+   "result": "pc190 P-none; panic found in the dump"
+  }
+ ],
+ "not_established": [
+  "the backboardd profile (the question of the run): needs a fixed sampler and a new run"
+ ],
+ "device_inventory": "devices/local-2026-11-14-nat190.json",
+ "artifacts": [
+  "artifacts/nat-190/run-001.log",
+  "artifacts/nat-190/analysis/kernel-text.txt",
+  "artifacts/nat-190/analysis/pc190.json",
+  "artifacts/nat-190/analysis/top186.json",
+  "artifacts/nat-190/analysis/frames159.json",
+  "artifacts/nat-190/analysis/cpuclk173.json",
+  "artifacts/nat-190/analysis/touch170.json",
+  "artifacts/nat-190/analysis/verdict.json",
+  "artifacts/nat-190/restore-001/report.json",
+  "artifacts/nat-190/restore-001/android-check.json",
+  "artifacts/nat-190/restore-001/assess.json"
+ ],
+ "artifact_sha256": {
+  "artifacts/nat-190/run-001.log": "7f59b4e7afdb227a0515a5886eb2c0dfd6fe1ca0e5ec6dd43d8386e50a6c0715",
+  "artifacts/nat-190/analysis/kernel-text.txt": "47331ecedfdd4674e13a44796354bd259858d9e0e92b7a15727d10062c420b32",
+  "artifacts/nat-190/analysis/pc190.json": "b6513eac8b913c69f6db67060c2dbdfe7c17a7eff9bf60de186f9a28acdf1a79",
+  "artifacts/nat-190/analysis/top186.json": "681bf37d73227faf10e9ade8edb216f53d1c3de2fcca20ac7a3038e667c6167c",
+  "artifacts/nat-190/analysis/frames159.json": "d10b15a65845948893cd2d7fdef39b76c39a57eb3eea338df00252e5cfb99ed0",
+  "artifacts/nat-190/analysis/cpuclk173.json": "133269c0152b8f4d9e0650db8fd96c3a6a9ea494ca900d59e3e142684b3c813d",
+  "artifacts/nat-190/analysis/touch170.json": "909eab6b3dcc1b37dd7cf79bf3639fd57a0abb7a18104670e63fec0dce6eaba1",
+  "artifacts/nat-190/analysis/verdict.json": "e36bef7b3889ae66016c91eb7c9c0c51ac92f1507e794e2eb8965fa50ab0a070",
+  "artifacts/nat-190/restore-001/report.json": "e9cfd24b5fb5dc6c33aede07a6433a0ef39ff3a7addb7fbbfc766534e82c03ff",
+  "artifacts/nat-190/restore-001/android-check.json": "6388e38232c0dee601b666b3adf975e7d4338297c29c081d52e7f601d34888c6",
+  "artifacts/nat-190/restore-001/assess.json": "f5740437b694829bb919206ba06940140a4345f3d92896fae08b956f05d2a54a"
+ }
+}

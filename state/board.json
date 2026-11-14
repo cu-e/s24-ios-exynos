@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-14T07:21:34+00:00",
-  "ledger_updated_at": "2026-11-14T07:21:09+00:00",
-  "registry_sha256": "615117aa4f22f98f08a0ad0567f9d9c0d721040cc20dc6639194c365a10caaeb",
+  "generated_at": "2026-11-14T07:40:34+00:00",
+  "ledger_updated_at": "2026-11-14T07:40:08+00:00",
+  "registry_sha256": "7c1d6faf2be301aab80d25fe9ac162b622a9b3653389829e50d1af8e215f9d11",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -25,6 +25,7 @@
       "NAT-088",
       "NAT-091",
       "NAT-086",
+      "NAT-190",
       "NAT-081",
       "NAT-078"
     ],
@@ -78,7 +79,6 @@
     ],
     "gated": [
       "NAT-017",
-      "NAT-190",
       "NAT-072",
       "NAT-003",
       "DRV-003",
@@ -12401,8 +12401,8 @@
     },
     {
       "id": "NAT-190",
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "claude-opus-usb130-20261113",
       "title": "Native: one run of scX (NAT-189) to profile backboardd's user pc during the synthetic swipes and the Today view; restore stock RECOVERY and verify Android",
       "scope": "native",
       "evidence_kind": "native-device",
@@ -12420,11 +12420,15 @@
         "Sampler cost (self us per window) and e1s-top backboardd share reported against NAT-186",
         "Stock RECOVERY restored with full hash check, Android verified, permit closed after done"
       ],
-      "column": "gated",
-      "reasons": [
-        "Scope not authorized: native"
-      ],
-      "card_path": "planning/tasks/NAT-190.md"
+      "started_at": "2026-11-14T07:23:51+00:00",
+      "last_heartbeat": "2026-11-14T07:39:49+00:00",
+      "updated_at": "2026-11-14T07:39:49+00:00",
+      "progress_note": "FAIL (native-device, decision 0077): scX panicked at 200.07 s on the e1s-pc sampler's first tick: recount.c:567 assert ml_get_interrupts_enabled()==FALSE via _e1s_pc_thread+0xac -> recount_current_thread_times (self-time read); pc190 P-none; until 200 s as scV (K2 2.26 ms, C2, P1). Loader deadline -> Download Mode by itself; stock RECOVERY restored, full hash, Android verified, assess pass. Evidence docs/procedures/nat-190/evidence.json",
+      "next_step": "NAT-191 host: self time via recount_thread_time_mach(current_thread()), harness aborts on recount_current_*, audit asserts of every called KPI; NAT-192 native rerun under a new decision",
+      "column": "in_progress",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-190.md",
+      "report_health": "recent"
     },
     {
       "id": "ESIM-001",
@@ -19648,7 +19652,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-004, KRN-001",
-        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-005, IOS-007, NAT-078, NAT-081, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103, NAT-124, NAT-135, NAT-137, NAT-146, NAT-149, NAT-151, NAT-154"
+        "Paths reserved by: GPU-005, KRN-001, ESIM-004, KRN-003, CELL-010, KRN-004, KRN-008, KRN-026, KRN-034, GPU-012, KRN-043, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-005, IOS-007, NAT-078, NAT-081, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103, NAT-124, NAT-135, NAT-137, NAT-146, NAT-149, NAT-151, NAT-154, NAT-190"
       ],
       "priority": 50,
       "card_path": "planning/tasks/NAT-003.md"
@@ -19687,7 +19691,7 @@
       "reasons": [
         "Scope not authorized: native",
         "Dependencies: NAT-003",
-        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-007, NAT-078, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103, NAT-124, NAT-135, NAT-137, NAT-146, NAT-149, NAT-151, NAT-154"
+        "Paths reserved by: GPU-005, KRN-003, NAT-009, NAT-021, ODIN-001, NAT-050, NAT-051, IOS-007, NAT-078, NAT-086, NAT-088, NAT-091, NAT-093, NAT-098, NAT-103, NAT-124, NAT-135, NAT-137, NAT-146, NAT-149, NAT-151, NAT-154, NAT-190"
       ],
       "priority": 50,
       "card_path": "planning/tasks/DRV-003.md"
@@ -20857,6 +20861,17 @@
         "handoff": null,
         "branch": null,
         "worktree": null
+      },
+      {
+        "id": "NAT-190",
+        "status": "in_progress",
+        "last_heartbeat": "2026-11-14T07:39:49+00:00",
+        "report_health": "recent",
+        "progress_note": "FAIL (native-device, decision 0077): scX panicked at 200.07 s on the e1s-pc sampler's first tick: recount.c:567 assert ml_get_interrupts_enabled()==FALSE via _e1s_pc_thread+0xac -> recount_current_thread_times (self-time read); pc190 P-none; until 200 s as scV (K2 2.26 ms, C2, P1). Loader deadline -> Download Mode by itself; stock RECOVERY restored, full hash, Android verified, assess pass. Evidence docs/procedures/nat-190/evidence.json",
+        "next_step": "NAT-191 host: self time via recount_thread_time_mach(current_thread()), harness aborts on recount_current_*, audit asserts of every called KPI; NAT-192 native rerun under a new decision",
+        "handoff": null,
+        "branch": null,
+        "worktree": null
       }
     ],
     "codex-team-export-gaps-20261105-ba": [
@@ -20952,60 +20967,6 @@
     ]
   },
   "recent_events": [
-    {
-      "at": "2026-11-14T06:09:32+00:00",
-      "action": "task.add:NAT-185",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-185",
-          "status": "pending",
-          "owner": null,
-          "priority": 93
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T06:09:51+00:00",
-      "action": "task.add:NAT-186",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-186",
-          "status": "pending",
-          "owner": null,
-          "priority": 93
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T06:10:10+00:00",
-      "action": "task.claim:NAT-185",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-185",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 93,
-          "last_heartbeat": "2026-11-14T06:10:10+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T06:14:08+00:00",
-      "action": "task.done:NAT-185",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-185",
-          "status": "done",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 93,
-          "last_heartbeat": "2026-11-14T06:10:10+00:00"
-        }
-      ]
-    },
     {
       "at": "2026-11-14T06:15:03+00:00",
       "action": "project.permit:native",
@@ -21213,11 +21174,63 @@
           "last_heartbeat": "2026-11-14T07:19:39+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-14T07:23:31+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-14T07:23:51+00:00",
+      "action": "task.claim:NAT-190",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-190",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 94,
+          "last_heartbeat": "2026-11-14T07:23:51+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T07:39:49+00:00",
+      "action": "task.update:NAT-190",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-190",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 94,
+          "progress_note": "FAIL (native-device, decision 0077): scX panicked at 200.07 s on the e1s-pc sampler's first tick: recount.c:567 assert ml_get_interrupts_enabled()==FALSE via _e1s_pc_thread+0xac -> recount_current_thread_times (self-time read); pc190 P-none; until 200 s as scV (K2 2.26 ms, C2, P1). Loader deadline -> Download Mode by itself; stock RECOVERY restored, full hash, Android verified, assess pass. Evidence docs/procedures/nat-190/evidence.json",
+          "next_step": "NAT-191 host: self time via recount_thread_time_mach(current_thread()), harness aborts on recount_current_*, audit asserts of every called KPI; NAT-192 native rerun under a new decision",
+          "last_heartbeat": "2026-11-14T07:39:49+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T07:40:08+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
     }
   ],
   "view_sha256": {
-    "STATUS.md": "467494176aadea838890f72ce04de81c55c0d5da607dd9870424392239446fdf",
-    "BOARD.md": "6b24f7dd18e410de1f7c9d088f93fc4293f6d8a9192deed97b8cb68e3b985fbd",
+    "STATUS.md": "fc3e8f32d666614c232cb83399db7eb72f615f50418174ba7e77de0c96c27898",
+    "BOARD.md": "28c80b2b7323ffd88652df310ce2dc5782d8a7c7b034cd8aa139b02fa9e3480c",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -21506,7 +21519,7 @@
     "planning/tasks/NAT-187.md": "54d00486528795cd5141488abc4e14f88741203ee68d01c5773c52a573242152",
     "planning/tasks/NAT-188.md": "3c7631470d84a1bbb078564876021e12599502f4296eca425be7b57e25b8b25c",
     "planning/tasks/NAT-189.md": "6994eca7bbb95f2f65b272fdc35abadf94a6edba5f5eef3884904e9febc404ba",
-    "planning/tasks/NAT-190.md": "0dc0c748fe0b207f2638519f8eec7246abecf8f0ebab5769b75d345ee1e71e38",
+    "planning/tasks/NAT-190.md": "7b31c953f95fdc98bd382586d56d9b7b7774066ed1edb3e7dbdeea9ed326e176",
     "planning/tasks/ESIM-001.md": "4ff5511bf1b91ec562d46b9fa0fdbc4dc3ffd12af187060e75777f8fcde71bb6",
     "planning/tasks/VM-004.md": "e60d0c34c4cbc0e4c68b4a74b97657a569fe4a12f25e16efc01dcaa45ccc2b15",
     "planning/tasks/NAT-057.md": "5a5cfb72e8e8b6bf01995892e27a8f23c02e6de2f5ea24330a780c8dc156837a",
@@ -21680,8 +21693,8 @@
     "planning/tasks/DRV-002.md": "6d472e1af8db2ed4b92e2acd334ec4bea728fd0b74827ae31a8bf79554a9e4e2",
     "planning/tasks/NAT-001.md": "a4e648c96854c867ebec58f1f6887dc908e1e88274637a366c850dd642278e32",
     "planning/tasks/NAT-002.md": "b97fa1e0c83a4c1f5b2fb99a7aa9496b2559c8f4e0cbae564a9d111ff389cb4e",
-    "planning/tasks/NAT-003.md": "01389a437911ef0221add830363bd91418098b4a388e82792ca9fdc89691f77c",
-    "planning/tasks/DRV-003.md": "573f20d7cdfc54cd2097be0b07d4150fc87a219a3ea5dced502735417fc64b2b",
+    "planning/tasks/NAT-003.md": "3e32b9e9350d4dcb4597026ab8169e681b7415779bb30b8acea3f65f622a6cbf",
+    "planning/tasks/DRV-003.md": "7afbe974fb7795ae650194eca8535c73a4ead07aee6a90991c1ee5e4ebb6e8d4",
     "planning/tasks/DEV-002.md": "1a347eb75ec0ef4a0c95d32e2c9fb4ddefe12333cad9a3af7a3bcb5c07f10fb9",
     "planning/tasks/DOC-001.md": "248f9bc55b3a92905d16d9958b00024b6e81671ba1080ad5a41d8ac9769bcace",
     "planning/tasks/VM-001.md": "94ccfe98ba8ed4075d0da8586255bbf8218d4db2c88a9b4c5720087b992ea483",

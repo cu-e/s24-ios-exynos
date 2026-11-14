@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T07:21:09+00:00",
+  "updated_at": "2026-11-14T07:40:08+00:00",
   "project": {
     "name": "s24-ios-exynos",
     "phase": "device baseline captured; Android-preserving research",
@@ -1070,6 +1070,20 @@
         "decision": "docs/decisions/0076-nat188-loader-diag-xnu-scW-md1-single-run-2026-11-14.md",
         "owner": "claude-opus-usb130-20261113",
         "at": "2026-11-14T06:54:24+00:00"
+      },
+      {
+        "scope": "native",
+        "value": true,
+        "decision": "docs/decisions/0077-nat190-loader-diag-xnu-scX-md1-single-run-2026-11-14.md",
+        "owner": "claude-opus-usb130-20261113",
+        "at": "2026-11-14T07:23:31+00:00"
+      },
+      {
+        "scope": "native",
+        "value": false,
+        "decision": "docs/decisions/0077-nat190-loader-diag-xnu-scX-md1-single-run-2026-11-14.md",
+        "owner": "claude-opus-usb130-20261113",
+        "at": "2026-11-14T07:40:08+00:00"
       }
     ]
   },
@@ -19410,8 +19424,8 @@
     },
     {
       "id": "NAT-190",
-      "status": "pending",
-      "owner": null,
+      "status": "in_progress",
+      "owner": "claude-opus-usb130-20261113",
       "title": "Native: one run of scX (NAT-189) to profile backboardd's user pc during the synthetic swipes and the Today view; restore stock RECOVERY and verify Android",
       "scope": "native",
       "evidence_kind": "native-device",
@@ -19428,7 +19442,12 @@
         "One run under its own decision file; pre-registered pc190 verdict (P-none/P-thin/P-ok) and groups over the swipe windows and the last window reported, with top functions",
         "Sampler cost (self us per window) and e1s-top backboardd share reported against NAT-186",
         "Stock RECOVERY restored with full hash check, Android verified, permit closed after done"
-      ]
+      ],
+      "started_at": "2026-11-14T07:23:51+00:00",
+      "last_heartbeat": "2026-11-14T07:39:49+00:00",
+      "updated_at": "2026-11-14T07:39:49+00:00",
+      "progress_note": "FAIL (native-device, decision 0077): scX panicked at 200.07 s on the e1s-pc sampler's first tick: recount.c:567 assert ml_get_interrupts_enabled()==FALSE via _e1s_pc_thread+0xac -> recount_current_thread_times (self-time read); pc190 P-none; until 200 s as scV (K2 2.26 ms, C2, P1). Loader deadline -> Download Mode by itself; stock RECOVERY restored, full hash, Android verified, assess pass. Evidence docs/procedures/nat-190/evidence.json",
+      "next_step": "NAT-191 host: self time via recount_thread_time_mach(current_thread()), harness aborts on recount_current_*, audit asserts of every called KPI; NAT-192 native rerun under a new decision"
     }
   ],
   "experiments": [
@@ -72408,6 +72427,58 @@
           "last_heartbeat": "2026-11-14T07:19:39+00:00"
         }
       ]
+    },
+    {
+      "at": "2026-11-14T07:23:31+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": true
+      }
+    },
+    {
+      "at": "2026-11-14T07:23:51+00:00",
+      "action": "task.claim:NAT-190",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-190",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 94,
+          "last_heartbeat": "2026-11-14T07:23:51+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T07:39:49+00:00",
+      "action": "task.update:NAT-190",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-190",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 94,
+          "progress_note": "FAIL (native-device, decision 0077): scX panicked at 200.07 s on the e1s-pc sampler's first tick: recount.c:567 assert ml_get_interrupts_enabled()==FALSE via _e1s_pc_thread+0xac -> recount_current_thread_times (self-time read); pc190 P-none; until 200 s as scV (K2 2.26 ms, C2, P1). Loader deadline -> Download Mode by itself; stock RECOVERY restored, full hash, Android verified, assess pass. Evidence docs/procedures/nat-190/evidence.json",
+          "next_step": "NAT-191 host: self time via recount_thread_time_mach(current_thread()), harness aborts on recount_current_*, audit asserts of every called KPI; NAT-192 native rerun under a new decision",
+          "last_heartbeat": "2026-11-14T07:39:49+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T07:40:08+00:00",
+      "action": "project.permit:native",
+      "owner": "claude-opus-usb130-20261113",
+      "permissions": {
+        "host": true,
+        "android-readonly": true,
+        "android-app": true,
+        "native": false
+      }
     }
   ]
 }
