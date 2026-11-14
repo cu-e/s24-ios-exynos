@@ -1,0 +1,119 @@
+{
+ "kind": "host-test",
+ "origin": "local-host",
+ "outcome": "pass",
+ "recorded_at": "2026-11-14T07:20:56+00:00",
+ "task": "NAT-189",
+ "summary": "scX = scV (NAT-185) with bsd/e1s_display.o rebuilt: NAT-185's patch plus a read-only backboardd user-pc sampler (1 ms ticks 200-375 s; saved pc/lr of threads whose run time grew; fine/coarse/lr tables in a kalloc_data block; four windows printed as shared-cache offsets; e1spc=0 off) and without NAT-176's e1s-dpp register snapshot (no room: scV had 1232 B left in its last __TEXT_EXEC page; the first build crossed it, moved all data by 0x4000 and failed the NAT-150 gate rc 5; with the snapshot out and minsize on the samplers __text grows +704 B and every segment keeps its size). Harness 11 OK, 7 mutants killed. Kernel dc827310 (0 undefined), loader sites rc 0, cmdline 254 B, package RECOVERY 170f8c93, payload 03e586cc, counted session be64e148. Host symboliser dscsym.py over the owner's local 20F66 cache (2710 images, 7,159,062 function starts; local names mostly <redacted>) and analyser pc190.py (P-none/P-thin/P-ok, groups). Host-test only.",
+ "commit": "e16d66a9 (base)",
+ "device_used": false,
+ "image": {
+  "name": "loader-diag-xnu-scX-md1",
+  "recovery_sha256": "170f8c9374d50198bc656769b0d27066cd34e6e1e75240c2e6c7c059fab5dda5",
+  "recovery_bytes": 100663296,
+  "payload_sha256": "03e586cca696f1c65740b003e22a843b8add841eee175957c832b591b5a78540",
+  "payload_bytes": 26208816,
+  "loader_image_sha256": "c971e119eba796a9f37d1584b8045fd774d699e26e0e63ba2c19913ea2588a3f",
+  "kernel_dir": "artifacts/nat-189/kernel-001",
+  "kernel_sha256": "dc827310b3f4e2766b0ad2bcd25e43bda52f0b4bfe287fa968eccce787f9a0b9",
+  "cmdline": "rd=md1 e1sufs=0 nat_attempt=NAT189-scX debug=0xc serial=3 -v loader_return_after=270 launchdsuffix=release cs_enforcement_disable=1 e1sbattery=0 fb_filter=0 touch_lat=1 e1s_wdt_pet=1 e1s_decon_hw=1 e1spmic=2 e1skeys=0 msgbuf=1048576 small_cores=0 xrd=md0",
+  "cmdline_bytes": 254,
+  "session": "docs/procedures/nat-189/session_nat190.py",
+  "session_sha256": "be64e14886fb35b37f5a955247c4cfa1b565010ac732bd8c57ea581f41a012db"
+ },
+ "segments": {
+  "scV": {
+   "__TEXT": 1671168,
+   "__DATA_CONST": 950272,
+   "__TEXT_EXEC": 8749056,
+   "__DATA": 5505024,
+   "__BOOTDATA": 311296
+  },
+  "scX": {
+   "__TEXT": 1671168,
+   "__DATA_CONST": 950272,
+   "__TEXT_EXEC": 8749056,
+   "__DATA": 5505024,
+   "__BOOTDATA": 311296
+  },
+  "display_object_text_bytes": {
+   "nat185": 4752,
+   "first_try": 7064,
+   "without_dpp": 6308,
+   "without_dpp_minsize_pc": 6012,
+   "final": 5456
+  }
+ },
+ "sources": {
+  "docs/procedures/nat-189/build.py": "f87a7b41842778d5f6ccaa8d54c4e6edebd640e99a38b46d2208e3fba0e408ec",
+  "docs/procedures/nat-189/e1s_display.patch": "ea3e870358beaf6760ab7fdabbab9ccadd0ab9f6e464d58b12fadc9c2a59ddad",
+  "docs/procedures/nat-189/rebuild-args.json": "5315e88e1d4c94871acaf2bc4082143d9b1e63230ff7ad3a671bc808f1ba99e8",
+  "docs/procedures/nat-189/host/shim189.h": "fed196e20867da3a641af5baa6b32dd8db458ddcab044c4089865284b8b31352",
+  "docs/procedures/nat-189/host/fake189.c": "4d70794fabbb918cef46f44553af4bfeca880ba9b0260b786719b83ad93ca2fa",
+  "docs/procedures/nat-189/test_nat189.py": "91db573c2571a45fb14ec9fafc6d932ce22a801f203cc69a3f1f4fbcdfed88a1",
+  "docs/procedures/nat-189/pc190.py": "358f58ebe12e4198c2e57ed2d9abef1e88c65aebca31e3272f964823c4482143",
+  "docs/procedures/nat-189/dscsym.py": "6e4a3b8f52c3b435be482b27f79d75f5d113e2d03ffbe300d65427cf2b1cff7c",
+  "docs/procedures/nat-189/derive190.py": "5bfaf4eeb6af6143f71df9c7c65a9ac3c8066be869682de2f81509aed3e41759",
+  "docs/procedures/nat-189/session_nat190.py": "be64e14886fb35b37f5a955247c4cfa1b565010ac732bd8c57ea581f41a012db",
+  "docs/procedures/nat-189/README.md": "99d7d3605efd6e55f13e45e32cd7b1fc72a1fe94757535be87d7e564f86316d1",
+  "docs/procedures/nat-189/task.json": "0f509c83ded587ceb2e56a3640e97b17ece47078fe0548329d4e7083c12cbf54",
+  "docs/procedures/nat-189/task190.json": "dddb0e6fdccc8a391c6741be89c32cd7ffbf1fbede4a18f7ba32ac67ebb1ef55"
+ },
+ "checks": [
+  {
+   "cmd": "python3 -c <json args> docs/procedures/krn-044/rebuild.py @docs/procedures/nat-189/rebuild-args.json (first try, static tables)",
+   "exit_code": 0,
+   "result": "kernel built; build.py then stopped at the NAT-150 gate: rc 5 NAT036_JUMP_BAD (__TEXT_EXEC 8749056 -> 8765440, data +0x4000)"
+  },
+  {
+   "cmd": "same with tables in kalloc_data",
+   "exit_code": 0,
+   "result": "gate still rc 5 (text growth 2312 B > 1232 B slack)"
+  },
+  {
+   "cmd": "python3 -c <json args> docs/procedures/krn-044/rebuild.py @docs/procedures/nat-189/rebuild-args.json (final)",
+   "exit_code": 0,
+   "result": "undefined_symbols 0, no_storage dc827310b3f4e2766b0ad2bcd25e43bda52f0b4bfe287fa968eccce787f9a0b9"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-189/build.py --out artifacts/nat-189/build-001 --loader-source artifacts/nat-020/build-003/source --ramdisk artifacts/nat-110/pid1-sc2-hb/root.apfs",
+   "exit_code": 0,
+   "result": "loader sites rc 0, constants on the same symbols, cmdline 254 B"
+  },
+  {
+   "cmd": "python3 -B -I docs/procedures/nat-044/package.py --build artifacts/nat-189/build-001 --out artifacts/nat-189/package-001",
+   "exit_code": 0,
+   "result": "RECOVERY 170f8c9374d50198bc656769b0d27066cd34e6e1e75240c2e6c7c059fab5dda5"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-150/check_loader_sites.py --build artifacts/nat-189/build-001 --image loader-diag-xnu-scX-md1 --kernel-dir artifacts/nat-189/kernel-001",
+   "exit_code": 0,
+   "result": "rc 0 ok"
+  },
+  {
+   "cmd": "TMPDIR=artifacts/nat-189/harness python3 -B docs/procedures/nat-189/test_nat189.py",
+   "exit_code": 0,
+   "result": "Ran 11 tests OK (7 mutants killed)"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-189/derive190.py --check",
+   "exit_code": 0,
+   "result": "pass: counted session derivation"
+  },
+  {
+   "cmd": "python3 -B docs/procedures/nat-189/dscsym.py --cache artifacts/apple-inputs/work/cryptex-os/System/Library/Caches/com.apple.dyld --extra artifacts/nat-189/dsc-symbols --table artifacts/nat-189/dsc-table.pickle build",
+   "exit_code": 0,
+   "result": "images 2710 symbols 7159062 base 0x180000000 (local artifact, not committed)"
+  }
+ ],
+ "artifacts": [
+  "artifacts/nat-189/kernel-001/rebuild.json",
+  "artifacts/nat-189/build-001/build.json",
+  "artifacts/nat-189/package-001/package.json",
+  "artifacts/nat-189/dsc-table.pickle"
+ ],
+ "limits": [
+  "host-test only: whether the sampler runs on the phone, its cost and what it finds are NAT-190",
+  "e1s-dpp lines are gone from scX (dpp177 has nothing to read)"
+ ]
+}

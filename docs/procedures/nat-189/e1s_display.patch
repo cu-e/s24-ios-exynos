@@ -1,0 +1,500 @@
+--- a/e1s_display.c
++++ b/e1s_display.c
+@@ -1,12 +1,19 @@
+ #if defined(ARM64_BOARD_CONFIG_E1S)
+ 
+ #include <console/video_console.h>
++#include <kern/clock.h>
++#include <kern/kalloc.h>
++#include <kern/recount.h>
++#include <kern/thread.h>
+ #include <libkern/libkern.h>
+ #include <pexpert/pexpert.h>
++#include <sys/proc_internal.h>
+ #include <sys/systm.h>
+ #include <sys/types.h>
++#include <vm/vm_shared_region.h>
+ 
+ extern struct vc_info vinfo;
++extern bool ml_cpu_idle_time(int cpu_id, uint64_t *idle);
+ extern vm_offset_t ml_io_map(vm_offset_t phys_addr, vm_size_t size);
+ 
+ #define E1S_DECON0_MAIN_PA      0x19100000UL
+@@ -220,10 +227,459 @@
+ 	    e1s_display_read(ss, 0x08U));
+ }
+ 
++/*
++ * NAT-185: where the only running core's time goes while the swipes run. Every E1S_TOP_EVERY_S from E1S_TOP_FROM_S to
++ * E1S_TOP_UNTIL_S of uptime, each process's user + system time (recount_task_times(), the counters task_info reads, no lock) is
++ * set against the last sample; the span, the sum, the kernel's share (pid 0), cpu0's idle counter (ml_cpu_idle_time, as boot-arg
++ * cpuload reads it) and the E1S_TOP_SHOW busiest are printed. Only reads; a process that exited inside a span is missing from it,
++ * one born inside it counts with its whole life. Boot-arg e1stop=0 turns it off.
++ */
++#define E1S_TOP_FROM_S          200U
++#define E1S_TOP_UNTIL_S         380U
++#define E1S_TOP_EVERY_S         5U
++#define E1S_TOP_PROCS           160U
++#define E1S_TOP_SHOW            6U
++
++struct e1s_top {
++	int             pid;
++	uint64_t        total;                  /* user + system, mach time */
++	uint64_t        delta;
++	char            name[20];
++};
++static struct e1s_top e1s_top_old[E1S_TOP_PROCS], e1s_top_new[E1S_TOP_PROCS];
++static unsigned int e1s_top_nold, e1s_top_nnew, e1s_top_lost;
++
++__attribute__((minsize))
++static int
++e1s_top_one(proc_t p, void *arg __unused)
++{
++	struct e1s_top *e;
++	task_t task;
++
++	if (e1s_top_nnew >= E1S_TOP_PROCS) {
++		e1s_top_lost++;
++		return PROC_RETURNED;
++	}
++	e = &e1s_top_new[e1s_top_nnew++];
++	e->pid = proc_pid(p);
++	e->total = 0;
++	e->delta = 0;
++	task = proc_task(p);
++	if (task != TASK_NULL) {
++		struct recount_times_mach t = recount_task_times(task);
++
++		e->total = t.rtm_user + t.rtm_system;
++	}
++	strlcpy(e->name, proc_best_name(p), sizeof(e->name));
++	return PROC_RETURNED;
++}
++
++__attribute__((minsize))
++static uint64_t
++e1s_top_us(uint64_t mach)
++{
++	uint64_t ns;
++
++	absolutetime_to_nanoseconds(mach, &ns);
++	return ns / 1000;
++}
++
++/* one sample; with report, the span since the last one is printed */
++__attribute__((minsize))
++static void
++e1s_top_sample(bool report, unsigned int at_s, uint64_t span_us, uint64_t idle_us)
++{
++	uint64_t sum = 0, kernel = 0;
++	unsigned int i, j, k, shown[E1S_TOP_SHOW], nshown = 0;
++	char line[200];
++	int len;
++
++	e1s_top_nnew = 0;
++	e1s_top_lost = 0;
++	proc_iterate(PROC_ALLPROCLIST, e1s_top_one, NULL, NULL, NULL);
++	for (i = 0; i < e1s_top_nnew; i++) {
++		struct e1s_top *e = &e1s_top_new[i];
++
++		e->delta = e->total;
++		for (j = 0; j < e1s_top_nold; j++) {
++			if (e1s_top_old[j].pid == e->pid) {
++				e->delta = e->total >= e1s_top_old[j].total ? e->total - e1s_top_old[j].total : 0;
++				break;
++			}
++		}
++		e->delta = e1s_top_us(e->delta);
++		sum += e->delta;
++		if (e->pid == 0) {
++			kernel = e->delta;
++		}
++	}
++	if (report) {
++		printf("e1s-top: %u s span %llu us busy %llu us kernel %llu us idle0 %llu us procs %u lost %u\n", at_s,
++		    (unsigned long long)span_us, (unsigned long long)sum, (unsigned long long)kernel, (unsigned long long)idle_us,
++		    e1s_top_nnew, e1s_top_lost);
++		for (k = 0; k < E1S_TOP_SHOW; k++) {
++			unsigned int best = E1S_TOP_PROCS;
++
++			for (i = 0; i < e1s_top_nnew; i++) {
++				bool taken = false;
++
++				for (j = 0; j < nshown; j++) {
++					taken = taken || shown[j] == i;
++				}
++				if (!taken && e1s_top_new[i].delta != 0 && (best == E1S_TOP_PROCS || e1s_top_new[i].delta > e1s_top_new[best].delta)) {
++					best = i;
++				}
++			}
++			if (best == E1S_TOP_PROCS) {
++				break;
++			}
++			shown[nshown++] = best;
++		}
++		len = snprintf(line, sizeof(line), "e1s-top: %u s top", at_s);
++		for (k = 0; k < nshown && len > 0 && (size_t)len < sizeof(line); k++) {
++			len += snprintf(line + len, sizeof(line) - (size_t)len, " %s[%d] %llu", e1s_top_new[shown[k]].name,
++			    e1s_top_new[shown[k]].pid, (unsigned long long)e1s_top_new[shown[k]].delta);
++		}
++		printf("%s\n", line);
++	}
++	memcpy(e1s_top_old, e1s_top_new, sizeof(e1s_top_new[0]) * e1s_top_nnew);
++	e1s_top_nold = e1s_top_nnew;
++}
++
++__attribute__((minsize))
++static void
++e1s_top_thread(void *arg __unused, wait_result_t result __unused)
++{
++	uint64_t ns, then = 0, idle = 0, idle_then = 0;
++	unsigned int next = E1S_TOP_FROM_S;
++	bool first = true;
++
++	for (;;) {
++		absolutetime_to_nanoseconds(mach_absolute_time(), &ns);
++		if (ns >= (uint64_t)E1S_TOP_UNTIL_S * NSEC_PER_SEC) {
++			break;
++		}
++		if (ns >= (uint64_t)next * NSEC_PER_SEC) {
++			if (!ml_cpu_idle_time(0, &idle)) {
++				idle = 0;
++			}
++			idle = e1s_top_us(idle);
++			e1s_top_sample(!first, (unsigned int)(ns / NSEC_PER_SEC), (ns - then) / 1000, idle >= idle_then ? idle - idle_then : 0);
++			first = false;
++			then = ns;
++			idle_then = idle;
++			next += E1S_TOP_EVERY_S;
++		}
++		delay_for_interval(100, NSEC_PER_USEC * 1000);
++	}
++	printf("e1s-top: done\n");
++	for (;;) {
++		delay_for_interval(3600, NSEC_PER_SEC);
++	}
++}
++
++/*
++ * NAT-189: where backboardd's time goes. Every E1S_PC_TICK_MS from E1S_PC_FROM_S to the last window's end, each thread of the
++ * process named backboardd whose run time (recount_thread_time_mach) grew since the previous tick adds one sample at the user pc
++ * and one at the user lr saved in its thread state (get_user_regs: where it was preempted, or the trap it is blocked in). Samples
++ * go into a fine table (64-byte buckets of the pc), a coarse one (64 KiB) and one for the lr (64 bytes). At the end of each window
++ * the busiest buckets are printed as offsets from the slid start of the shared cache (vm_shared_region_start_address; "c") or, outside
++ * it, as raw addresses ("a"), and the tables start again. Only reads kernel memory; boot-arg e1spc=0 turns it off.
++ * Room: NAT-185's kernel had 1232 bytes left in its last __TEXT_EXEC page, and a page more moves the data the loader checks (NAT-150
++ * gate). So NAT-176's display-layer snapshot (e1s-dpp, measured in NAT-177) is left out, and the samplers are built with minsize.
++ */
++#define E1S_PC_TICK_MS          1U
++#define E1S_PC_FROM_S           200U
++#define E1S_PC_WINDOWS          4U
++static const unsigned int e1s_pc_window_end[E1S_PC_WINDOWS] = { 220U, 265U, 310U, 375U };
++#define E1S_PC_SLOTS            4096U           /* each table: open addressing, a power of two */
++#define E1S_PC_THREADS          96U
++#define E1S_PC_SHOW_FINE        64U
++#define E1S_PC_SHOW_COARSE      32U
++#define E1S_PC_SHOW_LR          32U
++#define E1S_PC_PER_LINE         8U
++#define E1S_PC_CACHE_SIZE       0x100000000ULL  /* offsets below this from the cache start are printed as "c" */
++
++struct e1s_pc_table {
++	uint64_t        key[E1S_PC_SLOTS];      /* bucket + 1; 0 is empty */
++	uint32_t        count[E1S_PC_SLOTS];
++	uint32_t        lost;
++};
++struct e1s_pc_thread {
++	uint64_t        tid;
++	uint64_t        time;
++	uint32_t        gen;                    /* tick that last saw it; 0 = free */
++};
++/* allocated when the sampler starts: static data of this size would move the loader-checked data of loader_return.o (NAT-150 gate) */
++struct e1s_pc_state {
++	struct e1s_pc_table     fine, coarse, lr;
++	struct e1s_pc_thread    threads[E1S_PC_THREADS];
++};
++static struct e1s_pc_state *e1s_pc;
++static uint32_t e1s_pc_gen, e1s_pc_tlost, e1s_pc_samples;
++static uint64_t e1s_pc_start;                   /* slid shared cache start, 0 until known */
++static int e1s_pc_pid = -1;
++
++extern void task_act_iterate_wth_args(task_t task, void (*func)(thread_t, void *), void *arg);
++extern struct arm_saved_state *get_user_regs(thread_t thread);
++
++__attribute__((minsize))
++static void
++e1s_pc_add(struct e1s_pc_table *t, uint64_t bucket)
++{
++	uint64_t key = bucket + 1;
++	uint32_t i = (uint32_t)((key * 0x9E3779B97F4A7C15ULL) >> 52) & (E1S_PC_SLOTS - 1U), n;
++
++	for (n = 0; n < E1S_PC_SLOTS; n++, i = (i + 1U) & (E1S_PC_SLOTS - 1U)) {
++		if (t->key[i] == key) {
++			t->count[i]++;
++			return;
++		}
++		if (t->key[i] == 0) {
++			t->key[i] = key;
++			t->count[i] = 1;
++			return;
++		}
++	}
++	t->lost++;
++}
++
++__attribute__((minsize))
++static struct e1s_pc_thread *
++e1s_pc_thread_slot(uint64_t tid, bool *fresh)
++{
++	struct e1s_pc_thread *free_slot = NULL;
++	unsigned int i;
++
++	for (i = 0; i < E1S_PC_THREADS; i++) {
++		struct e1s_pc_thread *e = &e1s_pc->threads[i];
++
++		if (e->gen != 0 && e->tid == tid) {
++			*fresh = false;
++			return e;
++		}
++		/* free, or not seen in the previous tick (the thread is gone) */
++		if (free_slot == NULL && (e->gen == 0 || e->gen + 1U < e1s_pc_gen)) {
++			free_slot = e;
++		}
++	}
++	if (free_slot != NULL) {
++		free_slot->tid = tid;
++		free_slot->time = 0;
++		*fresh = true;
++	}
++	return free_slot;
++}
++
++__attribute__((minsize))
++static void
++e1s_pc_one(thread_t th, void *arg __unused)
++{
++	struct e1s_pc_thread *e;
++	struct arm_saved_state *ss;
++	uint64_t now, before, pc, lr;
++	bool fresh = false;
++
++	e = e1s_pc_thread_slot(thread_tid(th), &fresh);
++	if (e == NULL) {
++		e1s_pc_tlost++;
++		return;
++	}
++	now = recount_thread_time_mach(th);
++	before = e->time;
++	e->time = now;
++	e->gen = e1s_pc_gen;
++	if (fresh || now <= before) {
++		return;
++	}
++	ss = get_user_regs(th);
++	if (ss == NULL) {
++		return;
++	}
++	pc = (uint64_t)get_saved_state_pc(ss);
++	lr = (uint64_t)get_saved_state_lr(ss);
++	e1s_pc_add(&e1s_pc->fine, pc >> 6);
++	e1s_pc_add(&e1s_pc->coarse, pc >> 16);
++	e1s_pc_add(&e1s_pc->lr, lr >> 6);
++	e1s_pc_samples++;
++}
++
++__attribute__((minsize))
++static int
++e1s_pc_find(proc_t p, void *arg __unused)
++{
++	if (e1s_pc_pid < 0 && strncmp(proc_best_name(p), "backboardd", 11) == 0) {
++		e1s_pc_pid = proc_pid(p);
++	}
++	return PROC_RETURNED;
++}
++
++__attribute__((minsize))
++static void
++e1s_pc_learn_start(task_t task)
++{
++	vm_shared_region_t sr = vm_shared_region_get(task);
++	mach_vm_offset_t start = 0;
++
++	if (sr == NULL) {
++		return;
++	}
++	/* task NULL: no copyin from the target's address space */
++	if (vm_shared_region_start_address(sr, &start, TASK_NULL) == KERN_SUCCESS) {
++		e1s_pc_start = (uint64_t)start;
++	}
++	vm_shared_region_deallocate(sr);
++}
++
++/* one tick; true if backboardd was found */
++__attribute__((minsize))
++static bool
++e1s_pc_tick(void)
++{
++	proc_t p;
++	task_t task;
++
++	if (e1s_pc_pid < 0) {
++		proc_iterate(PROC_ALLPROCLIST, e1s_pc_find, NULL, NULL, NULL);
++		if (e1s_pc_pid < 0) {
++			return false;
++		}
++		p = proc_find(e1s_pc_pid);
++		if (p != PROC_NULL) {
++			task = proc_task(p);
++			if (task != TASK_NULL) {
++				e1s_pc_learn_start(task);
++			}
++			printf("e1s-pc: backboardd[%d] shared cache start %#llx\n", e1s_pc_pid, (unsigned long long)e1s_pc_start);
++			proc_rele(p);
++		}
++	}
++	p = proc_find(e1s_pc_pid);
++	if (p == PROC_NULL) {
++		e1s_pc_pid = -1;                /* gone: look for it again by name next tick */
++		e1s_pc_start = 0;
++		return false;
++	}
++	task = proc_task(p);
++	if (task != TASK_NULL) {
++		e1s_pc_gen++;
++		task_act_iterate_wth_args(task, e1s_pc_one, NULL);
++	}
++	proc_rele(p);
++	return true;
++}
++
++__attribute__((minsize))
++static void
++e1s_pc_print(const char *what, unsigned int end_s, struct e1s_pc_table *t, unsigned int shift, unsigned int show)
++{
++	char line[200];
++	unsigned int k, i, len = 0, inline_n = 0;
++	uint64_t shown = 0;
++
++	for (k = 0; k < show; k++) {
++		unsigned int best = E1S_PC_SLOTS;
++		uint64_t addr;
++
++		for (i = 0; i < E1S_PC_SLOTS; i++) {
++			if (t->key[i] != 0 && t->count[i] != 0 && (best == E1S_PC_SLOTS || t->count[i] > t->count[best])) {
++				best = i;
++			}
++		}
++		if (best == E1S_PC_SLOTS) {
++			break;
++		}
++		if (inline_n == 0) {
++			len = (unsigned int)snprintf(line, sizeof(line), "e1s-pc: %u %s", end_s, what);
++		}
++		addr = (t->key[best] - 1) << shift;
++		if (len >= sizeof(line) - 40U) {
++			break;
++		}
++		if (e1s_pc_start != 0 && addr >= e1s_pc_start && addr - e1s_pc_start < E1S_PC_CACHE_SIZE) {
++			len += (unsigned int)snprintf(line + len, sizeof(line) - len, " c%llx:%u", (unsigned long long)(addr - e1s_pc_start), t->count[best]);
++		} else {
++			len += (unsigned int)snprintf(line + len, sizeof(line) - len, " a%llx:%u", (unsigned long long)addr, t->count[best]);
++		}
++		shown += t->count[best];
++		t->count[best] = 0;             /* printed; the table is cleared after the window anyway */
++		if (++inline_n == E1S_PC_PER_LINE) {
++			printf("%s\n", line);
++			inline_n = 0;
++		}
++	}
++	if (inline_n != 0) {
++		printf("%s\n", line);
++	}
++	printf("e1s-pc: %u %s shown %llu lost %u\n", end_s, what, (unsigned long long)shown, t->lost);
++}
++
++__attribute__((minsize))
++static void
++e1s_pc_thread(void *arg __unused, wait_result_t result __unused)
++{
++	uint64_t ns, self_then;
++	unsigned int w = 0, ticks = 0, busy = 0, start_s = E1S_PC_FROM_S;
++	uint32_t samples_then = 0;
++
++	for (;;) {
++		absolutetime_to_nanoseconds(mach_absolute_time(), &ns);
++		if (ns >= (uint64_t)E1S_PC_FROM_S * NSEC_PER_SEC) {
++			break;
++		}
++		delay_for_interval(100, NSEC_PER_USEC * 1000);
++	}
++	e1s_pc = kalloc_data(sizeof(*e1s_pc), Z_WAITOK | Z_ZERO);
++	if (e1s_pc == NULL) {
++		printf("e1s-pc: cannot allocate %lu bytes\n", (unsigned long)sizeof(*e1s_pc));
++		w = E1S_PC_WINDOWS;
++	}
++	self_then = recount_current_thread_time_mach();
++	while (w < E1S_PC_WINDOWS) {
++		uint32_t before = e1s_pc_samples;
++
++		if (e1s_pc_tick()) {
++			ticks++;
++			busy += e1s_pc_samples != before;
++		}
++		absolutetime_to_nanoseconds(mach_absolute_time(), &ns);
++		if (ns >= (uint64_t)e1s_pc_window_end[w] * NSEC_PER_SEC) {
++			uint64_t self = recount_current_thread_time_mach(), self_ns;
++
++			absolutetime_to_nanoseconds(self - self_then, &self_ns);
++			printf("e1s-pc: %u window %u-%u s ticks %u busy %u samples %u tlost %u self %llu us pid %d start %#llx\n",
++			    e1s_pc_window_end[w], start_s, e1s_pc_window_end[w], ticks, busy, e1s_pc_samples - samples_then, e1s_pc_tlost,
++			    (unsigned long long)(self_ns / 1000), e1s_pc_pid, (unsigned long long)e1s_pc_start);
++			e1s_pc_print("f", e1s_pc_window_end[w], &e1s_pc->fine, 6, E1S_PC_SHOW_FINE);
++			e1s_pc_print("g", e1s_pc_window_end[w], &e1s_pc->coarse, 16, E1S_PC_SHOW_COARSE);
++			e1s_pc_print("l", e1s_pc_window_end[w], &e1s_pc->lr, 6, E1S_PC_SHOW_LR);
++			bzero(&e1s_pc->fine, sizeof(e1s_pc->fine));
++			bzero(&e1s_pc->coarse, sizeof(e1s_pc->coarse));
++			bzero(&e1s_pc->lr, sizeof(e1s_pc->lr));
++			start_s = e1s_pc_window_end[w];
++			ticks = 0;
++			busy = 0;
++			samples_then = e1s_pc_samples;
++			e1s_pc_tlost = 0;
++			self_then = recount_current_thread_time_mach();
++			w++;
++			continue;
++		}
++		delay_for_interval(E1S_PC_TICK_MS, NSEC_PER_USEC * 1000);
++	}
++	printf("e1s-pc: done\n");
++	for (;;) {
++		delay_for_interval(3600, NSEC_PER_SEC);
++	}
++}
++
+ void
+ e1s_display_probe(void)
+ {
+ 	uint32_t mode = 1;
++	uint32_t top = 1;
++	uint32_t pcs = 1;
++	thread_t thread;
+ 
+ 	(void)PE_parse_boot_argn("e1sdisp", &mode, sizeof(mode));
+ 	if (mode == 0) {
+@@ -233,6 +689,17 @@
+ 	if (mode >= 2) {
+ 		e1s_display_pipeline();
+ 	}
++	(void)PE_parse_boot_argn("e1stop", &top, sizeof(top));
++	if (top != 0 && kernel_thread_start(e1s_top_thread, NULL, &thread) == KERN_SUCCESS) {
++		thread_deallocate(thread);
++		printf("e1s-top: process time thread started (%u-%u s every %u s)\n", E1S_TOP_FROM_S, E1S_TOP_UNTIL_S, E1S_TOP_EVERY_S);
++	}
++	(void)PE_parse_boot_argn("e1spc", &pcs, sizeof(pcs));
++	if (pcs != 0 && kernel_thread_start(e1s_pc_thread, NULL, &thread) == KERN_SUCCESS) {
++		thread_deallocate(thread);
++		printf("e1s-pc: backboardd pc sampler started (%u-%u s every %u ms)\n", E1S_PC_FROM_S, e1s_pc_window_end[E1S_PC_WINDOWS - 1U],
++		    E1S_PC_TICK_MS);
++	}
+ }
+ 
+ #endif /* ARM64_BOARD_CONFIG_E1S */

@@ -1,0 +1,16 @@
+{
+ "id": "NAT-189",
+ "status": "pending",
+ "owner": null,
+ "title": "Host: scX = scV (NAT-185) with a read-only user-pc sampler for backboardd threads in bsd/e1s_display.o (1 ms ticks 200-375 s, saved pc/lr of threads that ran, four windows printed as shared-cache offsets) and a host symboliser for the 20F66 dyld shared cache, to find which code fills backboardd's ~68 ms CPU per frame (NAT-186/188)",
+ "scope": "host",
+ "evidence_kind": "host-test",
+ "priority": 94,
+ "depends_on": ["NAT-188"],
+ "paths": ["docs/procedures/nat-189", "artifacts/nat-189"],
+ "acceptance": [
+  "Sampler reads only kernel memory (no MMIO, no copyin, no thread state writes); simulated-kernel harness checks windows, counts, buckets, restart, churn, overflow, no shared region, no memory, e1spc=0, plus killed mutants",
+  "Kernel rebuilt with 0 undefined symbols; loader sites rc 0 with the same symbols (no __TEXT_EXEC page growth); image packaged; counted session derivation",
+  "Symboliser maps cache offsets to image + symbol from the owner's local cache copy (no Apple bytes committed); analyser pc190.py with registered verdicts P-none/P-thin/P-ok and groups"
+ ]
+}

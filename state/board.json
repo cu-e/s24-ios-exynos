@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-14T06:54:43+00:00",
-  "ledger_updated_at": "2026-11-14T06:54:24+00:00",
-  "registry_sha256": "d8b4c1605b9b00962d5494e7851a71ed78254eb1c02c8ebb9880d11187d09280",
+  "generated_at": "2026-11-14T07:21:34+00:00",
+  "ledger_updated_at": "2026-11-14T07:21:09+00:00",
+  "registry_sha256": "615117aa4f22f98f08a0ad0567f9d9c0d721040cc20dc6639194c365a10caaeb",
   "phase": "device baseline captured; Android-preserving research",
   "columns": {
     "ready": [
@@ -78,6 +78,7 @@
     ],
     "gated": [
       "NAT-017",
+      "NAT-190",
       "NAT-072",
       "NAT-003",
       "DRV-003",
@@ -356,6 +357,7 @@
       "NAT-070",
       "NAT-187",
       "NAT-188",
+      "NAT-189",
       "ESIM-001",
       "VM-004",
       "NAT-057",
@@ -12368,6 +12370,63 @@
       "card_path": "planning/tasks/NAT-188.md"
     },
     {
+      "id": "NAT-189",
+      "status": "done",
+      "owner": "claude-opus-usb130-20261113",
+      "title": "Host: scX = scV (NAT-185) with a read-only user-pc sampler for backboardd threads in bsd/e1s_display.o (1 ms ticks 200-375 s, saved pc/lr of threads that ran, four windows printed as shared-cache offsets) and a host symboliser for the 20F66 dyld shared cache, to find which code fills backboardd's ~68 ms CPU per frame (NAT-186/188)",
+      "scope": "host",
+      "evidence_kind": "host-test",
+      "priority": 94,
+      "depends_on": [
+        "NAT-188"
+      ],
+      "paths": [
+        "docs/procedures/nat-189",
+        "artifacts/nat-189"
+      ],
+      "acceptance": [
+        "Sampler reads only kernel memory (no MMIO, no copyin, no thread state writes); simulated-kernel harness checks windows, counts, buckets, restart, churn, overflow, no shared region, no memory, e1spc=0, plus killed mutants",
+        "Kernel rebuilt with 0 undefined symbols; loader sites rc 0 with the same symbols (no __TEXT_EXEC page growth); image packaged; counted session derivation",
+        "Symboliser maps cache offsets to image + symbol from the owner's local cache copy (no Apple bytes committed); analyser pc190.py with registered verdicts P-none/P-thin/P-ok and groups"
+      ],
+      "started_at": "2026-11-14T07:19:39+00:00",
+      "last_heartbeat": "2026-11-14T07:19:39+00:00",
+      "updated_at": "2026-11-14T07:21:09+00:00",
+      "evidence": "docs/procedures/nat-189/evidence.json",
+      "evidence_sha256": "aef788a80ffa4bb04eeb8186417bf97182d6edffd7970c01fae9cf2a20131c2c",
+      "finished_at": "2026-11-14T07:21:09+00:00",
+      "column": "done",
+      "reasons": [],
+      "card_path": "planning/tasks/NAT-189.md"
+    },
+    {
+      "id": "NAT-190",
+      "status": "pending",
+      "owner": null,
+      "title": "Native: one run of scX (NAT-189) to profile backboardd's user pc during the synthetic swipes and the Today view; restore stock RECOVERY and verify Android",
+      "scope": "native",
+      "evidence_kind": "native-device",
+      "priority": 94,
+      "depends_on": [
+        "NAT-189"
+      ],
+      "paths": [
+        "docs/procedures/nat-190",
+        "artifacts/nat-190",
+        "docs/decisions/0077-nat190-loader-diag-xnu-scX-md1-single-run-2026-11-14.md"
+      ],
+      "acceptance": [
+        "One run under its own decision file; pre-registered pc190 verdict (P-none/P-thin/P-ok) and groups over the swipe windows and the last window reported, with top functions",
+        "Sampler cost (self us per window) and e1s-top backboardd share reported against NAT-186",
+        "Stock RECOVERY restored with full hash check, Android verified, permit closed after done"
+      ],
+      "column": "gated",
+      "reasons": [
+        "Scope not authorized: native"
+      ],
+      "card_path": "planning/tasks/NAT-190.md"
+    },
+    {
       "id": "ESIM-001",
       "title": "Specify eUICC logical channels and LPA integration",
       "status": "done",
@@ -20894,56 +20953,6 @@
   },
   "recent_events": [
     {
-      "at": "2026-11-14T05:49:10+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": true
-      }
-    },
-    {
-      "at": "2026-11-14T05:49:29+00:00",
-      "action": "task.claim:NAT-184",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-184",
-          "status": "in_progress",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 92,
-          "last_heartbeat": "2026-11-14T05:49:29+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T06:07:45+00:00",
-      "action": "task.done:NAT-184",
-      "owner": "claude-opus-usb130-20261113",
-      "tasks": [
-        {
-          "id": "NAT-184",
-          "status": "done",
-          "owner": "claude-opus-usb130-20261113",
-          "priority": 92,
-          "last_heartbeat": "2026-11-14T05:49:29+00:00"
-        }
-      ]
-    },
-    {
-      "at": "2026-11-14T06:08:04+00:00",
-      "action": "project.permit:native",
-      "owner": "claude-opus-usb130-20261113",
-      "permissions": {
-        "host": true,
-        "android-readonly": true,
-        "android-app": true,
-        "native": false
-      }
-    },
-    {
       "at": "2026-11-14T06:09:32+00:00",
       "action": "task.add:NAT-185",
       "owner": "claude-opus-usb130-20261113",
@@ -21150,11 +21159,65 @@
         "android-app": true,
         "native": false
       }
+    },
+    {
+      "at": "2026-11-14T07:19:01+00:00",
+      "action": "task.add:NAT-189",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-189",
+          "status": "pending",
+          "owner": null,
+          "priority": 94
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T07:19:20+00:00",
+      "action": "task.add:NAT-190",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-190",
+          "status": "pending",
+          "owner": null,
+          "priority": 94
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T07:19:39+00:00",
+      "action": "task.claim:NAT-189",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-189",
+          "status": "in_progress",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 94,
+          "last_heartbeat": "2026-11-14T07:19:39+00:00"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-14T07:21:09+00:00",
+      "action": "task.done:NAT-189",
+      "owner": "claude-opus-usb130-20261113",
+      "tasks": [
+        {
+          "id": "NAT-189",
+          "status": "done",
+          "owner": "claude-opus-usb130-20261113",
+          "priority": 94,
+          "last_heartbeat": "2026-11-14T07:19:39+00:00"
+        }
+      ]
     }
   ],
   "view_sha256": {
-    "STATUS.md": "eb893e622d72667268384d8e199db6b768f46aaf4af99efa76624ebe696f88e9",
-    "BOARD.md": "7caf9562033246e3c51958dd48454d18b4e98612fef296e928c37cb8016d6b91",
+    "STATUS.md": "467494176aadea838890f72ce04de81c55c0d5da607dd9870424392239446fdf",
+    "BOARD.md": "6b24f7dd18e410de1f7c9d088f93fc4293f6d8a9192deed97b8cb68e3b985fbd",
     "planning/tasks/KRN-009.md": "b2e7a90dd290c286cfa76ea2c1234f65517d034dd43356c72093cc41457753f3",
     "planning/tasks/KRN-025.md": "9dd21eacec5af401c51a5984ecfdf172b1dbb4c13a3672a0c95767f3c6d8804f",
     "planning/tasks/REV-010.md": "28df7fd260d17a2ed5ae7cf0eea58de673191a5ed03818457692fa649587eef8",
@@ -21442,6 +21505,8 @@
     "planning/tasks/NAT-070.md": "eaeea69eb8c9452b0a1c058954eea550ce6c493961eb827b87ddbc9e5240dae9",
     "planning/tasks/NAT-187.md": "54d00486528795cd5141488abc4e14f88741203ee68d01c5773c52a573242152",
     "planning/tasks/NAT-188.md": "3c7631470d84a1bbb078564876021e12599502f4296eca425be7b57e25b8b25c",
+    "planning/tasks/NAT-189.md": "6994eca7bbb95f2f65b272fdc35abadf94a6edba5f5eef3884904e9febc404ba",
+    "planning/tasks/NAT-190.md": "0dc0c748fe0b207f2638519f8eec7246abecf8f0ebab5769b75d345ee1e71e38",
     "planning/tasks/ESIM-001.md": "4ff5511bf1b91ec562d46b9fa0fdbc4dc3ffd12af187060e75777f8fcde71bb6",
     "planning/tasks/VM-004.md": "e60d0c34c4cbc0e4c68b4a74b97657a569fe4a12f25e16efc01dcaa45ccc2b15",
     "planning/tasks/NAT-057.md": "5a5cfb72e8e8b6bf01995892e27a8f23c02e6de2f5ea24330a780c8dc156837a",
